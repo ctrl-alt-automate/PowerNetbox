@@ -3372,6 +3372,120 @@ function Get-NetboxIPAMRole {
 
 #endregion
 
+#region File Get-NetboxIPAMRouteTarget.ps1
+
+function Get-NetboxIPAMRouteTarget {
+<#
+    .SYNOPSIS
+        Get route targets from Netbox
+
+    .DESCRIPTION
+        Retrieves route target objects from Netbox with optional filtering.
+        Route targets are used for VRF import/export policies.
+
+    .PARAMETER Id
+        The ID of the route target to retrieve
+
+    .PARAMETER Name
+        Filter by route target name (RFC 4360 format)
+
+    .PARAMETER Query
+        A general search query
+
+    .PARAMETER Tenant_Id
+        Filter by tenant ID
+
+    .PARAMETER Tenant
+        Filter by tenant name
+
+    .PARAMETER Importing_VRF_Id
+        Filter by VRF ID that imports this target
+
+    .PARAMETER Exporting_VRF_Id
+        Filter by VRF ID that exports this target
+
+    .PARAMETER Limit
+        Limit the number of results
+
+    .PARAMETER Offset
+        Offset for pagination
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        Get-NetboxIPAMRouteTarget
+
+        Returns all route targets
+
+    .EXAMPLE
+        Get-NetboxIPAMRouteTarget -Name "65001:100"
+
+        Returns route targets matching the specified value
+#>
+
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(ParameterSetName = 'ByID',
+                   ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Name,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Query,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$Tenant_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Tenant,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$Importing_VRF_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$Exporting_VRF_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint16]$Limit,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' {
+                foreach ($RTId in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('ipam', 'route-targets', $RTId))
+
+                    $URI = BuildNewURI -Segments $Segments
+
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('ipam', 'route-targets'))
+
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
 #region File Get-NetboxIPAMVLAN.ps1
 
 
@@ -3470,6 +3584,124 @@ function Get-NetboxIPAMVLAN {
 
 
 
+
+#endregion
+
+#region File Get-NetboxIPAMVRF.ps1
+
+function Get-NetboxIPAMVRF {
+<#
+    .SYNOPSIS
+        Get VRFs from Netbox
+
+    .DESCRIPTION
+        Retrieves VRF (Virtual Routing and Forwarding) objects from Netbox with optional filtering.
+
+    .PARAMETER Id
+        The ID of the VRF to retrieve
+
+    .PARAMETER Name
+        Filter by VRF name
+
+    .PARAMETER Query
+        A general search query
+
+    .PARAMETER RD
+        Filter by route distinguisher
+
+    .PARAMETER Tenant_Id
+        Filter by tenant ID
+
+    .PARAMETER Tenant
+        Filter by tenant name
+
+    .PARAMETER Enforce_Unique
+        Filter by enforce unique flag
+
+    .PARAMETER Limit
+        Limit the number of results
+
+    .PARAMETER Offset
+        Offset for pagination
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        Get-NetboxIPAMVRF
+
+        Returns all VRFs
+
+    .EXAMPLE
+        Get-NetboxIPAMVRF -Name "Production"
+
+        Returns VRFs matching the name "Production"
+
+    .EXAMPLE
+        Get-NetboxIPAMVRF -RD "65001:100"
+
+        Returns VRFs with the specified route distinguisher
+#>
+
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(ParameterSetName = 'ByID',
+                   ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Name,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Query,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$RD,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$Tenant_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Tenant,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [bool]$Enforce_Unique,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint16]$Limit,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' {
+                foreach ($VRFId in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('ipam', 'vrfs', $VRFId))
+
+                    $URI = BuildNewURI -Segments $Segments
+
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('ipam', 'vrfs'))
+
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
+        }
+    }
+}
 
 #endregion
 
@@ -5414,6 +5646,79 @@ function New-NetboxIPAMPrefix {
 
 #endregion
 
+#region File New-NetboxIPAMRouteTarget.ps1
+
+function New-NetboxIPAMRouteTarget {
+<#
+    .SYNOPSIS
+        Create a new route target in Netbox
+
+    .DESCRIPTION
+        Creates a new route target object in Netbox.
+        Route targets are used for VRF import/export policies (RFC 4360).
+
+    .PARAMETER Name
+        The route target value (required, RFC 4360 format, e.g., "65001:100")
+
+    .PARAMETER Tenant
+        The tenant ID that owns this route target
+
+    .PARAMETER Description
+        A description of the route target
+
+    .PARAMETER Comments
+        Additional comments
+
+    .PARAMETER Custom_Fields
+        A hashtable of custom fields
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        New-NetboxIPAMRouteTarget -Name "65001:100"
+
+        Creates a new route target with value "65001:100"
+
+    .EXAMPLE
+        New-NetboxIPAMRouteTarget -Name "65001:200" -Description "Customer A import"
+
+        Creates a new route target with description
+#>
+
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [string]$Name,
+
+        [uint64]$Tenant,
+
+        [string]$Description,
+
+        [string]$Comments,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam', 'route-targets'))
+
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Name, 'Create new route target')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
 #region File New-NetboxIPAMVLAN.ps1
 
 function New-NetboxIPAMVLAN {
@@ -5496,6 +5801,98 @@ function New-NetboxIPAMVLAN {
 
     if ($PSCmdlet.ShouldProcess($nae, 'Create new Vlan $($vid)')) {
         InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+    }
+}
+
+#endregion
+
+#region File New-NetboxIPAMVRF.ps1
+
+function New-NetboxIPAMVRF {
+<#
+    .SYNOPSIS
+        Create a new VRF in Netbox
+
+    .DESCRIPTION
+        Creates a new VRF (Virtual Routing and Forwarding) object in Netbox.
+
+    .PARAMETER Name
+        The name of the VRF (required)
+
+    .PARAMETER RD
+        The route distinguisher (RFC 4364 format, e.g., "65001:100")
+
+    .PARAMETER Tenant
+        The tenant ID that owns this VRF
+
+    .PARAMETER Enforce_Unique
+        Prevent duplicate prefixes/IP addresses within this VRF
+
+    .PARAMETER Description
+        A description of the VRF
+
+    .PARAMETER Comments
+        Additional comments
+
+    .PARAMETER Import_Targets
+        Array of route target IDs for import
+
+    .PARAMETER Export_Targets
+        Array of route target IDs for export
+
+    .PARAMETER Custom_Fields
+        A hashtable of custom fields
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        New-NetboxIPAMVRF -Name "Production"
+
+        Creates a new VRF named "Production"
+
+    .EXAMPLE
+        New-NetboxIPAMVRF -Name "Customer-A" -RD "65001:100" -Enforce_Unique $true
+
+        Creates a new VRF with route distinguisher and unique enforcement
+#>
+
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [string]$Name,
+
+        [string]$RD,
+
+        [uint64]$Tenant,
+
+        [bool]$Enforce_Unique,
+
+        [string]$Description,
+
+        [string]$Comments,
+
+        [uint64[]]$Import_Targets,
+
+        [uint64[]]$Export_Targets,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam', 'vrfs'))
+
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Name, 'Create new VRF')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
     }
 }
 
@@ -6332,6 +6729,106 @@ function Remove-NetboxIPAMAddressRange {
 
                 InvokeNetboxRequest -URI $URI -Method DELETE
             }
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxIPAMRouteTarget.ps1
+
+function Remove-NetboxIPAMRouteTarget {
+<#
+    .SYNOPSIS
+        Remove a route target from Netbox
+
+    .DESCRIPTION
+        Deletes a route target object from Netbox.
+
+    .PARAMETER Id
+        The ID of the route target to delete (required)
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        Remove-NetboxIPAMRouteTarget -Id 1
+
+        Deletes route target with ID 1
+
+    .EXAMPLE
+        Get-NetboxIPAMRouteTarget -Name "65001:999" | Remove-NetboxIPAMRouteTarget
+
+        Deletes route targets matching the specified value
+#>
+
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam', 'route-targets', $Id))
+
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete route target')) {
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxIPAMVRF.ps1
+
+function Remove-NetboxIPAMVRF {
+<#
+    .SYNOPSIS
+        Remove a VRF from Netbox
+
+    .DESCRIPTION
+        Deletes a VRF (Virtual Routing and Forwarding) object from Netbox.
+
+    .PARAMETER Id
+        The ID of the VRF to delete (required)
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        Remove-NetboxIPAMVRF -Id 1
+
+        Deletes VRF with ID 1
+
+    .EXAMPLE
+        Get-NetboxIPAMVRF -Name "Test-VRF" | Remove-NetboxIPAMVRF
+
+        Deletes VRFs matching the name "Test-VRF"
+#>
+
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam', 'vrfs', $Id))
+
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete VRF')) {
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
         }
     }
 }
@@ -8088,6 +8585,180 @@ function Set-NetboxIPAMPrefix {
 
 
 
+
+#endregion
+
+#region File Set-NetboxIPAMRouteTarget.ps1
+
+function Set-NetboxIPAMRouteTarget {
+<#
+    .SYNOPSIS
+        Update a route target in Netbox
+
+    .DESCRIPTION
+        Updates an existing route target object in Netbox.
+
+    .PARAMETER Id
+        The ID of the route target to update (required)
+
+    .PARAMETER Name
+        The route target value (RFC 4360 format)
+
+    .PARAMETER Tenant
+        The tenant ID that owns this route target
+
+    .PARAMETER Description
+        A description of the route target
+
+    .PARAMETER Comments
+        Additional comments
+
+    .PARAMETER Custom_Fields
+        A hashtable of custom fields
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        Set-NetboxIPAMRouteTarget -Id 1 -Description "Updated description"
+
+        Updates the description of route target 1
+
+    .EXAMPLE
+        Set-NetboxIPAMRouteTarget -Id 1 -Tenant 5
+
+        Assigns route target 1 to tenant 5
+#>
+
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [string]$Name,
+
+        [uint64]$Tenant,
+
+        [string]$Description,
+
+        [string]$Comments,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam', 'route-targets', $Id))
+
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Update route target')) {
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxIPAMVRF.ps1
+
+function Set-NetboxIPAMVRF {
+<#
+    .SYNOPSIS
+        Update a VRF in Netbox
+
+    .DESCRIPTION
+        Updates an existing VRF (Virtual Routing and Forwarding) object in Netbox.
+
+    .PARAMETER Id
+        The ID of the VRF to update (required)
+
+    .PARAMETER Name
+        The name of the VRF
+
+    .PARAMETER RD
+        The route distinguisher (RFC 4364 format)
+
+    .PARAMETER Tenant
+        The tenant ID that owns this VRF
+
+    .PARAMETER Enforce_Unique
+        Prevent duplicate prefixes/IP addresses within this VRF
+
+    .PARAMETER Description
+        A description of the VRF
+
+    .PARAMETER Comments
+        Additional comments
+
+    .PARAMETER Import_Targets
+        Array of route target IDs for import
+
+    .PARAMETER Export_Targets
+        Array of route target IDs for export
+
+    .PARAMETER Custom_Fields
+        A hashtable of custom fields
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        Set-NetboxIPAMVRF -Id 1 -Name "Production-VRF"
+
+        Updates the name of VRF 1
+
+    .EXAMPLE
+        Set-NetboxIPAMVRF -Id 1 -Enforce_Unique $true
+
+        Enables unique enforcement for VRF 1
+#>
+
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [string]$Name,
+
+        [string]$RD,
+
+        [uint64]$Tenant,
+
+        [bool]$Enforce_Unique,
+
+        [string]$Description,
+
+        [string]$Comments,
+
+        [uint64[]]$Import_Targets,
+
+        [uint64[]]$Export_Targets,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam', 'vrfs', $Id))
+
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Update VRF')) {
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
 
 #endregion
 

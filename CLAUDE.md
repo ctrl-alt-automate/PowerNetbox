@@ -73,7 +73,7 @@ Invoke-Pester ./Tests/DCIM.Devices.Tests.ps1
 
 ```
 NetboxPS/
-├── Functions/                    # Source files - one function per file (122 functions)
+├── Functions/                    # Source files - one function per file (130 functions)
 │   ├── Circuits/                 # Circuit management
 │   │   ├── Circuits/
 │   │   ├── Providers/
@@ -100,7 +100,9 @@ NetboxPS/
 │   │   ├── Prefix/
 │   │   ├── Range/
 │   │   ├── Role/
-│   │   └── VLAN/
+│   │   ├── RouteTarget/          # Get/New/Set/Remove
+│   │   ├── VLAN/
+│   │   └── VRF/                  # Get/New/Set/Remove
 │   ├── Setup/                    # Connection and configuration
 │   │   └── Support/
 │   ├── Tenancy/                  # Tenants, contacts
@@ -294,15 +296,15 @@ InvokeNetboxRequest -URI $URI -Method POST -Body $bodyHashtable
 - New modules added: VPN, Wireless
 
 ### Testing Against Netbox 4.4.7
-All GET functions (29) have been tested and work correctly.
-CRUD operations tested for: Sites, IP Addresses, Virtual Machines, Racks, Manufacturers, Locations, Regions, SiteGroups.
+All GET functions (31) have been tested and work correctly.
+CRUD operations tested for: Sites, IP Addresses, Virtual Machines, Racks, Manufacturers, Locations, Regions, SiteGroups, VRFs, RouteTargets.
 
 ## Roadmap & Issues
 
 See [GitHub Issues](https://github.com/ctrl-alt-automate/NetboxPS/issues) for the full roadmap:
 - **v2.0.0**: Netbox 4.x compatibility testing and fixes *(in progress)*
 - **v2.1.0**: DCIM expansion (racks ✅, locations ✅, regions ✅, site-groups ✅, manufacturers ✅)
-- **v2.2.0**: IPAM expansion (VRFs, ASNs, services)
+- **v2.2.0**: IPAM expansion (VRFs ✅, route targets ✅, ASNs, services)
 - **v2.3.0**: New modules (VPN, Wireless)
 
 ## Testing API Endpoints
