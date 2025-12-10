@@ -8,7 +8,6 @@ function New-NetboxVirtualMachine {
         [Parameter(Mandatory = $true)]
         [string]$Name,
 
-        [Parameter(Mandatory = $true)]
         [uint64]$Site,
 
         [uint64]$Cluster,
@@ -45,10 +44,7 @@ function New-NetboxVirtualMachine {
 
     #$PSBoundParameters.Status = ValidateVirtualizationChoice -ProvidedValue $Status -VirtualMachineStatus
 
-    if ($PSBoundParameters.ContainsKey('Cluster') -and (-not $PSBoundParameters.ContainsKey('Site'))) {
-        throw "You must specify a site ID with a cluster ID"
-    }
-
+    # Note: In Netbox 4.x, Site is optional. A VM requires either a Cluster or can be standalone.
     $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'virtual-machines'))
 
     $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters

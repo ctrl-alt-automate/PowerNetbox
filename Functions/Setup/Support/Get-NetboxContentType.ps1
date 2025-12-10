@@ -62,7 +62,8 @@
     switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($ContentType_ID in $Id) {
-                $Segments = [System.Collections.ArrayList]::new(@('extras', 'content-types', $ContentType_ID))
+                # Netbox 4.x moved content-types from /extras/ to /core/object-types/
+                $Segments = [System.Collections.ArrayList]::new(@('core', 'object-types', $ContentType_ID))
 
                 $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id'
 
@@ -75,7 +76,8 @@
         }
 
         default {
-            $Segments = [System.Collections.ArrayList]::new(@('extras', 'content-types'))
+            # Netbox 4.x moved content-types from /extras/ to /core/object-types/
+            $Segments = [System.Collections.ArrayList]::new(@('core', 'object-types'))
 
             $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters
 

@@ -1,4 +1,4 @@
-﻿
+
 
 #region File Add-NetboxDCIMFrontPort.ps1
 
@@ -736,27 +736,6 @@ function Get-NetboxAPIDefinition {
 
 #endregion
 
-#region File GetNetboxAPIErrorBody.ps1
-
-
-function GetNetboxAPIErrorBody {
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [System.Net.HttpWebResponse]$Response
-    )
-
-    # This takes the $Response stream and turns it into a useable object... generally a string.
-    # If the body is JSON, you should be able to use ConvertFrom-Json
-
-    $reader = New-Object System.IO.StreamReader($Response.GetResponseStream())
-    $reader.BaseStream.Position = 0
-    $reader.DiscardBufferedData()
-    $reader.ReadToEnd()
-}
-
-#endregion
-
 #region File Get-NetboxCircuit.ps1
 
 
@@ -1066,14 +1045,6 @@ function Get-NetboxCircuitType {
             InvokeNetboxRequest -URI $URI -Raw:$Raw
         }
     }
-}
-
-#endregion
-
-#region File GetNetboxConfigVariable.ps1
-
-function GetNetboxConfigVariable {
-    return $script:NetboxConfig
 }
 
 #endregion
@@ -1477,7 +1448,8 @@ function Get-NetboxContentType {
     switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($ContentType_ID in $Id) {
-                $Segments = [System.Collections.ArrayList]::new(@('extras', 'content-types', $ContentType_ID))
+                # Netbox 4.x moved content-types from /extras/ to /core/object-types/
+                $Segments = [System.Collections.ArrayList]::new(@('core', 'object-types', $ContentType_ID))
 
                 $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id'
 
@@ -1490,7 +1462,8 @@ function Get-NetboxContentType {
         }
 
         default {
-            $Segments = [System.Collections.ArrayList]::new(@('extras', 'content-types'))
+            # Netbox 4.x moved content-types from /extras/ to /core/object-types/
+            $Segments = [System.Collections.ArrayList]::new(@('core', 'object-types'))
 
             $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters
 
@@ -1941,6 +1914,101 @@ function Get-NetboxDCIMInterfaceConnection {
 
 #endregion
 
+#region File Get-NetboxDCIMManufacturer.ps1
+
+function Get-NetboxDCIMManufacturer {
+<#
+    .SYNOPSIS
+        Get manufacturers from Netbox
+
+    .DESCRIPTION
+        Retrieves manufacturer objects from Netbox with optional filtering.
+
+    .PARAMETER Id
+        The ID of the manufacturer to retrieve
+
+    .PARAMETER Name
+        Filter by manufacturer name
+
+    .PARAMETER Slug
+        Filter by slug
+
+    .PARAMETER Query
+        A general search query
+
+    .PARAMETER Limit
+        Limit the number of results
+
+    .PARAMETER Offset
+        Offset for pagination
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        Get-NetboxDCIMManufacturer
+
+        Returns all manufacturers
+
+    .EXAMPLE
+        Get-NetboxDCIMManufacturer -Name "Cisco"
+
+        Returns manufacturers matching the name "Cisco"
+#>
+
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(ParameterSetName = 'ByID',
+                   ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Name,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Slug,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Query,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint16]$Limit,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' {
+                foreach ($ManufacturerId in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('dcim', 'manufacturers', $ManufacturerId))
+
+                    $URI = BuildNewURI -Segments $Segments
+
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim', 'manufacturers'))
+
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
 #region File Get-NetboxDCIMPlatform.ps1
 
 
@@ -1990,6 +2058,155 @@ function Get-NetboxDCIMPlatform {
             $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
             InvokeNetboxRequest -URI $URI -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxDCIMRack.ps1
+
+function Get-NetboxDCIMRack {
+<#
+    .SYNOPSIS
+        Get racks from Netbox
+
+    .DESCRIPTION
+        Retrieves rack objects from Netbox with optional filtering.
+
+    .PARAMETER Id
+        The ID of the rack to retrieve
+
+    .PARAMETER Name
+        Filter by rack name
+
+    .PARAMETER Query
+        A general search query
+
+    .PARAMETER Site_Id
+        Filter by site ID
+
+    .PARAMETER Site
+        Filter by site name
+
+    .PARAMETER Location_Id
+        Filter by location ID
+
+    .PARAMETER Tenant_Id
+        Filter by tenant ID
+
+    .PARAMETER Status
+        Filter by status (active, planned, reserved, deprecated)
+
+    .PARAMETER Role_Id
+        Filter by role ID
+
+    .PARAMETER Serial
+        Filter by serial number
+
+    .PARAMETER Asset_Tag
+        Filter by asset tag
+
+    .PARAMETER Facility_Id
+        Filter by facility ID
+
+    .PARAMETER Limit
+        Limit the number of results
+
+    .PARAMETER Offset
+        Offset for pagination
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        Get-NetboxDCIMRack
+
+        Returns all racks
+
+    .EXAMPLE
+        Get-NetboxDCIMRack -Site_Id 1
+
+        Returns all racks at site with ID 1
+
+    .EXAMPLE
+        Get-NetboxDCIMRack -Name "Rack-01"
+
+        Returns racks matching the name "Rack-01"
+#>
+
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(ParameterSetName = 'ByID',
+                   ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Name,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Query,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$Site_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Site,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$Location_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$Tenant_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [ValidateSet('active', 'planned', 'reserved', 'deprecated')]
+        [string]$Status,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$Role_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Serial,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Asset_Tag,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Facility_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint16]$Limit,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' {
+                foreach ($RackId in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('dcim', 'racks', $RackId))
+
+                    $URI = BuildNewURI -Segments $Segments
+
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim', 'racks'))
+
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
         }
     }
 }
@@ -3463,6 +3680,35 @@ function Get-NetboxVirtualMachineInterface {
 
 #endregion
 
+#region File GetNetboxAPIErrorBody.ps1
+
+
+function GetNetboxAPIErrorBody {
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.Net.HttpWebResponse]$Response
+    )
+
+    # This takes the $Response stream and turns it into a useable object... generally a string.
+    # If the body is JSON, you should be able to use ConvertFrom-Json
+
+    $reader = New-Object System.IO.StreamReader($Response.GetResponseStream())
+    $reader.BaseStream.Position = 0
+    $reader.DiscardBufferedData()
+    $reader.ReadToEnd()
+}
+
+#endregion
+
+#region File GetNetboxConfigVariable.ps1
+
+function GetNetboxConfigVariable {
+    return $script:NetboxConfig
+}
+
+#endregion
+
 #region File InvokeNetboxRequest.ps1
 
 
@@ -3950,6 +4196,242 @@ function New-NetboxDCIMDevice {
 
     if ($PSCmdlet.ShouldProcess($Name, 'Create new Device')) {
         InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method POST
+    }
+}
+
+#endregion
+
+#region File New-NetboxDCIMManufacturer.ps1
+
+function New-NetboxDCIMManufacturer {
+<#
+    .SYNOPSIS
+        Create a new manufacturer in Netbox
+
+    .DESCRIPTION
+        Creates a new manufacturer object in Netbox.
+
+    .PARAMETER Name
+        The name of the manufacturer (required)
+
+    .PARAMETER Slug
+        The URL-friendly slug (required)
+
+    .PARAMETER Description
+        A description of the manufacturer
+
+    .PARAMETER Custom_Fields
+        A hashtable of custom fields
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        New-NetboxDCIMManufacturer -Name "Cisco" -Slug "cisco"
+
+        Creates a new manufacturer named "Cisco"
+
+    .EXAMPLE
+        New-NetboxDCIMManufacturer -Name "Dell Technologies" -Slug "dell" -Description "Server and storage manufacturer"
+
+        Creates a new manufacturer with description
+#>
+
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [string]$Name,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Slug,
+
+        [string]$Description,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim', 'manufacturers'))
+
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Name, 'Create new manufacturer')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NetboxDCIMRack.ps1
+
+function New-NetboxDCIMRack {
+<#
+    .SYNOPSIS
+        Create a new rack in Netbox
+
+    .DESCRIPTION
+        Creates a new rack object in Netbox.
+
+    .PARAMETER Name
+        The name of the rack (required)
+
+    .PARAMETER Site
+        The site ID where the rack is located (required)
+
+    .PARAMETER Location
+        The location ID within the site
+
+    .PARAMETER Tenant
+        The tenant ID that owns this rack
+
+    .PARAMETER Status
+        The operational status (active, planned, reserved, deprecated)
+
+    .PARAMETER Role
+        The rack role ID
+
+    .PARAMETER Serial
+        The serial number
+
+    .PARAMETER Asset_Tag
+        The asset tag
+
+    .PARAMETER Rack_Type
+        The rack type ID
+
+    .PARAMETER Width
+        The rack width (10 or 19 inches)
+
+    .PARAMETER U_Height
+        The height in rack units (default: 42)
+
+    .PARAMETER Starting_Unit
+        The starting unit number (default: 1)
+
+    .PARAMETER Desc_Units
+        Whether units are numbered top-to-bottom
+
+    .PARAMETER Outer_Width
+        The outer width in millimeters
+
+    .PARAMETER Outer_Depth
+        The outer depth in millimeters
+
+    .PARAMETER Outer_Height
+        The outer height in millimeters
+
+    .PARAMETER Mounting_Depth
+        The mounting depth in millimeters
+
+    .PARAMETER Max_Weight
+        The maximum weight capacity
+
+    .PARAMETER Weight_Unit
+        The weight unit (kg, g, lb, oz)
+
+    .PARAMETER Facility_Id
+        The facility identifier
+
+    .PARAMETER Description
+        A description of the rack
+
+    .PARAMETER Comments
+        Additional comments
+
+    .PARAMETER Custom_Fields
+        A hashtable of custom fields
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        New-NetboxDCIMRack -Name "Rack-01" -Site 1
+
+        Creates a new rack named "Rack-01" at site 1
+
+    .EXAMPLE
+        New-NetboxDCIMRack -Name "Rack-02" -Site 1 -U_Height 48 -Status active
+
+        Creates a 48U active rack at site 1
+#>
+
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [string]$Name,
+
+        [Parameter(Mandatory = $true)]
+        [uint64]$Site,
+
+        [uint64]$Location,
+
+        [uint64]$Tenant,
+
+        [ValidateSet('active', 'planned', 'reserved', 'deprecated')]
+        [string]$Status,
+
+        [uint64]$Role,
+
+        [string]$Serial,
+
+        [string]$Asset_Tag,
+
+        [uint64]$Rack_Type,
+
+        [ValidateSet(10, 19, 21, 23)]
+        [uint16]$Width,
+
+        [ValidateRange(1, 100)]
+        [uint16]$U_Height,
+
+        [ValidateRange(1, 100)]
+        [uint16]$Starting_Unit,
+
+        [bool]$Desc_Units,
+
+        [uint16]$Outer_Width,
+
+        [uint16]$Outer_Depth,
+
+        [uint16]$Outer_Height,
+
+        [uint16]$Mounting_Depth,
+
+        [uint32]$Max_Weight,
+
+        [ValidateSet('kg', 'g', 'lb', 'oz')]
+        [string]$Weight_Unit,
+
+        [string]$Facility_Id,
+
+        [string]$Description,
+
+        [string]$Comments,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim', 'racks'))
+
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Name, 'Create new rack')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
     }
 }
 
@@ -4502,7 +4984,6 @@ function New-NetboxVirtualMachine {
         [Parameter(Mandatory = $true)]
         [string]$Name,
 
-        [Parameter(Mandatory = $true)]
         [uint64]$Site,
 
         [uint64]$Cluster,
@@ -4539,10 +5020,7 @@ function New-NetboxVirtualMachine {
 
     #$PSBoundParameters.Status = ValidateVirtualizationChoice -ProvidedValue $Status -VirtualMachineStatus
 
-    if ($PSBoundParameters.ContainsKey('Cluster') -and (-not $PSBoundParameters.ContainsKey('Site'))) {
-        throw "You must specify a site ID with a cluster ID"
-    }
-
+    # Note: In Netbox 4.x, Site is optional. A VM requires either a Cluster or can be standalone.
     $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'virtual-machines'))
 
     $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters
@@ -4757,6 +5235,136 @@ function Remove-NetboxDCIMInterfaceConnection {
 
     end {
 
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxDCIMManufacturer.ps1
+
+function Remove-NetboxDCIMManufacturer {
+<#
+    .SYNOPSIS
+        Delete a manufacturer from Netbox
+
+    .DESCRIPTION
+        Removes a manufacturer object from Netbox.
+
+    .PARAMETER Id
+        The ID of the manufacturer to delete
+
+    .PARAMETER Force
+        Skip confirmation prompts
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        Remove-NetboxDCIMManufacturer -Id 1
+
+        Deletes manufacturer with ID 1 (with confirmation)
+
+    .EXAMPLE
+        Remove-NetboxDCIMManufacturer -Id 1 -Confirm:$false
+
+        Deletes manufacturer with ID 1 without confirmation
+
+    .EXAMPLE
+        Get-NetboxDCIMManufacturer -Name "OldVendor" | Remove-NetboxDCIMManufacturer
+
+        Deletes manufacturer named "OldVendor"
+#>
+
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([void])]
+    param
+    (
+        [Parameter(Mandatory = $true,
+                   ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [switch]$Force,
+
+        [switch]$Raw
+    )
+
+    process {
+        foreach ($ManufacturerId in $Id) {
+            $CurrentManufacturer = Get-NetboxDCIMManufacturer -Id $ManufacturerId -ErrorAction Stop
+
+            if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentManufacturer.Name)", "Delete manufacturer")) {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim', 'manufacturers', $CurrentManufacturer.Id))
+
+                $URI = BuildNewURI -Segments $Segments
+
+                InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxDCIMRack.ps1
+
+function Remove-NetboxDCIMRack {
+<#
+    .SYNOPSIS
+        Delete a rack from Netbox
+
+    .DESCRIPTION
+        Removes a rack object from Netbox.
+
+    .PARAMETER Id
+        The ID of the rack to delete
+
+    .PARAMETER Force
+        Skip confirmation prompts
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        Remove-NetboxDCIMRack -Id 1
+
+        Deletes rack with ID 1 (with confirmation)
+
+    .EXAMPLE
+        Remove-NetboxDCIMRack -Id 1 -Confirm:$false
+
+        Deletes rack with ID 1 without confirmation
+
+    .EXAMPLE
+        Get-NetboxDCIMRack -Name "Rack-01" | Remove-NetboxDCIMRack
+
+        Deletes rack named "Rack-01"
+#>
+
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([void])]
+    param
+    (
+        [Parameter(Mandatory = $true,
+                   ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [switch]$Force,
+
+        [switch]$Raw
+    )
+
+    process {
+        foreach ($RackId in $Id) {
+            $CurrentRack = Get-NetboxDCIMRack -Id $RackId -ErrorAction Stop
+
+            if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentRack.Name)", "Delete rack")) {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim', 'racks', $CurrentRack.Id))
+
+                $URI = BuildNewURI -Segments $Segments
+
+                InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+            }
+        }
     }
 }
 
@@ -5294,7 +5902,7 @@ function Set-NetboxContactRole {
     .NOTES
         Additional information about the function.
 #>
-    
+
     [CmdletBinding(ConfirmImpact = 'Low',
                    SupportsShouldProcess = $true)]
     [OutputType([pscustomobject])]
@@ -5303,37 +5911,37 @@ function Set-NetboxContactRole {
         [Parameter(Mandatory = $true,
                    ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
-        
+
         [Parameter(ValueFromPipelineByPropertyName = $true)]
         [ValidateLength(1, 100)]
         [string]$Name,
-        
+
         [ValidateLength(1, 100)]
         [ValidatePattern('^[-a-zA-Z0-9_]+$')]
         [string]$Slug,
-        
+
         [ValidateLength(0, 200)]
         [string]$Description,
-        
+
         [hashtable]$Custom_Fields,
-        
+
         [switch]$Raw
     )
-    
+
     begin {
         $Method = 'PATCH'
     }
-    
+
     process {
         foreach ($ContactRoleId in $Id) {
             $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'contacts', $ContactRoleId))
-            
+
             $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force'
-            
+
             $URI = BuildNewURI -Segments $URIComponents.Segments
-            
+
             $CurrentContactRole = Get-NetboxContactRole -Id $ContactRoleId -ErrorAction Stop
-            
+
             if ($Force -or $PSCmdlet.ShouldProcess($CurrentContactRole.Name, 'Update contact role')) {
                 InvokeNetboxRequest -URI $URI -Method $Method -Body $URIComponents.Parameters -Raw:$Raw
             }
@@ -5703,6 +6311,252 @@ function Set-NetboxDCIMInterfaceConnection {
 
 #endregion
 
+#region File Set-NetboxDCIMManufacturer.ps1
+
+function Set-NetboxDCIMManufacturer {
+<#
+    .SYNOPSIS
+        Update a manufacturer in Netbox
+
+    .DESCRIPTION
+        Updates an existing manufacturer object in Netbox.
+
+    .PARAMETER Id
+        The ID of the manufacturer to update
+
+    .PARAMETER Name
+        The name of the manufacturer
+
+    .PARAMETER Slug
+        The URL-friendly slug
+
+    .PARAMETER Description
+        A description of the manufacturer
+
+    .PARAMETER Custom_Fields
+        A hashtable of custom fields
+
+    .PARAMETER Force
+        Skip confirmation prompts
+
+    .EXAMPLE
+        Set-NetboxDCIMManufacturer -Id 1 -Description "Updated description"
+
+    .EXAMPLE
+        Get-NetboxDCIMManufacturer -Name "Cisco" | Set-NetboxDCIMManufacturer -Description "Network equipment"
+#>
+
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true,
+                   ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [string]$Name,
+
+        [string]$Slug,
+
+        [string]$Description,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Force
+    )
+
+    process {
+        foreach ($ManufacturerId in $Id) {
+            $CurrentManufacturer = Get-NetboxDCIMManufacturer -Id $ManufacturerId -ErrorAction Stop
+
+            if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentManufacturer.Name)", "Update manufacturer")) {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim', 'manufacturers', $CurrentManufacturer.Id))
+
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force'
+
+                $URI = BuildNewURI -Segments $URIComponents.Segments
+
+                InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method PATCH
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxDCIMRack.ps1
+
+function Set-NetboxDCIMRack {
+<#
+    .SYNOPSIS
+        Update a rack in Netbox
+
+    .DESCRIPTION
+        Updates an existing rack object in Netbox.
+
+    .PARAMETER Id
+        The ID of the rack to update
+
+    .PARAMETER Name
+        The name of the rack
+
+    .PARAMETER Site
+        The site ID where the rack is located
+
+    .PARAMETER Location
+        The location ID within the site
+
+    .PARAMETER Tenant
+        The tenant ID that owns this rack
+
+    .PARAMETER Status
+        The operational status (active, planned, reserved, deprecated)
+
+    .PARAMETER Role
+        The rack role ID
+
+    .PARAMETER Serial
+        The serial number
+
+    .PARAMETER Asset_Tag
+        The asset tag
+
+    .PARAMETER Rack_Type
+        The rack type ID
+
+    .PARAMETER Width
+        The rack width (10 or 19 inches)
+
+    .PARAMETER U_Height
+        The height in rack units
+
+    .PARAMETER Starting_Unit
+        The starting unit number
+
+    .PARAMETER Desc_Units
+        Whether units are numbered top-to-bottom
+
+    .PARAMETER Outer_Width
+        The outer width in millimeters
+
+    .PARAMETER Outer_Depth
+        The outer depth in millimeters
+
+    .PARAMETER Outer_Height
+        The outer height in millimeters
+
+    .PARAMETER Mounting_Depth
+        The mounting depth in millimeters
+
+    .PARAMETER Max_Weight
+        The maximum weight capacity
+
+    .PARAMETER Weight_Unit
+        The weight unit (kg, g, lb, oz)
+
+    .PARAMETER Facility_Id
+        The facility identifier
+
+    .PARAMETER Description
+        A description of the rack
+
+    .PARAMETER Comments
+        Additional comments
+
+    .PARAMETER Custom_Fields
+        A hashtable of custom fields
+
+    .PARAMETER Force
+        Skip confirmation prompts
+
+    .EXAMPLE
+        Set-NetboxDCIMRack -Id 1 -Description "Updated description"
+
+    .EXAMPLE
+        Get-NetboxDCIMRack -Name "Rack-01" | Set-NetboxDCIMRack -Status deprecated
+#>
+
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true,
+                   ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [string]$Name,
+
+        [uint64]$Site,
+
+        [uint64]$Location,
+
+        [uint64]$Tenant,
+
+        [ValidateSet('active', 'planned', 'reserved', 'deprecated')]
+        [string]$Status,
+
+        [uint64]$Role,
+
+        [string]$Serial,
+
+        [string]$Asset_Tag,
+
+        [uint64]$Rack_Type,
+
+        [ValidateSet(10, 19, 21, 23)]
+        [uint16]$Width,
+
+        [ValidateRange(1, 100)]
+        [uint16]$U_Height,
+
+        [ValidateRange(1, 100)]
+        [uint16]$Starting_Unit,
+
+        [bool]$Desc_Units,
+
+        [uint16]$Outer_Width,
+
+        [uint16]$Outer_Depth,
+
+        [uint16]$Outer_Height,
+
+        [uint16]$Mounting_Depth,
+
+        [uint32]$Max_Weight,
+
+        [ValidateSet('kg', 'g', 'lb', 'oz')]
+        [string]$Weight_Unit,
+
+        [string]$Facility_Id,
+
+        [string]$Description,
+
+        [string]$Comments,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Force
+    )
+
+    process {
+        foreach ($RackId in $Id) {
+            $CurrentRack = Get-NetboxDCIMRack -Id $RackId -ErrorAction Stop
+
+            if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentRack.Name)", "Update rack")) {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim', 'racks', $CurrentRack.Id))
+
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force'
+
+                $URI = BuildNewURI -Segments $URIComponents.Segments
+
+                InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method PATCH
+            }
+        }
+    }
+}
+
+#endregion
+
 #region File Set-NetboxDCIMRearPort.ps1
 
 
@@ -5762,6 +6616,135 @@ function Set-NetboxDCIMRearPort {
 
     end {
 
+    }
+}
+
+#endregion
+
+#region File Set-NetboxDCIMSite.ps1
+
+function Set-NetboxDCIMSite {
+<#
+    .SYNOPSIS
+        Update a site in Netbox
+
+    .DESCRIPTION
+        Updates an existing site with the provided parameters.
+
+    .PARAMETER Id
+        The ID of the site to update
+
+    .PARAMETER Name
+        The name of the site
+
+    .PARAMETER Slug
+        The URL-friendly slug for the site
+
+    .PARAMETER Status
+        The operational status of the site (active, planned, staging, decommissioning, retired)
+
+    .PARAMETER Region
+        The region ID this site belongs to
+
+    .PARAMETER Group
+        The site group ID this site belongs to
+
+    .PARAMETER Tenant
+        The tenant ID that owns this site
+
+    .PARAMETER Facility
+        The facility identifier
+
+    .PARAMETER Time_Zone
+        The time zone for this site
+
+    .PARAMETER Description
+        A description of the site
+
+    .PARAMETER Physical_Address
+        The physical address of the site
+
+    .PARAMETER Shipping_Address
+        The shipping address for the site
+
+    .PARAMETER Latitude
+        The latitude coordinate
+
+    .PARAMETER Longitude
+        The longitude coordinate
+
+    .PARAMETER Comments
+        Additional comments
+
+    .PARAMETER Custom_Fields
+        A hashtable of custom fields and values
+
+    .PARAMETER Force
+        Skip confirmation prompts
+
+    .EXAMPLE
+        Set-NetboxDCIMSite -Id 1 -Description "Updated description"
+
+    .EXAMPLE
+        Get-NetboxDCIMSite -Name "Site1" | Set-NetboxDCIMSite -Status planned
+#>
+
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true,
+                   ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [string]$Name,
+
+        [string]$Slug,
+
+        [ValidateSet('active', 'planned', 'staging', 'decommissioning', 'retired')]
+        [string]$Status,
+
+        [uint64]$Region,
+
+        [uint64]$Group,
+
+        [uint64]$Tenant,
+
+        [string]$Facility,
+
+        [string]$Time_Zone,
+
+        [string]$Description,
+
+        [string]$Physical_Address,
+
+        [string]$Shipping_Address,
+
+        [double]$Latitude,
+
+        [double]$Longitude,
+
+        [string]$Comments,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Force
+    )
+
+    process {
+        foreach ($SiteID in $Id) {
+            $CurrentSite = Get-NetboxDCIMSite -Id $SiteID -ErrorAction Stop
+
+            if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentSite.Name)", "Update site")) {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim', 'sites', $CurrentSite.Id))
+
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force'
+
+                $URI = BuildNewURI -Segments $URIComponents.Segments
+
+                InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method PATCH
+            }
+        }
     }
 }
 
