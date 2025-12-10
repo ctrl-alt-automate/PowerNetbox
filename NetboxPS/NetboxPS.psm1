@@ -3009,6 +3009,214 @@ function Get-NetboxIPAMAggregate {
 
 #endregion
 
+#region File Get-NetboxIPAMASN.ps1
+
+function Get-NetboxIPAMASN {
+<#
+    .SYNOPSIS
+        Get ASNs from Netbox
+
+    .DESCRIPTION
+        Retrieves ASN (Autonomous System Number) objects from Netbox with optional filtering.
+
+    .PARAMETER Id
+        The ID of the ASN to retrieve
+
+    .PARAMETER ASN
+        Filter by ASN number
+
+    .PARAMETER Query
+        A general search query
+
+    .PARAMETER RIR_Id
+        Filter by RIR ID
+
+    .PARAMETER Tenant_Id
+        Filter by tenant ID
+
+    .PARAMETER Site_Id
+        Filter by site ID
+
+    .PARAMETER Limit
+        Limit the number of results
+
+    .PARAMETER Offset
+        Offset for pagination
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        Get-NetboxIPAMASN
+
+        Returns all ASNs
+
+    .EXAMPLE
+        Get-NetboxIPAMASN -ASN 65001
+
+        Returns ASN 65001
+#>
+
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(ParameterSetName = 'ByID',
+                   ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$ASN,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Query,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$RIR_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$Tenant_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$Site_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint16]$Limit,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' {
+                foreach ($ASNId in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('ipam', 'asns', $ASNId))
+
+                    $URI = BuildNewURI -Segments $Segments
+
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('ipam', 'asns'))
+
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxIPAMASNRange.ps1
+
+function Get-NetboxIPAMASNRange {
+<#
+    .SYNOPSIS
+        Get ASN ranges from Netbox
+
+    .DESCRIPTION
+        Retrieves ASN range objects from Netbox with optional filtering.
+
+    .PARAMETER Id
+        The ID of the ASN range to retrieve
+
+    .PARAMETER Name
+        Filter by name
+
+    .PARAMETER Query
+        A general search query
+
+    .PARAMETER RIR_Id
+        Filter by RIR ID
+
+    .PARAMETER Tenant_Id
+        Filter by tenant ID
+
+    .PARAMETER Limit
+        Limit the number of results
+
+    .PARAMETER Offset
+        Offset for pagination
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        Get-NetboxIPAMASNRange
+
+        Returns all ASN ranges
+
+    .EXAMPLE
+        Get-NetboxIPAMASNRange -Name "Private"
+
+        Returns ASN ranges matching the name "Private"
+#>
+
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(ParameterSetName = 'ByID',
+                   ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Name,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Query,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$RIR_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$Tenant_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint16]$Limit,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' {
+                foreach ($RangeId in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('ipam', 'asn-ranges', $RangeId))
+
+                    $URI = BuildNewURI -Segments $Segments
+
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('ipam', 'asn-ranges'))
+
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
 #region File Get-NetboxIPAMAvailableIP.ps1
 
 
@@ -3473,6 +3681,224 @@ function Get-NetboxIPAMRouteTarget {
 
             default {
                 $Segments = [System.Collections.ArrayList]::new(@('ipam', 'route-targets'))
+
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxIPAMService.ps1
+
+function Get-NetboxIPAMService {
+<#
+    .SYNOPSIS
+        Get services from Netbox
+
+    .DESCRIPTION
+        Retrieves service objects from Netbox with optional filtering.
+        Services represent network services running on devices or virtual machines.
+
+    .PARAMETER Id
+        The ID of the service to retrieve
+
+    .PARAMETER Name
+        Filter by service name
+
+    .PARAMETER Query
+        A general search query
+
+    .PARAMETER Protocol
+        Filter by protocol (tcp, udp, sctp)
+
+    .PARAMETER Port
+        Filter by port number
+
+    .PARAMETER Device_Id
+        Filter by device ID
+
+    .PARAMETER Virtual_Machine_Id
+        Filter by virtual machine ID
+
+    .PARAMETER Limit
+        Limit the number of results
+
+    .PARAMETER Offset
+        Offset for pagination
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        Get-NetboxIPAMService
+
+        Returns all services
+
+    .EXAMPLE
+        Get-NetboxIPAMService -Protocol tcp -Port 443
+
+        Returns TCP services on port 443
+#>
+
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(ParameterSetName = 'ByID',
+                   ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Name,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Query,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [ValidateSet('tcp', 'udp', 'sctp')]
+        [string]$Protocol,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint16]$Port,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$Device_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$Virtual_Machine_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint16]$Limit,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' {
+                foreach ($ServiceId in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('ipam', 'services', $ServiceId))
+
+                    $URI = BuildNewURI -Segments $Segments
+
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('ipam', 'services'))
+
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxIPAMServiceTemplate.ps1
+
+function Get-NetboxIPAMServiceTemplate {
+<#
+    .SYNOPSIS
+        Get service templates from Netbox
+
+    .DESCRIPTION
+        Retrieves service template objects from Netbox with optional filtering.
+        Service templates are reusable definitions for creating services.
+
+    .PARAMETER Id
+        The ID of the service template to retrieve
+
+    .PARAMETER Name
+        Filter by template name
+
+    .PARAMETER Query
+        A general search query
+
+    .PARAMETER Protocol
+        Filter by protocol (tcp, udp, sctp)
+
+    .PARAMETER Port
+        Filter by port number
+
+    .PARAMETER Limit
+        Limit the number of results
+
+    .PARAMETER Offset
+        Offset for pagination
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        Get-NetboxIPAMServiceTemplate
+
+        Returns all service templates
+
+    .EXAMPLE
+        Get-NetboxIPAMServiceTemplate -Name "HTTP"
+
+        Returns service templates matching the name "HTTP"
+#>
+
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(ParameterSetName = 'ByID',
+                   ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Name,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Query,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [ValidateSet('tcp', 'udp', 'sctp')]
+        [string]$Protocol,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint16]$Port,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint16]$Limit,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' {
+                foreach ($TemplateId in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('ipam', 'service-templates', $TemplateId))
+
+                    $URI = BuildNewURI -Segments $Segments
+
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('ipam', 'service-templates'))
 
                 $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
 
@@ -4253,6 +4679,245 @@ function Get-NetboxVirtualMachineInterface {
         $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
         InvokeNetboxRequest -URI $uri -Raw:$Raw
+    }
+}
+
+#endregion
+
+#region File Get-NetboxVPNIKEPolicy.ps1
+
+function Get-NetboxVPNIKEPolicy {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param([Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Name,[Parameter(ParameterSetName = 'Query')][uint16]$Limit,[Parameter(ParameterSetName = 'Query')][uint16]$Offset,[switch]$Raw)
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','ike-policies',$i)) -Raw:$Raw } }
+            default { $s = [System.Collections.ArrayList]::new(@('vpn','ike-policies')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'; InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments -Parameters $u.Parameters) -Raw:$Raw }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxVPNIKEProposal.ps1
+
+function Get-NetboxVPNIKEProposal {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param([Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Name,[Parameter(ParameterSetName = 'Query')][uint16]$Limit,[Parameter(ParameterSetName = 'Query')][uint16]$Offset,[switch]$Raw)
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','ike-proposals',$i)) -Raw:$Raw } }
+            default { $s = [System.Collections.ArrayList]::new(@('vpn','ike-proposals')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'; InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments -Parameters $u.Parameters) -Raw:$Raw }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxVPNIPSecPolicy.ps1
+
+function Get-NetboxVPNIPSecPolicy {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param([Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Name,[Parameter(ParameterSetName = 'Query')][uint16]$Limit,[Parameter(ParameterSetName = 'Query')][uint16]$Offset,[switch]$Raw)
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','ipsec-policies',$i)) -Raw:$Raw } }
+            default { $s = [System.Collections.ArrayList]::new(@('vpn','ipsec-policies')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'; InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments -Parameters $u.Parameters) -Raw:$Raw }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxVPNIPSecProfile.ps1
+
+function Get-NetboxVPNIPSecProfile {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param([Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Name,[Parameter(ParameterSetName = 'Query')][uint16]$Limit,[Parameter(ParameterSetName = 'Query')][uint16]$Offset,[switch]$Raw)
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','ipsec-profiles',$i)) -Raw:$Raw } }
+            default { $s = [System.Collections.ArrayList]::new(@('vpn','ipsec-profiles')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'; InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments -Parameters $u.Parameters) -Raw:$Raw }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxVPNIPSecProposal.ps1
+
+function Get-NetboxVPNIPSecProposal {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param([Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Name,[Parameter(ParameterSetName = 'Query')][uint16]$Limit,[Parameter(ParameterSetName = 'Query')][uint16]$Offset,[switch]$Raw)
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','ipsec-proposals',$i)) -Raw:$Raw } }
+            default { $s = [System.Collections.ArrayList]::new(@('vpn','ipsec-proposals')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'; InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments -Parameters $u.Parameters) -Raw:$Raw }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxVPNL2VPN.ps1
+
+function Get-NetboxVPNL2VPN {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param([Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Name,[Parameter(ParameterSetName = 'Query')][string]$Slug,
+        [Parameter(ParameterSetName = 'Query')][string]$Type,[Parameter(ParameterSetName = 'Query')][uint64]$Tenant_Id,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,[Parameter(ParameterSetName = 'Query')][uint16]$Offset,[switch]$Raw)
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','l2vpns',$i)) -Raw:$Raw } }
+            default { $s = [System.Collections.ArrayList]::new(@('vpn','l2vpns')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'; InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments -Parameters $u.Parameters) -Raw:$Raw }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxVPNL2VPNTermination.ps1
+
+function Get-NetboxVPNL2VPNTermination {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param([Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$L2VPN_Id,[Parameter(ParameterSetName = 'Query')][uint16]$Limit,[Parameter(ParameterSetName = 'Query')][uint16]$Offset,[switch]$Raw)
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','l2vpn-terminations',$i)) -Raw:$Raw } }
+            default { $s = [System.Collections.ArrayList]::new(@('vpn','l2vpn-terminations')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'; InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments -Parameters $u.Parameters) -Raw:$Raw }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxVPNTunnel.ps1
+
+function Get-NetboxVPNTunnel {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Name,
+        [Parameter(ParameterSetName = 'Query')][string]$Query,
+        [Parameter(ParameterSetName = 'Query')][string]$Status,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Group_Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Encapsulation,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [switch]$Raw
+    )
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' {
+                foreach ($TunnelId in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('vpn', 'tunnels', $TunnelId))
+                    $URI = BuildNewURI -Segments $Segments
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('vpn', 'tunnels'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxVPNTunnelGroup.ps1
+
+function Get-NetboxVPNTunnelGroup {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param([Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Name,[Parameter(ParameterSetName = 'Query')][string]$Slug,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,[Parameter(ParameterSetName = 'Query')][uint16]$Offset,[switch]$Raw)
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','tunnel-groups',$i)) -Raw:$Raw } }
+            default { $s = [System.Collections.ArrayList]::new(@('vpn','tunnel-groups')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'; InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments -Parameters $u.Parameters) -Raw:$Raw }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxVPNTunnelTermination.ps1
+
+function Get-NetboxVPNTunnelTermination {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param([Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Tunnel_Id,[Parameter(ParameterSetName = 'Query')][string]$Role,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,[Parameter(ParameterSetName = 'Query')][uint16]$Offset,[switch]$Raw)
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','tunnel-terminations',$i)) -Raw:$Raw } }
+            default { $s = [System.Collections.ArrayList]::new(@('vpn','tunnel-terminations')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'; InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments -Parameters $u.Parameters) -Raw:$Raw }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxWirelessLAN.ps1
+
+function Get-NetboxWirelessLAN {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param([Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$SSID,[Parameter(ParameterSetName = 'Query')][uint64]$Group_Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Status,[Parameter(ParameterSetName = 'Query')][uint64]$VLAN_Id,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,[Parameter(ParameterSetName = 'Query')][uint16]$Offset,[switch]$Raw)
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('wireless','wireless-lans',$i)) -Raw:$Raw } }
+            default { $s = [System.Collections.ArrayList]::new(@('wireless','wireless-lans')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'; InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments -Parameters $u.Parameters) -Raw:$Raw }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxWirelessLANGroup.ps1
+
+function Get-NetboxWirelessLANGroup {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param([Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Name,[Parameter(ParameterSetName = 'Query')][string]$Slug,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Parent_Id,[Parameter(ParameterSetName = 'Query')][uint16]$Limit,[Parameter(ParameterSetName = 'Query')][uint16]$Offset,[switch]$Raw)
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('wireless','wireless-lan-groups',$i)) -Raw:$Raw } }
+            default { $s = [System.Collections.ArrayList]::new(@('wireless','wireless-lan-groups')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'; InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments -Parameters $u.Parameters) -Raw:$Raw }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxWirelessLink.ps1
+
+function Get-NetboxWirelessLink {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param([Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$SSID,[Parameter(ParameterSetName = 'Query')][string]$Status,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,[Parameter(ParameterSetName = 'Query')][uint16]$Offset,[switch]$Raw)
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('wireless','wireless-links',$i)) -Raw:$Raw } }
+            default { $s = [System.Collections.ArrayList]::new(@('wireless','wireless-links')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'; InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments -Parameters $u.Parameters) -Raw:$Raw }
+        }
     }
 }
 
@@ -5591,6 +6256,172 @@ function New-NetboxIPAMAddressRange {
 
 #endregion
 
+#region File New-NetboxIPAMASN.ps1
+
+function New-NetboxIPAMASN {
+<#
+    .SYNOPSIS
+        Create a new ASN in Netbox
+
+    .DESCRIPTION
+        Creates a new ASN (Autonomous System Number) object in Netbox.
+
+    .PARAMETER ASN
+        The ASN number (required, 1-4294967295)
+
+    .PARAMETER RIR
+        The RIR (Regional Internet Registry) ID
+
+    .PARAMETER Tenant
+        The tenant ID
+
+    .PARAMETER Description
+        A description of the ASN
+
+    .PARAMETER Comments
+        Additional comments
+
+    .PARAMETER Custom_Fields
+        A hashtable of custom fields
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        New-NetboxIPAMASN -ASN 65001
+
+        Creates ASN 65001
+
+    .EXAMPLE
+        New-NetboxIPAMASN -ASN 65001 -RIR 1 -Description "Primary ASN"
+
+        Creates ASN 65001 with RIR and description
+#>
+
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateRange(1, 4294967295)]
+        [uint64]$ASN,
+
+        [uint64]$RIR,
+
+        [uint64]$Tenant,
+
+        [string]$Description,
+
+        [string]$Comments,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam', 'asns'))
+
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($ASN, 'Create new ASN')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NetboxIPAMASNRange.ps1
+
+function New-NetboxIPAMASNRange {
+<#
+    .SYNOPSIS
+        Create a new ASN range in Netbox
+
+    .DESCRIPTION
+        Creates a new ASN range object in Netbox.
+
+    .PARAMETER Name
+        The name of the ASN range (required)
+
+    .PARAMETER Slug
+        The URL-friendly slug (required)
+
+    .PARAMETER RIR
+        The RIR (Regional Internet Registry) ID (required)
+
+    .PARAMETER Start
+        The starting ASN number (required)
+
+    .PARAMETER End
+        The ending ASN number (required)
+
+    .PARAMETER Tenant
+        The tenant ID
+
+    .PARAMETER Description
+        A description of the ASN range
+
+    .PARAMETER Custom_Fields
+        A hashtable of custom fields
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        New-NetboxIPAMASNRange -Name "Private" -Slug "private" -RIR 1 -Start 64512 -End 65534
+
+        Creates a private ASN range
+#>
+
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [string]$Name,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Slug,
+
+        [Parameter(Mandatory = $true)]
+        [uint64]$RIR,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateRange(1, 4294967295)]
+        [uint64]$Start,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateRange(1, 4294967295)]
+        [uint64]$End,
+
+        [uint64]$Tenant,
+
+        [string]$Description,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam', 'asn-ranges'))
+
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Name, 'Create new ASN range')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
 #region File New-NetboxIPAMPrefix.ps1
 
 
@@ -5712,6 +6543,199 @@ function New-NetboxIPAMRouteTarget {
         $URI = BuildNewURI -Segments $URIComponents.Segments
 
         if ($PSCmdlet.ShouldProcess($Name, 'Create new route target')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NetboxIPAMService.ps1
+
+function New-NetboxIPAMService {
+<#
+    .SYNOPSIS
+        Create a new service in Netbox
+
+    .DESCRIPTION
+        Creates a new service object in Netbox.
+        Services represent network services running on devices or virtual machines.
+
+    .PARAMETER Name
+        The name of the service (required)
+
+    .PARAMETER Ports
+        Array of port numbers (required)
+
+    .PARAMETER Protocol
+        The protocol (tcp, udp, sctp). Defaults to tcp.
+
+    .PARAMETER Device
+        The device ID this service runs on
+
+    .PARAMETER Virtual_Machine
+        The virtual machine ID this service runs on
+
+    .PARAMETER IPAddresses
+        Array of IP address IDs associated with this service
+
+    .PARAMETER Description
+        A description of the service
+
+    .PARAMETER Comments
+        Additional comments
+
+    .PARAMETER Custom_Fields
+        A hashtable of custom fields
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        New-NetboxIPAMService -Name "HTTPS" -Ports @(443) -Protocol tcp -Device 1
+
+        Creates an HTTPS service on device 1
+
+    .EXAMPLE
+        New-NetboxIPAMService -Name "DNS" -Ports @(53) -Protocol udp -Virtual_Machine 1
+
+        Creates a DNS service on VM 1
+#>
+
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [string]$Name,
+
+        [Parameter(Mandatory = $true)]
+        [uint16[]]$Ports,
+
+        [ValidateSet('tcp', 'udp', 'sctp')]
+        [string]$Protocol = 'tcp',
+
+        [uint64]$Device,
+
+        [uint64]$Virtual_Machine,
+
+        [uint64[]]$IPAddresses,
+
+        [string]$Description,
+
+        [string]$Comments,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam', 'services'))
+
+        # Build body manually to handle parent object type
+        $Body = @{
+            name = $Name
+            ports = $Ports
+            protocol = $Protocol
+        }
+
+        if ($Device) {
+            $Body['parent_object_type'] = 'dcim.device'
+            $Body['parent_object_id'] = $Device
+        } elseif ($Virtual_Machine) {
+            $Body['parent_object_type'] = 'virtualization.virtualmachine'
+            $Body['parent_object_id'] = $Virtual_Machine
+        }
+
+        if ($IPAddresses) { $Body['ipaddresses'] = $IPAddresses }
+        if ($Description) { $Body['description'] = $Description }
+        if ($Comments) { $Body['comments'] = $Comments }
+        if ($Custom_Fields) { $Body['custom_fields'] = $Custom_Fields }
+
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ShouldProcess($Name, 'Create new service')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $Body -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NetboxIPAMServiceTemplate.ps1
+
+function New-NetboxIPAMServiceTemplate {
+<#
+    .SYNOPSIS
+        Create a new service template in Netbox
+
+    .DESCRIPTION
+        Creates a new service template object in Netbox.
+        Service templates are reusable definitions for creating services.
+
+    .PARAMETER Name
+        The name of the service template (required)
+
+    .PARAMETER Ports
+        Array of port numbers (required)
+
+    .PARAMETER Protocol
+        The protocol (tcp, udp, sctp). Defaults to tcp.
+
+    .PARAMETER Description
+        A description of the service template
+
+    .PARAMETER Comments
+        Additional comments
+
+    .PARAMETER Custom_Fields
+        A hashtable of custom fields
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        New-NetboxIPAMServiceTemplate -Name "HTTPS" -Ports @(443) -Protocol tcp
+
+        Creates an HTTPS service template
+
+    .EXAMPLE
+        New-NetboxIPAMServiceTemplate -Name "Web Server" -Ports @(80, 443) -Protocol tcp
+
+        Creates a web server template with HTTP and HTTPS ports
+#>
+
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [string]$Name,
+
+        [Parameter(Mandatory = $true)]
+        [uint16[]]$Ports,
+
+        [ValidateSet('tcp', 'udp', 'sctp')]
+        [string]$Protocol = 'tcp',
+
+        [string]$Description,
+
+        [string]$Comments,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam', 'service-templates'))
+
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Name, 'Create new service template')) {
             InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
         }
     }
@@ -6037,6 +7061,201 @@ function New-NetboxVirtualMachine {
 
 
 
+
+#endregion
+
+#region File New-NetboxVPNIKEPolicy.ps1
+
+function New-NetboxVPNIKEPolicy {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param([Parameter(Mandatory = $true)][string]$Name,[uint16]$Version,[string]$Mode,[uint64[]]$Proposals,
+        [string]$Preshared_Key,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
+    process {
+        $s = [System.Collections.ArrayList]::new(@('vpn','ike-policies')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Name, 'Create IKE policy')) { InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments) -Method POST -Body $u.Parameters -Raw:$Raw }
+    }
+}
+
+#endregion
+
+#region File New-NetboxVPNIKEProposal.ps1
+
+function New-NetboxVPNIKEProposal {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param([Parameter(Mandatory = $true)][string]$Name,[string]$Authentication_Method,[string]$Encryption_Algorithm,
+        [string]$Authentication_Algorithm,[uint16]$Group,[uint32]$SA_Lifetime,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
+    process {
+        $s = [System.Collections.ArrayList]::new(@('vpn','ike-proposals')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Name, 'Create IKE proposal')) { InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments) -Method POST -Body $u.Parameters -Raw:$Raw }
+    }
+}
+
+#endregion
+
+#region File New-NetboxVPNIPSecPolicy.ps1
+
+function New-NetboxVPNIPSecPolicy {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param([Parameter(Mandatory = $true)][string]$Name,[uint64[]]$Proposals,[bool]$Pfs_Group,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
+    process {
+        $s = [System.Collections.ArrayList]::new(@('vpn','ipsec-policies')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Name, 'Create IPSec policy')) { InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments) -Method POST -Body $u.Parameters -Raw:$Raw }
+    }
+}
+
+#endregion
+
+#region File New-NetboxVPNIPSecProfile.ps1
+
+function New-NetboxVPNIPSecProfile {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param([Parameter(Mandatory = $true)][string]$Name,[string]$Mode,[uint64]$IKE_Policy,[uint64]$IPSec_Policy,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
+    process {
+        $s = [System.Collections.ArrayList]::new(@('vpn','ipsec-profiles')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Name, 'Create IPSec profile')) { InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments) -Method POST -Body $u.Parameters -Raw:$Raw }
+    }
+}
+
+#endregion
+
+#region File New-NetboxVPNIPSecProposal.ps1
+
+function New-NetboxVPNIPSecProposal {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param([Parameter(Mandatory = $true)][string]$Name,[string]$Encryption_Algorithm,[string]$Authentication_Algorithm,[uint32]$SA_Lifetime_Seconds,[uint32]$SA_Lifetime_Data,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
+    process {
+        $s = [System.Collections.ArrayList]::new(@('vpn','ipsec-proposals')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Name, 'Create IPSec proposal')) { InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments) -Method POST -Body $u.Parameters -Raw:$Raw }
+    }
+}
+
+#endregion
+
+#region File New-NetboxVPNL2VPN.ps1
+
+function New-NetboxVPNL2VPN {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param([Parameter(Mandatory = $true)][string]$Name,[Parameter(Mandatory = $true)][string]$Slug,
+        [uint64]$Identifier,[string]$Type,[string]$Status,[uint64]$Tenant,[string]$Description,[string]$Comments,
+        [uint64[]]$Import_Targets,[uint64[]]$Export_Targets,[hashtable]$Custom_Fields,[switch]$Raw)
+    process {
+        $s = [System.Collections.ArrayList]::new(@('vpn','l2vpns')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Name, 'Create L2VPN')) { InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments) -Method POST -Body $u.Parameters -Raw:$Raw }
+    }
+}
+
+#endregion
+
+#region File New-NetboxVPNL2VPNTermination.ps1
+
+function New-NetboxVPNL2VPNTermination {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param([Parameter(Mandatory = $true)][uint64]$L2VPN,[Parameter(Mandatory = $true)][string]$Assigned_Object_Type,[Parameter(Mandatory = $true)][uint64]$Assigned_Object_Id,[hashtable]$Custom_Fields,[switch]$Raw)
+    process {
+        $s = [System.Collections.ArrayList]::new(@('vpn','l2vpn-terminations')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess("L2VPN $L2VPN", 'Create L2VPN termination')) { InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments) -Method POST -Body $u.Parameters -Raw:$Raw }
+    }
+}
+
+#endregion
+
+#region File New-NetboxVPNTunnel.ps1
+
+function New-NetboxVPNTunnel {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true)][string]$Name,
+        [Parameter(Mandatory = $true)][ValidateSet('active', 'planned', 'disabled')][string]$Status,
+        [Parameter(Mandatory = $true)][ValidateSet('ipsec-transport', 'ipsec-tunnel', 'ip-ip', 'gre')][string]$Encapsulation,
+        [uint64]$Group,
+        [uint64]$IPSec_Profile,
+        [uint64]$Tenant,
+        [uint64]$Tunnel_Id,
+        [string]$Description,
+        [string]$Comments,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('vpn', 'tunnels'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+        if ($PSCmdlet.ShouldProcess($Name, 'Create new VPN tunnel')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NetboxVPNTunnelGroup.ps1
+
+function New-NetboxVPNTunnelGroup {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param([Parameter(Mandatory = $true)][string]$Name,[Parameter(Mandatory = $true)][string]$Slug,[string]$Description,[hashtable]$Custom_Fields,[switch]$Raw)
+    process {
+        $s = [System.Collections.ArrayList]::new(@('vpn','tunnel-groups')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Name, 'Create tunnel group')) { InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments) -Method POST -Body $u.Parameters -Raw:$Raw }
+    }
+}
+
+#endregion
+
+#region File New-NetboxVPNTunnelTermination.ps1
+
+function New-NetboxVPNTunnelTermination {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param([Parameter(Mandatory = $true)][uint64]$Tunnel,[Parameter(Mandatory = $true)][ValidateSet('peer', 'hub', 'spoke')][string]$Role,
+        [string]$Termination_Type,[uint64]$Termination_Id,[uint64]$Outside_IP,[hashtable]$Custom_Fields,[switch]$Raw)
+    process {
+        $s = [System.Collections.ArrayList]::new(@('vpn','tunnel-terminations')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess("Tunnel $Tunnel", 'Create tunnel termination')) { InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments) -Method POST -Body $u.Parameters -Raw:$Raw }
+    }
+}
+
+#endregion
+
+#region File New-NetboxWirelessLAN.ps1
+
+function New-NetboxWirelessLAN {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param([Parameter(Mandatory = $true)][string]$SSID,[uint64]$Group,[string]$Status,[uint64]$VLAN,[uint64]$Tenant,
+        [string]$Auth_Type,[string]$Auth_Cipher,[string]$Auth_PSK,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
+    process {
+        $s = [System.Collections.ArrayList]::new(@('wireless','wireless-lans')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($SSID, 'Create wireless LAN')) { InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments) -Method POST -Body $u.Parameters -Raw:$Raw }
+    }
+}
+
+#endregion
+
+#region File New-NetboxWirelessLANGroup.ps1
+
+function New-NetboxWirelessLANGroup {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param([Parameter(Mandatory = $true)][string]$Name,[Parameter(Mandatory = $true)][string]$Slug,[uint64]$Parent,[string]$Description,[hashtable]$Custom_Fields,[switch]$Raw)
+    process {
+        $s = [System.Collections.ArrayList]::new(@('wireless','wireless-lan-groups')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Name, 'Create wireless LAN group')) { InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments) -Method POST -Body $u.Parameters -Raw:$Raw }
+    }
+}
+
+#endregion
+
+#region File New-NetboxWirelessLink.ps1
+
+function New-NetboxWirelessLink {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param([Parameter(Mandatory = $true)][uint64]$Interface_A,[Parameter(Mandatory = $true)][uint64]$Interface_B,
+        [string]$SSID,[string]$Status,[uint64]$Tenant,[string]$Auth_Type,[string]$Auth_Cipher,[string]$Auth_PSK,
+        [string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
+    process {
+        $s = [System.Collections.ArrayList]::new(@('wireless','wireless-links')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess("$Interface_A to $Interface_B", 'Create wireless link')) { InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments) -Method POST -Body $u.Parameters -Raw:$Raw }
+    }
+}
 
 #endregion
 
@@ -6735,6 +7954,96 @@ function Remove-NetboxIPAMAddressRange {
 
 #endregion
 
+#region File Remove-NetboxIPAMASN.ps1
+
+function Remove-NetboxIPAMASN {
+<#
+    .SYNOPSIS
+        Remove an ASN from Netbox
+
+    .DESCRIPTION
+        Deletes an ASN (Autonomous System Number) object from Netbox.
+
+    .PARAMETER Id
+        The ID of the ASN to delete (required)
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        Remove-NetboxIPAMASN -Id 1
+
+        Deletes ASN with ID 1
+#>
+
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam', 'asns', $Id))
+
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete ASN')) {
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxIPAMASNRange.ps1
+
+function Remove-NetboxIPAMASNRange {
+<#
+    .SYNOPSIS
+        Remove an ASN range from Netbox
+
+    .DESCRIPTION
+        Deletes an ASN range object from Netbox.
+
+    .PARAMETER Id
+        The ID of the ASN range to delete (required)
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        Remove-NetboxIPAMASNRange -Id 1
+
+        Deletes ASN range with ID 1
+#>
+
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam', 'asn-ranges', $Id))
+
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete ASN range')) {
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
 #region File Remove-NetboxIPAMRouteTarget.ps1
 
 function Remove-NetboxIPAMRouteTarget {
@@ -6778,6 +8087,96 @@ function Remove-NetboxIPAMRouteTarget {
         $URI = BuildNewURI -Segments $Segments
 
         if ($PSCmdlet.ShouldProcess($Id, 'Delete route target')) {
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxIPAMService.ps1
+
+function Remove-NetboxIPAMService {
+<#
+    .SYNOPSIS
+        Remove a service from Netbox
+
+    .DESCRIPTION
+        Deletes a service object from Netbox.
+
+    .PARAMETER Id
+        The ID of the service to delete (required)
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        Remove-NetboxIPAMService -Id 1
+
+        Deletes service with ID 1
+#>
+
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam', 'services', $Id))
+
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete service')) {
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxIPAMServiceTemplate.ps1
+
+function Remove-NetboxIPAMServiceTemplate {
+<#
+    .SYNOPSIS
+        Remove a service template from Netbox
+
+    .DESCRIPTION
+        Deletes a service template object from Netbox.
+
+    .PARAMETER Id
+        The ID of the service template to delete (required)
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        Remove-NetboxIPAMServiceTemplate -Id 1
+
+        Deletes service template with ID 1
+#>
+
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam', 'service-templates', $Id))
+
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete service template')) {
             InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
         }
     }
@@ -6891,6 +8290,147 @@ function Remove-NetboxVirtualMachine {
     end {
 
     }
+}
+
+#endregion
+
+#region File Remove-NetboxVPNIKEPolicy.ps1
+
+function Remove-NetboxVPNIKEPolicy {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[switch]$Raw)
+    process { if ($PSCmdlet.ShouldProcess($Id, 'Delete IKE policy')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','ike-policies',$Id)) -Method DELETE -Raw:$Raw } }
+}
+
+#endregion
+
+#region File Remove-NetboxVPNIKEProposal.ps1
+
+function Remove-NetboxVPNIKEProposal {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[switch]$Raw)
+    process { if ($PSCmdlet.ShouldProcess($Id, 'Delete IKE proposal')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','ike-proposals',$Id)) -Method DELETE -Raw:$Raw } }
+}
+
+#endregion
+
+#region File Remove-NetboxVPNIPSecPolicy.ps1
+
+function Remove-NetboxVPNIPSecPolicy {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[switch]$Raw)
+    process { if ($PSCmdlet.ShouldProcess($Id, 'Delete IPSec policy')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','ipsec-policies',$Id)) -Method DELETE -Raw:$Raw } }
+}
+
+#endregion
+
+#region File Remove-NetboxVPNIPSecProfile.ps1
+
+function Remove-NetboxVPNIPSecProfile {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[switch]$Raw)
+    process { if ($PSCmdlet.ShouldProcess($Id, 'Delete IPSec profile')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','ipsec-profiles',$Id)) -Method DELETE -Raw:$Raw } }
+}
+
+#endregion
+
+#region File Remove-NetboxVPNIPSecProposal.ps1
+
+function Remove-NetboxVPNIPSecProposal {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[switch]$Raw)
+    process { if ($PSCmdlet.ShouldProcess($Id, 'Delete IPSec proposal')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','ipsec-proposals',$Id)) -Method DELETE -Raw:$Raw } }
+}
+
+#endregion
+
+#region File Remove-NetboxVPNL2VPN.ps1
+
+function Remove-NetboxVPNL2VPN {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[switch]$Raw)
+    process { if ($PSCmdlet.ShouldProcess($Id, 'Delete L2VPN')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','l2vpns',$Id)) -Method DELETE -Raw:$Raw } }
+}
+
+#endregion
+
+#region File Remove-NetboxVPNL2VPNTermination.ps1
+
+function Remove-NetboxVPNL2VPNTermination {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[switch]$Raw)
+    process { if ($PSCmdlet.ShouldProcess($Id, 'Delete L2VPN termination')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','l2vpn-terminations',$Id)) -Method DELETE -Raw:$Raw } }
+}
+
+#endregion
+
+#region File Remove-NetboxVPNTunnel.ps1
+
+function Remove-NetboxVPNTunnel {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('vpn', 'tunnels', $Id))
+        $URI = BuildNewURI -Segments $Segments
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete VPN tunnel')) {
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxVPNTunnelGroup.ps1
+
+function Remove-NetboxVPNTunnelGroup {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[switch]$Raw)
+    process { if ($PSCmdlet.ShouldProcess($Id, 'Delete tunnel group')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','tunnel-groups',$Id)) -Method DELETE -Raw:$Raw } }
+}
+
+#endregion
+
+#region File Remove-NetboxVPNTunnelTermination.ps1
+
+function Remove-NetboxVPNTunnelTermination {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[switch]$Raw)
+    process { if ($PSCmdlet.ShouldProcess($Id, 'Delete tunnel termination')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','tunnel-terminations',$Id)) -Method DELETE -Raw:$Raw } }
+}
+
+#endregion
+
+#region File Remove-NetboxWirelessLAN.ps1
+
+function Remove-NetboxWirelessLAN {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[switch]$Raw)
+    process { if ($PSCmdlet.ShouldProcess($Id, 'Delete wireless LAN')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('wireless','wireless-lans',$Id)) -Method DELETE -Raw:$Raw } }
+}
+
+#endregion
+
+#region File Remove-NetboxWirelessLANGroup.ps1
+
+function Remove-NetboxWirelessLANGroup {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[switch]$Raw)
+    process { if ($PSCmdlet.ShouldProcess($Id, 'Delete wireless LAN group')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('wireless','wireless-lan-groups',$Id)) -Method DELETE -Raw:$Raw } }
+}
+
+#endregion
+
+#region File Remove-NetboxWirelessLink.ps1
+
+function Remove-NetboxWirelessLink {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[switch]$Raw)
+    process { if ($PSCmdlet.ShouldProcess($Id, 'Delete wireless link')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('wireless','wireless-links',$Id)) -Method DELETE -Raw:$Raw } }
 }
 
 #endregion
@@ -8504,6 +10044,173 @@ function Set-NetboxIPAMAddressRange {
 
 #endregion
 
+#region File Set-NetboxIPAMASN.ps1
+
+function Set-NetboxIPAMASN {
+<#
+    .SYNOPSIS
+        Update an ASN in Netbox
+
+    .DESCRIPTION
+        Updates an existing ASN (Autonomous System Number) object in Netbox.
+
+    .PARAMETER Id
+        The ID of the ASN to update (required)
+
+    .PARAMETER ASN
+        The ASN number
+
+    .PARAMETER RIR
+        The RIR (Regional Internet Registry) ID
+
+    .PARAMETER Tenant
+        The tenant ID
+
+    .PARAMETER Description
+        A description of the ASN
+
+    .PARAMETER Comments
+        Additional comments
+
+    .PARAMETER Custom_Fields
+        A hashtable of custom fields
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        Set-NetboxIPAMASN -Id 1 -Description "Updated description"
+
+        Updates the description of ASN 1
+#>
+
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [ValidateRange(1, 4294967295)]
+        [uint64]$ASN,
+
+        [uint64]$RIR,
+
+        [uint64]$Tenant,
+
+        [string]$Description,
+
+        [string]$Comments,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam', 'asns', $Id))
+
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Update ASN')) {
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxIPAMASNRange.ps1
+
+function Set-NetboxIPAMASNRange {
+<#
+    .SYNOPSIS
+        Update an ASN range in Netbox
+
+    .DESCRIPTION
+        Updates an existing ASN range object in Netbox.
+
+    .PARAMETER Id
+        The ID of the ASN range to update (required)
+
+    .PARAMETER Name
+        The name of the ASN range
+
+    .PARAMETER Slug
+        The URL-friendly slug
+
+    .PARAMETER RIR
+        The RIR (Regional Internet Registry) ID
+
+    .PARAMETER Start
+        The starting ASN number
+
+    .PARAMETER End
+        The ending ASN number
+
+    .PARAMETER Tenant
+        The tenant ID
+
+    .PARAMETER Description
+        A description of the ASN range
+
+    .PARAMETER Custom_Fields
+        A hashtable of custom fields
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        Set-NetboxIPAMASNRange -Id 1 -Description "Updated description"
+
+        Updates the description of ASN range 1
+#>
+
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [string]$Name,
+
+        [string]$Slug,
+
+        [uint64]$RIR,
+
+        [ValidateRange(1, 4294967295)]
+        [uint64]$Start,
+
+        [ValidateRange(1, 4294967295)]
+        [uint64]$End,
+
+        [uint64]$Tenant,
+
+        [string]$Description,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam', 'asn-ranges', $Id))
+
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Update ASN range')) {
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
 #region File Set-NetboxIPAMPrefix.ps1
 
 
@@ -8658,6 +10365,167 @@ function Set-NetboxIPAMRouteTarget {
         $URI = BuildNewURI -Segments $URIComponents.Segments
 
         if ($PSCmdlet.ShouldProcess($Id, 'Update route target')) {
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxIPAMService.ps1
+
+function Set-NetboxIPAMService {
+<#
+    .SYNOPSIS
+        Update a service in Netbox
+
+    .DESCRIPTION
+        Updates an existing service object in Netbox.
+
+    .PARAMETER Id
+        The ID of the service to update (required)
+
+    .PARAMETER Name
+        The name of the service
+
+    .PARAMETER Ports
+        Array of port numbers
+
+    .PARAMETER Protocol
+        The protocol (tcp, udp, sctp)
+
+    .PARAMETER IPAddresses
+        Array of IP address IDs associated with this service
+
+    .PARAMETER Description
+        A description of the service
+
+    .PARAMETER Comments
+        Additional comments
+
+    .PARAMETER Custom_Fields
+        A hashtable of custom fields
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        Set-NetboxIPAMService -Id 1 -Ports @(443, 8443)
+
+        Updates service 1 to listen on ports 443 and 8443
+#>
+
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [string]$Name,
+
+        [uint16[]]$Ports,
+
+        [ValidateSet('tcp', 'udp', 'sctp')]
+        [string]$Protocol,
+
+        [uint64[]]$IPAddresses,
+
+        [string]$Description,
+
+        [string]$Comments,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam', 'services', $Id))
+
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Update service')) {
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxIPAMServiceTemplate.ps1
+
+function Set-NetboxIPAMServiceTemplate {
+<#
+    .SYNOPSIS
+        Update a service template in Netbox
+
+    .DESCRIPTION
+        Updates an existing service template object in Netbox.
+
+    .PARAMETER Id
+        The ID of the service template to update (required)
+
+    .PARAMETER Name
+        The name of the service template
+
+    .PARAMETER Ports
+        Array of port numbers
+
+    .PARAMETER Protocol
+        The protocol (tcp, udp, sctp)
+
+    .PARAMETER Description
+        A description of the service template
+
+    .PARAMETER Comments
+        Additional comments
+
+    .PARAMETER Custom_Fields
+        A hashtable of custom fields
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        Set-NetboxIPAMServiceTemplate -Id 1 -Ports @(80, 443, 8080)
+
+        Updates service template 1 with new ports
+#>
+
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [string]$Name,
+
+        [uint16[]]$Ports,
+
+        [ValidateSet('tcp', 'udp', 'sctp')]
+        [string]$Protocol,
+
+        [string]$Description,
+
+        [string]$Comments,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam', 'service-templates', $Id))
+
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Update service template')) {
             InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
         }
     }
@@ -8926,6 +10794,200 @@ function Set-NetboxVirtualMachineInterface {
 
     end {
 
+    }
+}
+
+#endregion
+
+#region File Set-NetboxVPNIKEPolicy.ps1
+
+function Set-NetboxVPNIKEPolicy {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [string]$Name,[uint16]$Version,[string]$Mode,[uint64[]]$Proposals,[string]$Preshared_Key,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
+    process {
+        $s = [System.Collections.ArrayList]::new(@('vpn','ike-policies',$Id)); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update IKE policy')) { InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments) -Method PATCH -Body $u.Parameters -Raw:$Raw }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxVPNIKEProposal.ps1
+
+function Set-NetboxVPNIKEProposal {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[string]$Name,
+        [string]$Authentication_Method,[string]$Encryption_Algorithm,[string]$Authentication_Algorithm,[uint16]$Group,[uint32]$SA_Lifetime,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
+    process {
+        $s = [System.Collections.ArrayList]::new(@('vpn','ike-proposals',$Id)); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update IKE proposal')) { InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments) -Method PATCH -Body $u.Parameters -Raw:$Raw }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxVPNIPSecPolicy.ps1
+
+function Set-NetboxVPNIPSecPolicy {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[string]$Name,[uint64[]]$Proposals,[bool]$Pfs_Group,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
+    process {
+        $s = [System.Collections.ArrayList]::new(@('vpn','ipsec-policies',$Id)); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update IPSec policy')) { InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments) -Method PATCH -Body $u.Parameters -Raw:$Raw }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxVPNIPSecProfile.ps1
+
+function Set-NetboxVPNIPSecProfile {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[string]$Name,[string]$Mode,[uint64]$IKE_Policy,[uint64]$IPSec_Policy,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
+    process {
+        $s = [System.Collections.ArrayList]::new(@('vpn','ipsec-profiles',$Id)); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update IPSec profile')) { InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments) -Method PATCH -Body $u.Parameters -Raw:$Raw }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxVPNIPSecProposal.ps1
+
+function Set-NetboxVPNIPSecProposal {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[string]$Name,[string]$Encryption_Algorithm,[string]$Authentication_Algorithm,[uint32]$SA_Lifetime_Seconds,[uint32]$SA_Lifetime_Data,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
+    process {
+        $s = [System.Collections.ArrayList]::new(@('vpn','ipsec-proposals',$Id)); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update IPSec proposal')) { InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments) -Method PATCH -Body $u.Parameters -Raw:$Raw }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxVPNL2VPN.ps1
+
+function Set-NetboxVPNL2VPN {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [string]$Name,[string]$Slug,[uint64]$Identifier,[string]$Type,[string]$Status,[uint64]$Tenant,
+        [string]$Description,[string]$Comments,[uint64[]]$Import_Targets,[uint64[]]$Export_Targets,[hashtable]$Custom_Fields,[switch]$Raw)
+    process {
+        $s = [System.Collections.ArrayList]::new(@('vpn','l2vpns',$Id)); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update L2VPN')) { InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments) -Method PATCH -Body $u.Parameters -Raw:$Raw }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxVPNL2VPNTermination.ps1
+
+function Set-NetboxVPNL2VPNTermination {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[uint64]$L2VPN,[string]$Assigned_Object_Type,[uint64]$Assigned_Object_Id,[hashtable]$Custom_Fields,[switch]$Raw)
+    process {
+        $s = [System.Collections.ArrayList]::new(@('vpn','l2vpn-terminations',$Id)); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update L2VPN termination')) { InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments) -Method PATCH -Body $u.Parameters -Raw:$Raw }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxVPNTunnel.ps1
+
+function Set-NetboxVPNTunnel {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [string]$Name,
+        [ValidateSet('active', 'planned', 'disabled')][string]$Status,
+        [ValidateSet('ipsec-transport', 'ipsec-tunnel', 'ip-ip', 'gre')][string]$Encapsulation,
+        [uint64]$Group,
+        [uint64]$IPSec_Profile,
+        [uint64]$Tenant,
+        [string]$Description,
+        [string]$Comments,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('vpn', 'tunnels', $Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+        if ($PSCmdlet.ShouldProcess($Id, 'Update VPN tunnel')) {
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxVPNTunnelGroup.ps1
+
+function Set-NetboxVPNTunnelGroup {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[string]$Name,[string]$Slug,[string]$Description,[hashtable]$Custom_Fields,[switch]$Raw)
+    process {
+        $s = [System.Collections.ArrayList]::new(@('vpn','tunnel-groups',$Id)); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update tunnel group')) { InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments) -Method PATCH -Body $u.Parameters -Raw:$Raw }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxVPNTunnelTermination.ps1
+
+function Set-NetboxVPNTunnelTermination {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[uint64]$Tunnel,[ValidateSet('peer', 'hub', 'spoke')][string]$Role,[string]$Termination_Type,[uint64]$Termination_Id,[uint64]$Outside_IP,[hashtable]$Custom_Fields,[switch]$Raw)
+    process {
+        $s = [System.Collections.ArrayList]::new(@('vpn','tunnel-terminations',$Id)); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update tunnel termination')) { InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments) -Method PATCH -Body $u.Parameters -Raw:$Raw }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxWirelessLAN.ps1
+
+function Set-NetboxWirelessLAN {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[string]$SSID,[uint64]$Group,[string]$Status,[uint64]$VLAN,[uint64]$Tenant,
+        [string]$Auth_Type,[string]$Auth_Cipher,[string]$Auth_PSK,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
+    process {
+        $s = [System.Collections.ArrayList]::new(@('wireless','wireless-lans',$Id)); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update wireless LAN')) { InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments) -Method PATCH -Body $u.Parameters -Raw:$Raw }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxWirelessLANGroup.ps1
+
+function Set-NetboxWirelessLANGroup {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[string]$Name,[string]$Slug,[uint64]$Parent,[string]$Description,[hashtable]$Custom_Fields,[switch]$Raw)
+    process {
+        $s = [System.Collections.ArrayList]::new(@('wireless','wireless-lan-groups',$Id)); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update wireless LAN group')) { InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments) -Method PATCH -Body $u.Parameters -Raw:$Raw }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxWirelessLink.ps1
+
+function Set-NetboxWirelessLink {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[uint64]$Interface_A,[uint64]$Interface_B,
+        [string]$SSID,[string]$Status,[uint64]$Tenant,[string]$Auth_Type,[string]$Auth_Cipher,[string]$Auth_PSK,
+        [string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
+    process {
+        $s = [System.Collections.ArrayList]::new(@('wireless','wireless-links',$Id)); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update wireless link')) { InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments) -Method PATCH -Body $u.Parameters -Raw:$Raw }
     }
 }
 
