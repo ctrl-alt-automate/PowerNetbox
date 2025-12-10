@@ -1,0 +1,96 @@
+function Get-NetboxIPAMASNRange {
+<#
+    .SYNOPSIS
+        Get ASN ranges from Netbox
+
+    .DESCRIPTION
+        Retrieves ASN range objects from Netbox with optional filtering.
+
+    .PARAMETER Id
+        The ID of the ASN range to retrieve
+
+    .PARAMETER Name
+        Filter by name
+
+    .PARAMETER Query
+        A general search query
+
+    .PARAMETER RIR_Id
+        Filter by RIR ID
+
+    .PARAMETER Tenant_Id
+        Filter by tenant ID
+
+    .PARAMETER Limit
+        Limit the number of results
+
+    .PARAMETER Offset
+        Offset for pagination
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        Get-NetboxIPAMASNRange
+
+        Returns all ASN ranges
+
+    .EXAMPLE
+        Get-NetboxIPAMASNRange -Name "Private"
+
+        Returns ASN ranges matching the name "Private"
+#>
+
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(ParameterSetName = 'ByID',
+                   ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Name,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Query,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$RIR_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$Tenant_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint16]$Limit,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' {
+                foreach ($RangeId in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('ipam', 'asn-ranges', $RangeId))
+
+                    $URI = BuildNewURI -Segments $Segments
+
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('ipam', 'asn-ranges'))
+
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
+        }
+    }
+}
