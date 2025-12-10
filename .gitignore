@@ -9,3 +9,7 @@ CustomMenu.inf
 Test-Module.ps1
 Staging/
 concatenated.ps1
+
+# Local configuration (contains secrets)
+.netboxps.config.ps1
+*.local.ps1
