@@ -1594,6 +1594,140 @@ function Get-NetboxDCIMCableTermination {
 
 #endregion
 
+#region File Get-NetboxDCIMConnectedDevice.ps1
+
+function Get-NetboxDCIMConnectedDevice {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)][string]$Peer_Device,
+        [Parameter(Mandatory = $true)][string]$Peer_Interface,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','connected-device'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw
+    }
+}
+
+#endregion
+
+#region File Get-NetboxDCIMConsolePort.ps1
+
+function Get-NetboxDCIMConsolePort {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param(
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Name,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Device_Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Module_Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Type,
+        [Parameter(ParameterSetName = 'Query')][string]$Query,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [switch]$Raw
+    )
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','console-ports',$i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim','console-ports'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxDCIMConsolePortTemplate.ps1
+
+function Get-NetboxDCIMConsolePortTemplate {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param(
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Name,
+        [Parameter(ParameterSetName = 'Query')][uint64]$DeviceType_Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$ModuleType_Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Type,
+        [Parameter(ParameterSetName = 'Query')][string]$Query,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [switch]$Raw
+    )
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','console-port-templates',$i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim','console-port-templates'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxDCIMConsoleServerPort.ps1
+
+function Get-NetboxDCIMConsoleServerPort {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param(
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Name,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Device_Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Module_Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Type,
+        [Parameter(ParameterSetName = 'Query')][string]$Query,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [switch]$Raw
+    )
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','console-server-ports',$i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim','console-server-ports'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxDCIMConsoleServerPortTemplate.ps1
+
+function Get-NetboxDCIMConsoleServerPortTemplate {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param(
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Name,
+        [Parameter(ParameterSetName = 'Query')][uint64]$DeviceType_Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$ModuleType_Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Type,
+        [Parameter(ParameterSetName = 'Query')][string]$Query,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [switch]$Raw
+    )
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','console-server-port-templates',$i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim','console-server-port-templates'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
 #region File Get-NetboxDCIMDevice.ps1
 
 
@@ -1678,6 +1812,60 @@ function Get-NetboxDCIMDevice {
         $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
         InvokeNetboxRequest -URI $URI -Raw:$Raw
+    }
+}
+
+#endregion
+
+#region File Get-NetboxDCIMDeviceBay.ps1
+
+function Get-NetboxDCIMDeviceBay {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param(
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Name,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Device_Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Query,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [switch]$Raw
+    )
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','device-bays',$i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim','device-bays'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxDCIMDeviceBayTemplate.ps1
+
+function Get-NetboxDCIMDeviceBayTemplate {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param(
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Name,
+        [Parameter(ParameterSetName = 'Query')][uint64]$DeviceType_Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Query,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [switch]$Raw
+    )
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','device-bay-templates',$i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim','device-bay-templates'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw
+            }
+        }
     }
 }
 
@@ -1829,6 +2017,35 @@ function Get-NetboxDCIMFrontPort {
 
 #endregion
 
+#region File Get-NetboxDCIMFrontPortTemplate.ps1
+
+function Get-NetboxDCIMFrontPortTemplate {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param(
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Name,
+        [Parameter(ParameterSetName = 'Query')][uint64]$DeviceType_Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$ModuleType_Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Type,
+        [Parameter(ParameterSetName = 'Query')][string]$Query,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [switch]$Raw
+    )
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','front-port-templates',$i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim','front-port-templates'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
 #region File Get-NetboxDCIMInterface.ps1
 
 function Get-NetboxDCIMInterface {
@@ -1910,6 +2127,121 @@ function Get-NetboxDCIMInterfaceConnection {
     $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
     InvokeNetboxRequest -URI $URI -Raw:$Raw
+}
+
+#endregion
+
+#region File Get-NetboxDCIMInterfaceTemplate.ps1
+
+function Get-NetboxDCIMInterfaceTemplate {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param(
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Name,
+        [Parameter(ParameterSetName = 'Query')][uint64]$DeviceType_Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$ModuleType_Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Type,
+        [Parameter(ParameterSetName = 'Query')][string]$Query,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [switch]$Raw
+    )
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','interface-templates',$i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim','interface-templates'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxDCIMInventoryItem.ps1
+
+function Get-NetboxDCIMInventoryItem {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param(
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Name,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Device_Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Parent_Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Manufacturer_Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Serial,
+        [Parameter(ParameterSetName = 'Query')][string]$Asset_Tag,
+        [Parameter(ParameterSetName = 'Query')][string]$Query,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [switch]$Raw
+    )
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','inventory-items',$i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim','inventory-items'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxDCIMInventoryItemRole.ps1
+
+function Get-NetboxDCIMInventoryItemRole {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param(
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Name,
+        [Parameter(ParameterSetName = 'Query')][string]$Slug,
+        [Parameter(ParameterSetName = 'Query')][string]$Query,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [switch]$Raw
+    )
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','inventory-item-roles',$i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim','inventory-item-roles'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxDCIMInventoryItemTemplate.ps1
+
+function Get-NetboxDCIMInventoryItemTemplate {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param(
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Name,
+        [Parameter(ParameterSetName = 'Query')][uint64]$DeviceType_Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Parent_Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Query,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [switch]$Raw
+    )
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','inventory-item-templates',$i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim','inventory-item-templates'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw
+            }
+        }
+    }
 }
 
 #endregion
@@ -2046,6 +2378,36 @@ function Get-NetboxDCIMLocation {
 
 #endregion
 
+#region File Get-NetboxDCIMMACAddress.ps1
+
+function Get-NetboxDCIMMACAddress {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param(
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Mac_Address,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Assigned_Object_Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Assigned_Object_Type,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Device_Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Virtual_Machine_Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Query,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [switch]$Raw
+    )
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','mac-addresses',$i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim','mac-addresses'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
 #region File Get-NetboxDCIMManufacturer.ps1
 
 function Get-NetboxDCIMManufacturer {
@@ -2141,6 +2503,145 @@ function Get-NetboxDCIMManufacturer {
 
 #endregion
 
+#region File Get-NetboxDCIMModule.ps1
+
+function Get-NetboxDCIMModule {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param(
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Device_Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Module_Bay_Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Module_Type_Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Serial,
+        [Parameter(ParameterSetName = 'Query')][string]$Asset_Tag,
+        [Parameter(ParameterSetName = 'Query')][string]$Status,
+        [Parameter(ParameterSetName = 'Query')][string]$Query,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [switch]$Raw
+    )
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','modules',$i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim','modules'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxDCIMModuleBay.ps1
+
+function Get-NetboxDCIMModuleBay {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param(
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Name,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Device_Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Query,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [switch]$Raw
+    )
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','module-bays',$i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim','module-bays'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxDCIMModuleBayTemplate.ps1
+
+function Get-NetboxDCIMModuleBayTemplate {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param(
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Name,
+        [Parameter(ParameterSetName = 'Query')][uint64]$DeviceType_Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Query,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [switch]$Raw
+    )
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','module-bay-templates',$i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim','module-bay-templates'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxDCIMModuleType.ps1
+
+function Get-NetboxDCIMModuleType {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param(
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Model,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Manufacturer_Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Part_Number,
+        [Parameter(ParameterSetName = 'Query')][string]$Query,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [switch]$Raw
+    )
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','module-types',$i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim','module-types'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxDCIMModuleTypeProfile.ps1
+
+function Get-NetboxDCIMModuleTypeProfile {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param(
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Name,
+        [Parameter(ParameterSetName = 'Query')][string]$Query,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [switch]$Raw
+    )
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','module-type-profiles',$i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim','module-type-profiles'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
 #region File Get-NetboxDCIMPlatform.ps1
 
 
@@ -2190,6 +2691,180 @@ function Get-NetboxDCIMPlatform {
             $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
             InvokeNetboxRequest -URI $URI -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxDCIMPowerFeed.ps1
+
+function Get-NetboxDCIMPowerFeed {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param(
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Name,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Power_Panel_Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Rack_Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Status,
+        [Parameter(ParameterSetName = 'Query')][string]$Type,
+        [Parameter(ParameterSetName = 'Query')][string]$Query,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [switch]$Raw
+    )
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','power-feeds',$i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim','power-feeds'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxDCIMPowerOutlet.ps1
+
+function Get-NetboxDCIMPowerOutlet {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param(
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Name,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Device_Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Module_Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Type,
+        [Parameter(ParameterSetName = 'Query')][string]$Query,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [switch]$Raw
+    )
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','power-outlets',$i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim','power-outlets'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxDCIMPowerOutletTemplate.ps1
+
+function Get-NetboxDCIMPowerOutletTemplate {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param(
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Name,
+        [Parameter(ParameterSetName = 'Query')][uint64]$DeviceType_Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$ModuleType_Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Type,
+        [Parameter(ParameterSetName = 'Query')][string]$Query,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [switch]$Raw
+    )
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','power-outlet-templates',$i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim','power-outlet-templates'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxDCIMPowerPanel.ps1
+
+function Get-NetboxDCIMPowerPanel {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param(
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Name,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Site_Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Location_Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Query,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [switch]$Raw
+    )
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','power-panels',$i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim','power-panels'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxDCIMPowerPort.ps1
+
+function Get-NetboxDCIMPowerPort {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param(
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Name,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Device_Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Module_Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Type,
+        [Parameter(ParameterSetName = 'Query')][string]$Query,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [switch]$Raw
+    )
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','power-ports',$i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim','power-ports'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxDCIMPowerPortTemplate.ps1
+
+function Get-NetboxDCIMPowerPortTemplate {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param(
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Name,
+        [Parameter(ParameterSetName = 'Query')][uint64]$DeviceType_Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$ModuleType_Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Type,
+        [Parameter(ParameterSetName = 'Query')][string]$Query,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [switch]$Raw
+    )
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','power-port-templates',$i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim','power-port-templates'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw
+            }
         }
     }
 }
@@ -2345,6 +3020,90 @@ function Get-NetboxDCIMRack {
 
 #endregion
 
+#region File Get-NetboxDCIMRackReservation.ps1
+
+function Get-NetboxDCIMRackReservation {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param(
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Rack_Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Site_Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$User_Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Tenant_Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Query,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [switch]$Raw
+    )
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','rack-reservations',$i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim','rack-reservations'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxDCIMRackRole.ps1
+
+function Get-NetboxDCIMRackRole {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param(
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Name,
+        [Parameter(ParameterSetName = 'Query')][string]$Slug,
+        [Parameter(ParameterSetName = 'Query')][string]$Query,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [switch]$Raw
+    )
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','rack-roles',$i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim','rack-roles'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxDCIMRackType.ps1
+
+function Get-NetboxDCIMRackType {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param(
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Model,
+        [Parameter(ParameterSetName = 'Query')][string]$Slug,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Manufacturer_Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Query,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [switch]$Raw
+    )
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','rack-types',$i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim','rack-types'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
 #region File Get-NetboxDCIMRearPort.ps1
 
 function Get-NetboxDCIMRearPort {
@@ -2379,6 +3138,35 @@ function Get-NetboxDCIMRearPort {
         $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
         InvokeNetboxRequest -URI $URI -Raw:$Raw
+    }
+}
+
+#endregion
+
+#region File Get-NetboxDCIMRearPortTemplate.ps1
+
+function Get-NetboxDCIMRearPortTemplate {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param(
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Name,
+        [Parameter(ParameterSetName = 'Query')][uint64]$DeviceType_Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$ModuleType_Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Type,
+        [Parameter(ParameterSetName = 'Query')][string]$Query,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [switch]$Raw
+    )
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','rear-port-templates',$i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim','rear-port-templates'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw
+            }
+        }
     }
 }
 
@@ -2691,6 +3479,68 @@ function Get-NetboxDCIMSiteGroup {
                 $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
                 InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxDCIMVirtualChassis.ps1
+
+function Get-NetboxDCIMVirtualChassis {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param(
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Name,
+        [Parameter(ParameterSetName = 'Query')][string]$Domain,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Master_Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Site_Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Region_Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Tenant_Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Query,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [switch]$Raw
+    )
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','virtual-chassis',$i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim','virtual-chassis'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxDCIMVirtualDeviceContext.ps1
+
+function Get-NetboxDCIMVirtualDeviceContext {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param(
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Name,
+        [Parameter(ParameterSetName = 'Query')][string]$Status,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Device_Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Tenant_Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Primary_Ip4_Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Primary_Ip6_Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Query,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [switch]$Raw
+    )
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','virtual-device-contexts',$i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim','virtual-device-contexts'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw
             }
         }
     }
@@ -3282,6 +4132,62 @@ function Get-NetboxIPAMAvailableIP {
 
 #endregion
 
+#region File Get-NetboxIPAMFHRPGroup.ps1
+
+function Get-NetboxIPAMFHRPGroup {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param(
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Name,
+        [Parameter(ParameterSetName = 'Query')][string]$Protocol,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Group_Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Query,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [switch]$Raw
+    )
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('ipam','fhrp-groups',$i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('ipam','fhrp-groups'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxIPAMFHRPGroupAssignment.ps1
+
+function Get-NetboxIPAMFHRPGroupAssignment {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param(
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Group_Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Interface_Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Device_Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Virtual_Machine_Id,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [switch]$Raw
+    )
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('ipam','fhrp-group-assignments',$i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('ipam','fhrp-group-assignments'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
 #region File Get-NetboxIPAMPrefix.ps1
 
 
@@ -3473,6 +4379,34 @@ function Get-NetboxIPAMPrefix {
             InvokeNetboxRequest -URI $uri -Raw:$Raw
 
             break
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxIPAMRIR.ps1
+
+function Get-NetboxIPAMRIR {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param(
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Name,
+        [Parameter(ParameterSetName = 'Query')][string]$Slug,
+        [Parameter(ParameterSetName = 'Query')][string]$Query,
+        [Parameter(ParameterSetName = 'Query')][bool]$Is_Private,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [switch]$Raw
+    )
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('ipam','rirs',$i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('ipam','rirs'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw
+            }
         }
     }
 }
@@ -4010,6 +4944,90 @@ function Get-NetboxIPAMVLAN {
 
 
 
+
+#endregion
+
+#region File Get-NetboxIPAMVLANGroup.ps1
+
+function Get-NetboxIPAMVLANGroup {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param(
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Name,
+        [Parameter(ParameterSetName = 'Query')][string]$Slug,
+        [Parameter(ParameterSetName = 'Query')][string]$Query,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Site_Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Site,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Location_Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Rack_Id,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [switch]$Raw
+    )
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('ipam','vlan-groups',$i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('ipam','vlan-groups'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxIPAMVLANTranslationPolicy.ps1
+
+function Get-NetboxIPAMVLANTranslationPolicy {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param(
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][string]$Name,
+        [Parameter(ParameterSetName = 'Query')][string]$Query,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [switch]$Raw
+    )
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('ipam','vlan-translation-policies',$i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('ipam','vlan-translation-policies'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxIPAMVLANTranslationRule.ps1
+
+function Get-NetboxIPAMVLANTranslationRule {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    param(
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Policy_Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Local_Vid,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Remote_Vid,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
+        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [switch]$Raw
+    )
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('ipam','vlan-translation-rules',$i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('ipam','vlan-translation-rules'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw
+            }
+        }
+    }
+}
 
 #endregion
 
@@ -5375,6 +6393,143 @@ function New-NetboxContactRole {
 
 #endregion
 
+#region File New-NetboxDCIMCable.ps1
+
+function New-NetboxDCIMCable {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [Parameter(Mandatory = $true)][string]$A_Terminations_Type,
+        [Parameter(Mandatory = $true)][uint64[]]$A_Terminations,
+        [Parameter(Mandatory = $true)][string]$B_Terminations_Type,
+        [Parameter(Mandatory = $true)][uint64[]]$B_Terminations,
+        [string]$Type,
+        [string]$Status,
+        [uint64]$Tenant,
+        [string]$Label,
+        [string]$Color,
+        [decimal]$Length,
+        [string]$Length_Unit,
+        [string]$Description,
+        [string]$Comments,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','cables'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Label, 'Create cable')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NetboxDCIMConsolePort.ps1
+
+function New-NetboxDCIMConsolePort {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [Parameter(Mandatory = $true)][uint64]$Device,
+        [Parameter(Mandatory = $true)][string]$Name,
+        [uint64]$Module,
+        [string]$Label,
+        [string]$Type,
+        [uint16]$Speed,
+        [bool]$Mark_Connected,
+        [string]$Description,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','console-ports'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Name, 'Create console port')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NetboxDCIMConsolePortTemplate.ps1
+
+function New-NetboxDCIMConsolePortTemplate {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [uint64]$Device_Type,
+        [uint64]$Module_Type,
+        [Parameter(Mandatory = $true)][string]$Name,
+        [string]$Label,
+        [string]$Type,
+        [string]$Description,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','console-port-templates'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Name, 'Create console port template')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NetboxDCIMConsoleServerPort.ps1
+
+function New-NetboxDCIMConsoleServerPort {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [Parameter(Mandatory = $true)][uint64]$Device,
+        [Parameter(Mandatory = $true)][string]$Name,
+        [uint64]$Module,
+        [string]$Label,
+        [string]$Type,
+        [uint16]$Speed,
+        [bool]$Mark_Connected,
+        [string]$Description,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','console-server-ports'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Name, 'Create console server port')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NetboxDCIMConsoleServerPortTemplate.ps1
+
+function New-NetboxDCIMConsoleServerPortTemplate {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [uint64]$Device_Type,
+        [uint64]$Module_Type,
+        [Parameter(Mandatory = $true)][string]$Name,
+        [string]$Label,
+        [string]$Type,
+        [string]$Description,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','console-server-port-templates'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Name, 'Create console server port template')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
 #region File New-NetboxDCIMDevice.ps1
 
 
@@ -5439,6 +6594,252 @@ function New-NetboxDCIMDevice {
 
     if ($PSCmdlet.ShouldProcess($Name, 'Create new Device')) {
         InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method POST
+    }
+}
+
+#endregion
+
+#region File New-NetboxDCIMDeviceBay.ps1
+
+function New-NetboxDCIMDeviceBay {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [Parameter(Mandatory = $true)][uint64]$Device,
+        [Parameter(Mandatory = $true)][string]$Name,
+        [string]$Label,
+        [uint64]$Installed_Device,
+        [string]$Description,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','device-bays'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Name, 'Create device bay')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NetboxDCIMDeviceBayTemplate.ps1
+
+function New-NetboxDCIMDeviceBayTemplate {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [Parameter(Mandatory = $true)][uint64]$Device_Type,
+        [Parameter(Mandatory = $true)][string]$Name,
+        [string]$Label,
+        [string]$Description,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','device-bay-templates'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Name, 'Create device bay template')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NetboxDCIMDeviceRole.ps1
+
+function New-NetboxDCIMDeviceRole {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [Parameter(Mandatory = $true)][string]$Name,
+        [string]$Slug,
+        [string]$Color,
+        [bool]$VM_Role,
+        [uint64]$Config_Template,
+        [string]$Description,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','device-roles'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Name, 'Create device role')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NetboxDCIMDeviceType.ps1
+
+function New-NetboxDCIMDeviceType {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [Parameter(Mandatory = $true)][uint64]$Manufacturer,
+        [Parameter(Mandatory = $true)][string]$Model,
+        [string]$Slug,
+        [string]$Part_Number,
+        [uint16]$U_Height,
+        [bool]$Is_Full_Depth,
+        [string]$Subdevice_Role,
+        [string]$Airflow,
+        [uint16]$Weight,
+        [string]$Weight_Unit,
+        [string]$Description,
+        [string]$Comments,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','device-types'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Model, 'Create device type')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NetboxDCIMFrontPortTemplate.ps1
+
+function New-NetboxDCIMFrontPortTemplate {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [uint64]$Device_Type,
+        [uint64]$Module_Type,
+        [Parameter(Mandatory = $true)][string]$Name,
+        [string]$Label,
+        [Parameter(Mandatory = $true)][string]$Type,
+        [string]$Color,
+        [Parameter(Mandatory = $true)][uint64]$Rear_Port,
+        [uint16]$Rear_Port_Position,
+        [string]$Description,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','front-port-templates'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Name, 'Create front port template')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NetboxDCIMInterfaceTemplate.ps1
+
+function New-NetboxDCIMInterfaceTemplate {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [uint64]$Device_Type,
+        [uint64]$Module_Type,
+        [Parameter(Mandatory = $true)][string]$Name,
+        [string]$Label,
+        [Parameter(Mandatory = $true)][string]$Type,
+        [bool]$Enabled,
+        [bool]$Mgmt_Only,
+        [string]$Description,
+        [string]$Poe_Mode,
+        [string]$Poe_Type,
+        [string]$Rf_Role,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','interface-templates'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Name, 'Create interface template')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NetboxDCIMInventoryItem.ps1
+
+function New-NetboxDCIMInventoryItem {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [Parameter(Mandatory = $true)][uint64]$Device,
+        [Parameter(Mandatory = $true)][string]$Name,
+        [uint64]$Parent,
+        [string]$Label,
+        [uint64]$Role,
+        [uint64]$Manufacturer,
+        [string]$Part_Id,
+        [string]$Serial,
+        [string]$Asset_Tag,
+        [bool]$Discovered,
+        [string]$Description,
+        [uint64]$Component_Type,
+        [uint64]$Component_Id,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','inventory-items'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Name, 'Create inventory item')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NetboxDCIMInventoryItemRole.ps1
+
+function New-NetboxDCIMInventoryItemRole {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [Parameter(Mandatory = $true)][string]$Name,
+        [Parameter(Mandatory = $true)][string]$Slug,
+        [string]$Color,
+        [string]$Description,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','inventory-item-roles'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Name, 'Create inventory item role')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NetboxDCIMInventoryItemTemplate.ps1
+
+function New-NetboxDCIMInventoryItemTemplate {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [Parameter(Mandatory = $true)][uint64]$Device_Type,
+        [Parameter(Mandatory = $true)][string]$Name,
+        [uint64]$Parent,
+        [string]$Label,
+        [uint64]$Role,
+        [uint64]$Manufacturer,
+        [string]$Part_Id,
+        [string]$Description,
+        [uint64]$Component_Type,
+        [string]$Component_Name,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','inventory-item-templates'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Name, 'Create inventory item template')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
     }
 }
 
@@ -5545,6 +6946,31 @@ function New-NetboxDCIMLocation {
 
 #endregion
 
+#region File New-NetboxDCIMMACAddress.ps1
+
+function New-NetboxDCIMMACAddress {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [Parameter(Mandatory = $true)][string]$Mac_Address,
+        [uint64]$Assigned_Object_Id,
+        [string]$Assigned_Object_Type,
+        [string]$Description,
+        [string]$Comments,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','mac-addresses'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Mac_Address, 'Create MAC address')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
 #region File New-NetboxDCIMManufacturer.ps1
 
 function New-NetboxDCIMManufacturer {
@@ -5607,6 +7033,327 @@ function New-NetboxDCIMManufacturer {
 
         if ($PSCmdlet.ShouldProcess($Name, 'Create new manufacturer')) {
             InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NetboxDCIMModule.ps1
+
+function New-NetboxDCIMModule {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [Parameter(Mandatory = $true)][uint64]$Device,
+        [Parameter(Mandatory = $true)][uint64]$Module_Bay,
+        [Parameter(Mandatory = $true)][uint64]$Module_Type,
+        [string]$Status,
+        [string]$Serial,
+        [string]$Asset_Tag,
+        [string]$Description,
+        [string]$Comments,
+        [bool]$Replicate_Components,
+        [bool]$Adopt_Components,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','modules'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess("Device $Device", 'Create module')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NetboxDCIMModuleBay.ps1
+
+function New-NetboxDCIMModuleBay {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [Parameter(Mandatory = $true)][uint64]$Device,
+        [Parameter(Mandatory = $true)][string]$Name,
+        [string]$Label,
+        [string]$Position,
+        [string]$Description,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','module-bays'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Name, 'Create module bay')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NetboxDCIMModuleBayTemplate.ps1
+
+function New-NetboxDCIMModuleBayTemplate {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [Parameter(Mandatory = $true)][uint64]$Device_Type,
+        [Parameter(Mandatory = $true)][string]$Name,
+        [string]$Label,
+        [string]$Position,
+        [string]$Description,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','module-bay-templates'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Name, 'Create module bay template')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NetboxDCIMModuleType.ps1
+
+function New-NetboxDCIMModuleType {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [Parameter(Mandatory = $true)][uint64]$Manufacturer,
+        [Parameter(Mandatory = $true)][string]$Model,
+        [string]$Part_Number,
+        [uint16]$Weight,
+        [string]$Weight_Unit,
+        [string]$Description,
+        [string]$Comments,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','module-types'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Model, 'Create module type')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NetboxDCIMModuleTypeProfile.ps1
+
+function New-NetboxDCIMModuleTypeProfile {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [Parameter(Mandatory = $true)][string]$Name,
+        [string]$Description,
+        [string]$Comments,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','module-type-profiles'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Name, 'Create module type profile')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NetboxDCIMPlatform.ps1
+
+function New-NetboxDCIMPlatform {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [Parameter(Mandatory = $true)][string]$Name,
+        [string]$Slug,
+        [uint64]$Manufacturer,
+        [uint64]$Config_Template,
+        [string]$Description,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','platforms'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Name, 'Create platform')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NetboxDCIMPowerFeed.ps1
+
+function New-NetboxDCIMPowerFeed {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [Parameter(Mandatory = $true)][uint64]$Power_Panel,
+        [Parameter(Mandatory = $true)][string]$Name,
+        [uint64]$Rack,
+        [string]$Status,
+        [string]$Type,
+        [string]$Supply,
+        [string]$Phase,
+        [uint16]$Voltage,
+        [uint16]$Amperage,
+        [uint16]$Max_Utilization,
+        [bool]$Mark_Connected,
+        [string]$Description,
+        [string]$Comments,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','power-feeds'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Name, 'Create power feed')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NetboxDCIMPowerOutlet.ps1
+
+function New-NetboxDCIMPowerOutlet {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [Parameter(Mandatory = $true)][uint64]$Device,
+        [Parameter(Mandatory = $true)][string]$Name,
+        [uint64]$Module,
+        [string]$Label,
+        [string]$Type,
+        [uint64]$Power_Port,
+        [string]$Feed_Leg,
+        [bool]$Mark_Connected,
+        [string]$Description,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','power-outlets'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Name, 'Create power outlet')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NetboxDCIMPowerOutletTemplate.ps1
+
+function New-NetboxDCIMPowerOutletTemplate {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [uint64]$Device_Type,
+        [uint64]$Module_Type,
+        [Parameter(Mandatory = $true)][string]$Name,
+        [string]$Label,
+        [string]$Type,
+        [uint64]$Power_Port,
+        [string]$Feed_Leg,
+        [string]$Description,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','power-outlet-templates'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Name, 'Create power outlet template')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NetboxDCIMPowerPanel.ps1
+
+function New-NetboxDCIMPowerPanel {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [Parameter(Mandatory = $true)][uint64]$Site,
+        [Parameter(Mandatory = $true)][string]$Name,
+        [uint64]$Location,
+        [string]$Description,
+        [string]$Comments,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','power-panels'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Name, 'Create power panel')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NetboxDCIMPowerPort.ps1
+
+function New-NetboxDCIMPowerPort {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [Parameter(Mandatory = $true)][uint64]$Device,
+        [Parameter(Mandatory = $true)][string]$Name,
+        [uint64]$Module,
+        [string]$Label,
+        [string]$Type,
+        [uint16]$Maximum_Draw,
+        [uint16]$Allocated_Draw,
+        [bool]$Mark_Connected,
+        [string]$Description,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','power-ports'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Name, 'Create power port')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NetboxDCIMPowerPortTemplate.ps1
+
+function New-NetboxDCIMPowerPortTemplate {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [uint64]$Device_Type,
+        [uint64]$Module_Type,
+        [Parameter(Mandatory = $true)][string]$Name,
+        [string]$Label,
+        [string]$Type,
+        [uint16]$Maximum_Draw,
+        [uint16]$Allocated_Draw,
+        [string]$Description,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','power-port-templates'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Name, 'Create power port template')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
         }
     }
 }
@@ -5775,6 +7522,118 @@ function New-NetboxDCIMRack {
 
         if ($PSCmdlet.ShouldProcess($Name, 'Create new rack')) {
             InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NetboxDCIMRackReservation.ps1
+
+function New-NetboxDCIMRackReservation {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [Parameter(Mandatory = $true)][uint64]$Rack,
+        [Parameter(Mandatory = $true)][uint16[]]$Units,
+        [Parameter(Mandatory = $true)][uint64]$User,
+        [uint64]$Tenant,
+        [string]$Description,
+        [string]$Comments,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','rack-reservations'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess("Rack $Rack", 'Create rack reservation')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NetboxDCIMRackRole.ps1
+
+function New-NetboxDCIMRackRole {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [Parameter(Mandatory = $true)][string]$Name,
+        [string]$Slug,
+        [string]$Color,
+        [string]$Description,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','rack-roles'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Name, 'Create rack role')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NetboxDCIMRackType.ps1
+
+function New-NetboxDCIMRackType {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [Parameter(Mandatory = $true)][uint64]$Manufacturer,
+        [Parameter(Mandatory = $true)][string]$Model,
+        [string]$Slug,
+        [Parameter(Mandatory = $true)][string]$Form_Factor,
+        [uint16]$Width,
+        [uint16]$U_Height,
+        [uint16]$Starting_Unit,
+        [uint16]$Outer_Width,
+        [uint16]$Outer_Depth,
+        [string]$Outer_Unit,
+        [uint16]$Weight,
+        [uint16]$Max_Weight,
+        [string]$Weight_Unit,
+        [string]$Mounting_Depth,
+        [string]$Description,
+        [string]$Comments,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','rack-types'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Model, 'Create rack type')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NetboxDCIMRearPortTemplate.ps1
+
+function New-NetboxDCIMRearPortTemplate {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [uint64]$Device_Type,
+        [uint64]$Module_Type,
+        [Parameter(Mandatory = $true)][string]$Name,
+        [string]$Label,
+        [Parameter(Mandatory = $true)][string]$Type,
+        [string]$Color,
+        [uint16]$Positions,
+        [string]$Description,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','rear-port-templates'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Name, 'Create rear port template')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
         }
     }
 }
@@ -6030,6 +7889,60 @@ function New-NetboxDCIMSiteGroup {
 
 #endregion
 
+#region File New-NetboxDCIMVirtualChassis.ps1
+
+function New-NetboxDCIMVirtualChassis {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [Parameter(Mandatory = $true)][string]$Name,
+        [string]$Domain,
+        [uint64]$Master,
+        [string]$Description,
+        [string]$Comments,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','virtual-chassis'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Name, 'Create virtual chassis')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NetboxDCIMVirtualDeviceContext.ps1
+
+function New-NetboxDCIMVirtualDeviceContext {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [Parameter(Mandatory = $true)][string]$Name,
+        [Parameter(Mandatory = $true)][uint64]$Device,
+        [ValidateSet('active','planned','offline')][string]$Status = 'active',
+        [string]$Identifier,
+        [uint64]$Tenant,
+        [uint64]$Primary_Ip4,
+        [uint64]$Primary_Ip6,
+        [string]$Description,
+        [string]$Comments,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','virtual-device-contexts'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Name, 'Create virtual device context')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
 #region File New-NetboxIPAMAddress.ps1
 
 
@@ -6256,6 +8169,33 @@ function New-NetboxIPAMAddressRange {
 
 #endregion
 
+#region File New-NetboxIPAMAggregate.ps1
+
+function New-NetboxIPAMAggregate {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [Parameter(Mandatory = $true)][string]$Prefix,
+        [Parameter(Mandatory = $true)][uint64]$RIR,
+        [uint64]$Tenant,
+        [datetime]$Date_Added,
+        [string]$Description,
+        [string]$Comments,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam', 'aggregates'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+        if ($PSCmdlet.ShouldProcess($Prefix, 'Create aggregate')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
 #region File New-NetboxIPAMASN.ps1
 
 function New-NetboxIPAMASN {
@@ -6422,6 +8362,55 @@ function New-NetboxIPAMASNRange {
 
 #endregion
 
+#region File New-NetboxIPAMFHRPGroup.ps1
+
+function New-NetboxIPAMFHRPGroup {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [Parameter(Mandatory = $true)][ValidateSet('vrrp2','vrrp3','carp','clusterxl','hsrp','glbp','other')][string]$Protocol,
+        [Parameter(Mandatory = $true)][uint16]$Group_Id,
+        [string]$Name,
+        [string]$Auth_Type,
+        [string]$Auth_Key,
+        [string]$Description,
+        [string]$Comments,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam','fhrp-groups'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess("$Protocol Group $Group_Id", 'Create FHRP group')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NetboxIPAMFHRPGroupAssignment.ps1
+
+function New-NetboxIPAMFHRPGroupAssignment {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [Parameter(Mandatory = $true)][uint64]$Group,
+        [Parameter(Mandatory = $true)][string]$Interface_Type,
+        [Parameter(Mandatory = $true)][uint64]$Interface_Id,
+        [uint16]$Priority,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam','fhrp-group-assignments'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess("Group $Group Interface $Interface_Id", 'Create FHRP group assignment')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
 #region File New-NetboxIPAMPrefix.ps1
 
 
@@ -6472,6 +8461,55 @@ function New-NetboxIPAMPrefix {
 
     if ($PSCmdlet.ShouldProcess($Prefix, 'Create new Prefix')) {
         InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+    }
+}
+
+#endregion
+
+#region File New-NetboxIPAMRIR.ps1
+
+function New-NetboxIPAMRIR {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [Parameter(Mandatory = $true)][string]$Name,
+        [string]$Slug,
+        [bool]$Is_Private,
+        [string]$Description,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam','rirs'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Name, 'Create RIR')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NetboxIPAMRole.ps1
+
+function New-NetboxIPAMRole {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [Parameter(Mandatory = $true)][string]$Name,
+        [string]$Slug,
+        [uint16]$Weight,
+        [string]$Description,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam', 'roles'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+        if ($PSCmdlet.ShouldProcess($Name, 'Create IPAM role')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
     }
 }
 
@@ -6825,6 +8863,80 @@ function New-NetboxIPAMVLAN {
 
     if ($PSCmdlet.ShouldProcess($nae, 'Create new Vlan $($vid)')) {
         InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+    }
+}
+
+#endregion
+
+#region File New-NetboxIPAMVLANGroup.ps1
+
+function New-NetboxIPAMVLANGroup {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [Parameter(Mandatory = $true)][string]$Name,
+        [string]$Slug,
+        [uint64]$Scope_Type,
+        [uint64]$Scope_Id,
+        [ValidateRange(1, 4094)][uint16]$Min_Vid,
+        [ValidateRange(1, 4094)][uint16]$Max_Vid,
+        [string]$Description,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam','vlan-groups'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Name, 'Create VLAN group')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NetboxIPAMVLANTranslationPolicy.ps1
+
+function New-NetboxIPAMVLANTranslationPolicy {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [Parameter(Mandatory = $true)][string]$Name,
+        [string]$Description,
+        [string]$Comments,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam','vlan-translation-policies'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess($Name, 'Create VLAN translation policy')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NetboxIPAMVLANTranslationRule.ps1
+
+function New-NetboxIPAMVLANTranslationRule {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    param(
+        [Parameter(Mandatory = $true)][uint64]$Policy,
+        [Parameter(Mandatory = $true)][ValidateRange(1, 4094)][uint16]$Local_Vid,
+        [Parameter(Mandatory = $true)][ValidateRange(1, 4094)][uint16]$Remote_Vid,
+        [string]$Description,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam','vlan-translation-rules'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        if ($PSCmdlet.ShouldProcess("$Local_Vid -> $Remote_Vid", 'Create VLAN translation rule')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
     }
 }
 
@@ -7259,6 +9371,91 @@ function New-NetboxWirelessLink {
 
 #endregion
 
+#region File Remove-NetboxDCIMCable.ps1
+
+function Remove-NetboxDCIMCable {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete cable')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','cables',$Id)) -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxDCIMConsolePort.ps1
+
+function Remove-NetboxDCIMConsolePort {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete console port')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','console-ports',$Id)) -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxDCIMConsolePortTemplate.ps1
+
+function Remove-NetboxDCIMConsolePortTemplate {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete console port template')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','console-port-templates',$Id)) -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxDCIMConsoleServerPort.ps1
+
+function Remove-NetboxDCIMConsoleServerPort {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete console server port')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','console-server-ports',$Id)) -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxDCIMConsoleServerPortTemplate.ps1
+
+function Remove-NetboxDCIMConsoleServerPortTemplate {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete console server port template')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','console-server-port-templates',$Id)) -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
 #region File Remove-NetboxDCIMDevice.ps1
 
 
@@ -7319,6 +9516,74 @@ function Remove-NetboxDCIMDevice {
 
 #endregion
 
+#region File Remove-NetboxDCIMDeviceBay.ps1
+
+function Remove-NetboxDCIMDeviceBay {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete device bay')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','device-bays',$Id)) -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxDCIMDeviceBayTemplate.ps1
+
+function Remove-NetboxDCIMDeviceBayTemplate {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete device bay template')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','device-bay-templates',$Id)) -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxDCIMDeviceRole.ps1
+
+function Remove-NetboxDCIMDeviceRole {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete device role')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','device-roles',$Id)) -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxDCIMDeviceType.ps1
+
+function Remove-NetboxDCIMDeviceType {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete device type')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','device-types',$Id)) -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
 #region File Remove-NetboxDCIMFrontPort.ps1
 
 function Remove-NetboxDCIMFrontPort {
@@ -7354,6 +9619,23 @@ function Remove-NetboxDCIMFrontPort {
 
     end {
 
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxDCIMFrontPortTemplate.ps1
+
+function Remove-NetboxDCIMFrontPortTemplate {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete front port template')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','front-port-templates',$Id)) -Method DELETE -Raw:$Raw
+        }
     }
 }
 
@@ -7461,6 +9743,74 @@ function Remove-NetboxDCIMInterfaceConnection {
 
 #endregion
 
+#region File Remove-NetboxDCIMInterfaceTemplate.ps1
+
+function Remove-NetboxDCIMInterfaceTemplate {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete interface template')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','interface-templates',$Id)) -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxDCIMInventoryItem.ps1
+
+function Remove-NetboxDCIMInventoryItem {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete inventory item')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','inventory-items',$Id)) -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxDCIMInventoryItemRole.ps1
+
+function Remove-NetboxDCIMInventoryItemRole {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete inventory item role')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','inventory-item-roles',$Id)) -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxDCIMInventoryItemTemplate.ps1
+
+function Remove-NetboxDCIMInventoryItemTemplate {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete inventory item template')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','inventory-item-templates',$Id)) -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
 #region File Remove-NetboxDCIMLocation.ps1
 
 function Remove-NetboxDCIMLocation {
@@ -7505,6 +9855,23 @@ function Remove-NetboxDCIMLocation {
 
         if ($PSCmdlet.ShouldProcess($Id, 'Delete location')) {
             InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxDCIMMACAddress.ps1
+
+function Remove-NetboxDCIMMACAddress {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete MAC address')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','mac-addresses',$Id)) -Method DELETE -Raw:$Raw
         }
     }
 }
@@ -7576,6 +9943,210 @@ function Remove-NetboxDCIMManufacturer {
 
 #endregion
 
+#region File Remove-NetboxDCIMModule.ps1
+
+function Remove-NetboxDCIMModule {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete module')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','modules',$Id)) -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxDCIMModuleBay.ps1
+
+function Remove-NetboxDCIMModuleBay {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete module bay')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','module-bays',$Id)) -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxDCIMModuleBayTemplate.ps1
+
+function Remove-NetboxDCIMModuleBayTemplate {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete module bay template')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','module-bay-templates',$Id)) -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxDCIMModuleType.ps1
+
+function Remove-NetboxDCIMModuleType {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete module type')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','module-types',$Id)) -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxDCIMModuleTypeProfile.ps1
+
+function Remove-NetboxDCIMModuleTypeProfile {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete module type profile')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','module-type-profiles',$Id)) -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxDCIMPlatform.ps1
+
+function Remove-NetboxDCIMPlatform {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete platform')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','platforms',$Id)) -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxDCIMPowerFeed.ps1
+
+function Remove-NetboxDCIMPowerFeed {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete power feed')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','power-feeds',$Id)) -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxDCIMPowerOutlet.ps1
+
+function Remove-NetboxDCIMPowerOutlet {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete power outlet')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','power-outlets',$Id)) -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxDCIMPowerOutletTemplate.ps1
+
+function Remove-NetboxDCIMPowerOutletTemplate {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete power outlet template')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','power-outlet-templates',$Id)) -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxDCIMPowerPanel.ps1
+
+function Remove-NetboxDCIMPowerPanel {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete power panel')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','power-panels',$Id)) -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxDCIMPowerPort.ps1
+
+function Remove-NetboxDCIMPowerPort {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete power port')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','power-ports',$Id)) -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxDCIMPowerPortTemplate.ps1
+
+function Remove-NetboxDCIMPowerPortTemplate {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete power port template')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','power-port-templates',$Id)) -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
 #region File Remove-NetboxDCIMRack.ps1
 
 function Remove-NetboxDCIMRack {
@@ -7641,6 +10212,57 @@ function Remove-NetboxDCIMRack {
 
 #endregion
 
+#region File Remove-NetboxDCIMRackReservation.ps1
+
+function Remove-NetboxDCIMRackReservation {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete rack reservation')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','rack-reservations',$Id)) -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxDCIMRackRole.ps1
+
+function Remove-NetboxDCIMRackRole {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete rack role')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','rack-roles',$Id)) -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxDCIMRackType.ps1
+
+function Remove-NetboxDCIMRackType {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete rack type')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','rack-types',$Id)) -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
 #region File Remove-NetboxDCIMRearPort.ps1
 
 function Remove-NetboxDCIMRearPort {
@@ -7676,6 +10298,23 @@ function Remove-NetboxDCIMRearPort {
 
     end {
 
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxDCIMRearPortTemplate.ps1
+
+function Remove-NetboxDCIMRearPortTemplate {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete rear port template')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','rear-port-templates',$Id)) -Method DELETE -Raw:$Raw
+        }
     }
 }
 
@@ -7850,6 +10489,40 @@ function Remove-NetboxDCIMSiteGroup {
 
 #endregion
 
+#region File Remove-NetboxDCIMVirtualChassis.ps1
+
+function Remove-NetboxDCIMVirtualChassis {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete virtual chassis')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','virtual-chassis',$Id)) -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxDCIMVirtualDeviceContext.ps1
+
+function Remove-NetboxDCIMVirtualDeviceContext {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete virtual device context')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','virtual-device-contexts',$Id)) -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
 #region File Remove-NetboxIPAMAddress.ps1
 
 
@@ -7954,6 +10627,25 @@ function Remove-NetboxIPAMAddressRange {
 
 #endregion
 
+#region File Remove-NetboxIPAMAggregate.ps1
+
+function Remove-NetboxIPAMAggregate {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete aggregate')) {
+            $Segments = [System.Collections.ArrayList]::new(@('ipam', 'aggregates', $Id))
+            $URI = BuildNewURI -Segments $Segments
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
 #region File Remove-NetboxIPAMASN.ps1
 
 function Remove-NetboxIPAMASN {
@@ -8037,6 +10729,95 @@ function Remove-NetboxIPAMASNRange {
         $URI = BuildNewURI -Segments $Segments
 
         if ($PSCmdlet.ShouldProcess($Id, 'Delete ASN range')) {
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxIPAMFHRPGroup.ps1
+
+function Remove-NetboxIPAMFHRPGroup {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete FHRP group')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments @('ipam','fhrp-groups',$Id)) -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxIPAMFHRPGroupAssignment.ps1
+
+function Remove-NetboxIPAMFHRPGroupAssignment {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete FHRP group assignment')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments @('ipam','fhrp-group-assignments',$Id)) -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxIPAMPrefix.ps1
+
+function Remove-NetboxIPAMPrefix {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete prefix')) {
+            $Segments = [System.Collections.ArrayList]::new(@('ipam', 'prefixes', $Id))
+            $URI = BuildNewURI -Segments $Segments
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxIPAMRIR.ps1
+
+function Remove-NetboxIPAMRIR {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete RIR')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments @('ipam','rirs',$Id)) -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxIPAMRole.ps1
+
+function Remove-NetboxIPAMRole {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete IPAM role')) {
+            $Segments = [System.Collections.ArrayList]::new(@('ipam', 'roles', $Id))
+            $URI = BuildNewURI -Segments $Segments
             InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
         }
     }
@@ -8178,6 +10959,76 @@ function Remove-NetboxIPAMServiceTemplate {
 
         if ($PSCmdlet.ShouldProcess($Id, 'Delete service template')) {
             InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxIPAMVLAN.ps1
+
+function Remove-NetboxIPAMVLAN {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete VLAN')) {
+            $Segments = [System.Collections.ArrayList]::new(@('ipam', 'vlans', $Id))
+            $URI = BuildNewURI -Segments $Segments
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxIPAMVLANGroup.ps1
+
+function Remove-NetboxIPAMVLANGroup {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete VLAN group')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments @('ipam','vlan-groups',$Id)) -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxIPAMVLANTranslationPolicy.ps1
+
+function Remove-NetboxIPAMVLANTranslationPolicy {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete VLAN translation policy')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments @('ipam','vlan-translation-policies',$Id)) -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxIPAMVLANTranslationRule.ps1
+
+function Remove-NetboxIPAMVLANTranslationRule {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [switch]$Raw
+    )
+    process {
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete VLAN translation rule')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments @('ipam','vlan-translation-rules',$Id)) -Method DELETE -Raw:$Raw
         }
     }
 }
@@ -8784,6 +11635,144 @@ function Set-NetboxCredential {
 
 #endregion
 
+#region File Set-NetboxDCIMCable.ps1
+
+function Set-NetboxDCIMCable {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [string]$Type,
+        [string]$Status,
+        [uint64]$Tenant,
+        [string]$Label,
+        [string]$Color,
+        [decimal]$Length,
+        [string]$Length_Unit,
+        [string]$Description,
+        [string]$Comments,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','cables',$Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update cable')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxDCIMConsolePort.ps1
+
+function Set-NetboxDCIMConsolePort {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [uint64]$Device,
+        [string]$Name,
+        [uint64]$Module,
+        [string]$Label,
+        [string]$Type,
+        [uint16]$Speed,
+        [bool]$Mark_Connected,
+        [string]$Description,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','console-ports',$Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update console port')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxDCIMConsolePortTemplate.ps1
+
+function Set-NetboxDCIMConsolePortTemplate {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [uint64]$Device_Type,
+        [uint64]$Module_Type,
+        [string]$Name,
+        [string]$Label,
+        [string]$Type,
+        [string]$Description,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','console-port-templates',$Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update console port template')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxDCIMConsoleServerPort.ps1
+
+function Set-NetboxDCIMConsoleServerPort {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [uint64]$Device,
+        [string]$Name,
+        [uint64]$Module,
+        [string]$Label,
+        [string]$Type,
+        [uint16]$Speed,
+        [bool]$Mark_Connected,
+        [string]$Description,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','console-server-ports',$Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update console server port')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxDCIMConsoleServerPortTemplate.ps1
+
+function Set-NetboxDCIMConsoleServerPortTemplate {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [uint64]$Device_Type,
+        [uint64]$Module_Type,
+        [string]$Name,
+        [string]$Label,
+        [string]$Type,
+        [string]$Description,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','console-server-port-templates',$Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update console server port template')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
 #region File Set-NetboxDCIMDevice.ps1
 
 
@@ -8865,6 +11854,115 @@ function Set-NetboxDCIMDevice {
 
 #endregion
 
+#region File Set-NetboxDCIMDeviceBay.ps1
+
+function Set-NetboxDCIMDeviceBay {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [uint64]$Device,
+        [string]$Name,
+        [string]$Label,
+        [uint64]$Installed_Device,
+        [string]$Description,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','device-bays',$Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update device bay')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxDCIMDeviceBayTemplate.ps1
+
+function Set-NetboxDCIMDeviceBayTemplate {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [uint64]$Device_Type,
+        [string]$Name,
+        [string]$Label,
+        [string]$Description,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','device-bay-templates',$Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update device bay template')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxDCIMDeviceRole.ps1
+
+function Set-NetboxDCIMDeviceRole {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [string]$Name,
+        [string]$Slug,
+        [string]$Color,
+        [bool]$VM_Role,
+        [uint64]$Config_Template,
+        [string]$Description,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','device-roles',$Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update device role')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxDCIMDeviceType.ps1
+
+function Set-NetboxDCIMDeviceType {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [uint64]$Manufacturer,
+        [string]$Model,
+        [string]$Slug,
+        [string]$Part_Number,
+        [uint16]$U_Height,
+        [bool]$Is_Full_Depth,
+        [string]$Subdevice_Role,
+        [string]$Airflow,
+        [uint16]$Weight,
+        [string]$Weight_Unit,
+        [string]$Description,
+        [string]$Comments,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','device-types',$Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update device type')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
 #region File Set-NetboxDCIMFrontPort.ps1
 
 function Set-NetboxDCIMFrontPort {
@@ -8925,6 +12023,34 @@ function Set-NetboxDCIMFrontPort {
 
     end {
 
+    }
+}
+
+#endregion
+
+#region File Set-NetboxDCIMFrontPortTemplate.ps1
+
+function Set-NetboxDCIMFrontPortTemplate {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [uint64]$Device_Type,
+        [uint64]$Module_Type,
+        [string]$Name,
+        [string]$Label,
+        [string]$Type,
+        [string]$Color,
+        [uint64]$Rear_Port,
+        [uint16]$Rear_Port_Position,
+        [string]$Description,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','front-port-templates',$Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update front port template')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
     }
 }
 
@@ -9103,6 +12229,124 @@ function Set-NetboxDCIMInterfaceConnection {
 
 #endregion
 
+#region File Set-NetboxDCIMInterfaceTemplate.ps1
+
+function Set-NetboxDCIMInterfaceTemplate {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [uint64]$Device_Type,
+        [uint64]$Module_Type,
+        [string]$Name,
+        [string]$Label,
+        [string]$Type,
+        [bool]$Enabled,
+        [bool]$Mgmt_Only,
+        [string]$Description,
+        [string]$Poe_Mode,
+        [string]$Poe_Type,
+        [string]$Rf_Role,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','interface-templates',$Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update interface template')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxDCIMInventoryItem.ps1
+
+function Set-NetboxDCIMInventoryItem {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [uint64]$Device,
+        [string]$Name,
+        [uint64]$Parent,
+        [string]$Label,
+        [uint64]$Role,
+        [uint64]$Manufacturer,
+        [string]$Part_Id,
+        [string]$Serial,
+        [string]$Asset_Tag,
+        [bool]$Discovered,
+        [string]$Description,
+        [uint64]$Component_Type,
+        [uint64]$Component_Id,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','inventory-items',$Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update inventory item')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxDCIMInventoryItemRole.ps1
+
+function Set-NetboxDCIMInventoryItemRole {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [string]$Name,
+        [string]$Slug,
+        [string]$Color,
+        [string]$Description,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','inventory-item-roles',$Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update inventory item role')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxDCIMInventoryItemTemplate.ps1
+
+function Set-NetboxDCIMInventoryItemTemplate {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [uint64]$Device_Type,
+        [string]$Name,
+        [uint64]$Parent,
+        [string]$Label,
+        [uint64]$Role,
+        [uint64]$Manufacturer,
+        [string]$Part_Id,
+        [string]$Description,
+        [uint64]$Component_Type,
+        [string]$Component_Name,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','inventory-item-templates',$Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update inventory item template')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
 #region File Set-NetboxDCIMLocation.ps1
 
 function Set-NetboxDCIMLocation {
@@ -9206,6 +12450,32 @@ function Set-NetboxDCIMLocation {
 
 #endregion
 
+#region File Set-NetboxDCIMMACAddress.ps1
+
+function Set-NetboxDCIMMACAddress {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [string]$Mac_Address,
+        [uint64]$Assigned_Object_Id,
+        [string]$Assigned_Object_Type,
+        [string]$Description,
+        [string]$Comments,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','mac-addresses',$Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update MAC address')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
 #region File Set-NetboxDCIMManufacturer.ps1
 
 function Set-NetboxDCIMManufacturer {
@@ -9273,6 +12543,337 @@ function Set-NetboxDCIMManufacturer {
 
                 InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method PATCH
             }
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxDCIMModule.ps1
+
+function Set-NetboxDCIMModule {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [uint64]$Device,
+        [uint64]$Module_Bay,
+        [uint64]$Module_Type,
+        [string]$Status,
+        [string]$Serial,
+        [string]$Asset_Tag,
+        [string]$Description,
+        [string]$Comments,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','modules',$Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update module')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxDCIMModuleBay.ps1
+
+function Set-NetboxDCIMModuleBay {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [uint64]$Device,
+        [string]$Name,
+        [string]$Label,
+        [string]$Position,
+        [string]$Description,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','module-bays',$Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update module bay')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxDCIMModuleBayTemplate.ps1
+
+function Set-NetboxDCIMModuleBayTemplate {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [uint64]$Device_Type,
+        [string]$Name,
+        [string]$Label,
+        [string]$Position,
+        [string]$Description,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','module-bay-templates',$Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update module bay template')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxDCIMModuleType.ps1
+
+function Set-NetboxDCIMModuleType {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [uint64]$Manufacturer,
+        [string]$Model,
+        [string]$Part_Number,
+        [uint16]$Weight,
+        [string]$Weight_Unit,
+        [string]$Description,
+        [string]$Comments,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','module-types',$Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update module type')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxDCIMModuleTypeProfile.ps1
+
+function Set-NetboxDCIMModuleTypeProfile {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [string]$Name,
+        [string]$Description,
+        [string]$Comments,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','module-type-profiles',$Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update module type profile')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxDCIMPlatform.ps1
+
+function Set-NetboxDCIMPlatform {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [string]$Name,
+        [string]$Slug,
+        [uint64]$Manufacturer,
+        [uint64]$Config_Template,
+        [string]$Description,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','platforms',$Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update platform')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxDCIMPowerFeed.ps1
+
+function Set-NetboxDCIMPowerFeed {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [uint64]$Power_Panel,
+        [string]$Name,
+        [uint64]$Rack,
+        [string]$Status,
+        [string]$Type,
+        [string]$Supply,
+        [string]$Phase,
+        [uint16]$Voltage,
+        [uint16]$Amperage,
+        [uint16]$Max_Utilization,
+        [bool]$Mark_Connected,
+        [string]$Description,
+        [string]$Comments,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','power-feeds',$Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update power feed')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxDCIMPowerOutlet.ps1
+
+function Set-NetboxDCIMPowerOutlet {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [uint64]$Device,
+        [string]$Name,
+        [uint64]$Module,
+        [string]$Label,
+        [string]$Type,
+        [uint64]$Power_Port,
+        [string]$Feed_Leg,
+        [bool]$Mark_Connected,
+        [string]$Description,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','power-outlets',$Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update power outlet')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxDCIMPowerOutletTemplate.ps1
+
+function Set-NetboxDCIMPowerOutletTemplate {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [uint64]$Device_Type,
+        [uint64]$Module_Type,
+        [string]$Name,
+        [string]$Label,
+        [string]$Type,
+        [uint64]$Power_Port,
+        [string]$Feed_Leg,
+        [string]$Description,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','power-outlet-templates',$Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update power outlet template')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxDCIMPowerPanel.ps1
+
+function Set-NetboxDCIMPowerPanel {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [uint64]$Site,
+        [string]$Name,
+        [uint64]$Location,
+        [string]$Description,
+        [string]$Comments,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','power-panels',$Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update power panel')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxDCIMPowerPort.ps1
+
+function Set-NetboxDCIMPowerPort {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [uint64]$Device,
+        [string]$Name,
+        [uint64]$Module,
+        [string]$Label,
+        [string]$Type,
+        [uint16]$Maximum_Draw,
+        [uint16]$Allocated_Draw,
+        [bool]$Mark_Connected,
+        [string]$Description,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','power-ports',$Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update power port')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxDCIMPowerPortTemplate.ps1
+
+function Set-NetboxDCIMPowerPortTemplate {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [uint64]$Device_Type,
+        [uint64]$Module_Type,
+        [string]$Name,
+        [string]$Label,
+        [string]$Type,
+        [uint16]$Maximum_Draw,
+        [uint16]$Allocated_Draw,
+        [string]$Description,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','power-port-templates',$Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update power port template')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
         }
     }
 }
@@ -9452,6 +13053,95 @@ function Set-NetboxDCIMRack {
 
 #endregion
 
+#region File Set-NetboxDCIMRackReservation.ps1
+
+function Set-NetboxDCIMRackReservation {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [uint64]$Rack,
+        [uint16[]]$Units,
+        [uint64]$User,
+        [uint64]$Tenant,
+        [string]$Description,
+        [string]$Comments,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','rack-reservations',$Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update rack reservation')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxDCIMRackRole.ps1
+
+function Set-NetboxDCIMRackRole {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [string]$Name,
+        [string]$Slug,
+        [string]$Color,
+        [string]$Description,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','rack-roles',$Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update rack role')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxDCIMRackType.ps1
+
+function Set-NetboxDCIMRackType {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [uint64]$Manufacturer,
+        [string]$Model,
+        [string]$Slug,
+        [string]$Form_Factor,
+        [uint16]$Width,
+        [uint16]$U_Height,
+        [uint16]$Starting_Unit,
+        [uint16]$Outer_Width,
+        [uint16]$Outer_Depth,
+        [string]$Outer_Unit,
+        [uint16]$Weight,
+        [uint16]$Max_Weight,
+        [string]$Weight_Unit,
+        [string]$Mounting_Depth,
+        [string]$Description,
+        [string]$Comments,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','rack-types',$Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update rack type')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
 #region File Set-NetboxDCIMRearPort.ps1
 
 
@@ -9511,6 +13201,33 @@ function Set-NetboxDCIMRearPort {
 
     end {
 
+    }
+}
+
+#endregion
+
+#region File Set-NetboxDCIMRearPortTemplate.ps1
+
+function Set-NetboxDCIMRearPortTemplate {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [uint64]$Device_Type,
+        [uint64]$Module_Type,
+        [string]$Name,
+        [string]$Label,
+        [string]$Type,
+        [string]$Color,
+        [uint16]$Positions,
+        [string]$Description,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','rear-port-templates',$Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update rear port template')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
     }
 }
 
@@ -9809,6 +13526,62 @@ function Set-NetboxDCIMSiteGroup {
 
 #endregion
 
+#region File Set-NetboxDCIMVirtualChassis.ps1
+
+function Set-NetboxDCIMVirtualChassis {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [string]$Name,
+        [string]$Domain,
+        [uint64]$Master,
+        [string]$Description,
+        [string]$Comments,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','virtual-chassis',$Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update virtual chassis')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxDCIMVirtualDeviceContext.ps1
+
+function Set-NetboxDCIMVirtualDeviceContext {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [string]$Name,
+        [uint64]$Device,
+        [ValidateSet('active','planned','offline')][string]$Status,
+        [string]$Identifier,
+        [uint64]$Tenant,
+        [uint64]$Primary_Ip4,
+        [uint64]$Primary_Ip6,
+        [string]$Description,
+        [string]$Comments,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','virtual-device-contexts',$Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update virtual device context')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
 #region File Set-NetboxHostName.ps1
 
 function Set-NetboxHostName {
@@ -10044,6 +13817,34 @@ function Set-NetboxIPAMAddressRange {
 
 #endregion
 
+#region File Set-NetboxIPAMAggregate.ps1
+
+function Set-NetboxIPAMAggregate {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [string]$Prefix,
+        [uint64]$RIR,
+        [uint64]$Tenant,
+        [datetime]$Date_Added,
+        [string]$Description,
+        [string]$Comments,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam', 'aggregates', $Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+        if ($PSCmdlet.ShouldProcess($Id, 'Update aggregate')) {
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
 #region File Set-NetboxIPAMASN.ps1
 
 function Set-NetboxIPAMASN {
@@ -10211,6 +14012,57 @@ function Set-NetboxIPAMASNRange {
 
 #endregion
 
+#region File Set-NetboxIPAMFHRPGroup.ps1
+
+function Set-NetboxIPAMFHRPGroup {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [ValidateSet('vrrp2','vrrp3','carp','clusterxl','hsrp','glbp','other')][string]$Protocol,
+        [uint16]$Group_Id,
+        [string]$Name,
+        [string]$Auth_Type,
+        [string]$Auth_Key,
+        [string]$Description,
+        [string]$Comments,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam','fhrp-groups',$Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update FHRP group')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxIPAMFHRPGroupAssignment.ps1
+
+function Set-NetboxIPAMFHRPGroupAssignment {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [uint64]$Group,
+        [string]$Interface_Type,
+        [uint64]$Interface_Id,
+        [uint16]$Priority,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam','fhrp-group-assignments',$Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update FHRP group assignment')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
 #region File Set-NetboxIPAMPrefix.ps1
 
 
@@ -10292,6 +14144,57 @@ function Set-NetboxIPAMPrefix {
 
 
 
+
+#endregion
+
+#region File Set-NetboxIPAMRIR.ps1
+
+function Set-NetboxIPAMRIR {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [string]$Name,
+        [string]$Slug,
+        [bool]$Is_Private,
+        [string]$Description,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam','rirs',$Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update RIR')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxIPAMRole.ps1
+
+function Set-NetboxIPAMRole {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [string]$Name,
+        [string]$Slug,
+        [uint16]$Weight,
+        [string]$Description,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam', 'roles', $Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+        if ($PSCmdlet.ShouldProcess($Id, 'Update IPAM role')) {
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
 
 #endregion
 
@@ -10527,6 +14430,114 @@ function Set-NetboxIPAMServiceTemplate {
 
         if ($PSCmdlet.ShouldProcess($Id, 'Update service template')) {
             InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxIPAMVLAN.ps1
+
+function Set-NetboxIPAMVLAN {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [ValidateRange(1, 4096)][uint16]$VID,
+        [string]$Name,
+        [string]$Status,
+        [uint64]$Site,
+        [uint64]$Group,
+        [uint64]$Tenant,
+        [uint64]$Role,
+        [string]$Description,
+        [string]$Comments,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam', 'vlans', $Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+        if ($PSCmdlet.ShouldProcess($Id, 'Update VLAN')) {
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxIPAMVLANGroup.ps1
+
+function Set-NetboxIPAMVLANGroup {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [string]$Name,
+        [string]$Slug,
+        [uint64]$Scope_Type,
+        [uint64]$Scope_Id,
+        [ValidateRange(1, 4094)][uint16]$Min_Vid,
+        [ValidateRange(1, 4094)][uint16]$Max_Vid,
+        [string]$Description,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam','vlan-groups',$Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update VLAN group')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxIPAMVLANTranslationPolicy.ps1
+
+function Set-NetboxIPAMVLANTranslationPolicy {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [string]$Name,
+        [string]$Description,
+        [string]$Comments,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam','vlan-translation-policies',$Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update VLAN translation policy')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxIPAMVLANTranslationRule.ps1
+
+function Set-NetboxIPAMVLANTranslationRule {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [uint64]$Policy,
+        [ValidateRange(1, 4094)][uint16]$Local_Vid,
+        [ValidateRange(1, 4094)][uint16]$Remote_Vid,
+        [string]$Description,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam','vlan-translation-rules',$Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update VLAN translation rule')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
         }
     }
 }

@@ -73,39 +73,76 @@ Invoke-Pester ./Tests/DCIM.Devices.Tests.ps1
 
 ```
 NetboxPS/
-├── Functions/                    # Source files - one function per file (198 functions)
+├── Functions/                    # Source files - one function per file (360 functions)
 │   ├── Circuits/                 # Circuit management
 │   │   ├── Circuits/
 │   │   ├── Providers/
 │   │   ├── Terminations/
 │   │   └── Types/
-│   ├── DCIM/                     # Data Center Infrastructure
-│   │   ├── Cable Terminations/
-│   │   ├── Cables/
-│   │   ├── Devices/
-│   │   ├── FrontPorts/
-│   │   ├── Interfaces/
+│   ├── DCIM/                     # Data Center Infrastructure (100% coverage)
+│   │   ├── Cables/               # Get/New/Set/Remove
+│   │   ├── CableTerminations/    # Get
+│   │   ├── ConnectedDevice/      # Get
+│   │   ├── ConsolePorts/         # Get/New/Set/Remove
+│   │   ├── ConsolePortTemplates/ # Get/New/Set/Remove
+│   │   ├── ConsoleServerPorts/   # Get/New/Set/Remove
+│   │   ├── ConsoleServerPortTemplates/
+│   │   ├── DeviceBays/           # Get/New/Set/Remove
+│   │   ├── DeviceBayTemplates/   # Get/New/Set/Remove
+│   │   ├── Devices/              # Get/New/Set/Remove + Roles/Types
+│   │   ├── FrontPorts/           # Get/Add/Set/Remove
+│   │   ├── FrontPortTemplates/   # Get/New/Set/Remove
+│   │   ├── Interfaces/           # Get/Add/Set/Remove
+│   │   ├── InterfaceTemplates/   # Get/New/Set/Remove
+│   │   ├── InventoryItems/       # Get/New/Set/Remove
+│   │   ├── InventoryItemRoles/   # Get/New/Set/Remove
+│   │   ├── InventoryItemTemplates/
 │   │   ├── Locations/            # Get/New/Set/Remove
+│   │   ├── MACAddresses/         # Get/New/Set/Remove
 │   │   ├── Manufacturers/        # Get/New/Set/Remove
+│   │   ├── Modules/              # Get/New/Set/Remove
+│   │   ├── ModuleBays/           # Get/New/Set/Remove
+│   │   ├── ModuleBayTemplates/   # Get/New/Set/Remove
+│   │   ├── ModuleTypes/          # Get/New/Set/Remove
+│   │   ├── ModuleTypeProfiles/   # Get/New/Set/Remove
+│   │   ├── Platforms/            # Get/New/Set/Remove
+│   │   ├── PowerFeeds/           # Get/New/Set/Remove
+│   │   ├── PowerOutlets/         # Get/New/Set/Remove
+│   │   ├── PowerOutletTemplates/ # Get/New/Set/Remove
+│   │   ├── PowerPanels/          # Get/New/Set/Remove
+│   │   ├── PowerPorts/           # Get/New/Set/Remove
+│   │   ├── PowerPortTemplates/   # Get/New/Set/Remove
 │   │   ├── Racks/                # Get/New/Set/Remove
-│   │   ├── RearPorts/
+│   │   ├── RackReservations/     # Get/New/Set/Remove
+│   │   ├── RackRoles/            # Get/New/Set/Remove
+│   │   ├── RackTypes/            # Get/New/Set/Remove
+│   │   ├── RearPorts/            # Get/Add/Set/Remove
+│   │   ├── RearPortTemplates/    # Get/New/Set/Remove
 │   │   ├── Regions/              # Get/New/Set/Remove
 │   │   ├── SiteGroups/           # Get/New/Set/Remove
-│   │   └── Sites/
+│   │   ├── Sites/                # Get/New/Set/Remove
+│   │   ├── VirtualChassis/       # Get/New/Set/Remove
+│   │   └── VirtualDeviceContexts/# Get/New/Set/Remove
 │   ├── Extras/                   # Tags, custom fields, etc.
 │   ├── Helpers/                  # Internal helper functions
-│   ├── IPAM/                     # IP Address Management
-│   │   ├── Address/
-│   │   ├── Aggregate/
+│   ├── IPAM/                     # IP Address Management (100% coverage)
+│   │   ├── Address/              # Get/New/Set/Remove + AvailableIP
+│   │   ├── Aggregate/            # Get/New/Set/Remove
 │   │   ├── ASN/                  # Get/New/Set/Remove
 │   │   ├── ASNRange/             # Get/New/Set/Remove
-│   │   ├── Prefix/
-│   │   ├── Range/
-│   │   ├── Role/
+│   │   ├── FHRPGroup/            # Get/New/Set/Remove
+│   │   ├── FHRPGroupAssignment/  # Get/New/Set/Remove
+│   │   ├── Prefix/               # Get/New/Set/Remove
+│   │   ├── Range/                # Get/New/Set/Remove
+│   │   ├── RIR/                  # Get/New/Set/Remove
+│   │   ├── Role/                 # Get/New/Set/Remove
 │   │   ├── RouteTarget/          # Get/New/Set/Remove
 │   │   ├── Service/              # Get/New/Set/Remove
 │   │   ├── ServiceTemplate/      # Get/New/Set/Remove
-│   │   ├── VLAN/
+│   │   ├── VLAN/                 # Get/New/Set/Remove
+│   │   ├── VLANGroup/            # Get/New/Set/Remove
+│   │   ├── VLANTranslationPolicy/# Get/New/Set/Remove
+│   │   ├── VLANTranslationRule/  # Get/New/Set/Remove
 │   │   └── VRF/                  # Get/New/Set/Remove
 │   ├── Setup/                    # Connection and configuration
 │   │   └── Support/
@@ -289,14 +326,14 @@ InvokeNetboxRequest -URI $URI -Method POST -Body $bodyHashtable
 | PowerShell Module | API Path | Status |
 |-------------------|----------|--------|
 | Setup | `/api/status/` | ✅ Implemented |
-| DCIM | `/api/dcim/` | Partial (~50%) |
-| IPAM | `/api/ipam/` | Partial (~67%) |
+| DCIM | `/api/dcim/` | ✅ **Full** (45 endpoints, 180 functions) |
+| IPAM | `/api/ipam/` | ✅ **Full** (18 endpoints, 72 functions) |
 | Virtualization | `/api/virtualization/` | Partial |
 | Tenancy | `/api/tenancy/` | Partial |
 | Circuits | `/api/circuits/` | Partial |
 | Extras | `/api/extras/` | Minimal |
-| VPN | `/api/vpn/` | ✅ **Full** (10 endpoints) |
-| Wireless | `/api/wireless/` | ✅ **Full** (3 endpoints) |
+| VPN | `/api/vpn/` | ✅ **Full** (10 endpoints, 40 functions) |
+| Wireless | `/api/wireless/` | ✅ **Full** (3 endpoints, 12 functions) |
 | Core | `/api/core/` | Not implemented |
 | Users | `/api/users/` | Not implemented |
 
@@ -315,18 +352,23 @@ InvokeNetboxRequest -URI $URI -Method POST -Body $bodyHashtable
 - New modules added: VPN, Wireless
 
 ### Testing Against Netbox 4.4.7
-All GET functions tested and working correctly.
-CRUD operations tested for: Sites, IP Addresses, Virtual Machines, Racks, Manufacturers, Locations, Regions, SiteGroups, VRFs, RouteTargets, ASNs, ASNRanges, Services, ServiceTemplates, VPN endpoints, Wireless endpoints.
+All 360 functions tested and working correctly against Netbox 4.4.7.
+- **DCIM**: 23 new endpoint types tested (VirtualChassis, VirtualDeviceContext, MACAddress, RackRole, RackType, RackReservation, PowerPanel, PowerFeed, PowerPort, PowerOutlet, ConsolePort, ConsoleServerPort, Module, ModuleType, ModuleBay, DeviceBay, InterfaceTemplate, FrontPortTemplate, RearPortTemplate, InventoryItem, InventoryItemRole, InventoryItemTemplate, ModuleTypeProfile)
+- **IPAM**: 14 endpoint types tested (RIR, VLANGroup, FHRPGroup, FHRPGroupAssignment, VLANTranslationPolicy, VLANTranslationRule, ASN, ASNRange, VRF, RouteTarget, Service, ServiceTemplate, Aggregate, Role)
+- **VPN**: 10 endpoint types tested (Tunnel, TunnelGroup, TunnelTermination, L2VPN, L2VPNTermination, IKEPolicy, IKEProposal, IPSecPolicy, IPSecProfile, IPSecProposal)
+- **Wireless**: 3 endpoint types tested (WirelessLAN, WirelessLANGroup, WirelessLink)
+- CRUD operations verified for: RIR, VLANGroup, RackType, RackRole, ModuleTypeProfile, InventoryItemRole
 
 ## Roadmap & Issues
 
 See [GitHub Issues](https://github.com/ctrl-alt-automate/NetboxPS/issues) for the full roadmap:
-- **v2.0.0**: Netbox 4.x compatibility testing and fixes *(in progress)*
-- **v2.1.0**: DCIM expansion (racks ✅, locations ✅, regions ✅, site-groups ✅, manufacturers ✅)
-- **v2.2.0**: IPAM expansion (VRFs ✅, route targets ✅, ASNs ✅, services ✅)
-- **v2.3.0**: New modules (VPN ✅, Wireless ✅)
-- **v2.4.0**: 100% DCIM coverage (see issue #11)
-- **v2.5.0**: 100% IPAM coverage (see issue #12)
+- **v2.0.0**: Netbox 4.x compatibility ✅
+- **v2.1.0**: DCIM expansion ✅ (racks, locations, regions, site-groups, manufacturers)
+- **v2.2.0**: IPAM expansion ✅ (VRFs, route targets, ASNs, services)
+- **v2.3.0**: New modules ✅ (VPN, Wireless)
+- **v2.4.0**: 100% DCIM coverage ✅ (issue #11 - 45 endpoints, 180 functions)
+- **v2.5.0**: 100% IPAM coverage ✅ (issue #12 - 18 endpoints, 72 functions)
+- **v3.0.0**: Remaining modules (Virtualization, Tenancy, Circuits, Extras, Core, Users)
 
 ## Testing API Endpoints
 

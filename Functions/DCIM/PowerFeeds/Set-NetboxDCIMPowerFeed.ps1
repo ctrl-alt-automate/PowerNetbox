@@ -1,0 +1,29 @@
+function Set-NetboxDCIMPowerFeed {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [uint64]$Power_Panel,
+        [string]$Name,
+        [uint64]$Rack,
+        [string]$Status,
+        [string]$Type,
+        [string]$Supply,
+        [string]$Phase,
+        [uint16]$Voltage,
+        [uint16]$Amperage,
+        [uint16]$Max_Utilization,
+        [bool]$Mark_Connected,
+        [string]$Description,
+        [string]$Comments,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim','power-feeds',$Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update power feed')) {
+            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
