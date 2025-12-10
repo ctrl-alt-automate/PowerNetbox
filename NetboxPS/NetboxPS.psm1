@@ -1914,6 +1914,138 @@ function Get-NetboxDCIMInterfaceConnection {
 
 #endregion
 
+#region File Get-NetboxDCIMLocation.ps1
+
+function Get-NetboxDCIMLocation {
+<#
+    .SYNOPSIS
+        Get locations from Netbox
+
+    .DESCRIPTION
+        Retrieves location objects from Netbox with optional filtering.
+        Locations represent physical areas within a site (e.g., floors, rooms, cages).
+
+    .PARAMETER Id
+        The ID of the location to retrieve
+
+    .PARAMETER Name
+        Filter by location name
+
+    .PARAMETER Query
+        A general search query
+
+    .PARAMETER Slug
+        Filter by slug
+
+    .PARAMETER Site_Id
+        Filter by site ID
+
+    .PARAMETER Site
+        Filter by site name
+
+    .PARAMETER Parent_Id
+        Filter by parent location ID
+
+    .PARAMETER Status
+        Filter by status (planned, staging, active, decommissioning, retired)
+
+    .PARAMETER Tenant_Id
+        Filter by tenant ID
+
+    .PARAMETER Limit
+        Limit the number of results
+
+    .PARAMETER Offset
+        Offset for pagination
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        Get-NetboxDCIMLocation
+
+        Returns all locations
+
+    .EXAMPLE
+        Get-NetboxDCIMLocation -Site_Id 1
+
+        Returns all locations at site with ID 1
+
+    .EXAMPLE
+        Get-NetboxDCIMLocation -Name "Server Room"
+
+        Returns locations matching the name "Server Room"
+#>
+
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(ParameterSetName = 'ByID',
+                   ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Name,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Query,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Slug,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$Site_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Site,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$Parent_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [ValidateSet('planned', 'staging', 'active', 'decommissioning', 'retired')]
+        [string]$Status,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$Tenant_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint16]$Limit,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' {
+                foreach ($LocationId in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('dcim', 'locations', $LocationId))
+
+                    $URI = BuildNewURI -Segments $Segments
+
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim', 'locations'))
+
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
 #region File Get-NetboxDCIMManufacturer.ps1
 
 function Get-NetboxDCIMManufacturer {
@@ -2252,6 +2384,113 @@ function Get-NetboxDCIMRearPort {
 
 #endregion
 
+#region File Get-NetboxDCIMRegion.ps1
+
+function Get-NetboxDCIMRegion {
+<#
+    .SYNOPSIS
+        Get regions from Netbox
+
+    .DESCRIPTION
+        Retrieves region objects from Netbox with optional filtering.
+        Regions are used to organize sites geographically (e.g., countries, states, cities).
+
+    .PARAMETER Id
+        The ID of the region to retrieve
+
+    .PARAMETER Name
+        Filter by region name
+
+    .PARAMETER Query
+        A general search query
+
+    .PARAMETER Slug
+        Filter by slug
+
+    .PARAMETER Parent_Id
+        Filter by parent region ID
+
+    .PARAMETER Limit
+        Limit the number of results
+
+    .PARAMETER Offset
+        Offset for pagination
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        Get-NetboxDCIMRegion
+
+        Returns all regions
+
+    .EXAMPLE
+        Get-NetboxDCIMRegion -Name "Europe"
+
+        Returns regions matching the name "Europe"
+
+    .EXAMPLE
+        Get-NetboxDCIMRegion -Parent_Id 1
+
+        Returns all child regions of region 1
+#>
+
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(ParameterSetName = 'ByID',
+                   ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Name,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Query,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Slug,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$Parent_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint16]$Limit,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' {
+                foreach ($RegionId in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('dcim', 'regions', $RegionId))
+
+                    $URI = BuildNewURI -Segments $Segments
+
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim', 'regions'))
+
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
 #region File Get-NetboxDCIMSite.ps1
 
 
@@ -2341,6 +2580,113 @@ function Get-NetboxDCIMSite {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'sites'))
 
                 $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters
+
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NetboxDCIMSiteGroup.ps1
+
+function Get-NetboxDCIMSiteGroup {
+<#
+    .SYNOPSIS
+        Get site groups from Netbox
+
+    .DESCRIPTION
+        Retrieves site group objects from Netbox with optional filtering.
+        Site groups are used to organize sites by functional role (e.g., production, staging, DR).
+
+    .PARAMETER Id
+        The ID of the site group to retrieve
+
+    .PARAMETER Name
+        Filter by site group name
+
+    .PARAMETER Query
+        A general search query
+
+    .PARAMETER Slug
+        Filter by slug
+
+    .PARAMETER Parent_Id
+        Filter by parent site group ID
+
+    .PARAMETER Limit
+        Limit the number of results
+
+    .PARAMETER Offset
+        Offset for pagination
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        Get-NetboxDCIMSiteGroup
+
+        Returns all site groups
+
+    .EXAMPLE
+        Get-NetboxDCIMSiteGroup -Name "Production"
+
+        Returns site groups matching the name "Production"
+
+    .EXAMPLE
+        Get-NetboxDCIMSiteGroup -Parent_Id 1
+
+        Returns all child site groups of site group 1
+#>
+
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(ParameterSetName = 'ByID',
+                   ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Name,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Query,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Slug,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$Parent_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint16]$Limit,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' {
+                foreach ($SiteGroupId in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('dcim', 'site-groups', $SiteGroupId))
+
+                    $URI = BuildNewURI -Segments $Segments
+
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim', 'site-groups'))
+
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
 
                 $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
@@ -4201,6 +4547,107 @@ function New-NetboxDCIMDevice {
 
 #endregion
 
+#region File New-NetboxDCIMLocation.ps1
+
+function New-NetboxDCIMLocation {
+<#
+    .SYNOPSIS
+        Create a new location in Netbox
+
+    .DESCRIPTION
+        Creates a new location object in Netbox.
+        Locations represent physical areas within a site (e.g., floors, rooms, cages).
+
+    .PARAMETER Name
+        The name of the location (required)
+
+    .PARAMETER Slug
+        The URL-friendly slug (required)
+
+    .PARAMETER Site
+        The site ID where the location exists (required)
+
+    .PARAMETER Parent
+        The parent location ID for nested locations
+
+    .PARAMETER Status
+        The operational status (planned, staging, active, decommissioning, retired)
+
+    .PARAMETER Tenant
+        The tenant ID that owns this location
+
+    .PARAMETER Facility
+        The facility identifier
+
+    .PARAMETER Description
+        A description of the location
+
+    .PARAMETER Comments
+        Additional comments
+
+    .PARAMETER Custom_Fields
+        A hashtable of custom fields
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        New-NetboxDCIMLocation -Name "Server Room" -Slug "server-room" -Site 1
+
+        Creates a new location named "Server Room" at site 1
+
+    .EXAMPLE
+        New-NetboxDCIMLocation -Name "Floor 2" -Slug "floor-2" -Site 1 -Status active
+
+        Creates a new active location at site 1
+#>
+
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [string]$Name,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Slug,
+
+        [Parameter(Mandatory = $true)]
+        [uint64]$Site,
+
+        [uint64]$Parent,
+
+        [ValidateSet('planned', 'staging', 'active', 'decommissioning', 'retired')]
+        [string]$Status,
+
+        [uint64]$Tenant,
+
+        [string]$Facility,
+
+        [string]$Description,
+
+        [string]$Comments,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim', 'locations'))
+
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Name, 'Create new location')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
 #region File New-NetboxDCIMManufacturer.ps1
 
 function New-NetboxDCIMManufacturer {
@@ -4437,6 +4884,85 @@ function New-NetboxDCIMRack {
 
 #endregion
 
+#region File New-NetboxDCIMRegion.ps1
+
+function New-NetboxDCIMRegion {
+<#
+    .SYNOPSIS
+        Create a new region in Netbox
+
+    .DESCRIPTION
+        Creates a new region object in Netbox.
+        Regions are used to organize sites geographically (e.g., countries, states, cities).
+
+    .PARAMETER Name
+        The name of the region (required)
+
+    .PARAMETER Slug
+        The URL-friendly slug (required)
+
+    .PARAMETER Parent
+        The parent region ID for nested regions
+
+    .PARAMETER Description
+        A description of the region
+
+    .PARAMETER Comments
+        Additional comments
+
+    .PARAMETER Custom_Fields
+        A hashtable of custom fields
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        New-NetboxDCIMRegion -Name "Europe" -Slug "europe"
+
+        Creates a new region named "Europe"
+
+    .EXAMPLE
+        New-NetboxDCIMRegion -Name "Netherlands" -Slug "netherlands" -Parent 1
+
+        Creates a new region as a child of region 1
+#>
+
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [string]$Name,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Slug,
+
+        [uint64]$Parent,
+
+        [string]$Description,
+
+        [string]$Comments,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim', 'regions'))
+
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Name, 'Create new region')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
 #region File New-NetboxDCIMSite.ps1
 
 <#
@@ -4522,6 +5048,85 @@ function New-NetboxDCIMSite {
 
         if ($PSCmdlet.ShouldProcess($name, 'Create new Site')) {
             InvokeNetboxRequest -URI $URI -Method $Method -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NetboxDCIMSiteGroup.ps1
+
+function New-NetboxDCIMSiteGroup {
+<#
+    .SYNOPSIS
+        Create a new site group in Netbox
+
+    .DESCRIPTION
+        Creates a new site group object in Netbox.
+        Site groups are used to organize sites by functional role (e.g., production, staging, DR).
+
+    .PARAMETER Name
+        The name of the site group (required)
+
+    .PARAMETER Slug
+        The URL-friendly slug (required)
+
+    .PARAMETER Parent
+        The parent site group ID for nested groups
+
+    .PARAMETER Description
+        A description of the site group
+
+    .PARAMETER Comments
+        Additional comments
+
+    .PARAMETER Custom_Fields
+        A hashtable of custom fields
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        New-NetboxDCIMSiteGroup -Name "Production" -Slug "production"
+
+        Creates a new site group named "Production"
+
+    .EXAMPLE
+        New-NetboxDCIMSiteGroup -Name "DR Sites" -Slug "dr-sites" -Parent 1
+
+        Creates a new site group as a child of site group 1
+#>
+
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [string]$Name,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Slug,
+
+        [uint64]$Parent,
+
+        [string]$Description,
+
+        [string]$Comments,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim', 'site-groups'))
+
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Name, 'Create new site group')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
         }
     }
 }
@@ -5240,6 +5845,56 @@ function Remove-NetboxDCIMInterfaceConnection {
 
 #endregion
 
+#region File Remove-NetboxDCIMLocation.ps1
+
+function Remove-NetboxDCIMLocation {
+<#
+    .SYNOPSIS
+        Remove a location from Netbox
+
+    .DESCRIPTION
+        Deletes a location object from Netbox.
+
+    .PARAMETER Id
+        The ID of the location to delete (required)
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        Remove-NetboxDCIMLocation -Id 1
+
+        Deletes location with ID 1
+
+    .EXAMPLE
+        Get-NetboxDCIMLocation -Name "Old Room" | Remove-NetboxDCIMLocation
+
+        Deletes locations matching the name "Old Room"
+#>
+
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim', 'locations', $Id))
+
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete location')) {
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
 #region File Remove-NetboxDCIMManufacturer.ps1
 
 function Remove-NetboxDCIMManufacturer {
@@ -5410,6 +6065,56 @@ function Remove-NetboxDCIMRearPort {
 
 #endregion
 
+#region File Remove-NetboxDCIMRegion.ps1
+
+function Remove-NetboxDCIMRegion {
+<#
+    .SYNOPSIS
+        Remove a region from Netbox
+
+    .DESCRIPTION
+        Deletes a region object from Netbox.
+
+    .PARAMETER Id
+        The ID of the region to delete (required)
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        Remove-NetboxDCIMRegion -Id 1
+
+        Deletes region with ID 1
+
+    .EXAMPLE
+        Get-NetboxDCIMRegion -Name "Old Region" | Remove-NetboxDCIMRegion
+
+        Deletes regions matching the name "Old Region"
+#>
+
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim', 'regions', $Id))
+
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete region')) {
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
 #region File Remove-NetboxDCIMSite.ps1
 
 <#
@@ -5474,6 +6179,56 @@ function Remove-NetboxDCIMSite {
 
     end {
 
+    }
+}
+
+#endregion
+
+#region File Remove-NetboxDCIMSiteGroup.ps1
+
+function Remove-NetboxDCIMSiteGroup {
+<#
+    .SYNOPSIS
+        Remove a site group from Netbox
+
+    .DESCRIPTION
+        Deletes a site group object from Netbox.
+
+    .PARAMETER Id
+        The ID of the site group to delete (required)
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        Remove-NetboxDCIMSiteGroup -Id 1
+
+        Deletes site group with ID 1
+
+    .EXAMPLE
+        Get-NetboxDCIMSiteGroup -Name "Old Group" | Remove-NetboxDCIMSiteGroup
+
+        Deletes site groups matching the name "Old Group"
+#>
+
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim', 'site-groups', $Id))
+
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete site group')) {
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
     }
 }
 
@@ -6311,6 +7066,109 @@ function Set-NetboxDCIMInterfaceConnection {
 
 #endregion
 
+#region File Set-NetboxDCIMLocation.ps1
+
+function Set-NetboxDCIMLocation {
+<#
+    .SYNOPSIS
+        Update a location in Netbox
+
+    .DESCRIPTION
+        Updates an existing location object in Netbox.
+
+    .PARAMETER Id
+        The ID of the location to update (required)
+
+    .PARAMETER Name
+        The name of the location
+
+    .PARAMETER Slug
+        The URL-friendly slug
+
+    .PARAMETER Site
+        The site ID where the location exists
+
+    .PARAMETER Parent
+        The parent location ID for nested locations
+
+    .PARAMETER Status
+        The operational status (planned, staging, active, decommissioning, retired)
+
+    .PARAMETER Tenant
+        The tenant ID that owns this location
+
+    .PARAMETER Facility
+        The facility identifier
+
+    .PARAMETER Description
+        A description of the location
+
+    .PARAMETER Comments
+        Additional comments
+
+    .PARAMETER Custom_Fields
+        A hashtable of custom fields
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        Set-NetboxDCIMLocation -Id 1 -Name "Server Room A"
+
+        Updates the name of location 1
+
+    .EXAMPLE
+        Set-NetboxDCIMLocation -Id 1 -Status retired
+
+        Marks location 1 as retired
+#>
+
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [string]$Name,
+
+        [string]$Slug,
+
+        [uint64]$Site,
+
+        [uint64]$Parent,
+
+        [ValidateSet('planned', 'staging', 'active', 'decommissioning', 'retired')]
+        [string]$Status,
+
+        [uint64]$Tenant,
+
+        [string]$Facility,
+
+        [string]$Description,
+
+        [string]$Comments,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim', 'locations', $Id))
+
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Update location')) {
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
 #region File Set-NetboxDCIMManufacturer.ps1
 
 function Set-NetboxDCIMManufacturer {
@@ -6621,6 +7479,88 @@ function Set-NetboxDCIMRearPort {
 
 #endregion
 
+#region File Set-NetboxDCIMRegion.ps1
+
+function Set-NetboxDCIMRegion {
+<#
+    .SYNOPSIS
+        Update a region in Netbox
+
+    .DESCRIPTION
+        Updates an existing region object in Netbox.
+
+    .PARAMETER Id
+        The ID of the region to update (required)
+
+    .PARAMETER Name
+        The name of the region
+
+    .PARAMETER Slug
+        The URL-friendly slug
+
+    .PARAMETER Parent
+        The parent region ID for nested regions
+
+    .PARAMETER Description
+        A description of the region
+
+    .PARAMETER Comments
+        Additional comments
+
+    .PARAMETER Custom_Fields
+        A hashtable of custom fields
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        Set-NetboxDCIMRegion -Id 1 -Name "Western Europe"
+
+        Updates the name of region 1
+
+    .EXAMPLE
+        Set-NetboxDCIMRegion -Id 1 -Description "Western European countries"
+
+        Updates the description of region 1
+#>
+
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [string]$Name,
+
+        [string]$Slug,
+
+        [uint64]$Parent,
+
+        [string]$Description,
+
+        [string]$Comments,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim', 'regions', $Id))
+
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Update region')) {
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
 #region File Set-NetboxDCIMSite.ps1
 
 function Set-NetboxDCIMSite {
@@ -6744,6 +7684,88 @@ function Set-NetboxDCIMSite {
 
                 InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method PATCH
             }
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NetboxDCIMSiteGroup.ps1
+
+function Set-NetboxDCIMSiteGroup {
+<#
+    .SYNOPSIS
+        Update a site group in Netbox
+
+    .DESCRIPTION
+        Updates an existing site group object in Netbox.
+
+    .PARAMETER Id
+        The ID of the site group to update (required)
+
+    .PARAMETER Name
+        The name of the site group
+
+    .PARAMETER Slug
+        The URL-friendly slug
+
+    .PARAMETER Parent
+        The parent site group ID for nested groups
+
+    .PARAMETER Description
+        A description of the site group
+
+    .PARAMETER Comments
+        Additional comments
+
+    .PARAMETER Custom_Fields
+        A hashtable of custom fields
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        Set-NetboxDCIMSiteGroup -Id 1 -Name "Production Sites"
+
+        Updates the name of site group 1
+
+    .EXAMPLE
+        Set-NetboxDCIMSiteGroup -Id 1 -Description "All production sites"
+
+        Updates the description of site group 1
+#>
+
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [string]$Name,
+
+        [string]$Slug,
+
+        [uint64]$Parent,
+
+        [string]$Description,
+
+        [string]$Comments,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim', 'site-groups', $Id))
+
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Update site group')) {
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
         }
     }
 }

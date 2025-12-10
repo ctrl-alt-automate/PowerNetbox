@@ -73,7 +73,7 @@ Invoke-Pester ./Tests/DCIM.Devices.Tests.ps1
 
 ```
 NetboxPS/
-├── Functions/                    # Source files - one function per file (110 functions)
+├── Functions/                    # Source files - one function per file (122 functions)
 │   ├── Circuits/                 # Circuit management
 │   │   ├── Circuits/
 │   │   ├── Providers/
@@ -85,9 +85,12 @@ NetboxPS/
 │   │   ├── Devices/
 │   │   ├── FrontPorts/
 │   │   ├── Interfaces/
-│   │   ├── Manufacturers/        # NEW: Get/New/Set/Remove
-│   │   ├── Racks/                # NEW: Get/New/Set/Remove
+│   │   ├── Locations/            # Get/New/Set/Remove
+│   │   ├── Manufacturers/        # Get/New/Set/Remove
+│   │   ├── Racks/                # Get/New/Set/Remove
 │   │   ├── RearPorts/
+│   │   ├── Regions/              # Get/New/Set/Remove
+│   │   ├── SiteGroups/           # Get/New/Set/Remove
 │   │   └── Sites/
 │   ├── Extras/                   # Tags, custom fields, etc.
 │   ├── Helpers/                  # Internal helper functions
@@ -291,14 +294,14 @@ InvokeNetboxRequest -URI $URI -Method POST -Body $bodyHashtable
 - New modules added: VPN, Wireless
 
 ### Testing Against Netbox 4.4.7
-All existing GET functions (26) have been tested and work correctly.
-CRUD operations tested for: Sites, IP Addresses, Virtual Machines, Racks, Manufacturers.
+All GET functions (29) have been tested and work correctly.
+CRUD operations tested for: Sites, IP Addresses, Virtual Machines, Racks, Manufacturers, Locations, Regions, SiteGroups.
 
 ## Roadmap & Issues
 
 See [GitHub Issues](https://github.com/ctrl-alt-automate/NetboxPS/issues) for the full roadmap:
 - **v2.0.0**: Netbox 4.x compatibility testing and fixes *(in progress)*
-- **v2.1.0**: DCIM expansion (racks ✅, locations, manufacturers ✅)
+- **v2.1.0**: DCIM expansion (racks ✅, locations ✅, regions ✅, site-groups ✅, manufacturers ✅)
 - **v2.2.0**: IPAM expansion (VRFs, ASNs, services)
 - **v2.3.0**: New modules (VPN, Wireless)
 
