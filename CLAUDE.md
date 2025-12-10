@@ -73,7 +73,7 @@ Invoke-Pester ./Tests/DCIM.Devices.Tests.ps1
 
 ```
 NetboxPS/
-├── Functions/                    # Source files - one function per file
+├── Functions/                    # Source files - one function per file (110 functions)
 │   ├── Circuits/                 # Circuit management
 │   │   ├── Circuits/
 │   │   ├── Providers/
@@ -85,6 +85,8 @@ NetboxPS/
 │   │   ├── Devices/
 │   │   ├── FrontPorts/
 │   │   ├── Interfaces/
+│   │   ├── Manufacturers/        # NEW: Get/New/Set/Remove
+│   │   ├── Racks/                # NEW: Get/New/Set/Remove
 │   │   ├── RearPorts/
 │   │   └── Sites/
 │   ├── Extras/                   # Tags, custom fields, etc.
@@ -101,9 +103,11 @@ NetboxPS/
 │   ├── Tenancy/                  # Tenants, contacts
 │   └── Virtualization/           # VMs, clusters
 ├── Tests/                        # Pester tests
+├── .claude/commands/             # Specialized AI agent prompts
 ├── NetboxPS/                     # Build output directory
 ├── NetboxPS.psd1                 # Module manifest (source)
 ├── NetboxPS.psm1                 # Root module file (source)
+├── Connect-DevNetbox.ps1         # Quick connect helper script
 └── deploy.ps1                    # Build script
 ```
 
@@ -272,11 +276,29 @@ InvokeNetboxRequest -URI $URI -Method POST -Body $bodyHashtable
 | Core | `/api/core/` | **Not implemented** |
 | Users | `/api/users/` | **Not implemented** |
 
+## Netbox 4.x Compatibility
+
+### Known Breaking Changes (Fixed)
+| Issue | Old Behavior | New Behavior (4.x) | Status |
+|-------|--------------|-------------------|--------|
+| ContentTypes endpoint | `/api/extras/content-types/` | `/api/core/object-types/` | ✅ Fixed |
+| VM Site parameter | Mandatory | Optional (only Name required) | ✅ Fixed |
+| Set-NetboxDCIMSite | Missing | Added | ✅ Fixed |
+
+### API Endpoints Changed in Netbox 4.x
+- `/api/extras/content-types/` → `/api/core/object-types/`
+- Several fields that were mandatory are now optional
+- New modules added: VPN, Wireless
+
+### Testing Against Netbox 4.4.7
+All existing GET functions (26) have been tested and work correctly.
+CRUD operations tested for: Sites, IP Addresses, Virtual Machines, Racks, Manufacturers.
+
 ## Roadmap & Issues
 
-See GitHub Issues for the full roadmap:
-- **v2.0.0**: Netbox 4.x compatibility testing and fixes
-- **v2.1.0**: DCIM expansion (racks, locations, manufacturers)
+See [GitHub Issues](https://github.com/ctrl-alt-automate/NetboxPS/issues) for the full roadmap:
+- **v2.0.0**: Netbox 4.x compatibility testing and fixes *(in progress)*
+- **v2.1.0**: DCIM expansion (racks ✅, locations, manufacturers ✅)
 - **v2.2.0**: IPAM expansion (VRFs, ASNs, services)
 - **v2.3.0**: New modules (VPN, Wireless)
 
@@ -307,22 +329,43 @@ curl -s -H "Authorization: Token YOUR_TOKEN" "https://YOUR_HOST/api/dcim/" | pyt
 
 ## Slash Commands (Specialized Agents)
 
-This project includes specialized slash commands for different expertise areas:
+This project includes specialized slash commands in `.claude/commands/` for different expertise areas:
 
-| Command | Purpose |
-|---------|---------|
-| `/netbox-api [endpoint]` | Netbox API expert - query schemas, explain endpoints |
-| `/powershell-expert [question]` | PowerShell best practices and modern patterns |
-| `/implement [endpoint]` | Combined workflow to implement a new endpoint |
-| `/test-endpoint [function]` | Test existing functions against Netbox 4.4.7 |
+| Command | Purpose | When to Use |
+|---------|---------|-------------|
+| `/netbox-api [endpoint]` | Netbox API expert | Research endpoint schemas, understand API structure |
+| `/powershell-expert [question]` | PowerShell best practices | Code review, pattern questions, modern PS guidance |
+| `/implement [endpoint]` | Combined implementation workflow | Creating new endpoint functions (uses both experts) |
+| `/test-endpoint [function]` | Compatibility testing | Verify functions work against Netbox 4.4.7 |
 
 ### Usage Examples
+```bash
+# Research an API endpoint before implementing
+/netbox-api dcim/racks
+
+# Ask about PowerShell patterns
+/powershell-expert how should I handle pagination in Get functions?
+
+# Implement a complete new endpoint (recommended workflow)
+/implement dcim/locations
+
+# Test an existing function for compatibility
+/test-endpoint Get-NetboxDCIMDevice
 ```
-/netbox-api dcim/racks - explain the racks endpoint
-/powershell-expert how to handle pagination
-/implement dcim/racks - implement full CRUD for racks
-/test-endpoint Get-NetboxDCIMDevice - test compatibility
-```
+
+### Recommended Workflow for New Endpoints
+
+1. **Research first**: Use `/netbox-api [endpoint]` to understand the API schema
+2. **Check patterns**: Use `/powershell-expert` if unsure about implementation patterns
+3. **Implement**: Use `/implement [endpoint]` for guided implementation
+4. **Test**: Use `/test-endpoint` to verify against live Netbox
+
+### Agent Files Location
+The agent prompts are stored in `.claude/commands/`:
+- `netbox-api.md` - Netbox API expertise context
+- `powershell-expert.md` - PowerShell best practices context
+- `implement.md` - Combined implementation workflow
+- `test-endpoint.md` - Testing workflow
 
 ## Git Workflow
 
