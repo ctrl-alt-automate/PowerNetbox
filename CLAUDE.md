@@ -73,7 +73,7 @@ Invoke-Pester ./Tests/DCIM.Devices.Tests.ps1
 
 ```
 NetboxPS/
-├── Functions/                    # Source files - one function per file (130 functions)
+├── Functions/                    # Source files - one function per file (198 functions)
 │   ├── Circuits/                 # Circuit management
 │   │   ├── Circuits/
 │   │   ├── Providers/
@@ -97,16 +97,35 @@ NetboxPS/
 │   ├── IPAM/                     # IP Address Management
 │   │   ├── Address/
 │   │   ├── Aggregate/
+│   │   ├── ASN/                  # Get/New/Set/Remove
+│   │   ├── ASNRange/             # Get/New/Set/Remove
 │   │   ├── Prefix/
 │   │   ├── Range/
 │   │   ├── Role/
 │   │   ├── RouteTarget/          # Get/New/Set/Remove
+│   │   ├── Service/              # Get/New/Set/Remove
+│   │   ├── ServiceTemplate/      # Get/New/Set/Remove
 │   │   ├── VLAN/
 │   │   └── VRF/                  # Get/New/Set/Remove
 │   ├── Setup/                    # Connection and configuration
 │   │   └── Support/
 │   ├── Tenancy/                  # Tenants, contacts
-│   └── Virtualization/           # VMs, clusters
+│   ├── Virtualization/           # VMs, clusters
+│   ├── VPN/                      # VPN module (NEW)
+│   │   ├── IKEPolicy/            # Get/New/Set/Remove
+│   │   ├── IKEProposal/          # Get/New/Set/Remove
+│   │   ├── IPSecPolicy/          # Get/New/Set/Remove
+│   │   ├── IPSecProfile/         # Get/New/Set/Remove
+│   │   ├── IPSecProposal/        # Get/New/Set/Remove
+│   │   ├── L2VPN/                # Get/New/Set/Remove
+│   │   ├── L2VPNTermination/     # Get/New/Set/Remove
+│   │   ├── Tunnel/               # Get/New/Set/Remove
+│   │   ├── TunnelGroup/          # Get/New/Set/Remove
+│   │   └── TunnelTermination/    # Get/New/Set/Remove
+│   └── Wireless/                 # Wireless module (NEW)
+│       ├── WirelessLAN/          # Get/New/Set/Remove
+│       ├── WirelessLANGroup/     # Get/New/Set/Remove
+│       └── WirelessLink/         # Get/New/Set/Remove
 ├── Tests/                        # Pester tests
 ├── .claude/commands/             # Specialized AI agent prompts
 ├── NetboxPS/                     # Build output directory
@@ -269,17 +288,17 @@ InvokeNetboxRequest -URI $URI -Method POST -Body $bodyHashtable
 
 | PowerShell Module | API Path | Status |
 |-------------------|----------|--------|
-| Setup | `/api/status/` | Implemented |
-| DCIM | `/api/dcim/` | Partial |
-| IPAM | `/api/ipam/` | Partial |
+| Setup | `/api/status/` | ✅ Implemented |
+| DCIM | `/api/dcim/` | Partial (~50%) |
+| IPAM | `/api/ipam/` | Partial (~67%) |
 | Virtualization | `/api/virtualization/` | Partial |
 | Tenancy | `/api/tenancy/` | Partial |
 | Circuits | `/api/circuits/` | Partial |
 | Extras | `/api/extras/` | Minimal |
-| VPN | `/api/vpn/` | **Not implemented** |
-| Wireless | `/api/wireless/` | **Not implemented** |
-| Core | `/api/core/` | **Not implemented** |
-| Users | `/api/users/` | **Not implemented** |
+| VPN | `/api/vpn/` | ✅ **Full** (10 endpoints) |
+| Wireless | `/api/wireless/` | ✅ **Full** (3 endpoints) |
+| Core | `/api/core/` | Not implemented |
+| Users | `/api/users/` | Not implemented |
 
 ## Netbox 4.x Compatibility
 
@@ -296,16 +315,18 @@ InvokeNetboxRequest -URI $URI -Method POST -Body $bodyHashtable
 - New modules added: VPN, Wireless
 
 ### Testing Against Netbox 4.4.7
-All GET functions (31) have been tested and work correctly.
-CRUD operations tested for: Sites, IP Addresses, Virtual Machines, Racks, Manufacturers, Locations, Regions, SiteGroups, VRFs, RouteTargets.
+All GET functions tested and working correctly.
+CRUD operations tested for: Sites, IP Addresses, Virtual Machines, Racks, Manufacturers, Locations, Regions, SiteGroups, VRFs, RouteTargets, ASNs, ASNRanges, Services, ServiceTemplates, VPN endpoints, Wireless endpoints.
 
 ## Roadmap & Issues
 
 See [GitHub Issues](https://github.com/ctrl-alt-automate/NetboxPS/issues) for the full roadmap:
 - **v2.0.0**: Netbox 4.x compatibility testing and fixes *(in progress)*
 - **v2.1.0**: DCIM expansion (racks ✅, locations ✅, regions ✅, site-groups ✅, manufacturers ✅)
-- **v2.2.0**: IPAM expansion (VRFs ✅, route targets ✅, ASNs, services)
-- **v2.3.0**: New modules (VPN, Wireless)
+- **v2.2.0**: IPAM expansion (VRFs ✅, route targets ✅, ASNs ✅, services ✅)
+- **v2.3.0**: New modules (VPN ✅, Wireless ✅)
+- **v2.4.0**: 100% DCIM coverage (see issue #11)
+- **v2.5.0**: 100% IPAM coverage (see issue #12)
 
 ## Testing API Endpoints
 
