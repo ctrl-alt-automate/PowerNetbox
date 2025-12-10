@@ -1,0 +1,87 @@
+function New-NetboxIPAMVRF {
+<#
+    .SYNOPSIS
+        Create a new VRF in Netbox
+
+    .DESCRIPTION
+        Creates a new VRF (Virtual Routing and Forwarding) object in Netbox.
+
+    .PARAMETER Name
+        The name of the VRF (required)
+
+    .PARAMETER RD
+        The route distinguisher (RFC 4364 format, e.g., "65001:100")
+
+    .PARAMETER Tenant
+        The tenant ID that owns this VRF
+
+    .PARAMETER Enforce_Unique
+        Prevent duplicate prefixes/IP addresses within this VRF
+
+    .PARAMETER Description
+        A description of the VRF
+
+    .PARAMETER Comments
+        Additional comments
+
+    .PARAMETER Import_Targets
+        Array of route target IDs for import
+
+    .PARAMETER Export_Targets
+        Array of route target IDs for export
+
+    .PARAMETER Custom_Fields
+        A hashtable of custom fields
+
+    .PARAMETER Raw
+        Return the raw API response
+
+    .EXAMPLE
+        New-NetboxIPAMVRF -Name "Production"
+
+        Creates a new VRF named "Production"
+
+    .EXAMPLE
+        New-NetboxIPAMVRF -Name "Customer-A" -RD "65001:100" -Enforce_Unique $true
+
+        Creates a new VRF with route distinguisher and unique enforcement
+#>
+
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [string]$Name,
+
+        [string]$RD,
+
+        [uint64]$Tenant,
+
+        [bool]$Enforce_Unique,
+
+        [string]$Description,
+
+        [string]$Comments,
+
+        [uint64[]]$Import_Targets,
+
+        [uint64[]]$Export_Targets,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam', 'vrfs'))
+
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Name, 'Create new VRF')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
