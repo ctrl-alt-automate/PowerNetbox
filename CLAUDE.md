@@ -542,3 +542,21 @@ The build script uses `Join-Path` for all file paths to ensure cross-platform co
 $FunctionPath = Join-Path $PSScriptRoot 'Functions'
 $OutputDirectory = Join-Path $PSScriptRoot $ModuleName
 ```
+
+### Certificate Handling
+SSL/TLS certificate handling differs between PowerShell editions:
+
+| Edition | Method | Notes |
+|---------|--------|-------|
+| Desktop (5.1) | `ServicePointManager` | Uses `Set-NBCipherSSL` and `Set-NBuntrustedSSL` |
+| Core (7+) | `-SkipCertificateCheck` | Native parameter on `Invoke-RestMethod` |
+
+```powershell
+# TLS configuration (Set-NBCipherSSL)
+# - Desktop: Enables TLS 1.2/1.3 via ServicePointManager
+# - Core: Skipped (uses modern TLS by default)
+
+# Certificate validation (Set-NBuntrustedSSL)
+# - Desktop: Uses CertificatePolicy callback
+# - Core: Uses -SkipCertificateCheck parameter
+```
