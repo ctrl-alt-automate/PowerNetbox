@@ -51,7 +51,7 @@ function Get-NBContactAssignment {
                    Position = 0)]
         [string]$Name,
 
-        [Parameter(ParameterSetName = 'ByID')]
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
         [Parameter(ParameterSetName = 'Query')]
@@ -78,7 +78,8 @@ function Get-NBContactAssignment {
         [switch]$Raw
     )
 
-    switch ($PSCmdlet.ParameterSetName) {
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($ContactAssignment_ID in $Id) {
                 $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'contact-assignments', $ContactAssignment_ID))
@@ -104,5 +105,6 @@ function Get-NBContactAssignment {
 
             break
         }
+    }
     }
 }

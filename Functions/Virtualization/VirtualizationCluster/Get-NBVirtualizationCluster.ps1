@@ -58,6 +58,7 @@ function Get-NBVirtualizationCluster {
         [Alias('q')]
         [string]$Query,
 
+        [Parameter(ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
         [string]$Group,
@@ -81,11 +82,13 @@ function Get-NBVirtualizationCluster {
         [switch]$Raw
     )
 
-    $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'clusters'))
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'clusters'))
 
-    $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters
+        $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters
 
-    $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+        $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
-    InvokeNetboxRequest -URI $uri -Raw:$Raw
+        InvokeNetboxRequest -URI $uri -Raw:$Raw
+    }
 }

@@ -24,7 +24,7 @@ function Get-NBIPAMVLAN {
         [ValidateRange(1, 4096)]
         [uint16]$VID,
 
-        [Parameter(ParameterSetName = 'ByID')]
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
         [Parameter(ParameterSetName = 'Query')]
@@ -78,7 +78,8 @@ function Get-NBIPAMVLAN {
         [switch]$Raw
     )
 
-    switch ($PSCmdlet.ParameterSetName) {
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($VLAN_ID in $Id) {
                 $Segments = [System.Collections.ArrayList]::new(@('ipam', 'vlans', $VLAN_ID))
@@ -105,8 +106,5 @@ function Get-NBIPAMVLAN {
             break
         }
     }
+    }
 }
-
-
-
-

@@ -26,6 +26,7 @@ function Get-NBDCIMDeviceType {
         [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
+        [Parameter(ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
         [string]$Query,
@@ -54,13 +55,16 @@ function Get-NBDCIMDeviceType {
 
         [switch]$Raw
     )
-    #endregion Parameters
 
-    $Segments = [System.Collections.ArrayList]::new(@('dcim', 'device-types'))
+    process {
+        #endregion Parameters
 
-    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        $Segments = [System.Collections.ArrayList]::new(@('dcim', 'device-types'))
 
-    $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
 
-    InvokeNetboxRequest -URI $URI -Raw:$Raw
+        $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+
+        InvokeNetboxRequest -URI $URI -Raw:$Raw
+    }
 }

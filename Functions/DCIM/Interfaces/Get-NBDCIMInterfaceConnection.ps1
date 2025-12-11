@@ -36,11 +36,13 @@ function Get-NBDCIMInterfaceConnection {
         [switch]$Raw
     )
 
-    $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interface-connections'))
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interface-connections'))
 
-    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
 
-    $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+        $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
-    InvokeNetboxRequest -URI $URI -Raw:$Raw
+        InvokeNetboxRequest -URI $URI -Raw:$Raw
+    }
 }

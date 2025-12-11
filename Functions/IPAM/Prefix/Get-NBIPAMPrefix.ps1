@@ -90,7 +90,8 @@ function Get-NBIPAMPrefix {
         [Parameter(ParameterSetName = 'Query')]
         [string]$Query,
 
-        [Parameter(ParameterSetName = 'ByID')]
+        [Parameter(ParameterSetName = 'ByID',
+                   ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
         [Parameter(ParameterSetName = 'Query')]
@@ -154,15 +155,16 @@ function Get-NBIPAMPrefix {
         [switch]$Raw
     )
 
-    #    if ($null -ne $Family) {
-    #        $PSBoundParameters.Family = ValidateIPAMChoice -ProvidedValue $Family -PrefixFamily
-    #    }
-    #
-    #    if ($null -ne $Status) {
-    #        $PSBoundParameters.Status = ValidateIPAMChoice -ProvidedValue $Status -PrefixStatus
-    #    }
+    process {
+        #    if ($null -ne $Family) {
+        #        $PSBoundParameters.Family = ValidateIPAMChoice -ProvidedValue $Family -PrefixFamily
+        #    }
+        #
+        #    if ($null -ne $Status) {
+        #        $PSBoundParameters.Status = ValidateIPAMChoice -ProvidedValue $Status -PrefixStatus
+        #    }
 
-    switch ($PSCmdlet.ParameterSetName) {
+        switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($Prefix_ID in $Id) {
                 $Segments = [System.Collections.ArrayList]::new(@('ipam', 'prefixes', $Prefix_ID))
@@ -188,5 +190,6 @@ function Get-NBIPAMPrefix {
 
             break
         }
+    }
     }
 }

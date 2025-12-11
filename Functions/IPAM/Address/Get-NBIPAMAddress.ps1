@@ -23,7 +23,7 @@ function Get-NBIPAMAddress {
             Position = 0)]
         [string]$Address,
 
-        [Parameter(ParameterSetName = 'ByID')]
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
         [Parameter(ParameterSetName = 'Query')]
@@ -80,7 +80,8 @@ function Get-NBIPAMAddress {
         [switch]$Raw
     )
 
-    switch ($PSCmdlet.ParameterSetName) {
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($IP_ID in $Id) {
                 $Segments = [System.Collections.ArrayList]::new(@('ipam', 'ip-addresses', $IP_ID))
@@ -106,5 +107,6 @@ function Get-NBIPAMAddress {
 
             break
         }
+    }
     }
 }
