@@ -7,11 +7,12 @@ This file provides guidance to Claude Code (or any AI assistant) when working wi
 **NetboxPS** is a PowerShell module that provides a wrapper for the [Netbox](https://github.com/netbox-community/netbox) REST API. It allows users to interact with Netbox infrastructure management directly from PowerShell.
 
 - **Current Version**: 1.8.5
-- **Target Netbox Version**: 4.4.7 (working towards full compatibility)
+- **Target Netbox Version**: 4.4.7 (fully compatible)
 - **Minimum Netbox Version**: 2.8.x
-- **PowerShell Version**: 5.0+
+- **PowerShell Version**: 5.1+ (Desktop and Core editions)
 - **Repository**: Fork of https://github.com/benclaussen/NetboxPS
 - **Issue Tracking**: https://github.com/ctrl-alt-automate/NetboxPS/issues
+- **Total Functions**: 350+ public functions across all modules
 
 ## Development Environment
 
@@ -67,7 +68,21 @@ Invoke-Pester ./Tests/
 
 # Run specific test file
 Invoke-Pester ./Tests/DCIM.Devices.Tests.ps1
+
+# Run integration tests (mock responses)
+Invoke-Pester ./Tests/Integration.Tests.ps1 -Tag 'Integration'
+
+# Run live integration tests (requires Netbox instance)
+$env:NETBOX_HOST = 'your-netbox-host.com'
+$env:NETBOX_TOKEN = 'your-api-token'
+Invoke-Pester ./Tests/Integration.Tests.ps1 -Tag 'Live'
 ```
+
+### CI/CD Workflows
+The project uses GitHub Actions for CI/CD:
+- **Lint**: PSScriptAnalyzer runs on push/PR to check code quality
+- **Test**: Pester tests run on ubuntu, windows, and macos
+- **Release**: Tests must pass before PSGallery publish
 
 ## Project Structure
 
@@ -362,12 +377,22 @@ All 360 functions tested and working correctly against Netbox 4.4.7.
 ## Roadmap & Issues
 
 See [GitHub Issues](https://github.com/ctrl-alt-automate/NetboxPS/issues) for the full roadmap:
+
+### Completed
 - **v2.0.0**: Netbox 4.x compatibility ✅
 - **v2.1.0**: DCIM expansion ✅ (racks, locations, regions, site-groups, manufacturers)
 - **v2.2.0**: IPAM expansion ✅ (VRFs, route targets, ASNs, services)
 - **v2.3.0**: New modules ✅ (VPN, Wireless)
 - **v2.4.0**: 100% DCIM coverage ✅ (issue #11 - 45 endpoints, 180 functions)
 - **v2.5.0**: 100% IPAM coverage ✅ (issue #12 - 18 endpoints, 72 functions)
+- **Issue #23**: SupportsShouldProcess on New-NB* functions ✅
+- **Issue #24**: CI/CD workflow with Pester tests ✅
+- **Issue #25**: PSGallery manifest metadata ✅
+- **Issue #26**: Export only public functions ✅
+- **Issue #27**: Process blocks for pipeline support ✅
+- **Issue #28**: Integration tests with mock API ✅
+
+### Next
 - **v3.0.0**: Remaining modules (Virtualization, Tenancy, Circuits, Extras, Core, Users)
 
 ## Testing API Endpoints
@@ -389,11 +414,20 @@ curl -s -H "Authorization: Token YOUR_TOKEN" "https://YOUR_HOST/api/dcim/" | pyt
 - Follow [PowerShell Practice and Style Guidelines](https://poshcode.gitbook.io/powershell-practice-and-style/)
 - One function per file
 - Use `[CmdletBinding()]` on all functions
-- Support `-WhatIf`/`-Confirm` for state-changing operations
-- Use proper parameter validation attributes
+- Support `-WhatIf`/`-Confirm` for state-changing operations (`SupportsShouldProcess`)
+- Use proper parameter validation attributes (`ValidateSet`, `ValidateRange`, `ValidatePattern`)
 - Include pipeline support where appropriate (`ValueFromPipelineByPropertyName`)
 - Always include `-Raw` switch to return unprocessed API response
 - Use `Write-Verbose` for debug output, never `Write-Host`
+- Always use `process {}` blocks for proper pipeline streaming
+- Include `[OutputType([PSCustomObject])]` on all functions
+- Include comprehensive comment-based help (`.SYNOPSIS`, `.DESCRIPTION`, `.PARAMETER`, `.EXAMPLE`)
+
+### Function Export Policy
+- **Production builds**: Only functions with `-` in the name are exported (public API)
+- **Development builds**: All functions exported including internal helpers
+- Internal helpers (no `-`): `BuildNewURI`, `BuildURIComponents`, `InvokeNetboxRequest`, etc.
+- Backwards compatibility aliases maintained for renamed `Add-*` → `New-*` functions
 
 ## Slash Commands (Specialized Agents)
 
