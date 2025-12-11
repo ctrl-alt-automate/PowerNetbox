@@ -39,6 +39,10 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             return 'netbox.domain.com'
         }
 
+        Mock -CommandName 'Get-NBTimeout' -ModuleName 'NetboxPSv4' -MockWith {
+            return 30
+        }
+
         # Load choices data into module scope
         InModuleScope -ModuleName 'NetboxPSv4' -ArgumentList $script:TestPath -ScriptBlock {
             param($TestPath)
