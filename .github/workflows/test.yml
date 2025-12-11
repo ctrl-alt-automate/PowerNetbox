@@ -38,6 +38,7 @@ jobs:
           $config = New-PesterConfiguration
           $config.Run.Path = './Tests'
           $config.Run.Exit = $true
+          $config.Filter.ExcludeTag = @('Integration', 'Live')
           $config.TestResult.Enabled = $true
           $config.TestResult.OutputPath = 'TestResults.xml'
           $config.TestResult.OutputFormat = 'NUnitXml'

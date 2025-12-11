@@ -3,7 +3,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-. ../common.ps1
+. "$PSScriptRoot/../common.ps1"
 
 BeforeAll {
     Connect-NBAPI @invokeParams
