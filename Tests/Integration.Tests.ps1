@@ -39,6 +39,14 @@ Describe "Integration Tests - Mock API Responses" -Tag 'Integration', 'Mock' {
             [PSCredential]::new('api', (ConvertTo-SecureString -String "testtoken" -AsPlainText -Force))
         }
         Mock -CommandName 'Get-NBHostname' -ModuleName 'NetboxPSv4' -MockWith { 'netbox.test.local' }
+        Mock -CommandName 'Get-NBTimeout' -ModuleName 'NetboxPSv4' -MockWith { return 30 }
+        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'NetboxPSv4' -MockWith { return @{} }
+
+        InModuleScope -ModuleName 'NetboxPSv4' {
+            $script:NetboxConfig.Hostname = 'netbox.test.local'
+            $script:NetboxConfig.HostScheme = 'https'
+            $script:NetboxConfig.HostPort = 443
+        }
     }
 
     Context "DCIM Module - API Path Verification" {

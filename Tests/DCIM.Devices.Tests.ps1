@@ -47,9 +47,12 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             return @{}
         }
 
-        # Load choices data into module scope
+        # Set up module internal state and load choices data
         InModuleScope -ModuleName 'NetboxPSv4' -ArgumentList $script:TestPath -ScriptBlock {
             param($TestPath)
+            $script:NetboxConfig.Hostname = 'netbox.domain.com'
+            $script:NetboxConfig.HostScheme = 'https'
+            $script:NetboxConfig.HostPort = 443
             $script:NetboxConfig.Choices.DCIM = (Get-Content "$TestPath/DCIMChoices.json" -ErrorAction Stop | ConvertFrom-Json)
         }
     }

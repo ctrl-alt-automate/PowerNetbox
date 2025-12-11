@@ -8,12 +8,29 @@ Param()
 
 $script:pester_site1 = "pester_site1"
 
-$Credential = New-Object System.Management.Automation.PSCredential("username", (ConvertTo-SecureString $token -AsPlainText -Force))
-$script:invokeParams = @{
-    hostname             = $hostname;
-    Credential           = $Credential;
-    SkipCertificateCheck = $true;
+# Check for required credentials
+$hostname = $env:NETBOX_HOST
+$token = $env:NETBOX_TOKEN
+
+if (-not $hostname -or -not $token) {
+    # Try to load from credential file
+    $credentialFile = Join-Path $PSScriptRoot ".." "credential.ps1"
+    if (Test-Path $credentialFile) {
+        . $credentialFile
+    }
 }
 
-. (Join-Path $PSScriptRoot ".." "credential.ps1")
-#TODO: Add check if no ipaddress/token info...
+# Skip if no credentials available
+if (-not $hostname -or -not $token) {
+    $script:SkipIntegrationTests = $true
+    $script:invokeParams = @{}
+    return
+}
+
+$script:SkipIntegrationTests = $false
+$Credential = New-Object System.Management.Automation.PSCredential("username", (ConvertTo-SecureString $token -AsPlainText -Force))
+$script:invokeParams = @{
+    hostname             = $hostname
+    Credential           = $Credential
+    SkipCertificateCheck = $true
+}
