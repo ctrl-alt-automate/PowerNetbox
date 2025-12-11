@@ -59,11 +59,13 @@ Import-Module "PSScriptAnalyzer", "Microsoft.PowerShell.Utility" -ErrorAction St
 
 
 $ModuleName = 'NetboxPS'
-$ConcatenatedFilePath = "$PSScriptRoot\concatenated.ps1"
-$FunctionPath = "$PSScriptRoot\Functions"
-$OutputDirectory = "$PSScriptRoot\$ModuleName"
-$PSD1OutputPath = "$OutputDirectory\$ModuleName.psd1"
-$PSM1OutputPath = "$OutputDirectory\$ModuleName.psm1"
+$ConcatenatedFilePath = Join-Path $PSScriptRoot 'concatenated.ps1'
+$FunctionPath = Join-Path $PSScriptRoot 'Functions'
+$OutputDirectory = Join-Path $PSScriptRoot $ModuleName
+$PSD1OutputPath = Join-Path $OutputDirectory "$ModuleName.psd1"
+$PSM1OutputPath = Join-Path $OutputDirectory "$ModuleName.psm1"
+$SourcePSD1Path = Join-Path $PSScriptRoot "$ModuleName.psd1"
+$SourcePSM1Path = Join-Path $PSScriptRoot "$ModuleName.psm1"
 $PS1FunctionFiles = Get-ChildItem $FunctionPath -Filter "*.ps1" -Recurse | Sort-Object Name
 
 
@@ -97,16 +99,16 @@ foreach ($File in $PS1FunctionFiles) {
 
 
 Write-Host " Adding psm1"
-Get-Content "$PSScriptRoot\$ModuleName.psm1" | Out-File -FilePath $ConcatenatedFilePath -Encoding UTF8 -Append
+Get-Content $SourcePSM1Path | Out-File -FilePath $ConcatenatedFilePath -Encoding UTF8 -Append
 
 
-$PSDManifest = Import-PowerShellDataFile -Path "$PSScriptRoot\$ModuleName.psd1"
+$PSDManifest = Import-PowerShellDataFile -Path $SourcePSD1Path
 # Get the version from the PSD1
 [version]$CurrentVersion = $PSDManifest.ModuleVersion
 
 $UpdateModuleManifestSplat = @{
-    Path              = "$PSScriptRoot\$ModuleName.psd1"
-    ErrorAction       = 'Stop'
+    Path        = $SourcePSD1Path
+    ErrorAction = 'Stop'
 }
 
 if ($Environment -ilike 'dev*') {
@@ -171,7 +173,7 @@ if (-not (Test-Path $OutputDirectory)) {
 
 
 Write-Host " Copying psd1"
-Copy-Item -Path "$PSScriptRoot\$ModuleName.psd1" -Destination $PSD1OutputPath -Force
+Copy-Item -Path $SourcePSD1Path -Destination $PSD1OutputPath -Force
 
 Write-Host " Copying psm1"
 Copy-Item -Path $ConcatenatedFilePath -Destination $PSM1OutputPath -Force
