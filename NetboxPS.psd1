@@ -15,7 +15,7 @@ RootModule = 'NetboxPS.psm1'
 ModuleVersion = '1.8.5'
 
 # Supported PSEditions
-# CompatiblePSEditions = @()
+CompatiblePSEditions = @('Desktop', 'Core')
 
 # ID used to uniquely identify this module
 GUID = 'bba9b06c-49c8-47cf-8358-aca7c4e78896'
@@ -27,13 +27,13 @@ Author = 'Ben Claussen'
 CompanyName = 'NEOnet'
 
 # Copyright statement for this module
-Copyright = '(c) 2018. All rights reserved.'
+Copyright = '(c) 2018-2025 Ben Claussen and contributors. All rights reserved.'
 
 # Description of the functionality provided by this module
-Description = 'A Powershell wrapper for Netbox API'
+Description = 'A comprehensive PowerShell module for the Netbox REST API. Supports DCIM, IPAM, Virtualization, Circuits, Tenancy, VPN, and Wireless modules. Compatible with Netbox 4.x.'
 
 # Minimum version of the PowerShell engine required by this module
-PowerShellVersion = '5.0'
+PowerShellVersion = '5.1'
 
 # Name of the PowerShell host required by this module
 # PowerShellHostName = ''
@@ -249,25 +249,40 @@ PrivateData = @{
     PSData = @{
 
         # Tags applied to this module. These help with module discovery in online galleries.
-        Tags = 'Netbox','API','DCIM','IPAM'
+        Tags = @(
+            'Netbox',
+            'NetboxAPI',
+            'API',
+            'REST',
+            'DCIM',
+            'IPAM',
+            'Infrastructure',
+            'Automation',
+            'NetworkAutomation',
+            'DataCenter',
+            'Virtualization',
+            'VPN',
+            'Wireless',
+            'AssetManagement'
+        )
 
         # A URL to the license for this module.
-        # LicenseUri = ''
+        LicenseUri = 'https://github.com/ctrl-alt-automate/NetboxPS/blob/main/LICENSE'
 
         # A URL to the main website for this project.
-        ProjectUri = 'https://github.com/benclaussen/NetboxPS'
+        ProjectUri = 'https://github.com/ctrl-alt-automate/NetboxPS'
 
         # A URL to an icon representing this module.
         # IconUri = ''
 
         # ReleaseNotes of this module
-        # ReleaseNotes = ''
+        ReleaseNotes = 'https://github.com/ctrl-alt-automate/NetboxPS/releases'
 
         # Prerelease string of this module
         # Prerelease = ''
 
         # Flag to indicate whether the module requires explicit user acceptance for install/update/save
-        # RequireLicenseAcceptance = $false
+        RequireLicenseAcceptance = $false
 
         # External dependent modules of this module
         # ExternalModuleDependencies = @()
