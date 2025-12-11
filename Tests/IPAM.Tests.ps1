@@ -4,9 +4,9 @@ param
 (
 )
 Import-Module Pester
-Remove-Module NetboxPS -Force -ErrorAction SilentlyContinue
+Remove-Module NetboxPSv4 -Force -ErrorAction SilentlyContinue
 
- = Join-Path  ".." "NetboxPS" "NetboxPS.psd1"
+$ModulePath = Join-Path $PSScriptRoot ".." "NetboxPSv4" "NetboxPSv4.psd1"
 
 if (Test-Path $ModulePath) {
     Import-Module $ModulePath -ErrorAction Stop
@@ -14,11 +14,11 @@ if (Test-Path $ModulePath) {
 
 
 Describe "IPAM tests" -Tag 'Ipam' {
-    Mock -CommandName 'CheckNetboxIsConnected' -Verifiable -ModuleName 'NetboxPS' -MockWith {
+    Mock -CommandName 'CheckNetboxIsConnected' -Verifiable -ModuleName 'NetboxPSv4' -MockWith {
         return $true
     }
 
-    Mock -CommandName 'Invoke-RestMethod' -Verifiable -ModuleName 'NetboxPS' -MockWith {
+    Mock -CommandName 'Invoke-RestMethod' -Verifiable -ModuleName 'NetboxPSv4' -MockWith {
         # Return a hashtable of the items we would normally pass to Invoke-RestMethod
         return [ordered]@{
             'Method'      = $Method
@@ -30,15 +30,15 @@ Describe "IPAM tests" -Tag 'Ipam' {
         }
     }
 
-    Mock -CommandName 'Get-NBCredential' -Verifiable -ModuleName 'NetboxPS' -MockWith {
+    Mock -CommandName 'Get-NBCredential' -Verifiable -ModuleName 'NetboxPSv4' -MockWith {
         return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
     }
 
-    Mock -CommandName 'Get-NBHostname' -Verifiable -ModuleName 'NetboxPS' -MockWith {
+    Mock -CommandName 'Get-NBHostname' -Verifiable -ModuleName 'NetboxPSv4' -MockWith {
         return 'netbox.domain.com'
     }
 
-    InModuleScope -ModuleName 'NetboxPS' -ScriptBlock {
+    InModuleScope -ModuleName 'NetboxPSv4' -ScriptBlock {
         $script:NetboxConfig.Choices.IPAM = (Get-Content "/IPAMChoices.json" -ErrorAction Stop | ConvertFrom-Json)
 
         Context "Get-NBIPAMAggregate" {
@@ -411,7 +411,7 @@ Describe "IPAM tests" -Tag 'Ipam' {
         }
 
         Context "Remove-NBIPAMAddress" {
-            Mock -CommandName "Get-NBIPAMAddress" -ModuleName NetboxPS -MockWith {
+            Mock -CommandName "Get-NBIPAMAddress" -ModuleName NetboxPSv4 -MockWith {
                 return @{
                     'address' = "10.1.1.1/$Id"
                     'id'      = $id
@@ -475,7 +475,7 @@ Describe "IPAM tests" -Tag 'Ipam' {
         }
 
         Context "Set-NBIPAMAddress" {
-            Mock -CommandName "Get-NBIPAMAddress" -ModuleName NetboxPS -MockWith {
+            Mock -CommandName "Get-NBIPAMAddress" -ModuleName NetboxPSv4 -MockWith {
                 return @{
                     'address' = '10.1.1.1/24'
                     'id'      = $id

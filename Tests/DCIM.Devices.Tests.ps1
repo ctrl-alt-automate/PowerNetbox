@@ -4,20 +4,20 @@ param
 (
 )
 Import-Module Pester
-Remove-Module NetboxPS -Force -ErrorAction SilentlyContinue
+Remove-Module NetboxPSv4 -Force -ErrorAction SilentlyContinue
 
- = Join-Path  ".." "NetboxPS" "NetboxPS.psd1"
+$ModulePath = Join-Path $PSScriptRoot ".." "NetboxPSv4" "NetboxPSv4.psd1"
 
 if (Test-Path $ModulePath) {
     Import-Module $ModulePath -ErrorAction Stop
 }
 
 Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
-    Mock -CommandName 'CheckNetboxIsConnected' -Verifiable -ModuleName 'NetboxPS' -MockWith {
+    Mock -CommandName 'CheckNetboxIsConnected' -Verifiable -ModuleName 'NetboxPSv4' -MockWith {
         return $true
     }
 
-    Mock -CommandName 'Invoke-RestMethod' -Verifiable -ModuleName 'NetboxPS' -MockWith {
+    Mock -CommandName 'Invoke-RestMethod' -Verifiable -ModuleName 'NetboxPSv4' -MockWith {
         # Return a hashtable of the items we would normally pass to Invoke-RestMethod
         return [ordered]@{
             'Method'      = $Method
@@ -29,15 +29,15 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
         }
     }
 
-    Mock -CommandName 'Get-NBCredential' -Verifiable -ModuleName 'NetboxPS' -MockWith {
+    Mock -CommandName 'Get-NBCredential' -Verifiable -ModuleName 'NetboxPSv4' -MockWith {
         return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
     }
 
-    Mock -CommandName 'Get-NBHostname' -Verifiable -ModuleName 'NetboxPS' -MockWith {
+    Mock -CommandName 'Get-NBHostname' -Verifiable -ModuleName 'NetboxPSv4' -MockWith {
         return 'netbox.domain.com'
     }
 
-    InModuleScope -ModuleName 'NetboxPS' -ScriptBlock {
+    InModuleScope -ModuleName 'NetboxPSv4' -ScriptBlock {
         $script:NetboxConfig.Choices.DCIM = (Get-Content "/DCIMChoices.json" -ErrorAction Stop | ConvertFrom-Json)
 
         Context "Get-NBDCIMDevice" {
@@ -353,7 +353,7 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
         }
 
 
-        Mock -CommandName "Get-NBDCIMDevice" -ModuleName NetboxPS -MockWith {
+        Mock -CommandName "Get-NBDCIMDevice" -ModuleName NetboxPSv4 -MockWith {
             return [pscustomobject]@{
                 'Id'   = $Id
                 'Name' = $Name
