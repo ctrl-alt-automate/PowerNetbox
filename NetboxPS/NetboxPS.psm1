@@ -83,15 +83,18 @@ function BuildNewURI {
     Write-Verbose " URIPath: $($uriBuilder.Path)"
 
     if ($parameters) {
-        # Loop through the parameters and use the HttpUtility to create a Query string
-        [System.Collections.Specialized.NameValueCollection]$URIParams = [System.Web.HttpUtility]::ParseQueryString([String]::Empty)
+        # Build query string without System.Web dependency (cross-platform)
+        $QueryParts = [System.Collections.Generic.List[string]]::new()
 
         foreach ($param in $Parameters.GetEnumerator()) {
             Write-Verbose " Adding URI parameter $($param.Key):$($param.Value)"
-            $URIParams[$param.Key] = $param.Value
+            # URL encode key and value using .NET Uri class (available everywhere)
+            $EncodedKey = [System.Uri]::EscapeDataString($param.Key)
+            $EncodedValue = [System.Uri]::EscapeDataString([string]$param.Value)
+            $QueryParts.Add("$EncodedKey=$EncodedValue")
         }
 
-        $uriBuilder.Query = $URIParams.ToString()
+        $uriBuilder.Query = $QueryParts -join '&'
     }
 
     Write-Verbose " Completed building URIBuilder"
@@ -319,14 +322,12 @@ function Connect-NBAPI {
         $invokeParams.remove("SkipCertificateCheck")
     }
 
-    #for PowerShell (<=) 5 (Desktop), Enable TLS 1.1, 1.2 and Disable SSL chain trust
+    # For PowerShell Desktop (5.1), configure TLS and certificate handling
     if ("Desktop" -eq $PSVersionTable.PsEdition) {
-        #Add System.web (Need for ParseQueryString)
-        Add-Type -AssemblyName System.Web
-        #Enable TLS 1.1 and 1.2
+        # Enable modern TLS protocols
         Set-NBCipherSSL
         if ($SkipCertificateCheck) {
-            #Disable SSL chain trust...
+            # Disable SSL certificate validation
             Set-NBuntrustedSSL
         }
     }
@@ -521,6 +522,89 @@ function Get-NBAPIDefinition {
 
 #endregion
 
+#region File Get-NBBookmark.ps1
+
+<#
+.SYNOPSIS
+    Retrieves bookmarks from Netbox.
+
+.DESCRIPTION
+    Retrieves bookmarks from Netbox Extras module.
+
+.PARAMETER Id
+    Database ID of the bookmark.
+
+.PARAMETER Object_Type
+    Filter by object type.
+
+.PARAMETER Object_Id
+    Filter by object ID.
+
+.PARAMETER User_Id
+    Filter by user ID.
+
+.PARAMETER Limit
+    Number of results to return.
+
+.PARAMETER Offset
+    Result offset for pagination.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Get-NBBookmark
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Get-NBBookmark {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Object_Type,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$Object_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$User_Id,
+
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ById' {
+                foreach ($i in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('extras', 'bookmarks', $i))
+                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+                    $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('extras', 'bookmarks'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
 #region File Get-NBCircuit.ps1
 
 
@@ -646,6 +730,175 @@ function Get-NBCircuit {
 
 #endregion
 
+#region File Get-NBCircuitGroup.ps1
+
+<#
+.SYNOPSIS
+    Retrieves circuit groups from Netbox.
+
+.DESCRIPTION
+    Retrieves circuit groups from Netbox Circuits module.
+
+.PARAMETER Id
+    Database ID of the circuit group.
+
+.PARAMETER Name
+    Filter by name.
+
+.PARAMETER Slug
+    Filter by slug.
+
+.PARAMETER Query
+    Search query.
+
+.PARAMETER Limit
+    Number of results to return.
+
+.PARAMETER Offset
+    Result offset for pagination.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Get-NBCircuitGroup
+
+.EXAMPLE
+    Get-NBCircuitGroup -Id 1
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Get-NBCircuitGroup {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Name,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Slug,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Query,
+
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ById' {
+                foreach ($i in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuit-groups', $i))
+                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+                    $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuit-groups'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NBCircuitGroupAssignment.ps1
+
+<#
+.SYNOPSIS
+    Retrieves circuit group assignments from Netbox.
+
+.DESCRIPTION
+    Retrieves circuit group assignments from Netbox Circuits module.
+
+.PARAMETER Id
+    Database ID of the assignment.
+
+.PARAMETER Group_Id
+    Filter by circuit group ID.
+
+.PARAMETER Circuit_Id
+    Filter by circuit ID.
+
+.PARAMETER Priority
+    Filter by priority.
+
+.PARAMETER Limit
+    Number of results to return.
+
+.PARAMETER Offset
+    Result offset for pagination.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Get-NBCircuitGroupAssignment
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Get-NBCircuitGroupAssignment {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$Group_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$Circuit_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Priority,
+
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ById' {
+                foreach ($i in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuit-group-assignments', $i))
+                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+                    $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuit-group-assignments'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
 #region File Get-NBCircuitProvider.ps1
 
 <#
@@ -670,7 +923,7 @@ function Get-NBCircuitProvider {
     param
     (
         [Parameter(ParameterSetName = 'ById',
-                   Mandatory = $true)]
+                   Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
         [Parameter(ParameterSetName = 'Query',
@@ -698,7 +951,8 @@ function Get-NBCircuitProvider {
         [switch]$Raw
     )
 
-    switch ($PSCmdlet.ParameterSetName) {
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($i in $ID) {
                 $Segments = [System.Collections.ArrayList]::new(@('circuits', 'providers', $i))
@@ -719,6 +973,179 @@ function Get-NBCircuitProvider {
             $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
             InvokeNetboxRequest -URI $URI -Raw:$Raw
+        }
+    }
+    }
+}
+
+#endregion
+
+#region File Get-NBCircuitProviderAccount.ps1
+
+<#
+.SYNOPSIS
+    Retrieves provider accounts from Netbox.
+
+.DESCRIPTION
+    Retrieves provider accounts from Netbox Circuits module.
+
+.PARAMETER Id
+    Database ID of the provider account.
+
+.PARAMETER Name
+    Filter by name.
+
+.PARAMETER Provider_Id
+    Filter by provider ID.
+
+.PARAMETER Account
+    Filter by account number.
+
+.PARAMETER Query
+    Search query.
+
+.PARAMETER Limit
+    Number of results to return.
+
+.PARAMETER Offset
+    Result offset for pagination.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Get-NBCircuitProviderAccount
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Get-NBCircuitProviderAccount {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Name,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$Provider_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Account,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Query,
+
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ById' {
+                foreach ($i in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('circuits', 'provider-accounts', $i))
+                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+                    $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('circuits', 'provider-accounts'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NBCircuitProviderNetwork.ps1
+
+<#
+.SYNOPSIS
+    Retrieves provider networks from Netbox.
+
+.DESCRIPTION
+    Retrieves provider networks from Netbox Circuits module.
+
+.PARAMETER Id
+    Database ID of the provider network.
+
+.PARAMETER Name
+    Filter by name.
+
+.PARAMETER Provider_Id
+    Filter by provider ID.
+
+.PARAMETER Query
+    Search query.
+
+.PARAMETER Limit
+    Number of results to return.
+
+.PARAMETER Offset
+    Result offset for pagination.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Get-NBCircuitProviderNetwork
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Get-NBCircuitProviderNetwork {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Name,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$Provider_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Query,
+
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ById' {
+                foreach ($i in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('circuits', 'provider-networks', $i))
+                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+                    $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('circuits', 'provider-networks'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
         }
     }
 }
@@ -834,7 +1261,7 @@ function Get-NBCircuitType {
     [OutputType([PSCustomObject])]
     param
     (
-        [Parameter(ParameterSetName = 'ById')]
+        [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
         [Parameter(ParameterSetName = 'Query')]
@@ -855,7 +1282,8 @@ function Get-NBCircuitType {
         [switch]$Raw
     )
 
-    switch ($PSCmdlet.ParameterSetName) {
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($i in $ID) {
                 $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuit_types', $i))
@@ -876,6 +1304,90 @@ function Get-NBCircuitType {
             $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
             InvokeNetboxRequest -URI $URI -Raw:$Raw
+        }
+    }
+    }
+}
+
+#endregion
+
+#region File Get-NBConfigContext.ps1
+
+<#
+.SYNOPSIS
+    Retrieves config contexts from Netbox.
+
+.DESCRIPTION
+    Retrieves config contexts from Netbox Extras module.
+
+.PARAMETER Id
+    Database ID of the config context.
+
+.PARAMETER Name
+    Filter by name.
+
+.PARAMETER Is_Active
+    Filter by active status.
+
+.PARAMETER Query
+    Search query.
+
+.PARAMETER Limit
+    Number of results to return.
+
+.PARAMETER Offset
+    Result offset for pagination.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Get-NBConfigContext
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Get-NBConfigContext {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Name,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [bool]$Is_Active,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Query,
+
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ById' {
+                foreach ($i in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('extras', 'config-contexts', $i))
+                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+                    $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('extras', 'config-contexts'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
         }
     }
 }
@@ -943,7 +1455,7 @@ function Get-NBContact {
                    Position = 0)]
         [string]$Name,
 
-        [Parameter(ParameterSetName = 'ByID')]
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
         [Parameter(ParameterSetName = 'Query')]
@@ -976,7 +1488,8 @@ function Get-NBContact {
         [switch]$Raw
     )
 
-    switch ($PSCmdlet.ParameterSetName) {
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($Contact_ID in $Id) {
                 $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'contacts', $Contact_ID))
@@ -1002,6 +1515,7 @@ function Get-NBContact {
 
             break
         }
+    }
     }
 }
 
@@ -1062,7 +1576,7 @@ function Get-NBContactAssignment {
                    Position = 0)]
         [string]$Name,
 
-        [Parameter(ParameterSetName = 'ByID')]
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
         [Parameter(ParameterSetName = 'Query')]
@@ -1089,7 +1603,8 @@ function Get-NBContactAssignment {
         [switch]$Raw
     )
 
-    switch ($PSCmdlet.ParameterSetName) {
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($ContactAssignment_ID in $Id) {
                 $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'contact-assignments', $ContactAssignment_ID))
@@ -1115,6 +1630,7 @@ function Get-NBContactAssignment {
 
             break
         }
+    }
     }
 }
 
@@ -1163,7 +1679,7 @@ function Get-NBContactRole {
                    Position = 0)]
         [string]$Name,
 
-        [Parameter(ParameterSetName = 'ByID')]
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
         [Parameter(ParameterSetName = 'Query')]
@@ -1184,7 +1700,8 @@ function Get-NBContactRole {
         [switch]$Raw
     )
 
-    switch ($PSCmdlet.ParameterSetName) {
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($ContactRole_ID in $Id) {
                 $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'contact-roles', $ContactRole_ID))
@@ -1210,6 +1727,7 @@ function Get-NBContactRole {
 
             break
         }
+    }
     }
 }
 
@@ -1339,6 +1857,428 @@ function Get-NBCredential {
     }
 
     $script:NetboxConfig.Credential
+}
+
+#endregion
+
+#region File Get-NBCustomField.ps1
+
+<#
+.SYNOPSIS
+    Retrieves custom fields from Netbox.
+
+.DESCRIPTION
+    Retrieves custom fields from Netbox Extras module.
+
+.PARAMETER Id
+    Database ID of the custom field.
+
+.PARAMETER Name
+    Filter by name.
+
+.PARAMETER Type
+    Filter by field type.
+
+.PARAMETER Content_Types
+    Filter by content types.
+
+.PARAMETER Query
+    Search query.
+
+.PARAMETER Limit
+    Number of results to return.
+
+.PARAMETER Offset
+    Result offset for pagination.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Get-NBCustomField
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Get-NBCustomField {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Name,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Type,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Content_Types,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Query,
+
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ById' {
+                foreach ($i in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('extras', 'custom-fields', $i))
+                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+                    $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('extras', 'custom-fields'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NBCustomFieldChoiceSet.ps1
+
+<#
+.SYNOPSIS
+    Retrieves custom field choice sets from Netbox.
+
+.DESCRIPTION
+    Retrieves custom field choice sets from Netbox Extras module.
+
+.PARAMETER Id
+    Database ID of the choice set.
+
+.PARAMETER Name
+    Filter by name.
+
+.PARAMETER Query
+    Search query.
+
+.PARAMETER Limit
+    Number of results to return.
+
+.PARAMETER Offset
+    Result offset for pagination.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Get-NBCustomFieldChoiceSet
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Get-NBCustomFieldChoiceSet {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Name,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Query,
+
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ById' {
+                foreach ($i in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('extras', 'custom-field-choice-sets', $i))
+                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+                    $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('extras', 'custom-field-choice-sets'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NBCustomLink.ps1
+
+<#
+.SYNOPSIS
+    Retrieves custom links from Netbox.
+
+.DESCRIPTION
+    Retrieves custom links from Netbox Extras module.
+
+.PARAMETER Id
+    Database ID of the custom link.
+
+.PARAMETER Name
+    Filter by name.
+
+.PARAMETER Enabled
+    Filter by enabled status.
+
+.PARAMETER Query
+    Search query.
+
+.PARAMETER Limit
+    Number of results to return.
+
+.PARAMETER Offset
+    Result offset for pagination.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Get-NBCustomLink
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Get-NBCustomLink {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Name,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [bool]$Enabled,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Query,
+
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ById' {
+                foreach ($i in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('extras', 'custom-links', $i))
+                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+                    $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('extras', 'custom-links'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NBDataFile.ps1
+
+<#
+.SYNOPSIS
+    Retrieves data files from Netbox.
+
+.DESCRIPTION
+    Retrieves data files from Netbox Core module.
+
+.PARAMETER Id
+    Database ID of the data file.
+
+.PARAMETER Source_Id
+    Filter by data source ID.
+
+.PARAMETER Path
+    Filter by file path.
+
+.PARAMETER Query
+    Search query.
+
+.PARAMETER Limit
+    Number of results to return.
+
+.PARAMETER Offset
+    Result offset for pagination.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Get-NBDataFile
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Get-NBDataFile {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$Source_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Path,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Query,
+
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ById' {
+                foreach ($i in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('core', 'data-files', $i))
+                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+                    $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('core', 'data-files'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NBDataSource.ps1
+
+<#
+.SYNOPSIS
+    Retrieves data sources from Netbox.
+
+.DESCRIPTION
+    Retrieves data sources from Netbox Core module.
+
+.PARAMETER Id
+    Database ID of the data source.
+
+.PARAMETER Name
+    Filter by name.
+
+.PARAMETER Type
+    Filter by type (local, git, amazon-s3).
+
+.PARAMETER Enabled
+    Filter by enabled status.
+
+.PARAMETER Query
+    Search query.
+
+.PARAMETER Limit
+    Number of results to return.
+
+.PARAMETER Offset
+    Result offset for pagination.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Get-NBDataSource
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Get-NBDataSource {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Name,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [ValidateSet('local', 'git', 'amazon-s3')]
+        [string]$Type,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [bool]$Enabled,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Query,
+
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ById' {
+                foreach ($i in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('core', 'data-sources', $i))
+                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+                    $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('core', 'data-sources'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
+        }
+    }
 }
 
 #endregion
@@ -1936,7 +2876,7 @@ function Get-NBDCIMDeviceRole {
         [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
-        [Parameter(ParameterSetName = 'ById')]
+        [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
         [string]$Name,
@@ -1950,7 +2890,8 @@ function Get-NBDCIMDeviceRole {
         [switch]$Raw
     )
 
-    switch ($PSCmdlet.ParameterSetName) {
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($DRId in $Id) {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'device-roles', $DRId))
@@ -1974,6 +2915,7 @@ function Get-NBDCIMDeviceRole {
 
             InvokeNetboxRequest -URI $URI -Raw:$Raw
         }
+    }
     }
 }
 
@@ -2009,6 +2951,7 @@ function Get-NBDCIMDeviceType {
         [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
+        [Parameter(ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
         [string]$Query,
@@ -2037,15 +2980,18 @@ function Get-NBDCIMDeviceType {
 
         [switch]$Raw
     )
-    #endregion Parameters
 
-    $Segments = [System.Collections.ArrayList]::new(@('dcim', 'device-types'))
+    process {
+        #endregion Parameters
 
-    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        $Segments = [System.Collections.ArrayList]::new(@('dcim', 'device-types'))
 
-    $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
 
-    InvokeNetboxRequest -URI $URI -Raw:$Raw
+        $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+
+        InvokeNetboxRequest -URI $URI -Raw:$Raw
+    }
 }
 
 #endregion
@@ -2264,13 +3210,15 @@ function Get-NBDCIMInterfaceConnection {
         [switch]$Raw
     )
 
-    $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interface-connections'))
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interface-connections'))
 
-    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
 
-    $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+        $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
-    InvokeNetboxRequest -URI $URI -Raw:$Raw
+        InvokeNetboxRequest -URI $URI -Raw:$Raw
+    }
 }
 
 #endregion
@@ -3005,7 +3953,7 @@ function Get-NBDCIMPlatform {
         [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
-        [Parameter(ParameterSetName = 'ById')]
+        [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
         [string]$Name,
@@ -3019,7 +3967,8 @@ function Get-NBDCIMPlatform {
         [switch]$Raw
     )
 
-    switch ($PSCmdlet.ParameterSetName) {
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($PlatformID in $Id) {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'platforms', $PlatformID))
@@ -3043,6 +3992,7 @@ function Get-NBDCIMPlatform {
 
             InvokeNetboxRequest -URI $URI -Raw:$Raw
         }
+    }
     }
 }
 
@@ -4160,6 +5110,267 @@ function Get-NBDCIMVirtualDeviceContext {
 
 #endregion
 
+#region File Get-NBEventRule.ps1
+
+<#
+.SYNOPSIS
+    Retrieves event rules from Netbox.
+
+.DESCRIPTION
+    Retrieves event rules from Netbox Extras module.
+
+.PARAMETER Id
+    Database ID of the event rule.
+
+.PARAMETER Name
+    Filter by name.
+
+.PARAMETER Enabled
+    Filter by enabled status.
+
+.PARAMETER Type_Create
+    Filter by create event type.
+
+.PARAMETER Type_Update
+    Filter by update event type.
+
+.PARAMETER Type_Delete
+    Filter by delete event type.
+
+.PARAMETER Query
+    Search query.
+
+.PARAMETER Limit
+    Number of results to return.
+
+.PARAMETER Offset
+    Result offset for pagination.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Get-NBEventRule
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Get-NBEventRule {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Name,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [bool]$Enabled,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [bool]$Type_Create,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [bool]$Type_Update,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [bool]$Type_Delete,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Query,
+
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ById' {
+                foreach ($i in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('extras', 'event-rules', $i))
+                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+                    $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('extras', 'event-rules'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NBExportTemplate.ps1
+
+<#
+.SYNOPSIS
+    Retrieves export templates from Netbox.
+
+.DESCRIPTION
+    Retrieves export templates from Netbox Extras module.
+
+.PARAMETER Id
+    Database ID of the export template.
+
+.PARAMETER Name
+    Filter by name.
+
+.PARAMETER Object_Types
+    Filter by object types.
+
+.PARAMETER Query
+    Search query.
+
+.PARAMETER Limit
+    Number of results to return.
+
+.PARAMETER Offset
+    Result offset for pagination.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Get-NBExportTemplate
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Get-NBExportTemplate {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Name,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Object_Types,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Query,
+
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ById' {
+                foreach ($i in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('extras', 'export-templates', $i))
+                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+                    $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('extras', 'export-templates'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NBGroup.ps1
+
+<#
+.SYNOPSIS
+    Retrieves groups from Netbox.
+
+.DESCRIPTION
+    Retrieves groups from Netbox Users module.
+
+.PARAMETER Id
+    Database ID of the group.
+
+.PARAMETER Name
+    Filter by name.
+
+.PARAMETER Query
+    Search query.
+
+.PARAMETER Limit
+    Number of results to return.
+
+.PARAMETER Offset
+    Result offset for pagination.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Get-NBGroup
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Get-NBGroup {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Name,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Query,
+
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ById' {
+                foreach ($i in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('users', 'groups', $i))
+                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+                    $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('users', 'groups'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
 #region File Get-NBHostname.ps1
 
 <#
@@ -4259,6 +5470,95 @@ function Get-NBHostScheme {
 
 #endregion
 
+#region File Get-NBImageAttachment.ps1
+
+<#
+.SYNOPSIS
+    Retrieves image attachments from Netbox.
+
+.DESCRIPTION
+    Retrieves image attachments from Netbox Extras module.
+
+.PARAMETER Id
+    Database ID of the image attachment.
+
+.PARAMETER Object_Type
+    Filter by object type.
+
+.PARAMETER Object_Id
+    Filter by object ID.
+
+.PARAMETER Name
+    Filter by name.
+
+.PARAMETER Query
+    Search query.
+
+.PARAMETER Limit
+    Number of results to return.
+
+.PARAMETER Offset
+    Result offset for pagination.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Get-NBImageAttachment
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Get-NBImageAttachment {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Object_Type,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$Object_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Name,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Query,
+
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ById' {
+                foreach ($i in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('extras', 'image-attachments', $i))
+                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+                    $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('extras', 'image-attachments'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
 #region File Get-NBInvokeParams.ps1
 
 <#
@@ -4319,7 +5619,7 @@ function Get-NBIPAMAddress {
             Position = 0)]
         [string]$Address,
 
-        [Parameter(ParameterSetName = 'ByID')]
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
         [Parameter(ParameterSetName = 'Query')]
@@ -4376,7 +5676,8 @@ function Get-NBIPAMAddress {
         [switch]$Raw
     )
 
-    switch ($PSCmdlet.ParameterSetName) {
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($IP_ID in $Id) {
                 $Segments = [System.Collections.ArrayList]::new(@('ipam', 'ip-addresses', $IP_ID))
@@ -4402,6 +5703,7 @@ function Get-NBIPAMAddress {
 
             break
         }
+    }
     }
 }
 
@@ -4434,7 +5736,7 @@ function Get-NBIPAMAddressRange {
                    Position = 0)]
         [string]$Range,
 
-        [Parameter(ParameterSetName = 'ByID')]
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
         [Parameter(ParameterSetName = 'Query')]
@@ -4470,7 +5772,8 @@ function Get-NBIPAMAddressRange {
         [switch]$Raw
     )
 
-    switch ($PSCmdlet.ParameterSetName) {
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($Range_ID in $Id) {
                 $Segments = [System.Collections.ArrayList]::new(@('ipam', 'ip-ranges', $Range_ID))
@@ -4496,6 +5799,7 @@ function Get-NBIPAMAddressRange {
 
             break
         }
+    }
     }
 }
 
@@ -4527,7 +5831,7 @@ function Get-NBIPAMAggregate {
         [Parameter(ParameterSetName = 'Query')]
         [string]$Query,
 
-        [Parameter(ParameterSetName = 'ByID')]
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
         [Parameter(ParameterSetName = 'Query')]
@@ -4554,11 +5858,12 @@ function Get-NBIPAMAggregate {
         [switch]$Raw
     )
 
-#    if ($null -ne $Family) {
-#        $PSBoundParameters.Family = ValidateIPAMChoice -ProvidedValue $Family -AggregateFamily
-    #    }
+process {
+        #    if ($null -ne $Family) {
+        #        $PSBoundParameters.Family = ValidateIPAMChoice -ProvidedValue $Family -AggregateFamily
+        #    }
 
-    switch ($PSCmdlet.ParameterSetName) {
+        switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($IP_ID in $Id) {
                 $Segments = [System.Collections.ArrayList]::new(@('ipam', 'aggregates', $IP_ID))
@@ -4583,6 +5888,7 @@ function Get-NBIPAMAggregate {
 
             break
         }
+    }
     }
 }
 
@@ -5049,7 +6355,8 @@ function Get-NBIPAMPrefix {
         [Parameter(ParameterSetName = 'Query')]
         [string]$Query,
 
-        [Parameter(ParameterSetName = 'ByID')]
+        [Parameter(ParameterSetName = 'ByID',
+                   ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
         [Parameter(ParameterSetName = 'Query')]
@@ -5113,15 +6420,16 @@ function Get-NBIPAMPrefix {
         [switch]$Raw
     )
 
-    #    if ($null -ne $Family) {
-    #        $PSBoundParameters.Family = ValidateIPAMChoice -ProvidedValue $Family -PrefixFamily
-    #    }
-    #
-    #    if ($null -ne $Status) {
-    #        $PSBoundParameters.Status = ValidateIPAMChoice -ProvidedValue $Status -PrefixStatus
-    #    }
+    process {
+        #    if ($null -ne $Family) {
+        #        $PSBoundParameters.Family = ValidateIPAMChoice -ProvidedValue $Family -PrefixFamily
+        #    }
+        #
+        #    if ($null -ne $Status) {
+        #        $PSBoundParameters.Status = ValidateIPAMChoice -ProvidedValue $Status -PrefixStatus
+        #    }
 
-    switch ($PSCmdlet.ParameterSetName) {
+        switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($Prefix_ID in $Id) {
                 $Segments = [System.Collections.ArrayList]::new(@('ipam', 'prefixes', $Prefix_ID))
@@ -5147,6 +6455,7 @@ function Get-NBIPAMPrefix {
 
             break
         }
+    }
     }
 }
 
@@ -5251,7 +6560,7 @@ function Get-NBIPAMRole {
         [Parameter(ParameterSetName = 'Query')]
         [string]$Query,
 
-        [Parameter(ParameterSetName = 'ByID')]
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
         [Parameter(ParameterSetName = 'Query')]
@@ -5269,7 +6578,8 @@ function Get-NBIPAMRole {
         [switch]$Raw
     )
 
-    switch ($PSCmdlet.ParameterSetName) {
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($Role_ID in $Id) {
                 $Segments = [System.Collections.ArrayList]::new(@('ipam', 'roles', $Role_ID))
@@ -5295,6 +6605,7 @@ function Get-NBIPAMRole {
 
             break
         }
+    }
     }
 }
 
@@ -5660,7 +6971,7 @@ function Get-NBIPAMVLAN {
         [ValidateRange(1, 4096)]
         [uint16]$VID,
 
-        [Parameter(ParameterSetName = 'ByID')]
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
         [Parameter(ParameterSetName = 'Query')]
@@ -5714,7 +7025,8 @@ function Get-NBIPAMVLAN {
         [switch]$Raw
     )
 
-    switch ($PSCmdlet.ParameterSetName) {
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($VLAN_ID in $Id) {
                 $Segments = [System.Collections.ArrayList]::new(@('ipam', 'vlans', $VLAN_ID))
@@ -5741,11 +7053,8 @@ function Get-NBIPAMVLAN {
             break
         }
     }
+    }
 }
-
-
-
-
 
 #endregion
 
@@ -6008,6 +7317,606 @@ function Get-NBIPAMVRF {
 
 #endregion
 
+#region File Get-NBJob.ps1
+
+<#
+.SYNOPSIS
+    Retrieves jobs from Netbox.
+
+.DESCRIPTION
+    Retrieves background jobs from Netbox Core module.
+
+.PARAMETER Id
+    Database ID of the job.
+
+.PARAMETER Object_Type
+    Filter by object type.
+
+.PARAMETER Object_Id
+    Filter by object ID.
+
+.PARAMETER Name
+    Filter by job name.
+
+.PARAMETER Status
+    Filter by status (pending, scheduled, running, completed, errored, failed).
+
+.PARAMETER User_Id
+    Filter by user ID.
+
+.PARAMETER Query
+    Search query.
+
+.PARAMETER Limit
+    Number of results to return.
+
+.PARAMETER Offset
+    Result offset for pagination.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Get-NBJob
+
+.EXAMPLE
+    Get-NBJob -Status "running"
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Get-NBJob {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Object_Type,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$Object_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Name,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [ValidateSet('pending', 'scheduled', 'running', 'completed', 'errored', 'failed')]
+        [string]$Status,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$User_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Query,
+
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ById' {
+                foreach ($i in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('core', 'jobs', $i))
+                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+                    $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('core', 'jobs'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NBJournalEntry.ps1
+
+<#
+.SYNOPSIS
+    Retrieves journal entries from Netbox.
+
+.DESCRIPTION
+    Retrieves journal entries from Netbox Extras module.
+
+.PARAMETER Id
+    Database ID of the journal entry.
+
+.PARAMETER Assigned_Object_Type
+    Filter by assigned object type.
+
+.PARAMETER Assigned_Object_Id
+    Filter by assigned object ID.
+
+.PARAMETER Created_By
+    Filter by creator user ID.
+
+.PARAMETER Kind
+    Filter by kind (info, success, warning, danger).
+
+.PARAMETER Query
+    Search query.
+
+.PARAMETER Limit
+    Number of results to return.
+
+.PARAMETER Offset
+    Result offset for pagination.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Get-NBJournalEntry
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Get-NBJournalEntry {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Assigned_Object_Type,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$Assigned_Object_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$Created_By,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [ValidateSet('info', 'success', 'warning', 'danger')]
+        [string]$Kind,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Query,
+
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ById' {
+                foreach ($i in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('extras', 'journal-entries', $i))
+                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+                    $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('extras', 'journal-entries'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NBObjectChange.ps1
+
+<#
+.SYNOPSIS
+    Retrieves object changes from Netbox.
+
+.DESCRIPTION
+    Retrieves object change log entries from Netbox Core module.
+
+.PARAMETER Id
+    Database ID of the object change.
+
+.PARAMETER User_Id
+    Filter by user ID.
+
+.PARAMETER User_Name
+    Filter by username.
+
+.PARAMETER Changed_Object_Type
+    Filter by changed object type.
+
+.PARAMETER Changed_Object_Id
+    Filter by changed object ID.
+
+.PARAMETER Action
+    Filter by action (create, update, delete).
+
+.PARAMETER Query
+    Search query.
+
+.PARAMETER Limit
+    Number of results to return.
+
+.PARAMETER Offset
+    Result offset for pagination.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Get-NBObjectChange
+
+.EXAMPLE
+    Get-NBObjectChange -Action "create" -Limit 50
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Get-NBObjectChange {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$User_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$User_Name,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Changed_Object_Type,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$Changed_Object_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [ValidateSet('create', 'update', 'delete')]
+        [string]$Action,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Query,
+
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ById' {
+                foreach ($i in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('core', 'object-changes', $i))
+                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+                    $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('core', 'object-changes'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NBObjectType.ps1
+
+<#
+.SYNOPSIS
+    Retrieves object types from Netbox.
+
+.DESCRIPTION
+    Retrieves object types (content types) from Netbox Core module.
+
+.PARAMETER Id
+    Database ID of the object type.
+
+.PARAMETER App_Label
+    Filter by app label (e.g., "dcim", "ipam").
+
+.PARAMETER Model
+    Filter by model name (e.g., "device", "ipaddress").
+
+.PARAMETER Query
+    Search query.
+
+.PARAMETER Limit
+    Number of results to return.
+
+.PARAMETER Offset
+    Result offset for pagination.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Get-NBObjectType
+
+.EXAMPLE
+    Get-NBObjectType -App_Label "dcim"
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Get-NBObjectType {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$App_Label,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Model,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Query,
+
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ById' {
+                foreach ($i in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('core', 'object-types', $i))
+                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+                    $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('core', 'object-types'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NBPermission.ps1
+
+<#
+.SYNOPSIS
+    Retrieves permissions from Netbox.
+
+.DESCRIPTION
+    Retrieves permissions from Netbox Users module.
+
+.PARAMETER Id
+    Database ID of the permission.
+
+.PARAMETER Name
+    Filter by name.
+
+.PARAMETER Enabled
+    Filter by enabled status.
+
+.PARAMETER Object_Types
+    Filter by object types.
+
+.PARAMETER Group_Id
+    Filter by group ID.
+
+.PARAMETER User_Id
+    Filter by user ID.
+
+.PARAMETER Query
+    Search query.
+
+.PARAMETER Limit
+    Number of results to return.
+
+.PARAMETER Offset
+    Result offset for pagination.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Get-NBPermission
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Get-NBPermission {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Name,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [bool]$Enabled,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Object_Types,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$Group_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$User_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Query,
+
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ById' {
+                foreach ($i in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('users', 'permissions', $i))
+                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+                    $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('users', 'permissions'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NBSavedFilter.ps1
+
+<#
+.SYNOPSIS
+    Retrieves saved filters from Netbox.
+
+.DESCRIPTION
+    Retrieves saved filters from Netbox Extras module.
+
+.PARAMETER Id
+    Database ID of the saved filter.
+
+.PARAMETER Name
+    Filter by name.
+
+.PARAMETER Slug
+    Filter by slug.
+
+.PARAMETER Object_Types
+    Filter by object types.
+
+.PARAMETER User_Id
+    Filter by user ID.
+
+.PARAMETER Enabled
+    Filter by enabled status.
+
+.PARAMETER Shared
+    Filter by shared status.
+
+.PARAMETER Query
+    Search query.
+
+.PARAMETER Limit
+    Number of results to return.
+
+.PARAMETER Offset
+    Result offset for pagination.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Get-NBSavedFilter
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Get-NBSavedFilter {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Name,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Slug,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Object_Types,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$User_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [bool]$Enabled,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [bool]$Shared,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Query,
+
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ById' {
+                foreach ($i in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('extras', 'saved-filters', $i))
+                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+                    $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('extras', 'saved-filters'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
 #region File Get-NBTag.ps1
 
 <#
@@ -6116,7 +8025,7 @@ function Get-NBTenant {
                    Position = 0)]
         [string]$Name,
 
-        [Parameter(ParameterSetName = 'ByID')]
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
         [Parameter(ParameterSetName = 'Query')]
@@ -6143,7 +8052,8 @@ function Get-NBTenant {
         [switch]$Raw
     )
 
-    switch ($PSCmdlet.ParameterSetName) {
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($Tenant_ID in $Id) {
                 $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'tenants', $Tenant_ID))
@@ -6169,6 +8079,103 @@ function Get-NBTenant {
 
             break
         }
+    }
+    }
+}
+
+#endregion
+
+#region File Get-NBTenantGroup.ps1
+
+<#
+.SYNOPSIS
+    Retrieves tenant groups from Netbox.
+
+.DESCRIPTION
+    Retrieves tenant groups from the Netbox tenancy module.
+    Tenant groups are organizational containers for grouping related tenants.
+
+.PARAMETER Id
+    Database ID(s) of the tenant group to retrieve. Accepts pipeline input.
+
+.PARAMETER Name
+    Filter by tenant group name.
+
+.PARAMETER Slug
+    Filter by tenant group slug.
+
+.PARAMETER Description
+    Filter by description.
+
+.PARAMETER Parent_Id
+    Filter by parent tenant group ID.
+
+.PARAMETER Query
+    General search query.
+
+.PARAMETER Limit
+    Maximum number of results to return (1-1000).
+
+.PARAMETER Offset
+    Number of results to skip for pagination.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBTenantGroup
+
+    Returns all tenant groups.
+
+.EXAMPLE
+    Get-NBTenantGroup -Name "Enterprise*"
+
+    Returns tenant groups matching the name pattern.
+
+.EXAMPLE
+    Get-NBTenantGroup -Id 1
+
+    Returns the tenant group with ID 1.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/models/tenancy/tenantgroup/
+#>
+function Get-NBTenantGroup {
+    [CmdletBinding()]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [string]$Name,
+
+        [string]$Slug,
+
+        [string]$Description,
+
+        [uint64]$Parent_Id,
+
+        [Alias('q')]
+        [string]$Query,
+
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'tenant-groups'))
+
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+
+        $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+
+        InvokeNetboxRequest -URI $URI -Raw:$Raw
     }
 }
 
@@ -6207,6 +8214,217 @@ function Get-NBTimeout {
 
 #endregion
 
+#region File Get-NBToken.ps1
+
+<#
+.SYNOPSIS
+    Retrieves API tokens from Netbox.
+
+.DESCRIPTION
+    Retrieves API tokens from Netbox Users module.
+
+.PARAMETER Id
+    Database ID of the token.
+
+.PARAMETER User_Id
+    Filter by user ID.
+
+.PARAMETER Key
+    Filter by token key.
+
+.PARAMETER Write_Enabled
+    Filter by write enabled status.
+
+.PARAMETER Query
+    Search query.
+
+.PARAMETER Limit
+    Number of results to return.
+
+.PARAMETER Offset
+    Result offset for pagination.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Get-NBToken
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Get-NBToken {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$User_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Key,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [bool]$Write_Enabled,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Query,
+
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ById' {
+                foreach ($i in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('users', 'tokens', $i))
+                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+                    $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('users', 'tokens'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NBUser.ps1
+
+<#
+.SYNOPSIS
+    Retrieves users from Netbox.
+
+.DESCRIPTION
+    Retrieves users from Netbox Users module.
+
+.PARAMETER Id
+    Database ID of the user.
+
+.PARAMETER Username
+    Filter by username.
+
+.PARAMETER First_Name
+    Filter by first name.
+
+.PARAMETER Last_Name
+    Filter by last name.
+
+.PARAMETER Email
+    Filter by email.
+
+.PARAMETER Is_Staff
+    Filter by staff status.
+
+.PARAMETER Is_Active
+    Filter by active status.
+
+.PARAMETER Is_Superuser
+    Filter by superuser status.
+
+.PARAMETER Group_Id
+    Filter by group ID.
+
+.PARAMETER Query
+    Search query.
+
+.PARAMETER Limit
+    Number of results to return.
+
+.PARAMETER Offset
+    Result offset for pagination.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Get-NBUser
+
+.EXAMPLE
+    Get-NBUser -Username "admin"
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Get-NBUser {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Username,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$First_Name,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Last_Name,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Email,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [bool]$Is_Staff,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [bool]$Is_Active,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [bool]$Is_Superuser,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$Group_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Query,
+
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ById' {
+                foreach ($i in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('users', 'users', $i))
+                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+                    $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('users', 'users'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
 #region File Get-NBVersion.ps1
 
 <#
@@ -6239,6 +8457,292 @@ function Get-NBVersion {
     $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters -SkipConnectedCheck
 
     InvokeNetboxRequest -URI $URI
+}
+
+#endregion
+
+#region File Get-NBVirtualCircuit.ps1
+
+<#
+.SYNOPSIS
+    Retrieves virtual circuits from Netbox.
+
+.DESCRIPTION
+    Retrieves virtual circuits from Netbox Circuits module.
+
+.PARAMETER Id
+    Database ID of the virtual circuit.
+
+.PARAMETER Cid
+    Circuit ID string.
+
+.PARAMETER Name
+    Filter by name.
+
+.PARAMETER Provider_Id
+    Filter by provider ID.
+
+.PARAMETER Provider_Network_Id
+    Filter by provider network ID.
+
+.PARAMETER Type_Id
+    Filter by type ID.
+
+.PARAMETER Tenant_Id
+    Filter by tenant ID.
+
+.PARAMETER Status
+    Filter by status.
+
+.PARAMETER Query
+    Search query.
+
+.PARAMETER Limit
+    Number of results to return.
+
+.PARAMETER Offset
+    Result offset for pagination.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Get-NBVirtualCircuit
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Get-NBVirtualCircuit {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Cid,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Name,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$Provider_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$Provider_Network_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$Type_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$Tenant_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Status,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Query,
+
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ById' {
+                foreach ($i in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('circuits', 'virtual-circuits', $i))
+                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+                    $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('circuits', 'virtual-circuits'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NBVirtualCircuitTermination.ps1
+
+<#
+.SYNOPSIS
+    Retrieves virtual circuit terminations from Netbox.
+
+.DESCRIPTION
+    Retrieves virtual circuit terminations from Netbox Circuits module.
+
+.PARAMETER Id
+    Database ID of the termination.
+
+.PARAMETER Virtual_Circuit_Id
+    Filter by virtual circuit ID.
+
+.PARAMETER Interface_Id
+    Filter by interface ID.
+
+.PARAMETER Role
+    Filter by role (peer, hub, spoke).
+
+.PARAMETER Query
+    Search query.
+
+.PARAMETER Limit
+    Number of results to return.
+
+.PARAMETER Offset
+    Result offset for pagination.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Get-NBVirtualCircuitTermination
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Get-NBVirtualCircuitTermination {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$Virtual_Circuit_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [uint64]$Interface_Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [ValidateSet('peer', 'hub', 'spoke')]
+        [string]$Role,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Query,
+
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ById' {
+                foreach ($i in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('circuits', 'virtual-circuit-terminations', $i))
+                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+                    $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('circuits', 'virtual-circuit-terminations'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Get-NBVirtualCircuitType.ps1
+
+<#
+.SYNOPSIS
+    Retrieves virtual circuit types from Netbox.
+
+.DESCRIPTION
+    Retrieves virtual circuit types from Netbox Circuits module.
+
+.PARAMETER Id
+    Database ID of the virtual circuit type.
+
+.PARAMETER Name
+    Filter by name.
+
+.PARAMETER Slug
+    Filter by slug.
+
+.PARAMETER Query
+    Search query.
+
+.PARAMETER Limit
+    Number of results to return.
+
+.PARAMETER Offset
+    Result offset for pagination.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Get-NBVirtualCircuitType
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Get-NBVirtualCircuitType {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Name,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Slug,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Query,
+
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ById' {
+                foreach ($i in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('circuits', 'virtual-circuit-types', $i))
+                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+                    $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('circuits', 'virtual-circuit-types'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
+        }
+    }
 }
 
 #endregion
@@ -6305,6 +8809,7 @@ function Get-NBVirtualizationCluster {
         [Alias('q')]
         [string]$Query,
 
+        [Parameter(ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
         [string]$Group,
@@ -6328,13 +8833,15 @@ function Get-NBVirtualizationCluster {
         [switch]$Raw
     )
 
-    $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'clusters'))
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'clusters'))
 
-    $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters
+        $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters
 
-    $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+        $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
-    InvokeNetboxRequest -URI $uri -Raw:$Raw
+        InvokeNetboxRequest -URI $uri -Raw:$Raw
+    }
 }
 
 #endregion
@@ -6370,6 +8877,7 @@ function Get-NBVirtualizationClusterGroup {
 
         [string]$Query,
 
+        [Parameter(ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
         [ValidateRange(1, 1000)]
@@ -6381,13 +8889,106 @@ function Get-NBVirtualizationClusterGroup {
         [switch]$Raw
     )
 
-    $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'cluster-groups'))
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'cluster-groups'))
 
-    $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters
+        $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters
 
-    $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+        $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
-    InvokeNetboxRequest -URI $uri -Raw:$Raw
+        InvokeNetboxRequest -URI $uri -Raw:$Raw
+    }
+}
+
+#endregion
+
+#region File Get-NBVirtualizationClusterType.ps1
+
+<#
+.SYNOPSIS
+    Retrieves virtualization cluster types from Netbox.
+
+.DESCRIPTION
+    Retrieves cluster types from the Netbox virtualization module.
+    Cluster types define the virtualization technology (e.g., VMware vSphere, KVM, Hyper-V).
+
+.PARAMETER Id
+    Database ID(s) of the cluster type to retrieve. Accepts pipeline input.
+
+.PARAMETER Name
+    Filter by cluster type name.
+
+.PARAMETER Slug
+    Filter by cluster type slug.
+
+.PARAMETER Description
+    Filter by description.
+
+.PARAMETER Query
+    General search query.
+
+.PARAMETER Limit
+    Maximum number of results to return (1-1000).
+
+.PARAMETER Offset
+    Number of results to skip for pagination.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBVirtualizationClusterType
+
+    Returns all cluster types.
+
+.EXAMPLE
+    Get-NBVirtualizationClusterType -Name "VMware*"
+
+    Returns cluster types matching the name pattern.
+
+.EXAMPLE
+    Get-NBVirtualizationClusterType -Id 1
+
+    Returns the cluster type with ID 1.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/models/virtualization/clustertype/
+#>
+function Get-NBVirtualizationClusterType {
+    [CmdletBinding()]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [string]$Name,
+
+        [string]$Slug,
+
+        [string]$Description,
+
+        [Alias('q')]
+        [string]$Query,
+
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'cluster-types'))
+
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+
+        $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+
+        InvokeNetboxRequest -URI $URI -Raw:$Raw
+    }
 }
 
 #endregion
@@ -7009,6 +9610,89 @@ function Get-NBVPNTunnelTermination {
 
 #endregion
 
+#region File Get-NBWebhook.ps1
+
+<#
+.SYNOPSIS
+    Retrieves webhooks from Netbox.
+
+.DESCRIPTION
+    Retrieves webhooks from Netbox Extras module.
+
+.PARAMETER Id
+    Database ID of the webhook.
+
+.PARAMETER Name
+    Filter by name.
+
+.PARAMETER Enabled
+    Filter by enabled status.
+
+.PARAMETER Query
+    Search query.
+
+.PARAMETER Limit
+    Number of results to return.
+
+.PARAMETER Offset
+    Result offset for pagination.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Get-NBWebhook
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Get-NBWebhook {
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Name,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [bool]$Enabled,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Query,
+
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
+            'ById' {
+                foreach ($i in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('extras', 'webhooks', $i))
+                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+                    $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('extras', 'webhooks'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
 #region File Get-NBWirelessLAN.ps1
 
 <#
@@ -7131,7 +9815,8 @@ function GetNetboxAPIErrorBody {
     # This takes the $Response stream and turns it into a useable object... generally a string.
     # If the body is JSON, you should be able to use ConvertFrom-Json
 
-    $reader = New-Object System.IO.StreamReader($Response.GetResponseStream())
+    # Explicitly specify UTF-8 encoding for cross-platform consistency
+    $reader = [System.IO.StreamReader]::new($Response.GetResponseStream(), [System.Text.Encoding]::UTF8)
     $reader.BaseStream.Position = 0
     $reader.DiscardBufferedData()
     $reader.ReadToEnd()
@@ -7205,7 +9890,8 @@ function InvokeNetboxRequest {
 
             try {
                 $stream = $_.Exception.Response.GetResponseStream()
-                $reader = [System.IO.StreamReader]::new($stream)
+                # Explicitly specify UTF-8 encoding for cross-platform consistency
+                $reader = [System.IO.StreamReader]::new($stream, [System.Text.Encoding]::UTF8)
                 $responseBody = $reader.ReadToEnd()
                 $reader.Close()
 
@@ -7243,6 +9929,56 @@ function InvokeNetboxRequest {
         } else {
             Write-Verbose "Did NOT find results property on data, returning raw result"
             return $result
+        }
+    }
+}
+
+#endregion
+
+#region File New-NBBookmark.ps1
+
+<#
+.SYNOPSIS
+    Creates a new bookmark in Netbox.
+
+.DESCRIPTION
+    Creates a new bookmark in Netbox Extras module.
+
+.PARAMETER Object_Type
+    Object type (e.g., "dcim.device").
+
+.PARAMETER Object_Id
+    Object ID.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    New-NBBookmark -Object_Type "dcim.device" -Object_Id 1
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function New-NBBookmark {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Object_Type,
+
+        [Parameter(Mandatory = $true)]
+        [uint64]$Object_Id,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('extras', 'bookmarks'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess("$Object_Type $Object_Id", 'Create Bookmark')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
         }
     }
 }
@@ -7322,6 +10058,633 @@ function New-NBCircuit {
 
         if ($Force -or $PSCmdlet.ShouldProcess($CID, 'Create new circuit')) {
             InvokeNetboxRequest -URI $URI -Method $Method -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NBCircuitGroup.ps1
+
+<#
+.SYNOPSIS
+    Creates a new circuit group in Netbox.
+
+.DESCRIPTION
+    Creates a new circuit group in Netbox.
+
+.PARAMETER Name
+    Name of the circuit group.
+
+.PARAMETER Slug
+    URL-friendly slug.
+
+.PARAMETER Description
+    Description.
+
+.PARAMETER Tenant
+    Tenant ID.
+
+.PARAMETER Custom_Fields
+    Custom fields hashtable.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    New-NBCircuitGroup -Name "WAN Links" -Slug "wan-links"
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function New-NBCircuitGroup {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Name,
+
+        [string]$Slug,
+
+        [string]$Description,
+
+        [uint64]$Tenant,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuit-groups'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Name, 'Create Circuit Group')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NBCircuitGroupAssignment.ps1
+
+<#
+.SYNOPSIS
+    Creates a new circuit group assignment in Netbox.
+
+.DESCRIPTION
+    Creates a new circuit group assignment in Netbox.
+
+.PARAMETER Group
+    Circuit group ID.
+
+.PARAMETER Circuit
+    Circuit ID.
+
+.PARAMETER Priority
+    Priority (primary, secondary, tertiary, inactive).
+
+.PARAMETER Custom_Fields
+    Custom fields hashtable.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    New-NBCircuitGroupAssignment -Group 1 -Circuit 1 -Priority "primary"
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function New-NBCircuitGroupAssignment {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true)]
+        [uint64]$Group,
+
+        [Parameter(Mandatory = $true)]
+        [uint64]$Circuit,
+
+        [ValidateSet('primary', 'secondary', 'tertiary', 'inactive')]
+        [string]$Priority,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuit-group-assignments'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess("Group $Group Circuit $Circuit", 'Create Circuit Group Assignment')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NBCircuitProvider.ps1
+
+<#
+.SYNOPSIS
+    Creates a new circuit provider in Netbox.
+
+.DESCRIPTION
+    Creates a new circuit provider in Netbox.
+
+.PARAMETER Name
+    Name of the provider.
+
+.PARAMETER Slug
+    URL-friendly slug.
+
+.PARAMETER Description
+    Description of the provider.
+
+.PARAMETER Comments
+    Comments.
+
+.PARAMETER Custom_Fields
+    Custom fields hashtable.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    New-NBCircuitProvider -Name "AT&T" -Slug "att"
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function New-NBCircuitProvider {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Name,
+
+        [string]$Slug,
+
+        [string]$Description,
+
+        [string]$Comments,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('circuits', 'providers'))
+
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Name, 'Create Circuit Provider')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NBCircuitProviderAccount.ps1
+
+<#
+.SYNOPSIS
+    Creates a new provider account in Netbox.
+
+.DESCRIPTION
+    Creates a new provider account in Netbox.
+
+.PARAMETER Provider
+    Provider ID.
+
+.PARAMETER Name
+    Name of the account.
+
+.PARAMETER Account
+    Account number/identifier.
+
+.PARAMETER Description
+    Description.
+
+.PARAMETER Comments
+    Comments.
+
+.PARAMETER Custom_Fields
+    Custom fields hashtable.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    New-NBCircuitProviderAccount -Provider 1 -Name "Main Account" -Account "ACC-001"
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function New-NBCircuitProviderAccount {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true)]
+        [uint64]$Provider,
+
+        [string]$Name,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Account,
+
+        [string]$Description,
+
+        [string]$Comments,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('circuits', 'provider-accounts'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Account, 'Create Provider Account')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NBCircuitProviderNetwork.ps1
+
+<#
+.SYNOPSIS
+    Creates a new provider network in Netbox.
+
+.DESCRIPTION
+    Creates a new provider network in Netbox.
+
+.PARAMETER Provider
+    Provider ID.
+
+.PARAMETER Name
+    Name of the network.
+
+.PARAMETER Service_Id
+    Service identifier.
+
+.PARAMETER Description
+    Description.
+
+.PARAMETER Comments
+    Comments.
+
+.PARAMETER Custom_Fields
+    Custom fields hashtable.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    New-NBCircuitProviderNetwork -Provider 1 -Name "MPLS Network"
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function New-NBCircuitProviderNetwork {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true)]
+        [uint64]$Provider,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Name,
+
+        [string]$Service_Id,
+
+        [string]$Description,
+
+        [string]$Comments,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('circuits', 'provider-networks'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Name, 'Create Provider Network')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NBCircuitTermination.ps1
+
+<#
+.SYNOPSIS
+    Creates a new circuit termination in Netbox.
+
+.DESCRIPTION
+    Creates a new circuit termination in Netbox.
+
+.PARAMETER Circuit
+    Circuit ID.
+
+.PARAMETER Term_Side
+    Termination side (A or Z).
+
+.PARAMETER Site
+    Site ID.
+
+.PARAMETER Provider_Network
+    Provider network ID.
+
+.PARAMETER Port_Speed
+    Port speed in Kbps.
+
+.PARAMETER Upstream_Speed
+    Upstream speed in Kbps.
+
+.PARAMETER Xconnect_Id
+    Cross-connect ID.
+
+.PARAMETER Pp_Info
+    Patch panel info.
+
+.PARAMETER Description
+    Description.
+
+.PARAMETER Mark_Connected
+    Mark as connected.
+
+.PARAMETER Custom_Fields
+    Custom fields hashtable.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    New-NBCircuitTermination -Circuit 1 -Term_Side "A" -Site 1
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function New-NBCircuitTermination {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true)]
+        [uint64]$Circuit,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('A', 'Z')]
+        [string]$Term_Side,
+
+        [uint64]$Site,
+
+        [uint64]$Provider_Network,
+
+        [uint64]$Port_Speed,
+
+        [uint64]$Upstream_Speed,
+
+        [string]$Xconnect_Id,
+
+        [string]$Pp_Info,
+
+        [string]$Description,
+
+        [bool]$Mark_Connected,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuit-terminations'))
+
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess("Circuit $Circuit Side $Term_Side", 'Create Circuit Termination')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NBCircuitType.ps1
+
+<#
+.SYNOPSIS
+    Creates a new circuit type in Netbox.
+
+.DESCRIPTION
+    Creates a new circuit type in Netbox.
+
+.PARAMETER Name
+    Name of the circuit type.
+
+.PARAMETER Slug
+    URL-friendly slug. Auto-generated from name if not provided.
+
+.PARAMETER Color
+    Color code (6 hex characters).
+
+.PARAMETER Description
+    Description of the circuit type.
+
+.PARAMETER Custom_Fields
+    Custom fields hashtable.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    New-NBCircuitType -Name "MPLS" -Slug "mpls"
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function New-NBCircuitType {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Name,
+
+        [string]$Slug,
+
+        [ValidatePattern('^[0-9a-fA-F]{6}$')]
+        [string]$Color,
+
+        [string]$Description,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuit-types'))
+
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Name, 'Create Circuit Type')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NBConfigContext.ps1
+
+<#
+.SYNOPSIS
+    Creates a new config context in Netbox.
+
+.DESCRIPTION
+    Creates a new config context in Netbox Extras module.
+
+.PARAMETER Name
+    Name of the config context.
+
+.PARAMETER Weight
+    Weight for ordering (0-32767).
+
+.PARAMETER Description
+    Description of the config context.
+
+.PARAMETER Is_Active
+    Whether the config context is active.
+
+.PARAMETER Data
+    Configuration data (hashtable or JSON).
+
+.PARAMETER Regions
+    Array of region IDs.
+
+.PARAMETER Site_Groups
+    Array of site group IDs.
+
+.PARAMETER Sites
+    Array of site IDs.
+
+.PARAMETER Locations
+    Array of location IDs.
+
+.PARAMETER Device_Types
+    Array of device type IDs.
+
+.PARAMETER Roles
+    Array of role IDs.
+
+.PARAMETER Platforms
+    Array of platform IDs.
+
+.PARAMETER Cluster_Types
+    Array of cluster type IDs.
+
+.PARAMETER Cluster_Groups
+    Array of cluster group IDs.
+
+.PARAMETER Clusters
+    Array of cluster IDs.
+
+.PARAMETER Tenant_Groups
+    Array of tenant group IDs.
+
+.PARAMETER Tenants
+    Array of tenant IDs.
+
+.PARAMETER Tags
+    Array of tag slugs.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    New-NBConfigContext -Name "NTP Servers" -Data @{ntp_servers = @("10.0.0.1", "10.0.0.2")}
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function New-NBConfigContext {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Name,
+
+        [ValidateRange(0, 32767)]
+        [uint16]$Weight,
+
+        [string]$Description,
+
+        [bool]$Is_Active,
+
+        [Parameter(Mandatory = $true)]
+        $Data,
+
+        [uint64[]]$Regions,
+
+        [uint64[]]$Site_Groups,
+
+        [uint64[]]$Sites,
+
+        [uint64[]]$Locations,
+
+        [uint64[]]$Device_Types,
+
+        [uint64[]]$Roles,
+
+        [uint64[]]$Platforms,
+
+        [uint64[]]$Cluster_Types,
+
+        [uint64[]]$Cluster_Groups,
+
+        [uint64[]]$Clusters,
+
+        [uint64[]]$Tenant_Groups,
+
+        [uint64[]]$Tenants,
+
+        [string[]]$Tags,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('extras', 'config-contexts'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Name, 'Create Config Context')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
         }
     }
 }
@@ -7589,6 +10952,375 @@ function New-NBContactRole {
 
 
 
+
+#endregion
+
+#region File New-NBCustomField.ps1
+
+<#
+.SYNOPSIS
+    Creates a new custom field in Netbox.
+
+.DESCRIPTION
+    Creates a new custom field in Netbox Extras module.
+
+.PARAMETER Name
+    Internal name of the custom field.
+
+.PARAMETER Label
+    Display label for the custom field.
+
+.PARAMETER Type
+    Field type (text, longtext, integer, decimal, boolean, date, datetime, url, json, select, multiselect, object, multiobject).
+
+.PARAMETER Object_Types
+    Content types this field applies to.
+
+.PARAMETER Group_Name
+    Group name for organizing fields.
+
+.PARAMETER Description
+    Description of the field.
+
+.PARAMETER Required
+    Whether this field is required.
+
+.PARAMETER Search_Weight
+    Search weight (0-32767).
+
+.PARAMETER Filter_Logic
+    Filter logic (disabled, loose, exact).
+
+.PARAMETER Ui_Visible
+    UI visibility (always, if-set, hidden).
+
+.PARAMETER Ui_Editable
+    UI editability (yes, no, hidden).
+
+.PARAMETER Is_Cloneable
+    Whether the field is cloneable.
+
+.PARAMETER Default
+    Default value.
+
+.PARAMETER Weight
+    Display weight.
+
+.PARAMETER Validation_Minimum
+    Minimum value for numeric fields.
+
+.PARAMETER Validation_Maximum
+    Maximum value for numeric fields.
+
+.PARAMETER Validation_Regex
+    Validation regex pattern.
+
+.PARAMETER Choice_Set
+    Choice set ID for select fields.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    New-NBCustomField -Name "asset_id" -Label "Asset ID" -Type "text" -Object_Types @("dcim.device")
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function New-NBCustomField {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Name,
+
+        [string]$Label,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('text', 'longtext', 'integer', 'decimal', 'boolean', 'date', 'datetime', 'url', 'json', 'select', 'multiselect', 'object', 'multiobject')]
+        [string]$Type,
+
+        [Parameter(Mandatory = $true)]
+        [string[]]$Object_Types,
+
+        [string]$Group_Name,
+
+        [string]$Description,
+
+        [bool]$Required,
+
+        [ValidateRange(0, 32767)]
+        [uint16]$Search_Weight,
+
+        [ValidateSet('disabled', 'loose', 'exact')]
+        [string]$Filter_Logic,
+
+        [ValidateSet('always', 'if-set', 'hidden')]
+        [string]$Ui_Visible,
+
+        [ValidateSet('yes', 'no', 'hidden')]
+        [string]$Ui_Editable,
+
+        [bool]$Is_Cloneable,
+
+        $Default,
+
+        [uint16]$Weight,
+
+        [int64]$Validation_Minimum,
+
+        [int64]$Validation_Maximum,
+
+        [string]$Validation_Regex,
+
+        [uint64]$Choice_Set,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('extras', 'custom-fields'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Name, 'Create Custom Field')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NBCustomFieldChoiceSet.ps1
+
+<#
+.SYNOPSIS
+    Creates a new custom field choice set in Netbox.
+
+.DESCRIPTION
+    Creates a new custom field choice set in Netbox Extras module.
+
+.PARAMETER Name
+    Name of the choice set.
+
+.PARAMETER Description
+    Description of the choice set.
+
+.PARAMETER Base_Choices
+    Base choices to inherit from.
+
+.PARAMETER Extra_Choices
+    Array of extra choices in format @(@("value1", "label1"), @("value2", "label2")).
+
+.PARAMETER Order_Alphabetically
+    Whether to order choices alphabetically.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    New-NBCustomFieldChoiceSet -Name "Status Options" -Extra_Choices @(@("active", "Active"), @("inactive", "Inactive"))
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function New-NBCustomFieldChoiceSet {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Name,
+
+        [string]$Description,
+
+        [string]$Base_Choices,
+
+        [array]$Extra_Choices,
+
+        [bool]$Order_Alphabetically,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('extras', 'custom-field-choice-sets'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Name, 'Create Custom Field Choice Set')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NBCustomLink.ps1
+
+<#
+.SYNOPSIS
+    Creates a new custom link in Netbox.
+
+.DESCRIPTION
+    Creates a new custom link in Netbox Extras module.
+
+.PARAMETER Name
+    Name of the custom link.
+
+.PARAMETER Object_Types
+    Object types this link applies to.
+
+.PARAMETER Enabled
+    Whether the link is enabled.
+
+.PARAMETER Link_Text
+    Link text (Jinja2 template).
+
+.PARAMETER Link_Url
+    Link URL (Jinja2 template).
+
+.PARAMETER Weight
+    Display weight.
+
+.PARAMETER Group_Name
+    Group name for organizing links.
+
+.PARAMETER Button_Class
+    Button CSS class.
+
+.PARAMETER New_Window
+    Whether to open in new window.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    New-NBCustomLink -Name "External Doc" -Object_Types @("dcim.device") -Link_Text "View Docs" -Link_Url "https://docs.example.com/{{ object.name }}"
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function New-NBCustomLink {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Name,
+
+        [Parameter(Mandatory = $true)]
+        [string[]]$Object_Types,
+
+        [bool]$Enabled,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Link_Text,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Link_Url,
+
+        [uint16]$Weight,
+
+        [string]$Group_Name,
+
+        [ValidateSet('outline-dark', 'blue', 'indigo', 'purple', 'pink', 'red', 'orange', 'yellow', 'green', 'teal', 'cyan', 'gray', 'black', 'white', 'ghost-dark')]
+        [string]$Button_Class,
+
+        [bool]$New_Window,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('extras', 'custom-links'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Name, 'Create Custom Link')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NBDataSource.ps1
+
+<#
+.SYNOPSIS
+    Creates a new data source in Netbox.
+
+.DESCRIPTION
+    Creates a new data source in Netbox Core module.
+
+.PARAMETER Name
+    Name of the data source.
+
+.PARAMETER Type
+    Type of data source (local, git, amazon-s3).
+
+.PARAMETER Source_Url
+    Source URL for remote data sources.
+
+.PARAMETER Description
+    Description of the data source.
+
+.PARAMETER Enabled
+    Whether the data source is enabled.
+
+.PARAMETER Ignore_Rules
+    Patterns to ignore (one per line).
+
+.PARAMETER Parameters
+    Additional parameters (hashtable).
+
+.PARAMETER Comments
+    Comments.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    New-NBDataSource -Name "Config Repo" -Type "git" -Source_Url "https://github.com/example/configs.git"
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function New-NBDataSource {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Name,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('local', 'git', 'amazon-s3')]
+        [string]$Type,
+
+        [string]$Source_Url,
+
+        [string]$Description,
+
+        [bool]$Enabled,
+
+        [string]$Ignore_Rules,
+
+        [hashtable]$Parameters,
+
+        [string]$Comments,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('core', 'data-sources'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Name, 'Create Data Source')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
 
 #endregion
 
@@ -8106,64 +11838,124 @@ function New-NBDCIMDeviceType {
 
 <#
 .SYNOPSIS
-    Creates a new CIMFrontPort in Netbox D module.
+    Creates a new front port on a device in Netbox.
 
 .DESCRIPTION
-    Creates a new CIMFrontPort in Netbox D module.
-    Supports pipeline input for Id parameter where applicable.
+    Creates a new front port on a specified device in the Netbox DCIM module.
+    Front ports represent the front-facing ports on patch panels or other devices
+    that connect to rear ports for pass-through cabling.
 
-.PARAMETER Raw
-    Return the raw API response instead of the results array.
+.PARAMETER Device
+    The database ID of the device to add the front port to.
+
+.PARAMETER Name
+    The name of the front port (e.g., 'Port 1', 'Front-01').
+
+.PARAMETER Type
+    The connector type of the front port. Common types include:
+    - Copper: '8p8c' (RJ-45), '8p6c', '8p4c', '110-punch', 'bnc'
+    - Fiber: 'lc', 'lc-apc', 'sc', 'sc-apc', 'st', 'mpo', 'mtrj'
+    - Coax: 'f', 'n', 'bnc'
+    - Other: 'splice', 'other'
+
+.PARAMETER Rear_Port
+    The database ID of the rear port that this front port maps to.
+    Required for establishing the pass-through connection.
+
+.PARAMETER Module
+    The database ID of the module within the device (for modular devices).
+
+.PARAMETER Label
+    A physical label for the port (what's printed on the device).
+
+.PARAMETER Color
+    The color of the port in 6-character hex format (e.g., 'ff0000' for red).
+
+.PARAMETER Rear_Port_Position
+    The position on the rear port (for rear ports with multiple positions).
+    Defaults to 1 if not specified.
+
+.PARAMETER Description
+    A description of the front port.
+
+.PARAMETER Mark_Connected
+    Whether to mark this port as connected even without a cable object.
+
+.PARAMETER Tags
+    Array of tag IDs to assign to this front port.
 
 .EXAMPLE
-    New-NBDCIMFrontPort
+    New-NBDCIMFrontPort -Device 42 -Name "Port 1" -Type "8p8c" -Rear_Port 100
 
-    Returns all CIMFrontPort objects.
+    Creates a new RJ-45 front port named 'Port 1' on device 42, mapped to rear port 100.
+
+.EXAMPLE
+    New-NBDCIMFrontPort -Device 42 -Name "Fiber-01" -Type "lc" -Rear_Port 100 -Color "00ff00"
+
+    Creates a new LC fiber front port with a green color indicator.
+
+.EXAMPLE
+    1..24 | ForEach-Object {
+        New-NBDCIMFrontPort -Device 42 -Name "Port $_" -Type "8p8c" -Rear_Port (100 + $_)
+    }
+
+    Creates 24 front ports on a patch panel, each mapped to a corresponding rear port.
 
 .LINK
-    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+    https://netbox.readthedocs.io/en/stable/models/dcim/frontport/
 #>
 function New-NBDCIMFrontPort {
-    [CmdletBinding()]
-    [OutputType([pscustomobject])]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(Mandatory = $true)]
         [uint64]$Device,
 
-        [uint64]$Module,
-
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
-        [string]$Label,
-
         [Parameter(Mandatory = $true)]
+        [ValidateSet('8p8c', '8p6c', '8p4c', '8p2c', '6p6c', '6p4c', '6p2c', '4p4c', '4p2c',
+            'gg45', 'tera-4p', 'tera-2p', 'tera-1p', '110-punch', 'bnc', 'f', 'n', 'mrj21',
+            'fc', 'lc', 'lc-pc', 'lc-upc', 'lc-apc', 'lsh', 'lsh-pc', 'lsh-upc', 'lsh-apc',
+            'lx5', 'lx5-pc', 'lx5-upc', 'lx5-apc', 'mpo', 'mtrj', 'sc', 'sc-pc', 'sc-upc',
+            'sc-apc', 'st', 'cs', 'sn', 'sma-905', 'sma-906', 'urm-p2', 'urm-p4', 'urm-p8',
+            'splice', 'other', IgnoreCase = $true)]
         [string]$Type,
-
-        [ValidatePattern('^[0-9a-f]{6}$')]
-        [string]$Color,
 
         [Parameter(Mandatory = $true)]
         [uint64]$Rear_Port,
 
-        [uint64]$Rear_Port_Position,
+        [uint64]$Module,
+
+        [string]$Label,
+
+        [ValidatePattern('^[0-9a-fA-F]{6}$')]
+        [string]$Color,
+
+        [ValidateRange(1, 1024)]
+        [uint16]$Rear_Port_Position,
 
         [string]$Description,
 
         [bool]$Mark_Connected,
 
-        [uint16[]]$Tags
-
+        [uint64[]]$Tags
     )
 
-    $Segments = [System.Collections.ArrayList]::new(@('dcim', 'front-ports'))
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim', 'front-ports'))
 
-    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters
 
-    $URI = BuildNewURI -Segments $URIComponents.Segments
+        $URI = BuildNewURI -Segments $URIComponents.Segments
 
-    InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method POST
+        if ($PSCmdlet.ShouldProcess("Device $Device", "Create front port '$Name'")) {
+            InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method POST
+        }
+    }
 }
 
 #endregion
@@ -8219,33 +12011,80 @@ function New-NBDCIMFrontPortTemplate {
 
 <#
 .SYNOPSIS
-    Creates a new CIMInterface in Netbox D module.
+    Creates a new interface on a device in Netbox.
 
 .DESCRIPTION
-    Creates a new CIMInterface in Netbox D module.
-    Supports pipeline input for Id parameter where applicable.
+    Creates a new network interface on a specified device in the Netbox DCIM module.
+    Supports various interface types including physical, virtual, LAG, and wireless interfaces.
 
-.PARAMETER Raw
-    Return the raw API response instead of the results array.
+.PARAMETER Device
+    The database ID of the device to add the interface to.
+
+.PARAMETER Name
+    The name of the interface (e.g., 'eth0', 'GigabitEthernet0/1').
+
+.PARAMETER Type
+    The interface type. Supports physical types (1000base-t, 10gbase-x-sfpp, etc.),
+    virtual types (virtual, bridge, lag), and wireless types (ieee802.11ac, etc.).
+
+.PARAMETER Enabled
+    Whether the interface is enabled. Defaults to true if not specified.
+
+.PARAMETER Form_Factor
+    Legacy parameter for interface form factor.
+
+.PARAMETER MTU
+    Maximum Transmission Unit size (typically 1500 for Ethernet).
+
+.PARAMETER MAC_Address
+    The MAC address of the interface in format XX:XX:XX:XX:XX:XX.
+
+.PARAMETER MGMT_Only
+    If true, this interface is used for management traffic only.
+
+.PARAMETER LAG
+    The database ID of the LAG interface this interface belongs to.
+
+.PARAMETER Description
+    A description of the interface.
+
+.PARAMETER Mode
+    VLAN mode: 'Access' (untagged), 'Tagged' (trunk), or 'Tagged All'.
+
+.PARAMETER Untagged_VLAN
+    VLAN ID for untagged/native VLAN (1-4094).
+
+.PARAMETER Tagged_VLANs
+    Array of VLAN IDs for tagged VLANs (1-4094 each).
 
 .EXAMPLE
-    New-NBDCIMInterface
+    New-NBDCIMInterface -Device 42 -Name "eth0" -Type "1000base-t"
 
-    Returns all CIMInterface objects.
+    Creates a new 1GbE interface named 'eth0' on device ID 42.
+
+.EXAMPLE
+    New-NBDCIMInterface -Device 42 -Name "bond0" -Type "lag" -Description "Server uplink LAG"
+
+    Creates a new LAG interface for link aggregation.
+
+.EXAMPLE
+    New-NBDCIMInterface -Device 42 -Name "Gi0/1" -Type "1000base-t" -Mode "Tagged" -Tagged_VLANs 10,20,30
+
+    Creates a trunk interface with multiple tagged VLANs.
 
 .LINK
-    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+    https://netbox.readthedocs.io/en/stable/models/dcim/interface/
 #>
-
 function New-NBDCIMInterface {
-    [CmdletBinding()]
-    [OutputType([pscustomobject])]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(Mandatory = $true)]
         [uint64]$Device,
 
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [ValidateSet('virtual', 'bridge', 'lag', '100base-tx', '1000base-t', '2.5gbase-t', '5gbase-t', '10gbase-t', '10gbase-cx4', '1000base-x-gbic', '1000base-x-sfp', '10gbase-x-sfpp', '10gbase-x-xfp', '10gbase-x-xenpak', '10gbase-x-x2', '25gbase-x-sfp28', '50gbase-x-sfp56', '40gbase-x-qsfpp', '50gbase-x-sfp28', '100gbase-x-cfp', '100gbase-x-cfp2', '200gbase-x-cfp2', '100gbase-x-cfp4', '100gbase-x-cpak', '100gbase-x-qsfp28', '200gbase-x-qsfp56', '400gbase-x-qsfpdd', '400gbase-x-osfp', '1000base-kx', '10gbase-kr', '10gbase-kx4', '25gbase-kr', '40gbase-kr4', '50gbase-kr', '100gbase-kp4', '100gbase-kr2', '100gbase-kr4', 'ieee802.11a', 'ieee802.11g', 'ieee802.11n', 'ieee802.11ac', 'ieee802.11ad', 'ieee802.11ax', 'ieee802.11ay', 'ieee802.15.1', 'other-wireless', 'gsm', 'cdma', 'lte', 'sonet-oc3', 'sonet-oc12', 'sonet-oc48', 'sonet-oc192', 'sonet-oc768', 'sonet-oc1920', 'sonet-oc3840', '1gfc-sfp', '2gfc-sfp', '4gfc-sfp', '8gfc-sfpp', '16gfc-sfpp', '32gfc-sfp28', '64gfc-qsfpp', '128gfc-qsfp28', 'infiniband-sdr', 'infiniband-ddr', 'infiniband-qdr', 'infiniband-fdr10', 'infiniband-fdr', 'infiniband-edr', 'infiniband-hdr', 'infiniband-ndr', 'infiniband-xdr', 't1', 'e1', 't3', 'e3', 'xdsl', 'docsis', 'gpon', 'xg-pon', 'xgs-pon', 'ng-pon2', 'epon', '10g-epon', 'cisco-stackwise', 'cisco-stackwise-plus', 'cisco-flexstack', 'cisco-flexstack-plus', 'cisco-stackwise-80', 'cisco-stackwise-160', 'cisco-stackwise-320', 'cisco-stackwise-480', 'juniper-vcp', 'extreme-summitstack', 'extreme-summitstack-128', 'extreme-summitstack-256', 'extreme-summitstack-512', 'other', IgnoreCase = $true)]
@@ -8255,8 +12094,10 @@ function New-NBDCIMInterface {
 
         [object]$Form_Factor,
 
+        [ValidateRange(1, 65535)]
         [uint16]$MTU,
 
+        [ValidatePattern('^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$')]
         [string]$MAC_Address,
 
         [bool]$MGMT_Only,
@@ -8275,91 +12116,113 @@ function New-NBDCIMInterface {
         [uint16[]]$Tagged_VLANs
     )
 
-    if (-not [System.String]::IsNullOrWhiteSpace($Mode)) {
-        $PSBoundParameters.Mode = switch ($Mode) {
-            'Access' {
-                100
-                break
-            }
-
-            'Tagged' {
-                200
-                break
-            }
-
-            'Tagged All' {
-                300
-                break
-            }
-
-            default {
-                $_
+    process {
+        # Convert Mode friendly names to API values
+        if (-not [System.String]::IsNullOrWhiteSpace($Mode)) {
+            $PSBoundParameters.Mode = switch ($Mode) {
+                'Access' { 100 }
+                'Tagged' { 200 }
+                'Tagged All' { 300 }
+                default { $_ }
             }
         }
+
+        $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interfaces'))
+
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters
+
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess("Device $Device", "Create interface '$Name'")) {
+            InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method POST
+        }
     }
-
-    $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interfaces'))
-
-    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters
-
-    $URI = BuildNewURI -Segments $URIComponents.Segments
-
-    InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method POST
 }
 
 #endregion
 
 #region File New-NBDCIMInterfaceConnection.ps1
 
+<#
+.SYNOPSIS
+    Creates a new cable connection between two device interfaces in Netbox.
 
-function New-NBDCIMInterfaceConnection {
-    <#
-    .SYNOPSIS
-        Create a new connection between two interfaces
+.DESCRIPTION
+    Creates a new cable connection between two device interfaces in the Netbox DCIM module.
+    This function validates that both interfaces exist before attempting to create the connection.
+    The connection is represented as a cable object linking Interface A to Interface B.
 
-    .DESCRIPTION
-        Create a new connection between two interfaces
+.PARAMETER Interface_A
+    The database ID of the first interface (A-side of the connection).
+    The interface must exist in Netbox or the function will throw an error.
 
-    .PARAMETER Connection_Status
-        Is it connected or planned?
+.PARAMETER Interface_B
+    The database ID of the second interface (B-side of the connection).
+    The interface must exist in Netbox or the function will throw an error.
 
-    .PARAMETER Interface_A
-        Database ID of interface A
+.PARAMETER Connection_Status
+    The status of the connection. Common values include:
+    - 'connected' - The connection is active
+    - 'planned' - The connection is planned but not yet implemented
 
-    .PARAMETER Interface_B
-        Database ID of interface B
+.EXAMPLE
+    New-NBDCIMInterfaceConnection -Interface_A 101 -Interface_B 102
 
-    .EXAMPLE
-        PS C:\> New-NBDCIMInterfaceConnection -Interface_A $value1 -Interface_B $value2
+    Creates a new connection between interface ID 101 and interface ID 102.
 
-    .NOTES
-        Additional information about the function.
+.EXAMPLE
+    New-NBDCIMInterfaceConnection -Interface_A 101 -Interface_B 102 -Connection_Status 'planned'
+
+    Creates a planned connection between two interfaces.
+
+.EXAMPLE
+    $intA = Get-NBDCIMInterface -Device_Id 1 -Name 'eth0'
+    $intB = Get-NBDCIMInterface -Device_Id 2 -Name 'eth0'
+    New-NBDCIMInterfaceConnection -Interface_A $intA.Id -Interface_B $intB.Id
+
+    Creates a connection between eth0 interfaces on two different devices.
+
+.NOTES
+    This function creates a cable object in Netbox. The interface-connections endpoint
+    is a legacy endpoint that may be deprecated in future Netbox versions.
+    Consider using the cables endpoint directly for new implementations.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/models/dcim/cable/
 #>
-
-    [CmdletBinding()]
-    [OutputType([pscustomobject])]
+function New-NBDCIMInterfaceConnection {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param
     (
-        [object]$Connection_Status,
-
         [Parameter(Mandatory = $true)]
         [uint64]$Interface_A,
 
         [Parameter(Mandatory = $true)]
-        [uint64]$Interface_B
+        [uint64]$Interface_B,
+
+        [ValidateSet('connected', 'planned', IgnoreCase = $true)]
+        [string]$Connection_Status
     )
 
-    # Verify if both Interfaces exist
-    Get-NBDCIMInterface -Id $Interface_A -ErrorAction Stop | Out-null
-    Get-NBDCIMInterface -Id $Interface_B -ErrorAction Stop | Out-null
+    process {
+        # Verify both interfaces exist before creating connection
+        Write-Verbose "Validating Interface A (ID: $Interface_A) exists..."
+        $null = Get-NBDCIMInterface -Id $Interface_A -ErrorAction Stop
 
-    $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interface-connections'))
+        Write-Verbose "Validating Interface B (ID: $Interface_B) exists..."
+        $null = Get-NBDCIMInterface -Id $Interface_B -ErrorAction Stop
 
-    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters
+        $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interface-connections'))
 
-    $URI = BuildNewURI -Segments $URIComponents.Segments
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters
 
-    InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method POST
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess("Interface $Interface_A <-> Interface $Interface_B", 'Create connection')) {
+            InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method POST
+        }
+    }
 }
 
 #endregion
@@ -9651,56 +13514,105 @@ function New-NBDCIMRackType {
 
 <#
 .SYNOPSIS
-    Creates a new CIMRearPort in Netbox D module.
+    Creates a new rear port on a device in Netbox.
 
 .DESCRIPTION
-    Creates a new CIMRearPort in Netbox D module.
-    Supports pipeline input for Id parameter where applicable.
+    Creates a new rear port on a specified device in the Netbox DCIM module.
+    Rear ports represent the back-facing ports on patch panels or other devices
+    that connect to front ports for pass-through cabling.
 
-.PARAMETER Raw
-    Return the raw API response instead of the results array.
+.PARAMETER Device
+    The database ID of the device to add the rear port to.
+
+.PARAMETER Name
+    The name of the rear port (e.g., 'Rear 1', 'Back-01').
+
+.PARAMETER Type
+    The connector type of the rear port. Common types include:
+    - Copper: '8p8c' (RJ-45), '8p6c', '8p4c', '110-punch', 'bnc'
+    - Fiber: 'lc', 'lc-apc', 'sc', 'sc-apc', 'st', 'mpo', 'mtrj'
+    - Coax: 'f', 'n', 'bnc'
+    - Other: 'splice', 'other'
+
+.PARAMETER Module
+    The database ID of the module within the device (for modular devices).
+
+.PARAMETER Label
+    A physical label for the port (what's printed on the device).
+
+.PARAMETER Color
+    The color of the port in 6-character hex format (e.g., 'ff0000' for red).
+
+.PARAMETER Positions
+    The number of front port positions this rear port supports.
+    Defaults to 1. Use higher values for multi-position rear ports.
+
+.PARAMETER Description
+    A description of the rear port.
+
+.PARAMETER Mark_Connected
+    Whether to mark this port as connected even without a cable object.
+
+.PARAMETER Tags
+    Array of tag IDs to assign to this rear port.
 
 .EXAMPLE
-    New-NBDCIMRearPort
+    New-NBDCIMRearPort -Device 42 -Name "Rear 1" -Type "8p8c"
 
-    Returns all CIMRearPort objects.
+    Creates a new RJ-45 rear port named 'Rear 1' on device 42.
+
+.EXAMPLE
+    New-NBDCIMRearPort -Device 42 -Name "Fiber-Rear-01" -Type "lc" -Positions 2
+
+    Creates a new LC fiber rear port that supports 2 front port positions.
+
+.EXAMPLE
+    1..24 | ForEach-Object {
+        New-NBDCIMRearPort -Device 42 -Name "Rear $_" -Type "8p8c"
+    }
+
+    Creates 24 rear ports on a patch panel.
 
 .LINK
-    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+    https://netbox.readthedocs.io/en/stable/models/dcim/rearport/
 #>
 function New-NBDCIMRearPort {
-    [CmdletBinding()]
-    [OutputType([pscustomobject])]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(Mandatory = $true)]
         [uint64]$Device,
 
-        [uint64]$Module,
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [string]$Name,
 
         [Parameter(Mandatory = $true)]
-        [string]$Name,
+        [ValidateSet('8p8c', '8p6c', '8p4c', '8p2c', '6p6c', '6p4c', '6p2c', '4p4c', '4p2c',
+            'gg45', 'tera-4p', 'tera-2p', 'tera-1p', '110-punch', 'bnc', 'f', 'n', 'mrj21',
+            'fc', 'lc', 'lc-pc', 'lc-upc', 'lc-apc', 'lsh', 'lsh-pc', 'lsh-upc', 'lsh-apc',
+            'lx5', 'lx5-pc', 'lx5-upc', 'lx5-apc', 'mpo', 'mtrj', 'sc', 'sc-pc', 'sc-upc',
+            'sc-apc', 'st', 'cs', 'sn', 'sma-905', 'sma-906', 'urm-p2', 'urm-p4', 'urm-p8',
+            'splice', 'other', IgnoreCase = $true)]
+        [string]$Type,
+
+        [uint64]$Module,
 
         [string]$Label,
 
-        [Parameter(Mandatory = $true)]
-        [string]$Type,
-
-        [ValidatePattern('^[0-9a-f]{6}$')]
+        [ValidatePattern('^[0-9a-fA-F]{6}$')]
         [string]$Color,
 
+        [ValidateRange(1, 1024)]
         [uint16]$Positions = 1,
 
         [string]$Description,
 
         [bool]$Mark_Connected,
 
-        [uint16[]]$Tags
+        [uint64[]]$Tags
     )
-
-    begin {
-
-    }
 
     process {
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'rear-ports'))
@@ -9709,11 +13621,9 @@ function New-NBDCIMRearPort {
 
         $URI = BuildNewURI -Segments $URIComponents.Segments
 
-        InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method POST
-    }
-
-    end {
-
+        if ($PSCmdlet.ShouldProcess("Device $Device", "Create rear port '$Name'")) {
+            InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method POST
+        }
     }
 }
 
@@ -10102,6 +14012,252 @@ function New-NBDCIMVirtualDeviceContext {
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create virtual device context')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NBEventRule.ps1
+
+<#
+.SYNOPSIS
+    Creates a new event rule in Netbox.
+
+.DESCRIPTION
+    Creates a new event rule in Netbox Extras module.
+
+.PARAMETER Name
+    Name of the event rule.
+
+.PARAMETER Description
+    Description of the event rule.
+
+.PARAMETER Enabled
+    Whether the event rule is enabled.
+
+.PARAMETER Object_Types
+    Object types this rule applies to.
+
+.PARAMETER Type_Create
+    Trigger on create events.
+
+.PARAMETER Type_Update
+    Trigger on update events.
+
+.PARAMETER Type_Delete
+    Trigger on delete events.
+
+.PARAMETER Type_Job_Start
+    Trigger on job start events.
+
+.PARAMETER Type_Job_End
+    Trigger on job end events.
+
+.PARAMETER Action_Type
+    Action type (webhook, script).
+
+.PARAMETER Action_Object_Type
+    Action object type.
+
+.PARAMETER Action_Object_Id
+    Action object ID.
+
+.PARAMETER Conditions
+    Conditions (JSON logic).
+
+.PARAMETER Custom_Fields
+    Custom fields hashtable.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    New-NBEventRule -Name "Notify on device create" -Object_Types @("dcim.device") -Type_Create $true -Action_Type "webhook" -Action_Object_Id 1
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function New-NBEventRule {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Name,
+
+        [string]$Description,
+
+        [bool]$Enabled,
+
+        [Parameter(Mandatory = $true)]
+        [string[]]$Object_Types,
+
+        [bool]$Type_Create,
+
+        [bool]$Type_Update,
+
+        [bool]$Type_Delete,
+
+        [bool]$Type_Job_Start,
+
+        [bool]$Type_Job_End,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('webhook', 'script')]
+        [string]$Action_Type,
+
+        [string]$Action_Object_Type,
+
+        [uint64]$Action_Object_Id,
+
+        $Conditions,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('extras', 'event-rules'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Name, 'Create Event Rule')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NBExportTemplate.ps1
+
+<#
+.SYNOPSIS
+    Creates a new export template in Netbox.
+
+.DESCRIPTION
+    Creates a new export template in Netbox Extras module.
+
+.PARAMETER Name
+    Name of the export template.
+
+.PARAMETER Object_Types
+    Object types this template applies to.
+
+.PARAMETER Description
+    Description of the template.
+
+.PARAMETER Template_Code
+    Jinja2 template code.
+
+.PARAMETER Mime_Type
+    MIME type for the export.
+
+.PARAMETER File_Extension
+    File extension for the export.
+
+.PARAMETER As_Attachment
+    Whether to serve as attachment.
+
+.PARAMETER Data_Source
+    Data source ID.
+
+.PARAMETER Data_File
+    Data file ID.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    New-NBExportTemplate -Name "CSV Export" -Object_Types @("dcim.device") -Template_Code "{% for d in queryset %}{{ d.name }}{% endfor %}"
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function New-NBExportTemplate {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Name,
+
+        [Parameter(Mandatory = $true)]
+        [string[]]$Object_Types,
+
+        [string]$Description,
+
+        [string]$Template_Code,
+
+        [string]$Mime_Type,
+
+        [string]$File_Extension,
+
+        [bool]$As_Attachment,
+
+        [uint64]$Data_Source,
+
+        [uint64]$Data_File,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('extras', 'export-templates'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Name, 'Create Export Template')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NBGroup.ps1
+
+<#
+.SYNOPSIS
+    Creates a new group in Netbox.
+
+.DESCRIPTION
+    Creates a new group in Netbox Users module.
+
+.PARAMETER Name
+    Name of the group.
+
+.PARAMETER Permissions
+    Array of permission IDs.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    New-NBGroup -Name "Network Admins"
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function New-NBGroup {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Name,
+
+        [uint64[]]$Permissions,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('users', 'groups'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Name, 'Create Group')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
         }
     }
 }
@@ -11380,6 +15536,302 @@ function New-NBIPAMVRF {
 
 #endregion
 
+#region File New-NBJournalEntry.ps1
+
+<#
+.SYNOPSIS
+    Creates a new journal entry in Netbox.
+
+.DESCRIPTION
+    Creates a new journal entry in Netbox Extras module.
+
+.PARAMETER Assigned_Object_Type
+    Object type (e.g., "dcim.device").
+
+.PARAMETER Assigned_Object_Id
+    Object ID.
+
+.PARAMETER Comments
+    Journal entry comments (required).
+
+.PARAMETER Kind
+    Entry kind (info, success, warning, danger).
+
+.PARAMETER Custom_Fields
+    Custom fields hashtable.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    New-NBJournalEntry -Assigned_Object_Type "dcim.device" -Assigned_Object_Id 1 -Comments "Device maintenance completed"
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function New-NBJournalEntry {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Assigned_Object_Type,
+
+        [Parameter(Mandatory = $true)]
+        [uint64]$Assigned_Object_Id,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Comments,
+
+        [ValidateSet('info', 'success', 'warning', 'danger')]
+        [string]$Kind,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('extras', 'journal-entries'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess("$Assigned_Object_Type $Assigned_Object_Id", 'Create Journal Entry')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NBPermission.ps1
+
+<#
+.SYNOPSIS
+    Creates a new permission in Netbox.
+
+.DESCRIPTION
+    Creates a new permission in Netbox Users module.
+
+.PARAMETER Name
+    Name of the permission.
+
+.PARAMETER Description
+    Description of the permission.
+
+.PARAMETER Enabled
+    Whether the permission is enabled.
+
+.PARAMETER Object_Types
+    Object types this permission applies to.
+
+.PARAMETER Actions
+    Allowed actions (view, add, change, delete).
+
+.PARAMETER Constraints
+    JSON constraints for filtering objects.
+
+.PARAMETER Groups
+    Array of group IDs.
+
+.PARAMETER Users
+    Array of user IDs.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    New-NBPermission -Name "View Devices" -Object_Types @("dcim.device") -Actions @("view")
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function New-NBPermission {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Name,
+
+        [string]$Description,
+
+        [bool]$Enabled,
+
+        [Parameter(Mandatory = $true)]
+        [string[]]$Object_Types,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('view', 'add', 'change', 'delete')]
+        [string[]]$Actions,
+
+        $Constraints,
+
+        [uint64[]]$Groups,
+
+        [uint64[]]$Users,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('users', 'permissions'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Name, 'Create Permission')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NBSavedFilter.ps1
+
+<#
+.SYNOPSIS
+    Creates a new saved filter in Netbox.
+
+.DESCRIPTION
+    Creates a new saved filter in Netbox Extras module.
+
+.PARAMETER Name
+    Name of the saved filter.
+
+.PARAMETER Slug
+    URL-friendly slug.
+
+.PARAMETER Object_Types
+    Object types this filter applies to.
+
+.PARAMETER Description
+    Description of the filter.
+
+.PARAMETER Weight
+    Display weight.
+
+.PARAMETER Enabled
+    Whether the filter is enabled.
+
+.PARAMETER Shared
+    Whether the filter is shared.
+
+.PARAMETER Parameters
+    Filter parameters (hashtable).
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    New-NBSavedFilter -Name "Active Devices" -Slug "active-devices" -Object_Types @("dcim.device") -Parameters @{status = "active"}
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function New-NBSavedFilter {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Name,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Slug,
+
+        [Parameter(Mandatory = $true)]
+        [string[]]$Object_Types,
+
+        [string]$Description,
+
+        [uint16]$Weight,
+
+        [bool]$Enabled,
+
+        [bool]$Shared,
+
+        [Parameter(Mandatory = $true)]
+        [hashtable]$Parameters,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('extras', 'saved-filters'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Name, 'Create Saved Filter')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NBTag.ps1
+
+<#
+.SYNOPSIS
+    Creates a new tag in Netbox.
+
+.DESCRIPTION
+    Creates a new tag in Netbox Extras module.
+
+.PARAMETER Name
+    Name of the tag.
+
+.PARAMETER Slug
+    URL-friendly slug.
+
+.PARAMETER Color
+    Color code (6 hex characters).
+
+.PARAMETER Description
+    Description of the tag.
+
+.PARAMETER Object_Types
+    Object types this tag can be applied to.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    New-NBTag -Name "Production" -Slug "production" -Color "00ff00"
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function New-NBTag {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Name,
+
+        [string]$Slug,
+
+        [ValidatePattern('^[0-9a-fA-F]{6}$')]
+        [string]$Color,
+
+        [string]$Description,
+
+        [string[]]$Object_Types,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('extras', 'tags'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Name, 'Create Tag')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
 #region File New-NBTenant.ps1
 
 
@@ -11453,6 +15905,731 @@ function New-NBTenant {
 
 
 
+
+#endregion
+
+#region File New-NBTenantGroup.ps1
+
+<#
+.SYNOPSIS
+    Creates a new tenant group in Netbox.
+
+.DESCRIPTION
+    Creates a new tenant group in the Netbox tenancy module.
+    Tenant groups are organizational containers for grouping related tenants.
+    Supports hierarchical nesting via the Parent parameter.
+
+.PARAMETER Name
+    The name of the tenant group.
+
+.PARAMETER Slug
+    URL-friendly unique identifier. If not provided, will be auto-generated from name.
+
+.PARAMETER Parent
+    The database ID of the parent tenant group for hierarchical organization.
+
+.PARAMETER Description
+    A description of the tenant group.
+
+.PARAMETER Tags
+    Array of tag IDs to assign to this tenant group.
+
+.PARAMETER Custom_Fields
+    Hashtable of custom field values.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBTenantGroup -Name "Enterprise Customers" -Slug "enterprise-customers"
+
+    Creates a new top-level tenant group.
+
+.EXAMPLE
+    New-NBTenantGroup -Name "EMEA" -Parent 1 -Description "European customers"
+
+    Creates a nested tenant group under parent ID 1.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/models/tenancy/tenantgroup/
+#>
+function New-NBTenantGroup {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [string]$Name,
+
+        [string]$Slug,
+
+        [uint64]$Parent,
+
+        [string]$Description,
+
+        [uint64[]]$Tags,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        # Auto-generate slug from name if not provided
+        if (-not $PSBoundParameters.ContainsKey('Slug')) {
+            $PSBoundParameters['Slug'] = ($Name -replace '\s+', '-').ToLower()
+        }
+
+        $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'tenant-groups'))
+
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Name, 'Create tenant group')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NBToken.ps1
+
+<#
+.SYNOPSIS
+    Creates a new API token in Netbox.
+
+.DESCRIPTION
+    Creates a new API token in Netbox Users module.
+
+.PARAMETER User
+    User ID for the token.
+
+.PARAMETER Description
+    Description of the token.
+
+.PARAMETER Expires
+    Expiration date (datetime).
+
+.PARAMETER Key
+    Custom token key (auto-generated if not provided).
+
+.PARAMETER Write_Enabled
+    Whether write operations are enabled.
+
+.PARAMETER Allowed_Ips
+    Array of allowed IP addresses/networks.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    New-NBToken -User 1 -Description "API automation"
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function New-NBToken {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true)]
+        [uint64]$User,
+
+        [string]$Description,
+
+        [datetime]$Expires,
+
+        [string]$Key,
+
+        [bool]$Write_Enabled,
+
+        [string[]]$Allowed_Ips,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('users', 'tokens'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess("User $User", 'Create Token')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NBUser.ps1
+
+<#
+.SYNOPSIS
+    Creates a new user in Netbox.
+
+.DESCRIPTION
+    Creates a new user in Netbox Users module.
+
+.PARAMETER Username
+    Username for the new user.
+
+.PARAMETER Password
+    Password for the new user.
+
+.PARAMETER First_Name
+    First name.
+
+.PARAMETER Last_Name
+    Last name.
+
+.PARAMETER Email
+    Email address.
+
+.PARAMETER Is_Staff
+    Whether user has staff access.
+
+.PARAMETER Is_Active
+    Whether user is active.
+
+.PARAMETER Is_Superuser
+    Whether user is a superuser.
+
+.PARAMETER Groups
+    Array of group IDs.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    New-NBUser -Username "newuser" -Password "SecureP@ss123"
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function New-NBUser {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Username,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Password,
+
+        [string]$First_Name,
+
+        [string]$Last_Name,
+
+        [string]$Email,
+
+        [bool]$Is_Staff,
+
+        [bool]$Is_Active,
+
+        [bool]$Is_Superuser,
+
+        [uint64[]]$Groups,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('users', 'users'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Username, 'Create User')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NBVirtualCircuit.ps1
+
+<#
+.SYNOPSIS
+    Creates a new virtual circuit in Netbox.
+
+.DESCRIPTION
+    Creates a new virtual circuit in Netbox.
+
+.PARAMETER Cid
+    Circuit ID string.
+
+.PARAMETER Provider_Network
+    Provider network ID.
+
+.PARAMETER Provider_Account
+    Provider account ID.
+
+.PARAMETER Type
+    Virtual circuit type ID.
+
+.PARAMETER Status
+    Status (planned, provisioning, active, offline, deprovisioning, decommissioned).
+
+.PARAMETER Tenant
+    Tenant ID.
+
+.PARAMETER Description
+    Description.
+
+.PARAMETER Comments
+    Comments.
+
+.PARAMETER Custom_Fields
+    Custom fields hashtable.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    New-NBVirtualCircuit -Cid "VC-001" -Provider_Network 1 -Type 1
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function New-NBVirtualCircuit {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Cid,
+
+        [Parameter(Mandatory = $true)]
+        [uint64]$Provider_Network,
+
+        [uint64]$Provider_Account,
+
+        [Parameter(Mandatory = $true)]
+        [uint64]$Type,
+
+        [ValidateSet('planned', 'provisioning', 'active', 'offline', 'deprovisioning', 'decommissioned')]
+        [string]$Status,
+
+        [uint64]$Tenant,
+
+        [string]$Description,
+
+        [string]$Comments,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('circuits', 'virtual-circuits'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Cid, 'Create Virtual Circuit')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NBVirtualCircuitTermination.ps1
+
+<#
+.SYNOPSIS
+    Creates a new virtual circuit termination in Netbox.
+
+.DESCRIPTION
+    Creates a new virtual circuit termination in Netbox.
+
+.PARAMETER Virtual_Circuit
+    Virtual circuit ID.
+
+.PARAMETER Interface
+    Interface ID.
+
+.PARAMETER Role
+    Role (peer, hub, spoke).
+
+.PARAMETER Description
+    Description.
+
+.PARAMETER Custom_Fields
+    Custom fields hashtable.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    New-NBVirtualCircuitTermination -Virtual_Circuit 1 -Interface 1 -Role "peer"
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function New-NBVirtualCircuitTermination {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true)]
+        [uint64]$Virtual_Circuit,
+
+        [Parameter(Mandatory = $true)]
+        [uint64]$Interface,
+
+        [ValidateSet('peer', 'hub', 'spoke')]
+        [string]$Role,
+
+        [string]$Description,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('circuits', 'virtual-circuit-terminations'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess("VC $Virtual_Circuit Interface $Interface", 'Create Virtual Circuit Termination')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NBVirtualCircuitType.ps1
+
+<#
+.SYNOPSIS
+    Creates a new virtual circuit type in Netbox.
+
+.DESCRIPTION
+    Creates a new virtual circuit type in Netbox.
+
+.PARAMETER Name
+    Name of the virtual circuit type.
+
+.PARAMETER Slug
+    URL-friendly slug.
+
+.PARAMETER Color
+    Color code (6 hex characters).
+
+.PARAMETER Description
+    Description.
+
+.PARAMETER Custom_Fields
+    Custom fields hashtable.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    New-NBVirtualCircuitType -Name "EVPN" -Slug "evpn"
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function New-NBVirtualCircuitType {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Name,
+
+        [string]$Slug,
+
+        [ValidatePattern('^[0-9a-fA-F]{6}$')]
+        [string]$Color,
+
+        [string]$Description,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('circuits', 'virtual-circuit-types'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Name, 'Create Virtual Circuit Type')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NBVirtualizationCluster.ps1
+
+<#
+.SYNOPSIS
+    Creates a new virtualization cluster in Netbox.
+
+.DESCRIPTION
+    Creates a new virtualization cluster in the Netbox virtualization module.
+    Clusters represent a pool of resources (hypervisors) that host virtual machines.
+
+.PARAMETER Name
+    The name of the cluster.
+
+.PARAMETER Type
+    The database ID of the cluster type (e.g., VMware vSphere, KVM, Hyper-V).
+
+.PARAMETER Group
+    The database ID of the cluster group this cluster belongs to.
+
+.PARAMETER Site
+    The database ID of the site where this cluster is located.
+
+.PARAMETER Status
+    The operational status of the cluster: planned, staging, active, decommissioning, offline.
+
+.PARAMETER Tenant
+    The database ID of the tenant that owns this cluster.
+
+.PARAMETER Description
+    A description of the cluster.
+
+.PARAMETER Comments
+    Additional comments about the cluster.
+
+.PARAMETER Tags
+    Array of tag IDs to assign to this cluster.
+
+.PARAMETER Custom_Fields
+    Hashtable of custom field values.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBVirtualizationCluster -Name "Production vSphere" -Type 1
+
+    Creates a new cluster with the specified name and type.
+
+.EXAMPLE
+    $type = Get-NBVirtualizationClusterType -Name "VMware vSphere"
+    New-NBVirtualizationCluster -Name "DC1-Cluster" -Type $type.Id -Site 1 -Status "active"
+
+    Creates a new active cluster associated with a site.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/models/virtualization/cluster/
+#>
+function New-NBVirtualizationCluster {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [string]$Name,
+
+        [Parameter(Mandatory = $true)]
+        [uint64]$Type,
+
+        [uint64]$Group,
+
+        [uint64]$Site,
+
+        [ValidateSet('planned', 'staging', 'active', 'decommissioning', 'offline', IgnoreCase = $true)]
+        [string]$Status,
+
+        [uint64]$Tenant,
+
+        [string]$Description,
+
+        [string]$Comments,
+
+        [uint64[]]$Tags,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'clusters'))
+
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Name, 'Create virtualization cluster')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NBVirtualizationClusterGroup.ps1
+
+<#
+.SYNOPSIS
+    Creates a new virtualization cluster group in Netbox.
+
+.DESCRIPTION
+    Creates a new cluster group in the Netbox virtualization module.
+    Cluster groups are organizational containers for grouping related clusters.
+
+.PARAMETER Name
+    The name of the cluster group.
+
+.PARAMETER Slug
+    URL-friendly unique identifier. If not provided, will be auto-generated from name.
+
+.PARAMETER Description
+    A description of the cluster group.
+
+.PARAMETER Tags
+    Array of tag IDs to assign to this cluster group.
+
+.PARAMETER Custom_Fields
+    Hashtable of custom field values.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBVirtualizationClusterGroup -Name "Production Clusters" -Slug "production-clusters"
+
+    Creates a new cluster group with the specified name and slug.
+
+.EXAMPLE
+    New-NBVirtualizationClusterGroup -Name "DR Sites" -Description "Disaster recovery clusters"
+
+    Creates a new cluster group with auto-generated slug.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/models/virtualization/clustergroup/
+#>
+function New-NBVirtualizationClusterGroup {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [string]$Name,
+
+        [string]$Slug,
+
+        [string]$Description,
+
+        [uint64[]]$Tags,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        # Auto-generate slug from name if not provided
+        if (-not $PSBoundParameters.ContainsKey('Slug')) {
+            $PSBoundParameters['Slug'] = ($Name -replace '\s+', '-').ToLower()
+        }
+
+        $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'cluster-groups'))
+
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Name, 'Create cluster group')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File New-NBVirtualizationClusterType.ps1
+
+<#
+.SYNOPSIS
+    Creates a new virtualization cluster type in Netbox.
+
+.DESCRIPTION
+    Creates a new cluster type in the Netbox virtualization module.
+    Cluster types define the virtualization technology (e.g., VMware vSphere, KVM, Hyper-V).
+
+.PARAMETER Name
+    The name of the cluster type.
+
+.PARAMETER Slug
+    URL-friendly unique identifier. If not provided, will be auto-generated from name.
+
+.PARAMETER Description
+    A description of the cluster type.
+
+.PARAMETER Tags
+    Array of tag IDs to assign to this cluster type.
+
+.PARAMETER Custom_Fields
+    Hashtable of custom field values.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBVirtualizationClusterType -Name "VMware vSphere" -Slug "vmware-vsphere"
+
+    Creates a new cluster type for VMware vSphere.
+
+.EXAMPLE
+    New-NBVirtualizationClusterType -Name "Proxmox VE" -Description "Open source virtualization platform"
+
+    Creates a new cluster type with auto-generated slug.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/models/virtualization/clustertype/
+#>
+function New-NBVirtualizationClusterType {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [string]$Name,
+
+        [string]$Slug,
+
+        [string]$Description,
+
+        [uint64[]]$Tags,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        # Auto-generate slug from name if not provided
+        if (-not $PSBoundParameters.ContainsKey('Slug')) {
+            $PSBoundParameters['Slug'] = ($Name -replace '\s+', '-').ToLower()
+        }
+
+        $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'cluster-types'))
+
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Name, 'Create cluster type')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
 
 #endregion
 
@@ -11545,55 +16722,135 @@ function New-NBVirtualMachine {
 
 <#
 .SYNOPSIS
-    Creates a new irtualMachineInterface in Netbox V module.
+    Creates a new network interface on a virtual machine in Netbox.
 
 .DESCRIPTION
-    Creates a new irtualMachineInterface in Netbox V module.
-    Supports pipeline input for Id parameter where applicable.
+    Creates a new network interface on a specified virtual machine in the Netbox
+    Virtualization module. VM interfaces are used to assign IP addresses and
+    configure network connectivity for virtual machines.
+
+.PARAMETER Name
+    The name of the interface (e.g., 'eth0', 'ens192', 'Ethernet0').
+
+.PARAMETER Virtual_Machine
+    The database ID of the virtual machine to add the interface to.
+
+.PARAMETER Enabled
+    Whether the interface is enabled. Defaults to $true if not specified.
+
+.PARAMETER MAC_Address
+    The MAC address of the interface in format XX:XX:XX:XX:XX:XX.
+    Accepts both uppercase and lowercase hex characters.
+
+.PARAMETER MTU
+    Maximum Transmission Unit size. Common values:
+    - 1500 for standard Ethernet
+    - 9000 for jumbo frames
+    Valid range: 1-65535
+
+.PARAMETER Description
+    A description of the interface.
+
+.PARAMETER Mode
+    VLAN mode for the interface:
+    - 'access' - Untagged access port
+    - 'tagged' - Trunk port with tagged VLANs
+    - 'tagged-all' - Trunk port allowing all VLANs
+
+.PARAMETER Untagged_VLAN
+    The database ID of the untagged/native VLAN.
+
+.PARAMETER Tagged_VLANs
+    Array of database IDs for tagged VLANs (for trunk ports).
+
+.PARAMETER VRF
+    The database ID of the VRF for this interface.
+
+.PARAMETER Tags
+    Array of tag IDs to assign to this interface.
+
+.PARAMETER Custom_Fields
+    Hashtable of custom field values.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBVirtualMachineInterface
+    New-NBVirtualMachineInterface -Name "eth0" -Virtual_Machine 42
 
-    Returns all irtualMachineInterface objects.
+    Creates a new enabled interface named 'eth0' on VM ID 42.
+
+.EXAMPLE
+    New-NBVirtualMachineInterface -Name "ens192" -Virtual_Machine 42 -MAC_Address "00:50:56:AB:CD:EF"
+
+    Creates a new interface with a specific MAC address.
+
+.EXAMPLE
+    $vm = Get-NBVirtualMachine -Name "webserver01"
+    New-NBVirtualMachineInterface -Name "eth0" -Virtual_Machine $vm.Id -MTU 9000
+
+    Creates a new interface with jumbo frame support on a VM found by name.
+
+.EXAMPLE
+    New-NBVirtualMachineInterface -Name "eth0" -Virtual_Machine 42 -Mode "tagged" -Tagged_VLANs 10,20,30
+
+    Creates a trunk interface with multiple tagged VLANs.
 
 .LINK
-    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+    https://netbox.readthedocs.io/en/stable/models/virtualization/vminterface/
 #>
-
 function New-NBVirtualMachineInterface {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [Parameter(Mandatory = $true)]
         [uint64]$Virtual_Machine,
 
-        [boolean]$Enabled = $true,
+        [bool]$Enabled = $true,
 
+        [ValidatePattern('^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$')]
         [string]$MAC_Address,
 
+        [ValidateRange(1, 65535)]
         [uint16]$MTU,
 
         [string]$Description,
 
+        [ValidateSet('access', 'tagged', 'tagged-all', IgnoreCase = $true)]
+        [string]$Mode,
+
+        [uint64]$Untagged_VLAN,
+
+        [uint64[]]$Tagged_VLANs,
+
+        [uint64]$VRF,
+
+        [uint64[]]$Tags,
+
+        [hashtable]$Custom_Fields,
+
         [switch]$Raw
     )
 
-    $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'interfaces'))
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'interfaces'))
 
-    $PSBoundParameters.Enabled = $Enabled
+        # Ensure Enabled is always included in the body (defaults to true)
+        $PSBoundParameters['Enabled'] = $Enabled
 
-    $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
 
-    $uri = BuildNewURI -Segments $URIComponents.Segments
+        $URI = BuildNewURI -Segments $URIComponents.Segments
 
-    InvokeNetboxRequest -URI $uri -Method POST -Body $URIComponents.Parameters
+        if ($PSCmdlet.ShouldProcess("VM $Virtual_Machine", "Create interface '$Name'")) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
 }
 
 #endregion
@@ -11950,6 +17207,102 @@ function New-NBVPNTunnelTermination {
 
 #endregion
 
+#region File New-NBWebhook.ps1
+
+<#
+.SYNOPSIS
+    Creates a new webhook in Netbox.
+
+.DESCRIPTION
+    Creates a new webhook in Netbox Extras module.
+
+.PARAMETER Name
+    Name of the webhook.
+
+.PARAMETER Payload_Url
+    URL to send webhook payload to.
+
+.PARAMETER Description
+    Description of the webhook.
+
+.PARAMETER Http_Method
+    HTTP method (GET, POST, PUT, PATCH, DELETE).
+
+.PARAMETER Http_Content_Type
+    HTTP content type.
+
+.PARAMETER Additional_Headers
+    Additional HTTP headers.
+
+.PARAMETER Body_Template
+    Body template (Jinja2).
+
+.PARAMETER Secret
+    Secret for HMAC signature.
+
+.PARAMETER Ssl_Verification
+    Whether to verify SSL certificates.
+
+.PARAMETER Ca_File_Path
+    Path to CA certificate file.
+
+.PARAMETER Custom_Fields
+    Custom fields hashtable.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    New-NBWebhook -Name "Slack Notification" -Payload_Url "https://hooks.slack.com/services/xxx"
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function New-NBWebhook {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Name,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Payload_Url,
+
+        [string]$Description,
+
+        [ValidateSet('GET', 'POST', 'PUT', 'PATCH', 'DELETE')]
+        [string]$Http_Method,
+
+        [string]$Http_Content_Type,
+
+        [string]$Additional_Headers,
+
+        [string]$Body_Template,
+
+        [string]$Secret,
+
+        [bool]$Ssl_Verification,
+
+        [string]$Ca_File_Path,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('extras', 'webhooks'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Name, 'Create Webhook')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
 #region File New-NBWirelessLAN.ps1
 
 <#
@@ -12047,6 +17400,818 @@ function New-NBWirelessLink {
     process {
         $s = [System.Collections.ArrayList]::new(@('wireless','wireless-links')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess("$Interface_A to $Interface_B", 'Create wireless link')) { InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments) -Method POST -Body $u.Parameters -Raw:$Raw }
+    }
+}
+
+#endregion
+
+#region File Remove-NBBookmark.ps1
+
+<#
+.SYNOPSIS
+    Removes a bookmark from Netbox.
+
+.DESCRIPTION
+    Deletes a bookmark from Netbox by ID.
+
+.PARAMETER Id
+    The ID of the bookmark to delete.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Remove-NBBookmark -Id 1
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Remove-NBBookmark {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('extras', 'bookmarks', $Id))
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete Bookmark')) {
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NBCircuit.ps1
+
+<#
+.SYNOPSIS
+    Removes a circuit from Netbox.
+
+.DESCRIPTION
+    Deletes a circuit from Netbox by ID.
+
+.PARAMETER Id
+    The ID of the circuit to delete.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Remove-NBCircuit -Id 1
+
+.EXAMPLE
+    Get-NBCircuit -Id 1 | Remove-NBCircuit
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Remove-NBCircuit {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuits', $Id))
+
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete Circuit')) {
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NBCircuitGroup.ps1
+
+<#
+.SYNOPSIS
+    Removes a circuit group from Netbox.
+
+.DESCRIPTION
+    Deletes a circuit group from Netbox by ID.
+
+.PARAMETER Id
+    The ID of the circuit group to delete.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Remove-NBCircuitGroup -Id 1
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Remove-NBCircuitGroup {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuit-groups', $Id))
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete Circuit Group')) {
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NBCircuitGroupAssignment.ps1
+
+<#
+.SYNOPSIS
+    Removes a circuit group assignment from Netbox.
+
+.DESCRIPTION
+    Deletes a circuit group assignment from Netbox by ID.
+
+.PARAMETER Id
+    The ID of the assignment to delete.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Remove-NBCircuitGroupAssignment -Id 1
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Remove-NBCircuitGroupAssignment {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuit-group-assignments', $Id))
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete Circuit Group Assignment')) {
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NBCircuitProvider.ps1
+
+<#
+.SYNOPSIS
+    Removes a circuit provider from Netbox.
+
+.DESCRIPTION
+    Deletes a circuit provider from Netbox by ID.
+
+.PARAMETER Id
+    The ID of the provider to delete.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Remove-NBCircuitProvider -Id 1
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Remove-NBCircuitProvider {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('circuits', 'providers', $Id))
+
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete Circuit Provider')) {
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NBCircuitProviderAccount.ps1
+
+<#
+.SYNOPSIS
+    Removes a provider account from Netbox.
+
+.DESCRIPTION
+    Deletes a provider account from Netbox by ID.
+
+.PARAMETER Id
+    The ID of the provider account to delete.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Remove-NBCircuitProviderAccount -Id 1
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Remove-NBCircuitProviderAccount {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('circuits', 'provider-accounts', $Id))
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete Provider Account')) {
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NBCircuitProviderNetwork.ps1
+
+<#
+.SYNOPSIS
+    Removes a provider network from Netbox.
+
+.DESCRIPTION
+    Deletes a provider network from Netbox by ID.
+
+.PARAMETER Id
+    The ID of the provider network to delete.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Remove-NBCircuitProviderNetwork -Id 1
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Remove-NBCircuitProviderNetwork {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('circuits', 'provider-networks', $Id))
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete Provider Network')) {
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NBCircuitTermination.ps1
+
+<#
+.SYNOPSIS
+    Removes a circuit termination from Netbox.
+
+.DESCRIPTION
+    Deletes a circuit termination from Netbox by ID.
+
+.PARAMETER Id
+    The ID of the circuit termination to delete.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Remove-NBCircuitTermination -Id 1
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Remove-NBCircuitTermination {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuit-terminations', $Id))
+
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete Circuit Termination')) {
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NBCircuitType.ps1
+
+<#
+.SYNOPSIS
+    Removes a circuit type from Netbox.
+
+.DESCRIPTION
+    Deletes a circuit type from Netbox by ID.
+
+.PARAMETER Id
+    The ID of the circuit type to delete.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Remove-NBCircuitType -Id 1
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Remove-NBCircuitType {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuit-types', $Id))
+
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete Circuit Type')) {
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NBConfigContext.ps1
+
+<#
+.SYNOPSIS
+    Removes a config context from Netbox.
+
+.DESCRIPTION
+    Deletes a config context from Netbox by ID.
+
+.PARAMETER Id
+    The ID of the config context to delete.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Remove-NBConfigContext -Id 1
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Remove-NBConfigContext {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('extras', 'config-contexts', $Id))
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete Config Context')) {
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NBContact.ps1
+
+<#
+.SYNOPSIS
+    Removes a contact from Netbox.
+
+.DESCRIPTION
+    Removes a contact from the Netbox tenancy module.
+    Supports pipeline input from Get-NBContact.
+
+.PARAMETER Id
+    The database ID(s) of the contact(s) to remove. Accepts pipeline input.
+
+.PARAMETER Force
+    Skip confirmation prompts.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBContact -Id 1
+
+    Removes contact ID 1 (with confirmation prompt).
+
+.EXAMPLE
+    Remove-NBContact -Id 1, 2, 3 -Force
+
+    Removes multiple contacts without confirmation.
+
+.EXAMPLE
+    Get-NBContact -Group_Id 5 | Remove-NBContact
+
+    Removes all contacts in a specific group via pipeline.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/models/tenancy/contact/
+#>
+function Remove-NBContact {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [switch]$Force,
+
+        [switch]$Raw
+    )
+
+    process {
+        foreach ($ContactId in $Id) {
+            $CurrentContact = Get-NBContact -Id $ContactId -ErrorAction Stop
+
+            $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'contacts', $CurrentContact.Id))
+
+            $URI = BuildNewURI -Segments $Segments
+
+            if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentContact.Name)", 'Delete contact')) {
+                InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NBContactAssignment.ps1
+
+<#
+.SYNOPSIS
+    Removes a contact assignment from Netbox.
+
+.DESCRIPTION
+    Removes a contact assignment from the Netbox tenancy module.
+    Contact assignments link contacts to objects (sites, devices, circuits, etc.).
+    Supports pipeline input from Get-NBContactAssignment.
+
+.PARAMETER Id
+    The database ID(s) of the contact assignment(s) to remove. Accepts pipeline input.
+
+.PARAMETER Force
+    Skip confirmation prompts.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBContactAssignment -Id 1
+
+    Removes contact assignment ID 1 (with confirmation prompt).
+
+.EXAMPLE
+    Remove-NBContactAssignment -Id 1, 2, 3 -Force
+
+    Removes multiple contact assignments without confirmation.
+
+.EXAMPLE
+    Get-NBContactAssignment -Contact_Id 5 | Remove-NBContactAssignment
+
+    Removes all assignments for a specific contact via pipeline.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/models/tenancy/contactassignment/
+#>
+function Remove-NBContactAssignment {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [switch]$Force,
+
+        [switch]$Raw
+    )
+
+    process {
+        foreach ($AssignmentId in $Id) {
+            $CurrentAssignment = Get-NBContactAssignment -Id $AssignmentId -ErrorAction Stop
+
+            $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'contact-assignments', $CurrentAssignment.Id))
+
+            $URI = BuildNewURI -Segments $Segments
+
+            # Build descriptive target for confirmation
+            $Target = "Assignment ID $($CurrentAssignment.Id)"
+            if ($CurrentAssignment.Contact -and $CurrentAssignment.Object) {
+                $Target = "Contact '$($CurrentAssignment.Contact.Name)' -> '$($CurrentAssignment.Object.Name)'"
+            }
+
+            if ($Force -or $PSCmdlet.ShouldProcess($Target, 'Delete contact assignment')) {
+                InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NBContactRole.ps1
+
+<#
+.SYNOPSIS
+    Removes a contact role from Netbox.
+
+.DESCRIPTION
+    Removes a contact role from the Netbox tenancy module.
+    Supports pipeline input from Get-NBContactRole.
+
+.PARAMETER Id
+    The database ID(s) of the contact role(s) to remove. Accepts pipeline input.
+
+.PARAMETER Force
+    Skip confirmation prompts.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBContactRole -Id 1
+
+    Removes contact role ID 1 (with confirmation prompt).
+
+.EXAMPLE
+    Get-NBContactRole | Where-Object { $_.name -like "Test*" } | Remove-NBContactRole -Force
+
+    Removes all contact roles matching a pattern without confirmation.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/models/tenancy/contactrole/
+#>
+function Remove-NBContactRole {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [switch]$Force,
+
+        [switch]$Raw
+    )
+
+    process {
+        foreach ($RoleId in $Id) {
+            $CurrentRole = Get-NBContactRole -Id $RoleId -ErrorAction Stop
+
+            $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'contact-roles', $CurrentRole.Id))
+
+            $URI = BuildNewURI -Segments $Segments
+
+            if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentRole.Name)", 'Delete contact role')) {
+                InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NBCustomField.ps1
+
+<#
+.SYNOPSIS
+    Removes a custom field from Netbox.
+
+.DESCRIPTION
+    Deletes a custom field from Netbox by ID.
+
+.PARAMETER Id
+    The ID of the custom field to delete.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Remove-NBCustomField -Id 1
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Remove-NBCustomField {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('extras', 'custom-fields', $Id))
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete Custom Field')) {
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NBCustomFieldChoiceSet.ps1
+
+<#
+.SYNOPSIS
+    Removes a custom field choice set from Netbox.
+
+.DESCRIPTION
+    Deletes a custom field choice set from Netbox by ID.
+
+.PARAMETER Id
+    The ID of the choice set to delete.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Remove-NBCustomFieldChoiceSet -Id 1
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Remove-NBCustomFieldChoiceSet {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('extras', 'custom-field-choice-sets', $Id))
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete Custom Field Choice Set')) {
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NBCustomLink.ps1
+
+<#
+.SYNOPSIS
+    Removes a custom link from Netbox.
+
+.DESCRIPTION
+    Deletes a custom link from Netbox by ID.
+
+.PARAMETER Id
+    The ID of the custom link to delete.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Remove-NBCustomLink -Id 1
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Remove-NBCustomLink {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('extras', 'custom-links', $Id))
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete Custom Link')) {
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NBDataSource.ps1
+
+<#
+.SYNOPSIS
+    Removes a data source from Netbox.
+
+.DESCRIPTION
+    Deletes a data source from Netbox by ID.
+
+.PARAMETER Id
+    The ID of the data source to delete.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Remove-NBDataSource -Id 1
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Remove-NBDataSource {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('core', 'data-sources', $Id))
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete Data Source')) {
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
     }
 }
 
@@ -13923,6 +20088,178 @@ function Remove-NBDCIMVirtualDeviceContext {
 
 #endregion
 
+#region File Remove-NBEventRule.ps1
+
+<#
+.SYNOPSIS
+    Removes an event rule from Netbox.
+
+.DESCRIPTION
+    Deletes an event rule from Netbox by ID.
+
+.PARAMETER Id
+    The ID of the event rule to delete.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Remove-NBEventRule -Id 1
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Remove-NBEventRule {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('extras', 'event-rules', $Id))
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete Event Rule')) {
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NBExportTemplate.ps1
+
+<#
+.SYNOPSIS
+    Removes an export template from Netbox.
+
+.DESCRIPTION
+    Deletes an export template from Netbox by ID.
+
+.PARAMETER Id
+    The ID of the export template to delete.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Remove-NBExportTemplate -Id 1
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Remove-NBExportTemplate {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('extras', 'export-templates', $Id))
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete Export Template')) {
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NBGroup.ps1
+
+<#
+.SYNOPSIS
+    Removes a group from Netbox.
+
+.DESCRIPTION
+    Deletes a group from Netbox by ID.
+
+.PARAMETER Id
+    The ID of the group to delete.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Remove-NBGroup -Id 1
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Remove-NBGroup {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('users', 'groups', $Id))
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete Group')) {
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NBImageAttachment.ps1
+
+<#
+.SYNOPSIS
+    Removes an image attachment from Netbox.
+
+.DESCRIPTION
+    Deletes an image attachment from Netbox by ID.
+
+.PARAMETER Id
+    The ID of the image attachment to delete.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Remove-NBImageAttachment -Id 1
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Remove-NBImageAttachment {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('extras', 'image-attachments', $Id))
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete Image Attachment')) {
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
 #region File Remove-NBIPAMAddress.ps1
 
 
@@ -14685,6 +21022,714 @@ function Remove-NBIPAMVRF {
 
 #endregion
 
+#region File Remove-NBJournalEntry.ps1
+
+<#
+.SYNOPSIS
+    Removes a journal entry from Netbox.
+
+.DESCRIPTION
+    Deletes a journal entry from Netbox by ID.
+
+.PARAMETER Id
+    The ID of the journal entry to delete.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Remove-NBJournalEntry -Id 1
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Remove-NBJournalEntry {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('extras', 'journal-entries', $Id))
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete Journal Entry')) {
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NBPermission.ps1
+
+<#
+.SYNOPSIS
+    Removes a permission from Netbox.
+
+.DESCRIPTION
+    Deletes a permission from Netbox by ID.
+
+.PARAMETER Id
+    The ID of the permission to delete.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Remove-NBPermission -Id 1
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Remove-NBPermission {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('users', 'permissions', $Id))
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete Permission')) {
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NBSavedFilter.ps1
+
+<#
+.SYNOPSIS
+    Removes a saved filter from Netbox.
+
+.DESCRIPTION
+    Deletes a saved filter from Netbox by ID.
+
+.PARAMETER Id
+    The ID of the saved filter to delete.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Remove-NBSavedFilter -Id 1
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Remove-NBSavedFilter {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('extras', 'saved-filters', $Id))
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete Saved Filter')) {
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NBTag.ps1
+
+<#
+.SYNOPSIS
+    Removes a tag from Netbox.
+
+.DESCRIPTION
+    Deletes a tag from Netbox by ID.
+
+.PARAMETER Id
+    The ID of the tag to delete.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Remove-NBTag -Id 1
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Remove-NBTag {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('extras', 'tags', $Id))
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete Tag')) {
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NBTenant.ps1
+
+<#
+.SYNOPSIS
+    Removes a tenant from Netbox.
+
+.DESCRIPTION
+    Removes a tenant from the Netbox tenancy module.
+    Supports pipeline input from Get-NBTenant.
+
+.PARAMETER Id
+    The database ID(s) of the tenant(s) to remove. Accepts pipeline input.
+
+.PARAMETER Force
+    Skip confirmation prompts.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBTenant -Id 1
+
+    Removes tenant ID 1 (with confirmation prompt).
+
+.EXAMPLE
+    Remove-NBTenant -Id 1, 2, 3 -Force
+
+    Removes multiple tenants without confirmation.
+
+.EXAMPLE
+    Get-NBTenant -Group_Id 5 | Remove-NBTenant
+
+    Removes all tenants in a specific group via pipeline.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/models/tenancy/tenant/
+#>
+function Remove-NBTenant {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [switch]$Force,
+
+        [switch]$Raw
+    )
+
+    process {
+        foreach ($TenantId in $Id) {
+            $CurrentTenant = Get-NBTenant -Id $TenantId -ErrorAction Stop
+
+            $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'tenants', $CurrentTenant.Id))
+
+            $URI = BuildNewURI -Segments $Segments
+
+            if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentTenant.Name)", 'Delete tenant')) {
+                InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NBTenantGroup.ps1
+
+<#
+.SYNOPSIS
+    Removes a tenant group from Netbox.
+
+.DESCRIPTION
+    Removes a tenant group from the Netbox tenancy module.
+    Supports pipeline input from Get-NBTenantGroup.
+
+.PARAMETER Id
+    The database ID(s) of the tenant group(s) to remove. Accepts pipeline input.
+
+.PARAMETER Force
+    Skip confirmation prompts.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBTenantGroup -Id 1
+
+    Removes tenant group ID 1 (with confirmation prompt).
+
+.EXAMPLE
+    Get-NBTenantGroup | Where-Object { $_.tenant_count -eq 0 } | Remove-NBTenantGroup -Force
+
+    Removes all empty tenant groups without confirmation.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/models/tenancy/tenantgroup/
+#>
+function Remove-NBTenantGroup {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [switch]$Force,
+
+        [switch]$Raw
+    )
+
+    process {
+        foreach ($GroupId in $Id) {
+            $CurrentGroup = Get-NBTenantGroup -Id $GroupId -ErrorAction Stop
+
+            $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'tenant-groups', $CurrentGroup.Id))
+
+            $URI = BuildNewURI -Segments $Segments
+
+            if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentGroup.Name)", 'Delete tenant group')) {
+                InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NBToken.ps1
+
+<#
+.SYNOPSIS
+    Removes an API token from Netbox.
+
+.DESCRIPTION
+    Deletes an API token from Netbox by ID.
+
+.PARAMETER Id
+    The ID of the token to delete.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Remove-NBToken -Id 1
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Remove-NBToken {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('users', 'tokens', $Id))
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete Token')) {
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NBUser.ps1
+
+<#
+.SYNOPSIS
+    Removes a user from Netbox.
+
+.DESCRIPTION
+    Deletes a user from Netbox by ID.
+
+.PARAMETER Id
+    The ID of the user to delete.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Remove-NBUser -Id 1
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Remove-NBUser {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('users', 'users', $Id))
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete User')) {
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NBVirtualCircuit.ps1
+
+<#
+.SYNOPSIS
+    Removes a virtual circuit from Netbox.
+
+.DESCRIPTION
+    Deletes a virtual circuit from Netbox by ID.
+
+.PARAMETER Id
+    The ID of the virtual circuit to delete.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Remove-NBVirtualCircuit -Id 1
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Remove-NBVirtualCircuit {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('circuits', 'virtual-circuits', $Id))
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete Virtual Circuit')) {
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NBVirtualCircuitTermination.ps1
+
+<#
+.SYNOPSIS
+    Removes a virtual circuit termination from Netbox.
+
+.DESCRIPTION
+    Deletes a virtual circuit termination from Netbox by ID.
+
+.PARAMETER Id
+    The ID of the termination to delete.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Remove-NBVirtualCircuitTermination -Id 1
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Remove-NBVirtualCircuitTermination {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('circuits', 'virtual-circuit-terminations', $Id))
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete Virtual Circuit Termination')) {
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NBVirtualCircuitType.ps1
+
+<#
+.SYNOPSIS
+    Removes a virtual circuit type from Netbox.
+
+.DESCRIPTION
+    Deletes a virtual circuit type from Netbox by ID.
+
+.PARAMETER Id
+    The ID of the virtual circuit type to delete.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Remove-NBVirtualCircuitType -Id 1
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Remove-NBVirtualCircuitType {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('circuits', 'virtual-circuit-types', $Id))
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete Virtual Circuit Type')) {
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NBVirtualizationCluster.ps1
+
+<#
+.SYNOPSIS
+    Removes a virtualization cluster from Netbox.
+
+.DESCRIPTION
+    Removes a virtualization cluster from the Netbox virtualization module.
+    Supports pipeline input from Get-NBVirtualizationCluster.
+    Warning: This will also remove all VMs associated with the cluster.
+
+.PARAMETER Id
+    The database ID(s) of the cluster(s) to remove. Accepts pipeline input.
+
+.PARAMETER Force
+    Skip confirmation prompts.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBVirtualizationCluster -Id 1
+
+    Removes cluster ID 1 (with confirmation prompt).
+
+.EXAMPLE
+    Remove-NBVirtualizationCluster -Id 1, 2, 3 -Force
+
+    Removes multiple clusters without confirmation.
+
+.EXAMPLE
+    Get-NBVirtualizationCluster -Name "test-*" | Remove-NBVirtualizationCluster
+
+    Removes all clusters matching the name pattern via pipeline.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/models/virtualization/cluster/
+#>
+function Remove-NBVirtualizationCluster {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [switch]$Force,
+
+        [switch]$Raw
+    )
+
+    process {
+        foreach ($ClusterId in $Id) {
+            $CurrentCluster = Get-NBVirtualizationCluster -Id $ClusterId -ErrorAction Stop
+
+            $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'clusters', $CurrentCluster.Id))
+
+            $URI = BuildNewURI -Segments $Segments
+
+            if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentCluster.Name)", 'Delete cluster')) {
+                InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NBVirtualizationClusterGroup.ps1
+
+<#
+.SYNOPSIS
+    Removes a virtualization cluster group from Netbox.
+
+.DESCRIPTION
+    Removes a cluster group from the Netbox virtualization module.
+    Supports pipeline input from Get-NBVirtualizationClusterGroup.
+
+.PARAMETER Id
+    The database ID(s) of the cluster group(s) to remove. Accepts pipeline input.
+
+.PARAMETER Force
+    Skip confirmation prompts.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBVirtualizationClusterGroup -Id 1
+
+    Removes cluster group ID 1 (with confirmation prompt).
+
+.EXAMPLE
+    Get-NBVirtualizationClusterGroup | Where-Object { $_.cluster_count -eq 0 } | Remove-NBVirtualizationClusterGroup -Force
+
+    Removes all empty cluster groups without confirmation.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/models/virtualization/clustergroup/
+#>
+function Remove-NBVirtualizationClusterGroup {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [switch]$Force,
+
+        [switch]$Raw
+    )
+
+    process {
+        foreach ($GroupId in $Id) {
+            $CurrentGroup = Get-NBVirtualizationClusterGroup -Id $GroupId -ErrorAction Stop
+
+            $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'cluster-groups', $CurrentGroup.Id))
+
+            $URI = BuildNewURI -Segments $Segments
+
+            if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentGroup.Name)", 'Delete cluster group')) {
+                InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Remove-NBVirtualizationClusterType.ps1
+
+<#
+.SYNOPSIS
+    Removes a virtualization cluster type from Netbox.
+
+.DESCRIPTION
+    Removes a cluster type from the Netbox virtualization module.
+    Supports pipeline input from Get-NBVirtualizationClusterType.
+
+.PARAMETER Id
+    The database ID(s) of the cluster type(s) to remove. Accepts pipeline input.
+
+.PARAMETER Force
+    Skip confirmation prompts.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBVirtualizationClusterType -Id 1
+
+    Removes cluster type ID 1 (with confirmation prompt).
+
+.EXAMPLE
+    Get-NBVirtualizationClusterType | Where-Object { $_.cluster_count -eq 0 } | Remove-NBVirtualizationClusterType -Force
+
+    Removes all unused cluster types without confirmation.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/models/virtualization/clustertype/
+#>
+function Remove-NBVirtualizationClusterType {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [switch]$Force,
+
+        [switch]$Raw
+    )
+
+    process {
+        foreach ($TypeId in $Id) {
+            $CurrentType = Get-NBVirtualizationClusterType -Id $TypeId -ErrorAction Stop
+
+            $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'cluster-types', $CurrentType.Id))
+
+            $URI = BuildNewURI -Segments $Segments
+
+            if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentType.Name)", 'Delete cluster type')) {
+                InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
 #region File Remove-NBVirtualMachine.ps1
 
 
@@ -14740,6 +21785,85 @@ function Remove-NBVirtualMachine {
 
     end {
 
+    }
+}
+
+#endregion
+
+#region File Remove-NBVirtualMachineInterface.ps1
+
+<#
+.SYNOPSIS
+    Removes a virtual machine interface from Netbox.
+
+.DESCRIPTION
+    Removes a virtual machine interface from the Netbox virtualization module.
+    Supports pipeline input from Get-NBVirtualMachineInterface.
+    Warning: This will also remove any IP addresses assigned to the interface.
+
+.PARAMETER Id
+    The database ID(s) of the interface(s) to remove. Accepts pipeline input.
+
+.PARAMETER Force
+    Skip confirmation prompts.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBVirtualMachineInterface -Id 1
+
+    Removes VM interface ID 1 (with confirmation prompt).
+
+.EXAMPLE
+    Remove-NBVirtualMachineInterface -Id 1, 2, 3 -Force
+
+    Removes multiple interfaces without confirmation.
+
+.EXAMPLE
+    Get-NBVirtualMachineInterface -Virtual_Machine_Id 5 | Remove-NBVirtualMachineInterface -Force
+
+    Removes all interfaces from VM ID 5 via pipeline.
+
+.EXAMPLE
+    Get-NBVirtualMachine -Name "test-vm" | Get-NBVirtualMachineInterface | Remove-NBVirtualMachineInterface
+
+    Removes all interfaces from a VM found by name.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/models/virtualization/vminterface/
+#>
+function Remove-NBVirtualMachineInterface {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [switch]$Force,
+
+        [switch]$Raw
+    )
+
+    process {
+        foreach ($InterfaceId in $Id) {
+            $CurrentInterface = Get-NBVirtualMachineInterface -Id $InterfaceId -ErrorAction Stop
+
+            $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'interfaces', $CurrentInterface.Id))
+
+            $URI = BuildNewURI -Segments $Segments
+
+            # Build descriptive target for confirmation
+            $Target = "$($CurrentInterface.Name)"
+            if ($CurrentInterface.Virtual_Machine) {
+                $Target = "Interface '$($CurrentInterface.Name)' on VM '$($CurrentInterface.Virtual_Machine.Name)'"
+            }
+
+            if ($Force -or $PSCmdlet.ShouldProcess($Target, 'Delete interface')) {
+                InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+            }
+        }
     }
 }
 
@@ -15055,6 +22179,49 @@ function Remove-NBVPNTunnelTermination {
 
 #endregion
 
+#region File Remove-NBWebhook.ps1
+
+<#
+.SYNOPSIS
+    Removes a webhook from Netbox.
+
+.DESCRIPTION
+    Deletes a webhook from Netbox by ID.
+
+.PARAMETER Id
+    The ID of the webhook to delete.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Remove-NBWebhook -Id 1
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Remove-NBWebhook {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('extras', 'webhooks', $Id))
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Delete Webhook')) {
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
 #region File Remove-NBWirelessLAN.ps1
 
 <#
@@ -15147,13 +22314,812 @@ function Remove-NBWirelessLink {
 
 #region File Set-NBCipherSSL.ps1
 
-Function Set-NBCipherSSL {
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessforStateChangingFunctions", "")]
-    Param(  )
-    # Hack for allowing TLS 1.1 and TLS 1.2 (by default it is only SSL3 and TLS (1.0))
-    $AllProtocols = [System.Net.SecurityProtocolType]'Ssl3,Tls,Tls11,Tls12'
-    [System.Net.ServicePointManager]::SecurityProtocol = $AllProtocols
+function Set-NBCipherSSL {
+    <#
+    .SYNOPSIS
+        Enables modern TLS protocols for PowerShell Desktop (5.1).
 
+    .DESCRIPTION
+        Configures ServicePointManager to use TLS 1.2 (and optionally TLS 1.3).
+        This is required for PowerShell Desktop (5.1) which defaults to older protocols.
+        PowerShell Core (7+) already uses modern TLS by default.
+
+    .NOTES
+        This function should only be called on PowerShell Desktop edition.
+        SSL3 and TLS 1.0/1.1 are intentionally excluded as they are deprecated.
+    #>
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessForStateChangingFunctions", "")]
+    [CmdletBinding()]
+    param()
+
+    # Only apply to Desktop edition (PS 5.1)
+    if ($PSVersionTable.PSEdition -ne 'Desktop') {
+        Write-Verbose "Skipping TLS configuration - PowerShell Core uses modern TLS by default"
+        return
+    }
+
+    # Enable TLS 1.2 (required minimum for most modern APIs)
+    # TLS 1.3 is available in .NET Framework 4.8+ but may not be on all systems
+    try {
+        # Try to enable TLS 1.2 and 1.3 if available
+        $Protocols = [System.Net.SecurityProtocolType]::Tls12
+
+        # Check if TLS 1.3 is available (requires .NET 4.8+)
+        if ([Enum]::IsDefined([System.Net.SecurityProtocolType], 'Tls13')) {
+            $Protocols = $Protocols -bor [System.Net.SecurityProtocolType]::Tls13
+        }
+
+        [System.Net.ServicePointManager]::SecurityProtocol = $Protocols
+        Write-Verbose "Enabled TLS protocols: $([System.Net.ServicePointManager]::SecurityProtocol)"
+    } catch {
+        # Fallback to TLS 1.2 only
+        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
+        Write-Verbose "Enabled TLS 1.2"
+    }
+}
+
+#endregion
+
+#region File Set-NBCircuit.ps1
+
+<#
+.SYNOPSIS
+    Updates an existing circuit in Netbox.
+
+.DESCRIPTION
+    Updates an existing circuit in Netbox using PATCH method.
+
+.PARAMETER Id
+    The ID of the circuit to update.
+
+.PARAMETER CID
+    Circuit ID string.
+
+.PARAMETER Provider
+    Provider ID.
+
+.PARAMETER Type
+    Circuit type ID.
+
+.PARAMETER Status
+    Circuit status.
+
+.PARAMETER Description
+    Description of the circuit.
+
+.PARAMETER Tenant
+    Tenant ID.
+
+.PARAMETER Install_Date
+    Installation date.
+
+.PARAMETER Termination_Date
+    Termination date.
+
+.PARAMETER Commit_Rate
+    Committed rate in Kbps.
+
+.PARAMETER Comments
+    Comments.
+
+.PARAMETER Custom_Fields
+    Custom fields hashtable.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Set-NBCircuit -Id 1 -Description "Updated description"
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Set-NBCircuit {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [string]$CID,
+
+        [uint64]$Provider,
+
+        [uint64]$Type,
+
+        [string]$Status,
+
+        [string]$Description,
+
+        [uint64]$Tenant,
+
+        [datetime]$Install_Date,
+
+        [datetime]$Termination_Date,
+
+        [ValidateRange(0, 2147483647)]
+        [uint64]$Commit_Rate,
+
+        [string]$Comments,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuits', $Id))
+
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Update Circuit')) {
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NBCircuitGroup.ps1
+
+<#
+.SYNOPSIS
+    Updates an existing circuit group in Netbox.
+
+.DESCRIPTION
+    Updates an existing circuit group in Netbox.
+
+.PARAMETER Id
+    The ID of the circuit group to update.
+
+.PARAMETER Name
+    Name of the circuit group.
+
+.PARAMETER Slug
+    URL-friendly slug.
+
+.PARAMETER Description
+    Description.
+
+.PARAMETER Tenant
+    Tenant ID.
+
+.PARAMETER Custom_Fields
+    Custom fields hashtable.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Set-NBCircuitGroup -Id 1 -Description "Updated"
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Set-NBCircuitGroup {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [string]$Name,
+
+        [string]$Slug,
+
+        [string]$Description,
+
+        [uint64]$Tenant,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuit-groups', $Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Update Circuit Group')) {
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NBCircuitGroupAssignment.ps1
+
+<#
+.SYNOPSIS
+    Updates an existing circuit group assignment in Netbox.
+
+.DESCRIPTION
+    Updates an existing circuit group assignment in Netbox.
+
+.PARAMETER Id
+    The ID of the assignment to update.
+
+.PARAMETER Group
+    Circuit group ID.
+
+.PARAMETER Circuit
+    Circuit ID.
+
+.PARAMETER Priority
+    Priority (primary, secondary, tertiary, inactive).
+
+.PARAMETER Custom_Fields
+    Custom fields hashtable.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Set-NBCircuitGroupAssignment -Id 1 -Priority "secondary"
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Set-NBCircuitGroupAssignment {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [uint64]$Group,
+
+        [uint64]$Circuit,
+
+        [ValidateSet('primary', 'secondary', 'tertiary', 'inactive')]
+        [string]$Priority,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuit-group-assignments', $Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Update Circuit Group Assignment')) {
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NBCircuitProvider.ps1
+
+<#
+.SYNOPSIS
+    Updates an existing circuit provider in Netbox.
+
+.DESCRIPTION
+    Updates an existing circuit provider in Netbox.
+
+.PARAMETER Id
+    The ID of the provider to update.
+
+.PARAMETER Name
+    Name of the provider.
+
+.PARAMETER Slug
+    URL-friendly slug.
+
+.PARAMETER Description
+    Description of the provider.
+
+.PARAMETER Comments
+    Comments.
+
+.PARAMETER Custom_Fields
+    Custom fields hashtable.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Set-NBCircuitProvider -Id 1 -Description "Updated description"
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Set-NBCircuitProvider {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [string]$Name,
+
+        [string]$Slug,
+
+        [string]$Description,
+
+        [string]$Comments,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('circuits', 'providers', $Id))
+
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Update Circuit Provider')) {
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NBCircuitProviderAccount.ps1
+
+<#
+.SYNOPSIS
+    Updates an existing provider account in Netbox.
+
+.DESCRIPTION
+    Updates an existing provider account in Netbox.
+
+.PARAMETER Id
+    The ID of the provider account to update.
+
+.PARAMETER Provider
+    Provider ID.
+
+.PARAMETER Name
+    Name of the account.
+
+.PARAMETER Account
+    Account number/identifier.
+
+.PARAMETER Description
+    Description.
+
+.PARAMETER Comments
+    Comments.
+
+.PARAMETER Custom_Fields
+    Custom fields hashtable.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Set-NBCircuitProviderAccount -Id 1 -Description "Updated"
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Set-NBCircuitProviderAccount {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [uint64]$Provider,
+
+        [string]$Name,
+
+        [string]$Account,
+
+        [string]$Description,
+
+        [string]$Comments,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('circuits', 'provider-accounts', $Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Update Provider Account')) {
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NBCircuitProviderNetwork.ps1
+
+<#
+.SYNOPSIS
+    Updates an existing provider network in Netbox.
+
+.DESCRIPTION
+    Updates an existing provider network in Netbox.
+
+.PARAMETER Id
+    The ID of the provider network to update.
+
+.PARAMETER Provider
+    Provider ID.
+
+.PARAMETER Name
+    Name of the network.
+
+.PARAMETER Service_Id
+    Service identifier.
+
+.PARAMETER Description
+    Description.
+
+.PARAMETER Comments
+    Comments.
+
+.PARAMETER Custom_Fields
+    Custom fields hashtable.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Set-NBCircuitProviderNetwork -Id 1 -Description "Updated"
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Set-NBCircuitProviderNetwork {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [uint64]$Provider,
+
+        [string]$Name,
+
+        [string]$Service_Id,
+
+        [string]$Description,
+
+        [string]$Comments,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('circuits', 'provider-networks', $Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Update Provider Network')) {
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NBCircuitTermination.ps1
+
+<#
+.SYNOPSIS
+    Updates an existing circuit termination in Netbox.
+
+.DESCRIPTION
+    Updates an existing circuit termination in Netbox.
+
+.PARAMETER Id
+    The ID of the circuit termination to update.
+
+.PARAMETER Circuit
+    Circuit ID.
+
+.PARAMETER Term_Side
+    Termination side (A or Z).
+
+.PARAMETER Site
+    Site ID.
+
+.PARAMETER Provider_Network
+    Provider network ID.
+
+.PARAMETER Port_Speed
+    Port speed in Kbps.
+
+.PARAMETER Upstream_Speed
+    Upstream speed in Kbps.
+
+.PARAMETER Xconnect_Id
+    Cross-connect ID.
+
+.PARAMETER Pp_Info
+    Patch panel info.
+
+.PARAMETER Description
+    Description.
+
+.PARAMETER Mark_Connected
+    Mark as connected.
+
+.PARAMETER Custom_Fields
+    Custom fields hashtable.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Set-NBCircuitTermination -Id 1 -Port_Speed 10000
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Set-NBCircuitTermination {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [uint64]$Circuit,
+
+        [ValidateSet('A', 'Z')]
+        [string]$Term_Side,
+
+        [uint64]$Site,
+
+        [uint64]$Provider_Network,
+
+        [uint64]$Port_Speed,
+
+        [uint64]$Upstream_Speed,
+
+        [string]$Xconnect_Id,
+
+        [string]$Pp_Info,
+
+        [string]$Description,
+
+        [bool]$Mark_Connected,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuit-terminations', $Id))
+
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Update Circuit Termination')) {
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NBCircuitType.ps1
+
+<#
+.SYNOPSIS
+    Updates an existing circuit type in Netbox.
+
+.DESCRIPTION
+    Updates an existing circuit type in Netbox.
+
+.PARAMETER Id
+    The ID of the circuit type to update.
+
+.PARAMETER Name
+    Name of the circuit type.
+
+.PARAMETER Slug
+    URL-friendly slug.
+
+.PARAMETER Color
+    Color code (6 hex characters).
+
+.PARAMETER Description
+    Description of the circuit type.
+
+.PARAMETER Custom_Fields
+    Custom fields hashtable.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Set-NBCircuitType -Id 1 -Description "Updated description"
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Set-NBCircuitType {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [string]$Name,
+
+        [string]$Slug,
+
+        [ValidatePattern('^[0-9a-fA-F]{6}$')]
+        [string]$Color,
+
+        [string]$Description,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuit-types', $Id))
+
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Update Circuit Type')) {
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NBConfigContext.ps1
+
+<#
+.SYNOPSIS
+    Updates an existing config context in Netbox.
+
+.DESCRIPTION
+    Updates an existing config context in Netbox Extras module.
+
+.PARAMETER Id
+    The ID of the config context to update.
+
+.PARAMETER Name
+    Name of the config context.
+
+.PARAMETER Weight
+    Weight for ordering (0-32767).
+
+.PARAMETER Description
+    Description of the config context.
+
+.PARAMETER Is_Active
+    Whether the config context is active.
+
+.PARAMETER Data
+    Configuration data (hashtable or JSON).
+
+.PARAMETER Regions
+    Array of region IDs.
+
+.PARAMETER Site_Groups
+    Array of site group IDs.
+
+.PARAMETER Sites
+    Array of site IDs.
+
+.PARAMETER Locations
+    Array of location IDs.
+
+.PARAMETER Device_Types
+    Array of device type IDs.
+
+.PARAMETER Roles
+    Array of role IDs.
+
+.PARAMETER Platforms
+    Array of platform IDs.
+
+.PARAMETER Cluster_Types
+    Array of cluster type IDs.
+
+.PARAMETER Cluster_Groups
+    Array of cluster group IDs.
+
+.PARAMETER Clusters
+    Array of cluster IDs.
+
+.PARAMETER Tenant_Groups
+    Array of tenant group IDs.
+
+.PARAMETER Tenants
+    Array of tenant IDs.
+
+.PARAMETER Tags
+    Array of tag slugs.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Set-NBConfigContext -Id 1 -Is_Active $false
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Set-NBConfigContext {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [string]$Name,
+
+        [ValidateRange(0, 32767)]
+        [uint16]$Weight,
+
+        [string]$Description,
+
+        [bool]$Is_Active,
+
+        $Data,
+
+        [uint64[]]$Regions,
+
+        [uint64[]]$Site_Groups,
+
+        [uint64[]]$Sites,
+
+        [uint64[]]$Locations,
+
+        [uint64[]]$Device_Types,
+
+        [uint64[]]$Roles,
+
+        [uint64[]]$Platforms,
+
+        [uint64[]]$Cluster_Types,
+
+        [uint64[]]$Cluster_Groups,
+
+        [uint64[]]$Clusters,
+
+        [uint64[]]$Tenant_Groups,
+
+        [uint64[]]$Tenants,
+
+        [string[]]$Tags,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('extras', 'config-contexts', $Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Update Config Context')) {
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
 }
 
 #endregion
@@ -15508,6 +23474,389 @@ function Set-NBCredential {
         }
 
         $script:NetboxConfig.Credential
+    }
+}
+
+#endregion
+
+#region File Set-NBCustomField.ps1
+
+<#
+.SYNOPSIS
+    Updates an existing custom field in Netbox.
+
+.DESCRIPTION
+    Updates an existing custom field in Netbox Extras module.
+
+.PARAMETER Id
+    The ID of the custom field to update.
+
+.PARAMETER Name
+    Internal name of the custom field.
+
+.PARAMETER Label
+    Display label for the custom field.
+
+.PARAMETER Type
+    Field type.
+
+.PARAMETER Object_Types
+    Content types this field applies to.
+
+.PARAMETER Group_Name
+    Group name for organizing fields.
+
+.PARAMETER Description
+    Description of the field.
+
+.PARAMETER Required
+    Whether this field is required.
+
+.PARAMETER Search_Weight
+    Search weight (0-32767).
+
+.PARAMETER Filter_Logic
+    Filter logic (disabled, loose, exact).
+
+.PARAMETER Ui_Visible
+    UI visibility (always, if-set, hidden).
+
+.PARAMETER Ui_Editable
+    UI editability (yes, no, hidden).
+
+.PARAMETER Is_Cloneable
+    Whether the field is cloneable.
+
+.PARAMETER Default
+    Default value.
+
+.PARAMETER Weight
+    Display weight.
+
+.PARAMETER Validation_Minimum
+    Minimum value for numeric fields.
+
+.PARAMETER Validation_Maximum
+    Maximum value for numeric fields.
+
+.PARAMETER Validation_Regex
+    Validation regex pattern.
+
+.PARAMETER Choice_Set
+    Choice set ID for select fields.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Set-NBCustomField -Id 1 -Label "New Label"
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Set-NBCustomField {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [string]$Name,
+
+        [string]$Label,
+
+        [ValidateSet('text', 'longtext', 'integer', 'decimal', 'boolean', 'date', 'datetime', 'url', 'json', 'select', 'multiselect', 'object', 'multiobject')]
+        [string]$Type,
+
+        [string[]]$Object_Types,
+
+        [string]$Group_Name,
+
+        [string]$Description,
+
+        [bool]$Required,
+
+        [ValidateRange(0, 32767)]
+        [uint16]$Search_Weight,
+
+        [ValidateSet('disabled', 'loose', 'exact')]
+        [string]$Filter_Logic,
+
+        [ValidateSet('always', 'if-set', 'hidden')]
+        [string]$Ui_Visible,
+
+        [ValidateSet('yes', 'no', 'hidden')]
+        [string]$Ui_Editable,
+
+        [bool]$Is_Cloneable,
+
+        $Default,
+
+        [uint16]$Weight,
+
+        [int64]$Validation_Minimum,
+
+        [int64]$Validation_Maximum,
+
+        [string]$Validation_Regex,
+
+        [uint64]$Choice_Set,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('extras', 'custom-fields', $Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Update Custom Field')) {
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NBCustomFieldChoiceSet.ps1
+
+<#
+.SYNOPSIS
+    Updates an existing custom field choice set in Netbox.
+
+.DESCRIPTION
+    Updates an existing custom field choice set in Netbox Extras module.
+
+.PARAMETER Id
+    The ID of the choice set to update.
+
+.PARAMETER Name
+    Name of the choice set.
+
+.PARAMETER Description
+    Description of the choice set.
+
+.PARAMETER Base_Choices
+    Base choices to inherit from.
+
+.PARAMETER Extra_Choices
+    Array of extra choices.
+
+.PARAMETER Order_Alphabetically
+    Whether to order choices alphabetically.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Set-NBCustomFieldChoiceSet -Id 1 -Name "Updated Name"
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Set-NBCustomFieldChoiceSet {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [string]$Name,
+
+        [string]$Description,
+
+        [string]$Base_Choices,
+
+        [array]$Extra_Choices,
+
+        [bool]$Order_Alphabetically,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('extras', 'custom-field-choice-sets', $Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Update Custom Field Choice Set')) {
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NBCustomLink.ps1
+
+<#
+.SYNOPSIS
+    Updates an existing custom link in Netbox.
+
+.DESCRIPTION
+    Updates an existing custom link in Netbox Extras module.
+
+.PARAMETER Id
+    The ID of the custom link to update.
+
+.PARAMETER Name
+    Name of the custom link.
+
+.PARAMETER Object_Types
+    Object types this link applies to.
+
+.PARAMETER Enabled
+    Whether the link is enabled.
+
+.PARAMETER Link_Text
+    Link text (Jinja2 template).
+
+.PARAMETER Link_Url
+    Link URL (Jinja2 template).
+
+.PARAMETER Weight
+    Display weight.
+
+.PARAMETER Group_Name
+    Group name for organizing links.
+
+.PARAMETER Button_Class
+    Button CSS class.
+
+.PARAMETER New_Window
+    Whether to open in new window.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Set-NBCustomLink -Id 1 -Enabled $false
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Set-NBCustomLink {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [string]$Name,
+
+        [string[]]$Object_Types,
+
+        [bool]$Enabled,
+
+        [string]$Link_Text,
+
+        [string]$Link_Url,
+
+        [uint16]$Weight,
+
+        [string]$Group_Name,
+
+        [ValidateSet('outline-dark', 'blue', 'indigo', 'purple', 'pink', 'red', 'orange', 'yellow', 'green', 'teal', 'cyan', 'gray', 'black', 'white', 'ghost-dark')]
+        [string]$Button_Class,
+
+        [bool]$New_Window,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('extras', 'custom-links', $Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Update Custom Link')) {
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NBDataSource.ps1
+
+<#
+.SYNOPSIS
+    Updates an existing data source in Netbox.
+
+.DESCRIPTION
+    Updates an existing data source in Netbox Core module.
+
+.PARAMETER Id
+    The ID of the data source to update.
+
+.PARAMETER Name
+    Name of the data source.
+
+.PARAMETER Type
+    Type of data source (local, git, amazon-s3).
+
+.PARAMETER Source_Url
+    Source URL for remote data sources.
+
+.PARAMETER Description
+    Description of the data source.
+
+.PARAMETER Enabled
+    Whether the data source is enabled.
+
+.PARAMETER Ignore_Rules
+    Patterns to ignore (one per line).
+
+.PARAMETER Parameters
+    Additional parameters (hashtable).
+
+.PARAMETER Comments
+    Comments.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Set-NBDataSource -Id 1 -Enabled $false
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Set-NBDataSource {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [string]$Name,
+
+        [ValidateSet('local', 'git', 'amazon-s3')]
+        [string]$Type,
+
+        [string]$Source_Url,
+
+        [string]$Description,
+
+        [bool]$Enabled,
+
+        [string]$Ignore_Rules,
+
+        [hashtable]$Parameters,
+
+        [string]$Comments,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('core', 'data-sources', $Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Update Data Source')) {
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
     }
 }
 
@@ -18197,6 +26546,264 @@ function Set-NBDCIMVirtualDeviceContext {
 
 #endregion
 
+#region File Set-NBEventRule.ps1
+
+<#
+.SYNOPSIS
+    Updates an existing event rule in Netbox.
+
+.DESCRIPTION
+    Updates an existing event rule in Netbox Extras module.
+
+.PARAMETER Id
+    The ID of the event rule to update.
+
+.PARAMETER Name
+    Name of the event rule.
+
+.PARAMETER Description
+    Description of the event rule.
+
+.PARAMETER Enabled
+    Whether the event rule is enabled.
+
+.PARAMETER Object_Types
+    Object types this rule applies to.
+
+.PARAMETER Type_Create
+    Trigger on create events.
+
+.PARAMETER Type_Update
+    Trigger on update events.
+
+.PARAMETER Type_Delete
+    Trigger on delete events.
+
+.PARAMETER Type_Job_Start
+    Trigger on job start events.
+
+.PARAMETER Type_Job_End
+    Trigger on job end events.
+
+.PARAMETER Action_Type
+    Action type (webhook, script).
+
+.PARAMETER Action_Object_Type
+    Action object type.
+
+.PARAMETER Action_Object_Id
+    Action object ID.
+
+.PARAMETER Conditions
+    Conditions (JSON logic).
+
+.PARAMETER Custom_Fields
+    Custom fields hashtable.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Set-NBEventRule -Id 1 -Enabled $false
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Set-NBEventRule {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [string]$Name,
+
+        [string]$Description,
+
+        [bool]$Enabled,
+
+        [string[]]$Object_Types,
+
+        [bool]$Type_Create,
+
+        [bool]$Type_Update,
+
+        [bool]$Type_Delete,
+
+        [bool]$Type_Job_Start,
+
+        [bool]$Type_Job_End,
+
+        [ValidateSet('webhook', 'script')]
+        [string]$Action_Type,
+
+        [string]$Action_Object_Type,
+
+        [uint64]$Action_Object_Id,
+
+        $Conditions,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('extras', 'event-rules', $Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Update Event Rule')) {
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NBExportTemplate.ps1
+
+<#
+.SYNOPSIS
+    Updates an existing export template in Netbox.
+
+.DESCRIPTION
+    Updates an existing export template in Netbox Extras module.
+
+.PARAMETER Id
+    The ID of the export template to update.
+
+.PARAMETER Name
+    Name of the export template.
+
+.PARAMETER Object_Types
+    Object types this template applies to.
+
+.PARAMETER Description
+    Description of the template.
+
+.PARAMETER Template_Code
+    Jinja2 template code.
+
+.PARAMETER Mime_Type
+    MIME type for the export.
+
+.PARAMETER File_Extension
+    File extension for the export.
+
+.PARAMETER As_Attachment
+    Whether to serve as attachment.
+
+.PARAMETER Data_Source
+    Data source ID.
+
+.PARAMETER Data_File
+    Data file ID.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Set-NBExportTemplate -Id 1 -Name "Updated Template"
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Set-NBExportTemplate {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [string]$Name,
+
+        [string[]]$Object_Types,
+
+        [string]$Description,
+
+        [string]$Template_Code,
+
+        [string]$Mime_Type,
+
+        [string]$File_Extension,
+
+        [bool]$As_Attachment,
+
+        [uint64]$Data_Source,
+
+        [uint64]$Data_File,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('extras', 'export-templates', $Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Update Export Template')) {
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NBGroup.ps1
+
+<#
+.SYNOPSIS
+    Updates an existing group in Netbox.
+
+.DESCRIPTION
+    Updates an existing group in Netbox Users module.
+
+.PARAMETER Id
+    The ID of the group to update.
+
+.PARAMETER Name
+    Name of the group.
+
+.PARAMETER Permissions
+    Array of permission IDs.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Set-NBGroup -Id 1 -Name "Updated Group Name"
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Set-NBGroup {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [string]$Name,
+
+        [uint64[]]$Permissions,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('users', 'groups', $Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Update Group')) {
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
 #region File Set-NBHostName.ps1
 
 <#
@@ -19572,6 +28179,508 @@ function Set-NBIPAMVRF {
 
 #endregion
 
+#region File Set-NBJournalEntry.ps1
+
+<#
+.SYNOPSIS
+    Updates an existing journal entry in Netbox.
+
+.DESCRIPTION
+    Updates an existing journal entry in Netbox Extras module.
+
+.PARAMETER Id
+    The ID of the journal entry to update.
+
+.PARAMETER Assigned_Object_Type
+    Object type.
+
+.PARAMETER Assigned_Object_Id
+    Object ID.
+
+.PARAMETER Comments
+    Journal entry comments.
+
+.PARAMETER Kind
+    Entry kind (info, success, warning, danger).
+
+.PARAMETER Custom_Fields
+    Custom fields hashtable.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Set-NBJournalEntry -Id 1 -Comments "Updated comments"
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Set-NBJournalEntry {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [string]$Assigned_Object_Type,
+
+        [uint64]$Assigned_Object_Id,
+
+        [string]$Comments,
+
+        [ValidateSet('info', 'success', 'warning', 'danger')]
+        [string]$Kind,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('extras', 'journal-entries', $Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Update Journal Entry')) {
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NBPermission.ps1
+
+<#
+.SYNOPSIS
+    Updates an existing permission in Netbox.
+
+.DESCRIPTION
+    Updates an existing permission in Netbox Users module.
+
+.PARAMETER Id
+    The ID of the permission to update.
+
+.PARAMETER Name
+    Name of the permission.
+
+.PARAMETER Description
+    Description of the permission.
+
+.PARAMETER Enabled
+    Whether the permission is enabled.
+
+.PARAMETER Object_Types
+    Object types this permission applies to.
+
+.PARAMETER Actions
+    Allowed actions (view, add, change, delete).
+
+.PARAMETER Constraints
+    JSON constraints for filtering objects.
+
+.PARAMETER Groups
+    Array of group IDs.
+
+.PARAMETER Users
+    Array of user IDs.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Set-NBPermission -Id 1 -Enabled $false
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Set-NBPermission {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [string]$Name,
+
+        [string]$Description,
+
+        [bool]$Enabled,
+
+        [string[]]$Object_Types,
+
+        [ValidateSet('view', 'add', 'change', 'delete')]
+        [string[]]$Actions,
+
+        $Constraints,
+
+        [uint64[]]$Groups,
+
+        [uint64[]]$Users,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('users', 'permissions', $Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Update Permission')) {
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NBSavedFilter.ps1
+
+<#
+.SYNOPSIS
+    Updates an existing saved filter in Netbox.
+
+.DESCRIPTION
+    Updates an existing saved filter in Netbox Extras module.
+
+.PARAMETER Id
+    The ID of the saved filter to update.
+
+.PARAMETER Name
+    Name of the saved filter.
+
+.PARAMETER Slug
+    URL-friendly slug.
+
+.PARAMETER Object_Types
+    Object types this filter applies to.
+
+.PARAMETER Description
+    Description of the filter.
+
+.PARAMETER Weight
+    Display weight.
+
+.PARAMETER Enabled
+    Whether the filter is enabled.
+
+.PARAMETER Shared
+    Whether the filter is shared.
+
+.PARAMETER Parameters
+    Filter parameters (hashtable).
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Set-NBSavedFilter -Id 1 -Enabled $false
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Set-NBSavedFilter {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [string]$Name,
+
+        [string]$Slug,
+
+        [string[]]$Object_Types,
+
+        [string]$Description,
+
+        [uint16]$Weight,
+
+        [bool]$Enabled,
+
+        [bool]$Shared,
+
+        [hashtable]$Parameters,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('extras', 'saved-filters', $Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Update Saved Filter')) {
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NBTag.ps1
+
+<#
+.SYNOPSIS
+    Updates an existing tag in Netbox.
+
+.DESCRIPTION
+    Updates an existing tag in Netbox Extras module.
+
+.PARAMETER Id
+    The ID of the tag to update.
+
+.PARAMETER Name
+    Name of the tag.
+
+.PARAMETER Slug
+    URL-friendly slug.
+
+.PARAMETER Color
+    Color code (6 hex characters).
+
+.PARAMETER Description
+    Description of the tag.
+
+.PARAMETER Object_Types
+    Object types this tag can be applied to.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Set-NBTag -Id 1 -Color "ff0000"
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Set-NBTag {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [string]$Name,
+
+        [string]$Slug,
+
+        [ValidatePattern('^[0-9a-fA-F]{6}$')]
+        [string]$Color,
+
+        [string]$Description,
+
+        [string[]]$Object_Types,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('extras', 'tags', $Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Update Tag')) {
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NBTenant.ps1
+
+<#
+.SYNOPSIS
+    Updates an existing tenant in Netbox.
+
+.DESCRIPTION
+    Updates an existing tenant in the Netbox tenancy module.
+    Supports pipeline input from Get-NBTenant.
+
+.PARAMETER Id
+    The database ID of the tenant to update. Accepts pipeline input.
+
+.PARAMETER Name
+    The new name of the tenant.
+
+.PARAMETER Slug
+    URL-friendly unique identifier.
+
+.PARAMETER Group
+    The database ID of the tenant group.
+
+.PARAMETER Description
+    A description of the tenant.
+
+.PARAMETER Comments
+    Additional comments about the tenant.
+
+.PARAMETER Tags
+    Array of tag IDs to assign.
+
+.PARAMETER Custom_Fields
+    Hashtable of custom field values.
+
+.PARAMETER Force
+    Skip confirmation prompts.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBTenant -Id 1 -Description "Updated tenant description"
+
+    Updates the description of tenant ID 1.
+
+.EXAMPLE
+    Get-NBTenant -Name "Acme Corp" | Set-NBTenant -Group 2
+
+    Moves a tenant to a different group via pipeline.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/models/tenancy/tenant/
+#>
+function Set-NBTenant {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [string]$Name,
+
+        [string]$Slug,
+
+        [uint64]$Group,
+
+        [string]$Description,
+
+        [string]$Comments,
+
+        [uint64[]]$Tags,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Force,
+
+        [switch]$Raw
+    )
+
+    process {
+        foreach ($TenantId in $Id) {
+            $CurrentTenant = Get-NBTenant -Id $TenantId -ErrorAction Stop
+
+            $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'tenants', $CurrentTenant.Id))
+
+            $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force', 'Raw'
+
+            $URI = BuildNewURI -Segments $URIComponents.Segments
+
+            if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentTenant.Name)", 'Update tenant')) {
+                InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NBTenantGroup.ps1
+
+<#
+.SYNOPSIS
+    Updates an existing tenant group in Netbox.
+
+.DESCRIPTION
+    Updates an existing tenant group in the Netbox tenancy module.
+    Supports pipeline input from Get-NBTenantGroup.
+
+.PARAMETER Id
+    The database ID of the tenant group to update. Accepts pipeline input.
+
+.PARAMETER Name
+    The new name of the tenant group.
+
+.PARAMETER Slug
+    URL-friendly unique identifier.
+
+.PARAMETER Parent
+    The database ID of the parent tenant group.
+
+.PARAMETER Description
+    A description of the tenant group.
+
+.PARAMETER Tags
+    Array of tag IDs to assign.
+
+.PARAMETER Custom_Fields
+    Hashtable of custom field values.
+
+.PARAMETER Force
+    Skip confirmation prompts.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBTenantGroup -Id 1 -Description "Updated description"
+
+    Updates the description of tenant group ID 1.
+
+.EXAMPLE
+    Get-NBTenantGroup -Name "legacy" | Set-NBTenantGroup -Parent 2
+
+    Moves a tenant group under a new parent via pipeline.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/models/tenancy/tenantgroup/
+#>
+function Set-NBTenantGroup {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [string]$Name,
+
+        [string]$Slug,
+
+        [uint64]$Parent,
+
+        [string]$Description,
+
+        [uint64[]]$Tags,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Force,
+
+        [switch]$Raw
+    )
+
+    process {
+        foreach ($GroupId in $Id) {
+            $CurrentGroup = Get-NBTenantGroup -Id $GroupId -ErrorAction Stop
+
+            $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'tenant-groups', $CurrentGroup.Id))
+
+            $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force', 'Raw'
+
+            $URI = BuildNewURI -Segments $URIComponents.Segments
+
+            if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentGroup.Name)", 'Update tenant group')) {
+                InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
 #region File Set-NBTimeout.ps1
 
 <#
@@ -19613,6 +28722,75 @@ function Set-NBTimeout {
 
 #endregion
 
+#region File Set-NBToken.ps1
+
+<#
+.SYNOPSIS
+    Updates an existing API token in Netbox.
+
+.DESCRIPTION
+    Updates an existing API token in Netbox Users module.
+
+.PARAMETER Id
+    The ID of the token to update.
+
+.PARAMETER User
+    User ID for the token.
+
+.PARAMETER Description
+    Description of the token.
+
+.PARAMETER Expires
+    Expiration date (datetime).
+
+.PARAMETER Write_Enabled
+    Whether write operations are enabled.
+
+.PARAMETER Allowed_Ips
+    Array of allowed IP addresses/networks.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Set-NBToken -Id 1 -Write_Enabled $false
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Set-NBToken {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [uint64]$User,
+
+        [string]$Description,
+
+        [datetime]$Expires,
+
+        [bool]$Write_Enabled,
+
+        [string[]]$Allowed_Ips,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('users', 'tokens', $Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Update Token')) {
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
 #region File Set-NBUnstrustedSSL.ps1
 
 Function Set-NBUntrustedSSL {
@@ -19633,6 +28811,686 @@ Function Set-NBUntrustedSSL {
 
     [System.Net.ServicePointManager]::CertificatePolicy = New-Object -TypeName TrustAllCertsPolicy
 
+}
+
+#endregion
+
+#region File Set-NBuntrustedSSL.ps1
+
+function Set-NBuntrustedSSL {
+    <#
+    .SYNOPSIS
+        Disables SSL certificate validation for PowerShell Desktop (5.1).
+
+    .DESCRIPTION
+        Configures ServicePointManager to skip SSL certificate validation.
+        This is only used for PowerShell Desktop (5.1) when -SkipCertificateCheck
+        is specified. PowerShell Core (7+) uses the -SkipCertificateCheck parameter
+        on Invoke-RestMethod directly.
+
+    .NOTES
+        This function should only be called on PowerShell Desktop edition.
+        Security Warning: Only use in development/testing environments.
+    #>
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessForStateChangingFunctions", "")]
+    [CmdletBinding()]
+    param()
+
+    # Only apply to Desktop edition (PS 5.1)
+    if ($PSVersionTable.PSEdition -ne 'Desktop') {
+        Write-Verbose "Skipping certificate callback - not needed for PowerShell Core"
+        return
+    }
+
+    # Check if callback is already set
+    if ([System.Net.ServicePointManager]::ServerCertificateValidationCallback) {
+        Write-Verbose "Certificate validation callback already configured"
+        return
+    }
+
+    # Create callback to accept all certificates
+    $CertCallback = @"
+using System;
+using System.Net;
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
+
+public class NetboxTrustAllCertsPolicy : ICertificatePolicy {
+    public bool CheckValidationResult(
+        ServicePoint srvPoint, X509Certificate certificate,
+        WebRequest request, int certificateProblem) {
+        return true;
+    }
+}
+"@
+
+    # Only add type if not already loaded
+    if (-not ([System.Management.Automation.PSTypeName]'NetboxTrustAllCertsPolicy').Type) {
+        try {
+            Add-Type -TypeDefinition $CertCallback -ErrorAction Stop
+        } catch {
+            Write-Verbose "Type already exists or could not be added: $_"
+        }
+    }
+
+    try {
+        [System.Net.ServicePointManager]::CertificatePolicy = [NetboxTrustAllCertsPolicy]::new()
+        Write-Verbose "Certificate validation disabled for this session"
+    } catch {
+        Write-Warning "Could not set certificate policy: $_"
+    }
+}
+
+#endregion
+
+#region File Set-NBUser.ps1
+
+<#
+.SYNOPSIS
+    Updates an existing user in Netbox.
+
+.DESCRIPTION
+    Updates an existing user in Netbox Users module.
+
+.PARAMETER Id
+    The ID of the user to update.
+
+.PARAMETER Username
+    Username.
+
+.PARAMETER Password
+    Password.
+
+.PARAMETER First_Name
+    First name.
+
+.PARAMETER Last_Name
+    Last name.
+
+.PARAMETER Email
+    Email address.
+
+.PARAMETER Is_Staff
+    Whether user has staff access.
+
+.PARAMETER Is_Active
+    Whether user is active.
+
+.PARAMETER Is_Superuser
+    Whether user is a superuser.
+
+.PARAMETER Groups
+    Array of group IDs.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Set-NBUser -Id 1 -Is_Active $false
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Set-NBUser {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [string]$Username,
+
+        [string]$Password,
+
+        [string]$First_Name,
+
+        [string]$Last_Name,
+
+        [string]$Email,
+
+        [bool]$Is_Staff,
+
+        [bool]$Is_Active,
+
+        [bool]$Is_Superuser,
+
+        [uint64[]]$Groups,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('users', 'users', $Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Update User')) {
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NBVirtualCircuit.ps1
+
+<#
+.SYNOPSIS
+    Updates an existing virtual circuit in Netbox.
+
+.DESCRIPTION
+    Updates an existing virtual circuit in Netbox.
+
+.PARAMETER Id
+    The ID of the virtual circuit to update.
+
+.PARAMETER Cid
+    Circuit ID string.
+
+.PARAMETER Provider_Network
+    Provider network ID.
+
+.PARAMETER Provider_Account
+    Provider account ID.
+
+.PARAMETER Type
+    Virtual circuit type ID.
+
+.PARAMETER Status
+    Status (planned, provisioning, active, offline, deprovisioning, decommissioned).
+
+.PARAMETER Tenant
+    Tenant ID.
+
+.PARAMETER Description
+    Description.
+
+.PARAMETER Comments
+    Comments.
+
+.PARAMETER Custom_Fields
+    Custom fields hashtable.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Set-NBVirtualCircuit -Id 1 -Status "active"
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Set-NBVirtualCircuit {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [string]$Cid,
+
+        [uint64]$Provider_Network,
+
+        [uint64]$Provider_Account,
+
+        [uint64]$Type,
+
+        [ValidateSet('planned', 'provisioning', 'active', 'offline', 'deprovisioning', 'decommissioned')]
+        [string]$Status,
+
+        [uint64]$Tenant,
+
+        [string]$Description,
+
+        [string]$Comments,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('circuits', 'virtual-circuits', $Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Update Virtual Circuit')) {
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NBVirtualCircuitTermination.ps1
+
+<#
+.SYNOPSIS
+    Updates an existing virtual circuit termination in Netbox.
+
+.DESCRIPTION
+    Updates an existing virtual circuit termination in Netbox.
+
+.PARAMETER Id
+    The ID of the termination to update.
+
+.PARAMETER Virtual_Circuit
+    Virtual circuit ID.
+
+.PARAMETER Interface
+    Interface ID.
+
+.PARAMETER Role
+    Role (peer, hub, spoke).
+
+.PARAMETER Description
+    Description.
+
+.PARAMETER Custom_Fields
+    Custom fields hashtable.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Set-NBVirtualCircuitTermination -Id 1 -Role "hub"
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Set-NBVirtualCircuitTermination {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [uint64]$Virtual_Circuit,
+
+        [uint64]$Interface,
+
+        [ValidateSet('peer', 'hub', 'spoke')]
+        [string]$Role,
+
+        [string]$Description,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('circuits', 'virtual-circuit-terminations', $Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Update Virtual Circuit Termination')) {
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NBVirtualCircuitType.ps1
+
+<#
+.SYNOPSIS
+    Updates an existing virtual circuit type in Netbox.
+
+.DESCRIPTION
+    Updates an existing virtual circuit type in Netbox.
+
+.PARAMETER Id
+    The ID of the virtual circuit type to update.
+
+.PARAMETER Name
+    Name of the virtual circuit type.
+
+.PARAMETER Slug
+    URL-friendly slug.
+
+.PARAMETER Color
+    Color code (6 hex characters).
+
+.PARAMETER Description
+    Description.
+
+.PARAMETER Custom_Fields
+    Custom fields hashtable.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Set-NBVirtualCircuitType -Id 1 -Description "Updated"
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Set-NBVirtualCircuitType {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [string]$Name,
+
+        [string]$Slug,
+
+        [ValidatePattern('^[0-9a-fA-F]{6}$')]
+        [string]$Color,
+
+        [string]$Description,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('circuits', 'virtual-circuit-types', $Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Update Virtual Circuit Type')) {
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NBVirtualizationCluster.ps1
+
+<#
+.SYNOPSIS
+    Updates an existing virtualization cluster in Netbox.
+
+.DESCRIPTION
+    Updates an existing virtualization cluster in the Netbox virtualization module.
+    Supports pipeline input from Get-NBVirtualizationCluster.
+
+.PARAMETER Id
+    The database ID of the cluster to update. Accepts pipeline input.
+
+.PARAMETER Name
+    The new name of the cluster.
+
+.PARAMETER Type
+    The database ID of the cluster type.
+
+.PARAMETER Group
+    The database ID of the cluster group.
+
+.PARAMETER Site
+    The database ID of the site.
+
+.PARAMETER Status
+    The operational status: planned, staging, active, decommissioning, offline.
+
+.PARAMETER Tenant
+    The database ID of the tenant.
+
+.PARAMETER Description
+    A description of the cluster.
+
+.PARAMETER Comments
+    Additional comments about the cluster.
+
+.PARAMETER Tags
+    Array of tag IDs to assign.
+
+.PARAMETER Custom_Fields
+    Hashtable of custom field values.
+
+.PARAMETER Force
+    Skip confirmation prompts.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBVirtualizationCluster -Id 1 -Description "Updated description"
+
+    Updates the description of cluster ID 1.
+
+.EXAMPLE
+    Get-NBVirtualizationCluster -Name "prod-cluster" | Set-NBVirtualizationCluster -Status "active"
+
+    Updates a cluster found by name via pipeline.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/models/virtualization/cluster/
+#>
+function Set-NBVirtualizationCluster {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [string]$Name,
+
+        [uint64]$Type,
+
+        [uint64]$Group,
+
+        [uint64]$Site,
+
+        [ValidateSet('planned', 'staging', 'active', 'decommissioning', 'offline', IgnoreCase = $true)]
+        [string]$Status,
+
+        [uint64]$Tenant,
+
+        [string]$Description,
+
+        [string]$Comments,
+
+        [uint64[]]$Tags,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Force,
+
+        [switch]$Raw
+    )
+
+    process {
+        foreach ($ClusterId in $Id) {
+            $CurrentCluster = Get-NBVirtualizationCluster -Id $ClusterId -ErrorAction Stop
+
+            $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'clusters', $CurrentCluster.Id))
+
+            $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force', 'Raw'
+
+            $URI = BuildNewURI -Segments $URIComponents.Segments
+
+            if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentCluster.Name)", 'Update cluster')) {
+                InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NBVirtualizationClusterGroup.ps1
+
+<#
+.SYNOPSIS
+    Updates an existing virtualization cluster group in Netbox.
+
+.DESCRIPTION
+    Updates an existing cluster group in the Netbox virtualization module.
+    Supports pipeline input from Get-NBVirtualizationClusterGroup.
+
+.PARAMETER Id
+    The database ID of the cluster group to update. Accepts pipeline input.
+
+.PARAMETER Name
+    The new name of the cluster group.
+
+.PARAMETER Slug
+    URL-friendly unique identifier.
+
+.PARAMETER Description
+    A description of the cluster group.
+
+.PARAMETER Tags
+    Array of tag IDs to assign.
+
+.PARAMETER Custom_Fields
+    Hashtable of custom field values.
+
+.PARAMETER Force
+    Skip confirmation prompts.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBVirtualizationClusterGroup -Id 1 -Description "Updated description"
+
+    Updates the description of cluster group ID 1.
+
+.EXAMPLE
+    Get-NBVirtualizationClusterGroup -Name "prod" | Set-NBVirtualizationClusterGroup -Name "Production"
+
+    Updates a cluster group found by name via pipeline.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/models/virtualization/clustergroup/
+#>
+function Set-NBVirtualizationClusterGroup {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [string]$Name,
+
+        [string]$Slug,
+
+        [string]$Description,
+
+        [uint64[]]$Tags,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Force,
+
+        [switch]$Raw
+    )
+
+    process {
+        foreach ($GroupId in $Id) {
+            $CurrentGroup = Get-NBVirtualizationClusterGroup -Id $GroupId -ErrorAction Stop
+
+            $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'cluster-groups', $CurrentGroup.Id))
+
+            $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force', 'Raw'
+
+            $URI = BuildNewURI -Segments $URIComponents.Segments
+
+            if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentGroup.Name)", 'Update cluster group')) {
+                InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+            }
+        }
+    }
+}
+
+#endregion
+
+#region File Set-NBVirtualizationClusterType.ps1
+
+<#
+.SYNOPSIS
+    Updates an existing virtualization cluster type in Netbox.
+
+.DESCRIPTION
+    Updates an existing cluster type in the Netbox virtualization module.
+    Supports pipeline input from Get-NBVirtualizationClusterType.
+
+.PARAMETER Id
+    The database ID of the cluster type to update. Accepts pipeline input.
+
+.PARAMETER Name
+    The new name of the cluster type.
+
+.PARAMETER Slug
+    URL-friendly unique identifier.
+
+.PARAMETER Description
+    A description of the cluster type.
+
+.PARAMETER Tags
+    Array of tag IDs to assign.
+
+.PARAMETER Custom_Fields
+    Hashtable of custom field values.
+
+.PARAMETER Force
+    Skip confirmation prompts.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBVirtualizationClusterType -Id 1 -Description "VMware vSphere 8.0"
+
+    Updates the description of cluster type ID 1.
+
+.EXAMPLE
+    Get-NBVirtualizationClusterType -Slug "kvm" | Set-NBVirtualizationClusterType -Name "KVM/QEMU"
+
+    Updates a cluster type found by slug via pipeline.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/models/virtualization/clustertype/
+#>
+function Set-NBVirtualizationClusterType {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [string]$Name,
+
+        [string]$Slug,
+
+        [string]$Description,
+
+        [uint64[]]$Tags,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Force,
+
+        [switch]$Raw
+    )
+
+    process {
+        foreach ($TypeId in $Id) {
+            $CurrentType = Get-NBVirtualizationClusterType -Id $TypeId -ErrorAction Stop
+
+            $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'cluster-types', $CurrentType.Id))
+
+            $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force', 'Raw'
+
+            $URI = BuildNewURI -Segments $URIComponents.Segments
+
+            if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentType.Name)", 'Update cluster type')) {
+                InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+            }
+        }
+    }
 }
 
 #endregion
@@ -20145,6 +30003,106 @@ function Set-NBVPNTunnelTermination {
     process {
         $s = [System.Collections.ArrayList]::new(@('vpn','tunnel-terminations',$Id)); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update tunnel termination')) { InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments) -Method PATCH -Body $u.Parameters -Raw:$Raw }
+    }
+}
+
+#endregion
+
+#region File Set-NBWebhook.ps1
+
+<#
+.SYNOPSIS
+    Updates an existing webhook in Netbox.
+
+.DESCRIPTION
+    Updates an existing webhook in Netbox Extras module.
+
+.PARAMETER Id
+    The ID of the webhook to update.
+
+.PARAMETER Name
+    Name of the webhook.
+
+.PARAMETER Payload_Url
+    URL to send webhook payload to.
+
+.PARAMETER Description
+    Description of the webhook.
+
+.PARAMETER Http_Method
+    HTTP method (GET, POST, PUT, PATCH, DELETE).
+
+.PARAMETER Http_Content_Type
+    HTTP content type.
+
+.PARAMETER Additional_Headers
+    Additional HTTP headers.
+
+.PARAMETER Body_Template
+    Body template (Jinja2).
+
+.PARAMETER Secret
+    Secret for HMAC signature.
+
+.PARAMETER Ssl_Verification
+    Whether to verify SSL certificates.
+
+.PARAMETER Ca_File_Path
+    Path to CA certificate file.
+
+.PARAMETER Custom_Fields
+    Custom fields hashtable.
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Set-NBWebhook -Id 1 -Ssl_Verification $true
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Set-NBWebhook {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [uint64]$Id,
+
+        [string]$Name,
+
+        [string]$Payload_Url,
+
+        [string]$Description,
+
+        [ValidateSet('GET', 'POST', 'PUT', 'PATCH', 'DELETE')]
+        [string]$Http_Method,
+
+        [string]$Http_Content_Type,
+
+        [string]$Additional_Headers,
+
+        [string]$Body_Template,
+
+        [string]$Secret,
+
+        [bool]$Ssl_Verification,
+
+        [string]$Ca_File_Path,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('extras', 'webhooks', $Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Id, 'Update Webhook')) {
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
     }
 }
 

@@ -12,10 +12,10 @@
 RootModule = 'NetboxPS.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.8.5'
+ModuleVersion = '4.4.7'
 
 # Supported PSEditions
-CompatiblePSEditions = @('Desktop', 'Core')
+CompatiblePSEditions = 'Desktop', 'Core'
 
 # ID used to uniquely identify this module
 GUID = 'bba9b06c-49c8-47cf-8358-aca7c4e78896'
@@ -69,12 +69,15 @@ ClrVersion = '2.0.50727'
 NestedModules = @()
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-FunctionsToExport = 'Aliases', 'BuildNewURI', 'BuildURIComponents',
-               'CheckNetboxIsConnected', 'Clear-NBCredential', 'Connect-NBAPI',
-               'CreateEnum', 'Get-ModelDefinition', 'Get-NBAPIDefinition',
-               'Get-NBCircuit', 'Get-NBCircuitProvider', 'Get-NBCircuitTermination',
-               'Get-NBCircuitType', 'Get-NBContact', 'Get-NBContactAssignment',
-               'Get-NBContactRole', 'Get-NBContentType', 'Get-NBCredential',
+FunctionsToExport = 'Clear-NBCredential', 'Connect-NBAPI', 'Get-ModelDefinition',
+               'Get-NBAPIDefinition', 'Get-NBBookmark', 'Get-NBCircuit',
+               'Get-NBCircuitGroup', 'Get-NBCircuitGroupAssignment',
+               'Get-NBCircuitProvider', 'Get-NBCircuitProviderAccount',
+               'Get-NBCircuitProviderNetwork', 'Get-NBCircuitTermination',
+               'Get-NBCircuitType', 'Get-NBConfigContext', 'Get-NBContact',
+               'Get-NBContactAssignment', 'Get-NBContactRole', 'Get-NBContentType',
+               'Get-NBCredential', 'Get-NBCustomField', 'Get-NBCustomFieldChoiceSet',
+               'Get-NBCustomLink', 'Get-NBDataFile', 'Get-NBDataSource',
                'Get-NBDCIMCable', 'Get-NBDCIMCableTermination',
                'Get-NBDCIMConnectedDevice', 'Get-NBDCIMConsolePort',
                'Get-NBDCIMConsolePortTemplate', 'Get-NBDCIMConsoleServerPort',
@@ -95,28 +98,39 @@ FunctionsToExport = 'Aliases', 'BuildNewURI', 'BuildURIComponents',
                'Get-NBDCIMRackType', 'Get-NBDCIMRearPort',
                'Get-NBDCIMRearPortTemplate', 'Get-NBDCIMRegion', 'Get-NBDCIMSite',
                'Get-NBDCIMSiteGroup', 'Get-NBDCIMVirtualChassis',
-               'Get-NBDCIMVirtualDeviceContext', 'Get-NBHostname', 'Get-NBHostPort',
-               'Get-NBHostScheme', 'Get-NBInvokeParams', 'Get-NBIPAMAddress',
-               'Get-NBIPAMAddressRange', 'Get-NBIPAMAggregate', 'Get-NBIPAMASN',
-               'Get-NBIPAMASNRange', 'Get-NBIPAMAvailableIP', 'Get-NBIPAMFHRPGroup',
+               'Get-NBDCIMVirtualDeviceContext', 'Get-NBEventRule',
+               'Get-NBExportTemplate', 'Get-NBGroup', 'Get-NBHostname',
+               'Get-NBHostPort', 'Get-NBHostScheme', 'Get-NBImageAttachment',
+               'Get-NBInvokeParams', 'Get-NBIPAMAddress', 'Get-NBIPAMAddressRange',
+               'Get-NBIPAMAggregate', 'Get-NBIPAMASN', 'Get-NBIPAMASNRange',
+               'Get-NBIPAMAvailableIP', 'Get-NBIPAMFHRPGroup',
                'Get-NBIPAMFHRPGroupAssignment', 'Get-NBIPAMPrefix', 'Get-NBIPAMRIR',
                'Get-NBIPAMRole', 'Get-NBIPAMRouteTarget', 'Get-NBIPAMService',
                'Get-NBIPAMServiceTemplate', 'Get-NBIPAMVLAN', 'Get-NBIPAMVLANGroup',
                'Get-NBIPAMVLANTranslationPolicy', 'Get-NBIPAMVLANTranslationRule',
-               'Get-NBIPAMVRF', 'Get-NBTag', 'Get-NBTenant', 'Get-NBTimeout',
-               'Get-NBVersion', 'Get-NBVirtualizationCluster',
-               'Get-NBVirtualizationClusterGroup', 'Get-NBVirtualMachine',
+               'Get-NBIPAMVRF', 'Get-NBJob', 'Get-NBJournalEntry',
+               'Get-NBObjectChange', 'Get-NBObjectType', 'Get-NBPermission',
+               'Get-NBSavedFilter', 'Get-NBTag', 'Get-NBTenant', 'Get-NBTenantGroup',
+               'Get-NBTimeout', 'Get-NBToken', 'Get-NBUser', 'Get-NBVersion',
+               'Get-NBVirtualCircuit', 'Get-NBVirtualCircuitTermination',
+               'Get-NBVirtualCircuitType', 'Get-NBVirtualizationCluster',
+               'Get-NBVirtualizationClusterGroup',
+               'Get-NBVirtualizationClusterType', 'Get-NBVirtualMachine',
                'Get-NBVirtualMachineInterface', 'Get-NBVPNIKEPolicy',
                'Get-NBVPNIKEProposal', 'Get-NBVPNIPSecPolicy',
                'Get-NBVPNIPSecProfile', 'Get-NBVPNIPSecProposal', 'Get-NBVPNL2VPN',
                'Get-NBVPNL2VPNTermination', 'Get-NBVPNTunnel',
-               'Get-NBVPNTunnelGroup', 'Get-NBVPNTunnelTermination',
+               'Get-NBVPNTunnelGroup', 'Get-NBVPNTunnelTermination', 'Get-NBWebhook',
                'Get-NBWirelessLAN', 'Get-NBWirelessLANGroup', 'Get-NBWirelessLink',
-               'GetNetboxAPIErrorBody', 'GetNetboxConfigVariable',
-               'InvokeNetboxRequest', 'New-NBCircuit', 'New-NBContact',
-               'New-NBContactAssignment', 'New-NBContactRole', 'New-NBDCIMCable',
-               'New-NBDCIMConsolePort', 'New-NBDCIMConsolePortTemplate',
-               'New-NBDCIMConsoleServerPort',
+               'New-NBBookmark', 'New-NBCircuit', 'New-NBCircuitGroup',
+               'New-NBCircuitGroupAssignment', 'New-NBCircuitProvider',
+               'New-NBCircuitProviderAccount', 'New-NBCircuitProviderNetwork',
+               'New-NBCircuitTermination', 'New-NBCircuitType',
+               'New-NBConfigContext', 'New-NBContact', 'New-NBContactAssignment',
+               'New-NBContactRole', 'New-NBCustomField',
+               'New-NBCustomFieldChoiceSet', 'New-NBCustomLink', 'New-NBDataSource',
+               'New-NBDCIMCable', 'New-NBDCIMConsolePort',
+               'New-NBDCIMConsolePortTemplate', 'New-NBDCIMConsoleServerPort',
                'New-NBDCIMConsoleServerPortTemplate', 'New-NBDCIMDevice',
                'New-NBDCIMDeviceBay', 'New-NBDCIMDeviceBayTemplate',
                'New-NBDCIMDeviceRole', 'New-NBDCIMDeviceType', 'New-NBDCIMFrontPort',
@@ -134,22 +148,35 @@ FunctionsToExport = 'Aliases', 'BuildNewURI', 'BuildURIComponents',
                'New-NBDCIMRackType', 'New-NBDCIMRearPort',
                'New-NBDCIMRearPortTemplate', 'New-NBDCIMRegion', 'New-NBDCIMSite',
                'New-NBDCIMSiteGroup', 'New-NBDCIMVirtualChassis',
-               'New-NBDCIMVirtualDeviceContext', 'New-NBIPAMAddress',
+               'New-NBDCIMVirtualDeviceContext', 'New-NBEventRule',
+               'New-NBExportTemplate', 'New-NBGroup', 'New-NBIPAMAddress',
                'New-NBIPAMAddressRange', 'New-NBIPAMAggregate', 'New-NBIPAMASN',
                'New-NBIPAMASNRange', 'New-NBIPAMFHRPGroup',
                'New-NBIPAMFHRPGroupAssignment', 'New-NBIPAMPrefix', 'New-NBIPAMRIR',
                'New-NBIPAMRole', 'New-NBIPAMRouteTarget', 'New-NBIPAMService',
                'New-NBIPAMServiceTemplate', 'New-NBIPAMVLAN', 'New-NBIPAMVLANGroup',
                'New-NBIPAMVLANTranslationPolicy', 'New-NBIPAMVLANTranslationRule',
-               'New-NBIPAMVRF', 'New-NBTenant', 'New-NBVirtualMachine',
+               'New-NBIPAMVRF', 'New-NBJournalEntry', 'New-NBPermission',
+               'New-NBSavedFilter', 'New-NBTag', 'New-NBTenant', 'New-NBTenantGroup',
+               'New-NBToken', 'New-NBUser', 'New-NBVirtualCircuit',
+               'New-NBVirtualCircuitTermination', 'New-NBVirtualCircuitType',
+               'New-NBVirtualizationCluster', 'New-NBVirtualizationClusterGroup',
+               'New-NBVirtualizationClusterType', 'New-NBVirtualMachine',
                'New-NBVirtualMachineInterface', 'New-NBVPNIKEPolicy',
                'New-NBVPNIKEProposal', 'New-NBVPNIPSecPolicy',
                'New-NBVPNIPSecProfile', 'New-NBVPNIPSecProposal', 'New-NBVPNL2VPN',
                'New-NBVPNL2VPNTermination', 'New-NBVPNTunnel',
-               'New-NBVPNTunnelGroup', 'New-NBVPNTunnelTermination',
+               'New-NBVPNTunnelGroup', 'New-NBVPNTunnelTermination', 'New-NBWebhook',
                'New-NBWirelessLAN', 'New-NBWirelessLANGroup', 'New-NBWirelessLink',
-               'Remove-NBDCIMCable', 'Remove-NBDCIMConsolePort',
-               'Remove-NBDCIMConsolePortTemplate',
+               'Remove-NBBookmark', 'Remove-NBCircuit', 'Remove-NBCircuitGroup',
+               'Remove-NBCircuitGroupAssignment', 'Remove-NBCircuitProvider',
+               'Remove-NBCircuitProviderAccount',
+               'Remove-NBCircuitProviderNetwork', 'Remove-NBCircuitTermination',
+               'Remove-NBCircuitType', 'Remove-NBConfigContext', 'Remove-NBContact',
+               'Remove-NBContactAssignment', 'Remove-NBContactRole',
+               'Remove-NBCustomField', 'Remove-NBCustomFieldChoiceSet',
+               'Remove-NBCustomLink', 'Remove-NBDataSource', 'Remove-NBDCIMCable',
+               'Remove-NBDCIMConsolePort', 'Remove-NBDCIMConsolePortTemplate',
                'Remove-NBDCIMConsoleServerPort',
                'Remove-NBDCIMConsoleServerPortTemplate', 'Remove-NBDCIMDevice',
                'Remove-NBDCIMDeviceBay', 'Remove-NBDCIMDeviceBayTemplate',
@@ -171,25 +198,39 @@ FunctionsToExport = 'Aliases', 'BuildNewURI', 'BuildURIComponents',
                'Remove-NBDCIMRearPort', 'Remove-NBDCIMRearPortTemplate',
                'Remove-NBDCIMRegion', 'Remove-NBDCIMSite', 'Remove-NBDCIMSiteGroup',
                'Remove-NBDCIMVirtualChassis', 'Remove-NBDCIMVirtualDeviceContext',
-               'Remove-NBIPAMAddress', 'Remove-NBIPAMAddressRange',
-               'Remove-NBIPAMAggregate', 'Remove-NBIPAMASN', 'Remove-NBIPAMASNRange',
-               'Remove-NBIPAMFHRPGroup', 'Remove-NBIPAMFHRPGroupAssignment',
-               'Remove-NBIPAMPrefix', 'Remove-NBIPAMRIR', 'Remove-NBIPAMRole',
-               'Remove-NBIPAMRouteTarget', 'Remove-NBIPAMService',
-               'Remove-NBIPAMServiceTemplate', 'Remove-NBIPAMVLAN',
-               'Remove-NBIPAMVLANGroup', 'Remove-NBIPAMVLANTranslationPolicy',
+               'Remove-NBEventRule', 'Remove-NBExportTemplate', 'Remove-NBGroup',
+               'Remove-NBImageAttachment', 'Remove-NBIPAMAddress',
+               'Remove-NBIPAMAddressRange', 'Remove-NBIPAMAggregate',
+               'Remove-NBIPAMASN', 'Remove-NBIPAMASNRange', 'Remove-NBIPAMFHRPGroup',
+               'Remove-NBIPAMFHRPGroupAssignment', 'Remove-NBIPAMPrefix',
+               'Remove-NBIPAMRIR', 'Remove-NBIPAMRole', 'Remove-NBIPAMRouteTarget',
+               'Remove-NBIPAMService', 'Remove-NBIPAMServiceTemplate',
+               'Remove-NBIPAMVLAN', 'Remove-NBIPAMVLANGroup',
+               'Remove-NBIPAMVLANTranslationPolicy',
                'Remove-NBIPAMVLANTranslationRule', 'Remove-NBIPAMVRF',
-               'Remove-NBVirtualMachine', 'Remove-NBVPNIKEPolicy',
+               'Remove-NBJournalEntry', 'Remove-NBPermission',
+               'Remove-NBSavedFilter', 'Remove-NBTag', 'Remove-NBTenant',
+               'Remove-NBTenantGroup', 'Remove-NBToken', 'Remove-NBUser',
+               'Remove-NBVirtualCircuit', 'Remove-NBVirtualCircuitTermination',
+               'Remove-NBVirtualCircuitType', 'Remove-NBVirtualizationCluster',
+               'Remove-NBVirtualizationClusterGroup',
+               'Remove-NBVirtualizationClusterType', 'Remove-NBVirtualMachine',
+               'Remove-NBVirtualMachineInterface', 'Remove-NBVPNIKEPolicy',
                'Remove-NBVPNIKEProposal', 'Remove-NBVPNIPSecPolicy',
                'Remove-NBVPNIPSecProfile', 'Remove-NBVPNIPSecProposal',
                'Remove-NBVPNL2VPN', 'Remove-NBVPNL2VPNTermination',
                'Remove-NBVPNTunnel', 'Remove-NBVPNTunnelGroup',
-               'Remove-NBVPNTunnelTermination', 'Remove-NBWirelessLAN',
-               'Remove-NBWirelessLANGroup', 'Remove-NBWirelessLink',
-               'Set-NBCipherSSL', 'Set-NBContact', 'Set-NBContactAssignment',
-               'Set-NBContactRole', 'Set-NBCredential', 'Set-NBDCIMCable',
-               'Set-NBDCIMConsolePort', 'Set-NBDCIMConsolePortTemplate',
-               'Set-NBDCIMConsoleServerPort',
+               'Remove-NBVPNTunnelTermination', 'Remove-NBWebhook',
+               'Remove-NBWirelessLAN', 'Remove-NBWirelessLANGroup',
+               'Remove-NBWirelessLink', 'Set-NBCipherSSL', 'Set-NBCircuit',
+               'Set-NBCircuitGroup', 'Set-NBCircuitGroupAssignment',
+               'Set-NBCircuitProvider', 'Set-NBCircuitProviderAccount',
+               'Set-NBCircuitProviderNetwork', 'Set-NBCircuitTermination',
+               'Set-NBCircuitType', 'Set-NBConfigContext', 'Set-NBContact',
+               'Set-NBContactAssignment', 'Set-NBContactRole', 'Set-NBCredential',
+               'Set-NBCustomField', 'Set-NBCustomFieldChoiceSet', 'Set-NBCustomLink',
+               'Set-NBDataSource', 'Set-NBDCIMCable', 'Set-NBDCIMConsolePort',
+               'Set-NBDCIMConsolePortTemplate', 'Set-NBDCIMConsoleServerPort',
                'Set-NBDCIMConsoleServerPortTemplate', 'Set-NBDCIMDevice',
                'Set-NBDCIMDeviceBay', 'Set-NBDCIMDeviceBayTemplate',
                'Set-NBDCIMDeviceRole', 'Set-NBDCIMDeviceType', 'Set-NBDCIMFrontPort',
@@ -207,39 +248,40 @@ FunctionsToExport = 'Aliases', 'BuildNewURI', 'BuildURIComponents',
                'Set-NBDCIMRackType', 'Set-NBDCIMRearPort',
                'Set-NBDCIMRearPortTemplate', 'Set-NBDCIMRegion', 'Set-NBDCIMSite',
                'Set-NBDCIMSiteGroup', 'Set-NBDCIMVirtualChassis',
-               'Set-NBDCIMVirtualDeviceContext', 'Set-NBHostName', 'Set-NBHostPort',
-               'Set-NBHostScheme', 'Set-NBInvokeParams', 'Set-NBIPAMAddress',
-               'Set-NBIPAMAddressRange', 'Set-NBIPAMAggregate', 'Set-NBIPAMASN',
-               'Set-NBIPAMASNRange', 'Set-NBIPAMFHRPGroup',
+               'Set-NBDCIMVirtualDeviceContext', 'Set-NBEventRule',
+               'Set-NBExportTemplate', 'Set-NBGroup', 'Set-NBHostName',
+               'Set-NBHostPort', 'Set-NBHostScheme', 'Set-NBInvokeParams',
+               'Set-NBIPAMAddress', 'Set-NBIPAMAddressRange', 'Set-NBIPAMAggregate',
+               'Set-NBIPAMASN', 'Set-NBIPAMASNRange', 'Set-NBIPAMFHRPGroup',
                'Set-NBIPAMFHRPGroupAssignment', 'Set-NBIPAMPrefix', 'Set-NBIPAMRIR',
                'Set-NBIPAMRole', 'Set-NBIPAMRouteTarget', 'Set-NBIPAMService',
                'Set-NBIPAMServiceTemplate', 'Set-NBIPAMVLAN', 'Set-NBIPAMVLANGroup',
                'Set-NBIPAMVLANTranslationPolicy', 'Set-NBIPAMVLANTranslationRule',
-               'Set-NBIPAMVRF', 'Set-NBTimeout', 'Set-NBUnstrustedSSL',
-               'Set-NBVirtualMachine', 'Set-NBVirtualMachineInterface',
-               'Set-NBVPNIKEPolicy', 'Set-NBVPNIKEProposal', 'Set-NBVPNIPSecPolicy',
+               'Set-NBIPAMVRF', 'Set-NBJournalEntry', 'Set-NBPermission',
+               'Set-NBSavedFilter', 'Set-NBTag', 'Set-NBTenant', 'Set-NBTenantGroup',
+               'Set-NBTimeout', 'Set-NBToken', 'Set-NBUnstrustedSSL',
+               'Set-NBuntrustedSSL', 'Set-NBUser', 'Set-NBVirtualCircuit',
+               'Set-NBVirtualCircuitTermination', 'Set-NBVirtualCircuitType',
+               'Set-NBVirtualizationCluster', 'Set-NBVirtualizationClusterGroup',
+               'Set-NBVirtualizationClusterType', 'Set-NBVirtualMachine',
+               'Set-NBVirtualMachineInterface', 'Set-NBVPNIKEPolicy',
+               'Set-NBVPNIKEProposal', 'Set-NBVPNIPSecPolicy',
                'Set-NBVPNIPSecProfile', 'Set-NBVPNIPSecProposal', 'Set-NBVPNL2VPN',
                'Set-NBVPNL2VPNTermination', 'Set-NBVPNTunnel',
-               'Set-NBVPNTunnelGroup', 'Set-NBVPNTunnelTermination',
+               'Set-NBVPNTunnelGroup', 'Set-NBVPNTunnelTermination', 'Set-NBWebhook',
                'Set-NBWirelessLAN', 'Set-NBWirelessLANGroup', 'Set-NBWirelessLink',
-               'SetupNetboxConfigVariable', 'Test-NBAPIConnected',
-               'ThrowNetboxRESTError', 'VerifyAPIConnectivity'
+               'Test-NBAPIConnected'
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = @()
 
 # Variables to export from this module
-VariablesToExport = @()
+# VariablesToExport = @()
 
 # Aliases to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no aliases to export.
-# Backwards-compatible aliases for renamed Add-* -> New-* functions
-AliasesToExport = @(
-    'Add-NBDCIMInterface',
-    'Add-NBDCIMInterfaceConnection',
-    'Add-NBDCIMFrontPort',
-    'Add-NBDCIMRearPort',
-    'Add-NBVirtualMachineInterface'
-)
+AliasesToExport = 'Add-NBDCIMInterface', 'Add-NBDCIMInterfaceConnection',
+               'Add-NBDCIMFrontPort', 'Add-NBDCIMRearPort',
+               'Add-NBVirtualMachineInterface'
 
 # DSC resources to export from this module
 # DscResourcesToExport = @()
@@ -256,22 +298,7 @@ PrivateData = @{
     PSData = @{
 
         # Tags applied to this module. These help with module discovery in online galleries.
-        Tags = @(
-            'Netbox',
-            'NetboxAPI',
-            'API',
-            'REST',
-            'DCIM',
-            'IPAM',
-            'Infrastructure',
-            'Automation',
-            'NetworkAutomation',
-            'DataCenter',
-            'Virtualization',
-            'VPN',
-            'Wireless',
-            'AssetManagement'
-        )
+        Tags = 'Netbox','NetboxAPI','API','REST','DCIM','IPAM','Infrastructure','Automation','NetworkAutomation','DataCenter','Virtualization','VPN','Wireless','AssetManagement'
 
         # A URL to the license for this module.
         LicenseUri = 'https://github.com/ctrl-alt-automate/NetboxPS/blob/main/LICENSE'
@@ -283,13 +310,19 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = 'https://github.com/ctrl-alt-automate/NetboxPS/releases'
+        ReleaseNotes = 'v4.4.7 - Full Netbox 4.4.7 Compatibility
+- 100% API coverage for all Netbox modules
+- 488 public functions across DCIM, IPAM, Virtualization, Circuits, Tenancy, VPN, Wireless, Extras, Core, Users
+- Cross-platform support (Windows, Linux, macOS)
+- PowerShell 5.1 and 7+ compatible
+- Improved certificate handling for self-signed certificates
+- Removed Windows-only dependencies (System.Web)'
 
         # Prerelease string of this module
         # Prerelease = ''
 
         # Flag to indicate whether the module requires explicit user acceptance for install/update/save
-        RequireLicenseAcceptance = $false
+        # RequireLicenseAcceptance = $false
 
         # External dependent modules of this module
         # ExternalModuleDependencies = @()
