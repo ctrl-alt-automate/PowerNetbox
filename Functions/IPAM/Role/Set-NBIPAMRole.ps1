@@ -1,0 +1,21 @@
+function Set-NBIPAMRole {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
+        [string]$Name,
+        [string]$Slug,
+        [uint16]$Weight,
+        [string]$Description,
+        [string[]]$Tags,
+        [hashtable]$Custom_Fields,
+        [switch]$Raw
+    )
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam', 'roles', $Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+        if ($PSCmdlet.ShouldProcess($Id, 'Update IPAM role')) {
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}

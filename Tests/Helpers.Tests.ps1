@@ -15,7 +15,7 @@ if (Test-Path $ModulePath) {
 Describe "Helpers tests" -Tag 'Core', 'Helpers' -Fixture {
     It "Should throw because we are not connected" {
         {
-            Check-NetboxIsConnected
+            CheckNetboxIsConnected
         } | Should -Throw
     }
 
@@ -172,7 +172,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' -Fixture {
                 }
             }
 
-            Mock -CommandName 'Get-NetboxCredential' -Verifiable -ModuleName 'NetboxPS' -MockWith {
+            Mock -CommandName 'Get-NBCredential' -Verifiable -ModuleName 'NetboxPS' -MockWith {
                 return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
             }
 

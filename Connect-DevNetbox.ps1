@@ -84,8 +84,8 @@ if ($script:NetboxDevConfig.Scheme) {
 
 # Connect
 Write-Host "Connecting to Netbox API..." -ForegroundColor Cyan
-Connect-NetboxAPI @ConnectParams
+Connect-NBAPI @ConnectParams
 
 Write-Host ""
-Write-Host "Connected to Netbox $((Get-NetboxVersion).'netbox-version')" -ForegroundColor Green
+Write-Host "Connected to Netbox $((Get-NBVersion).'netbox-version')" -ForegroundColor Green
 Write-Host "Ready for testing!" -ForegroundColor Green

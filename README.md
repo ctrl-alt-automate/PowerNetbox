@@ -12,13 +12,13 @@ This module is a wrapper for the [Netbox](https://github.com/netbox-community/ne
 # Usage
 1. Install module from the `netboxPS` folder
 2. Import module
-3. Connect to an API endpoint by using `Connect-NetboxAPI -Hostname netbox.example.com`
+3. Connect to an API endpoint by using `Connect-NBAPI -Hostname netbox.example.com`
 
 ## Basic Commands
 
 ```powershell
 #Just adding a new IP
-New-NetboxIPAMAddress -Address 10.0.0.1/24 -Dns_name this.is.thedns.fqdn -Custom_Fields @{CustomFieldID="CustomFieldContent"} -Tenant 1 -Description "Description"
+New-NBIPAMAddress -Address 10.0.0.1/24 -Dns_name this.is.thedns.fqdn -Custom_Fields @{CustomFieldID="CustomFieldContent"} -Tenant 1 -Description "Description"
 
 #Creating a new VM, add an interface and assign Interface IP
 function New-NBVirtualMachine
@@ -37,18 +37,18 @@ function New-NBVirtualMachine
 
     Begin
     {
-        $NBCluster = Get-NetboxVirtualizationCluster -name $Cluster
-        $NBTenant = Get-NetboxTenant -Name $tenant
+        $NBCluster = Get-NBVirtualizationCluster -name $Cluster
+        $NBTenant = Get-NBTenant -Name $tenant
     }
     Process
     {
-        $vm = New-NetboxVirtualMachine -Name $Name -Cluster $NBCluster.id -Tenant $NBtenant.id
-        $interface = Add-NetboxVirtualMachineInterface -Name $VMNICName -Virtual_Machine $vm.id
+        $vm = New-NBVirtualMachine -Name $Name -Cluster $NBCluster.id -Tenant $NBtenant.id
+        $interface = Add-NBVirtualMachineInterface -Name $VMNICName -Virtual_Machine $vm.id
 
 
-        $NBip = New-NetboxIPAMAddress -Address $IP -Tenant $NBtenant.id 
-        Set-NetboxIPAMAddress -Assigned_Object_Type virtualization.vminterface -Assigned_Object_Id $interface.id -id $NBip.id
-        Set-NetboxVirtualMachine -Primary_IP4 $NBip.id -Id $vm.id
+        $NBip = New-NBIPAMAddress -Address $IP -Tenant $NBtenant.id 
+        Set-NBIPAMAddress -Assigned_Object_Type virtualization.vminterface -Assigned_Object_Id $interface.id -id $NBip.id
+        Set-NBVirtualMachine -Primary_IP4 $NBip.id -Id $vm.id
     }
 }
 

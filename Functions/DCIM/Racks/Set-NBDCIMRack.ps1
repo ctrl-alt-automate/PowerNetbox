@@ -1,0 +1,168 @@
+function Set-NBDCIMRack {
+<#
+    .SYNOPSIS
+        Update a rack in Netbox
+
+    .DESCRIPTION
+        Updates an existing rack object in Netbox.
+
+    .PARAMETER Id
+        The ID of the rack to update
+
+    .PARAMETER Name
+        The name of the rack
+
+    .PARAMETER Site
+        The site ID where the rack is located
+
+    .PARAMETER Location
+        The location ID within the site
+
+    .PARAMETER Tenant
+        The tenant ID that owns this rack
+
+    .PARAMETER Status
+        The operational status (active, planned, reserved, deprecated)
+
+    .PARAMETER Role
+        The rack role ID
+
+    .PARAMETER Serial
+        The serial number
+
+    .PARAMETER Asset_Tag
+        The asset tag
+
+    .PARAMETER Rack_Type
+        The rack type ID
+
+    .PARAMETER Width
+        The rack width (10 or 19 inches)
+
+    .PARAMETER U_Height
+        The height in rack units
+
+    .PARAMETER Starting_Unit
+        The starting unit number
+
+    .PARAMETER Desc_Units
+        Whether units are numbered top-to-bottom
+
+    .PARAMETER Outer_Width
+        The outer width in millimeters
+
+    .PARAMETER Outer_Depth
+        The outer depth in millimeters
+
+    .PARAMETER Outer_Height
+        The outer height in millimeters
+
+    .PARAMETER Mounting_Depth
+        The mounting depth in millimeters
+
+    .PARAMETER Max_Weight
+        The maximum weight capacity
+
+    .PARAMETER Weight_Unit
+        The weight unit (kg, g, lb, oz)
+
+    .PARAMETER Facility_Id
+        The facility identifier
+
+    .PARAMETER Description
+        A description of the rack
+
+    .PARAMETER Comments
+        Additional comments
+
+    .PARAMETER Custom_Fields
+        A hashtable of custom fields
+
+    .PARAMETER Force
+        Skip confirmation prompts
+
+    .EXAMPLE
+        Set-NBDCIMRack -Id 1 -Description "Updated description"
+
+    .EXAMPLE
+        Get-NBDCIMRack -Name "Rack-01" | Set-NBDCIMRack -Status deprecated
+#>
+
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true,
+                   ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [string]$Name,
+
+        [uint64]$Site,
+
+        [uint64]$Location,
+
+        [uint64]$Tenant,
+
+        [ValidateSet('active', 'planned', 'reserved', 'deprecated')]
+        [string]$Status,
+
+        [uint64]$Role,
+
+        [string]$Serial,
+
+        [string]$Asset_Tag,
+
+        [uint64]$Rack_Type,
+
+        [ValidateSet(10, 19, 21, 23)]
+        [uint16]$Width,
+
+        [ValidateRange(1, 100)]
+        [uint16]$U_Height,
+
+        [ValidateRange(1, 100)]
+        [uint16]$Starting_Unit,
+
+        [bool]$Desc_Units,
+
+        [uint16]$Outer_Width,
+
+        [uint16]$Outer_Depth,
+
+        [uint16]$Outer_Height,
+
+        [uint16]$Mounting_Depth,
+
+        [uint32]$Max_Weight,
+
+        [ValidateSet('kg', 'g', 'lb', 'oz')]
+        [string]$Weight_Unit,
+
+        [string]$Facility_Id,
+
+        [string]$Description,
+
+        [string]$Comments,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Force
+    )
+
+    process {
+        foreach ($RackId in $Id) {
+            $CurrentRack = Get-NBDCIMRack -Id $RackId -ErrorAction Stop
+
+            if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentRack.Name)", "Update rack")) {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim', 'racks', $CurrentRack.Id))
+
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force'
+
+                $URI = BuildNewURI -Segments $URIComponents.Segments
+
+                InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method PATCH
+            }
+        }
+    }
+}
