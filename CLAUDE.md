@@ -343,10 +343,10 @@ InvokeNetboxRequest -URI $URI -Method POST -Body $bodyHashtable
 | Setup | `/api/status/` | ✅ Implemented |
 | DCIM | `/api/dcim/` | ✅ **Full** (45 endpoints, 180 functions) |
 | IPAM | `/api/ipam/` | ✅ **Full** (18 endpoints, 72 functions) |
-| Virtualization | `/api/virtualization/` | Partial |
-| Tenancy | `/api/tenancy/` | Partial |
-| Circuits | `/api/circuits/` | Partial |
-| Extras | `/api/extras/` | Minimal |
+| Virtualization | `/api/virtualization/` | ✅ **Full** (5 endpoints, 20 functions) |
+| Tenancy | `/api/tenancy/` | ✅ **Full** (5 endpoints, 20 functions) |
+| Circuits | `/api/circuits/` | Partial (~20%) |
+| Extras | `/api/extras/` | Minimal (~11%) |
 | VPN | `/api/vpn/` | ✅ **Full** (10 endpoints, 40 functions) |
 | Wireless | `/api/wireless/` | ✅ **Full** (3 endpoints, 12 functions) |
 | Core | `/api/core/` | Not implemented |
@@ -391,9 +391,14 @@ See [GitHub Issues](https://github.com/ctrl-alt-automate/NetboxPS/issues) for th
 - **Issue #26**: Export only public functions ✅
 - **Issue #27**: Process blocks for pipeline support ✅
 - **Issue #28**: Integration tests with mock API ✅
+- **Issue #29**: Virtualization module 100% coverage ✅ (11 new functions)
+- **Issue #30**: Tenancy module 100% coverage ✅ (9 new functions)
 
-### Next
-- **v3.0.0**: Remaining modules (Virtualization, Tenancy, Circuits, Extras, Core, Users)
+### In Progress
+- **Issue #31**: Circuits module (~20% → 100%)
+- **Issue #32**: Extras module (~11% → partial)
+- **Issue #33**: Core module (new)
+- **Issue #34**: Users module (new)
 
 ## Testing API Endpoints
 
