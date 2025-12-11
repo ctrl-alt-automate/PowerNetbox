@@ -530,3 +530,15 @@ Connect-NBAPI -Hostname "netbox.local" -Credential $cred -SkipCertificateCheck
 - Check token permissions in Netbox
 - Ensure token hasn't expired
 - Verify the API endpoint exists in your Netbox version
+
+## Cross-Platform Compatibility
+
+This module supports Windows, Linux, and macOS with PowerShell 5.1+ and PowerShell Core 7+.
+
+### Build Script (deploy.ps1)
+The build script uses `Join-Path` for all file paths to ensure cross-platform compatibility:
+```powershell
+# Cross-platform path construction
+$FunctionPath = Join-Path $PSScriptRoot 'Functions'
+$OutputDirectory = Join-Path $PSScriptRoot $ModuleName
+```
