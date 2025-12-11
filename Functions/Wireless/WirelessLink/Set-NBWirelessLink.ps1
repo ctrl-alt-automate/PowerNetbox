@@ -1,5 +1,25 @@
+<#
+.SYNOPSIS
+    Updates an existing irelessLink in Netbox W module.
+
+.DESCRIPTION
+    Updates an existing irelessLink in Netbox W module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBWirelessLink
+
+    Returns all irelessLink objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBWirelessLink {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[uint64]$Interface_A,[uint64]$Interface_B,
         [string]$SSID,[string]$Status,[uint64]$Tenant,[string]$Auth_Type,[string]$Auth_Cipher,[string]$Auth_PSK,
         [string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)

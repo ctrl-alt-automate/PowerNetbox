@@ -1,4 +1,4 @@
-﻿
+
 function Get-NBVirtualMachine {
     <#
     .SYNOPSIS
@@ -121,8 +121,10 @@ function Get-NBVirtualMachine {
 
         [uint64]$Role_Id,
 
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [switch]$Raw

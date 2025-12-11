@@ -1,5 +1,24 @@
-﻿
-function Add-NBDCIMInterface {
+<#
+.SYNOPSIS
+    Creates a new CIMInterface in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMInterface in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMInterface
+
+    Returns all CIMInterface objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+
+function New-NBDCIMInterface {
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param

@@ -1,4 +1,23 @@
-﻿
+<#
+.SYNOPSIS
+    Updates an existing irtualMachineInterface in Netbox V module.
+
+.DESCRIPTION
+    Updates an existing irtualMachineInterface in Netbox V module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBVirtualMachineInterface
+
+    Returns all irtualMachineInterface objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+
 function Set-NBVirtualMachineInterface {
     [CmdletBinding(ConfirmImpact = 'Medium',
                    SupportsShouldProcess = $true)]

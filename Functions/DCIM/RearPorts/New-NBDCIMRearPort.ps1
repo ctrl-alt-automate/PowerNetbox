@@ -1,4 +1,23 @@
-﻿function Add-NBDCIMRearPort {
+<#
+.SYNOPSIS
+    Creates a new CIMRearPort in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMRearPort in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMRearPort
+
+    Returns all CIMRearPort objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function New-NBDCIMRearPort {
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param

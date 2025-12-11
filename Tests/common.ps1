@@ -15,5 +15,5 @@ $script:invokeParams = @{
     SkipCertificateCheck = $true;
 }
 
-. ../credential.ps1
+. (Join-Path $PSScriptRoot ".." "credential.ps1")
 #TODO: Add check if no ipaddress/token info...

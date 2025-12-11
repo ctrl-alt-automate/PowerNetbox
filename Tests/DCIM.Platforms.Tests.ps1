@@ -1,4 +1,4 @@
-﻿
+
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
@@ -6,13 +6,13 @@ param
 Import-Module Pester
 Remove-Module NetboxPS -Force -ErrorAction SilentlyContinue
 
-$ModulePath = "$PSScriptRoot\..\dist\NetboxPS.psd1"
+ = Join-Path  ".." "NetboxPS" "NetboxPS.psd1"
 
 if (Test-Path $ModulePath) {
     Import-Module $ModulePath -ErrorAction Stop
 }
 
-Describe -Name "DCIM Platforms Tests" -Tag 'DCIM', 'platforms' -Fixture {
+Describe "DCIM Platforms Tests" -Tag 'DCIM', 'platforms' {
     Mock -CommandName 'CheckNetboxIsConnected' -Verifiable -ModuleName 'NetboxPS' -MockWith {
         return $true
     }
@@ -38,12 +38,12 @@ Describe -Name "DCIM Platforms Tests" -Tag 'DCIM', 'platforms' -Fixture {
     }
 
     InModuleScope -ModuleName 'NetboxPS' -ScriptBlock {
-        Context -Name "Get-NBDCIMPlatform" -Fixture {
+        Context "Get-NBDCIMPlatform" {
             It "Should request the default number of platforms" {
                 $Result = Get-NBDCIMPlatform
 
-                Assert-VerifiableMock
-                Assert-MockCalled -CommandName 'Invoke-RestMethod' -Times 1 -Scope 'It' -Exactly
+                Should -InvokeVerifiable
+                Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -Scope 'It' -Exactly
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/platforms/'
@@ -53,8 +53,8 @@ Describe -Name "DCIM Platforms Tests" -Tag 'DCIM', 'platforms' -Fixture {
             It "Should request with a limit and offset" {
                 $Result = Get-NBDCIMPlatform -Limit 10 -Offset 100
 
-                Assert-VerifiableMock
-                Assert-MockCalled -CommandName 'Invoke-RestMethod' -Times 1 -Scope 'It' -Exactly
+                Should -InvokeVerifiable
+                Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -Scope 'It' -Exactly
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/platforms/?offset=100&limit=10'
@@ -64,8 +64,8 @@ Describe -Name "DCIM Platforms Tests" -Tag 'DCIM', 'platforms' -Fixture {
             It "Should request with a platform name" {
                 $Result = Get-NBDCIMPlatform -Name "Windows Server 2016"
 
-                Assert-VerifiableMock
-                Assert-MockCalled -CommandName 'Invoke-RestMethod' -Times 1 -Scope 'It' -Exactly
+                Should -InvokeVerifiable
+                Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -Scope 'It' -Exactly
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/platforms/?name=Windows+Server+2016'
@@ -75,8 +75,8 @@ Describe -Name "DCIM Platforms Tests" -Tag 'DCIM', 'platforms' -Fixture {
             It "Should request a platform by manufacturer" {
                 $Result = Get-NBDCIMPlatform -Manufacturer 'Cisco'
 
-                Assert-VerifiableMock
-                Assert-MockCalled -CommandName 'Invoke-RestMethod' -Times 1 -Scope 'It' -Exactly
+                Should -InvokeVerifiable
+                Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -Scope 'It' -Exactly
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -BeExactly 'https://netbox.domain.com/api/dcim/platforms/?manufacturer=Cisco'
@@ -86,8 +86,8 @@ Describe -Name "DCIM Platforms Tests" -Tag 'DCIM', 'platforms' -Fixture {
             It "Should request a platform by ID" {
                 $Result = Get-NBDCIMPlatform -Id 10
 
-                Assert-VerifiableMock
-                Assert-MockCalled -CommandName 'Invoke-RestMethod' -Times 1 -Scope 'It' -Exactly
+                Should -InvokeVerifiable
+                Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -Scope 'It' -Exactly
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -BeExactly 'https://netbox.domain.com/api/dcim/platforms/10/'
@@ -97,8 +97,8 @@ Describe -Name "DCIM Platforms Tests" -Tag 'DCIM', 'platforms' -Fixture {
             It "Should request multiple platforms by ID" {
                 $Result = Get-NBDCIMPlatform -Id 10, 20
 
-                Assert-VerifiableMock
-                Assert-MockCalled -CommandName 'Invoke-RestMethod' -Times 2 -Scope 'It' -Exactly
+                Should -InvokeVerifiable
+                Should -Invoke -CommandName 'Invoke-RestMethod' -Times 2 -Scope 'It' -Exactly
 
                 $Result.Method | Should -Be 'GET', 'GET'
                 $Result.Uri | Should -BeExactly 'https://netbox.domain.com/api/dcim/platforms/10/', 'https://netbox.domain.com/api/dcim/platforms/20/'

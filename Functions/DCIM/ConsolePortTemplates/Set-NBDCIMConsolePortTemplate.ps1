@@ -1,5 +1,25 @@
+<#
+.SYNOPSIS
+    Updates an existing CIMConsolePortTemplate in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMConsolePortTemplate in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMConsolePortTemplate
+
+    Returns all CIMConsolePortTemplate objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBDCIMConsolePortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [uint64]$Device_Type,

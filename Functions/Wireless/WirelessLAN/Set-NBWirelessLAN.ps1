@@ -1,5 +1,25 @@
+<#
+.SYNOPSIS
+    Updates an existing irelessLAN in Netbox W module.
+
+.DESCRIPTION
+    Updates an existing irelessLAN in Netbox W module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBWirelessLAN
+
+    Returns all irelessLAN objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBWirelessLAN {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[string]$SSID,[uint64]$Group,[string]$Status,[uint64]$VLAN,[uint64]$Tenant,
         [string]$Auth_Type,[string]$Auth_Cipher,[string]$Auth_PSK,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
     process {

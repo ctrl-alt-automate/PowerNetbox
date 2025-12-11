@@ -1,269 +1,18 @@
 
 
-#region File Add-NBDCIMFrontPort.ps1
-
-function Add-NBDCIMFrontPort {
-    [CmdletBinding()]
-    [OutputType([pscustomobject])]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [uint64]$Device,
-
-        [uint64]$Module,
-
-        [Parameter(Mandatory = $true)]
-        [string]$Name,
-
-        [string]$Label,
-
-        [Parameter(Mandatory = $true)]
-        [string]$Type,
-
-        [ValidatePattern('^[0-9a-f]{6}$')]
-        [string]$Color,
-
-        [Parameter(Mandatory = $true)]
-        [uint64]$Rear_Port,
-
-        [uint64]$Rear_Port_Position,
-
-        [string]$Description,
-
-        [bool]$Mark_Connected,
-
-        [uint16[]]$Tags
-
-    )
-
-    $Segments = [System.Collections.ArrayList]::new(@('dcim', 'front-ports'))
-
-    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters
-
-    $URI = BuildNewURI -Segments $URIComponents.Segments
-
-    InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method POST
-}
-
-#endregion
-
-#region File Add-NBDCIMInterface.ps1
-
-
-function Add-NBDCIMInterface {
-    [CmdletBinding()]
-    [OutputType([pscustomobject])]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [uint64]$Device,
-
-        [Parameter(Mandatory = $true)]
-        [string]$Name,
-
-        [ValidateSet('virtual', 'bridge', 'lag', '100base-tx', '1000base-t', '2.5gbase-t', '5gbase-t', '10gbase-t', '10gbase-cx4', '1000base-x-gbic', '1000base-x-sfp', '10gbase-x-sfpp', '10gbase-x-xfp', '10gbase-x-xenpak', '10gbase-x-x2', '25gbase-x-sfp28', '50gbase-x-sfp56', '40gbase-x-qsfpp', '50gbase-x-sfp28', '100gbase-x-cfp', '100gbase-x-cfp2', '200gbase-x-cfp2', '100gbase-x-cfp4', '100gbase-x-cpak', '100gbase-x-qsfp28', '200gbase-x-qsfp56', '400gbase-x-qsfpdd', '400gbase-x-osfp', '1000base-kx', '10gbase-kr', '10gbase-kx4', '25gbase-kr', '40gbase-kr4', '50gbase-kr', '100gbase-kp4', '100gbase-kr2', '100gbase-kr4', 'ieee802.11a', 'ieee802.11g', 'ieee802.11n', 'ieee802.11ac', 'ieee802.11ad', 'ieee802.11ax', 'ieee802.11ay', 'ieee802.15.1', 'other-wireless', 'gsm', 'cdma', 'lte', 'sonet-oc3', 'sonet-oc12', 'sonet-oc48', 'sonet-oc192', 'sonet-oc768', 'sonet-oc1920', 'sonet-oc3840', '1gfc-sfp', '2gfc-sfp', '4gfc-sfp', '8gfc-sfpp', '16gfc-sfpp', '32gfc-sfp28', '64gfc-qsfpp', '128gfc-qsfp28', 'infiniband-sdr', 'infiniband-ddr', 'infiniband-qdr', 'infiniband-fdr10', 'infiniband-fdr', 'infiniband-edr', 'infiniband-hdr', 'infiniband-ndr', 'infiniband-xdr', 't1', 'e1', 't3', 'e3', 'xdsl', 'docsis', 'gpon', 'xg-pon', 'xgs-pon', 'ng-pon2', 'epon', '10g-epon', 'cisco-stackwise', 'cisco-stackwise-plus', 'cisco-flexstack', 'cisco-flexstack-plus', 'cisco-stackwise-80', 'cisco-stackwise-160', 'cisco-stackwise-320', 'cisco-stackwise-480', 'juniper-vcp', 'extreme-summitstack', 'extreme-summitstack-128', 'extreme-summitstack-256', 'extreme-summitstack-512', 'other', IgnoreCase = $true)]
-        [string]$Type,
-
-        [bool]$Enabled,
-
-        [object]$Form_Factor,
-
-        [uint16]$MTU,
-
-        [string]$MAC_Address,
-
-        [bool]$MGMT_Only,
-
-        [uint64]$LAG,
-
-        [string]$Description,
-
-        [ValidateSet('Access', 'Tagged', 'Tagged All', '100', '200', '300', IgnoreCase = $true)]
-        [string]$Mode,
-
-        [ValidateRange(1, 4094)]
-        [uint16]$Untagged_VLAN,
-
-        [ValidateRange(1, 4094)]
-        [uint16[]]$Tagged_VLANs
-    )
-
-    if (-not [System.String]::IsNullOrWhiteSpace($Mode)) {
-        $PSBoundParameters.Mode = switch ($Mode) {
-            'Access' {
-                100
-                break
-            }
-
-            'Tagged' {
-                200
-                break
-            }
-
-            'Tagged All' {
-                300
-                break
-            }
-
-            default {
-                $_
-            }
-        }
-    }
-
-    $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interfaces'))
-
-    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters
-
-    $URI = BuildNewURI -Segments $URIComponents.Segments
-
-    InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method POST
-}
-
-#endregion
-
-#region File Add-NBDCIMInterfaceConnection.ps1
-
-
-function Add-NBDCIMInterfaceConnection {
-    <#
-    .SYNOPSIS
-        Create a new connection between two interfaces
-
-    .DESCRIPTION
-        Create a new connection between two interfaces
-
-    .PARAMETER Connection_Status
-        Is it connected or planned?
-
-    .PARAMETER Interface_A
-        Database ID of interface A
-
-    .PARAMETER Interface_B
-        Database ID of interface B
-
-    .EXAMPLE
-        PS C:\> Add-NBDCIMInterfaceConnection -Interface_A $value1 -Interface_B $value2
-
-    .NOTES
-        Additional information about the function.
-#>
-
-    [CmdletBinding()]
-    [OutputType([pscustomobject])]
-    param
-    (
-        [object]$Connection_Status,
-
-        [Parameter(Mandatory = $true)]
-        [uint64]$Interface_A,
-
-        [Parameter(Mandatory = $true)]
-        [uint64]$Interface_B
-    )
-
-    # Verify if both Interfaces exist
-    Get-NBDCIMInterface -Id $Interface_A -ErrorAction Stop | Out-null
-    Get-NBDCIMInterface -Id $Interface_B -ErrorAction Stop | Out-null
-
-    $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interface-connections'))
-
-    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters
-
-    $URI = BuildNewURI -Segments $URIComponents.Segments
-
-    InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method POST
-}
-
-#endregion
-
-#region File Add-NBDCIMRearPort.ps1
-
-function Add-NBDCIMRearPort {
-    [CmdletBinding()]
-    [OutputType([pscustomobject])]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [uint64]$Device,
-
-        [uint64]$Module,
-
-        [Parameter(Mandatory = $true)]
-        [string]$Name,
-
-        [string]$Label,
-
-        [Parameter(Mandatory = $true)]
-        [string]$Type,
-
-        [ValidatePattern('^[0-9a-f]{6}$')]
-        [string]$Color,
-
-        [uint16]$Positions = 1,
-
-        [string]$Description,
-
-        [bool]$Mark_Connected,
-
-        [uint16[]]$Tags
-    )
-
-    begin {
-
-    }
-
-    process {
-        $Segments = [System.Collections.ArrayList]::new(@('dcim', 'rear-ports'))
-
-        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters
-
-        $URI = BuildNewURI -Segments $URIComponents.Segments
-
-        InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method POST
-    }
-
-    end {
-
-    }
-}
-
-#endregion
-
-#region File Add-NBVirtualMachineInterface.ps1
-
-
-function Add-NBVirtualMachineInterface {
-    [CmdletBinding()]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [string]$Name,
-
-        [Parameter(Mandatory = $true)]
-        [uint64]$Virtual_Machine,
-
-        [boolean]$Enabled = $true,
-
-        [string]$MAC_Address,
-
-        [uint16]$MTU,
-
-        [string]$Description,
-
-        [switch]$Raw
-    )
-
-    $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'interfaces'))
-
-    $PSBoundParameters.Enabled = $Enabled
-
-    $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters
-
-    $uri = BuildNewURI -Segments $URIComponents.Segments
-
-    InvokeNetboxRequest -URI $uri -Method POST -Body $URIComponents.Parameters
-}
+#region File Aliases.ps1
+
+# Backwards compatibility aliases for renamed functions
+# These aliases maintain compatibility with scripts using the old Add-* naming convention
+
+Set-Alias -Name Add-NBDCIMInterface -Value New-NBDCIMInterface
+Set-Alias -Name Add-NBDCIMInterfaceConnection -Value New-NBDCIMInterfaceConnection
+Set-Alias -Name Add-NBDCIMFrontPort -Value New-NBDCIMFrontPort
+Set-Alias -Name Add-NBDCIMRearPort -Value New-NBDCIMRearPort
+Set-Alias -Name Add-NBVirtualMachineInterface -Value New-NBVirtualMachineInterface
+
+# Export aliases
+Export-ModuleMember -Alias Add-NBDCIMInterface, Add-NBDCIMInterfaceConnection, Add-NBDCIMFrontPort, Add-NBDCIMRearPort, Add-NBVirtualMachineInterface
 
 #endregion
 
@@ -449,8 +198,28 @@ function CheckNetboxIsConnected {
 
 #region File Clear-NBCredential.ps1
 
+<#
+.SYNOPSIS
+    Manages redential in Netbox C module.
+
+.DESCRIPTION
+    Manages redential in Netbox C module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Clear-NBCredential
+
+    Returns all redential objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Clear-NBCredential {
     [CmdletBinding(ConfirmImpact = 'Medium', SupportsShouldProcess = $true)]
+    [OutputType([PSCustomObject])]
     param
     (
         [switch]$Force
@@ -712,9 +481,25 @@ function Get-ModelDefinition {
 
 #region File Get-NBAPIDefinition.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Support objects from Netbox Setup module.
 
+.DESCRIPTION
+    Retrieves Support objects from Netbox Setup module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBAPIDefinition
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBAPIDefinition {
     [CmdletBinding()]
+    [OutputType([PSCustomObject])]
     param
     (
         [ValidateSet('json', 'yaml', IgnoreCase = $true)]
@@ -823,10 +608,10 @@ function Get-NBCircuit {
         [Parameter(ParameterSetName = 'Query')]
         [string]$Tenant,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [switch]$Raw
@@ -863,9 +648,25 @@ function Get-NBCircuit {
 
 #region File Get-NBCircuitProvider.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Providers objects from Netbox Circuits module.
 
+.DESCRIPTION
+    Retrieves Providers objects from Netbox Circuits module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBCircuitProvider
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBCircuitProvider {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(ParameterSetName = 'ById',
@@ -888,10 +689,10 @@ function Get-NBCircuitProvider {
         [Parameter(ParameterSetName = 'Query')]
         [string]$Account,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [switch]$Raw
@@ -926,9 +727,25 @@ function Get-NBCircuitProvider {
 
 #region File Get-NBCircuitTermination.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Terminations objects from Netbox Circuits module.
 
+.DESCRIPTION
+    Retrieves Terminations objects from Netbox Circuits module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBCircuitTermination
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBCircuitTermination {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(ParameterSetName = 'ById',
@@ -956,10 +773,10 @@ function Get-NBCircuitTermination {
         [Parameter(ParameterSetName = 'Query')]
         [string]$XConnect_ID,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [switch]$Raw
@@ -996,9 +813,25 @@ function Get-NBCircuitTermination {
 
 #region File Get-NBCircuitType.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Types objects from Netbox Circuits module.
 
+.DESCRIPTION
+    Retrieves Types objects from Netbox Circuits module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBCircuitType
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBCircuitType {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(ParameterSetName = 'ById')]
@@ -1013,10 +846,10 @@ function Get-NBCircuitType {
         [Parameter(ParameterSetName = 'Query')]
         [string]$Query,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [switch]$Raw
@@ -1134,10 +967,10 @@ function Get-NBContact {
         [Parameter(ParameterSetName = 'Query')]
         [uint64]$GroupID,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [switch]$Raw
@@ -1247,10 +1080,10 @@ function Get-NBContactAssignment {
         [Parameter(ParameterSetName = 'Query')]
         [uint64]$Role_Id,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [switch]$Raw
@@ -1342,10 +1175,10 @@ function Get-NBContactRole {
         [Parameter(ParameterSetName = 'Query')]
         [string]$Description,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [switch]$Raw
@@ -1436,10 +1269,10 @@ function Get-NBContentType {
         [Parameter(ParameterSetName = 'Query')]
         [string]$Query,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [switch]$Raw
@@ -1480,6 +1313,22 @@ function Get-NBContentType {
 
 #region File Get-NBCredential.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Get-NBCredential.ps1 objects from Netbox Setup module.
+
+.DESCRIPTION
+    Retrieves Get-NBCredential.ps1 objects from Netbox Setup module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBCredential
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBCredential {
     [CmdletBinding()]
     [OutputType([pscredential])]
@@ -1496,13 +1345,32 @@ function Get-NBCredential {
 
 #region File Get-NBDCIMCable.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Cables objects from Netbox DCIM module.
+
+.DESCRIPTION
+    Retrieves Cables objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMCable
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMCable {
     [CmdletBinding()]
+    [OutputType([PSCustomObject])]
     #region Parameters
     param
     (
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [Parameter(ValueFromPipelineByPropertyName = $true)]
@@ -1556,13 +1424,32 @@ function Get-NBDCIMCable {
 
 #region File Get-NBDCIMCableTermination.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Cable Terminations objects from Netbox DCIM module.
+
+.DESCRIPTION
+    Retrieves Cable Terminations objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMCableTermination
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMCableTermination {
     [CmdletBinding()]
+    [OutputType([PSCustomObject])]
     #region Parameters
     param
     (
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [Parameter(ValueFromPipelineByPropertyName = $true)]
@@ -1596,8 +1483,25 @@ function Get-NBDCIMCableTermination {
 
 #region File Get-NBDCIMConnectedDevice.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Connected Device objects from Netbox DCIM module.
+
+.DESCRIPTION
+    Retrieves Connected Device objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMConnectedDevice
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMConnectedDevice {
     [CmdletBinding()]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][string]$Peer_Device,
         [Parameter(Mandatory = $true)][string]$Peer_Interface,
@@ -1614,8 +1518,25 @@ function Get-NBDCIMConnectedDevice {
 
 #region File Get-NBDCIMConsolePort.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Console Ports objects from Netbox DCIM module.
+
+.DESCRIPTION
+    Retrieves Console Ports objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMConsolePort
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMConsolePort {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,
@@ -1623,8 +1544,10 @@ function Get-NBDCIMConsolePort {
         [Parameter(ParameterSetName = 'Query')][uint64]$Module_Id,
         [Parameter(ParameterSetName = 'Query')][string]$Type,
         [Parameter(ParameterSetName = 'Query')][string]$Query,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
         [switch]$Raw
     )
     process {
@@ -1643,8 +1566,25 @@ function Get-NBDCIMConsolePort {
 
 #region File Get-NBDCIMConsolePortTemplate.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Console Port Templates objects from Netbox DCIM module.
+
+.DESCRIPTION
+    Retrieves Console Port Templates objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMConsolePortTemplate
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMConsolePortTemplate {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,
@@ -1652,8 +1592,10 @@ function Get-NBDCIMConsolePortTemplate {
         [Parameter(ParameterSetName = 'Query')][uint64]$ModuleType_Id,
         [Parameter(ParameterSetName = 'Query')][string]$Type,
         [Parameter(ParameterSetName = 'Query')][string]$Query,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
         [switch]$Raw
     )
     process {
@@ -1672,8 +1614,25 @@ function Get-NBDCIMConsolePortTemplate {
 
 #region File Get-NBDCIMConsoleServerPort.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Console Server Ports objects from Netbox DCIM module.
+
+.DESCRIPTION
+    Retrieves Console Server Ports objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMConsoleServerPort
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMConsoleServerPort {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,
@@ -1681,8 +1640,10 @@ function Get-NBDCIMConsoleServerPort {
         [Parameter(ParameterSetName = 'Query')][uint64]$Module_Id,
         [Parameter(ParameterSetName = 'Query')][string]$Type,
         [Parameter(ParameterSetName = 'Query')][string]$Query,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
         [switch]$Raw
     )
     process {
@@ -1701,8 +1662,25 @@ function Get-NBDCIMConsoleServerPort {
 
 #region File Get-NBDCIMConsoleServerPortTemplate.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Console Server Port Templates objects from Netbox DCIM module.
+
+.DESCRIPTION
+    Retrieves Console Server Port Templates objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMConsoleServerPortTemplate
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMConsoleServerPortTemplate {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,
@@ -1710,8 +1688,10 @@ function Get-NBDCIMConsoleServerPortTemplate {
         [Parameter(ParameterSetName = 'Query')][uint64]$ModuleType_Id,
         [Parameter(ParameterSetName = 'Query')][string]$Type,
         [Parameter(ParameterSetName = 'Query')][string]$Query,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
         [switch]$Raw
     )
     process {
@@ -1730,14 +1710,32 @@ function Get-NBDCIMConsoleServerPortTemplate {
 
 #region File Get-NBDCIMDevice.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Devices objects from Netbox DCIM module.
 
+.DESCRIPTION
+    Retrieves Devices objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMDevice
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMDevice {
     [CmdletBinding()]
+    [OutputType([PSCustomObject])]
     #region Parameters
     param
     (
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [Parameter(ValueFromPipelineByPropertyName = $true)]
@@ -1819,15 +1817,34 @@ function Get-NBDCIMDevice {
 
 #region File Get-NBDCIMDeviceBay.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Device Bays objects from Netbox DCIM module.
+
+.DESCRIPTION
+    Retrieves Device Bays objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMDeviceBay
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMDeviceBay {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,
         [Parameter(ParameterSetName = 'Query')][uint64]$Device_Id,
         [Parameter(ParameterSetName = 'Query')][string]$Query,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
         [switch]$Raw
     )
     process {
@@ -1846,15 +1863,34 @@ function Get-NBDCIMDeviceBay {
 
 #region File Get-NBDCIMDeviceBayTemplate.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Device Bay Templates objects from Netbox DCIM module.
+
+.DESCRIPTION
+    Retrieves Device Bay Templates objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMDeviceBayTemplate
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMDeviceBayTemplate {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,
         [Parameter(ParameterSetName = 'Query')][uint64]$DeviceType_Id,
         [Parameter(ParameterSetName = 'Query')][string]$Query,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
         [switch]$Raw
     )
     process {
@@ -1873,13 +1909,31 @@ function Get-NBDCIMDeviceBayTemplate {
 
 #region File Get-NBDCIMDeviceRole.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Devices objects from Netbox DCIM module.
 
+.DESCRIPTION
+    Retrieves Devices objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMDeviceRole
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMDeviceRole {
     [CmdletBinding()]
+    [OutputType([PSCustomObject])]
     param
     (
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [Parameter(ParameterSetName = 'ById')]
@@ -1927,14 +1981,32 @@ function Get-NBDCIMDeviceRole {
 
 #region File Get-NBDCIMDeviceType.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Devices objects from Netbox DCIM module.
 
+.DESCRIPTION
+    Retrieves Devices objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMDeviceType
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMDeviceType {
     [CmdletBinding()]
+    [OutputType([PSCustomObject])]
     #region Parameters
     param
     (
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
         [uint64[]]$Id,
@@ -1980,13 +2052,31 @@ function Get-NBDCIMDeviceType {
 
 #region File Get-NBDCIMFrontPort.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Front Ports objects from Netbox DCIM module.
+
+.DESCRIPTION
+    Retrieves Front Ports objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMFrontPort
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMFrontPort {
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param
     (
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [Parameter(ValueFromPipelineByPropertyName = $true)]
@@ -2019,8 +2109,25 @@ function Get-NBDCIMFrontPort {
 
 #region File Get-NBDCIMFrontPortTemplate.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Front Port Templates objects from Netbox DCIM module.
+
+.DESCRIPTION
+    Retrieves Front Port Templates objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMFrontPortTemplate
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMFrontPortTemplate {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,
@@ -2028,8 +2135,10 @@ function Get-NBDCIMFrontPortTemplate {
         [Parameter(ParameterSetName = 'Query')][uint64]$ModuleType_Id,
         [Parameter(ParameterSetName = 'Query')][string]$Type,
         [Parameter(ParameterSetName = 'Query')][string]$Query,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
         [switch]$Raw
     )
     process {
@@ -2048,13 +2157,31 @@ function Get-NBDCIMFrontPortTemplate {
 
 #region File Get-NBDCIMInterface.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Interfaces objects from Netbox DCIM module.
+
+.DESCRIPTION
+    Retrieves Interfaces objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMInterface
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMInterface {
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param
     (
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [Parameter(ValueFromPipelineByPropertyName = $true)]
@@ -2099,14 +2226,31 @@ function Get-NBDCIMInterface {
 
 #region File Get-NBDCIMInterfaceConnection.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Interfaces objects from Netbox DCIM module.
 
+.DESCRIPTION
+    Retrieves Interfaces objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMInterfaceConnection
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMInterfaceConnection {
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param
     (
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [uint64]$Id,
@@ -2133,8 +2277,25 @@ function Get-NBDCIMInterfaceConnection {
 
 #region File Get-NBDCIMInterfaceTemplate.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Interface Templates objects from Netbox DCIM module.
+
+.DESCRIPTION
+    Retrieves Interface Templates objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMInterfaceTemplate
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMInterfaceTemplate {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,
@@ -2142,8 +2303,10 @@ function Get-NBDCIMInterfaceTemplate {
         [Parameter(ParameterSetName = 'Query')][uint64]$ModuleType_Id,
         [Parameter(ParameterSetName = 'Query')][string]$Type,
         [Parameter(ParameterSetName = 'Query')][string]$Query,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
         [switch]$Raw
     )
     process {
@@ -2162,8 +2325,25 @@ function Get-NBDCIMInterfaceTemplate {
 
 #region File Get-NBDCIMInventoryItem.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Inventory Items objects from Netbox DCIM module.
+
+.DESCRIPTION
+    Retrieves Inventory Items objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMInventoryItem
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMInventoryItem {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,
@@ -2173,8 +2353,10 @@ function Get-NBDCIMInventoryItem {
         [Parameter(ParameterSetName = 'Query')][string]$Serial,
         [Parameter(ParameterSetName = 'Query')][string]$Asset_Tag,
         [Parameter(ParameterSetName = 'Query')][string]$Query,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
         [switch]$Raw
     )
     process {
@@ -2193,15 +2375,34 @@ function Get-NBDCIMInventoryItem {
 
 #region File Get-NBDCIMInventoryItemRole.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Inventory Item Roles objects from Netbox DCIM module.
+
+.DESCRIPTION
+    Retrieves Inventory Item Roles objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMInventoryItemRole
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMInventoryItemRole {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,
         [Parameter(ParameterSetName = 'Query')][string]$Slug,
         [Parameter(ParameterSetName = 'Query')][string]$Query,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
         [switch]$Raw
     )
     process {
@@ -2220,16 +2421,35 @@ function Get-NBDCIMInventoryItemRole {
 
 #region File Get-NBDCIMInventoryItemTemplate.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Inventory Item Templates objects from Netbox DCIM module.
+
+.DESCRIPTION
+    Retrieves Inventory Item Templates objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMInventoryItemTemplate
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMInventoryItemTemplate {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,
         [Parameter(ParameterSetName = 'Query')][uint64]$DeviceType_Id,
         [Parameter(ParameterSetName = 'Query')][uint64]$Parent_Id,
         [Parameter(ParameterSetName = 'Query')][string]$Query,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
         [switch]$Raw
     )
     process {
@@ -2342,10 +2562,10 @@ function Get-NBDCIMLocation {
         [Parameter(ParameterSetName = 'Query')]
         [uint64]$Tenant_Id,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [switch]$Raw
@@ -2380,8 +2600,25 @@ function Get-NBDCIMLocation {
 
 #region File Get-NBDCIMMACAddress.ps1
 
+<#
+.SYNOPSIS
+    Retrieves MACAddresses objects from Netbox DCIM module.
+
+.DESCRIPTION
+    Retrieves MACAddresses objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMMACAddress
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMMACAddress {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Mac_Address,
@@ -2390,8 +2627,10 @@ function Get-NBDCIMMACAddress {
         [Parameter(ParameterSetName = 'Query')][uint64]$Device_Id,
         [Parameter(ParameterSetName = 'Query')][uint64]$Virtual_Machine_Id,
         [Parameter(ParameterSetName = 'Query')][string]$Query,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
         [switch]$Raw
     )
     process {
@@ -2467,10 +2706,10 @@ function Get-NBDCIMManufacturer {
         [Parameter(ParameterSetName = 'Query')]
         [string]$Query,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [switch]$Raw
@@ -2505,8 +2744,25 @@ function Get-NBDCIMManufacturer {
 
 #region File Get-NBDCIMModule.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Modules objects from Netbox DCIM module.
+
+.DESCRIPTION
+    Retrieves Modules objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMModule
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMModule {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][uint64]$Device_Id,
@@ -2516,8 +2772,10 @@ function Get-NBDCIMModule {
         [Parameter(ParameterSetName = 'Query')][string]$Asset_Tag,
         [Parameter(ParameterSetName = 'Query')][string]$Status,
         [Parameter(ParameterSetName = 'Query')][string]$Query,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
         [switch]$Raw
     )
     process {
@@ -2536,15 +2794,34 @@ function Get-NBDCIMModule {
 
 #region File Get-NBDCIMModuleBay.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Module Bays objects from Netbox DCIM module.
+
+.DESCRIPTION
+    Retrieves Module Bays objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMModuleBay
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMModuleBay {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,
         [Parameter(ParameterSetName = 'Query')][uint64]$Device_Id,
         [Parameter(ParameterSetName = 'Query')][string]$Query,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
         [switch]$Raw
     )
     process {
@@ -2563,15 +2840,34 @@ function Get-NBDCIMModuleBay {
 
 #region File Get-NBDCIMModuleBayTemplate.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Module Bay Templates objects from Netbox DCIM module.
+
+.DESCRIPTION
+    Retrieves Module Bay Templates objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMModuleBayTemplate
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMModuleBayTemplate {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,
         [Parameter(ParameterSetName = 'Query')][uint64]$DeviceType_Id,
         [Parameter(ParameterSetName = 'Query')][string]$Query,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
         [switch]$Raw
     )
     process {
@@ -2590,16 +2886,35 @@ function Get-NBDCIMModuleBayTemplate {
 
 #region File Get-NBDCIMModuleType.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Module Types objects from Netbox DCIM module.
+
+.DESCRIPTION
+    Retrieves Module Types objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMModuleType
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMModuleType {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Model,
         [Parameter(ParameterSetName = 'Query')][uint64]$Manufacturer_Id,
         [Parameter(ParameterSetName = 'Query')][string]$Part_Number,
         [Parameter(ParameterSetName = 'Query')][string]$Query,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
         [switch]$Raw
     )
     process {
@@ -2618,14 +2933,33 @@ function Get-NBDCIMModuleType {
 
 #region File Get-NBDCIMModuleTypeProfile.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Module Type Profiles objects from Netbox DCIM module.
+
+.DESCRIPTION
+    Retrieves Module Type Profiles objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMModuleTypeProfile
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMModuleTypeProfile {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,
         [Parameter(ParameterSetName = 'Query')][string]$Query,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
         [switch]$Raw
     )
     process {
@@ -2644,14 +2978,31 @@ function Get-NBDCIMModuleTypeProfile {
 
 #region File Get-NBDCIMPlatform.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Platforms objects from Netbox DCIM module.
 
+.DESCRIPTION
+    Retrieves Platforms objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMPlatform
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMPlatform {
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param
     (
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [Parameter(ParameterSetName = 'ById')]
@@ -2699,8 +3050,25 @@ function Get-NBDCIMPlatform {
 
 #region File Get-NBDCIMPowerFeed.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Power Feeds objects from Netbox DCIM module.
+
+.DESCRIPTION
+    Retrieves Power Feeds objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMPowerFeed
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMPowerFeed {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,
@@ -2709,8 +3077,10 @@ function Get-NBDCIMPowerFeed {
         [Parameter(ParameterSetName = 'Query')][string]$Status,
         [Parameter(ParameterSetName = 'Query')][string]$Type,
         [Parameter(ParameterSetName = 'Query')][string]$Query,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
         [switch]$Raw
     )
     process {
@@ -2729,8 +3099,25 @@ function Get-NBDCIMPowerFeed {
 
 #region File Get-NBDCIMPowerOutlet.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Power Outlets objects from Netbox DCIM module.
+
+.DESCRIPTION
+    Retrieves Power Outlets objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMPowerOutlet
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMPowerOutlet {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,
@@ -2738,8 +3125,10 @@ function Get-NBDCIMPowerOutlet {
         [Parameter(ParameterSetName = 'Query')][uint64]$Module_Id,
         [Parameter(ParameterSetName = 'Query')][string]$Type,
         [Parameter(ParameterSetName = 'Query')][string]$Query,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
         [switch]$Raw
     )
     process {
@@ -2758,8 +3147,25 @@ function Get-NBDCIMPowerOutlet {
 
 #region File Get-NBDCIMPowerOutletTemplate.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Power Outlet Templates objects from Netbox DCIM module.
+
+.DESCRIPTION
+    Retrieves Power Outlet Templates objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMPowerOutletTemplate
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMPowerOutletTemplate {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,
@@ -2767,8 +3173,10 @@ function Get-NBDCIMPowerOutletTemplate {
         [Parameter(ParameterSetName = 'Query')][uint64]$ModuleType_Id,
         [Parameter(ParameterSetName = 'Query')][string]$Type,
         [Parameter(ParameterSetName = 'Query')][string]$Query,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
         [switch]$Raw
     )
     process {
@@ -2787,16 +3195,35 @@ function Get-NBDCIMPowerOutletTemplate {
 
 #region File Get-NBDCIMPowerPanel.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Power Panels objects from Netbox DCIM module.
+
+.DESCRIPTION
+    Retrieves Power Panels objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMPowerPanel
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMPowerPanel {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,
         [Parameter(ParameterSetName = 'Query')][uint64]$Site_Id,
         [Parameter(ParameterSetName = 'Query')][uint64]$Location_Id,
         [Parameter(ParameterSetName = 'Query')][string]$Query,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
         [switch]$Raw
     )
     process {
@@ -2815,8 +3242,25 @@ function Get-NBDCIMPowerPanel {
 
 #region File Get-NBDCIMPowerPort.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Power Ports objects from Netbox DCIM module.
+
+.DESCRIPTION
+    Retrieves Power Ports objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMPowerPort
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMPowerPort {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,
@@ -2824,8 +3268,10 @@ function Get-NBDCIMPowerPort {
         [Parameter(ParameterSetName = 'Query')][uint64]$Module_Id,
         [Parameter(ParameterSetName = 'Query')][string]$Type,
         [Parameter(ParameterSetName = 'Query')][string]$Query,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
         [switch]$Raw
     )
     process {
@@ -2844,8 +3290,25 @@ function Get-NBDCIMPowerPort {
 
 #region File Get-NBDCIMPowerPortTemplate.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Power Port Templates objects from Netbox DCIM module.
+
+.DESCRIPTION
+    Retrieves Power Port Templates objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMPowerPortTemplate
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMPowerPortTemplate {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,
@@ -2853,8 +3316,10 @@ function Get-NBDCIMPowerPortTemplate {
         [Parameter(ParameterSetName = 'Query')][uint64]$ModuleType_Id,
         [Parameter(ParameterSetName = 'Query')][string]$Type,
         [Parameter(ParameterSetName = 'Query')][string]$Query,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
         [switch]$Raw
     )
     process {
@@ -2984,10 +3449,10 @@ function Get-NBDCIMRack {
         [Parameter(ParameterSetName = 'Query')]
         [string]$Facility_Id,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [switch]$Raw
@@ -3022,8 +3487,25 @@ function Get-NBDCIMRack {
 
 #region File Get-NBDCIMRackReservation.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Rack Reservations objects from Netbox DCIM module.
+
+.DESCRIPTION
+    Retrieves Rack Reservations objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMRackReservation
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMRackReservation {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][uint64]$Rack_Id,
@@ -3031,8 +3513,10 @@ function Get-NBDCIMRackReservation {
         [Parameter(ParameterSetName = 'Query')][uint64]$User_Id,
         [Parameter(ParameterSetName = 'Query')][uint64]$Tenant_Id,
         [Parameter(ParameterSetName = 'Query')][string]$Query,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
         [switch]$Raw
     )
     process {
@@ -3051,15 +3535,34 @@ function Get-NBDCIMRackReservation {
 
 #region File Get-NBDCIMRackRole.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Rack Roles objects from Netbox DCIM module.
+
+.DESCRIPTION
+    Retrieves Rack Roles objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMRackRole
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMRackRole {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,
         [Parameter(ParameterSetName = 'Query')][string]$Slug,
         [Parameter(ParameterSetName = 'Query')][string]$Query,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
         [switch]$Raw
     )
     process {
@@ -3078,16 +3581,35 @@ function Get-NBDCIMRackRole {
 
 #region File Get-NBDCIMRackType.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Rack Types objects from Netbox DCIM module.
+
+.DESCRIPTION
+    Retrieves Rack Types objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMRackType
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMRackType {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Model,
         [Parameter(ParameterSetName = 'Query')][string]$Slug,
         [Parameter(ParameterSetName = 'Query')][uint64]$Manufacturer_Id,
         [Parameter(ParameterSetName = 'Query')][string]$Query,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
         [switch]$Raw
     )
     process {
@@ -3106,13 +3628,31 @@ function Get-NBDCIMRackType {
 
 #region File Get-NBDCIMRearPort.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Rear Ports objects from Netbox DCIM module.
+
+.DESCRIPTION
+    Retrieves Rear Ports objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMRearPort
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMRearPort {
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param
     (
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [Parameter(ValueFromPipelineByPropertyName = $true)]
@@ -3145,8 +3685,25 @@ function Get-NBDCIMRearPort {
 
 #region File Get-NBDCIMRearPortTemplate.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Rear Port Templates objects from Netbox DCIM module.
+
+.DESCRIPTION
+    Retrieves Rear Port Templates objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMRearPortTemplate
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMRearPortTemplate {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,
@@ -3154,8 +3711,10 @@ function Get-NBDCIMRearPortTemplate {
         [Parameter(ParameterSetName = 'Query')][uint64]$ModuleType_Id,
         [Parameter(ParameterSetName = 'Query')][string]$Type,
         [Parameter(ParameterSetName = 'Query')][string]$Query,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
         [switch]$Raw
     )
     process {
@@ -3243,10 +3802,10 @@ function Get-NBDCIMRegion {
         [Parameter(ParameterSetName = 'Query')]
         [uint64]$Parent_Id,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [switch]$Raw
@@ -3281,7 +3840,22 @@ function Get-NBDCIMRegion {
 
 #region File Get-NBDCIMSite.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Sites objects from Netbox DCIM module.
 
+.DESCRIPTION
+    Retrieves Sites objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMSite
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMSite {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([pscustomobject])]
@@ -3341,10 +3915,10 @@ function Get-NBDCIMSite {
         [Parameter(ParameterSetName = 'Query')]
         [string]$Region,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [switch]$Raw
@@ -3450,10 +4024,10 @@ function Get-NBDCIMSiteGroup {
         [Parameter(ParameterSetName = 'Query')]
         [uint64]$Parent_Id,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [switch]$Raw
@@ -3488,8 +4062,25 @@ function Get-NBDCIMSiteGroup {
 
 #region File Get-NBDCIMVirtualChassis.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Virtual Chassis objects from Netbox DCIM module.
+
+.DESCRIPTION
+    Retrieves Virtual Chassis objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMVirtualChassis
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMVirtualChassis {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,
@@ -3499,8 +4090,10 @@ function Get-NBDCIMVirtualChassis {
         [Parameter(ParameterSetName = 'Query')][uint64]$Region_Id,
         [Parameter(ParameterSetName = 'Query')][uint64]$Tenant_Id,
         [Parameter(ParameterSetName = 'Query')][string]$Query,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
         [switch]$Raw
     )
     process {
@@ -3519,8 +4112,25 @@ function Get-NBDCIMVirtualChassis {
 
 #region File Get-NBDCIMVirtualDeviceContext.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Virtual Device Contexts objects from Netbox DCIM module.
+
+.DESCRIPTION
+    Retrieves Virtual Device Contexts objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMVirtualDeviceContext
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMVirtualDeviceContext {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,
@@ -3530,8 +4140,10 @@ function Get-NBDCIMVirtualDeviceContext {
         [Parameter(ParameterSetName = 'Query')][uint64]$Primary_Ip4_Id,
         [Parameter(ParameterSetName = 'Query')][uint64]$Primary_Ip6_Id,
         [Parameter(ParameterSetName = 'Query')][string]$Query,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
         [switch]$Raw
     )
     process {
@@ -3550,8 +4162,25 @@ function Get-NBDCIMVirtualDeviceContext {
 
 #region File Get-NBHostname.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Get-NBHostname.ps1 objects from Netbox Setup module.
+
+.DESCRIPTION
+    Retrieves Get-NBHostname.ps1 objects from Netbox Setup module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBHostname
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBHostname {
     [CmdletBinding()]
+    [OutputType([PSCustomObject])]
     param ()
 
     Write-Verbose "Getting Netbox hostname"
@@ -3566,8 +4195,25 @@ function Get-NBHostname {
 
 #region File Get-NBHostPort.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Get-NBHost Port.ps1 objects from Netbox Setup module.
+
+.DESCRIPTION
+    Retrieves Get-NBHost Port.ps1 objects from Netbox Setup module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBHostPort
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBHostPort {
     [CmdletBinding()]
+    [OutputType([PSCustomObject])]
     param ()
 
     Write-Verbose "Getting Netbox host port"
@@ -3582,8 +4228,25 @@ function Get-NBHostPort {
 
 #region File Get-NBHostScheme.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Get-NBHost Scheme.ps1 objects from Netbox Setup module.
+
+.DESCRIPTION
+    Retrieves Get-NBHost Scheme.ps1 objects from Netbox Setup module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBHostScheme
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBHostScheme {
     [CmdletBinding()]
+    [OutputType([PSCustomObject])]
     param ()
 
     Write-Verbose "Getting Netbox host scheme"
@@ -3598,8 +4261,25 @@ function Get-NBHostScheme {
 
 #region File Get-NBInvokeParams.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Get-NBInvoke Params.ps1 objects from Netbox Setup module.
+
+.DESCRIPTION
+    Retrieves Get-NBInvoke Params.ps1 objects from Netbox Setup module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBInvokeParams
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBInvokeParams {
     [CmdletBinding()]
+    [OutputType([PSCustomObject])]
     param ()
 
     Write-Verbose "Getting Netbox InvokeParams"
@@ -3614,8 +4294,25 @@ function Get-NBInvokeParams {
 
 #region File Get-NBIPAMAddress.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Address objects from Netbox IPAM module.
+
+.DESCRIPTION
+    Retrieves Address objects from Netbox IPAM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBIPAMAddress
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBIPAMAddress {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(ParameterSetName = 'Query',
@@ -3670,10 +4367,10 @@ function Get-NBIPAMAddress {
         [Parameter(ParameterSetName = 'Query')]
         [object]$Role,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [switch]$Raw
@@ -3712,9 +4409,25 @@ function Get-NBIPAMAddress {
 
 #region File Get-NBIPAMAddressRange.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Range objects from Netbox IPAM module.
 
+.DESCRIPTION
+    Retrieves Range objects from Netbox IPAM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBIPAMAddressRange
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBIPAMAddressRange {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(ParameterSetName = 'Query',
@@ -3748,10 +4461,10 @@ function Get-NBIPAMAddressRange {
         [Parameter(ParameterSetName = 'Query')]
         [object]$Role,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [switch]$Raw
@@ -3790,9 +4503,25 @@ function Get-NBIPAMAddressRange {
 
 #region File Get-NBIPAMAggregate.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Aggregate objects from Netbox IPAM module.
 
+.DESCRIPTION
+    Retrieves Aggregate objects from Netbox IPAM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBIPAMAggregate
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBIPAMAggregate {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(ParameterSetName = 'Query')]
@@ -3816,10 +4545,10 @@ function Get-NBIPAMAggregate {
         [Parameter(ParameterSetName = 'Query')]
         [datetime]$Date_Added,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [switch]$Raw
@@ -3930,10 +4659,10 @@ function Get-NBIPAMASN {
         [Parameter(ParameterSetName = 'Query')]
         [uint64]$Site_Id,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [switch]$Raw
@@ -4031,10 +4760,10 @@ function Get-NBIPAMASNRange {
         [Parameter(ParameterSetName = 'Query')]
         [uint64]$Tenant_Id,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [switch]$Raw
@@ -4134,16 +4863,35 @@ function Get-NBIPAMAvailableIP {
 
 #region File Get-NBIPAMFHRPGroup.ps1
 
+<#
+.SYNOPSIS
+    Retrieves FHRPGroup objects from Netbox IPAM module.
+
+.DESCRIPTION
+    Retrieves FHRPGroup objects from Netbox IPAM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBIPAMFHRPGroup
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBIPAMFHRPGroup {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,
         [Parameter(ParameterSetName = 'Query')][string]$Protocol,
         [Parameter(ParameterSetName = 'Query')][uint16]$Group_Id,
         [Parameter(ParameterSetName = 'Query')][string]$Query,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
         [switch]$Raw
     )
     process {
@@ -4162,16 +4910,35 @@ function Get-NBIPAMFHRPGroup {
 
 #region File Get-NBIPAMFHRPGroupAssignment.ps1
 
+<#
+.SYNOPSIS
+    Retrieves FHRPGroup Assignment objects from Netbox IPAM module.
+
+.DESCRIPTION
+    Retrieves FHRPGroup Assignment objects from Netbox IPAM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBIPAMFHRPGroupAssignment
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBIPAMFHRPGroupAssignment {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][uint64]$Group_Id,
         [Parameter(ParameterSetName = 'Query')][uint64]$Interface_Id,
         [Parameter(ParameterSetName = 'Query')][uint64]$Device_Id,
         [Parameter(ParameterSetName = 'Query')][uint64]$Virtual_Machine_Id,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
         [switch]$Raw
     )
     process {
@@ -4337,10 +5104,10 @@ function Get-NBIPAMPrefix {
         [Parameter(ParameterSetName = 'Query')]
         [uint64]$Role_Id,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [switch]$Raw
@@ -4387,16 +5154,35 @@ function Get-NBIPAMPrefix {
 
 #region File Get-NBIPAMRIR.ps1
 
+<#
+.SYNOPSIS
+    Retrieves RIR objects from Netbox IPAM module.
+
+.DESCRIPTION
+    Retrieves RIR objects from Netbox IPAM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBIPAMRIR
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBIPAMRIR {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,
         [Parameter(ParameterSetName = 'Query')][string]$Slug,
         [Parameter(ParameterSetName = 'Query')][string]$Query,
         [Parameter(ParameterSetName = 'Query')][bool]$Is_Private,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
         [switch]$Raw
     )
     process {
@@ -4474,10 +5260,10 @@ function Get-NBIPAMRole {
         [Parameter(ParameterSetName = 'Query')]
         [switch]$Brief,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [switch]$Raw
@@ -4592,10 +5378,10 @@ function Get-NBIPAMRouteTarget {
         [Parameter(ParameterSetName = 'Query')]
         [uint64]$Exporting_VRF_Id,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [switch]$Raw
@@ -4707,10 +5493,10 @@ function Get-NBIPAMService {
         [Parameter(ParameterSetName = 'Query')]
         [uint64]$Virtual_Machine_Id,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [switch]$Raw
@@ -4810,10 +5596,10 @@ function Get-NBIPAMServiceTemplate {
         [Parameter(ParameterSetName = 'Query')]
         [uint16]$Port,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [switch]$Raw
@@ -4848,9 +5634,25 @@ function Get-NBIPAMServiceTemplate {
 
 #region File Get-NBIPAMVLAN.ps1
 
+<#
+.SYNOPSIS
+    Retrieves VLAN objects from Netbox IPAM module.
 
+.DESCRIPTION
+    Retrieves VLAN objects from Netbox IPAM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBIPAMVLAN
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBIPAMVLAN {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(ParameterSetName = 'Query',
@@ -4903,10 +5705,10 @@ function Get-NBIPAMVLAN {
         [Parameter(ParameterSetName = 'Query')]
         [uint64]$Role_Id,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [switch]$Raw
@@ -4949,8 +5751,25 @@ function Get-NBIPAMVLAN {
 
 #region File Get-NBIPAMVLANGroup.ps1
 
+<#
+.SYNOPSIS
+    Retrieves VLANGroup objects from Netbox IPAM module.
+
+.DESCRIPTION
+    Retrieves VLANGroup objects from Netbox IPAM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBIPAMVLANGroup
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBIPAMVLANGroup {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,
@@ -4960,8 +5779,10 @@ function Get-NBIPAMVLANGroup {
         [Parameter(ParameterSetName = 'Query')][string]$Site,
         [Parameter(ParameterSetName = 'Query')][uint64]$Location_Id,
         [Parameter(ParameterSetName = 'Query')][uint64]$Rack_Id,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
         [switch]$Raw
     )
     process {
@@ -4980,14 +5801,33 @@ function Get-NBIPAMVLANGroup {
 
 #region File Get-NBIPAMVLANTranslationPolicy.ps1
 
+<#
+.SYNOPSIS
+    Retrieves VLANTranslation Policy objects from Netbox IPAM module.
+
+.DESCRIPTION
+    Retrieves VLANTranslation Policy objects from Netbox IPAM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBIPAMVLANTranslationPolicy
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBIPAMVLANTranslationPolicy {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,
         [Parameter(ParameterSetName = 'Query')][string]$Query,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
         [switch]$Raw
     )
     process {
@@ -5006,15 +5846,34 @@ function Get-NBIPAMVLANTranslationPolicy {
 
 #region File Get-NBIPAMVLANTranslationRule.ps1
 
+<#
+.SYNOPSIS
+    Retrieves VLANTranslation Rule objects from Netbox IPAM module.
+
+.DESCRIPTION
+    Retrieves VLANTranslation Rule objects from Netbox IPAM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBIPAMVLANTranslationRule
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBIPAMVLANTranslationRule {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][uint64]$Policy_Id,
         [Parameter(ParameterSetName = 'Query')][uint64]$Local_Vid,
         [Parameter(ParameterSetName = 'Query')][uint64]$Remote_Vid,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
         [switch]$Raw
     )
     process {
@@ -5113,10 +5972,10 @@ function Get-NBIPAMVRF {
         [Parameter(ParameterSetName = 'Query')]
         [bool]$Enforce_Unique,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [switch]$Raw
@@ -5151,7 +6010,22 @@ function Get-NBIPAMVRF {
 
 #region File Get-NBTag.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Tags objects from Netbox Extras module.
 
+.DESCRIPTION
+    Retrieves Tags objects from Netbox Extras module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBTag
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBTag {
     [CmdletBinding()]
     [OutputType([pscustomobject])]
@@ -5164,8 +6038,10 @@ function Get-NBTag {
 
         [string]$Slug,
 
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [switch]$Raw
@@ -5258,10 +6134,10 @@ function Get-NBTenant {
         [Parameter(ParameterSetName = 'Query')]
         [hashtable]$CustomFields,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [switch]$Raw
@@ -5300,7 +6176,22 @@ function Get-NBTenant {
 
 #region File Get-NBTimeout.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Get-NBTimeout.ps1 objects from Netbox Setup module.
 
+.DESCRIPTION
+    Retrieves Get-NBTimeout.ps1 objects from Netbox Setup module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBTimeout
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBTimeout {
     [CmdletBinding()]
     [OutputType([uint16])]
@@ -5318,9 +6209,25 @@ function Get-NBTimeout {
 
 #region File Get-NBVersion.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Get-NBVersion.ps1 objects from Netbox Setup module.
 
+.DESCRIPTION
+    Retrieves Get-NBVersion.ps1 objects from Netbox Setup module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBVersion
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBVersion {
     [CmdletBinding()]
+    [OutputType([PSCustomObject])]
     param ()
 
     $Segments = [System.Collections.ArrayList]::new(@('status'))
@@ -5412,8 +6319,10 @@ function Get-NBVirtualizationCluster {
 
         [uint64]$Site_Id,
 
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [switch]$Raw
@@ -5432,9 +6341,25 @@ function Get-NBVirtualizationCluster {
 
 #region File Get-NBVirtualizationClusterGroup.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Virtualization Cluster objects from Netbox Virtualization module.
 
+.DESCRIPTION
+    Retrieves Virtualization Cluster objects from Netbox Virtualization module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBVirtualizationClusterGroup
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBVirtualizationClusterGroup {
     [CmdletBinding()]
+    [OutputType([PSCustomObject])]
     param
     (
         [string]$Name,
@@ -5447,8 +6372,10 @@ function Get-NBVirtualizationClusterGroup {
 
         [uint64[]]$Id,
 
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [switch]$Raw
@@ -5590,8 +6517,10 @@ function Get-NBVirtualMachine {
 
         [uint64]$Role_Id,
 
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [switch]$Raw
@@ -5682,8 +6611,10 @@ function Get-NBVirtualMachineInterface {
 
         [string]$MAC_Address,
 
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [switch]$Raw
@@ -5704,10 +6635,29 @@ function Get-NBVirtualMachineInterface {
 
 #region File Get-NBVPNIKEPolicy.ps1
 
+<#
+.SYNOPSIS
+    Retrieves IKEPolicy objects from Netbox VPN module.
+
+.DESCRIPTION
+    Retrieves IKEPolicy objects from Netbox VPN module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBVPNIKEPolicy
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBVPNIKEPolicy {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param([Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
-        [Parameter(ParameterSetName = 'Query')][string]$Name,[Parameter(ParameterSetName = 'Query')][uint16]$Limit,[Parameter(ParameterSetName = 'Query')][uint16]$Offset,[switch]$Raw)
+        [Parameter(ParameterSetName = 'Query')][string]$Name,[ValidateRange(1, 1000)]
+        [uint16]$Limit,[ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,[switch]$Raw)
     process {
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','ike-policies',$i)) -Raw:$Raw } }
@@ -5720,10 +6670,29 @@ function Get-NBVPNIKEPolicy {
 
 #region File Get-NBVPNIKEProposal.ps1
 
+<#
+.SYNOPSIS
+    Retrieves IKEProposal objects from Netbox VPN module.
+
+.DESCRIPTION
+    Retrieves IKEProposal objects from Netbox VPN module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBVPNIKEProposal
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBVPNIKEProposal {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param([Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
-        [Parameter(ParameterSetName = 'Query')][string]$Name,[Parameter(ParameterSetName = 'Query')][uint16]$Limit,[Parameter(ParameterSetName = 'Query')][uint16]$Offset,[switch]$Raw)
+        [Parameter(ParameterSetName = 'Query')][string]$Name,[ValidateRange(1, 1000)]
+        [uint16]$Limit,[ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,[switch]$Raw)
     process {
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','ike-proposals',$i)) -Raw:$Raw } }
@@ -5736,10 +6705,29 @@ function Get-NBVPNIKEProposal {
 
 #region File Get-NBVPNIPSecPolicy.ps1
 
+<#
+.SYNOPSIS
+    Retrieves IPSec Policy objects from Netbox VPN module.
+
+.DESCRIPTION
+    Retrieves IPSec Policy objects from Netbox VPN module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBVPNIPSecPolicy
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBVPNIPSecPolicy {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param([Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
-        [Parameter(ParameterSetName = 'Query')][string]$Name,[Parameter(ParameterSetName = 'Query')][uint16]$Limit,[Parameter(ParameterSetName = 'Query')][uint16]$Offset,[switch]$Raw)
+        [Parameter(ParameterSetName = 'Query')][string]$Name,[ValidateRange(1, 1000)]
+        [uint16]$Limit,[ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,[switch]$Raw)
     process {
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','ipsec-policies',$i)) -Raw:$Raw } }
@@ -5752,10 +6740,29 @@ function Get-NBVPNIPSecPolicy {
 
 #region File Get-NBVPNIPSecProfile.ps1
 
+<#
+.SYNOPSIS
+    Retrieves IPSec Profile objects from Netbox VPN module.
+
+.DESCRIPTION
+    Retrieves IPSec Profile objects from Netbox VPN module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBVPNIPSecProfile
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBVPNIPSecProfile {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param([Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
-        [Parameter(ParameterSetName = 'Query')][string]$Name,[Parameter(ParameterSetName = 'Query')][uint16]$Limit,[Parameter(ParameterSetName = 'Query')][uint16]$Offset,[switch]$Raw)
+        [Parameter(ParameterSetName = 'Query')][string]$Name,[ValidateRange(1, 1000)]
+        [uint16]$Limit,[ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,[switch]$Raw)
     process {
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','ipsec-profiles',$i)) -Raw:$Raw } }
@@ -5768,10 +6775,29 @@ function Get-NBVPNIPSecProfile {
 
 #region File Get-NBVPNIPSecProposal.ps1
 
+<#
+.SYNOPSIS
+    Retrieves IPSec Proposal objects from Netbox VPN module.
+
+.DESCRIPTION
+    Retrieves IPSec Proposal objects from Netbox VPN module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBVPNIPSecProposal
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBVPNIPSecProposal {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param([Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
-        [Parameter(ParameterSetName = 'Query')][string]$Name,[Parameter(ParameterSetName = 'Query')][uint16]$Limit,[Parameter(ParameterSetName = 'Query')][uint16]$Offset,[switch]$Raw)
+        [Parameter(ParameterSetName = 'Query')][string]$Name,[ValidateRange(1, 1000)]
+        [uint16]$Limit,[ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,[switch]$Raw)
     process {
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','ipsec-proposals',$i)) -Raw:$Raw } }
@@ -5784,12 +6810,31 @@ function Get-NBVPNIPSecProposal {
 
 #region File Get-NBVPNL2VPN.ps1
 
+<#
+.SYNOPSIS
+    Retrieves L2VPN objects from Netbox VPN module.
+
+.DESCRIPTION
+    Retrieves L2VPN objects from Netbox VPN module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBVPNL2VPN
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBVPNL2VPN {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param([Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,[Parameter(ParameterSetName = 'Query')][string]$Slug,
         [Parameter(ParameterSetName = 'Query')][string]$Type,[Parameter(ParameterSetName = 'Query')][uint64]$Tenant_Id,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,[Parameter(ParameterSetName = 'Query')][uint16]$Offset,[switch]$Raw)
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,[ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,[switch]$Raw)
     process {
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','l2vpns',$i)) -Raw:$Raw } }
@@ -5802,10 +6847,29 @@ function Get-NBVPNL2VPN {
 
 #region File Get-NBVPNL2VPNTermination.ps1
 
+<#
+.SYNOPSIS
+    Retrieves L2VPNTermination objects from Netbox VPN module.
+
+.DESCRIPTION
+    Retrieves L2VPNTermination objects from Netbox VPN module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBVPNL2VPNTermination
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBVPNL2VPNTermination {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param([Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
-        [Parameter(ParameterSetName = 'Query')][uint64]$L2VPN_Id,[Parameter(ParameterSetName = 'Query')][uint16]$Limit,[Parameter(ParameterSetName = 'Query')][uint16]$Offset,[switch]$Raw)
+        [Parameter(ParameterSetName = 'Query')][uint64]$L2VPN_Id,[ValidateRange(1, 1000)]
+        [uint16]$Limit,[ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,[switch]$Raw)
     process {
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','l2vpn-terminations',$i)) -Raw:$Raw } }
@@ -5818,6 +6882,22 @@ function Get-NBVPNL2VPNTermination {
 
 #region File Get-NBVPNTunnel.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Tunnel objects from Netbox VPN module.
+
+.DESCRIPTION
+    Retrieves Tunnel objects from Netbox VPN module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBVPNTunnel
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBVPNTunnel {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([PSCustomObject])]
@@ -5830,8 +6910,10 @@ function Get-NBVPNTunnel {
         [Parameter(ParameterSetName = 'Query')][string]$Status,
         [Parameter(ParameterSetName = 'Query')][uint64]$Group_Id,
         [Parameter(ParameterSetName = 'Query')][string]$Encapsulation,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Offset,
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
         [switch]$Raw
     )
     process {
@@ -5857,11 +6939,30 @@ function Get-NBVPNTunnel {
 
 #region File Get-NBVPNTunnelGroup.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Tunnel Group objects from Netbox VPN module.
+
+.DESCRIPTION
+    Retrieves Tunnel Group objects from Netbox VPN module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBVPNTunnelGroup
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBVPNTunnelGroup {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param([Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,[Parameter(ParameterSetName = 'Query')][string]$Slug,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,[Parameter(ParameterSetName = 'Query')][uint16]$Offset,[switch]$Raw)
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,[ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,[switch]$Raw)
     process {
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','tunnel-groups',$i)) -Raw:$Raw } }
@@ -5874,11 +6975,30 @@ function Get-NBVPNTunnelGroup {
 
 #region File Get-NBVPNTunnelTermination.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Tunnel Termination objects from Netbox VPN module.
+
+.DESCRIPTION
+    Retrieves Tunnel Termination objects from Netbox VPN module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBVPNTunnelTermination
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBVPNTunnelTermination {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param([Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][uint64]$Tunnel_Id,[Parameter(ParameterSetName = 'Query')][string]$Role,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,[Parameter(ParameterSetName = 'Query')][uint16]$Offset,[switch]$Raw)
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,[ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,[switch]$Raw)
     process {
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','tunnel-terminations',$i)) -Raw:$Raw } }
@@ -5891,12 +7011,31 @@ function Get-NBVPNTunnelTermination {
 
 #region File Get-NBWirelessLAN.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Wireless LAN objects from Netbox Wireless module.
+
+.DESCRIPTION
+    Retrieves Wireless LAN objects from Netbox Wireless module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBWirelessLAN
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBWirelessLAN {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param([Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$SSID,[Parameter(ParameterSetName = 'Query')][uint64]$Group_Id,
         [Parameter(ParameterSetName = 'Query')][string]$Status,[Parameter(ParameterSetName = 'Query')][uint64]$VLAN_Id,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,[Parameter(ParameterSetName = 'Query')][uint16]$Offset,[switch]$Raw)
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,[ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,[switch]$Raw)
     process {
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('wireless','wireless-lans',$i)) -Raw:$Raw } }
@@ -5909,11 +7048,30 @@ function Get-NBWirelessLAN {
 
 #region File Get-NBWirelessLANGroup.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Wireless LANGroup objects from Netbox Wireless module.
+
+.DESCRIPTION
+    Retrieves Wireless LANGroup objects from Netbox Wireless module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBWirelessLANGroup
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBWirelessLANGroup {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param([Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,[Parameter(ParameterSetName = 'Query')][string]$Slug,
-        [Parameter(ParameterSetName = 'Query')][uint64]$Parent_Id,[Parameter(ParameterSetName = 'Query')][uint16]$Limit,[Parameter(ParameterSetName = 'Query')][uint16]$Offset,[switch]$Raw)
+        [Parameter(ParameterSetName = 'Query')][uint64]$Parent_Id,[ValidateRange(1, 1000)]
+        [uint16]$Limit,[ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,[switch]$Raw)
     process {
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('wireless','wireless-lan-groups',$i)) -Raw:$Raw } }
@@ -5926,11 +7084,30 @@ function Get-NBWirelessLANGroup {
 
 #region File Get-NBWirelessLink.ps1
 
+<#
+.SYNOPSIS
+    Retrieves Wireless Link objects from Netbox Wireless module.
+
+.DESCRIPTION
+    Retrieves Wireless Link objects from Netbox Wireless module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBWirelessLink
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBWirelessLink {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param([Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$SSID,[Parameter(ParameterSetName = 'Query')][string]$Status,
-        [Parameter(ParameterSetName = 'Query')][uint16]$Limit,[Parameter(ParameterSetName = 'Query')][uint16]$Offset,[switch]$Raw)
+        [ValidateRange(1, 1000)]
+        [uint16]$Limit,[ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,[switch]$Raw)
     process {
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('wireless','wireless-links',$i)) -Raw:$Raw } }
@@ -6015,42 +7192,45 @@ function InvokeNetboxRequest {
         $null = $splat.Add('Body', ($Body | ConvertTo-Json -Compress))
     }
 
-    $result = Invoke-RestMethod @splat
-
-    #region TODO: Handle errors a little more gracefully...
-
-    <#
     try {
-        Write-Verbose "Sending request..."
+        Write-Verbose "Sending request to $($URI.Uri.AbsoluteUri)"
         $result = Invoke-RestMethod @splat
-        Write-Verbose $result
     } catch {
-        Write-Verbose "Caught exception"
-        if ($_.Exception.psobject.properties.Name.contains('Response')) {
-            Write-Verbose "Exception contains a response property"
-            if ($Raw) {
-                Write-Verbose "RAW provided...throwing raw exception"
-                throw $_
+        $errorMessage = $_.Exception.Message
+        $statusCode = $null
+
+        # Try to extract response body for better error messages
+        if ($_.Exception.Response) {
+            $statusCode = [int]$_.Exception.Response.StatusCode
+
+            try {
+                $stream = $_.Exception.Response.GetResponseStream()
+                $reader = [System.IO.StreamReader]::new($stream)
+                $responseBody = $reader.ReadToEnd()
+                $reader.Close()
+
+                if ($responseBody) {
+                    $errorData = $responseBody | ConvertFrom-Json -ErrorAction SilentlyContinue
+                    if ($errorData.detail) {
+                        $errorMessage = $errorData.detail
+                    } elseif ($errorData) {
+                        $errorMessage = $responseBody
+                    }
+                }
+            } catch {
+                # Keep original error message if we can't parse response
+                Write-Verbose "Could not parse error response body: $_"
             }
-
-            Write-Verbose "Converting response to object"
-            $myError = GetNetboxAPIErrorBody -Response $_.Exception.Response | ConvertFrom-Json
-        } else {
-            Write-Verbose "No response property found"
-            $myError = $_
         }
+
+        $errorRecord = [System.Management.Automation.ErrorRecord]::new(
+            [System.Exception]::new("Netbox API Error ($statusCode): $errorMessage"),
+            'NetboxAPIError',
+            [System.Management.Automation.ErrorCategory]::InvalidOperation,
+            $URI.Uri.AbsoluteUri
+        )
+        $PSCmdlet.ThrowTerminatingError($errorRecord)
     }
-
-    Write-Verbose "MyError is $($myError.GetType().FullName)"
-
-    if ($myError -is [Exception]) {
-        throw $_
-    } elseif ($myError -is [pscustomobject]) {
-        throw $myError.detail
-    }
-    #>
-
-    #endregion TODO: Handle errors a little more gracefully...
 
     # If the user wants the raw value from the API... otherwise return only the actual result
     if ($Raw) {
@@ -6071,6 +7251,25 @@ function InvokeNetboxRequest {
 
 #region File New-NBCircuit.ps1
 
+<#
+.SYNOPSIS
+    Creates a new ircuit in Netbox C module.
+
+.DESCRIPTION
+    Creates a new ircuit in Netbox C module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBCircuit
+
+    Returns all ircuit objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 
 function New-NBCircuit {
     [CmdletBinding(ConfirmImpact = 'Low',
@@ -6395,8 +7594,28 @@ function New-NBContactRole {
 
 #region File New-NBDCIMCable.ps1
 
+<#
+.SYNOPSIS
+    Creates a new CIMCable in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMCable in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMCable
+
+    Returns all CIMCable objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBDCIMCable {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][string]$A_Terminations_Type,
         [Parameter(Mandatory = $true)][uint64[]]$A_Terminations,
@@ -6428,8 +7647,28 @@ function New-NBDCIMCable {
 
 #region File New-NBDCIMConsolePort.ps1
 
+<#
+.SYNOPSIS
+    Creates a new CIMConsolePort in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMConsolePort in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMConsolePort
+
+    Returns all CIMConsolePort objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBDCIMConsolePort {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][uint64]$Device,
         [Parameter(Mandatory = $true)][string]$Name,
@@ -6456,8 +7695,28 @@ function New-NBDCIMConsolePort {
 
 #region File New-NBDCIMConsolePortTemplate.ps1
 
+<#
+.SYNOPSIS
+    Creates a new CIMConsolePortTemplate in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMConsolePortTemplate in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMConsolePortTemplate
+
+    Returns all CIMConsolePortTemplate objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBDCIMConsolePortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [uint64]$Device_Type,
         [uint64]$Module_Type,
@@ -6480,8 +7739,28 @@ function New-NBDCIMConsolePortTemplate {
 
 #region File New-NBDCIMConsoleServerPort.ps1
 
+<#
+.SYNOPSIS
+    Creates a new CIMConsoleServerPort in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMConsoleServerPort in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMConsoleServerPort
+
+    Returns all CIMConsoleServerPort objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBDCIMConsoleServerPort {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][uint64]$Device,
         [Parameter(Mandatory = $true)][string]$Name,
@@ -6508,8 +7787,28 @@ function New-NBDCIMConsoleServerPort {
 
 #region File New-NBDCIMConsoleServerPortTemplate.ps1
 
+<#
+.SYNOPSIS
+    Creates a new CIMConsoleServerPortTemplate in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMConsoleServerPortTemplate in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMConsoleServerPortTemplate
+
+    Returns all CIMConsoleServerPortTemplate objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBDCIMConsoleServerPortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [uint64]$Device_Type,
         [uint64]$Module_Type,
@@ -6532,6 +7831,25 @@ function New-NBDCIMConsoleServerPortTemplate {
 
 #region File New-NBDCIMDevice.ps1
 
+<#
+.SYNOPSIS
+    Creates a new CIMDevice in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMDevice in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMDevice
+
+    Returns all CIMDevice objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 
 function New-NBDCIMDevice {
     [CmdletBinding(ConfirmImpact = 'low',
@@ -6601,8 +7919,28 @@ function New-NBDCIMDevice {
 
 #region File New-NBDCIMDeviceBay.ps1
 
+<#
+.SYNOPSIS
+    Creates a new CIMDeviceBay in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMDeviceBay in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMDeviceBay
+
+    Returns all CIMDeviceBay objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBDCIMDeviceBay {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][uint64]$Device,
         [Parameter(Mandatory = $true)][string]$Name,
@@ -6626,8 +7964,28 @@ function New-NBDCIMDeviceBay {
 
 #region File New-NBDCIMDeviceBayTemplate.ps1
 
+<#
+.SYNOPSIS
+    Creates a new CIMDeviceBayTemplate in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMDeviceBayTemplate in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMDeviceBayTemplate
+
+    Returns all CIMDeviceBayTemplate objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBDCIMDeviceBayTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][uint64]$Device_Type,
         [Parameter(Mandatory = $true)][string]$Name,
@@ -6648,8 +8006,28 @@ function New-NBDCIMDeviceBayTemplate {
 
 #region File New-NBDCIMDeviceRole.ps1
 
+<#
+.SYNOPSIS
+    Creates a new CIMDeviceRole in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMDeviceRole in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMDeviceRole
+
+    Returns all CIMDeviceRole objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBDCIMDeviceRole {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][string]$Name,
         [string]$Slug,
@@ -6674,8 +8052,28 @@ function New-NBDCIMDeviceRole {
 
 #region File New-NBDCIMDeviceType.ps1
 
+<#
+.SYNOPSIS
+    Creates a new CIMDeviceType in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMDeviceType in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMDeviceType
+
+    Returns all CIMDeviceType objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBDCIMDeviceType {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][uint64]$Manufacturer,
         [Parameter(Mandatory = $true)][string]$Model,
@@ -6704,10 +8102,96 @@ function New-NBDCIMDeviceType {
 
 #endregion
 
+#region File New-NBDCIMFrontPort.ps1
+
+<#
+.SYNOPSIS
+    Creates a new CIMFrontPort in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMFrontPort in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMFrontPort
+
+    Returns all CIMFrontPort objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function New-NBDCIMFrontPort {
+    [CmdletBinding()]
+    [OutputType([pscustomobject])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [uint64]$Device,
+
+        [uint64]$Module,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Name,
+
+        [string]$Label,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Type,
+
+        [ValidatePattern('^[0-9a-f]{6}$')]
+        [string]$Color,
+
+        [Parameter(Mandatory = $true)]
+        [uint64]$Rear_Port,
+
+        [uint64]$Rear_Port_Position,
+
+        [string]$Description,
+
+        [bool]$Mark_Connected,
+
+        [uint16[]]$Tags
+
+    )
+
+    $Segments = [System.Collections.ArrayList]::new(@('dcim', 'front-ports'))
+
+    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters
+
+    $URI = BuildNewURI -Segments $URIComponents.Segments
+
+    InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method POST
+}
+
+#endregion
+
 #region File New-NBDCIMFrontPortTemplate.ps1
 
+<#
+.SYNOPSIS
+    Creates a new CIMFrontPortTemplate in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMFrontPortTemplate in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMFrontPortTemplate
+
+    Returns all CIMFrontPortTemplate objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBDCIMFrontPortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [uint64]$Device_Type,
         [uint64]$Module_Type,
@@ -6731,10 +8215,179 @@ function New-NBDCIMFrontPortTemplate {
 
 #endregion
 
+#region File New-NBDCIMInterface.ps1
+
+<#
+.SYNOPSIS
+    Creates a new CIMInterface in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMInterface in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMInterface
+
+    Returns all CIMInterface objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+
+function New-NBDCIMInterface {
+    [CmdletBinding()]
+    [OutputType([pscustomobject])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [uint64]$Device,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Name,
+
+        [ValidateSet('virtual', 'bridge', 'lag', '100base-tx', '1000base-t', '2.5gbase-t', '5gbase-t', '10gbase-t', '10gbase-cx4', '1000base-x-gbic', '1000base-x-sfp', '10gbase-x-sfpp', '10gbase-x-xfp', '10gbase-x-xenpak', '10gbase-x-x2', '25gbase-x-sfp28', '50gbase-x-sfp56', '40gbase-x-qsfpp', '50gbase-x-sfp28', '100gbase-x-cfp', '100gbase-x-cfp2', '200gbase-x-cfp2', '100gbase-x-cfp4', '100gbase-x-cpak', '100gbase-x-qsfp28', '200gbase-x-qsfp56', '400gbase-x-qsfpdd', '400gbase-x-osfp', '1000base-kx', '10gbase-kr', '10gbase-kx4', '25gbase-kr', '40gbase-kr4', '50gbase-kr', '100gbase-kp4', '100gbase-kr2', '100gbase-kr4', 'ieee802.11a', 'ieee802.11g', 'ieee802.11n', 'ieee802.11ac', 'ieee802.11ad', 'ieee802.11ax', 'ieee802.11ay', 'ieee802.15.1', 'other-wireless', 'gsm', 'cdma', 'lte', 'sonet-oc3', 'sonet-oc12', 'sonet-oc48', 'sonet-oc192', 'sonet-oc768', 'sonet-oc1920', 'sonet-oc3840', '1gfc-sfp', '2gfc-sfp', '4gfc-sfp', '8gfc-sfpp', '16gfc-sfpp', '32gfc-sfp28', '64gfc-qsfpp', '128gfc-qsfp28', 'infiniband-sdr', 'infiniband-ddr', 'infiniband-qdr', 'infiniband-fdr10', 'infiniband-fdr', 'infiniband-edr', 'infiniband-hdr', 'infiniband-ndr', 'infiniband-xdr', 't1', 'e1', 't3', 'e3', 'xdsl', 'docsis', 'gpon', 'xg-pon', 'xgs-pon', 'ng-pon2', 'epon', '10g-epon', 'cisco-stackwise', 'cisco-stackwise-plus', 'cisco-flexstack', 'cisco-flexstack-plus', 'cisco-stackwise-80', 'cisco-stackwise-160', 'cisco-stackwise-320', 'cisco-stackwise-480', 'juniper-vcp', 'extreme-summitstack', 'extreme-summitstack-128', 'extreme-summitstack-256', 'extreme-summitstack-512', 'other', IgnoreCase = $true)]
+        [string]$Type,
+
+        [bool]$Enabled,
+
+        [object]$Form_Factor,
+
+        [uint16]$MTU,
+
+        [string]$MAC_Address,
+
+        [bool]$MGMT_Only,
+
+        [uint64]$LAG,
+
+        [string]$Description,
+
+        [ValidateSet('Access', 'Tagged', 'Tagged All', '100', '200', '300', IgnoreCase = $true)]
+        [string]$Mode,
+
+        [ValidateRange(1, 4094)]
+        [uint16]$Untagged_VLAN,
+
+        [ValidateRange(1, 4094)]
+        [uint16[]]$Tagged_VLANs
+    )
+
+    if (-not [System.String]::IsNullOrWhiteSpace($Mode)) {
+        $PSBoundParameters.Mode = switch ($Mode) {
+            'Access' {
+                100
+                break
+            }
+
+            'Tagged' {
+                200
+                break
+            }
+
+            'Tagged All' {
+                300
+                break
+            }
+
+            default {
+                $_
+            }
+        }
+    }
+
+    $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interfaces'))
+
+    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters
+
+    $URI = BuildNewURI -Segments $URIComponents.Segments
+
+    InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method POST
+}
+
+#endregion
+
+#region File New-NBDCIMInterfaceConnection.ps1
+
+
+function New-NBDCIMInterfaceConnection {
+    <#
+    .SYNOPSIS
+        Create a new connection between two interfaces
+
+    .DESCRIPTION
+        Create a new connection between two interfaces
+
+    .PARAMETER Connection_Status
+        Is it connected or planned?
+
+    .PARAMETER Interface_A
+        Database ID of interface A
+
+    .PARAMETER Interface_B
+        Database ID of interface B
+
+    .EXAMPLE
+        PS C:\> New-NBDCIMInterfaceConnection -Interface_A $value1 -Interface_B $value2
+
+    .NOTES
+        Additional information about the function.
+#>
+
+    [CmdletBinding()]
+    [OutputType([pscustomobject])]
+    param
+    (
+        [object]$Connection_Status,
+
+        [Parameter(Mandatory = $true)]
+        [uint64]$Interface_A,
+
+        [Parameter(Mandatory = $true)]
+        [uint64]$Interface_B
+    )
+
+    # Verify if both Interfaces exist
+    Get-NBDCIMInterface -Id $Interface_A -ErrorAction Stop | Out-null
+    Get-NBDCIMInterface -Id $Interface_B -ErrorAction Stop | Out-null
+
+    $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interface-connections'))
+
+    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters
+
+    $URI = BuildNewURI -Segments $URIComponents.Segments
+
+    InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method POST
+}
+
+#endregion
+
 #region File New-NBDCIMInterfaceTemplate.ps1
 
+<#
+.SYNOPSIS
+    Creates a new CIMInterfaceTemplate in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMInterfaceTemplate in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMInterfaceTemplate
+
+    Returns all CIMInterfaceTemplate objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBDCIMInterfaceTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [uint64]$Device_Type,
         [uint64]$Module_Type,
@@ -6762,8 +8415,28 @@ function New-NBDCIMInterfaceTemplate {
 
 #region File New-NBDCIMInventoryItem.ps1
 
+<#
+.SYNOPSIS
+    Creates a new CIMInventoryItem in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMInventoryItem in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMInventoryItem
+
+    Returns all CIMInventoryItem objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBDCIMInventoryItem {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][uint64]$Device,
         [Parameter(Mandatory = $true)][string]$Name,
@@ -6795,8 +8468,28 @@ function New-NBDCIMInventoryItem {
 
 #region File New-NBDCIMInventoryItemRole.ps1
 
+<#
+.SYNOPSIS
+    Creates a new CIMInventoryItemRole in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMInventoryItemRole in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMInventoryItemRole
+
+    Returns all CIMInventoryItemRole objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBDCIMInventoryItemRole {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][string]$Name,
         [Parameter(Mandatory = $true)][string]$Slug,
@@ -6819,8 +8512,28 @@ function New-NBDCIMInventoryItemRole {
 
 #region File New-NBDCIMInventoryItemTemplate.ps1
 
+<#
+.SYNOPSIS
+    Creates a new CIMInventoryItemTemplate in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMInventoryItemTemplate in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMInventoryItemTemplate
+
+    Returns all CIMInventoryItemTemplate objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBDCIMInventoryItemTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][uint64]$Device_Type,
         [Parameter(Mandatory = $true)][string]$Name,
@@ -6948,8 +8661,28 @@ function New-NBDCIMLocation {
 
 #region File New-NBDCIMMACAddress.ps1
 
+<#
+.SYNOPSIS
+    Creates a new CIMMACAddress in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMMACAddress in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMMACAddress
+
+    Returns all CIMMACAddress objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBDCIMMACAddress {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][string]$Mac_Address,
         [uint64]$Assigned_Object_Id,
@@ -7041,8 +8774,28 @@ function New-NBDCIMManufacturer {
 
 #region File New-NBDCIMModule.ps1
 
+<#
+.SYNOPSIS
+    Creates a new CIMModule in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMModule in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMModule
+
+    Returns all CIMModule objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBDCIMModule {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][uint64]$Device,
         [Parameter(Mandatory = $true)][uint64]$Module_Bay,
@@ -7071,8 +8824,28 @@ function New-NBDCIMModule {
 
 #region File New-NBDCIMModuleBay.ps1
 
+<#
+.SYNOPSIS
+    Creates a new CIMModuleBay in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMModuleBay in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMModuleBay
+
+    Returns all CIMModuleBay objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBDCIMModuleBay {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][uint64]$Device,
         [Parameter(Mandatory = $true)][string]$Name,
@@ -7096,8 +8869,28 @@ function New-NBDCIMModuleBay {
 
 #region File New-NBDCIMModuleBayTemplate.ps1
 
+<#
+.SYNOPSIS
+    Creates a new CIMModuleBayTemplate in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMModuleBayTemplate in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMModuleBayTemplate
+
+    Returns all CIMModuleBayTemplate objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBDCIMModuleBayTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][uint64]$Device_Type,
         [Parameter(Mandatory = $true)][string]$Name,
@@ -7119,8 +8912,28 @@ function New-NBDCIMModuleBayTemplate {
 
 #region File New-NBDCIMModuleType.ps1
 
+<#
+.SYNOPSIS
+    Creates a new CIMModuleType in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMModuleType in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMModuleType
+
+    Returns all CIMModuleType objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBDCIMModuleType {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][uint64]$Manufacturer,
         [Parameter(Mandatory = $true)][string]$Model,
@@ -7146,8 +8959,28 @@ function New-NBDCIMModuleType {
 
 #region File New-NBDCIMModuleTypeProfile.ps1
 
+<#
+.SYNOPSIS
+    Creates a new CIMModuleTypeProfile in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMModuleTypeProfile in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMModuleTypeProfile
+
+    Returns all CIMModuleTypeProfile objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBDCIMModuleTypeProfile {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][string]$Name,
         [string]$Description,
@@ -7169,8 +9002,28 @@ function New-NBDCIMModuleTypeProfile {
 
 #region File New-NBDCIMPlatform.ps1
 
+<#
+.SYNOPSIS
+    Creates a new CIMPlatform in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMPlatform in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMPlatform
+
+    Returns all CIMPlatform objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBDCIMPlatform {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][string]$Name,
         [string]$Slug,
@@ -7194,8 +9047,28 @@ function New-NBDCIMPlatform {
 
 #region File New-NBDCIMPowerFeed.ps1
 
+<#
+.SYNOPSIS
+    Creates a new CIMPowerFeed in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMPowerFeed in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMPowerFeed
+
+    Returns all CIMPowerFeed objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBDCIMPowerFeed {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][uint64]$Power_Panel,
         [Parameter(Mandatory = $true)][string]$Name,
@@ -7227,8 +9100,28 @@ function New-NBDCIMPowerFeed {
 
 #region File New-NBDCIMPowerOutlet.ps1
 
+<#
+.SYNOPSIS
+    Creates a new CIMPowerOutlet in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMPowerOutlet in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMPowerOutlet
+
+    Returns all CIMPowerOutlet objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBDCIMPowerOutlet {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][uint64]$Device,
         [Parameter(Mandatory = $true)][string]$Name,
@@ -7256,8 +9149,28 @@ function New-NBDCIMPowerOutlet {
 
 #region File New-NBDCIMPowerOutletTemplate.ps1
 
+<#
+.SYNOPSIS
+    Creates a new CIMPowerOutletTemplate in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMPowerOutletTemplate in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMPowerOutletTemplate
+
+    Returns all CIMPowerOutletTemplate objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBDCIMPowerOutletTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [uint64]$Device_Type,
         [uint64]$Module_Type,
@@ -7282,8 +9195,28 @@ function New-NBDCIMPowerOutletTemplate {
 
 #region File New-NBDCIMPowerPanel.ps1
 
+<#
+.SYNOPSIS
+    Creates a new CIMPowerPanel in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMPowerPanel in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMPowerPanel
+
+    Returns all CIMPowerPanel objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBDCIMPowerPanel {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][uint64]$Site,
         [Parameter(Mandatory = $true)][string]$Name,
@@ -7307,8 +9240,28 @@ function New-NBDCIMPowerPanel {
 
 #region File New-NBDCIMPowerPort.ps1
 
+<#
+.SYNOPSIS
+    Creates a new CIMPowerPort in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMPowerPort in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMPowerPort
+
+    Returns all CIMPowerPort objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBDCIMPowerPort {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][uint64]$Device,
         [Parameter(Mandatory = $true)][string]$Name,
@@ -7336,8 +9289,28 @@ function New-NBDCIMPowerPort {
 
 #region File New-NBDCIMPowerPortTemplate.ps1
 
+<#
+.SYNOPSIS
+    Creates a new CIMPowerPortTemplate in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMPowerPortTemplate in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMPowerPortTemplate
+
+    Returns all CIMPowerPortTemplate objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBDCIMPowerPortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [uint64]$Device_Type,
         [uint64]$Module_Type,
@@ -7530,8 +9503,28 @@ function New-NBDCIMRack {
 
 #region File New-NBDCIMRackReservation.ps1
 
+<#
+.SYNOPSIS
+    Creates a new CIMRackReservation in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMRackReservation in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMRackReservation
+
+    Returns all CIMRackReservation objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBDCIMRackReservation {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][uint64]$Rack,
         [Parameter(Mandatory = $true)][uint16[]]$Units,
@@ -7556,8 +9549,28 @@ function New-NBDCIMRackReservation {
 
 #region File New-NBDCIMRackRole.ps1
 
+<#
+.SYNOPSIS
+    Creates a new CIMRackRole in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMRackRole in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMRackRole
+
+    Returns all CIMRackRole objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBDCIMRackRole {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][string]$Name,
         [string]$Slug,
@@ -7580,8 +9593,28 @@ function New-NBDCIMRackRole {
 
 #region File New-NBDCIMRackType.ps1
 
+<#
+.SYNOPSIS
+    Creates a new CIMRackType in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMRackType in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMRackType
+
+    Returns all CIMRackType objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBDCIMRackType {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][uint64]$Manufacturer,
         [Parameter(Mandatory = $true)][string]$Model,
@@ -7614,10 +9647,102 @@ function New-NBDCIMRackType {
 
 #endregion
 
+#region File New-NBDCIMRearPort.ps1
+
+<#
+.SYNOPSIS
+    Creates a new CIMRearPort in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMRearPort in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMRearPort
+
+    Returns all CIMRearPort objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function New-NBDCIMRearPort {
+    [CmdletBinding()]
+    [OutputType([pscustomobject])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [uint64]$Device,
+
+        [uint64]$Module,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Name,
+
+        [string]$Label,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Type,
+
+        [ValidatePattern('^[0-9a-f]{6}$')]
+        [string]$Color,
+
+        [uint16]$Positions = 1,
+
+        [string]$Description,
+
+        [bool]$Mark_Connected,
+
+        [uint16[]]$Tags
+    )
+
+    begin {
+
+    }
+
+    process {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim', 'rear-ports'))
+
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters
+
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method POST
+    }
+
+    end {
+
+    }
+}
+
+#endregion
+
 #region File New-NBDCIMRearPortTemplate.ps1
 
+<#
+.SYNOPSIS
+    Creates a new CIMRearPortTemplate in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMRearPortTemplate in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMRearPortTemplate
+
+    Returns all CIMRearPortTemplate objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBDCIMRearPortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [uint64]$Device_Type,
         [uint64]$Module_Type,
@@ -7891,8 +10016,28 @@ function New-NBDCIMSiteGroup {
 
 #region File New-NBDCIMVirtualChassis.ps1
 
+<#
+.SYNOPSIS
+    Creates a new CIMVirtualChassis in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMVirtualChassis in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMVirtualChassis
+
+    Returns all CIMVirtualChassis objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBDCIMVirtualChassis {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][string]$Name,
         [string]$Domain,
@@ -7916,8 +10061,28 @@ function New-NBDCIMVirtualChassis {
 
 #region File New-NBDCIMVirtualDeviceContext.ps1
 
+<#
+.SYNOPSIS
+    Creates a new CIMVirtualDeviceContext in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMVirtualDeviceContext in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMVirtualDeviceContext
+
+    Returns all CIMVirtualDeviceContext objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBDCIMVirtualDeviceContext {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][string]$Name,
         [Parameter(Mandatory = $true)][uint64]$Device,
@@ -8171,8 +10336,28 @@ function New-NBIPAMAddressRange {
 
 #region File New-NBIPAMAggregate.ps1
 
+<#
+.SYNOPSIS
+    Creates a new PAMAggregate in Netbox I module.
+
+.DESCRIPTION
+    Creates a new PAMAggregate in Netbox I module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBIPAMAggregate
+
+    Returns all PAMAggregate objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBIPAMAggregate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][string]$Prefix,
         [Parameter(Mandatory = $true)][uint64]$RIR,
@@ -8364,8 +10549,28 @@ function New-NBIPAMASNRange {
 
 #region File New-NBIPAMFHRPGroup.ps1
 
+<#
+.SYNOPSIS
+    Creates a new PAMFHRPGroup in Netbox I module.
+
+.DESCRIPTION
+    Creates a new PAMFHRPGroup in Netbox I module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBIPAMFHRPGroup
+
+    Returns all PAMFHRPGroup objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBIPAMFHRPGroup {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][ValidateSet('vrrp2','vrrp3','carp','clusterxl','hsrp','glbp','other')][string]$Protocol,
         [Parameter(Mandatory = $true)][uint16]$Group_Id,
@@ -8391,8 +10596,28 @@ function New-NBIPAMFHRPGroup {
 
 #region File New-NBIPAMFHRPGroupAssignment.ps1
 
+<#
+.SYNOPSIS
+    Creates a new PAMFHRPGroupAssignment in Netbox I module.
+
+.DESCRIPTION
+    Creates a new PAMFHRPGroupAssignment in Netbox I module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBIPAMFHRPGroupAssignment
+
+    Returns all PAMFHRPGroupAssignment objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBIPAMFHRPGroupAssignment {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][uint64]$Group,
         [Parameter(Mandatory = $true)][string]$Interface_Type,
@@ -8413,11 +10638,32 @@ function New-NBIPAMFHRPGroupAssignment {
 
 #region File New-NBIPAMPrefix.ps1
 
+<#
+.SYNOPSIS
+    Creates a new PAMPrefix in Netbox I module.
+
+.DESCRIPTION
+    Creates a new PAMPrefix in Netbox I module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBIPAMPrefix
+
+    Returns all PAMPrefix objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 
 function New-NBIPAMPrefix {
     [CmdletBinding(ConfirmImpact = 'low',
         SupportsShouldProcess = $true)]
+    [OutputType([PSCustomObject])]
     [CmdletBinding()]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(Mandatory = $true)]
@@ -8468,8 +10714,28 @@ function New-NBIPAMPrefix {
 
 #region File New-NBIPAMRIR.ps1
 
+<#
+.SYNOPSIS
+    Creates a new PAMRIR in Netbox I module.
+
+.DESCRIPTION
+    Creates a new PAMRIR in Netbox I module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBIPAMRIR
+
+    Returns all PAMRIR objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBIPAMRIR {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][string]$Name,
         [string]$Slug,
@@ -8492,8 +10758,28 @@ function New-NBIPAMRIR {
 
 #region File New-NBIPAMRole.ps1
 
+<#
+.SYNOPSIS
+    Creates a new PAMRole in Netbox I module.
+
+.DESCRIPTION
+    Creates a new PAMRole in Netbox I module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBIPAMRole
+
+    Returns all PAMRole objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBIPAMRole {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][string]$Name,
         [string]$Slug,
@@ -8870,8 +11156,28 @@ function New-NBIPAMVLAN {
 
 #region File New-NBIPAMVLANGroup.ps1
 
+<#
+.SYNOPSIS
+    Creates a new PAMVLANGroup in Netbox I module.
+
+.DESCRIPTION
+    Creates a new PAMVLANGroup in Netbox I module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBIPAMVLANGroup
+
+    Returns all PAMVLANGroup objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBIPAMVLANGroup {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][string]$Name,
         [string]$Slug,
@@ -8897,8 +11203,28 @@ function New-NBIPAMVLANGroup {
 
 #region File New-NBIPAMVLANTranslationPolicy.ps1
 
+<#
+.SYNOPSIS
+    Creates a new PAMVLANTranslationPolicy in Netbox I module.
+
+.DESCRIPTION
+    Creates a new PAMVLANTranslationPolicy in Netbox I module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBIPAMVLANTranslationPolicy
+
+    Returns all PAMVLANTranslationPolicy objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBIPAMVLANTranslationPolicy {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][string]$Name,
         [string]$Description,
@@ -8920,8 +11246,28 @@ function New-NBIPAMVLANTranslationPolicy {
 
 #region File New-NBIPAMVLANTranslationRule.ps1
 
+<#
+.SYNOPSIS
+    Creates a new PAMVLANTranslationRule in Netbox I module.
+
+.DESCRIPTION
+    Creates a new PAMVLANTranslationRule in Netbox I module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBIPAMVLANTranslationRule
+
+    Returns all PAMVLANTranslationRule objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBIPAMVLANTranslationRule {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][uint64]$Policy,
         [Parameter(Mandatory = $true)][ValidateRange(1, 4094)][uint16]$Local_Vid,
@@ -9112,6 +11458,25 @@ function New-NBTenant {
 
 #region File New-NBVirtualMachine.ps1
 
+<#
+.SYNOPSIS
+    Creates a new irtualMachine in Netbox V module.
+
+.DESCRIPTION
+    Creates a new irtualMachine in Netbox V module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBVirtualMachine
+
+    Returns all irtualMachine objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 
 function New-NBVirtualMachine {
     [CmdletBinding(ConfirmImpact = 'low',
@@ -9176,10 +11541,87 @@ function New-NBVirtualMachine {
 
 #endregion
 
+#region File New-NBVirtualMachineInterface.ps1
+
+<#
+.SYNOPSIS
+    Creates a new irtualMachineInterface in Netbox V module.
+
+.DESCRIPTION
+    Creates a new irtualMachineInterface in Netbox V module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBVirtualMachineInterface
+
+    Returns all irtualMachineInterface objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+
+function New-NBVirtualMachineInterface {
+    [CmdletBinding()]
+    [OutputType([PSCustomObject])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [string]$Name,
+
+        [Parameter(Mandatory = $true)]
+        [uint64]$Virtual_Machine,
+
+        [boolean]$Enabled = $true,
+
+        [string]$MAC_Address,
+
+        [uint16]$MTU,
+
+        [string]$Description,
+
+        [switch]$Raw
+    )
+
+    $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'interfaces'))
+
+    $PSBoundParameters.Enabled = $Enabled
+
+    $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters
+
+    $uri = BuildNewURI -Segments $URIComponents.Segments
+
+    InvokeNetboxRequest -URI $uri -Method POST -Body $URIComponents.Parameters
+}
+
+#endregion
+
 #region File New-NBVPNIKEPolicy.ps1
 
+<#
+.SYNOPSIS
+    Creates a new PNIKEPolicy in Netbox V module.
+
+.DESCRIPTION
+    Creates a new PNIKEPolicy in Netbox V module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBVPNIKEPolicy
+
+    Returns all PNIKEPolicy objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBVPNIKEPolicy {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true)][string]$Name,[uint16]$Version,[string]$Mode,[uint64[]]$Proposals,
         [string]$Preshared_Key,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
     process {
@@ -9192,8 +11634,28 @@ function New-NBVPNIKEPolicy {
 
 #region File New-NBVPNIKEProposal.ps1
 
+<#
+.SYNOPSIS
+    Creates a new PNIKEProposal in Netbox V module.
+
+.DESCRIPTION
+    Creates a new PNIKEProposal in Netbox V module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBVPNIKEProposal
+
+    Returns all PNIKEProposal objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBVPNIKEProposal {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true)][string]$Name,[string]$Authentication_Method,[string]$Encryption_Algorithm,
         [string]$Authentication_Algorithm,[uint16]$Group,[uint32]$SA_Lifetime,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
     process {
@@ -9206,8 +11668,28 @@ function New-NBVPNIKEProposal {
 
 #region File New-NBVPNIPSecPolicy.ps1
 
+<#
+.SYNOPSIS
+    Creates a new PNIPSecPolicy in Netbox V module.
+
+.DESCRIPTION
+    Creates a new PNIPSecPolicy in Netbox V module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBVPNIPSecPolicy
+
+    Returns all PNIPSecPolicy objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBVPNIPSecPolicy {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true)][string]$Name,[uint64[]]$Proposals,[bool]$Pfs_Group,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
     process {
         $s = [System.Collections.ArrayList]::new(@('vpn','ipsec-policies')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
@@ -9219,8 +11701,28 @@ function New-NBVPNIPSecPolicy {
 
 #region File New-NBVPNIPSecProfile.ps1
 
+<#
+.SYNOPSIS
+    Creates a new PNIPSecProfile in Netbox V module.
+
+.DESCRIPTION
+    Creates a new PNIPSecProfile in Netbox V module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBVPNIPSecProfile
+
+    Returns all PNIPSecProfile objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBVPNIPSecProfile {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true)][string]$Name,[string]$Mode,[uint64]$IKE_Policy,[uint64]$IPSec_Policy,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
     process {
         $s = [System.Collections.ArrayList]::new(@('vpn','ipsec-profiles')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
@@ -9232,8 +11734,28 @@ function New-NBVPNIPSecProfile {
 
 #region File New-NBVPNIPSecProposal.ps1
 
+<#
+.SYNOPSIS
+    Creates a new PNIPSecProposal in Netbox V module.
+
+.DESCRIPTION
+    Creates a new PNIPSecProposal in Netbox V module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBVPNIPSecProposal
+
+    Returns all PNIPSecProposal objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBVPNIPSecProposal {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true)][string]$Name,[string]$Encryption_Algorithm,[string]$Authentication_Algorithm,[uint32]$SA_Lifetime_Seconds,[uint32]$SA_Lifetime_Data,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
     process {
         $s = [System.Collections.ArrayList]::new(@('vpn','ipsec-proposals')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
@@ -9245,8 +11767,28 @@ function New-NBVPNIPSecProposal {
 
 #region File New-NBVPNL2VPN.ps1
 
+<#
+.SYNOPSIS
+    Creates a new PNL2VPN in Netbox V module.
+
+.DESCRIPTION
+    Creates a new PNL2VPN in Netbox V module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBVPNL2VPN
+
+    Returns all PNL2VPN objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBVPNL2VPN {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true)][string]$Name,[Parameter(Mandatory = $true)][string]$Slug,
         [uint64]$Identifier,[string]$Type,[string]$Status,[uint64]$Tenant,[string]$Description,[string]$Comments,
         [uint64[]]$Import_Targets,[uint64[]]$Export_Targets,[hashtable]$Custom_Fields,[switch]$Raw)
@@ -9260,8 +11802,28 @@ function New-NBVPNL2VPN {
 
 #region File New-NBVPNL2VPNTermination.ps1
 
+<#
+.SYNOPSIS
+    Creates a new PNL2VPNTermination in Netbox V module.
+
+.DESCRIPTION
+    Creates a new PNL2VPNTermination in Netbox V module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBVPNL2VPNTermination
+
+    Returns all PNL2VPNTermination objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBVPNL2VPNTermination {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true)][uint64]$L2VPN,[Parameter(Mandatory = $true)][string]$Assigned_Object_Type,[Parameter(Mandatory = $true)][uint64]$Assigned_Object_Id,[hashtable]$Custom_Fields,[switch]$Raw)
     process {
         $s = [System.Collections.ArrayList]::new(@('vpn','l2vpn-terminations')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
@@ -9273,6 +11835,25 @@ function New-NBVPNL2VPNTermination {
 
 #region File New-NBVPNTunnel.ps1
 
+<#
+.SYNOPSIS
+    Creates a new PNTunnel in Netbox V module.
+
+.DESCRIPTION
+    Creates a new PNTunnel in Netbox V module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBVPNTunnel
+
+    Returns all PNTunnel objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBVPNTunnel {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
@@ -9304,8 +11885,28 @@ function New-NBVPNTunnel {
 
 #region File New-NBVPNTunnelGroup.ps1
 
+<#
+.SYNOPSIS
+    Creates a new PNTunnelGroup in Netbox V module.
+
+.DESCRIPTION
+    Creates a new PNTunnelGroup in Netbox V module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBVPNTunnelGroup
+
+    Returns all PNTunnelGroup objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBVPNTunnelGroup {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true)][string]$Name,[Parameter(Mandatory = $true)][string]$Slug,[string]$Description,[hashtable]$Custom_Fields,[switch]$Raw)
     process {
         $s = [System.Collections.ArrayList]::new(@('vpn','tunnel-groups')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
@@ -9317,8 +11918,28 @@ function New-NBVPNTunnelGroup {
 
 #region File New-NBVPNTunnelTermination.ps1
 
+<#
+.SYNOPSIS
+    Creates a new PNTunnelTermination in Netbox V module.
+
+.DESCRIPTION
+    Creates a new PNTunnelTermination in Netbox V module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBVPNTunnelTermination
+
+    Returns all PNTunnelTermination objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBVPNTunnelTermination {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true)][uint64]$Tunnel,[Parameter(Mandatory = $true)][ValidateSet('peer', 'hub', 'spoke')][string]$Role,
         [string]$Termination_Type,[uint64]$Termination_Id,[uint64]$Outside_IP,[hashtable]$Custom_Fields,[switch]$Raw)
     process {
@@ -9331,8 +11952,28 @@ function New-NBVPNTunnelTermination {
 
 #region File New-NBWirelessLAN.ps1
 
+<#
+.SYNOPSIS
+    Creates a new irelessLAN in Netbox W module.
+
+.DESCRIPTION
+    Creates a new irelessLAN in Netbox W module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBWirelessLAN
+
+    Returns all irelessLAN objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBWirelessLAN {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true)][string]$SSID,[uint64]$Group,[string]$Status,[uint64]$VLAN,[uint64]$Tenant,
         [string]$Auth_Type,[string]$Auth_Cipher,[string]$Auth_PSK,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
     process {
@@ -9345,8 +11986,28 @@ function New-NBWirelessLAN {
 
 #region File New-NBWirelessLANGroup.ps1
 
+<#
+.SYNOPSIS
+    Creates a new irelessLANGroup in Netbox W module.
+
+.DESCRIPTION
+    Creates a new irelessLANGroup in Netbox W module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBWirelessLANGroup
+
+    Returns all irelessLANGroup objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBWirelessLANGroup {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true)][string]$Name,[Parameter(Mandatory = $true)][string]$Slug,[uint64]$Parent,[string]$Description,[hashtable]$Custom_Fields,[switch]$Raw)
     process {
         $s = [System.Collections.ArrayList]::new(@('wireless','wireless-lan-groups')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
@@ -9358,8 +12019,28 @@ function New-NBWirelessLANGroup {
 
 #region File New-NBWirelessLink.ps1
 
+<#
+.SYNOPSIS
+    Creates a new irelessLink in Netbox W module.
+
+.DESCRIPTION
+    Creates a new irelessLink in Netbox W module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBWirelessLink
+
+    Returns all irelessLink objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBWirelessLink {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true)][uint64]$Interface_A,[Parameter(Mandatory = $true)][uint64]$Interface_B,
         [string]$SSID,[string]$Status,[uint64]$Tenant,[string]$Auth_Type,[string]$Auth_Cipher,[string]$Auth_PSK,
         [string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
@@ -9373,8 +12054,28 @@ function New-NBWirelessLink {
 
 #region File Remove-NBDCIMCable.ps1
 
+<#
+.SYNOPSIS
+    Removes a CIMCable from Netbox D module.
+
+.DESCRIPTION
+    Removes a CIMCable from Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBDCIMCable
+
+    Returns all CIMCable objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBDCIMCable {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -9390,8 +12091,28 @@ function Remove-NBDCIMCable {
 
 #region File Remove-NBDCIMConsolePort.ps1
 
+<#
+.SYNOPSIS
+    Removes a CIMConsolePort from Netbox D module.
+
+.DESCRIPTION
+    Removes a CIMConsolePort from Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBDCIMConsolePort
+
+    Returns all CIMConsolePort objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBDCIMConsolePort {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -9407,8 +12128,28 @@ function Remove-NBDCIMConsolePort {
 
 #region File Remove-NBDCIMConsolePortTemplate.ps1
 
+<#
+.SYNOPSIS
+    Removes a CIMConsolePortTemplate from Netbox D module.
+
+.DESCRIPTION
+    Removes a CIMConsolePortTemplate from Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBDCIMConsolePortTemplate
+
+    Returns all CIMConsolePortTemplate objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBDCIMConsolePortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -9424,8 +12165,28 @@ function Remove-NBDCIMConsolePortTemplate {
 
 #region File Remove-NBDCIMConsoleServerPort.ps1
 
+<#
+.SYNOPSIS
+    Removes a CIMConsoleServerPort from Netbox D module.
+
+.DESCRIPTION
+    Removes a CIMConsoleServerPort from Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBDCIMConsoleServerPort
+
+    Returns all CIMConsoleServerPort objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBDCIMConsoleServerPort {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -9441,8 +12202,28 @@ function Remove-NBDCIMConsoleServerPort {
 
 #region File Remove-NBDCIMConsoleServerPortTemplate.ps1
 
+<#
+.SYNOPSIS
+    Removes a CIMConsoleServerPortTemplate from Netbox D module.
+
+.DESCRIPTION
+    Removes a CIMConsoleServerPortTemplate from Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBDCIMConsoleServerPortTemplate
+
+    Returns all CIMConsoleServerPortTemplate objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBDCIMConsoleServerPortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -9518,8 +12299,28 @@ function Remove-NBDCIMDevice {
 
 #region File Remove-NBDCIMDeviceBay.ps1
 
+<#
+.SYNOPSIS
+    Removes a CIMDeviceBay from Netbox D module.
+
+.DESCRIPTION
+    Removes a CIMDeviceBay from Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBDCIMDeviceBay
+
+    Returns all CIMDeviceBay objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBDCIMDeviceBay {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -9535,8 +12336,28 @@ function Remove-NBDCIMDeviceBay {
 
 #region File Remove-NBDCIMDeviceBayTemplate.ps1
 
+<#
+.SYNOPSIS
+    Removes a CIMDeviceBayTemplate from Netbox D module.
+
+.DESCRIPTION
+    Removes a CIMDeviceBayTemplate from Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBDCIMDeviceBayTemplate
+
+    Returns all CIMDeviceBayTemplate objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBDCIMDeviceBayTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -9552,8 +12373,28 @@ function Remove-NBDCIMDeviceBayTemplate {
 
 #region File Remove-NBDCIMDeviceRole.ps1
 
+<#
+.SYNOPSIS
+    Removes a CIMDeviceRole from Netbox D module.
+
+.DESCRIPTION
+    Removes a CIMDeviceRole from Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBDCIMDeviceRole
+
+    Returns all CIMDeviceRole objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBDCIMDeviceRole {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -9569,8 +12410,28 @@ function Remove-NBDCIMDeviceRole {
 
 #region File Remove-NBDCIMDeviceType.ps1
 
+<#
+.SYNOPSIS
+    Removes a CIMDeviceType from Netbox D module.
+
+.DESCRIPTION
+    Removes a CIMDeviceType from Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBDCIMDeviceType
+
+    Returns all CIMDeviceType objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBDCIMDeviceType {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -9586,10 +12447,30 @@ function Remove-NBDCIMDeviceType {
 
 #region File Remove-NBDCIMFrontPort.ps1
 
+<#
+.SYNOPSIS
+    Removes a CIMFrontPort from Netbox D module.
+
+.DESCRIPTION
+    Removes a CIMFrontPort from Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBDCIMFrontPort
+
+    Returns all CIMFrontPort objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBDCIMFrontPort {
 
     [CmdletBinding(ConfirmImpact = 'High',
         SupportsShouldProcess = $true)]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(Mandatory = $true,
@@ -9626,8 +12507,28 @@ function Remove-NBDCIMFrontPort {
 
 #region File Remove-NBDCIMFrontPortTemplate.ps1
 
+<#
+.SYNOPSIS
+    Removes a CIMFrontPortTemplate from Netbox D module.
+
+.DESCRIPTION
+    Removes a CIMFrontPortTemplate from Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBDCIMFrontPortTemplate
+
+    Returns all CIMFrontPortTemplate objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBDCIMFrontPortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -9702,6 +12603,25 @@ function Remove-NBDCIMInterface {
 
 #region File Remove-NBDCIMInterfaceConnection.ps1
 
+<#
+.SYNOPSIS
+    Removes a CIMInterfaceConnection from Netbox D module.
+
+.DESCRIPTION
+    Removes a CIMInterfaceConnection from Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBDCIMInterfaceConnection
+
+    Returns all CIMInterfaceConnection objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 
 function Remove-NBDCIMInterfaceConnection {
     [CmdletBinding(ConfirmImpact = 'High',
@@ -9745,8 +12665,28 @@ function Remove-NBDCIMInterfaceConnection {
 
 #region File Remove-NBDCIMInterfaceTemplate.ps1
 
+<#
+.SYNOPSIS
+    Removes a CIMInterfaceTemplate from Netbox D module.
+
+.DESCRIPTION
+    Removes a CIMInterfaceTemplate from Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBDCIMInterfaceTemplate
+
+    Returns all CIMInterfaceTemplate objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBDCIMInterfaceTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -9762,8 +12702,28 @@ function Remove-NBDCIMInterfaceTemplate {
 
 #region File Remove-NBDCIMInventoryItem.ps1
 
+<#
+.SYNOPSIS
+    Removes a CIMInventoryItem from Netbox D module.
+
+.DESCRIPTION
+    Removes a CIMInventoryItem from Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBDCIMInventoryItem
+
+    Returns all CIMInventoryItem objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBDCIMInventoryItem {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -9779,8 +12739,28 @@ function Remove-NBDCIMInventoryItem {
 
 #region File Remove-NBDCIMInventoryItemRole.ps1
 
+<#
+.SYNOPSIS
+    Removes a CIMInventoryItemRole from Netbox D module.
+
+.DESCRIPTION
+    Removes a CIMInventoryItemRole from Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBDCIMInventoryItemRole
+
+    Returns all CIMInventoryItemRole objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBDCIMInventoryItemRole {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -9796,8 +12776,28 @@ function Remove-NBDCIMInventoryItemRole {
 
 #region File Remove-NBDCIMInventoryItemTemplate.ps1
 
+<#
+.SYNOPSIS
+    Removes a CIMInventoryItemTemplate from Netbox D module.
+
+.DESCRIPTION
+    Removes a CIMInventoryItemTemplate from Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBDCIMInventoryItemTemplate
+
+    Returns all CIMInventoryItemTemplate objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBDCIMInventoryItemTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -9863,8 +12863,28 @@ function Remove-NBDCIMLocation {
 
 #region File Remove-NBDCIMMACAddress.ps1
 
+<#
+.SYNOPSIS
+    Removes a CIMMACAddress from Netbox D module.
+
+.DESCRIPTION
+    Removes a CIMMACAddress from Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBDCIMMACAddress
+
+    Returns all CIMMACAddress objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBDCIMMACAddress {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -9945,8 +12965,28 @@ function Remove-NBDCIMManufacturer {
 
 #region File Remove-NBDCIMModule.ps1
 
+<#
+.SYNOPSIS
+    Removes a CIMModule from Netbox D module.
+
+.DESCRIPTION
+    Removes a CIMModule from Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBDCIMModule
+
+    Returns all CIMModule objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBDCIMModule {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -9962,8 +13002,28 @@ function Remove-NBDCIMModule {
 
 #region File Remove-NBDCIMModuleBay.ps1
 
+<#
+.SYNOPSIS
+    Removes a CIMModuleBay from Netbox D module.
+
+.DESCRIPTION
+    Removes a CIMModuleBay from Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBDCIMModuleBay
+
+    Returns all CIMModuleBay objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBDCIMModuleBay {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -9979,8 +13039,28 @@ function Remove-NBDCIMModuleBay {
 
 #region File Remove-NBDCIMModuleBayTemplate.ps1
 
+<#
+.SYNOPSIS
+    Removes a CIMModuleBayTemplate from Netbox D module.
+
+.DESCRIPTION
+    Removes a CIMModuleBayTemplate from Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBDCIMModuleBayTemplate
+
+    Returns all CIMModuleBayTemplate objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBDCIMModuleBayTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -9996,8 +13076,28 @@ function Remove-NBDCIMModuleBayTemplate {
 
 #region File Remove-NBDCIMModuleType.ps1
 
+<#
+.SYNOPSIS
+    Removes a CIMModuleType from Netbox D module.
+
+.DESCRIPTION
+    Removes a CIMModuleType from Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBDCIMModuleType
+
+    Returns all CIMModuleType objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBDCIMModuleType {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -10013,8 +13113,28 @@ function Remove-NBDCIMModuleType {
 
 #region File Remove-NBDCIMModuleTypeProfile.ps1
 
+<#
+.SYNOPSIS
+    Removes a CIMModuleTypeProfile from Netbox D module.
+
+.DESCRIPTION
+    Removes a CIMModuleTypeProfile from Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBDCIMModuleTypeProfile
+
+    Returns all CIMModuleTypeProfile objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBDCIMModuleTypeProfile {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -10030,8 +13150,28 @@ function Remove-NBDCIMModuleTypeProfile {
 
 #region File Remove-NBDCIMPlatform.ps1
 
+<#
+.SYNOPSIS
+    Removes a CIMPlatform from Netbox D module.
+
+.DESCRIPTION
+    Removes a CIMPlatform from Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBDCIMPlatform
+
+    Returns all CIMPlatform objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBDCIMPlatform {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -10047,8 +13187,28 @@ function Remove-NBDCIMPlatform {
 
 #region File Remove-NBDCIMPowerFeed.ps1
 
+<#
+.SYNOPSIS
+    Removes a CIMPowerFeed from Netbox D module.
+
+.DESCRIPTION
+    Removes a CIMPowerFeed from Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBDCIMPowerFeed
+
+    Returns all CIMPowerFeed objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBDCIMPowerFeed {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -10064,8 +13224,28 @@ function Remove-NBDCIMPowerFeed {
 
 #region File Remove-NBDCIMPowerOutlet.ps1
 
+<#
+.SYNOPSIS
+    Removes a CIMPowerOutlet from Netbox D module.
+
+.DESCRIPTION
+    Removes a CIMPowerOutlet from Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBDCIMPowerOutlet
+
+    Returns all CIMPowerOutlet objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBDCIMPowerOutlet {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -10081,8 +13261,28 @@ function Remove-NBDCIMPowerOutlet {
 
 #region File Remove-NBDCIMPowerOutletTemplate.ps1
 
+<#
+.SYNOPSIS
+    Removes a CIMPowerOutletTemplate from Netbox D module.
+
+.DESCRIPTION
+    Removes a CIMPowerOutletTemplate from Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBDCIMPowerOutletTemplate
+
+    Returns all CIMPowerOutletTemplate objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBDCIMPowerOutletTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -10098,8 +13298,28 @@ function Remove-NBDCIMPowerOutletTemplate {
 
 #region File Remove-NBDCIMPowerPanel.ps1
 
+<#
+.SYNOPSIS
+    Removes a CIMPowerPanel from Netbox D module.
+
+.DESCRIPTION
+    Removes a CIMPowerPanel from Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBDCIMPowerPanel
+
+    Returns all CIMPowerPanel objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBDCIMPowerPanel {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -10115,8 +13335,28 @@ function Remove-NBDCIMPowerPanel {
 
 #region File Remove-NBDCIMPowerPort.ps1
 
+<#
+.SYNOPSIS
+    Removes a CIMPowerPort from Netbox D module.
+
+.DESCRIPTION
+    Removes a CIMPowerPort from Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBDCIMPowerPort
+
+    Returns all CIMPowerPort objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBDCIMPowerPort {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -10132,8 +13372,28 @@ function Remove-NBDCIMPowerPort {
 
 #region File Remove-NBDCIMPowerPortTemplate.ps1
 
+<#
+.SYNOPSIS
+    Removes a CIMPowerPortTemplate from Netbox D module.
+
+.DESCRIPTION
+    Removes a CIMPowerPortTemplate from Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBDCIMPowerPortTemplate
+
+    Returns all CIMPowerPortTemplate objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBDCIMPowerPortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -10214,8 +13474,28 @@ function Remove-NBDCIMRack {
 
 #region File Remove-NBDCIMRackReservation.ps1
 
+<#
+.SYNOPSIS
+    Removes a CIMRackReservation from Netbox D module.
+
+.DESCRIPTION
+    Removes a CIMRackReservation from Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBDCIMRackReservation
+
+    Returns all CIMRackReservation objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBDCIMRackReservation {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -10231,8 +13511,28 @@ function Remove-NBDCIMRackReservation {
 
 #region File Remove-NBDCIMRackRole.ps1
 
+<#
+.SYNOPSIS
+    Removes a CIMRackRole from Netbox D module.
+
+.DESCRIPTION
+    Removes a CIMRackRole from Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBDCIMRackRole
+
+    Returns all CIMRackRole objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBDCIMRackRole {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -10248,8 +13548,28 @@ function Remove-NBDCIMRackRole {
 
 #region File Remove-NBDCIMRackType.ps1
 
+<#
+.SYNOPSIS
+    Removes a CIMRackType from Netbox D module.
+
+.DESCRIPTION
+    Removes a CIMRackType from Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBDCIMRackType
+
+    Returns all CIMRackType objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBDCIMRackType {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -10265,10 +13585,30 @@ function Remove-NBDCIMRackType {
 
 #region File Remove-NBDCIMRearPort.ps1
 
+<#
+.SYNOPSIS
+    Removes a CIMRearPort from Netbox D module.
+
+.DESCRIPTION
+    Removes a CIMRearPort from Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBDCIMRearPort
+
+    Returns all CIMRearPort objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBDCIMRearPort {
 
     [CmdletBinding(ConfirmImpact = 'High',
         SupportsShouldProcess = $true)]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(Mandatory = $true,
@@ -10305,8 +13645,28 @@ function Remove-NBDCIMRearPort {
 
 #region File Remove-NBDCIMRearPortTemplate.ps1
 
+<#
+.SYNOPSIS
+    Removes a CIMRearPortTemplate from Netbox D module.
+
+.DESCRIPTION
+    Removes a CIMRearPortTemplate from Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBDCIMRearPortTemplate
+
+    Returns all CIMRearPortTemplate objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBDCIMRearPortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -10491,8 +13851,28 @@ function Remove-NBDCIMSiteGroup {
 
 #region File Remove-NBDCIMVirtualChassis.ps1
 
+<#
+.SYNOPSIS
+    Removes a CIMVirtualChassis from Netbox D module.
+
+.DESCRIPTION
+    Removes a CIMVirtualChassis from Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBDCIMVirtualChassis
+
+    Returns all CIMVirtualChassis objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBDCIMVirtualChassis {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -10508,8 +13888,28 @@ function Remove-NBDCIMVirtualChassis {
 
 #region File Remove-NBDCIMVirtualDeviceContext.ps1
 
+<#
+.SYNOPSIS
+    Removes a CIMVirtualDeviceContext from Netbox D module.
+
+.DESCRIPTION
+    Removes a CIMVirtualDeviceContext from Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBDCIMVirtualDeviceContext
+
+    Returns all CIMVirtualDeviceContext objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBDCIMVirtualDeviceContext {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -10629,8 +14029,28 @@ function Remove-NBIPAMAddressRange {
 
 #region File Remove-NBIPAMAggregate.ps1
 
+<#
+.SYNOPSIS
+    Removes a PAMAggregate from Netbox I module.
+
+.DESCRIPTION
+    Removes a PAMAggregate from Netbox I module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBIPAMAggregate
+
+    Returns all PAMAggregate objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBIPAMAggregate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -10738,8 +14158,28 @@ function Remove-NBIPAMASNRange {
 
 #region File Remove-NBIPAMFHRPGroup.ps1
 
+<#
+.SYNOPSIS
+    Removes a PAMFHRPGroup from Netbox I module.
+
+.DESCRIPTION
+    Removes a PAMFHRPGroup from Netbox I module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBIPAMFHRPGroup
+
+    Returns all PAMFHRPGroup objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBIPAMFHRPGroup {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -10755,8 +14195,28 @@ function Remove-NBIPAMFHRPGroup {
 
 #region File Remove-NBIPAMFHRPGroupAssignment.ps1
 
+<#
+.SYNOPSIS
+    Removes a PAMFHRPGroupAssignment from Netbox I module.
+
+.DESCRIPTION
+    Removes a PAMFHRPGroupAssignment from Netbox I module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBIPAMFHRPGroupAssignment
+
+    Returns all PAMFHRPGroupAssignment objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBIPAMFHRPGroupAssignment {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -10772,8 +14232,28 @@ function Remove-NBIPAMFHRPGroupAssignment {
 
 #region File Remove-NBIPAMPrefix.ps1
 
+<#
+.SYNOPSIS
+    Removes a PAMPrefix from Netbox I module.
+
+.DESCRIPTION
+    Removes a PAMPrefix from Netbox I module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBIPAMPrefix
+
+    Returns all PAMPrefix objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBIPAMPrefix {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -10791,8 +14271,28 @@ function Remove-NBIPAMPrefix {
 
 #region File Remove-NBIPAMRIR.ps1
 
+<#
+.SYNOPSIS
+    Removes a PAMRIR from Netbox I module.
+
+.DESCRIPTION
+    Removes a PAMRIR from Netbox I module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBIPAMRIR
+
+    Returns all PAMRIR objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBIPAMRIR {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -10808,8 +14308,28 @@ function Remove-NBIPAMRIR {
 
 #region File Remove-NBIPAMRole.ps1
 
+<#
+.SYNOPSIS
+    Removes a PAMRole from Netbox I module.
+
+.DESCRIPTION
+    Removes a PAMRole from Netbox I module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBIPAMRole
+
+    Returns all PAMRole objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBIPAMRole {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -10967,8 +14487,28 @@ function Remove-NBIPAMServiceTemplate {
 
 #region File Remove-NBIPAMVLAN.ps1
 
+<#
+.SYNOPSIS
+    Removes a PAMVLAN from Netbox I module.
+
+.DESCRIPTION
+    Removes a PAMVLAN from Netbox I module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBIPAMVLAN
+
+    Returns all PAMVLAN objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBIPAMVLAN {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -10986,8 +14526,28 @@ function Remove-NBIPAMVLAN {
 
 #region File Remove-NBIPAMVLANGroup.ps1
 
+<#
+.SYNOPSIS
+    Removes a PAMVLANGroup from Netbox I module.
+
+.DESCRIPTION
+    Removes a PAMVLANGroup from Netbox I module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBIPAMVLANGroup
+
+    Returns all PAMVLANGroup objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBIPAMVLANGroup {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -11003,8 +14563,28 @@ function Remove-NBIPAMVLANGroup {
 
 #region File Remove-NBIPAMVLANTranslationPolicy.ps1
 
+<#
+.SYNOPSIS
+    Removes a PAMVLANTranslationPolicy from Netbox I module.
+
+.DESCRIPTION
+    Removes a PAMVLANTranslationPolicy from Netbox I module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBIPAMVLANTranslationPolicy
+
+    Returns all PAMVLANTranslationPolicy objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBIPAMVLANTranslationPolicy {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -11020,8 +14600,28 @@ function Remove-NBIPAMVLANTranslationPolicy {
 
 #region File Remove-NBIPAMVLANTranslationRule.ps1
 
+<#
+.SYNOPSIS
+    Removes a PAMVLANTranslationRule from Netbox I module.
+
+.DESCRIPTION
+    Removes a PAMVLANTranslationRule from Netbox I module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBIPAMVLANTranslationRule
+
+    Returns all PAMVLANTranslationRule objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBIPAMVLANTranslationRule {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [switch]$Raw
@@ -11147,8 +14747,28 @@ function Remove-NBVirtualMachine {
 
 #region File Remove-NBVPNIKEPolicy.ps1
 
+<#
+.SYNOPSIS
+    Removes a PNIKEPolicy from Netbox V module.
+
+.DESCRIPTION
+    Removes a PNIKEPolicy from Netbox V module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBVPNIKEPolicy
+
+    Returns all PNIKEPolicy objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBVPNIKEPolicy {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[switch]$Raw)
     process { if ($PSCmdlet.ShouldProcess($Id, 'Delete IKE policy')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','ike-policies',$Id)) -Method DELETE -Raw:$Raw } }
 }
@@ -11157,8 +14777,28 @@ function Remove-NBVPNIKEPolicy {
 
 #region File Remove-NBVPNIKEProposal.ps1
 
+<#
+.SYNOPSIS
+    Removes a PNIKEProposal from Netbox V module.
+
+.DESCRIPTION
+    Removes a PNIKEProposal from Netbox V module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBVPNIKEProposal
+
+    Returns all PNIKEProposal objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBVPNIKEProposal {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[switch]$Raw)
     process { if ($PSCmdlet.ShouldProcess($Id, 'Delete IKE proposal')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','ike-proposals',$Id)) -Method DELETE -Raw:$Raw } }
 }
@@ -11167,8 +14807,28 @@ function Remove-NBVPNIKEProposal {
 
 #region File Remove-NBVPNIPSecPolicy.ps1
 
+<#
+.SYNOPSIS
+    Removes a PNIPSecPolicy from Netbox V module.
+
+.DESCRIPTION
+    Removes a PNIPSecPolicy from Netbox V module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBVPNIPSecPolicy
+
+    Returns all PNIPSecPolicy objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBVPNIPSecPolicy {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[switch]$Raw)
     process { if ($PSCmdlet.ShouldProcess($Id, 'Delete IPSec policy')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','ipsec-policies',$Id)) -Method DELETE -Raw:$Raw } }
 }
@@ -11177,8 +14837,28 @@ function Remove-NBVPNIPSecPolicy {
 
 #region File Remove-NBVPNIPSecProfile.ps1
 
+<#
+.SYNOPSIS
+    Removes a PNIPSecProfile from Netbox V module.
+
+.DESCRIPTION
+    Removes a PNIPSecProfile from Netbox V module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBVPNIPSecProfile
+
+    Returns all PNIPSecProfile objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBVPNIPSecProfile {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[switch]$Raw)
     process { if ($PSCmdlet.ShouldProcess($Id, 'Delete IPSec profile')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','ipsec-profiles',$Id)) -Method DELETE -Raw:$Raw } }
 }
@@ -11187,8 +14867,28 @@ function Remove-NBVPNIPSecProfile {
 
 #region File Remove-NBVPNIPSecProposal.ps1
 
+<#
+.SYNOPSIS
+    Removes a PNIPSecProposal from Netbox V module.
+
+.DESCRIPTION
+    Removes a PNIPSecProposal from Netbox V module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBVPNIPSecProposal
+
+    Returns all PNIPSecProposal objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBVPNIPSecProposal {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[switch]$Raw)
     process { if ($PSCmdlet.ShouldProcess($Id, 'Delete IPSec proposal')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','ipsec-proposals',$Id)) -Method DELETE -Raw:$Raw } }
 }
@@ -11197,8 +14897,28 @@ function Remove-NBVPNIPSecProposal {
 
 #region File Remove-NBVPNL2VPN.ps1
 
+<#
+.SYNOPSIS
+    Removes a PNL2VPN from Netbox V module.
+
+.DESCRIPTION
+    Removes a PNL2VPN from Netbox V module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBVPNL2VPN
+
+    Returns all PNL2VPN objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBVPNL2VPN {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[switch]$Raw)
     process { if ($PSCmdlet.ShouldProcess($Id, 'Delete L2VPN')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','l2vpns',$Id)) -Method DELETE -Raw:$Raw } }
 }
@@ -11207,8 +14927,28 @@ function Remove-NBVPNL2VPN {
 
 #region File Remove-NBVPNL2VPNTermination.ps1
 
+<#
+.SYNOPSIS
+    Removes a PNL2VPNTermination from Netbox V module.
+
+.DESCRIPTION
+    Removes a PNL2VPNTermination from Netbox V module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBVPNL2VPNTermination
+
+    Returns all PNL2VPNTermination objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBVPNL2VPNTermination {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[switch]$Raw)
     process { if ($PSCmdlet.ShouldProcess($Id, 'Delete L2VPN termination')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','l2vpn-terminations',$Id)) -Method DELETE -Raw:$Raw } }
 }
@@ -11217,6 +14957,25 @@ function Remove-NBVPNL2VPNTermination {
 
 #region File Remove-NBVPNTunnel.ps1
 
+<#
+.SYNOPSIS
+    Removes a PNTunnel from Netbox V module.
+
+.DESCRIPTION
+    Removes a PNTunnel from Netbox V module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBVPNTunnel
+
+    Returns all PNTunnel objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBVPNTunnel {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     [OutputType([PSCustomObject])]
@@ -11238,8 +14997,28 @@ function Remove-NBVPNTunnel {
 
 #region File Remove-NBVPNTunnelGroup.ps1
 
+<#
+.SYNOPSIS
+    Removes a PNTunnelGroup from Netbox V module.
+
+.DESCRIPTION
+    Removes a PNTunnelGroup from Netbox V module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBVPNTunnelGroup
+
+    Returns all PNTunnelGroup objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBVPNTunnelGroup {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[switch]$Raw)
     process { if ($PSCmdlet.ShouldProcess($Id, 'Delete tunnel group')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','tunnel-groups',$Id)) -Method DELETE -Raw:$Raw } }
 }
@@ -11248,8 +15027,28 @@ function Remove-NBVPNTunnelGroup {
 
 #region File Remove-NBVPNTunnelTermination.ps1
 
+<#
+.SYNOPSIS
+    Removes a PNTunnelTermination from Netbox V module.
+
+.DESCRIPTION
+    Removes a PNTunnelTermination from Netbox V module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBVPNTunnelTermination
+
+    Returns all PNTunnelTermination objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBVPNTunnelTermination {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[switch]$Raw)
     process { if ($PSCmdlet.ShouldProcess($Id, 'Delete tunnel termination')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','tunnel-terminations',$Id)) -Method DELETE -Raw:$Raw } }
 }
@@ -11258,8 +15057,28 @@ function Remove-NBVPNTunnelTermination {
 
 #region File Remove-NBWirelessLAN.ps1
 
+<#
+.SYNOPSIS
+    Removes a irelessLAN from Netbox W module.
+
+.DESCRIPTION
+    Removes a irelessLAN from Netbox W module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBWirelessLAN
+
+    Returns all irelessLAN objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBWirelessLAN {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[switch]$Raw)
     process { if ($PSCmdlet.ShouldProcess($Id, 'Delete wireless LAN')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('wireless','wireless-lans',$Id)) -Method DELETE -Raw:$Raw } }
 }
@@ -11268,8 +15087,28 @@ function Remove-NBWirelessLAN {
 
 #region File Remove-NBWirelessLANGroup.ps1
 
+<#
+.SYNOPSIS
+    Removes a irelessLANGroup from Netbox W module.
+
+.DESCRIPTION
+    Removes a irelessLANGroup from Netbox W module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBWirelessLANGroup
+
+    Returns all irelessLANGroup objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBWirelessLANGroup {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[switch]$Raw)
     process { if ($PSCmdlet.ShouldProcess($Id, 'Delete wireless LAN group')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('wireless','wireless-lan-groups',$Id)) -Method DELETE -Raw:$Raw } }
 }
@@ -11278,8 +15117,28 @@ function Remove-NBWirelessLANGroup {
 
 #region File Remove-NBWirelessLink.ps1
 
+<#
+.SYNOPSIS
+    Removes a irelessLink from Netbox W module.
+
+.DESCRIPTION
+    Removes a irelessLink from Netbox W module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBWirelessLink
+
+    Returns all irelessLink objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Remove-NBWirelessLink {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[switch]$Raw)
     process { if ($PSCmdlet.ShouldProcess($Id, 'Delete wireless link')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('wireless','wireless-links',$Id)) -Method DELETE -Raw:$Raw } }
 }
@@ -11600,6 +15459,25 @@ function Set-NBContactRole {
 
 #region File Set-NBCredential.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing redential in Netbox C module.
+
+.DESCRIPTION
+    Updates an existing redential in Netbox C module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBCredential
+
+    Returns all redential objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBCredential {
     [CmdletBinding(DefaultParameterSetName = 'CredsObject',
         ConfirmImpact = 'Low',
@@ -11637,8 +15515,28 @@ function Set-NBCredential {
 
 #region File Set-NBDCIMCable.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing CIMCable in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMCable in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMCable
+
+    Returns all CIMCable objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBDCIMCable {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [string]$Type,
@@ -11667,8 +15565,28 @@ function Set-NBDCIMCable {
 
 #region File Set-NBDCIMConsolePort.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing CIMConsolePort in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMConsolePort in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMConsolePort
+
+    Returns all CIMConsolePort objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBDCIMConsolePort {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [uint64]$Device,
@@ -11696,8 +15614,28 @@ function Set-NBDCIMConsolePort {
 
 #region File Set-NBDCIMConsolePortTemplate.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing CIMConsolePortTemplate in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMConsolePortTemplate in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMConsolePortTemplate
+
+    Returns all CIMConsolePortTemplate objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBDCIMConsolePortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [uint64]$Device_Type,
@@ -11721,8 +15659,28 @@ function Set-NBDCIMConsolePortTemplate {
 
 #region File Set-NBDCIMConsoleServerPort.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing CIMConsoleServerPort in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMConsoleServerPort in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMConsoleServerPort
+
+    Returns all CIMConsoleServerPort objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBDCIMConsoleServerPort {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [uint64]$Device,
@@ -11750,8 +15708,28 @@ function Set-NBDCIMConsoleServerPort {
 
 #region File Set-NBDCIMConsoleServerPortTemplate.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing CIMConsoleServerPortTemplate in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMConsoleServerPortTemplate in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMConsoleServerPortTemplate
+
+    Returns all CIMConsoleServerPortTemplate objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBDCIMConsoleServerPortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [uint64]$Device_Type,
@@ -11775,9 +15753,29 @@ function Set-NBDCIMConsoleServerPortTemplate {
 
 #region File Set-NBDCIMDevice.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing CIMDevice in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMDevice in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMDevice
+
+    Returns all CIMDevice objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 
 function Set-NBDCIMDevice {
     [CmdletBinding(SupportsShouldProcess = $true)]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(Mandatory = $true,
@@ -11856,8 +15854,28 @@ function Set-NBDCIMDevice {
 
 #region File Set-NBDCIMDeviceBay.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing CIMDeviceBay in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMDeviceBay in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMDeviceBay
+
+    Returns all CIMDeviceBay objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBDCIMDeviceBay {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [uint64]$Device,
@@ -11882,8 +15900,28 @@ function Set-NBDCIMDeviceBay {
 
 #region File Set-NBDCIMDeviceBayTemplate.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing CIMDeviceBayTemplate in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMDeviceBayTemplate in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMDeviceBayTemplate
+
+    Returns all CIMDeviceBayTemplate objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBDCIMDeviceBayTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [uint64]$Device_Type,
@@ -11905,8 +15943,28 @@ function Set-NBDCIMDeviceBayTemplate {
 
 #region File Set-NBDCIMDeviceRole.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing CIMDeviceRole in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMDeviceRole in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMDeviceRole
+
+    Returns all CIMDeviceRole objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBDCIMDeviceRole {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [string]$Name,
@@ -11932,8 +15990,28 @@ function Set-NBDCIMDeviceRole {
 
 #region File Set-NBDCIMDeviceType.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing CIMDeviceType in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMDeviceType in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMDeviceType
+
+    Returns all CIMDeviceType objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBDCIMDeviceType {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [uint64]$Manufacturer,
@@ -11965,6 +16043,25 @@ function Set-NBDCIMDeviceType {
 
 #region File Set-NBDCIMFrontPort.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing CIMFrontPort in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMFrontPort in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMFrontPort
+
+    Returns all CIMFrontPort objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBDCIMFrontPort {
     [CmdletBinding(ConfirmImpact = 'Medium',
         SupportsShouldProcess = $true)]
@@ -12030,8 +16127,28 @@ function Set-NBDCIMFrontPort {
 
 #region File Set-NBDCIMFrontPortTemplate.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing CIMFrontPortTemplate in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMFrontPortTemplate in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMFrontPortTemplate
+
+    Returns all CIMFrontPortTemplate objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBDCIMFrontPortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [uint64]$Device_Type,
@@ -12058,6 +16175,25 @@ function Set-NBDCIMFrontPortTemplate {
 
 #region File Set-NBDCIMInterface.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing CIMInterface in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMInterface in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMInterface
+
+    Returns all CIMInterface objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBDCIMInterface {
     [CmdletBinding(ConfirmImpact = 'Medium',
         SupportsShouldProcess = $true)]
@@ -12231,8 +16367,28 @@ function Set-NBDCIMInterfaceConnection {
 
 #region File Set-NBDCIMInterfaceTemplate.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing CIMInterfaceTemplate in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMInterfaceTemplate in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMInterfaceTemplate
+
+    Returns all CIMInterfaceTemplate objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBDCIMInterfaceTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [uint64]$Device_Type,
@@ -12261,8 +16417,28 @@ function Set-NBDCIMInterfaceTemplate {
 
 #region File Set-NBDCIMInventoryItem.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing CIMInventoryItem in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMInventoryItem in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMInventoryItem
+
+    Returns all CIMInventoryItem objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBDCIMInventoryItem {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [uint64]$Device,
@@ -12295,8 +16471,28 @@ function Set-NBDCIMInventoryItem {
 
 #region File Set-NBDCIMInventoryItemRole.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing CIMInventoryItemRole in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMInventoryItemRole in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMInventoryItemRole
+
+    Returns all CIMInventoryItemRole objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBDCIMInventoryItemRole {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [string]$Name,
@@ -12320,8 +16516,28 @@ function Set-NBDCIMInventoryItemRole {
 
 #region File Set-NBDCIMInventoryItemTemplate.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing CIMInventoryItemTemplate in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMInventoryItemTemplate in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMInventoryItemTemplate
+
+    Returns all CIMInventoryItemTemplate objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBDCIMInventoryItemTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [uint64]$Device_Type,
@@ -12452,8 +16668,28 @@ function Set-NBDCIMLocation {
 
 #region File Set-NBDCIMMACAddress.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing CIMMACAddress in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMMACAddress in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMMACAddress
+
+    Returns all CIMMACAddress objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBDCIMMACAddress {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [string]$Mac_Address,
@@ -12551,8 +16787,28 @@ function Set-NBDCIMManufacturer {
 
 #region File Set-NBDCIMModule.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing CIMModule in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMModule in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMModule
+
+    Returns all CIMModule objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBDCIMModule {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [uint64]$Device,
@@ -12580,8 +16836,28 @@ function Set-NBDCIMModule {
 
 #region File Set-NBDCIMModuleBay.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing CIMModuleBay in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMModuleBay in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMModuleBay
+
+    Returns all CIMModuleBay objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBDCIMModuleBay {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [uint64]$Device,
@@ -12606,8 +16882,28 @@ function Set-NBDCIMModuleBay {
 
 #region File Set-NBDCIMModuleBayTemplate.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing CIMModuleBayTemplate in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMModuleBayTemplate in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMModuleBayTemplate
+
+    Returns all CIMModuleBayTemplate objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBDCIMModuleBayTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [uint64]$Device_Type,
@@ -12630,8 +16926,28 @@ function Set-NBDCIMModuleBayTemplate {
 
 #region File Set-NBDCIMModuleType.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing CIMModuleType in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMModuleType in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMModuleType
+
+    Returns all CIMModuleType objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBDCIMModuleType {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [uint64]$Manufacturer,
@@ -12658,8 +16974,28 @@ function Set-NBDCIMModuleType {
 
 #region File Set-NBDCIMModuleTypeProfile.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing CIMModuleTypeProfile in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMModuleTypeProfile in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMModuleTypeProfile
+
+    Returns all CIMModuleTypeProfile objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBDCIMModuleTypeProfile {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [string]$Name,
@@ -12682,8 +17018,28 @@ function Set-NBDCIMModuleTypeProfile {
 
 #region File Set-NBDCIMPlatform.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing CIMPlatform in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMPlatform in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMPlatform
+
+    Returns all CIMPlatform objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBDCIMPlatform {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [string]$Name,
@@ -12708,8 +17064,28 @@ function Set-NBDCIMPlatform {
 
 #region File Set-NBDCIMPowerFeed.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing CIMPowerFeed in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMPowerFeed in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMPowerFeed
+
+    Returns all CIMPowerFeed objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBDCIMPowerFeed {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [uint64]$Power_Panel,
@@ -12742,8 +17118,28 @@ function Set-NBDCIMPowerFeed {
 
 #region File Set-NBDCIMPowerOutlet.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing CIMPowerOutlet in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMPowerOutlet in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMPowerOutlet
+
+    Returns all CIMPowerOutlet objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBDCIMPowerOutlet {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [uint64]$Device,
@@ -12772,8 +17168,28 @@ function Set-NBDCIMPowerOutlet {
 
 #region File Set-NBDCIMPowerOutletTemplate.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing CIMPowerOutletTemplate in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMPowerOutletTemplate in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMPowerOutletTemplate
+
+    Returns all CIMPowerOutletTemplate objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBDCIMPowerOutletTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [uint64]$Device_Type,
@@ -12799,8 +17215,28 @@ function Set-NBDCIMPowerOutletTemplate {
 
 #region File Set-NBDCIMPowerPanel.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing CIMPowerPanel in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMPowerPanel in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMPowerPanel
+
+    Returns all CIMPowerPanel objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBDCIMPowerPanel {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [uint64]$Site,
@@ -12825,8 +17261,28 @@ function Set-NBDCIMPowerPanel {
 
 #region File Set-NBDCIMPowerPort.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing CIMPowerPort in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMPowerPort in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMPowerPort
+
+    Returns all CIMPowerPort objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBDCIMPowerPort {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [uint64]$Device,
@@ -12855,8 +17311,28 @@ function Set-NBDCIMPowerPort {
 
 #region File Set-NBDCIMPowerPortTemplate.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing CIMPowerPortTemplate in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMPowerPortTemplate in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMPowerPortTemplate
+
+    Returns all CIMPowerPortTemplate objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBDCIMPowerPortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [uint64]$Device_Type,
@@ -13055,8 +17531,28 @@ function Set-NBDCIMRack {
 
 #region File Set-NBDCIMRackReservation.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing CIMRackReservation in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMRackReservation in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMRackReservation
+
+    Returns all CIMRackReservation objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBDCIMRackReservation {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [uint64]$Rack,
@@ -13082,8 +17578,28 @@ function Set-NBDCIMRackReservation {
 
 #region File Set-NBDCIMRackRole.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing CIMRackRole in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMRackRole in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMRackRole
+
+    Returns all CIMRackRole objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBDCIMRackRole {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [string]$Name,
@@ -13107,8 +17623,28 @@ function Set-NBDCIMRackRole {
 
 #region File Set-NBDCIMRackType.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing CIMRackType in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMRackType in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMRackType
+
+    Returns all CIMRackType objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBDCIMRackType {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [uint64]$Manufacturer,
@@ -13144,6 +17680,25 @@ function Set-NBDCIMRackType {
 
 #region File Set-NBDCIMRearPort.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing CIMRearPort in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMRearPort in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMRearPort
+
+    Returns all CIMRearPort objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 
 function Set-NBDCIMRearPort {
     [CmdletBinding(ConfirmImpact = 'Medium',
@@ -13208,8 +17763,28 @@ function Set-NBDCIMRearPort {
 
 #region File Set-NBDCIMRearPortTemplate.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing CIMRearPortTemplate in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMRearPortTemplate in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMRearPortTemplate
+
+    Returns all CIMRearPortTemplate objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBDCIMRearPortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [uint64]$Device_Type,
@@ -13528,8 +18103,28 @@ function Set-NBDCIMSiteGroup {
 
 #region File Set-NBDCIMVirtualChassis.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing CIMVirtualChassis in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMVirtualChassis in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMVirtualChassis
+
+    Returns all CIMVirtualChassis objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBDCIMVirtualChassis {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [string]$Name,
@@ -13554,8 +18149,28 @@ function Set-NBDCIMVirtualChassis {
 
 #region File Set-NBDCIMVirtualDeviceContext.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing CIMVirtualDeviceContext in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMVirtualDeviceContext in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMVirtualDeviceContext
+
+    Returns all CIMVirtualDeviceContext objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBDCIMVirtualDeviceContext {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [string]$Name,
@@ -13584,6 +18199,25 @@ function Set-NBDCIMVirtualDeviceContext {
 
 #region File Set-NBHostName.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing ostName in Netbox H module.
+
+.DESCRIPTION
+    Updates an existing ostName in Netbox H module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBHostName
+
+    Returns all ostName objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBHostName {
     [CmdletBinding(ConfirmImpact = 'Low',
         SupportsShouldProcess = $true)]
@@ -13604,6 +18238,25 @@ function Set-NBHostName {
 
 #region File Set-NBHostPort.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing ostPort in Netbox H module.
+
+.DESCRIPTION
+    Updates an existing ostPort in Netbox H module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBHostPort
+
+    Returns all ostPort objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBHostPort {
     [CmdletBinding(ConfirmImpact = 'Low',
                    SupportsShouldProcess = $true)]
@@ -13624,6 +18277,25 @@ function Set-NBHostPort {
 
 #region File Set-NBHostScheme.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing ostScheme in Netbox H module.
+
+.DESCRIPTION
+    Updates an existing ostScheme in Netbox H module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBHostScheme
+
+    Returns all ostScheme objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBHostScheme {
     [CmdletBinding(ConfirmImpact = 'Low',
                    SupportsShouldProcess = $true)]
@@ -13649,6 +18321,25 @@ function Set-NBHostScheme {
 
 #region File Set-NBInvokeParams.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing nvokeParams in Netbox I module.
+
+.DESCRIPTION
+    Updates an existing nvokeParams in Netbox I module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBInvokeParams
+
+    Returns all nvokeParams objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBInvokeParams {
     [CmdletBinding(ConfirmImpact = 'Low',
         SupportsShouldProcess = $true)]
@@ -13668,10 +18359,30 @@ function Set-NBInvokeParams {
 
 #region File Set-NBIPAMAddress.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing PAMAddress in Netbox I module.
+
+.DESCRIPTION
+    Updates an existing PAMAddress in Netbox I module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBIPAMAddress
+
+    Returns all PAMAddress objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 
 function Set-NBIPAMAddress {
     [CmdletBinding(ConfirmImpact = 'Medium',
         SupportsShouldProcess = $true)]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(Mandatory = $true,
@@ -13756,10 +18467,30 @@ function Set-NBIPAMAddress {
 
 #region File Set-NBIPAMAddressRange.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing PAMAddressRange in Netbox I module.
+
+.DESCRIPTION
+    Updates an existing PAMAddressRange in Netbox I module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBIPAMAddressRange
+
+    Returns all PAMAddressRange objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 
 function Set-NBIPAMAddressRange {
     [CmdletBinding(ConfirmImpact = 'Medium',
                    SupportsShouldProcess = $true)]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(Mandatory = $true,
@@ -13819,8 +18550,28 @@ function Set-NBIPAMAddressRange {
 
 #region File Set-NBIPAMAggregate.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing PAMAggregate in Netbox I module.
+
+.DESCRIPTION
+    Updates an existing PAMAggregate in Netbox I module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBIPAMAggregate
+
+    Returns all PAMAggregate objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBIPAMAggregate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [string]$Prefix,
@@ -14014,8 +18765,28 @@ function Set-NBIPAMASNRange {
 
 #region File Set-NBIPAMFHRPGroup.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing PAMFHRPGroup in Netbox I module.
+
+.DESCRIPTION
+    Updates an existing PAMFHRPGroup in Netbox I module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBIPAMFHRPGroup
+
+    Returns all PAMFHRPGroup objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBIPAMFHRPGroup {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [ValidateSet('vrrp2','vrrp3','carp','clusterxl','hsrp','glbp','other')][string]$Protocol,
@@ -14042,8 +18813,28 @@ function Set-NBIPAMFHRPGroup {
 
 #region File Set-NBIPAMFHRPGroupAssignment.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing PAMFHRPGroupAssignment in Netbox I module.
+
+.DESCRIPTION
+    Updates an existing PAMFHRPGroupAssignment in Netbox I module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBIPAMFHRPGroupAssignment
+
+    Returns all PAMFHRPGroupAssignment objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBIPAMFHRPGroupAssignment {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [uint64]$Group,
@@ -14065,10 +18856,30 @@ function Set-NBIPAMFHRPGroupAssignment {
 
 #region File Set-NBIPAMPrefix.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing PAMPrefix in Netbox I module.
+
+.DESCRIPTION
+    Updates an existing PAMPrefix in Netbox I module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBIPAMPrefix
+
+    Returns all PAMPrefix objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 
 function Set-NBIPAMPrefix {
     [CmdletBinding(ConfirmImpact = 'Medium',
                    SupportsShouldProcess = $true)]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(Mandatory = $true,
@@ -14149,8 +18960,28 @@ function Set-NBIPAMPrefix {
 
 #region File Set-NBIPAMRIR.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing PAMRIR in Netbox I module.
+
+.DESCRIPTION
+    Updates an existing PAMRIR in Netbox I module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBIPAMRIR
+
+    Returns all PAMRIR objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBIPAMRIR {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [string]$Name,
@@ -14174,8 +19005,28 @@ function Set-NBIPAMRIR {
 
 #region File Set-NBIPAMRole.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing PAMRole in Netbox I module.
+
+.DESCRIPTION
+    Updates an existing PAMRole in Netbox I module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBIPAMRole
+
+    Returns all PAMRole objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBIPAMRole {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [string]$Name,
@@ -14438,8 +19289,28 @@ function Set-NBIPAMServiceTemplate {
 
 #region File Set-NBIPAMVLAN.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing PAMVLAN in Netbox I module.
+
+.DESCRIPTION
+    Updates an existing PAMVLAN in Netbox I module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBIPAMVLAN
+
+    Returns all PAMVLAN objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBIPAMVLAN {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [ValidateRange(1, 4096)][uint16]$VID,
@@ -14469,8 +19340,28 @@ function Set-NBIPAMVLAN {
 
 #region File Set-NBIPAMVLANGroup.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing PAMVLANGroup in Netbox I module.
+
+.DESCRIPTION
+    Updates an existing PAMVLANGroup in Netbox I module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBIPAMVLANGroup
+
+    Returns all PAMVLANGroup objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBIPAMVLANGroup {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [string]$Name,
@@ -14497,8 +19388,28 @@ function Set-NBIPAMVLANGroup {
 
 #region File Set-NBIPAMVLANTranslationPolicy.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing PAMVLANTranslationPolicy in Netbox I module.
+
+.DESCRIPTION
+    Updates an existing PAMVLANTranslationPolicy in Netbox I module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBIPAMVLANTranslationPolicy
+
+    Returns all PAMVLANTranslationPolicy objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBIPAMVLANTranslationPolicy {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [string]$Name,
@@ -14521,8 +19432,28 @@ function Set-NBIPAMVLANTranslationPolicy {
 
 #region File Set-NBIPAMVLANTranslationRule.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing PAMVLANTranslationRule in Netbox I module.
+
+.DESCRIPTION
+    Updates an existing PAMVLANTranslationRule in Netbox I module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBIPAMVLANTranslationRule
+
+    Returns all PAMVLANTranslationRule objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBIPAMVLANTranslationRule {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [uint64]$Policy,
@@ -14643,6 +19574,25 @@ function Set-NBIPAMVRF {
 
 #region File Set-NBTimeout.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing imeout in Netbox T module.
+
+.DESCRIPTION
+    Updates an existing imeout in Netbox T module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBTimeout
+
+    Returns all imeout objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 
 function Set-NBTimeout {
     [CmdletBinding(ConfirmImpact = 'Low',
@@ -14689,10 +19639,30 @@ Function Set-NBUntrustedSSL {
 
 #region File Set-NBVirtualMachine.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing irtualMachine in Netbox V module.
+
+.DESCRIPTION
+    Updates an existing irtualMachine in Netbox V module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBVirtualMachine
+
+    Returns all irtualMachine objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 
 function Set-NBVirtualMachine {
     [CmdletBinding(ConfirmImpact = 'Medium',
         SupportsShouldProcess = $true)]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(Mandatory = $true,
@@ -14755,6 +19725,25 @@ function Set-NBVirtualMachine {
 
 #region File Set-NBVirtualMachineInterface.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing irtualMachineInterface in Netbox V module.
+
+.DESCRIPTION
+    Updates an existing irtualMachineInterface in Netbox V module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBVirtualMachineInterface
+
+    Returns all irtualMachineInterface objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 
 function Set-NBVirtualMachineInterface {
     [CmdletBinding(ConfirmImpact = 'Medium',
@@ -14812,8 +19801,28 @@ function Set-NBVirtualMachineInterface {
 
 #region File Set-NBVPNIKEPolicy.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing PNIKEPolicy in Netbox V module.
+
+.DESCRIPTION
+    Updates an existing PNIKEPolicy in Netbox V module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBVPNIKEPolicy
+
+    Returns all PNIKEPolicy objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBVPNIKEPolicy {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [string]$Name,[uint16]$Version,[string]$Mode,[uint64[]]$Proposals,[string]$Preshared_Key,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
     process {
@@ -14826,8 +19835,28 @@ function Set-NBVPNIKEPolicy {
 
 #region File Set-NBVPNIKEProposal.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing PNIKEProposal in Netbox V module.
+
+.DESCRIPTION
+    Updates an existing PNIKEProposal in Netbox V module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBVPNIKEProposal
+
+    Returns all PNIKEProposal objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBVPNIKEProposal {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[string]$Name,
         [string]$Authentication_Method,[string]$Encryption_Algorithm,[string]$Authentication_Algorithm,[uint16]$Group,[uint32]$SA_Lifetime,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
     process {
@@ -14840,8 +19869,28 @@ function Set-NBVPNIKEProposal {
 
 #region File Set-NBVPNIPSecPolicy.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing PNIPSecPolicy in Netbox V module.
+
+.DESCRIPTION
+    Updates an existing PNIPSecPolicy in Netbox V module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBVPNIPSecPolicy
+
+    Returns all PNIPSecPolicy objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBVPNIPSecPolicy {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[string]$Name,[uint64[]]$Proposals,[bool]$Pfs_Group,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
     process {
         $s = [System.Collections.ArrayList]::new(@('vpn','ipsec-policies',$Id)); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
@@ -14853,8 +19902,28 @@ function Set-NBVPNIPSecPolicy {
 
 #region File Set-NBVPNIPSecProfile.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing PNIPSecProfile in Netbox V module.
+
+.DESCRIPTION
+    Updates an existing PNIPSecProfile in Netbox V module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBVPNIPSecProfile
+
+    Returns all PNIPSecProfile objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBVPNIPSecProfile {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[string]$Name,[string]$Mode,[uint64]$IKE_Policy,[uint64]$IPSec_Policy,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
     process {
         $s = [System.Collections.ArrayList]::new(@('vpn','ipsec-profiles',$Id)); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
@@ -14866,8 +19935,28 @@ function Set-NBVPNIPSecProfile {
 
 #region File Set-NBVPNIPSecProposal.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing PNIPSecProposal in Netbox V module.
+
+.DESCRIPTION
+    Updates an existing PNIPSecProposal in Netbox V module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBVPNIPSecProposal
+
+    Returns all PNIPSecProposal objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBVPNIPSecProposal {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[string]$Name,[string]$Encryption_Algorithm,[string]$Authentication_Algorithm,[uint32]$SA_Lifetime_Seconds,[uint32]$SA_Lifetime_Data,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
     process {
         $s = [System.Collections.ArrayList]::new(@('vpn','ipsec-proposals',$Id)); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
@@ -14879,8 +19968,28 @@ function Set-NBVPNIPSecProposal {
 
 #region File Set-NBVPNL2VPN.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing PNL2VPN in Netbox V module.
+
+.DESCRIPTION
+    Updates an existing PNL2VPN in Netbox V module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBVPNL2VPN
+
+    Returns all PNL2VPN objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBVPNL2VPN {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [string]$Name,[string]$Slug,[uint64]$Identifier,[string]$Type,[string]$Status,[uint64]$Tenant,
         [string]$Description,[string]$Comments,[uint64[]]$Import_Targets,[uint64[]]$Export_Targets,[hashtable]$Custom_Fields,[switch]$Raw)
@@ -14894,8 +20003,28 @@ function Set-NBVPNL2VPN {
 
 #region File Set-NBVPNL2VPNTermination.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing PNL2VPNTermination in Netbox V module.
+
+.DESCRIPTION
+    Updates an existing PNL2VPNTermination in Netbox V module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBVPNL2VPNTermination
+
+    Returns all PNL2VPNTermination objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBVPNL2VPNTermination {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[uint64]$L2VPN,[string]$Assigned_Object_Type,[uint64]$Assigned_Object_Id,[hashtable]$Custom_Fields,[switch]$Raw)
     process {
         $s = [System.Collections.ArrayList]::new(@('vpn','l2vpn-terminations',$Id)); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
@@ -14907,6 +20036,25 @@ function Set-NBVPNL2VPNTermination {
 
 #region File Set-NBVPNTunnel.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing PNTunnel in Netbox V module.
+
+.DESCRIPTION
+    Updates an existing PNTunnel in Netbox V module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBVPNTunnel
+
+    Returns all PNTunnel objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBVPNTunnel {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     [OutputType([PSCustomObject])]
@@ -14938,8 +20086,28 @@ function Set-NBVPNTunnel {
 
 #region File Set-NBVPNTunnelGroup.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing PNTunnelGroup in Netbox V module.
+
+.DESCRIPTION
+    Updates an existing PNTunnelGroup in Netbox V module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBVPNTunnelGroup
+
+    Returns all PNTunnelGroup objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBVPNTunnelGroup {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[string]$Name,[string]$Slug,[string]$Description,[hashtable]$Custom_Fields,[switch]$Raw)
     process {
         $s = [System.Collections.ArrayList]::new(@('vpn','tunnel-groups',$Id)); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
@@ -14951,8 +20119,28 @@ function Set-NBVPNTunnelGroup {
 
 #region File Set-NBVPNTunnelTermination.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing PNTunnelTermination in Netbox V module.
+
+.DESCRIPTION
+    Updates an existing PNTunnelTermination in Netbox V module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBVPNTunnelTermination
+
+    Returns all PNTunnelTermination objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBVPNTunnelTermination {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[uint64]$Tunnel,[ValidateSet('peer', 'hub', 'spoke')][string]$Role,[string]$Termination_Type,[uint64]$Termination_Id,[uint64]$Outside_IP,[hashtable]$Custom_Fields,[switch]$Raw)
     process {
         $s = [System.Collections.ArrayList]::new(@('vpn','tunnel-terminations',$Id)); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
@@ -14964,8 +20152,28 @@ function Set-NBVPNTunnelTermination {
 
 #region File Set-NBWirelessLAN.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing irelessLAN in Netbox W module.
+
+.DESCRIPTION
+    Updates an existing irelessLAN in Netbox W module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBWirelessLAN
+
+    Returns all irelessLAN objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBWirelessLAN {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[string]$SSID,[uint64]$Group,[string]$Status,[uint64]$VLAN,[uint64]$Tenant,
         [string]$Auth_Type,[string]$Auth_Cipher,[string]$Auth_PSK,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
     process {
@@ -14978,8 +20186,28 @@ function Set-NBWirelessLAN {
 
 #region File Set-NBWirelessLANGroup.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing irelessLANGroup in Netbox W module.
+
+.DESCRIPTION
+    Updates an existing irelessLANGroup in Netbox W module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBWirelessLANGroup
+
+    Returns all irelessLANGroup objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBWirelessLANGroup {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[string]$Name,[string]$Slug,[uint64]$Parent,[string]$Description,[hashtable]$Custom_Fields,[switch]$Raw)
     process {
         $s = [System.Collections.ArrayList]::new(@('wireless','wireless-lan-groups',$Id)); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
@@ -14991,8 +20219,28 @@ function Set-NBWirelessLANGroup {
 
 #region File Set-NBWirelessLink.ps1
 
+<#
+.SYNOPSIS
+    Updates an existing irelessLink in Netbox W module.
+
+.DESCRIPTION
+    Updates an existing irelessLink in Netbox W module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBWirelessLink
+
+    Returns all irelessLink objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBWirelessLink {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[uint64]$Interface_A,[uint64]$Interface_B,
         [string]$SSID,[string]$Status,[uint64]$Tenant,[string]$Auth_Type,[string]$Auth_Cipher,[string]$Auth_PSK,
         [string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
@@ -15032,9 +20280,29 @@ function SetupNetboxConfigVariable {
 
 #region File Test-NBAPIConnected.ps1
 
+<#
+.SYNOPSIS
+    Manages PIConnected in Netbox A module.
+
+.DESCRIPTION
+    Manages PIConnected in Netbox A module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Test-NBAPIConnected
+
+    Returns all PIConnected objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 
 function Test-NBAPIConnected {
     [CmdletBinding()]
+    [OutputType([PSCustomObject])]
     param ()
 
     $script:NetboxConfig.Connected

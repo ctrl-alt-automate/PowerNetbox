@@ -1,4 +1,23 @@
-﻿function Set-NBDCIMInterface {
+<#
+.SYNOPSIS
+    Updates an existing CIMInterface in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMInterface in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMInterface
+
+    Returns all CIMInterface objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Set-NBDCIMInterface {
     [CmdletBinding(ConfirmImpact = 'Medium',
         SupportsShouldProcess = $true)]
     [OutputType([pscustomobject])]

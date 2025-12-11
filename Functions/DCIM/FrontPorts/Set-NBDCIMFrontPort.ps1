@@ -1,4 +1,23 @@
-﻿function Set-NBDCIMFrontPort {
+<#
+.SYNOPSIS
+    Updates an existing CIMFrontPort in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMFrontPort in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMFrontPort
+
+    Returns all CIMFrontPort objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Set-NBDCIMFrontPort {
     [CmdletBinding(ConfirmImpact = 'Medium',
         SupportsShouldProcess = $true)]
     [OutputType([pscustomobject])]

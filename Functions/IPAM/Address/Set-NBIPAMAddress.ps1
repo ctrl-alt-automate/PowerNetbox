@@ -1,7 +1,27 @@
-﻿
+<#
+.SYNOPSIS
+    Updates an existing PAMAddress in Netbox I module.
+
+.DESCRIPTION
+    Updates an existing PAMAddress in Netbox I module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBIPAMAddress
+
+    Returns all PAMAddress objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+
 function Set-NBIPAMAddress {
     [CmdletBinding(ConfirmImpact = 'Medium',
         SupportsShouldProcess = $true)]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(Mandatory = $true,

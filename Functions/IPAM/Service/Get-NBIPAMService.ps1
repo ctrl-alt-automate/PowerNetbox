@@ -75,10 +75,10 @@ function Get-NBIPAMService {
         [Parameter(ParameterSetName = 'Query')]
         [uint64]$Virtual_Machine_Id,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [switch]$Raw

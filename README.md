@@ -43,7 +43,7 @@ function New-NBVirtualMachine
     Process
     {
         $vm = New-NBVirtualMachine -Name $Name -Cluster $NBCluster.id -Tenant $NBtenant.id
-        $interface = Add-NBVirtualMachineInterface -Name $VMNICName -Virtual_Machine $vm.id
+        $interface = New-NBVirtualMachineInterface -Name $VMNICName -Virtual_Machine $vm.id
 
 
         $NBip = New-NBIPAMAddress -Address $IP -Tenant $NBtenant.id 

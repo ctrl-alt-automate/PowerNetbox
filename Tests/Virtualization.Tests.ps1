@@ -1,4 +1,4 @@
-﻿
+
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
@@ -6,13 +6,13 @@ param
 Import-Module Pester
 Remove-Module NetboxPS -Force -ErrorAction SilentlyContinue
 
-$ModulePath = "$PSScriptRoot\..\dist\NetboxPS.psd1"
+ = Join-Path  ".." "NetboxPS" "NetboxPS.psd1"
 
 if (Test-Path $ModulePath) {
     Import-Module $ModulePath -ErrorAction Stop
 }
 
-Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
+Describe "Virtualization tests" -Tag 'Virtualization' {
     Mock -CommandName 'CheckNetboxIsConnected' -Verifiable -ModuleName 'NetboxPS' -MockWith {
         return $true
     }
@@ -38,13 +38,13 @@ Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
     }
 
     InModuleScope -ModuleName 'NetboxPS' -ScriptBlock {
-        $script:NetboxConfig.Choices.Virtualization = (Get-Content "$PSScriptRoot\VirtualizationChoices.json" -ErrorAction Stop | ConvertFrom-Json)
+        $script:NetboxConfig.Choices.Virtualization = (Get-Content "/VirtualizationChoices.json" -ErrorAction Stop | ConvertFrom-Json)
 
-        Context -Name "Get-NBVirtualMachine" -Fixture {
+        Context "Get-NBVirtualMachine" {
             It "Should request the default number of VMs" {
                 $Result = Get-NBVirtualMachine
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/'
@@ -54,7 +54,7 @@ Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
             It "Should request with limit and offset" {
                 $Result = Get-NBVirtualMachine -Limit 10 -Offset 12
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/?offset=12&limit=10'
@@ -64,7 +64,7 @@ Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
             It "Should request with a query" {
                 $Result = Get-NBVirtualMachine -Query 'testvm'
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/?q=testvm'
@@ -74,7 +74,7 @@ Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
             It "Should request with an escaped query" {
                 $Result = Get-NBVirtualMachine -Query 'test vm'
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/?q=test+vm'
@@ -84,7 +84,7 @@ Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
             It "Should request with a name" {
                 $Result = Get-NBVirtualMachine -Name 'testvm'
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/?name=testvm'
@@ -94,7 +94,7 @@ Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
             It "Should request with a single ID" {
                 $Result = Get-NBVirtualMachine -Id 10
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/10/'
@@ -104,7 +104,7 @@ Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
             It "Should request with multiple IDs" {
                 $Result = Get-NBVirtualMachine -Id 10, 12, 15
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/?id__in=10,12,15'
@@ -114,7 +114,7 @@ Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
             It "Should request a status" {
                 $Result = Get-NBVirtualMachine -Status 'Active'
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/?status=1'
@@ -126,11 +126,11 @@ Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
             }
         }
 
-        Context -Name "Get-NBVirtualMachineInterface" -Fixture {
+        Context "Get-NBVirtualMachineInterface" {
             It "Should request the default number of interfaces" {
                 $Result = Get-NBVirtualMachineInterface
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/interfaces/'
@@ -140,7 +140,7 @@ Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
             It "Should request with a limit and offset" {
                 $Result = Get-NBVirtualMachineInterface -Limit 10 -Offset 12
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/interfaces/?offset=12&limit=10'
@@ -150,7 +150,7 @@ Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
             It "Should request a interface with a specific ID" {
                 $Result = Get-NBVirtualMachineInterface -Id 10
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/interfaces/10/'
@@ -160,7 +160,7 @@ Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
             It "Should request a name" {
                 $Result = Get-NBVirtualMachineInterface -Name 'Ethernet0'
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/interfaces/?name=Ethernet0'
@@ -170,7 +170,7 @@ Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
             It "Should request with a VM ID" {
                 $Result = Get-NBVirtualMachineInterface -Virtual_Machine_Id 10
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/interfaces/?virtual_machine_id=10'
@@ -180,7 +180,7 @@ Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
             It "Should request with Enabled" {
                 $Result = Get-NBVirtualMachineInterface -Enabled $true
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/interfaces/?enabled=true'
@@ -188,11 +188,11 @@ Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
             }
         }
 
-        Context -Name "Get-NBVirtualMachineCluster" -Fixture {
+        Context "Get-NBVirtualMachineCluster" {
             It "Should request the default number of clusters" {
                 $Result = Get-NBVirtualizationCluster
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/clusters/'
@@ -202,7 +202,7 @@ Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
             It "Should request with limit and offset" {
                 $Result = Get-NBVirtualizationCluster -Limit 10 -Offset 12
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/clusters/?offset=12&limit=10'
@@ -212,7 +212,7 @@ Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
             It "Should request with a query" {
                 $Result = Get-NBVirtualizationCluster -Query 'testcluster'
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/clusters/?q=testcluster'
@@ -222,7 +222,7 @@ Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
             It "Should request with an escaped query" {
                 $Result = Get-NBVirtualizationCluster -Query 'test cluster'
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/clusters/?q=test+cluster'
@@ -232,7 +232,7 @@ Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
             It "Should request with a name" {
                 $Result = Get-NBVirtualizationCluster -Name 'testcluster'
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/clusters/?name=testcluster'
@@ -242,7 +242,7 @@ Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
             It "Should request with a single ID" {
                 $Result = Get-NBVirtualizationCluster -Id 10
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/clusters/10/'
@@ -252,7 +252,7 @@ Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
             It "Should request with multiple IDs" {
                 $Result = Get-NBVirtualizationCluster -Id 10, 12, 15
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/clusters/?id__in=10,12,15'
@@ -260,11 +260,11 @@ Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
             }
         }
 
-        Context -Name "Get-NBVirtualMachineClusterGroup" -Fixture {
+        Context "Get-NBVirtualMachineClusterGroup" {
             It "Should request the default number of cluster groups" {
                 $Result = Get-NBVirtualizationClusterGroup
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/cluster-groups/'
@@ -274,7 +274,7 @@ Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
             It "Should request with limit and offset" {
                 $Result = Get-NBVirtualizationClusterGroup -Limit 10 -Offset 12
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/cluster-groups/?offset=12&limit=10'
@@ -284,7 +284,7 @@ Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
             It "Should request with a name" {
                 $Result = Get-NBVirtualizationClusterGroup -Name 'testclustergroup'
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/cluster-groups/?name=testclustergroup'
@@ -294,7 +294,7 @@ Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
             It "Should request with a slug" {
                 $Result = Get-NBVirtualizationClusterGroup -Slug 'test-cluster-group'
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/cluster-groups/?slug=test-cluster-group'
@@ -302,11 +302,11 @@ Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
             }
         }
 
-        Context -Name "New-NBVirtualMachine" -Fixture {
+        Context "New-NBVirtualMachine" {
             It "Should create a basic VM" {
                 $Result = New-NBVirtualMachine -Name 'testvm' -Cluster 1
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'POST'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/'
@@ -317,7 +317,7 @@ Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
             It "Should create a VM with CPUs, Memory, Disk, tenancy, and comments" {
                 $Result = New-NBVirtualMachine -Name 'testvm' -Cluster 1 -Status Active -vCPUs 4 -Memory 4096 -Tenant 11 -Disk 50 -Comments "these are comments"
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'POST'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/'
@@ -330,11 +330,11 @@ Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
             }
         }
 
-        Context -Name "Add-NBVirtualMachineInterface" -Fixture {
+        Context "New-NBVirtualMachineInterface" {
             It "Should add a basic interface" {
-                $Result = Add-NBVirtualMachineInterface -Name 'Ethernet0' -Virtual_Machine 10
+                $Result = New-NBVirtualMachineInterface -Name 'Ethernet0' -Virtual_Machine 10
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'POST'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/interfaces/'
@@ -343,9 +343,9 @@ Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
             }
 
             It "Should add an interface with a MAC, MTU, and Description" {
-                $Result = Add-NBVirtualMachineInterface -Name 'Ethernet0' -Virtual_Machine 10 -Mac_Address '11:22:33:44:55:66' -MTU 1500 -Description "Test description"
+                $Result = New-NBVirtualMachineInterface -Name 'Ethernet0' -Virtual_Machine 10 -Mac_Address '11:22:33:44:55:66' -MTU 1500 -Description "Test description"
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'POST'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/interfaces/'
@@ -362,12 +362,12 @@ Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
             }
         }
 
-        Context -Name "Set-NBVirtualMachine" -Fixture {
+        Context "Set-NBVirtualMachine" {
             It "Should set a VM to a new name" {
                 $Result = Set-NBVirtualMachine -Id 1234 -Name 'newtestname' -Force
 
-                Assert-VerifiableMock
-                Assert-MockCalled -CommandName 'Get-NBVirtualMachine' -Times 1 -Exactly -Scope 'It'
+                Should -InvokeVerifiable
+                Should -Invoke -CommandName 'Get-NBVirtualMachine' -Times 1 -Scope 'It' -Exactly
 
                 $Result.Method | Should -Be 'PATCH'
                 $Result.URI | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/1234/'
@@ -378,8 +378,8 @@ Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
             It "Should set a VM with a new name, cluster, platform, and status" {
                 $Result = Set-NBVirtualMachine -Id 1234 -Name 'newtestname' -Cluster 10 -Platform 15 -Status 'Offline' -Force
 
-                Assert-VerifiableMock
-                Assert-MockCalled -CommandName 'Get-NBVirtualMachine' -Times 1 -Exactly -Scope 'It'
+                Should -InvokeVerifiable
+                Should -Invoke -CommandName 'Get-NBVirtualMachine' -Times 1 -Scope 'It' -Exactly
 
                 $Result.Method | Should -Be 'PATCH'
                 $Result.URI | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/1234/'
@@ -390,8 +390,8 @@ Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
             It "Should throw because of an invalid status" {
                 { Set-NBVirtualMachine -Id 1234 -Status 'Fake' -Force } | Should -Throw
 
-                Assert-VerifiableMock
-                Assert-MockCalled -CommandName 'Get-NBVirtualMachine' -Times 0 -Exactly -Scope 'It'
+                Should -InvokeVerifiable
+                Should -Invoke -CommandName 'Get-NBVirtualMachine' -Times 0 -Scope 'It' -Exactly
             }
         }
 
@@ -403,11 +403,11 @@ Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
             }
         }
 
-        Context -Name "Set-NBVirtualMachineInterface" -Fixture {
+        Context "Set-NBVirtualMachineInterface" {
             It "Should set an interface to a new name" {
                 $Result = Set-NBVirtualMachineInterface -Id 1234 -Name 'newtestname' -Force
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
                 Assert-MockCalled -CommandName Get-NBVirtualMachineInterface -Times 1 -Scope 'It' -Exactly
 
                 $Result.Method | Should -Be 'PATCH'
@@ -428,7 +428,7 @@ Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
 
                 $Result = Set-NBVirtualMachineInterface @paramSetNetboxVirtualMachineInterface
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
                 Assert-MockCalled -CommandName Get-NBVirtualMachineInterface -Times 1 -Scope 'It' -Exactly
 
                 $Result.Method | Should -Be 'PATCH'
@@ -440,7 +440,7 @@ Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
             It "Should set multiple interfaces to a new name" {
                 $Result = Set-NBVirtualMachineInterface -Id 1234, 4321 -Name 'newtestname' -Force
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
                 Assert-MockCalled -CommandName Get-NBVirtualMachineInterface -Times 2 -Scope 'It' -Exactly
 
                 $Result.Method | Should -Be 'PATCH', 'PATCH'
@@ -459,7 +459,7 @@ Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
                     }
                 ) | Set-NBVirtualMachineInterface -Name 'newtestname' -Force
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
                 Assert-MockCalled -CommandName Get-NBVirtualMachineInterface -Times 2 -Scope 'It' -Exactly
 
                 $Result.Method | Should -Be 'PATCH', 'PATCH'
@@ -469,12 +469,12 @@ Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
             }
         }
 
-        Context -Name "Remove-NBVirtualMachine" -Fixture {
+        Context "Remove-NBVirtualMachine" {
             It "Should remove a single VM" {
                 $Result = Remove-NBVirtualMachine -Id 4125 -Force
 
-                Assert-VerifiableMock
-                Assert-MockCalled -CommandName 'Get-NBVirtualMachine' -Times 1 -Exactly -Scope 'It'
+                Should -InvokeVerifiable
+                Should -Invoke -CommandName 'Get-NBVirtualMachine' -Times 1 -Scope 'It' -Exactly
 
                 $Result.Method | Should -Be 'DELETE'
                 $Result.URI | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/4125/'
@@ -484,8 +484,8 @@ Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
             It "Should remove mulitple VMs" {
                 $Result = Remove-NBVirtualMachine -Id 4125, 4132 -Force
 
-                Assert-VerifiableMock
-                Assert-MockCalled -CommandName 'Get-NBVirtualMachine' -Times 2 -Exactly -Scope 'It'
+                Should -InvokeVerifiable
+                Should -Invoke -CommandName 'Get-NBVirtualMachine' -Times 2 -Scope 'It' -Exactly
 
                 $Result.Method | Should -Be 'DELETE', 'DELETE'
                 $Result.URI | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/4125/', 'https://netbox.domain.com/api/virtualization/virtual-machines/4132/'
@@ -495,8 +495,8 @@ Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
             It "Should remove a VM from the pipeline" {
                 $Result = Get-NBVirtualMachine -Id 4125 | Remove-NBVirtualMachine -Force
 
-                Assert-VerifiableMock
-                Assert-MockCalled -CommandName 'Get-NBVirtualMachine' -Times 2 -Exactly -Scope 'It'
+                Should -InvokeVerifiable
+                Should -Invoke -CommandName 'Get-NBVirtualMachine' -Times 2 -Scope 'It' -Exactly
 
                 $Result.Method | Should -Be 'DELETE'
                 $Result.URI | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/4125/'
@@ -513,8 +513,8 @@ Describe -Name "Virtualization tests" -Tag 'Virtualization' -Fixture {
                     }
                 ) | Remove-NBVirtualMachine -Force
 
-                Assert-VerifiableMock
-                Assert-MockCalled -CommandName 'Get-NBVirtualMachine' -Times 2 -Exactly -Scope 'It'
+                Should -InvokeVerifiable
+                Should -Invoke -CommandName 'Get-NBVirtualMachine' -Times 2 -Scope 'It' -Exactly
 
                 $Result.Method | Should -Be 'DELETE', 'DELETE'
                 $Result.URI | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/4125/', 'https://netbox.domain.com/api/virtualization/virtual-machines/4132/'

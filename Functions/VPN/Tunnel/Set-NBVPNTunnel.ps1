@@ -1,3 +1,22 @@
+<#
+.SYNOPSIS
+    Updates an existing PNTunnel in Netbox V module.
+
+.DESCRIPTION
+    Updates an existing PNTunnel in Netbox V module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBVPNTunnel
+
+    Returns all PNTunnel objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBVPNTunnel {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     [OutputType([PSCustomObject])]

@@ -1,5 +1,22 @@
+<#
+.SYNOPSIS
+    Retrieves Connected Device objects from Netbox DCIM module.
+
+.DESCRIPTION
+    Retrieves Connected Device objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMConnectedDevice
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMConnectedDevice {
     [CmdletBinding()]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][string]$Peer_Device,
         [Parameter(Mandatory = $true)][string]$Peer_Interface,

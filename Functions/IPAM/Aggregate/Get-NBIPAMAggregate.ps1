@@ -1,6 +1,22 @@
-﻿
+<#
+.SYNOPSIS
+    Retrieves Aggregate objects from Netbox IPAM module.
+
+.DESCRIPTION
+    Retrieves Aggregate objects from Netbox IPAM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBIPAMAggregate
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBIPAMAggregate {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(ParameterSetName = 'Query')]
@@ -24,10 +40,10 @@ function Get-NBIPAMAggregate {
         [Parameter(ParameterSetName = 'Query')]
         [datetime]$Date_Added,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [switch]$Raw

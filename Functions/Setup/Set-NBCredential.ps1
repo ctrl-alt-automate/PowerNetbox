@@ -1,4 +1,23 @@
-﻿function Set-NBCredential {
+<#
+.SYNOPSIS
+    Updates an existing redential in Netbox C module.
+
+.DESCRIPTION
+    Updates an existing redential in Netbox C module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBCredential
+
+    Returns all redential objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Set-NBCredential {
     [CmdletBinding(DefaultParameterSetName = 'CredsObject',
         ConfirmImpact = 'Low',
         SupportsShouldProcess = $true)]

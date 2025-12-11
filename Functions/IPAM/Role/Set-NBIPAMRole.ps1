@@ -1,5 +1,25 @@
+<#
+.SYNOPSIS
+    Updates an existing PAMRole in Netbox I module.
+
+.DESCRIPTION
+    Updates an existing PAMRole in Netbox I module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBIPAMRole
+
+    Returns all PAMRole objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBIPAMRole {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [string]$Name,

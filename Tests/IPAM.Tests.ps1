@@ -1,4 +1,4 @@
-﻿
+
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
@@ -6,14 +6,14 @@ param
 Import-Module Pester
 Remove-Module NetboxPS -Force -ErrorAction SilentlyContinue
 
-$ModulePath = "$PSScriptRoot\..\dist\NetboxPS.psd1"
+ = Join-Path  ".." "NetboxPS" "NetboxPS.psd1"
 
 if (Test-Path $ModulePath) {
     Import-Module $ModulePath -ErrorAction Stop
 }
 
 
-Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
+Describe "IPAM tests" -Tag 'Ipam' {
     Mock -CommandName 'CheckNetboxIsConnected' -Verifiable -ModuleName 'NetboxPS' -MockWith {
         return $true
     }
@@ -39,13 +39,13 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
     }
 
     InModuleScope -ModuleName 'NetboxPS' -ScriptBlock {
-        $script:NetboxConfig.Choices.IPAM = (Get-Content "$PSScriptRoot\IPAMChoices.json" -ErrorAction Stop | ConvertFrom-Json)
+        $script:NetboxConfig.Choices.IPAM = (Get-Content "/IPAMChoices.json" -ErrorAction Stop | ConvertFrom-Json)
 
-        Context -Name "Get-NBIPAMAggregate" -Fixture {
+        Context "Get-NBIPAMAggregate" {
             It "Should request the default number of aggregates" {
                 $Result = Get-NBIPAMAggregate
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/aggregates/'
@@ -56,7 +56,7 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
             It "Should request with limit and offset" {
                 $Result = Get-NBIPAMAggregate -Limit 10 -Offset 12
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/aggregates/?offset=12&limit=10'
@@ -67,7 +67,7 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
             It "Should request with a query" {
                 $Result = Get-NBIPAMAggregate -Query '10.10.0.0'
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/aggregates/?q=10.10.0.0'
@@ -78,7 +78,7 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
             It "Should request with an escaped query" {
                 $Result = Get-NBIPAMAggregate -Query 'my aggregate'
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/aggregates/?q=my+aggregate'
@@ -89,7 +89,7 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
             It "Should request with a single ID" {
                 $Result = Get-NBIPAMAggregate -Id 10
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/aggregates/10/'
@@ -100,7 +100,7 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
             It "Should request with multiple IDs" {
                 $Result = Get-NBIPAMAggregate -Id 10, 12, 15
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/aggregates/?id__in=10,12,15'
@@ -109,11 +109,11 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
             }
         }
 
-        Context -Name "Get-NBIPAMAddress" -Fixture {
+        Context "Get-NBIPAMAddress" {
             It "Should request the default number of addresses" {
                 $Result = Get-NBIPAMAddress
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/'
@@ -124,7 +124,7 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
             It "Should request with limit and offset" {
                 $Result = Get-NBIPAMAddress -Limit 10 -Offset 12
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/?offset=12&limit=10'
@@ -135,7 +135,7 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
             It "Should request with a query" {
                 $Result = Get-NBIPAMAddress -Query '10.10.10.10'
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/?q=10.10.10.10'
@@ -146,7 +146,7 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
             It "Should request with an escaped query" {
                 $Result = Get-NBIPAMAddress -Query 'my ip address'
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/?q=my+ip+address'
@@ -157,7 +157,7 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
             It "Should request with a single ID" {
                 $Result = Get-NBIPAMAddress -Id 10
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/10/'
@@ -168,7 +168,7 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
             It "Should request with multiple IDs" {
                 $Result = Get-NBIPAMAddress -Id 10, 12, 15
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/?id__in=10,12,15'
@@ -179,7 +179,7 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
             It "Should request with a family number" {
                 $Result = Get-NBIPAMAddress -Family 4
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/?family=4'
@@ -189,7 +189,7 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
             It "Should request with a family name" {
                 $Result = Get-NBIPAMAddress -Family 'IPv4'
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/?family=4'
@@ -197,11 +197,11 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
             }
         }
 
-        Context -Name "Get-NBIPAMAvailableIP" -Fixture {
+        Context "Get-NBIPAMAvailableIP" {
             It "Should request the default number of available IPs" {
                 $Result = Get-NBIPAMAvailableIP -Prefix_Id 10
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/prefixes/10/available-ips/'
@@ -212,7 +212,7 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
             It "Should request 10 available IPs" {
                 $Result = Get-NBIPAMAvailableIP -Prefix_Id 1504 -NumberOfIPs 10
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/prefixes/1504/available-ips/?limit=10'
@@ -221,11 +221,11 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
             }
         }
 
-        Context -Name "Get-NBIPAMPrefix" -Fixture {
+        Context "Get-NBIPAMPrefix" {
             It "Should request the default number of prefixes" {
                 $Result = Get-NBIPAMPrefix
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/prefixes/'
@@ -236,7 +236,7 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
             It "Should request with limit and offset" {
                 $Result = Get-NBIPAMPrefix -Limit 10 -Offset 12
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/prefixes/?offset=12&limit=10'
@@ -247,7 +247,7 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
             It "Should request with a query" {
                 $Result = Get-NBIPAMPrefix -Query '10.10.10.10'
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/prefixes/?q=10.10.10.10'
@@ -258,7 +258,7 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
             It "Should request with an escaped query" {
                 $Result = Get-NBIPAMPrefix -Query 'my ip address'
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/prefixes/?q=my+ip+address'
@@ -269,7 +269,7 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
             It "Should request with a single ID" {
                 $Result = Get-NBIPAMPrefix -Id 10
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/prefixes/10/'
@@ -280,7 +280,7 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
             It "Should request with multiple IDs" {
                 $Result = Get-NBIPAMPrefix -Id 10, 12, 15
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/prefixes/?id__in=10,12,15'
@@ -291,7 +291,7 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
             It "Should request with VLAN vID" {
                 $Result = Get-NBIPAMPrefix -VLAN_VID 10
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/prefixes/?vlan_vid=10'
@@ -302,7 +302,7 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
             It "Should request with family of 4" {
                 $Result = Get-NBIPAMPrefix -Family 4
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/prefixes/?family=4'
@@ -331,7 +331,7 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
             It "Should request with mask length 24" {
                 $Result = Get-NBIPAMPrefix -Mask_length 24
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/prefixes/?mask_length=24'
@@ -340,11 +340,11 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
             }
         }
 
-        Context -Name "New-NBIPAMPrefix" -Fixture {
+        Context "New-NBIPAMPrefix" {
             It "Should create a basic prefix" {
                 $Result = New-NBIPAMPrefix -Prefix "10.0.0.0/24"
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'POST'
                 $Result.URI | Should -Be 'https://netbox.domain.com/api/ipam/prefixes/'
@@ -355,7 +355,7 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
             It "Should create a prefix with a status and role names" {
                 $Result = New-NBIPAMPrefix -Prefix "10.0.0.0/24" -Status 'Active' -Role 'Active'
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'POST'
                 $Result.URI | Should -Be 'https://netbox.domain.com/api/ipam/prefixes/'
@@ -366,7 +366,7 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
             It "Should create a prefix with a status, role name, and tenant ID" {
                 $Result = New-NBIPAMPrefix -Prefix "10.0.0.0/24" -Status 'Active' -Role 'Active' -Tenant 15
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'POST'
                 $Result.URI | Should -Be 'https://netbox.domain.com/api/ipam/prefixes/'
@@ -375,11 +375,11 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
             }
         }
 
-        Context -Name "New-NBIPAMAddress" -Fixture {
+        Context "New-NBIPAMAddress" {
             It "Should create a basic IP address" {
                 $Result = New-NBIPAMAddress -Address '10.0.0.1/24'
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'POST'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/'
@@ -390,7 +390,7 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
             It "Should create an IP with a status and role names" {
                 $Result = New-NBIPAMAddress -Address '10.0.0.1/24' -Status 'Reserved' -Role 'Anycast'
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'POST'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/'
@@ -401,7 +401,7 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
             It "Should create an IP with a status and role values" {
                 $Result = New-NBIPAMAddress -Address '10.0.1.1/24' -Status '1' -Role '10'
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'POST'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/'
@@ -410,7 +410,7 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
             }
         }
 
-        Context -Name "Remove-NBIPAMAddress" -Fixture {
+        Context "Remove-NBIPAMAddress" {
             Mock -CommandName "Get-NBIPAMAddress" -ModuleName NetboxPS -MockWith {
                 return @{
                     'address' = "10.1.1.1/$Id"
@@ -421,8 +421,8 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
             It "Should remove a single IP" {
                 $Result = Remove-NBIPAMAddress -Id 4109 -Force
 
-                Assert-VerifiableMock
-                Assert-MockCalled -CommandName "Get-NBIPAMAddress" -Times 1 -Scope 'It' -Exactly
+                Should -InvokeVerifiable
+                Should -Invoke -CommandName "Get-NBIPAMAddress" -Times 1 -Scope 'It' -Exactly
 
                 $Result.Method | Should -Be 'DELETE'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/4109/'
@@ -435,8 +435,8 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
                     'id' = 4110
                 } | Remove-NBIPAMAddress -Force
 
-                Assert-VerifiableMock
-                Assert-MockCalled -CommandName "Get-NBIPAMAddress" -Times 1 -Scope 'It' -Exactly
+                Should -InvokeVerifiable
+                Should -Invoke -CommandName "Get-NBIPAMAddress" -Times 1 -Scope 'It' -Exactly
 
                 $Result.Method | Should -Be 'DELETE'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/4110/'
@@ -447,8 +447,8 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
             It "Should remove multiple IPs" {
                 $Result = Remove-NBIPAMAddress -Id 4109, 4110 -Force
 
-                Assert-VerifiableMock
-                Assert-MockCalled -CommandName "Get-NBIPAMAddress" -Times 2 -Scope 'It' -Exactly
+                Should -InvokeVerifiable
+                Should -Invoke -CommandName "Get-NBIPAMAddress" -Times 2 -Scope 'It' -Exactly
 
                 $Result.Method | Should -Be 'DELETE', 'DELETE'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/4109/', 'https://netbox.domain.com/api/ipam/ip-addresses/4110/'
@@ -465,8 +465,8 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
                     }
                 ) | Remove-NBIPAMAddress -Force
 
-                Assert-VerifiableMock
-                Assert-MockCalled -CommandName "Get-NBIPAMAddress" -Times 2 -Scope 'It' -Exactly
+                Should -InvokeVerifiable
+                Should -Invoke -CommandName "Get-NBIPAMAddress" -Times 2 -Scope 'It' -Exactly
 
                 $Result.Method | Should -Be 'DELETE', 'DELETE'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/4109/', 'https://netbox.domain.com/api/ipam/ip-addresses/4110/'
@@ -474,7 +474,7 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
             }
         }
 
-        Context -Name "Set-NBIPAMAddress" -Fixture {
+        Context "Set-NBIPAMAddress" {
             Mock -CommandName "Get-NBIPAMAddress" -ModuleName NetboxPS -MockWith {
                 return @{
                     'address' = '10.1.1.1/24'
@@ -485,8 +485,8 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
             It "Should set an IP with a new status" {
                 $Result = Set-NBIPAMAddress -Id 4109 -Status 2 -Force
 
-                Assert-VerifiableMock
-                Assert-MockCalled -CommandName "Get-NBIPAMAddress" -Times 1 -Scope "It" -Exactly
+                Should -InvokeVerifiable
+                Should -Invoke -CommandName "Get-NBIPAMAddress" -Times 1 -Scope "It" -Exactly
 
                 $Result.Method | Should -Be 'PATCH'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/4109/'
@@ -499,8 +499,8 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
                     'Id' = 4501
                 } | Set-NBIPAMAddress -VRF 10 -Tenant 14 -Description 'Test description' -Force
 
-                Assert-VerifiableMock
-                Assert-MockCalled -CommandName "Get-NBIPAMAddress" -Times 1 -Scope "It" -Exactly
+                Should -InvokeVerifiable
+                Should -Invoke -CommandName "Get-NBIPAMAddress" -Times 1 -Scope "It" -Exactly
 
                 $Result.Method | Should -Be 'PATCH'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/4501/'
@@ -511,8 +511,8 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
             It "Should set mulitple IPs to a new status" {
                 $Result = Set-NBIPAMAddress -Id 4109, 4555 -Status 2 -Force
 
-                Assert-VerifiableMock
-                Assert-MockCalled -CommandName "Get-NBIPAMAddress" -Times 2 -Scope "It" -Exactly
+                Should -InvokeVerifiable
+                Should -Invoke -CommandName "Get-NBIPAMAddress" -Times 2 -Scope "It" -Exactly
 
                 $Result.Method | Should -Be 'PATCH', 'PATCH'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/4109/', 'https://netbox.domain.com/api/ipam/ip-addresses/4555/'
@@ -523,8 +523,8 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
             It "Should set an IP with VRF, Tenant, and Description" {
                 $Result = Set-NBIPAMAddress -Id 4110 -VRF 10 -Tenant 14 -Description 'Test description' -Force
 
-                Assert-VerifiableMock
-                Assert-MockCalled -CommandName "Get-NBIPAMAddress" -Times 1 -Scope "It" -Exactly
+                Should -InvokeVerifiable
+                Should -Invoke -CommandName "Get-NBIPAMAddress" -Times 1 -Scope "It" -Exactly
 
                 $Result.Method | Should -Be 'PATCH'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/4110/'
@@ -542,8 +542,8 @@ Describe -Name "IPAM tests" -Tag 'Ipam' -Fixture {
                     }
                 ) | Set-NBIPAMAddress -Status 2 -Force
 
-                Assert-VerifiableMock
-                Assert-MockCalled -CommandName "Get-NBIPAMAddress" -Times 2 -Scope "It" -Exactly
+                Should -InvokeVerifiable
+                Should -Invoke -CommandName "Get-NBIPAMAddress" -Times 2 -Scope "It" -Exactly
 
                 $Result.Method | Should -Be 'PATCH', 'PATCH'
                 $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/4501/', 'https://netbox.domain.com/api/ipam/ip-addresses/4611/'

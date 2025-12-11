@@ -1,4 +1,23 @@
-﻿
+<#
+.SYNOPSIS
+    Removes a CIMInterfaceConnection from Netbox D module.
+
+.DESCRIPTION
+    Removes a CIMInterfaceConnection from Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBDCIMInterfaceConnection
+
+    Returns all CIMInterfaceConnection objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+
 function Remove-NBDCIMInterfaceConnection {
     [CmdletBinding(ConfirmImpact = 'High',
                    SupportsShouldProcess = $true)]
