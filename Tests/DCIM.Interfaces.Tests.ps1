@@ -38,7 +38,7 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
     }
 
     InModuleScope -ModuleName 'NetboxPSv4' -ScriptBlock {
-        $script:NetboxConfig.Choices.DCIM = (Get-Content "/DCIMChoices.json" -ErrorAction Stop | ConvertFrom-Json)
+        $script:NetboxConfig.Choices.DCIM = (Get-Content "$PSScriptRoot/DCIMChoices.json" -ErrorAction Stop | ConvertFrom-Json)
 
         Context "Get-NBDCIMInterface" {
             It "Should request the default number of interfaces" {

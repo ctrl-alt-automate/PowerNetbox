@@ -39,7 +39,7 @@ Describe "IPAM tests" -Tag 'Ipam' {
     }
 
     InModuleScope -ModuleName 'NetboxPSv4' -ScriptBlock {
-        $script:NetboxConfig.Choices.IPAM = (Get-Content "/IPAMChoices.json" -ErrorAction Stop | ConvertFrom-Json)
+        $script:NetboxConfig.Choices.IPAM = (Get-Content "$PSScriptRoot/IPAMChoices.json" -ErrorAction Stop | ConvertFrom-Json)
 
         Context "Get-NBIPAMAggregate" {
             It "Should request the default number of aggregates" {

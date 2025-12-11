@@ -38,7 +38,7 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
     }
 
     InModuleScope -ModuleName 'NetboxPSv4' -ScriptBlock {
-        $script:NetboxConfig.Choices.DCIM = (Get-Content "/DCIMChoices.json" -ErrorAction Stop | ConvertFrom-Json)
+        $script:NetboxConfig.Choices.DCIM = (Get-Content "$PSScriptRoot/DCIMChoices.json" -ErrorAction Stop | ConvertFrom-Json)
 
         Context "Get-NBDCIMDevice" {
             It "Should request the default number of devices" {
