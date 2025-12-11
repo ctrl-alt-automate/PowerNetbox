@@ -1,0 +1,33 @@
+# Cross-platform line ending configuration
+# Ensures consistent behavior across Windows, Linux, and macOS
+
+# Default behavior: auto-detect and normalize to LF in repo
+* text=auto eol=lf
+
+# PowerShell files
+*.ps1 text eol=lf
+*.psm1 text eol=lf
+*.psd1 text eol=lf
+
+# Documentation
+*.md text eol=lf
+*.txt text eol=lf
+
+# Configuration files
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.xml text eol=lf
+
+# Shell scripts
+*.sh text eol=lf
+
+# Batch files (keep CRLF for Windows compatibility)
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary files (no conversion)
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary

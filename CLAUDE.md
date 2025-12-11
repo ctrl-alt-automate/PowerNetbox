@@ -563,3 +563,8 @@ SSL/TLS certificate handling differs between PowerShell editions:
 
 ### URL Encoding
 Query string building uses `[System.Uri]::EscapeDataString()` instead of `System.Web.HttpUtility` for cross-platform compatibility. This eliminates the need for the Windows-only `System.Web` assembly.
+
+### Line Endings & Encoding
+- `.gitattributes` enforces LF line endings for all text files
+- Build script uses `utf8NoBOM` encoding on PowerShell Core
+- PowerShell Desktop uses `utf8` (with BOM, unavoidable limitation)
