@@ -59,6 +59,11 @@ Import-Module "PSScriptAnalyzer", "Microsoft.PowerShell.Utility" -ErrorAction St
 
 
 $ModuleName = 'NetboxPS'
+
+# Use UTF-8 without BOM on PS Core, UTF-8 (with BOM) on PS Desktop
+# PS Core 6+ supports 'utf8NoBOM', PS Desktop only supports 'utf8' (with BOM)
+$FileEncoding = if ($PSVersionTable.PSEdition -eq 'Core') { 'utf8NoBOM' } else { 'utf8' }
+
 $ConcatenatedFilePath = Join-Path $PSScriptRoot 'concatenated.ps1'
 $FunctionPath = Join-Path $PSScriptRoot 'Functions'
 $OutputDirectory = Join-Path $PSScriptRoot $ModuleName
@@ -75,7 +80,7 @@ Invoke-ScriptAnalyzer -Path $FunctionPath -IncludeRule 'PSAvoidTrailingWhitespac
 
 Write-Host "Concatenating [$($PS1FunctionFiles.Count)] PS1 files from $FunctionPath"
 
-"" | Out-File -FilePath $ConcatenatedFilePath -Encoding utf8
+"" | Out-File -FilePath $ConcatenatedFilePath -Encoding $FileEncoding
 
 $Counter = 0
 foreach ($File in $PS1FunctionFiles) {
@@ -84,22 +89,22 @@ foreach ($File in $PS1FunctionFiles) {
     try {
         Write-Host (" Adding file {0:D2}/{1:D2}: $($File.Name)" -f $Counter, $PS1FunctionFiles.Count)
 
-        "`r`n#region File $($File.Name)`r`n" | Out-File -FilePath $ConcatenatedFilePath -Encoding utf8 -Append -ErrorAction Stop
+        "`n#region File $($File.Name)`n" | Out-File -FilePath $ConcatenatedFilePath -Encoding $FileEncoding -Append -ErrorAction Stop
 
-        Get-Content $File.FullName -Encoding UTF8 -ErrorAction Stop | Out-File -FilePath $ConcatenatedFilePath -Encoding utf8 -Append -ErrorAction Stop
+        Get-Content $File.FullName -Encoding UTF8 -ErrorAction Stop | Out-File -FilePath $ConcatenatedFilePath -Encoding $FileEncoding -Append -ErrorAction Stop
 
-        "`r`n#endregion" | Out-File -FilePath $ConcatenatedFilePath -Encoding utf8 -Append -ErrorAction Stop
+        "`n#endregion" | Out-File -FilePath $ConcatenatedFilePath -Encoding $FileEncoding -Append -ErrorAction Stop
     } catch {
         Write-Host "FAILED TO WRITE CONCATENATED FILE: $($_.Exception.Message): $($_.TargetObject)" -ForegroundColor Red
         return
     }
 }
 
-"" | Out-File -FilePath $ConcatenatedFilePath -Encoding utf8 -Append
+"" | Out-File -FilePath $ConcatenatedFilePath -Encoding $FileEncoding -Append
 
 
 Write-Host " Adding psm1"
-Get-Content $SourcePSM1Path | Out-File -FilePath $ConcatenatedFilePath -Encoding UTF8 -Append
+Get-Content $SourcePSM1Path -Encoding UTF8 | Out-File -FilePath $ConcatenatedFilePath -Encoding $FileEncoding -Append
 
 
 $PSDManifest = Import-PowerShellDataFile -Path $SourcePSD1Path
