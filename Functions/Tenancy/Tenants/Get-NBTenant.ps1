@@ -51,7 +51,7 @@ function Get-NBTenant {
                    Position = 0)]
         [string]$Name,
 
-        [Parameter(ParameterSetName = 'ByID')]
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
         [Parameter(ParameterSetName = 'Query')]
@@ -78,7 +78,8 @@ function Get-NBTenant {
         [switch]$Raw
     )
 
-    switch ($PSCmdlet.ParameterSetName) {
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($Tenant_ID in $Id) {
                 $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'tenants', $Tenant_ID))
@@ -104,5 +105,6 @@ function Get-NBTenant {
 
             break
         }
+    }
     }
 }

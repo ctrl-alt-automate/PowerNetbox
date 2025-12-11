@@ -23,7 +23,7 @@ function Get-NBIPAMAddressRange {
                    Position = 0)]
         [string]$Range,
 
-        [Parameter(ParameterSetName = 'ByID')]
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
         [Parameter(ParameterSetName = 'Query')]
@@ -59,7 +59,8 @@ function Get-NBIPAMAddressRange {
         [switch]$Raw
     )
 
-    switch ($PSCmdlet.ParameterSetName) {
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($Range_ID in $Id) {
                 $Segments = [System.Collections.ArrayList]::new(@('ipam', 'ip-ranges', $Range_ID))
@@ -85,5 +86,6 @@ function Get-NBIPAMAddressRange {
 
             break
         }
+    }
     }
 }

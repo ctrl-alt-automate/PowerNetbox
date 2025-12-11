@@ -20,7 +20,7 @@ function Get-NBCircuitProvider {
     param
     (
         [Parameter(ParameterSetName = 'ById',
-                   Mandatory = $true)]
+                   Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
         [Parameter(ParameterSetName = 'Query',
@@ -48,7 +48,8 @@ function Get-NBCircuitProvider {
         [switch]$Raw
     )
 
-    switch ($PSCmdlet.ParameterSetName) {
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($i in $ID) {
                 $Segments = [System.Collections.ArrayList]::new(@('circuits', 'providers', $i))
@@ -70,5 +71,6 @@ function Get-NBCircuitProvider {
 
             InvokeNetboxRequest -URI $URI -Raw:$Raw
         }
+    }
     }
 }

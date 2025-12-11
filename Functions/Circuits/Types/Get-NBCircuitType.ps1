@@ -19,7 +19,7 @@ function Get-NBCircuitType {
     [OutputType([PSCustomObject])]
     param
     (
-        [Parameter(ParameterSetName = 'ById')]
+        [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
         [Parameter(ParameterSetName = 'Query')]
@@ -40,7 +40,8 @@ function Get-NBCircuitType {
         [switch]$Raw
     )
 
-    switch ($PSCmdlet.ParameterSetName) {
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($i in $ID) {
                 $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuit_types', $i))
@@ -62,5 +63,6 @@ function Get-NBCircuitType {
 
             InvokeNetboxRequest -URI $URI -Raw:$Raw
         }
+    }
     }
 }

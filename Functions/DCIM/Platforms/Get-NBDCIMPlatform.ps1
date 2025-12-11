@@ -25,7 +25,7 @@ function Get-NBDCIMPlatform {
         [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
-        [Parameter(ParameterSetName = 'ById')]
+        [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
         [string]$Name,
@@ -39,7 +39,8 @@ function Get-NBDCIMPlatform {
         [switch]$Raw
     )
 
-    switch ($PSCmdlet.ParameterSetName) {
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($PlatformID in $Id) {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'platforms', $PlatformID))
@@ -63,5 +64,6 @@ function Get-NBDCIMPlatform {
 
             InvokeNetboxRequest -URI $URI -Raw:$Raw
         }
+    }
     }
 }

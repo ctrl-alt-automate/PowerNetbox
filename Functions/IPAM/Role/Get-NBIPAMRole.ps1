@@ -48,7 +48,7 @@ function Get-NBIPAMRole {
         [Parameter(ParameterSetName = 'Query')]
         [string]$Query,
 
-        [Parameter(ParameterSetName = 'ByID')]
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
         [Parameter(ParameterSetName = 'Query')]
@@ -66,7 +66,8 @@ function Get-NBIPAMRole {
         [switch]$Raw
     )
 
-    switch ($PSCmdlet.ParameterSetName) {
+    process {
+        switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($Role_ID in $Id) {
                 $Segments = [System.Collections.ArrayList]::new(@('ipam', 'roles', $Role_ID))
@@ -92,5 +93,6 @@ function Get-NBIPAMRole {
 
             break
         }
+    }
     }
 }

@@ -22,7 +22,7 @@ function Get-NBIPAMAggregate {
         [Parameter(ParameterSetName = 'Query')]
         [string]$Query,
 
-        [Parameter(ParameterSetName = 'ByID')]
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
         [Parameter(ParameterSetName = 'Query')]
@@ -49,11 +49,12 @@ function Get-NBIPAMAggregate {
         [switch]$Raw
     )
 
-#    if ($null -ne $Family) {
-#        $PSBoundParameters.Family = ValidateIPAMChoice -ProvidedValue $Family -AggregateFamily
-    #    }
+process {
+        #    if ($null -ne $Family) {
+        #        $PSBoundParameters.Family = ValidateIPAMChoice -ProvidedValue $Family -AggregateFamily
+        #    }
 
-    switch ($PSCmdlet.ParameterSetName) {
+        switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($IP_ID in $Id) {
                 $Segments = [System.Collections.ArrayList]::new(@('ipam', 'aggregates', $IP_ID))
@@ -78,5 +79,6 @@ function Get-NBIPAMAggregate {
 
             break
         }
+    }
     }
 }
