@@ -54,7 +54,8 @@ function InvokeNetboxRequest {
 
             try {
                 $stream = $_.Exception.Response.GetResponseStream()
-                $reader = [System.IO.StreamReader]::new($stream)
+                # Explicitly specify UTF-8 encoding for cross-platform consistency
+                $reader = [System.IO.StreamReader]::new($stream, [System.Text.Encoding]::UTF8)
                 $responseBody = $reader.ReadToEnd()
                 $reader.Close()
 
