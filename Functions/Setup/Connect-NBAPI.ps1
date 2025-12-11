@@ -83,14 +83,12 @@
         $invokeParams.remove("SkipCertificateCheck")
     }
 
-    #for PowerShell (<=) 5 (Desktop), Enable TLS 1.1, 1.2 and Disable SSL chain trust
+    # For PowerShell Desktop (5.1), configure TLS and certificate handling
     if ("Desktop" -eq $PSVersionTable.PsEdition) {
-        #Add System.web (Need for ParseQueryString)
-        Add-Type -AssemblyName System.Web
-        #Enable TLS 1.1 and 1.2
+        # Enable modern TLS protocols
         Set-NBCipherSSL
         if ($SkipCertificateCheck) {
-            #Disable SSL chain trust...
+            # Disable SSL certificate validation
             Set-NBuntrustedSSL
         }
     }
