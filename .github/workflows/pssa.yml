@@ -1,16 +1,57 @@
-name: CI
-on: [pull_request]
+name: Lint
+
+on:
+  push:
+    branches: [dev, main, master]
+    paths:
+      - 'Functions/**'
+      - '*.ps1'
+      - '*.psm1'
+  pull_request:
+    branches: [dev, main, master]
+    paths:
+      - 'Functions/**'
+      - '*.ps1'
+      - '*.psm1'
+
 jobs:
   lint:
-    name: Run PSSA
+    name: PSScriptAnalyzer
     runs-on: ubuntu-latest
+
     steps:
-    - uses: actions/checkout@v1
-    - name: lint
-      uses: docker://devblackops/github-action-psscriptanalyzer:2.3.0
-      with:
-        settingsPath: .vscode/PSScriptAnalyzerSettings.psd1
-        sendComment: false
-        failOnInfos: true
-        failOnErrors: true
-        failOnWarnings: true
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install PSScriptAnalyzer
+        shell: pwsh
+        run: |
+          Set-PSRepository PSGallery -InstallationPolicy Trusted
+          Install-Module PSScriptAnalyzer -Force -Scope CurrentUser
+
+      - name: Run PSScriptAnalyzer
+        shell: pwsh
+        run: |
+          $settingsPath = '.vscode/PSScriptAnalyzerSettings.psd1'
+          $settings = if (Test-Path $settingsPath) { $settingsPath } else { $null }
+
+          Write-Host "Analyzing Functions directory..." -ForegroundColor Cyan
+
+          $splat = @{
+              Path     = './Functions'
+              Recurse  = $true
+              Severity = 'Error', 'Warning'
+          }
+          if ($settings) {
+              $splat['Settings'] = $settings
+          }
+
+          $results = Invoke-ScriptAnalyzer @splat
+
+          if ($results) {
+              Write-Host "`n❌ PSScriptAnalyzer found $($results.Count) issue(s):`n" -ForegroundColor Red
+              $results | Format-Table -Property Severity, RuleName, ScriptName, Line, Message -AutoSize -Wrap
+              exit 1
+          } else {
+              Write-Host "✅ No issues found!" -ForegroundColor Green
+          }
