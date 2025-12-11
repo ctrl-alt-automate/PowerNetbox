@@ -38,7 +38,7 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
     }
 
     InModuleScope -ModuleName 'NetboxPSv4' -ScriptBlock {
-        $script:NetboxConfig.Choices.Virtualization = (Get-Content "/VirtualizationChoices.json" -ErrorAction Stop | ConvertFrom-Json)
+        $script:NetboxConfig.Choices.Virtualization = (Get-Content "$PSScriptRoot/VirtualizationChoices.json" -ErrorAction Stop | ConvertFrom-Json)
 
         Context "Get-NBVirtualMachine" {
             It "Should request the default number of VMs" {

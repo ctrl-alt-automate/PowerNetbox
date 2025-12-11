@@ -256,7 +256,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' -Fixture {
         Context "Validating choices" {
             Context "Virtualization choices" {
                 $MajorObject = 'Virtualization'
-                $script:NetboxConfig.Choices.Virtualization = (Get-Content "/VirtualizationChoices.json" -ErrorAction Stop | ConvertFrom-Json)
+                $script:NetboxConfig.Choices.Virtualization = (Get-Content "$PSScriptRoot/VirtualizationChoices.json" -ErrorAction Stop | ConvertFrom-Json)
 
                 It "Should return a valid integer for status when provided a name" {
                     $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName 'virtual-machine:status' -ProvidedValue 'Active'
@@ -281,7 +281,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' -Fixture {
 
             Context "IPAM choices" {
                 $MajorObject = 'IPAM'
-                $script:NetboxConfig.Choices.IPAM = (Get-Content "/IPAMChoices.json" -ErrorAction Stop | ConvertFrom-Json)
+                $script:NetboxConfig.Choices.IPAM = (Get-Content "$PSScriptRoot/IPAMChoices.json" -ErrorAction Stop | ConvertFrom-Json)
 
                 Context "aggregate:family" {
                     $ChoiceName = 'aggregate:family'
@@ -478,7 +478,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' -Fixture {
 
             Context "DCIM choices" {
                 $MajorObject = 'DCIM'
-                $script:NetboxConfig.Choices.DCIM = (Get-Content "/DCIMChoices.json" -ErrorAction Stop | ConvertFrom-Json)
+                $script:NetboxConfig.Choices.DCIM = (Get-Content "$PSScriptRoot/DCIMChoices.json" -ErrorAction Stop | ConvertFrom-Json)
 
                 Context "device:face" {
                     $ChoiceName = 'device:face'
