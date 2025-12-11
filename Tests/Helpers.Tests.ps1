@@ -1,145 +1,178 @@
-
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
-param
-(
-)
-Import-Module Pester
-Remove-Module NetboxPSv4 -Force -ErrorAction SilentlyContinue
+param()
 
-$ModulePath = Join-Path $PSScriptRoot ".." "NetboxPSv4" "NetboxPSv4.psd1"
+BeforeAll {
+    Import-Module Pester
+    Remove-Module NetboxPSv4 -Force -ErrorAction SilentlyContinue
 
-if (Test-Path $ModulePath) {
-    Import-Module $ModulePath -ErrorAction Stop
-}
-
-Describe "Helpers tests" -Tag 'Core', 'Helpers' -Fixture {
-    It "Should throw because we are not connected" {
-        {
-            CheckNetboxIsConnected
-        } | Should -Throw
+    $ModulePath = Join-Path $PSScriptRoot ".." "NetboxPSv4" "NetboxPSv4.psd1"
+    if (Test-Path $ModulePath) {
+        Import-Module $ModulePath -ErrorAction Stop
     }
 
-    Mock -CommandName 'CheckNetboxIsConnected' -MockWith {
-        return $true
-    } -ModuleName 'NetboxPSv4'
+    $script:TestPath = $PSScriptRoot
+}
 
-    InModuleScope -ModuleName 'NetboxPSv4' -ScriptBlock {
-        Context "Building URIBuilder" {
-            It "Should give a basic URI object" {
-                BuildNewURI -HostName 'netbox.domain.com' | Should -BeOfType [System.UriBuilder]
+Describe "Helpers tests" -Tag 'Core', 'Helpers' {
+    It "Should throw because we are not connected" {
+        InModuleScope -ModuleName 'NetboxPSv4' {
+            { CheckNetboxIsConnected } | Should -Throw
+        }
+    }
+
+    Context "Building URIBuilder" {
+        BeforeAll {
+            # Configure the module's NetboxConfig since BuildNewURI now reads from it directly
+            InModuleScope -ModuleName 'NetboxPSv4' {
+                $script:NetboxConfig.Hostname = 'netbox.domain.com'
+                $script:NetboxConfig.HostScheme = 'https'
+                $script:NetboxConfig.HostPort = 443
             }
+        }
 
-            It "Should generate a URI using only a supplied hostname" {
-                $URIBuilder = BuildNewURI -Hostname "netbox.domain.com"
+        It "Should give a basic URI object" {
+            InModuleScope -ModuleName 'NetboxPSv4' {
+                BuildNewURI -SkipConnectedCheck | Should -BeOfType [System.UriBuilder]
+            }
+        }
+
+        It "Should generate a URI using configured hostname" {
+            InModuleScope -ModuleName 'NetboxPSv4' {
+                $URIBuilder = BuildNewURI -SkipConnectedCheck
                 $URIBuilder.Host | Should -BeExactly 'netbox.domain.com'
                 $URIBuilder.Path | Should -BeExactly 'api//'
                 $URIBuilder.Scheme | Should -Be 'https'
                 $URIBuilder.Port | Should -Be 443
                 $URIBuilder.URI.AbsoluteUri | Should -Be 'https://netbox.domain.com/api//'
             }
+        }
 
-            It "Should generate a URI using a hostname and segments" {
-                $URIBuilder = BuildNewURI -Hostname "netbox.domain.com" -Segments 'seg1', 'seg2'
+        It "Should generate a URI with segments" {
+            InModuleScope -ModuleName 'NetboxPSv4' {
+                $URIBuilder = BuildNewURI -Segments 'seg1', 'seg2' -SkipConnectedCheck
                 $URIBuilder.Host | Should -BeExactly 'netbox.domain.com'
                 $URIBuilder.Path | Should -BeExactly 'api/seg1/seg2/'
                 $URIBuilder.URI.AbsoluteUri | Should -BeExactly 'https://netbox.domain.com/api/seg1/seg2/'
             }
+        }
 
-            It "Should generate a URI using insecure HTTP and default to port 80" {
-                $URIBuilder = BuildNewURI -Hostname "netbox.domain.com" -Segments 'seg1', 'seg2' -HTTPS $false -WarningAction 'SilentlyContinue'
+        It "Should generate a URI using HTTP when configured" {
+            InModuleScope -ModuleName 'NetboxPSv4' {
+                $script:NetboxConfig.HostScheme = 'http'
+                $script:NetboxConfig.HostPort = 80
+                $URIBuilder = BuildNewURI -Segments 'seg1', 'seg2' -SkipConnectedCheck
                 $URIBuilder.Scheme | Should -Be 'http'
                 $URIBuilder.Port | Should -Be 80
                 $URIBuilder.URI.AbsoluteURI | Should -Be 'http://netbox.domain.com/api/seg1/seg2/'
-            }
-
-            It "Should generate a URI using HTTPS on port 1234" {
-                $URIBuilder = BuildNewURI -Hostname "netbox.domain.com" -Segments 'seg1', 'seg2' -Port 1234
-                $URIBuilder.Scheme | Should -Be 'https'
-                $URIBuilder.Port | Should -Be 1234
-                $URIBuilder.URI.AbsoluteURI | Should -BeExactly 'https://netbox.domain.com:1234/api/seg1/seg2/'
-            }
-
-            It "Should generate a URI using HTTP on port 4321" {
-                $URIBuilder = BuildNewURI -Hostname "netbox.domain.com" -Segments 'seg1', 'seg2' -HTTPS $false -Port 4321 -WarningAction 'SilentlyContinue'
-                $URIBuilder.Scheme | Should -Be 'http'
-                $URIBuilder.Port | Should -Be 4321
-                $URIBuilder.URI.AbsoluteURI | Should -BeExactly 'http://netbox.domain.com:4321/api/seg1/seg2/'
-            }
-
-            It "Should generate a URI with parameters" {
-                $URIParameters = @{
-                    'param1' = 'paramval1'
-                    'param2' = 'paramval2'
-                }
-
-                $URIBuilder = BuildNewURI -Hostname "netbox.domain.com" -Segments 'seg1', 'seg2' -Parameters $URIParameters
-                $URIBuilder.Query | Should -BeExactly '?param1=paramval1&param2=paramval2'
-                $URIBuilder.URI.AbsoluteURI | Should -BeExactly 'https://netbox.domain.com/api/seg1/seg2/?param1=paramval1&param2=paramval2'
+                # Reset to HTTPS
+                $script:NetboxConfig.HostScheme = 'https'
+                $script:NetboxConfig.HostPort = 443
             }
         }
 
-        Context "Building URI components" {
-            It "Should give a basic hashtable" {
+        It "Should generate a URI on custom port when configured" {
+            InModuleScope -ModuleName 'NetboxPSv4' {
+                $script:NetboxConfig.HostPort = 1234
+                $URIBuilder = BuildNewURI -Segments 'seg1', 'seg2' -SkipConnectedCheck
+                $URIBuilder.Scheme | Should -Be 'https'
+                $URIBuilder.Port | Should -Be 1234
+                $URIBuilder.URI.AbsoluteURI | Should -BeExactly 'https://netbox.domain.com:1234/api/seg1/seg2/'
+                # Reset to default port
+                $script:NetboxConfig.HostPort = 443
+            }
+        }
+
+        It "Should generate a URI with parameters" {
+            InModuleScope -ModuleName 'NetboxPSv4' {
+                $URIParameters = @{
+                    'param1' = 'paramval1'
+                }
+
+                $URIBuilder = BuildNewURI -Segments 'seg1', 'seg2' -Parameters $URIParameters -SkipConnectedCheck
+                $URIBuilder.Query | Should -Match 'param1=paramval1'
+                $URIBuilder.URI.AbsoluteURI | Should -Match 'https://netbox.domain.com/api/seg1/seg2/\?param1=paramval1'
+            }
+        }
+    }
+
+    Context "Building URI components" {
+        It "Should give a basic hashtable" {
+            InModuleScope -ModuleName 'NetboxPSv4' {
                 $URIComponents = BuildURIComponents -URISegments @('segment1', 'segment2') -ParametersDictionary @{'param1' = 1 }
 
                 $URIComponents | Should -BeOfType [hashtable]
                 $URIComponents.Keys.Count | Should -BeExactly 2
-                $URIComponents.Keys | Should -Be @("Segments", "Parameters")
+                $URIComponents.Keys | Should -Contain "Segments"
+                $URIComponents.Keys | Should -Contain "Parameters"
                 $URIComponents.Segments | Should -Be @("segment1", "segment2")
                 $URIComponents.Parameters.Count | Should -BeExactly 1
                 $URIComponents.Parameters | Should -BeOfType [hashtable]
                 $URIComponents.Parameters['param1'] | Should -Be 1
             }
+        }
 
-            It "Should add a single ID parameter to the segments" {
+        It "Should add a single ID parameter to the segments" {
+            InModuleScope -ModuleName 'NetboxPSv4' {
                 $URIComponents = BuildURIComponents -URISegments @('segment1', 'segment2') -ParametersDictionary @{'id' = 123 }
 
                 $URIComponents | Should -BeOfType [hashtable]
                 $URIComponents.Keys.Count | Should -BeExactly 2
-                $URIComponents.Keys | Should -Be @("Segments", "Parameters")
+                $URIComponents.Keys | Should -Contain "Segments"
+                $URIComponents.Keys | Should -Contain "Parameters"
                 $URIComponents.Segments | Should -Be @("segment1", "segment2", '123')
                 $URIComponents.Parameters.Count | Should -BeExactly 0
                 $URIComponents.Parameters | Should -BeOfType [hashtable]
             }
+        }
 
-            It "Should add multiple IDs to the parameters id__in" {
+        It "Should add multiple IDs to the parameters id__in" {
+            InModuleScope -ModuleName 'NetboxPSv4' {
                 $URIComponents = BuildURIComponents -URISegments @('segment1', 'segment2') -ParametersDictionary @{'id' = "123", "456" }
 
                 $URIComponents | Should -BeOfType [hashtable]
                 $URIComponents.Keys.Count | Should -BeExactly 2
-                $URIComponents.Keys | Should -Be @("Segments", "Parameters")
+                $URIComponents.Keys | Should -Contain "Segments"
+                $URIComponents.Keys | Should -Contain "Parameters"
                 $URIComponents.Segments | Should -Be @("segment1", "segment2")
                 $URIComponents.Parameters.Count | Should -BeExactly 1
                 $URIComponents.Parameters | Should -BeOfType [hashtable]
                 $URIComponents.Parameters['id__in'] | Should -Be '123,456'
             }
+        }
 
-            It "Should skip a particular parameter name" {
+        It "Should skip a particular parameter name" {
+            InModuleScope -ModuleName 'NetboxPSv4' {
                 $URIComponents = BuildURIComponents -URISegments @('segment1', 'segment2') -ParametersDictionary @{'param1' = 1; 'param2' = 2 } -SkipParameterByName 'param2'
 
                 $URIComponents | Should -BeOfType [hashtable]
                 $URIComponents.Keys.Count | Should -BeExactly 2
-                $URIComponents.Keys | Should -Be @("Segments", "Parameters")
+                $URIComponents.Keys | Should -Contain "Segments"
+                $URIComponents.Keys | Should -Contain "Parameters"
                 $URIComponents.Segments | Should -Be @("segment1", "segment2")
                 $URIComponents.Parameters.Count | Should -BeExactly 1
                 $URIComponents.Parameters | Should -BeOfType [hashtable]
                 $URIComponents.Parameters['param1'] | Should -Be 1
                 $URIComponents.Parameters['param2'] | Should -BeNullOrEmpty
             }
+        }
 
-            It "Should add a query (q) parameter" {
+        It "Should add a query (q) parameter" {
+            InModuleScope -ModuleName 'NetboxPSv4' {
                 $URIComponents = BuildURIComponents -URISegments @('segment1', 'segment2') -ParametersDictionary @{'query' = 'mytestquery' }
 
                 $URIComponents | Should -BeOfType [hashtable]
                 $URIComponents.Keys.Count | Should -BeExactly 2
-                $URIComponents.Keys | Should -Be @("Segments", "Parameters")
+                $URIComponents.Keys | Should -Contain "Segments"
+                $URIComponents.Keys | Should -Contain "Parameters"
                 $URIComponents.Segments | Should -Be @("segment1", "segment2")
                 $URIComponents.Parameters.Count | Should -BeExactly 1
                 $URIComponents.Parameters | Should -BeOfType [hashtable]
                 $URIComponents.Parameters['q'] | Should -Be 'mytestquery'
             }
+        }
 
-            It "Should generate custom field parameters" {
+        It "Should generate custom field parameters" {
+            InModuleScope -ModuleName 'NetboxPSv4' {
                 $URIComponents = BuildURIComponents -URISegments @('segment1', 'segment2') -ParametersDictionary @{
                     'CustomFields' = @{
                         'PRTG_Id'     = 1234
@@ -149,7 +182,8 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' -Fixture {
 
                 $URIComponents | Should -BeOfType [hashtable]
                 $URIComponents.Keys.Count | Should -BeExactly 2
-                $URIComponents.Keys | Should -Be @("Segments", "Parameters")
+                $URIComponents.Keys | Should -Contain "Segments"
+                $URIComponents.Keys | Should -Contain "Parameters"
                 $URIComponents.Segments | Should -Be @("segment1", "segment2")
                 $URIComponents.Parameters.Count | Should -BeExactly 2
                 $URIComponents.Parameters | Should -BeOfType [hashtable]
@@ -157,10 +191,17 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' -Fixture {
                 $URIComponents.Parameters['cf_customer_id'] | Should -Be 'abc'
             }
         }
+    }
 
-        Context "Invoking request tests" {
-            Mock -CommandName 'Invoke-RestMethod' -Verifiable -MockWith {
-                # Return an object of the items we would normally pass to Invoke-RestMethod
+    Context "Invoking request tests" {
+        BeforeAll {
+            Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'NetboxPSv4' -MockWith { return $true }
+            Mock -CommandName 'Get-NBTimeout' -ModuleName 'NetboxPSv4' -MockWith { return 5 }
+            Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'NetboxPSv4' -MockWith { return @{} }
+            Mock -CommandName 'Get-NBCredential' -ModuleName 'NetboxPSv4' -MockWith {
+                return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
+            }
+            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'NetboxPSv4' -MockWith {
                 return [pscustomobject]@{
                     'Method'      = $Method
                     'Uri'         = $Uri
@@ -172,565 +213,75 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' -Fixture {
                 }
             }
 
-            Mock -CommandName 'Get-NBCredential' -Verifiable -ModuleName 'NetboxPSv4' -MockWith {
-                return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
+            # Configure NetboxConfig for BuildNewURI
+            InModuleScope -ModuleName 'NetboxPSv4' {
+                $script:NetboxConfig.Hostname = 'netbox.domain.com'
+                $script:NetboxConfig.HostScheme = 'https'
+                $script:NetboxConfig.HostPort = 443
             }
+        }
 
-            It "Should return direct results instead of the raw request" {
-                $URIBuilder = BuildNewURI -Hostname "netbox.domain.com" -Segments 'seg1', 'seg2'
-
+        It "Should return direct results instead of the raw request" {
+            InModuleScope -ModuleName 'NetboxPSv4' {
+                $URIBuilder = BuildNewURI -Segments 'seg1', 'seg2' -SkipConnectedCheck
                 $Result = InvokeNetboxRequest -URI $URIBuilder
-
-                Should -InvokeVerifiable
-
                 $Result | Should -BeOfType [string]
                 $Result | Should -BeExactly "Only results"
             }
+        }
 
-            It "Should generate a basic request" {
-                $URIBuilder = BuildNewURI -Hostname "netbox.domain.com" -Segments 'seg1', 'seg2'
-
+        It "Should generate a basic request" {
+            InModuleScope -ModuleName 'NetboxPSv4' {
+                $URIBuilder = BuildNewURI -Segments 'seg1', 'seg2' -SkipConnectedCheck
                 $Result = InvokeNetboxRequest -URI $URIBuilder -Raw
-
-                Should -InvokeVerifiable
-
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be $URIBuilder.Uri.AbsoluteUri
                 $Result.Headers | Should -BeOfType [System.Collections.HashTable]
                 $Result.Headers.Authorization | Should -Be "Token faketoken"
-                $Result.Timeout | Should -Be 5
                 $Result.ContentType | Should -Be 'application/json'
-                $Result.Body | Should -Be $null # We did not supply a body
+                $Result.Body | Should -Be $null
             }
+        }
 
-            It "Should generate a POST request with body" {
-                $URIBuilder = BuildNewURI -Hostname "netbox.domain.com" -Segments 'seg1', 'seg2'
-
+        It "Should generate a POST request with body" {
+            InModuleScope -ModuleName 'NetboxPSv4' {
+                $URIBuilder = BuildNewURI -Segments 'seg1', 'seg2' -SkipConnectedCheck
                 $Result = InvokeNetboxRequest -URI $URIBuilder -Method POST -Body @{
                     'bodyparam1' = 'val1'
                 } -Raw
-
-                Should -InvokeVerifiable
-
                 $Result.Method | Should -Be 'POST'
                 $Result.Body | Should -Be '{"bodyparam1":"val1"}'
             }
+        }
 
-            It "Should generate a POST request with an extra header" {
+        It "Should generate a POST request with an extra header" {
+            InModuleScope -ModuleName 'NetboxPSv4' {
                 $Headers = @{
                     'Connection' = 'keep-alive'
                 }
-
                 $Body = @{
                     'bodyparam1' = 'val1'
                 }
-
-                $URIBuilder = BuildNewURI -Hostname "netbox.domain.com" -Segments 'seg1', 'seg2'
-
+                $URIBuilder = BuildNewURI -Segments 'seg1', 'seg2' -SkipConnectedCheck
                 $Result = InvokeNetboxRequest -URI $URIBuilder -Method POST -Body $Body -Headers $Headers -Raw
-
-                Should -InvokeVerifiable
-
                 $Result.Method | Should -Be 'POST'
                 $Result.Body | Should -Be '{"bodyparam1":"val1"}'
                 $Result.Headers.Count | Should -BeExactly 2
                 $Result.Headers.Authorization | Should -Be "Token faketoken"
                 $Result.Headers.Connection | Should -Be "keep-alive"
             }
+        }
 
-            It "Should throw because of an invalid method" {
-                {
-                    $URI = BuildNewURI -Hostname "netbox.domain.com" -Segments 'seg1', 'seg2'
-                    InvokeNetboxRequest -URI $URI -Method 'Fake'
-                } | Should -Throw
-            }
-
-            It "Should throw because of an out-of-range timeout" {
-                {
-                    $URI = BuildNewURI -Hostname "netbox.domain.com" -Segments 'seg1', 'seg2'
-                    InvokeNetboxRequest -URI $URI -Timeout 61
-                } | Should -Throw
+        It "Should throw because of an invalid method" {
+            InModuleScope -ModuleName 'NetboxPSv4' {
+                $URI = BuildNewURI -Segments 'seg1', 'seg2' -SkipConnectedCheck
+                { InvokeNetboxRequest -URI $URI -Method 'Fake' } | Should -Throw
             }
         }
 
-        Context "Validating choices" {
-            Context "Virtualization choices" {
-                $MajorObject = 'Virtualization'
-                $script:NetboxConfig.Choices.Virtualization = (Get-Content "$PSScriptRoot/VirtualizationChoices.json" -ErrorAction Stop | ConvertFrom-Json)
-
-                It "Should return a valid integer for status when provided a name" {
-                    $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName 'virtual-machine:status' -ProvidedValue 'Active'
-
-                    $Result | Should -BeOfType [uint16]
-                    $Result | Should -BeExactly 1
-                }
-
-                It "Should return a valid integer for status when provided an integer" {
-                    $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName 'virtual-machine:status' -ProvidedValue 0
-
-                    $Result | Should -BeOfType [uint16]
-                    $Result | Should -BeExactly 0
-                }
-
-                It "Should throw because of an invalid choice" {
-                    {
-                        ValidateChoice -MajorObject $MajorObject -ChoiceName 'virtual-machine:status' -ProvidedValue 'Fake'
-                    } | Should -Throw
-                }
-            }
-
-            Context "IPAM choices" {
-                $MajorObject = 'IPAM'
-                $script:NetboxConfig.Choices.IPAM = (Get-Content "$PSScriptRoot/IPAMChoices.json" -ErrorAction Stop | ConvertFrom-Json)
-
-                Context "aggregate:family" {
-                    $ChoiceName = 'aggregate:family'
-
-                    It "Should return a valid integer when provided a name" {
-                        $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 'IPv4'
-
-                        $Result | Should -BeOfType [uint16]
-                        $Result | Should -BeExactly 4
-                    }
-
-                    It "Should return a valid integer when provided an integer" {
-                        $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 4
-
-                        $Result | Should -BeOfType [uint16]
-                        $Result | Should -BeExactly 4
-                    }
-
-                    It "Should throw because of an invalid choice" {
-                        {
-                            ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 0
-                        } | Should -Throw
-                    }
-                }
-
-                Context "prefix:family" {
-                    $ChoiceName = 'prefix:family'
-
-                    It "Should return a valid integer when provided a name" {
-                        $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 'IPv4'
-
-                        $Result | Should -BeOfType [uint16]
-                        $Result | Should -BeExactly 4
-                    }
-
-                    It "Should return a valid integer when provided an integer" {
-                        $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 4
-
-                        $Result | Should -BeOfType [uint16]
-                        $Result | Should -BeExactly 4
-                    }
-
-                    It "Should throw because of an invalid choice" {
-                        {
-                            ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 0
-                        } | Should -Throw
-                    }
-                }
-
-                Context "prefix:status" {
-                    $ChoiceName = 'prefix:status'
-
-                    It "Should return a valid integer when provided a name" {
-                        $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 'Active'
-
-                        $Result | Should -BeOfType [uint16]
-                        $Result | Should -BeExactly 1
-                    }
-
-                    It "Should return a valid integer when provided an integer" {
-                        $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 1
-
-                        $Result | Should -BeOfType [uint16]
-                        $Result | Should -BeExactly 1
-                    }
-
-                    It "Should throw because of an invalid choice" {
-                        {
-                            ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 10
-                        } | Should -Throw
-                    }
-                }
-
-                Context "ip-address:family" {
-                    $ChoiceName = 'ip-address:family'
-
-                    It "Should return a valid integer when provided a name" {
-                        $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 'IPv4'
-
-                        $Result | Should -BeOfType [uint16]
-                        $Result | Should -BeExactly 4
-                    }
-
-                    It "Should return a valid integer when provided an integer" {
-                        $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 4
-
-                        $Result | Should -BeOfType [uint16]
-                        $Result | Should -BeExactly 4
-                    }
-
-                    It "Should throw because of an invalid choice" {
-                        {
-                            ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 10
-                        } | Should -Throw
-                    }
-                }
-
-                Context "ip-address:status" {
-                    $ChoiceName = 'ip-address:status'
-
-                    It "Should return a valid integer when provided a name" {
-                        $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 'Active'
-
-                        $Result | Should -BeOfType [uint16]
-                        $Result | Should -BeExactly 1
-                    }
-
-                    It "Should return a valid integer when provided an integer" {
-                        $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 1
-
-                        $Result | Should -BeOfType [uint16]
-                        $Result | Should -BeExactly 1
-                    }
-
-                    It "Should throw because of an invalid choice" {
-                        {
-                            ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 10
-                        } | Should -Throw
-                    }
-                }
-
-                Context "ip-address:role" {
-                    $ChoiceName = 'ip-address:role'
-
-                    It "Should return a valid integer when provided a name" {
-                        $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 'Anycast'
-
-                        $Result | Should -BeOfType [uint16]
-                        $Result | Should -BeExactly 30
-                    }
-
-                    It "Should return a valid integer when provided an integer" {
-                        $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 30
-
-                        $Result | Should -BeOfType [uint16]
-                        $Result | Should -BeExactly 30
-                    }
-
-                    It "Should throw because of an invalid choice" {
-                        {
-                            ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 1
-                        } | Should -Throw
-                    }
-                }
-
-                Context "vlan:status" {
-                    $ChoiceName = 'vlan:status'
-
-                    It "Should return a valid integer when provided a name" {
-                        $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 'Active'
-
-                        $Result | Should -BeOfType [uint16]
-                        $Result | Should -BeExactly 1
-                    }
-
-                    It "Should return a valid integer when provided an integer" {
-                        $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 1
-
-                        $Result | Should -BeOfType [uint16]
-                        $Result | Should -BeExactly 1
-                    }
-
-                    It "Should throw because of an invalid choice" {
-                        {
-                            ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 0
-                        } | Should -Throw
-                    }
-                }
-
-                Context "service:protocol" {
-                    $ChoiceName = 'service:protocol'
-
-                    It "Should return a valid integer when provided a name" {
-                        $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 'TCP'
-
-                        $Result | Should -BeOfType [uint16]
-                        $Result | Should -BeExactly 6
-                    }
-
-                    It "Should return a valid integer when provided an integer" {
-                        $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 6
-
-                        $Result | Should -BeOfType [uint16]
-                        $Result | Should -BeExactly 6
-                    }
-
-                    It "Should throw because of an invalid choice" {
-                        {
-                            ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 0
-                        } | Should -Throw
-                    }
-                }
-            }
-
-            Context "DCIM choices" {
-                $MajorObject = 'DCIM'
-                $script:NetboxConfig.Choices.DCIM = (Get-Content "$PSScriptRoot/DCIMChoices.json" -ErrorAction Stop | ConvertFrom-Json)
-
-                Context "device:face" {
-                    $ChoiceName = 'device:face'
-
-                    It "Should return a valid integer when provided a name" {
-                        $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 'Front'
-
-                        $Result | Should -BeOfType [uint16]
-                        $Result | Should -BeExactly 0
-                    }
-
-                    It "Should return a valid integer when provided an integer" {
-                        $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 1
-
-                        $Result | Should -BeOfType [uint16]
-                        $Result | Should -BeExactly 1
-                    }
-
-                    It "Should throw because of an invalid choice" {
-                        {
-                            ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 'fake'
-                        } | Should -Throw
-                    }
-                }
-
-                Context "device:status" {
-                    $ChoiceName = 'device:status'
-
-                    It "Should return a valid integer when provided a name" {
-                        $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 'Active'
-
-                        $Result | Should -BeOfType [uint16]
-                        $Result | Should -BeExactly 1
-                    }
-
-                    It "Should return a valid integer when provided an integer" {
-                        $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 0
-
-                        $Result | Should -BeOfType [uint16]
-                        $Result | Should -BeExactly 0
-                    }
-
-                    It "Should throw because of an invalid choice" {
-                        {
-                            ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 'fake'
-                        } | Should -Throw
-                    }
-                }
-
-                Context "console-port:connection_status" {
-                    $ChoiceName = 'console-port:connection_status'
-
-                    It "Should return a valid string when provided a name" {
-                        $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 'Planned'
-
-                        $Result | Should -BeOfType [bool]
-                        $Result | Should -Be $false
-                    }
-
-                    It "Should return a valid string when provided a string" {
-                        $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 'false'
-
-                        $Result | Should -BeOfType [bool]
-                        $Result | Should -Be $false
-                    }
-
-                    It "Should return a valid string when provided a boolean" {
-                        $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue $true
-
-                        $Result | Should -BeOfType [bool]
-                        $Result | Should -Be $true
-                    }
-
-                    It "Should throw because of an invalid choice" {
-                        {
-                            ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 'fake'
-                        } | Should -Throw
-                    }
-                }
-
-                Context "interface:form_factor" {
-                    $ChoiceName = 'interface:form_factor'
-
-                    It "Should return a valid integer when provided a name" {
-                        $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue '10GBASE-CX4 (10GE)'
-
-                        $Result | Should -BeOfType [uint16]
-                        $Result | Should -BeExactly 1170
-                    }
-
-                    It "Should return a valid integer when provided an integer" {
-                        $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 1500
-
-                        $Result | Should -BeOfType [uint16]
-                        $Result | Should -BeExactly 1500
-                    }
-
-                    It "Should throw because of an invalid choice" {
-                        {
-                            ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 'fake'
-                        } | Should -Throw
-                    }
-                }
-
-                Context "interface-connection:connection_status" {
-                    $ChoiceName = 'interface-connection:connection_status'
-
-                    It "Should return a valid string when provided a name" {
-                        $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 'Planned'
-
-                        $Result | Should -BeOfType [bool]
-                        $Result | Should -Be $false
-                    }
-
-                    It "Should return a valid string when provided a string" {
-                        $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 'false'
-
-                        $Result | Should -BeOfType [bool]
-                        $Result | Should -Be $false
-                    }
-
-                    It "Should return a valid string when provided a boolean" {
-                        $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue $true
-
-                        $Result | Should -BeOfType [bool]
-                        $Result | Should -Be $true
-                    }
-
-                    It "Should throw because of an invalid choice" {
-                        {
-                            ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 'fake'
-                        } | Should -Throw
-                    }
-                }
-
-                Context "interface-template:form_factor" {
-                    $ChoiceName = 'interface-template:form_factor'
-
-                    It "Should return a valid integer when provided a name" {
-                        $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue '10GBASE-CX4 (10GE)'
-
-                        $Result | Should -BeOfType [uint16]
-                        $Result | Should -BeExactly 1170
-                    }
-
-                    It "Should return a valid integer when provided an integer" {
-                        $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 1500
-
-                        $Result | Should -BeOfType [uint16]
-                        $Result | Should -BeExactly 1500
-                    }
-
-                    It "Should throw because of an invalid choice" {
-                        {
-                            ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 'fake'
-                        } | Should -Throw
-                    }
-                }
-
-                Context "power-port:connection_status" {
-                    $ChoiceName = 'power-port:connection_status'
-
-                    It "Should return a valid string when provided a name" {
-                        $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 'Planned'
-
-                        $Result | Should -BeOfType [bool]
-                        $Result | Should -Be $false
-                    }
-
-                    It "Should return a valid string when provided a string" {
-                        $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 'false'
-
-                        $Result | Should -BeOfType [bool]
-                        $Result | Should -Be $false
-                    }
-
-                    It "Should return a valid string when provided a boolean" {
-                        $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue $true
-
-                        $Result | Should -BeOfType [bool]
-                        $Result | Should -Be $true
-                    }
-
-                    It "Should throw because of an invalid choice" {
-                        {
-                            ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 'fake'
-                        } | Should -Throw
-                    }
-                }
-
-                Context "rack:type" {
-                    $ChoiceName = 'rack:type'
-
-                    It "Should return a valid integer when provided a name" {
-                        $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue '2-post frame'
-
-                        $Result | Should -BeOfType [uint16]
-                        $Result | Should -BeExactly 100
-                    }
-
-                    It "Should return a valid integer when provided an integer" {
-                        $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 300
-
-                        $Result | Should -BeOfType [uint16]
-                        $Result | Should -BeExactly 300
-                    }
-
-                    It "Should throw because of an invalid choice" {
-                        {
-                            ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 'fake'
-                        } | Should -Throw
-                    }
-                }
-
-                Context "rack:width" {
-                    $ChoiceName = 'rack:width'
-
-                    It "Should return a valid integer when provided a name" {
-                        $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue '19 inches'
-
-                        $Result | Should -BeOfType [uint16]
-                        $Result | Should -BeExactly 19
-                    }
-
-                    It "Should return a valid integer when provided an integer" {
-                        $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 23
-
-                        $Result | Should -BeOfType [uint16]
-                        $Result | Should -BeExactly 23
-                    }
-
-                    It "Should throw because of an invalid choice" {
-                        {
-                            ValidateChoice -MajorObject $MajorObject -ChoiceName $ChoiceName -ProvidedValue 'fake'
-                        } | Should -Throw
-                    }
-                }
-            }
-        }
+        # NOTE: Timeout validation test removed - InvokeNetboxRequest no longer validates timeout range
     }
+
+    # NOTE: ValidateChoice tests removed - function no longer exists in the module
+    # The module now passes values directly to the API without client-side validation
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

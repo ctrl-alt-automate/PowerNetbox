@@ -1,18 +1,17 @@
-
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
-param
-(
-)
-Import-Module Pester
-Remove-Module NetboxPSv4 -Force -ErrorAction SilentlyContinue
+param()
 
-$ModulePath = Join-Path $PSScriptRoot ".." "NetboxPSv4" "NetboxPSv4.psd1"
+BeforeAll {
+    Import-Module Pester
+    Remove-Module NetboxPSv4 -Force -ErrorAction SilentlyContinue
 
-if (Test-Path $ModulePath) {
-    Import-Module $ModulePath -ErrorAction Stop
+    $ModulePath = Join-Path $PSScriptRoot ".." "NetboxPSv4" "NetboxPSv4.psd1"
+    if (Test-Path $ModulePath) {
+        Import-Module $ModulePath -ErrorAction Stop
+    }
 }
 
-Describe "Setup tests" -Tag 'Core', 'Setup' -Fixture {
+Describe "Setup tests" -Tag 'Core', 'Setup' {
     It "Throws an error for an empty hostname" {
         { Get-NBHostname } | Should -Throw
     }
@@ -41,9 +40,8 @@ Describe "Setup tests" -Tag 'Core', 'Setup' -Fixture {
     }
 
     Context "Credentials object" {
-        $Creds = [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
-
         It "Sets the credentials using [pscredential]" {
+            $Creds = [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
             Set-NBCredential -Credential $Creds | Should -BeOfType [pscredential]
         }
 
@@ -51,35 +49,4 @@ Describe "Setup tests" -Tag 'Core', 'Setup' -Fixture {
             (Get-NBCredential).GetNetworkCredential().Password | Should -BeExactly 'faketoken'
         }
     }
-
-    <#
-    Context "Connecting to the API" {
-        Mock Get-NBCircuitsChoices {
-            return $true
-        } -ModuleName NetboxPSv4 -Verifiable
-
-        $Creds = [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
-
-        It "Connects using supplied hostname and obtained credentials" {
-            #$null = Set-NBCredentials -Credentials $Creds
-            Connect-NBAPI -Hostname "fake.org" | Should -Be $true
-        }
-
-        It "Connects using supplied hostname and credentials" {
-            Connect-NBAPI -Hostname 'fake.org' -Credentials $Creds | Should -Be $true
-        }
-
-
-
-        Assert-MockCalled -CommandName Get-NBCircuitsChoices -ModuleName NetboxPSv4
-    }
-    #>
 }
-
-
-
-
-
-
-
-

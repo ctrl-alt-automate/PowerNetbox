@@ -3,13 +3,20 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-. "$PSScriptRoot/../common.ps1"
 
-BeforeAll {
-    Connect-NBAPI @invokeParams
+BeforeDiscovery {
+    . "$PSScriptRoot/../common.ps1"
+    $script:SkipTests = $script:SkipIntegrationTests
 }
 
-Describe "Get (DCIM) Site" {
+BeforeAll {
+    . "$PSScriptRoot/../common.ps1"
+    if (-not $script:SkipIntegrationTests) {
+        Connect-NBAPI @invokeParams
+    }
+}
+
+Describe "Get (DCIM) Site" -Skip:$script:SkipTests {
 
     BeforeAll {
         New-NBDCIMSite -name $pester_site1
@@ -45,7 +52,7 @@ Describe "Get (DCIM) Site" {
     }
 }
 
-Describe "New (DCIM) Site" {
+Describe "New (DCIM) Site" -Skip:$script:SkipTests {
 
     It "New Site with no option" {
         New-NBDCIMSite -name $pester_site1
@@ -68,7 +75,7 @@ Describe "New (DCIM) Site" {
     }
 }
 
-Describe "Remove Site" {
+Describe "Remove Site" -Skip:$script:SkipTests {
 
     BeforeEach {
         New-NBDCIMSite -name $pester_site1
