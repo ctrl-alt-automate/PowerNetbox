@@ -1,11 +1,13 @@
-# NetboxPS
+# NetboxPSv4
 
-[![PowerShell Gallery](https://img.shields.io/powershellgallery/v/NetboxPS?label=PSGallery&logo=powershell&logoColor=white)](https://www.powershellgallery.com/packages/NetboxPS)
-[![PowerShell Gallery Downloads](https://img.shields.io/powershellgallery/dt/NetboxPS?label=Downloads&logo=powershell&logoColor=white)](https://www.powershellgallery.com/packages/NetboxPS)
+[![PowerShell Gallery](https://img.shields.io/powershellgallery/v/NetboxPSv4?label=PSGallery&logo=powershell&logoColor=white)](https://www.powershellgallery.com/packages/NetboxPSv4)
+[![PowerShell Gallery Downloads](https://img.shields.io/powershellgallery/dt/NetboxPSv4?label=Downloads&logo=powershell&logoColor=white)](https://www.powershellgallery.com/packages/NetboxPSv4)
 [![License](https://img.shields.io/github/license/ctrl-alt-automate/NetboxPS)](LICENSE)
 [![Netbox Version](https://img.shields.io/badge/Netbox-4.4.7-blue?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyTDIgN2wxMCA1IDEwLTV6TTIgMTdsMTAgNSAxMC01TTIgMTJsMTAgNSAxMC01Ii8+PC9zdmc+)](https://github.com/netbox-community/netbox)
 
-A comprehensive PowerShell module for the [Netbox](https://github.com/netbox-community/netbox) REST API. Fully compatible with **Netbox 4.4.7** (latest stable release).
+A comprehensive PowerShell module for the [Netbox](https://github.com/netbox-community/netbox) REST API with **100% API coverage**. Fully compatible with **Netbox 4.4.7** (latest stable release).
+
+> **Note:** This is a fork of [NetboxPS](https://github.com/benclaussen/NetboxPS) published under a new name to provide full Netbox 4.x compatibility and cross-platform support.
 
 ## Acknowledgements
 
@@ -43,10 +45,10 @@ This project is a fork of the original [NetboxPS](https://github.com/benclaussen
 
 ```powershell
 # Install for current user
-Install-Module -Name NetboxPS -Scope CurrentUser
+Install-Module -Name NetboxPSv4 -Scope CurrentUser
 
 # Install system-wide (requires admin/root)
-Install-Module -Name NetboxPS -Scope AllUsers
+Install-Module -Name NetboxPSv4 -Scope AllUsers
 ```
 
 ### Platform-Specific Instructions
@@ -55,11 +57,11 @@ Install-Module -Name NetboxPS -Scope AllUsers
 
 ```powershell
 # PowerShell 5.1 (Windows PowerShell)
-Install-Module -Name NetboxPS -Scope CurrentUser
+Install-Module -Name NetboxPSv4 -Scope CurrentUser
 
 # PowerShell 7+ (recommended)
 # First install PowerShell 7: https://aka.ms/powershell-release?tag=stable
-pwsh -Command "Install-Module -Name NetboxPS -Scope CurrentUser"
+pwsh -Command "Install-Module -Name NetboxPSv4 -Scope CurrentUser"
 ```
 
 #### macOS
@@ -68,8 +70,8 @@ pwsh -Command "Install-Module -Name NetboxPS -Scope CurrentUser"
 # Install PowerShell 7 via Homebrew
 brew install powershell/tap/powershell
 
-# Install NetboxPS
-pwsh -Command "Install-Module -Name NetboxPS -Scope CurrentUser"
+# Install NetboxPSv4
+pwsh -Command "Install-Module -Name NetboxPSv4 -Scope CurrentUser"
 ```
 
 #### Linux (Ubuntu/Debian)
@@ -83,8 +85,8 @@ sudo dpkg -i packages-microsoft-prod.deb
 sudo apt-get update
 sudo apt-get install -y powershell
 
-# Install NetboxPS
-pwsh -Command "Install-Module -Name NetboxPS -Scope CurrentUser"
+# Install NetboxPSv4
+pwsh -Command "Install-Module -Name NetboxPSv4 -Scope CurrentUser"
 ```
 
 #### Linux (RHEL/CentOS/Fedora)
@@ -93,8 +95,8 @@ pwsh -Command "Install-Module -Name NetboxPS -Scope CurrentUser"
 # Install PowerShell 7
 sudo dnf install powershell
 
-# Install NetboxPS
-pwsh -Command "Install-Module -Name NetboxPS -Scope CurrentUser"
+# Install NetboxPSv4
+pwsh -Command "Install-Module -Name NetboxPSv4 -Scope CurrentUser"
 ```
 
 ### Manual Installation
@@ -108,7 +110,7 @@ cd NetboxPS
 ./deploy.ps1 -Environment prod -SkipVersion
 
 # Import the module
-Import-Module ./NetboxPS/NetboxPS.psd1
+Import-Module ./NetboxPSv4/NetboxPSv4.psd1
 ```
 
 ## Quick Start
@@ -117,7 +119,7 @@ Import-Module ./NetboxPS/NetboxPS.psd1
 
 ```powershell
 # Import the module
-Import-Module NetboxPS
+Import-Module NetboxPSv4
 
 # Connect with API token
 $credential = Get-Credential -UserName 'api' -Message 'Enter your Netbox API token'
@@ -172,6 +174,24 @@ Get-NBIPAMAddress -Status 'active' -Tenant 1 -Limit 100
 - **[CLAUDE.md](CLAUDE.md)** - Detailed development guide and API reference
 - **[Netbox API Docs](https://netbox.readthedocs.io/en/stable/rest-api/overview/)** - Official Netbox API documentation
 
+## Migrating from NetboxPS
+
+If you're migrating from the original NetboxPS module:
+
+```powershell
+# Remove old module
+Remove-Module NetboxPS -Force -ErrorAction SilentlyContinue
+Uninstall-Module NetboxPS -Force -ErrorAction SilentlyContinue
+
+# Install NetboxPSv4
+Install-Module -Name NetboxPSv4 -Scope CurrentUser
+
+# Import new module
+Import-Module NetboxPSv4
+```
+
+All function names remain the same (`Get-NBDCIMDevice`, `New-NBIPAMAddress`, etc.), so your existing scripts should work without modification.
+
 ## Requirements
 
 | Platform | Minimum Version |
@@ -206,14 +226,16 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Changelog
 
-### v4.4.7 (Current)
-- 100% API coverage for Netbox 4.4.7
-- Cross-platform support (Windows, Linux, macOS)
-- 488 public functions across all modules
-- New modules: VPN, Wireless, Core, Users
+### v4.4.7 (Current) - Initial NetboxPSv4 Release
+- **100% API coverage** for Netbox 4.4.7
+- **Cross-platform support** - Windows, Linux, macOS
+- **478 public functions** across all modules
+- **New modules:** VPN, Wireless, Core, Users
 - Full Circuits and Extras module coverage
-- Improved certificate handling
-- Removed Windows-only dependencies
+- Improved certificate handling for self-signed certs
+- Removed Windows-only dependencies (System.Web)
+- UTF-8 encoding throughout
+- Published as **NetboxPSv4** on PowerShell Gallery
 
 ### Previous Versions
-See the [original repository](https://github.com/benclaussen/NetboxPS) for earlier version history.
+See the [original NetboxPS repository](https://github.com/benclaussen/NetboxPS) for earlier version history.
