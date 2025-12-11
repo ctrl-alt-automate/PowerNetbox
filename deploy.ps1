@@ -110,10 +110,14 @@ $UpdateModuleManifestSplat = @{
 }
 
 if ($Environment -ilike 'dev*') {
-    Write-Host "Exporting all functions for development"
+    Write-Host "Exporting all functions for development (including internal helpers)"
     $UpdateModuleManifestSplat['FunctionsToExport'] = $PS1FunctionFiles.BaseName
 } else {
-    $UpdateModuleManifestSplat['FunctionsToExport'] = ($PS1FunctionFiles.BaseName | Where-Object { $_ -like '*-*' })
+    # Production: Only export public functions (those with '-' in the name)
+    # Internal helpers like BuildNewURI, InvokeNetboxRequest are kept private
+    $PublicFunctions = $PS1FunctionFiles.BaseName | Where-Object { $_ -like '*-*' }
+    Write-Host "Exporting $($PublicFunctions.Count) public functions (hiding internal helpers)"
+    $UpdateModuleManifestSplat['FunctionsToExport'] = $PublicFunctions
 }
 
 
