@@ -12,7 +12,7 @@ function InvokeNetboxRequest {
         [pscustomobject]$Body = $null,
 
         [ValidateRange(1, 65535)]
-        [uint16]$Timeout = (Get-NetboxTimeout),
+        [uint16]$Timeout = (Get-NBTimeout),
 
         [ValidateSet('GET', 'PATCH', 'PUT', 'POST', 'DELETE', 'OPTIONS', IgnoreCase = $true)]
         [string]$Method = 'GET',
@@ -20,7 +20,7 @@ function InvokeNetboxRequest {
         [switch]$Raw
     )
 
-    $creds = Get-NetboxCredential
+    $creds = Get-NBCredential
 
     $Headers.Authorization = "Token {0}" -f $creds.GetNetworkCredential().Password
 
@@ -34,7 +34,7 @@ function InvokeNetboxRequest {
         'Verbose'     = $VerbosePreference
     }
 
-    $splat += Get-NetboxInvokeParams
+    $splat += Get-NBInvokeParams
 
     if ($Body) {
         Write-Verbose "BODY: $($Body | ConvertTo-Json -Compress)"

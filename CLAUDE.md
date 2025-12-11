@@ -36,7 +36,7 @@ Copy-Item .netboxps.config.example.ps1 .netboxps.config.ps1
 # Load config manually
 $config = & ./.netboxps.config.ps1
 $cred = [PSCredential]::new('api', (ConvertTo-SecureString $config.Token -AsPlainText -Force))
-Connect-NetboxAPI -Hostname $config.Hostname -Credential $cred
+Connect-NBAPI -Hostname $config.Hostname -Credential $cred
 ```
 
 ### Building the Module
@@ -174,7 +174,7 @@ NetboxPS/
 
 ## Function Naming Convention
 
-Functions follow this pattern: `[Verb]-Netbox[Module][Resource]`
+Functions follow this pattern: `[Verb]-NB[Module][Resource]`
 
 | Verb | Purpose | HTTP Method |
 |------|---------|-------------|
@@ -185,16 +185,16 @@ Functions follow this pattern: `[Verb]-Netbox[Module][Resource]`
 | `Add-` | Create child resources (legacy, prefer `New-`) | POST |
 
 Examples:
-- `Get-NetboxDCIMDevice` - Get devices from DCIM module
-- `New-NetboxIPAMAddress` - Create new IP address
-- `Set-NetboxVirtualMachine` - Update a virtual machine
-- `Remove-NetboxDCIMSite` - Delete a site
+- `Get-NBDCIMDevice` - Get devices from DCIM module
+- `New-NBIPAMAddress` - Create new IP address
+- `Set-NBVirtualMachine` - Update a virtual machine
+- `Remove-NBDCIMSite` - Delete a site
 
 ## Creating New Functions
 
 ### Template for GET Function
 ```powershell
-function Get-Netbox[Module][Resource] {
+function Get-NB[Module][Resource] {
     [CmdletBinding()]
     param (
         [uint16]$Limit,
@@ -223,7 +223,7 @@ function Get-Netbox[Module][Resource] {
 
 ### Template for NEW Function
 ```powershell
-function New-Netbox[Module][Resource] {
+function New-NB[Module][Resource] {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
     param (
         [Parameter(Mandatory = $true)]
@@ -250,7 +250,7 @@ function New-Netbox[Module][Resource] {
 
 ### Template for SET Function
 ```powershell
-function Set-Netbox[Module][Resource] {
+function Set-NB[Module][Resource] {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
     param (
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
@@ -278,7 +278,7 @@ function Set-Netbox[Module][Resource] {
 
 ### Template for REMOVE Function
 ```powershell
-function Remove-Netbox[Module][Resource] {
+function Remove-NB[Module][Resource] {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
     param (
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
@@ -344,7 +344,7 @@ InvokeNetboxRequest -URI $URI -Method POST -Body $bodyHashtable
 |-------|--------------|-------------------|--------|
 | ContentTypes endpoint | `/api/extras/content-types/` | `/api/core/object-types/` | ✅ Fixed |
 | VM Site parameter | Mandatory | Optional (only Name required) | ✅ Fixed |
-| Set-NetboxDCIMSite | Missing | Added | ✅ Fixed |
+| Set-NBDCIMSite | Missing | Added | ✅ Fixed |
 
 ### API Endpoints Changed in Netbox 4.x
 - `/api/extras/content-types/` → `/api/core/object-types/`
@@ -418,7 +418,7 @@ This project includes specialized slash commands in `.claude/commands/` for diff
 /implement dcim/locations
 
 # Test an existing function for compatibility
-/test-endpoint Get-NetboxDCIMDevice
+/test-endpoint Get-NBDCIMDevice
 ```
 
 ### Recommended Workflow for New Endpoints
@@ -454,7 +454,7 @@ Import-Module ./NetboxPS/NetboxPS.psd1 -Force
 ### SSL/Certificate errors
 ```powershell
 # Use SkipCertificateCheck parameter
-Connect-NetboxAPI -Hostname "netbox.local" -Credential $cred -SkipCertificateCheck
+Connect-NBAPI -Hostname "netbox.local" -Credential $cred -SkipCertificateCheck
 ```
 
 ### API returns 403

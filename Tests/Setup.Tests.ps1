@@ -14,29 +14,29 @@ if (Test-Path $ModulePath) {
 
 Describe "Setup tests" -Tag 'Core', 'Setup' -Fixture {
     It "Throws an error for an empty hostname" {
-        { Get-NetboxHostname } | Should -Throw
+        { Get-NBHostname } | Should -Throw
     }
 
     It "Sets the hostname" {
-        Set-NetboxHostName -HostName 'netbox.domain.com' | Should -Be 'netbox.domain.com'
+        Set-NBHostName -HostName 'netbox.domain.com' | Should -Be 'netbox.domain.com'
     }
 
     It "Gets the hostname from the variable" {
-        Get-NetboxHostName | Should -Be 'netbox.domain.com'
+        Get-NBHostName | Should -Be 'netbox.domain.com'
     }
 
     It "Throws an error for empty credentials" {
-        { Get-NetboxCredential } | Should -Throw
+        { Get-NBCredential } | Should -Throw
     }
 
     Context "Plain text credentials" {
         It "Sets the credentials using plain text" {
-            Set-NetboxCredential -Token (ConvertTo-SecureString -String "faketoken" -Force -AsPlainText) | Should -BeOfType [pscredential]
+            Set-NBCredential -Token (ConvertTo-SecureString -String "faketoken" -Force -AsPlainText) | Should -BeOfType [pscredential]
         }
 
         It "Checks the set credentials" {
-            Set-NetboxCredential -Token (ConvertTo-SecureString -String "faketoken" -Force -AsPlainText)
-            (Get-NetboxCredential).GetNetworkCredential().Password | Should -BeExactly "faketoken"
+            Set-NBCredential -Token (ConvertTo-SecureString -String "faketoken" -Force -AsPlainText)
+            (Get-NBCredential).GetNetworkCredential().Password | Should -BeExactly "faketoken"
         }
     }
 
@@ -44,34 +44,34 @@ Describe "Setup tests" -Tag 'Core', 'Setup' -Fixture {
         $Creds = [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
 
         It "Sets the credentials using [pscredential]" {
-            Set-NetboxCredential -Credential $Creds | Should -BeOfType [pscredential]
+            Set-NBCredential -Credential $Creds | Should -BeOfType [pscredential]
         }
 
         It "Checks the set credentials" {
-            (Get-NetboxCredential).GetNetworkCredential().Password | Should -BeExactly 'faketoken'
+            (Get-NBCredential).GetNetworkCredential().Password | Should -BeExactly 'faketoken'
         }
     }
 
     <#
     Context "Connecting to the API" {
-        Mock Get-NetboxCircuitsChoices {
+        Mock Get-NBCircuitsChoices {
             return $true
         } -ModuleName NetboxPS -Verifiable
 
         $Creds = [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
 
         It "Connects using supplied hostname and obtained credentials" {
-            #$null = Set-NetboxCredentials -Credentials $Creds
-            Connect-NetboxAPI -Hostname "fake.org" | Should -Be $true
+            #$null = Set-NBCredentials -Credentials $Creds
+            Connect-NBAPI -Hostname "fake.org" | Should -Be $true
         }
 
         It "Connects using supplied hostname and credentials" {
-            Connect-NetboxAPI -Hostname 'fake.org' -Credentials $Creds | Should -Be $true
+            Connect-NBAPI -Hostname 'fake.org' -Credentials $Creds | Should -Be $true
         }
 
 
 
-        Assert-MockCalled -CommandName Get-NetboxCircuitsChoices -ModuleName NetboxPS
+        Assert-MockCalled -CommandName Get-NBCircuitsChoices -ModuleName NetboxPS
     }
     #>
 }

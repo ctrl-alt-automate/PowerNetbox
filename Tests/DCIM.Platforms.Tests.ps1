@@ -29,18 +29,18 @@ Describe -Name "DCIM Platforms Tests" -Tag 'DCIM', 'platforms' -Fixture {
         }
     }
 
-    Mock -CommandName 'Get-NetboxCredential' -Verifiable -ModuleName 'NetboxPS' -MockWith {
+    Mock -CommandName 'Get-NBCredential' -Verifiable -ModuleName 'NetboxPS' -MockWith {
         return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
     }
 
-    Mock -CommandName 'Get-NetboxHostname' -Verifiable -ModuleName 'NetboxPS' -MockWith {
+    Mock -CommandName 'Get-NBHostname' -Verifiable -ModuleName 'NetboxPS' -MockWith {
         return 'netbox.domain.com'
     }
 
     InModuleScope -ModuleName 'NetboxPS' -ScriptBlock {
-        Context -Name "Get-NetboxDCIMPlatform" -Fixture {
+        Context -Name "Get-NBDCIMPlatform" -Fixture {
             It "Should request the default number of platforms" {
-                $Result = Get-NetboxDCIMPlatform
+                $Result = Get-NBDCIMPlatform
 
                 Assert-VerifiableMock
                 Assert-MockCalled -CommandName 'Invoke-RestMethod' -Times 1 -Scope 'It' -Exactly
@@ -51,7 +51,7 @@ Describe -Name "DCIM Platforms Tests" -Tag 'DCIM', 'platforms' -Fixture {
             }
 
             It "Should request with a limit and offset" {
-                $Result = Get-NetboxDCIMPlatform -Limit 10 -Offset 100
+                $Result = Get-NBDCIMPlatform -Limit 10 -Offset 100
 
                 Assert-VerifiableMock
                 Assert-MockCalled -CommandName 'Invoke-RestMethod' -Times 1 -Scope 'It' -Exactly
@@ -62,7 +62,7 @@ Describe -Name "DCIM Platforms Tests" -Tag 'DCIM', 'platforms' -Fixture {
             }
 
             It "Should request with a platform name" {
-                $Result = Get-NetboxDCIMPlatform -Name "Windows Server 2016"
+                $Result = Get-NBDCIMPlatform -Name "Windows Server 2016"
 
                 Assert-VerifiableMock
                 Assert-MockCalled -CommandName 'Invoke-RestMethod' -Times 1 -Scope 'It' -Exactly
@@ -73,7 +73,7 @@ Describe -Name "DCIM Platforms Tests" -Tag 'DCIM', 'platforms' -Fixture {
             }
 
             It "Should request a platform by manufacturer" {
-                $Result = Get-NetboxDCIMPlatform -Manufacturer 'Cisco'
+                $Result = Get-NBDCIMPlatform -Manufacturer 'Cisco'
 
                 Assert-VerifiableMock
                 Assert-MockCalled -CommandName 'Invoke-RestMethod' -Times 1 -Scope 'It' -Exactly
@@ -84,7 +84,7 @@ Describe -Name "DCIM Platforms Tests" -Tag 'DCIM', 'platforms' -Fixture {
             }
 
             It "Should request a platform by ID" {
-                $Result = Get-NetboxDCIMPlatform -Id 10
+                $Result = Get-NBDCIMPlatform -Id 10
 
                 Assert-VerifiableMock
                 Assert-MockCalled -CommandName 'Invoke-RestMethod' -Times 1 -Scope 'It' -Exactly
@@ -95,7 +95,7 @@ Describe -Name "DCIM Platforms Tests" -Tag 'DCIM', 'platforms' -Fixture {
             }
 
             It "Should request multiple platforms by ID" {
-                $Result = Get-NetboxDCIMPlatform -Id 10, 20
+                $Result = Get-NBDCIMPlatform -Id 10, 20
 
                 Assert-VerifiableMock
                 Assert-MockCalled -CommandName 'Invoke-RestMethod' -Times 2 -Scope 'It' -Exactly

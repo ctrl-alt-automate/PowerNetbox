@@ -29,20 +29,20 @@ Describe -Name "DCIM Devices Tests" -Tag 'DCIM', 'Devices' -Fixture {
         }
     }
 
-    Mock -CommandName 'Get-NetboxCredential' -Verifiable -ModuleName 'NetboxPS' -MockWith {
+    Mock -CommandName 'Get-NBCredential' -Verifiable -ModuleName 'NetboxPS' -MockWith {
         return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
     }
 
-    Mock -CommandName 'Get-NetboxHostname' -Verifiable -ModuleName 'NetboxPS' -MockWith {
+    Mock -CommandName 'Get-NBHostname' -Verifiable -ModuleName 'NetboxPS' -MockWith {
         return 'netbox.domain.com'
     }
 
     InModuleScope -ModuleName 'NetboxPS' -ScriptBlock {
         $script:NetboxConfig.Choices.DCIM = (Get-Content "$PSScriptRoot\DCIMChoices.json" -ErrorAction Stop | ConvertFrom-Json)
 
-        Context -Name "Get-NetboxDCIMDevice" -Fixture {
+        Context -Name "Get-NBDCIMDevice" -Fixture {
             It "Should request the default number of devices" {
-                $Result = Get-NetboxDCIMDevice
+                $Result = Get-NBDCIMDevice
 
                 Assert-VerifiableMock
 
@@ -52,7 +52,7 @@ Describe -Name "DCIM Devices Tests" -Tag 'DCIM', 'Devices' -Fixture {
             }
 
             It "Should request with a limit and offset" {
-                $Result = Get-NetboxDCIMDevice -Limit 10 -Offset 100
+                $Result = Get-NBDCIMDevice -Limit 10 -Offset 100
 
                 Assert-VerifiableMock
 
@@ -62,7 +62,7 @@ Describe -Name "DCIM Devices Tests" -Tag 'DCIM', 'Devices' -Fixture {
             }
 
             It "Should request with a query" {
-                $Result = Get-NetboxDCIMDevice -Query 'testdevice'
+                $Result = Get-NBDCIMDevice -Query 'testdevice'
 
                 Assert-VerifiableMock
 
@@ -72,7 +72,7 @@ Describe -Name "DCIM Devices Tests" -Tag 'DCIM', 'Devices' -Fixture {
             }
 
             It "Should request with an escaped query" {
-                $Result = Get-NetboxDCIMDevice -Query 'test device'
+                $Result = Get-NBDCIMDevice -Query 'test device'
 
                 Assert-VerifiableMock
 
@@ -82,7 +82,7 @@ Describe -Name "DCIM Devices Tests" -Tag 'DCIM', 'Devices' -Fixture {
             }
 
             It "Should request with a name" {
-                $Result = Get-NetboxDCIMDevice -Name 'testdevice'
+                $Result = Get-NBDCIMDevice -Name 'testdevice'
 
                 Assert-VerifiableMock
 
@@ -92,7 +92,7 @@ Describe -Name "DCIM Devices Tests" -Tag 'DCIM', 'Devices' -Fixture {
             }
 
             It "Should request with a single ID" {
-                $Result = Get-NetboxDCIMDevice -Id 10
+                $Result = Get-NBDCIMDevice -Id 10
 
                 Assert-VerifiableMock
 
@@ -104,7 +104,7 @@ Describe -Name "DCIM Devices Tests" -Tag 'DCIM', 'Devices' -Fixture {
             It "Should request a device by ID from the pipeline" {
                 $Result = [pscustomobject]@{
                     'id' = 10
-                } | Get-NetboxDCIMDevice
+                } | Get-NBDCIMDevice
 
                 Assert-VerifiableMock
 
@@ -114,7 +114,7 @@ Describe -Name "DCIM Devices Tests" -Tag 'DCIM', 'Devices' -Fixture {
             }
 
             It "Should request with multiple IDs" {
-                $Result = Get-NetboxDCIMDevice -Id 10, 12, 15
+                $Result = Get-NBDCIMDevice -Id 10, 12, 15
 
                 Assert-VerifiableMock
 
@@ -124,7 +124,7 @@ Describe -Name "DCIM Devices Tests" -Tag 'DCIM', 'Devices' -Fixture {
             }
 
             It "Should request a status" {
-                $Result = Get-NetboxDCIMDevice -Status 'Active'
+                $Result = Get-NBDCIMDevice -Status 'Active'
 
                 Assert-VerifiableMock
 
@@ -135,12 +135,12 @@ Describe -Name "DCIM Devices Tests" -Tag 'DCIM', 'Devices' -Fixture {
 
             It "Should throw for an invalid status" {
                 {
-                    Get-NetboxDCIMDevice -Status 'Fake'
+                    Get-NBDCIMDevice -Status 'Fake'
                 } | Should -Throw
             }
 
             It "Should request devices that are a PDU" {
-                $Result = Get-NetboxDCIMDevice -Is_PDU $True
+                $Result = Get-NBDCIMDevice -Is_PDU $True
 
                 Assert-VerifiableMock
 
@@ -150,9 +150,9 @@ Describe -Name "DCIM Devices Tests" -Tag 'DCIM', 'Devices' -Fixture {
             }
         }
 
-        Context -Name "Get-NetboxDCIMDeviceType" -Fixture {
+        Context -Name "Get-NBDCIMDeviceType" -Fixture {
             It "Should request the default number of devices types" {
-                $Result = Get-NetboxDCIMDeviceType
+                $Result = Get-NBDCIMDeviceType
 
                 Assert-VerifiableMock
 
@@ -162,7 +162,7 @@ Describe -Name "DCIM Devices Tests" -Tag 'DCIM', 'Devices' -Fixture {
             }
 
             It "Should request with a limit and offset" {
-                $Result = Get-NetboxDCIMDeviceType -Limit 10 -Offset 100
+                $Result = Get-NBDCIMDeviceType -Limit 10 -Offset 100
 
                 Assert-VerifiableMock
 
@@ -172,7 +172,7 @@ Describe -Name "DCIM Devices Tests" -Tag 'DCIM', 'Devices' -Fixture {
             }
 
             It "Should request with a query" {
-                $Result = Get-NetboxDCIMDeviceType -Query 'testdevice'
+                $Result = Get-NBDCIMDeviceType -Query 'testdevice'
 
                 Assert-VerifiableMock
 
@@ -182,7 +182,7 @@ Describe -Name "DCIM Devices Tests" -Tag 'DCIM', 'Devices' -Fixture {
             }
 
             It "Should request with an escaped query" {
-                $Result = Get-NetboxDCIMDeviceType -Query 'test device'
+                $Result = Get-NBDCIMDeviceType -Query 'test device'
 
                 Assert-VerifiableMock
 
@@ -192,7 +192,7 @@ Describe -Name "DCIM Devices Tests" -Tag 'DCIM', 'Devices' -Fixture {
             }
 
             It "Should request with a slug" {
-                $Result = Get-NetboxDCIMDeviceType -Slug 'testdevice'
+                $Result = Get-NBDCIMDeviceType -Slug 'testdevice'
 
                 Assert-VerifiableMock
 
@@ -202,7 +202,7 @@ Describe -Name "DCIM Devices Tests" -Tag 'DCIM', 'Devices' -Fixture {
             }
 
             It "Should request with a single ID" {
-                $Result = Get-NetboxDCIMDeviceType -Id 10
+                $Result = Get-NBDCIMDeviceType -Id 10
 
                 Assert-VerifiableMock
 
@@ -212,7 +212,7 @@ Describe -Name "DCIM Devices Tests" -Tag 'DCIM', 'Devices' -Fixture {
             }
 
             It "Should request with multiple IDs" {
-                $Result = Get-NetboxDCIMDeviceType -Id 10, 12, 15
+                $Result = Get-NBDCIMDeviceType -Id 10, 12, 15
 
                 Assert-VerifiableMock
 
@@ -222,7 +222,7 @@ Describe -Name "DCIM Devices Tests" -Tag 'DCIM', 'Devices' -Fixture {
             }
 
             It "Should request a device type that is PDU" {
-                $Result = Get-NetboxDCIMDeviceType -Is_PDU $true
+                $Result = Get-NBDCIMDeviceType -Is_PDU $true
 
                 Assert-VerifiableMock
 
@@ -232,9 +232,9 @@ Describe -Name "DCIM Devices Tests" -Tag 'DCIM', 'Devices' -Fixture {
             }
         }
 
-        Context -Name "Get-NetboxDCIMDeviceRole" -Fixture {
+        Context -Name "Get-NBDCIMDeviceRole" -Fixture {
             It "Should request the default number of devices types" {
-                $Result = Get-NetboxDCIMDeviceRole
+                $Result = Get-NBDCIMDeviceRole
 
                 Assert-VerifiableMock
                 Assert-MockCalled -CommandName "Invoke-RestMethod" -Times 1 -Scope 'It' -Exactly
@@ -245,7 +245,7 @@ Describe -Name "DCIM Devices Tests" -Tag 'DCIM', 'Devices' -Fixture {
             }
 
             It "Should request a device role by Id" {
-                $Result = Get-NetboxDCIMDeviceRole -Id 10
+                $Result = Get-NBDCIMDeviceRole -Id 10
 
                 Assert-VerifiableMock
                 Assert-MockCalled -CommandName "Invoke-RestMethod" -Times 1 -Scope 'It' -Exactly
@@ -256,7 +256,7 @@ Describe -Name "DCIM Devices Tests" -Tag 'DCIM', 'Devices' -Fixture {
             }
 
             It "Should request multiple roles by Id" {
-                $Result = Get-NetboxDCIMDeviceRole -Id 10, 12
+                $Result = Get-NBDCIMDeviceRole -Id 10, 12
 
                 Assert-VerifiableMock
                 Assert-MockCalled -CommandName "Invoke-RestMethod" -Times 2 -Scope 'It' -Exactly
@@ -267,7 +267,7 @@ Describe -Name "DCIM Devices Tests" -Tag 'DCIM', 'Devices' -Fixture {
             }
 
             It "Should request single role by Id and color" {
-                $Result = Get-NetboxDCIMDeviceRole -Id 10 -Color '0fab12'
+                $Result = Get-NBDCIMDeviceRole -Id 10 -Color '0fab12'
 
                 Assert-VerifiableMock
                 Assert-MockCalled -CommandName "Invoke-RestMethod" -Times 1 -Scope 'It' -Exactly
@@ -278,7 +278,7 @@ Describe -Name "DCIM Devices Tests" -Tag 'DCIM', 'Devices' -Fixture {
             }
 
             It "Should request multiple roles by Id and color" {
-                $Result = Get-NetboxDCIMDeviceRole -Id 10, 12 -Color '0fab12'
+                $Result = Get-NBDCIMDeviceRole -Id 10, 12 -Color '0fab12'
 
                 Assert-VerifiableMock
                 Assert-MockCalled -CommandName "Invoke-RestMethod" -Times 2 -Scope 'It' -Exactly
@@ -289,7 +289,7 @@ Describe -Name "DCIM Devices Tests" -Tag 'DCIM', 'Devices' -Fixture {
             }
 
             It "Should request with a limit and offset" {
-                $Result = Get-NetboxDCIMDeviceRole -Limit 10 -Offset 100
+                $Result = Get-NBDCIMDeviceRole -Limit 10 -Offset 100
 
                 Assert-VerifiableMock
                 Assert-MockCalled -CommandName "Invoke-RestMethod" -Times 1 -Scope 'It' -Exactly
@@ -300,7 +300,7 @@ Describe -Name "DCIM Devices Tests" -Tag 'DCIM', 'Devices' -Fixture {
             }
 
             It "Should request with a slug" {
-                $Result = Get-NetboxDCIMDeviceRole -Slug 'testdevice'
+                $Result = Get-NBDCIMDeviceRole -Slug 'testdevice'
 
                 Assert-VerifiableMock
                 Assert-MockCalled -CommandName "Invoke-RestMethod" -Times 1 -Scope 'It' -Exactly
@@ -311,7 +311,7 @@ Describe -Name "DCIM Devices Tests" -Tag 'DCIM', 'Devices' -Fixture {
             }
 
             It "Should request with a name" {
-                $Result = Get-NetboxDCIMDeviceRole -Name 'TestRole'
+                $Result = Get-NBDCIMDeviceRole -Name 'TestRole'
 
                 Assert-VerifiableMock
                 Assert-MockCalled -CommandName "Invoke-RestMethod" -Times 1 -Scope 'It' -Exactly
@@ -322,7 +322,7 @@ Describe -Name "DCIM Devices Tests" -Tag 'DCIM', 'Devices' -Fixture {
             }
 
             It "Should request those that are VM role" {
-                $Result = Get-NetboxDCIMDeviceRole -VM_Role $true
+                $Result = Get-NBDCIMDeviceRole -VM_Role $true
 
                 Assert-VerifiableMock
                 Assert-MockCalled -CommandName "Invoke-RestMethod" -Times 1 -Scope 'It' -Exactly
@@ -333,9 +333,9 @@ Describe -Name "DCIM Devices Tests" -Tag 'DCIM', 'Devices' -Fixture {
             }
         }
 
-        Context -Name "New-NetboxDCIMDevice" -Fixture {
+        Context -Name "New-NBDCIMDevice" -Fixture {
             It "Should create a new device" {
-                $Result = New-NetboxDCIMDevice -Name "newdevice" -Device_Role 4 -Device_Type 10 -Site 1 -Face 0
+                $Result = New-NBDCIMDevice -Name "newdevice" -Device_Role 4 -Device_Type 10 -Site 1 -Face 0
 
                 Assert-MockCalled -CommandName 'Invoke-RestMethod' -Times 1 -Exactly -Scope 'It'
 
@@ -347,25 +347,25 @@ Describe -Name "DCIM Devices Tests" -Tag 'DCIM', 'Devices' -Fixture {
 
             It "Should throw because of an invalid status" {
                 {
-                    New-NetboxDCIMDevice -Name "newdevice" -Device_Role 4 -Device_Type 10 -Site 1 -Status 5555
+                    New-NBDCIMDevice -Name "newdevice" -Device_Role 4 -Device_Type 10 -Site 1 -Status 5555
                 } | Should -Throw
             }
         }
 
 
-        Mock -CommandName "Get-NetboxDCIMDevice" -ModuleName NetboxPS -MockWith {
+        Mock -CommandName "Get-NBDCIMDevice" -ModuleName NetboxPS -MockWith {
             return [pscustomobject]@{
                 'Id'   = $Id
                 'Name' = $Name
             }
         }
 
-        Context -Name "Set-NetboxDCIMDevice" -Fixture {
+        Context -Name "Set-NBDCIMDevice" -Fixture {
             It "Should set a device to a new name" {
-                $Result = Set-NetboxDCIMDevice -Id 1234 -Name 'newtestname' -Force
+                $Result = Set-NBDCIMDevice -Id 1234 -Name 'newtestname' -Force
 
                 Assert-VerifiableMock
-                Assert-MockCalled -CommandName 'Get-NetboxDCIMDevice' -Times 1 -Exactly -Scope 'It'
+                Assert-MockCalled -CommandName 'Get-NBDCIMDevice' -Times 1 -Exactly -Scope 'It'
 
                 $Result.Method | Should -Be 'PATCH'
                 $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/devices/1234/'
@@ -374,10 +374,10 @@ Describe -Name "DCIM Devices Tests" -Tag 'DCIM', 'Devices' -Fixture {
             }
 
             It "Should set a device with new properties" {
-                $Result = Set-NetboxDCIMDevice -Id 1234 -Name 'newtestname' -Cluster 10 -Platform 20 -Site 15 -Force
+                $Result = Set-NBDCIMDevice -Id 1234 -Name 'newtestname' -Cluster 10 -Platform 20 -Site 15 -Force
 
                 Assert-VerifiableMock
-                Assert-MockCalled -CommandName 'Get-NetboxDCIMDevice' -Times 1 -Exactly -Scope 'It'
+                Assert-MockCalled -CommandName 'Get-NBDCIMDevice' -Times 1 -Exactly -Scope 'It'
 
                 $Result.Method | Should -Be 'PATCH'
                 $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/devices/1234/'
@@ -386,10 +386,10 @@ Describe -Name "DCIM Devices Tests" -Tag 'DCIM', 'Devices' -Fixture {
             }
 
             It "Should set multiple devices with new properties" {
-                $Result = Set-NetboxDCIMDevice -Id 1234, 3214 -Cluster 10 -Platform 20 -Site 15 -Force
+                $Result = Set-NBDCIMDevice -Id 1234, 3214 -Cluster 10 -Platform 20 -Site 15 -Force
 
                 Assert-VerifiableMock
-                Assert-MockCalled -CommandName 'Get-NetboxDCIMDevice' -Times 2 -Exactly -Scope 'It'
+                Assert-MockCalled -CommandName 'Get-NBDCIMDevice' -Times 2 -Exactly -Scope 'It'
 
                 $Result.Method | Should -Be 'PATCH', 'PATCH'
                 $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/devices/1234/', 'https://netbox.domain.com/api/dcim/devices/3214/'
@@ -405,10 +405,10 @@ Describe -Name "DCIM Devices Tests" -Tag 'DCIM', 'Devices' -Fixture {
                     [pscustomobject]@{
                         'id' = 3241
                     }
-                ) | Set-NetboxDCIMDevice -Cluster 10 -Platform 20 -Site 15 -Force
+                ) | Set-NBDCIMDevice -Cluster 10 -Platform 20 -Site 15 -Force
 
                 Assert-VerifiableMock
-                Assert-MockCalled -CommandName 'Get-NetboxDCIMDevice' -Times 2 -Exactly -Scope 'It'
+                Assert-MockCalled -CommandName 'Get-NBDCIMDevice' -Times 2 -Exactly -Scope 'It'
 
                 $Result.Method | Should -Be 'PATCH', 'PATCH'
                 $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/devices/4432/', 'https://netbox.domain.com/api/dcim/devices/3241/'
@@ -417,12 +417,12 @@ Describe -Name "DCIM Devices Tests" -Tag 'DCIM', 'Devices' -Fixture {
             }
         }
 
-        Context -Name "Remove-NetboxDCIMDevice" -Fixture {
+        Context -Name "Remove-NBDCIMDevice" -Fixture {
             It "Should remove a device" {
-                $Result = Remove-NetboxDCIMDevice -Id 10 -Force
+                $Result = Remove-NBDCIMDevice -Id 10 -Force
 
                 Assert-VerifiableMock
-                Assert-MockCalled -CommandName 'Get-NetboxDCIMDevice' -Times 1 -Exactly -Scope 'It'
+                Assert-MockCalled -CommandName 'Get-NBDCIMDevice' -Times 1 -Exactly -Scope 'It'
 
                 $Result.Method | Should -Be 'DELETE'
                 $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/devices/10/'
@@ -430,10 +430,10 @@ Describe -Name "DCIM Devices Tests" -Tag 'DCIM', 'Devices' -Fixture {
             }
 
             It "Should remove multiple devices" {
-                $Result = Remove-NetboxDCIMDevice -Id 10, 12 -Force
+                $Result = Remove-NBDCIMDevice -Id 10, 12 -Force
 
                 Assert-VerifiableMock
-                Assert-MockCalled -CommandName 'Get-NetboxDCIMDevice' -Times 2 -Exactly -Scope 'It'
+                Assert-MockCalled -CommandName 'Get-NBDCIMDevice' -Times 2 -Exactly -Scope 'It'
 
                 $Result.Method | Should -Be 'DELETE', 'DELETE'
                 $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/devices/10/', 'https://netbox.domain.com/api/dcim/devices/12/'
@@ -441,10 +441,10 @@ Describe -Name "DCIM Devices Tests" -Tag 'DCIM', 'Devices' -Fixture {
             }
 
             It "Should remove a device from the pipeline" {
-                $Result = Get-NetboxDCIMDevice -Id 20 | Remove-NetboxDCIMDevice -Force
+                $Result = Get-NBDCIMDevice -Id 20 | Remove-NBDCIMDevice -Force
 
                 Assert-VerifiableMock
-                Assert-MockCalled -CommandName 'Get-NetboxDCIMDevice' -Times 2 -Exactly -Scope 'It'
+                Assert-MockCalled -CommandName 'Get-NBDCIMDevice' -Times 2 -Exactly -Scope 'It'
 
                 $Result.Method | Should -Be 'DELETE'
                 $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/devices/20/'
@@ -459,10 +459,10 @@ Describe -Name "DCIM Devices Tests" -Tag 'DCIM', 'Devices' -Fixture {
                     [pscustomobject]@{
                         'Id' = 40
                     }
-                ) | Remove-NetboxDCIMDevice -Force
+                ) | Remove-NBDCIMDevice -Force
 
                 Assert-VerifiableMock
-                Assert-MockCalled -CommandName 'Get-NetboxDCIMDevice' -Times 2 -Exactly -Scope 'It'
+                Assert-MockCalled -CommandName 'Get-NBDCIMDevice' -Times 2 -Exactly -Scope 'It'
 
                 $Result.Method | Should -Be 'DELETE', 'DELETE'
                 $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/devices/30/', 'https://netbox.domain.com/api/dcim/devices/40/'

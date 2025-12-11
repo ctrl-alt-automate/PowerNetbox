@@ -29,20 +29,20 @@ Describe -Name "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' -Fixture {
         }
     }
 
-    Mock -CommandName 'Get-NetboxCredential' -Verifiable -ModuleName 'NetboxPS' -MockWith {
+    Mock -CommandName 'Get-NBCredential' -Verifiable -ModuleName 'NetboxPS' -MockWith {
         return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
     }
 
-    Mock -CommandName 'Get-NetboxHostname' -Verifiable -ModuleName 'NetboxPS' -MockWith {
+    Mock -CommandName 'Get-NBHostname' -Verifiable -ModuleName 'NetboxPS' -MockWith {
         return 'netbox.domain.com'
     }
 
     InModuleScope -ModuleName 'NetboxPS' -ScriptBlock {
         $script:NetboxConfig.Choices.DCIM = (Get-Content "$PSScriptRoot\DCIMChoices.json" -ErrorAction Stop | ConvertFrom-Json)
 
-        Context -Name "Get-NetboxDCIMInterface" -Fixture {
+        Context -Name "Get-NBDCIMInterface" -Fixture {
             It "Should request the default number of interfaces" {
-                $Result = Get-NetboxDCIMInterface
+                $Result = Get-NBDCIMInterface
 
                 Assert-VerifiableMock
                 Assert-MockCalled -CommandName 'Invoke-RestMethod' -Times 1 -Scope 'It' -Exactly
@@ -53,7 +53,7 @@ Describe -Name "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' -Fixture {
             }
 
             It "Should request with a limit and offset" {
-                $Result = Get-NetboxDCIMInterface -Limit 10 -Offset 100
+                $Result = Get-NBDCIMInterface -Limit 10 -Offset 100
 
                 Assert-VerifiableMock
                 Assert-MockCalled -CommandName 'Invoke-RestMethod' -Times 1 -Scope 'It' -Exactly
@@ -64,7 +64,7 @@ Describe -Name "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' -Fixture {
             }
 
             It "Should request with enabled" {
-                $Result = Get-NetboxDCIMInterface -Enabled $true
+                $Result = Get-NBDCIMInterface -Enabled $true
 
                 Assert-VerifiableMock
                 Assert-MockCalled -CommandName 'Invoke-RestMethod' -Times 1 -Scope 'It' -Exactly
@@ -75,7 +75,7 @@ Describe -Name "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' -Fixture {
             }
 
             It "Should request with a form factor name" {
-                $Result = Get-NetboxDCIMInterface -Form_Factor '10GBASE-T (10GE)'
+                $Result = Get-NBDCIMInterface -Form_Factor '10GBASE-T (10GE)'
 
                 Assert-VerifiableMock
                 Assert-MockCalled -CommandName 'Invoke-RestMethod' -Times 1 -Scope 'It' -Exactly
@@ -87,12 +87,12 @@ Describe -Name "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' -Fixture {
 
             It "Should throw for an invalid form factor" {
                 {
-                    Get-NetboxDCIMInterface -Form_Factor 'Fake'
+                    Get-NBDCIMInterface -Form_Factor 'Fake'
                 } | Should -Throw
             }
 
             It "Should request devices that are mgmt only" {
-                $Result = Get-NetboxDCIMInterface -MGMT_Only $True
+                $Result = Get-NBDCIMInterface -MGMT_Only $True
 
                 Assert-VerifiableMock
                 Assert-MockCalled -CommandName 'Invoke-RestMethod' -Times 1 -Scope 'It' -Exactly
@@ -105,7 +105,7 @@ Describe -Name "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' -Fixture {
             It "Should request an interface from the pipeline" {
                 $Result = [pscustomobject]@{
                     'Id' = 1234
-                } | Get-NetboxDCIMInterface
+                } | Get-NBDCIMInterface
 
                 Assert-VerifiableMock
                 Assert-MockCalled -CommandName 'Invoke-RestMethod' -Times 1 -Scope 'It' -Exactly
@@ -116,9 +116,9 @@ Describe -Name "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' -Fixture {
             }
         }
 
-        Context -Name "Add-NetboxDCIMInterface" -Fixture {
+        Context -Name "Add-NBDCIMInterface" -Fixture {
             It "Should add a basic interface to a device" {
-                $Result = Add-NetboxDCIMInterface -Device 111 -Name "TestInterface"
+                $Result = Add-NBDCIMInterface -Device 111 -Name "TestInterface"
 
                 Assert-VerifiableMock
                 Assert-MockCalled -CommandName 'Invoke-RestMethod' -Times 1 -Exactly -Scope 'It'
@@ -140,7 +140,7 @@ Describe -Name "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' -Fixture {
                     Mode        = 'Access'
                 }
 
-                $Result = Add-NetboxDCIMInterface @paramAddNetboxDCIMInterface
+                $Result = Add-NBDCIMInterface @paramAddNetboxDCIMInterface
 
                 Assert-VerifiableMock
                 Assert-MockCalled -CommandName 'Invoke-RestMethod' -Times 1 -Exactly -Scope 'It'
@@ -152,7 +152,7 @@ Describe -Name "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' -Fixture {
             }
 
             It "Should add an interface with multiple tagged VLANs" {
-                $Result = Add-NetboxDCIMInterface -Device 444 -Name "TestInterface" -Mode 'Tagged' -Tagged_VLANs 1, 2, 3, 4
+                $Result = Add-NBDCIMInterface -Device 444 -Name "TestInterface" -Mode 'Tagged' -Tagged_VLANs 1, 2, 3, 4
 
                 Assert-VerifiableMock
                 Assert-MockCalled -CommandName 'Invoke-RestMethod' -Times 1 -Exactly -Scope 'It'
@@ -165,30 +165,30 @@ Describe -Name "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' -Fixture {
 
             It "Should throw for invalid mode" {
                 {
-                    Add-NetboxDCIMInterface -Device 321 -Name "Test123" -Mode 'Fake'
+                    Add-NBDCIMInterface -Device 321 -Name "Test123" -Mode 'Fake'
                 } | Should -Throw
             }
 
             It "Should throw for out of range VLAN" {
                 {
-                    Add-NetboxDCIMInterface -Device 321 -Name "Test123" -Untagged_VLAN 4100
+                    Add-NBDCIMInterface -Device 321 -Name "Test123" -Untagged_VLAN 4100
                 } | Should -Throw
             }
         }
 
 
-        Mock -CommandName "Get-NetboxDCIMInterface" -ModuleName "NetboxPS" -MockWith {
+        Mock -CommandName "Get-NBDCIMInterface" -ModuleName "NetboxPS" -MockWith {
             return [pscustomobject]@{
                 'Id' = $Id
             }
         }
 
-        Context -Name "Set-NetboxDCIMInterface" -Fixture {
+        Context -Name "Set-NBDCIMInterface" -Fixture {
             It "Should set an interface to a new name" {
-                $Result = Set-NetboxDCIMInterface -Id 123 -Name "TestInterface"
+                $Result = Set-NBDCIMInterface -Id 123 -Name "TestInterface"
 
                 Assert-VerifiableMock
-                Assert-MockCalled -CommandName 'Get-NetboxDCIMInterface' -Times 1 -Exactly -Scope 'It'
+                Assert-MockCalled -CommandName 'Get-NBDCIMInterface' -Times 1 -Exactly -Scope 'It'
                 Assert-MockCalled -CommandName 'Invoke-RestMethod' -Times 1 -Exactly -Scope 'It'
 
                 $Result.Method | Should -Be 'PATCH'
@@ -198,10 +198,10 @@ Describe -Name "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' -Fixture {
             }
 
             It "Should set multiple interfaces to a new name" {
-                $Result = Set-NetboxDCIMInterface -Id 456, 789 -Name "TestInterface"
+                $Result = Set-NBDCIMInterface -Id 456, 789 -Name "TestInterface"
 
                 Assert-VerifiableMock
-                Assert-MockCalled -CommandName 'Get-NetboxDCIMInterface' -Times 2 -Exactly -Scope 'It'
+                Assert-MockCalled -CommandName 'Get-NBDCIMInterface' -Times 2 -Exactly -Scope 'It'
                 Assert-MockCalled -CommandName 'Invoke-RestMethod' -Times 2 -Exactly -Scope 'It'
 
                 $Result.Method | Should -Be 'PATCH', 'PATCH'
@@ -218,10 +218,10 @@ Describe -Name "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' -Fixture {
                     [pscustomobject]@{
                         'Id' = 4231
                     }
-                ) | Set-NetboxDCIMInterface -Name "TestInterface"
+                ) | Set-NBDCIMInterface -Name "TestInterface"
 
                 Assert-VerifiableMock
-                Assert-MockCalled -CommandName 'Get-NetboxDCIMInterface' -Times 2 -Exactly -Scope 'It'
+                Assert-MockCalled -CommandName 'Get-NBDCIMInterface' -Times 2 -Exactly -Scope 'It'
                 Assert-MockCalled -CommandName 'Invoke-RestMethod' -Times 2 -Exactly -Scope 'It'
 
                 $Result.Method | Should -Be 'PATCH', 'PATCH'
@@ -232,17 +232,17 @@ Describe -Name "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' -Fixture {
 
             It "Should throw for invalid form factor" {
                 {
-                    Set-NetboxDCIMInterface -Id 1234 -Form_Factor 'fake'
+                    Set-NBDCIMInterface -Id 1234 -Form_Factor 'fake'
                 } | Should -Throw
             }
         }
 
-        Context -Name "Remove-NetboxDCIMInterface" -Fixture {
+        Context -Name "Remove-NBDCIMInterface" -Fixture {
             It "Should remove an interface" {
-                $Result = Remove-NetboxDCIMInterface -Id 10 -Force
+                $Result = Remove-NBDCIMInterface -Id 10 -Force
 
                 Assert-VerifiableMock
-                Assert-MockCalled -CommandName 'Get-NetboxDCIMInterface' -Times 1 -Exactly -Scope 'It'
+                Assert-MockCalled -CommandName 'Get-NBDCIMInterface' -Times 1 -Exactly -Scope 'It'
 
                 $Result.Method | Should -Be 'DELETE'
                 $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/interfaces/10/'
@@ -250,10 +250,10 @@ Describe -Name "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' -Fixture {
             }
 
             It "Should remove multiple interfaces" {
-                $Result = Remove-NetboxDCIMInterface -Id 10, 12 -Force
+                $Result = Remove-NBDCIMInterface -Id 10, 12 -Force
 
                 Assert-VerifiableMock
-                Assert-MockCalled -CommandName 'Get-NetboxDCIMInterface' -Times 2 -Exactly -Scope 'It'
+                Assert-MockCalled -CommandName 'Get-NBDCIMInterface' -Times 2 -Exactly -Scope 'It'
 
                 $Result.Method | Should -Be 'DELETE', 'DELETE'
                 $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/interfaces/10/', 'https://netbox.domain.com/api/dcim/interfaces/12/'
@@ -261,10 +261,10 @@ Describe -Name "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' -Fixture {
             }
 
             It "Should remove an interface from the pipeline" {
-                $Result = Get-NetboxDCIMInterface -Id 20 | Remove-NetboxDCIMInterface -Force
+                $Result = Get-NBDCIMInterface -Id 20 | Remove-NBDCIMInterface -Force
 
                 Assert-VerifiableMock
-                Assert-MockCalled -CommandName 'Get-NetboxDCIMInterface' -Times 2 -Exactly -Scope 'It'
+                Assert-MockCalled -CommandName 'Get-NBDCIMInterface' -Times 2 -Exactly -Scope 'It'
 
                 $Result.Method | Should -Be 'DELETE'
                 $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/interfaces/20/'
@@ -279,10 +279,10 @@ Describe -Name "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' -Fixture {
                     [pscustomobject]@{
                         'Id' = 40
                     }
-                ) | Remove-NetboxDCIMInterface -Force
+                ) | Remove-NBDCIMInterface -Force
 
                 Assert-VerifiableMock
-                Assert-MockCalled -CommandName 'Get-NetboxDCIMInterface' -Times 2 -Exactly -Scope 'It'
+                Assert-MockCalled -CommandName 'Get-NBDCIMInterface' -Times 2 -Exactly -Scope 'It'
 
                 $Result.Method | Should -Be 'DELETE', 'DELETE'
                 $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/interfaces/30/', 'https://netbox.domain.com/api/dcim/interfaces/40/'
@@ -291,9 +291,9 @@ Describe -Name "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' -Fixture {
         }
 
 
-        Context -Name "Get-NetboxDCIMInterfaceConnection" -Fixture {
+        Context -Name "Get-NBDCIMInterfaceConnection" -Fixture {
             It "Should request the default number of interface connections" {
-                $Result = Get-NetboxDCIMInterfaceConnection
+                $Result = Get-NBDCIMInterfaceConnection
 
                 Assert-VerifiableMock
                 Assert-MockCalled -CommandName 'Invoke-RestMethod' -Times 1 -Scope 'It' -Exactly
@@ -304,7 +304,7 @@ Describe -Name "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' -Fixture {
             }
 
             It "Should request with a limit and offset" {
-                $Result = Get-NetboxDCIMInterfaceConnection -Limit 10 -Offset 100
+                $Result = Get-NBDCIMInterfaceConnection -Limit 10 -Offset 100
 
                 Assert-VerifiableMock
                 Assert-MockCalled -CommandName 'Invoke-RestMethod' -Times 1 -Scope 'It' -Exactly
@@ -315,7 +315,7 @@ Describe -Name "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' -Fixture {
             }
 
             It "Should request connected interfaces" {
-                $Result = Get-NetboxDCIMInterfaceConnection -Connection_Status 'Connected'
+                $Result = Get-NBDCIMInterfaceConnection -Connection_Status 'Connected'
 
                 Assert-VerifiableMock
                 Assert-MockCalled -CommandName 'Invoke-RestMethod' -Times 1 -Scope 'It' -Exactly
@@ -327,14 +327,14 @@ Describe -Name "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' -Fixture {
 
             It "Should throw for an invalid connection status" {
                 {
-                    Get-NetboxDCIMInterfaceConnection -Connection_Status 'Fake'
+                    Get-NBDCIMInterfaceConnection -Connection_Status 'Fake'
                 } | Should -Throw
             }
         }
 
-        Context -Name "Add-NetboxDCIMInterfaceConnection" -Fixture {
+        Context -Name "Add-NBDCIMInterfaceConnection" -Fixture {
             It "Should add a new interface connection" {
-                $Result = Add-NetboxDCIMInterfaceConnection -Interface_A 21 -Interface_B 22
+                $Result = Add-NBDCIMInterfaceConnection -Interface_A 21 -Interface_B 22
 
                 Assert-VerifiableMock
                 Assert-MockCalled -CommandName 'Invoke-RestMethod' -Times 1 -Exactly -Scope 'It'
@@ -347,21 +347,21 @@ Describe -Name "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' -Fixture {
 
             It "Should throw because of an invalid connection status" {
                 {
-                    Add-NetboxDCIMInterfaceConnection -Interface_A 21 -Interface_B 22 -Connection_Status 'fake'
+                    Add-NBDCIMInterfaceConnection -Interface_A 21 -Interface_B 22 -Connection_Status 'fake'
                 } | Should -Throw
             }
         }
 
 
-        Mock -CommandName "Get-NetboxDCIMInterfaceConnection" -ModuleName 'NetboxPS' -MockWith {
+        Mock -CommandName "Get-NBDCIMInterfaceConnection" -ModuleName 'NetboxPS' -MockWith {
             [pscustomobject]@{
                 'Id' = $Id
             }
         }
 
-        Context -Name "Set-NetboxDCIMInterfaceConnection" -Fixture {
+        Context -Name "Set-NBDCIMInterfaceConnection" -Fixture {
             It "Should set an interface connection" {
-                $Result = Set-NetboxDCIMInterfaceConnection -Id 123 -Interface_B 2 -Force
+                $Result = Set-NBDCIMInterfaceConnection -Id 123 -Interface_B 2 -Force
 
                 Assert-VerifiableMock
                 Assert-MockCalled -CommandName 'Invoke-RestMethod' -Times 1 -Exactly -Scope 'It'
@@ -373,7 +373,7 @@ Describe -Name "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' -Fixture {
             }
 
             It "Should set multiple interface connections to a new status" {
-                $Result = Set-NetboxDCIMInterfaceConnection -Id 456, 789 -Connection_Status 'Planned' -Force
+                $Result = Set-NBDCIMInterfaceConnection -Id 456, 789 -Connection_Status 'Planned' -Force
 
                 Assert-VerifiableMock
                 Assert-MockCalled -CommandName 'Invoke-RestMethod' -Times 2 -Exactly -Scope 'It'
@@ -387,7 +387,7 @@ Describe -Name "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' -Fixture {
             It "Should set an interface connection from the pipeline" {
                 $Result = [pscustomobject]@{
                     'id' = 3
-                } | Set-NetboxDCIMInterfaceConnection -Connection_Status 'Planned' -Force
+                } | Set-NBDCIMInterfaceConnection -Connection_Status 'Planned' -Force
 
                 Assert-VerifiableMock
                 Assert-MockCalled -CommandName 'Invoke-RestMethod' -Times 1 -Exactly -Scope 'It'
@@ -406,7 +406,7 @@ Describe -Name "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' -Fixture {
                     [pscustomobject]@{
                         'id' = 789
                     }
-                ) | Set-NetboxDCIMInterfaceConnection -Connection_Status 'Planned' -Force
+                ) | Set-NBDCIMInterfaceConnection -Connection_Status 'Planned' -Force
 
                 Assert-VerifiableMock
                 Assert-MockCalled -CommandName 'Invoke-RestMethod' -Times 2 -Exactly -Scope 'It'
@@ -419,17 +419,17 @@ Describe -Name "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' -Fixture {
 
             It "Should throw trying to set multiple connections to the same interface" {
                 {
-                    Set-NetboxDCIMInterfaceConnection -Id 456, 789 -Interface_B 22 -Force
+                    Set-NBDCIMInterfaceConnection -Id 456, 789 -Interface_B 22 -Force
                 } | Should -Throw -ExpectedMessage "Cannot set multiple connections to the same interface"
             }
         }
 
-        Context -Name "Remove-NetboxDCIMInterfaceConnection" -Fixture {
+        Context -Name "Remove-NBDCIMInterfaceConnection" -Fixture {
             It "Should remove an interface connection" {
-                $Result = Remove-NetboxDCIMInterfaceConnection -Id 10 -Force
+                $Result = Remove-NBDCIMInterfaceConnection -Id 10 -Force
 
                 Assert-VerifiableMock
-                Assert-MockCalled -CommandName 'Get-NetboxDCIMInterfaceConnection' -Times 1 -Exactly -Scope 'It'
+                Assert-MockCalled -CommandName 'Get-NBDCIMInterfaceConnection' -Times 1 -Exactly -Scope 'It'
 
                 $Result.Method | Should -Be 'DELETE'
                 $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/interface-connections/10/'
@@ -437,10 +437,10 @@ Describe -Name "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' -Fixture {
             }
 
             It "Should remove multiple interface connections" {
-                $Result = Remove-NetboxDCIMInterfaceConnection -Id 10, 12 -Force
+                $Result = Remove-NBDCIMInterfaceConnection -Id 10, 12 -Force
 
                 Assert-VerifiableMock
-                Assert-MockCalled -CommandName 'Get-NetboxDCIMInterfaceConnection' -Times 2 -Exactly -Scope 'It'
+                Assert-MockCalled -CommandName 'Get-NBDCIMInterfaceConnection' -Times 2 -Exactly -Scope 'It'
 
                 $Result.Method | Should -Be 'DELETE', 'DELETE'
                 $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/interface-connections/10/', 'https://netbox.domain.com/api/dcim/interface-connections/12/'
@@ -448,10 +448,10 @@ Describe -Name "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' -Fixture {
             }
 
             It "Should remove an interface connection from the pipeline" {
-                $Result = Get-NetboxDCIMInterfaceConnection -Id 20 | Remove-NetboxDCIMInterfaceConnection -Force
+                $Result = Get-NBDCIMInterfaceConnection -Id 20 | Remove-NBDCIMInterfaceConnection -Force
 
                 Assert-VerifiableMock
-                Assert-MockCalled -CommandName 'Get-NetboxDCIMInterfaceConnection' -Times 2 -Exactly -Scope 'It'
+                Assert-MockCalled -CommandName 'Get-NBDCIMInterfaceConnection' -Times 2 -Exactly -Scope 'It'
 
                 $Result.Method | Should -Be 'DELETE'
                 $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/interface-connections/20/'
@@ -466,10 +466,10 @@ Describe -Name "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' -Fixture {
                     [pscustomobject]@{
                         'Id' = 40
                     }
-                ) | Remove-NetboxDCIMInterfaceConnection -Force
+                ) | Remove-NBDCIMInterfaceConnection -Force
 
                 Assert-VerifiableMock
-                Assert-MockCalled -CommandName 'Get-NetboxDCIMInterfaceConnection' -Times 2 -Exactly -Scope 'It'
+                Assert-MockCalled -CommandName 'Get-NBDCIMInterfaceConnection' -Times 2 -Exactly -Scope 'It'
 
                 $Result.Method | Should -Be 'DELETE', 'DELETE'
                 $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/interface-connections/30/', 'https://netbox.domain.com/api/dcim/interface-connections/40/'

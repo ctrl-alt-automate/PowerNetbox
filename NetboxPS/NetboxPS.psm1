@@ -1,8 +1,8 @@
 
 
-#region File Add-NetboxDCIMFrontPort.ps1
+#region File Add-NBDCIMFrontPort.ps1
 
-function Add-NetboxDCIMFrontPort {
+function Add-NBDCIMFrontPort {
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param
@@ -47,10 +47,10 @@ function Add-NetboxDCIMFrontPort {
 
 #endregion
 
-#region File Add-NetboxDCIMInterface.ps1
+#region File Add-NBDCIMInterface.ps1
 
 
-function Add-NetboxDCIMInterface {
+function Add-NBDCIMInterface {
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param
@@ -122,10 +122,10 @@ function Add-NetboxDCIMInterface {
 
 #endregion
 
-#region File Add-NetboxDCIMInterfaceConnection.ps1
+#region File Add-NBDCIMInterfaceConnection.ps1
 
 
-function Add-NetboxDCIMInterfaceConnection {
+function Add-NBDCIMInterfaceConnection {
     <#
     .SYNOPSIS
         Create a new connection between two interfaces
@@ -143,7 +143,7 @@ function Add-NetboxDCIMInterfaceConnection {
         Database ID of interface B
 
     .EXAMPLE
-        PS C:\> Add-NetboxDCIMInterfaceConnection -Interface_A $value1 -Interface_B $value2
+        PS C:\> Add-NBDCIMInterfaceConnection -Interface_A $value1 -Interface_B $value2
 
     .NOTES
         Additional information about the function.
@@ -163,8 +163,8 @@ function Add-NetboxDCIMInterfaceConnection {
     )
 
     # Verify if both Interfaces exist
-    Get-NetboxDCIMInterface -Id $Interface_A -ErrorAction Stop | Out-null
-    Get-NetboxDCIMInterface -Id $Interface_B -ErrorAction Stop | Out-null
+    Get-NBDCIMInterface -Id $Interface_A -ErrorAction Stop | Out-null
+    Get-NBDCIMInterface -Id $Interface_B -ErrorAction Stop | Out-null
 
     $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interface-connections'))
 
@@ -177,9 +177,9 @@ function Add-NetboxDCIMInterfaceConnection {
 
 #endregion
 
-#region File Add-NetboxDCIMRearPort.ps1
+#region File Add-NBDCIMRearPort.ps1
 
-function Add-NetboxDCIMRearPort {
+function Add-NBDCIMRearPort {
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param
@@ -230,10 +230,10 @@ function Add-NetboxDCIMRearPort {
 
 #endregion
 
-#region File Add-NetboxVirtualMachineInterface.ps1
+#region File Add-NBVirtualMachineInterface.ps1
 
 
-function Add-NetboxVirtualMachineInterface {
+function Add-NBVirtualMachineInterface {
     [CmdletBinding()]
     param
     (
@@ -441,15 +441,15 @@ function CheckNetboxIsConnected {
 
     Write-Verbose "Checking connection status"
     if (-not $script:NetboxConfig.Connected) {
-        throw "Not connected to a Netbox API! Please run 'Connect-NetboxAPI'"
+        throw "Not connected to a Netbox API! Please run 'Connect-NBAPI'"
     }
 }
 
 #endregion
 
-#region File Clear-NetboxCredential.ps1
+#region File Clear-NBCredential.ps1
 
-function Clear-NetboxCredential {
+function Clear-NBCredential {
     [CmdletBinding(ConfirmImpact = 'Medium', SupportsShouldProcess = $true)]
     param
     (
@@ -463,9 +463,9 @@ function Clear-NetboxCredential {
 
 #endregion
 
-#region File Connect-NetboxAPI.ps1
+#region File Connect-NBAPI.ps1
 
-function Connect-NetboxAPI {
+function Connect-NBAPI {
 <#
     .SYNOPSIS
         Connects to the Netbox API and ensures Credential work properly
@@ -495,7 +495,7 @@ function Connect-NetboxAPI {
         The number of seconds before the HTTP call times out. Defaults to 30 seconds
 
     .EXAMPLE
-        PS C:\> Connect-NetboxAPI -Hostname "netbox.domain.com"
+        PS C:\> Connect-NBAPI -Hostname "netbox.domain.com"
 
         This will prompt for Credential, then proceed to attempt a connection to Netbox
 
@@ -534,7 +534,7 @@ function Connect-NetboxAPI {
 
     if (-not $Credential) {
         try {
-            $Credential = Get-NetboxCredential -ErrorAction Stop
+            $Credential = Get-NBCredential -ErrorAction Stop
         } catch {
             # Credentials are not set... Try to obtain from the user
             if (-not ($Credential = Get-Credential -UserName 'username-not-applicable' -Message "Enter token for Netbox")) {
@@ -555,10 +555,10 @@ function Connect-NetboxAPI {
         #Add System.web (Need for ParseQueryString)
         Add-Type -AssemblyName System.Web
         #Enable TLS 1.1 and 1.2
-        Set-NetboxCipherSSL
+        Set-NBCipherSSL
         if ($SkipCertificateCheck) {
             #Disable SSL chain trust...
-            Set-NetboxuntrustedSSL
+            Set-NBuntrustedSSL
         }
     }
 
@@ -575,12 +575,12 @@ function Connect-NetboxAPI {
         }
     }
 
-    $null = Set-NetboxHostName -Hostname $uriBuilder.Host
-    $null = Set-NetboxCredential -Credential $Credential
-    $null = Set-NetboxHostScheme -Scheme $uriBuilder.Scheme
-    $null = Set-NetboxHostPort -Port $uriBuilder.Port
-    $null = Set-NetboxInvokeParams -invokeParams $invokeParams
-    $null = Set-NetboxTimeout -TimeoutSeconds $TimeoutSeconds
+    $null = Set-NBHostName -Hostname $uriBuilder.Host
+    $null = Set-NBCredential -Credential $Credential
+    $null = Set-NBHostScheme -Scheme $uriBuilder.Scheme
+    $null = Set-NBHostPort -Port $uriBuilder.Port
+    $null = Set-NBInvokeParams -invokeParams $invokeParams
+    $null = Set-NBTimeout -TimeoutSeconds $TimeoutSeconds
 
     try {
         Write-Verbose "Verifying API connectivity..."
@@ -596,7 +596,7 @@ function Connect-NetboxAPI {
     }
 
 #    Write-Verbose "Caching API definition"
-#    $script:NetboxConfig.APIDefinition = Get-NetboxAPIDefinition
+#    $script:NetboxConfig.APIDefinition = Get-NBAPIDefinition
 #
 #    if ([version]$script:NetboxConfig.APIDefinition.info.version -lt 2.8) {
 #        $Script:NetboxConfig.Connected = $false
@@ -604,7 +604,7 @@ function Connect-NetboxAPI {
     #    }
 
     Write-Verbose "Checking Netbox version compatibility"
-    $script:NetboxConfig.NetboxVersion = Get-NetboxVersion
+    $script:NetboxConfig.NetboxVersion = Get-NBVersion
     if ([version]$script:NetboxConfig.NetboxVersion.'netbox-version' -lt 2.8) {
         $Script:NetboxConfig.Connected = $false
         throw "Netbox version is incompatible with this PS module. Requires >=2.8.*, found version $($script:NetboxConfig.NetboxVersion.'netbox-version')"
@@ -615,7 +615,7 @@ function Connect-NetboxAPI {
     $script:NetboxConfig.Connected = $true
     Write-Verbose "Successfully connected!"
 
-    $script:NetboxConfig.ContentTypes = Get-NetboxContentType -Limit 500
+    $script:NetboxConfig.ContentTypes = Get-NBContentType -Limit 500
 
     Write-Verbose "Connection process completed"
 }
@@ -710,10 +710,10 @@ function Get-ModelDefinition {
 
 #endregion
 
-#region File Get-NetboxAPIDefinition.ps1
+#region File Get-NBAPIDefinition.ps1
 
 
-function Get-NetboxAPIDefinition {
+function Get-NBAPIDefinition {
     [CmdletBinding()]
     param
     (
@@ -736,16 +736,16 @@ function Get-NetboxAPIDefinition {
 
 #endregion
 
-#region File Get-NetboxCircuit.ps1
+#region File Get-NBCircuit.ps1
 
 
-function Get-NetboxCircuit {
+function Get-NBCircuit {
     <#
     .SYNOPSIS
         Gets one or more circuits
 
     .DESCRIPTION
-        A detailed description of the Get-NetboxCircuit function.
+        A detailed description of the Get-NBCircuit function.
 
     .PARAMETER Id
         Database ID of circuit. This will query for exactly the IDs provided
@@ -787,7 +787,7 @@ function Get-NetboxCircuit {
         Multiple unique DB IDs to retrieve
 
     .EXAMPLE
-        PS C:\> Get-NetboxCircuit
+        PS C:\> Get-NBCircuit
 
     .NOTES
         Additional information about the function.
@@ -861,10 +861,10 @@ function Get-NetboxCircuit {
 
 #endregion
 
-#region File Get-NetboxCircuitProvider.ps1
+#region File Get-NBCircuitProvider.ps1
 
 
-function Get-NetboxCircuitProvider {
+function Get-NBCircuitProvider {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param
     (
@@ -924,10 +924,10 @@ function Get-NetboxCircuitProvider {
 
 #endregion
 
-#region File Get-NetboxCircuitTermination.ps1
+#region File Get-NBCircuitTermination.ps1
 
 
-function Get-NetboxCircuitTermination {
+function Get-NBCircuitTermination {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param
     (
@@ -994,10 +994,10 @@ function Get-NetboxCircuitTermination {
 
 #endregion
 
-#region File Get-NetboxCircuitType.ps1
+#region File Get-NBCircuitType.ps1
 
 
-function Get-NetboxCircuitType {
+function Get-NBCircuitType {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param
     (
@@ -1049,10 +1049,10 @@ function Get-NetboxCircuitType {
 
 #endregion
 
-#region File Get-NetboxContact.ps1
+#region File Get-NBContact.ps1
 
 
-function Get-NetboxContact {
+function Get-NBContact {
 <#
     .SYNOPSIS
         Get a contact from Netbox
@@ -1097,7 +1097,7 @@ function Get-NetboxContact {
         Return the unparsed data from the HTTP request
 
     .EXAMPLE
-        PS C:\> Get-NetboxContact
+        PS C:\> Get-NBContact
 
     .NOTES
         Additional information about the function.
@@ -1174,16 +1174,16 @@ function Get-NetboxContact {
 
 #endregion
 
-#region File Get-NetboxContactAssignment.ps1
+#region File Get-NBContactAssignment.ps1
 
 
-function Get-NetboxContactAssignment {
+function Get-NBContactAssignment {
 <#
     .SYNOPSIS
         Get a contact Assignment from Netbox
 
     .DESCRIPTION
-        A detailed description of the Get-NetboxContactAssignment function.
+        A detailed description of the Get-NBContactAssignment function.
 
     .PARAMETER Name
         The specific name of the contact Assignment. Must match exactly as is defined in Netbox
@@ -1216,7 +1216,7 @@ function Get-NetboxContactAssignment {
         Return the unparsed data from the HTTP request
 
     .EXAMPLE
-        PS C:\> Get-NetboxContactAssignment
+        PS C:\> Get-NBContactAssignment
 
     .NOTES
         Additional information about the function.
@@ -1287,16 +1287,16 @@ function Get-NetboxContactAssignment {
 
 #endregion
 
-#region File Get-NetboxContactRole.ps1
+#region File Get-NBContactRole.ps1
 
 
-function Get-NetboxContactRole {
+function Get-NBContactRole {
 <#
     .SYNOPSIS
         Get a contact role from Netbox
 
     .DESCRIPTION
-        A detailed description of the Get-NetboxContactRole function.
+        A detailed description of the Get-NBContactRole function.
 
     .PARAMETER Name
         The specific name of the contact role. Must match exactly as is defined in Netbox
@@ -1317,7 +1317,7 @@ function Get-NetboxContactRole {
         Return the unparsed data from the HTTP request
 
     .EXAMPLE
-        PS C:\> Get-NetboxContactRole
+        PS C:\> Get-NBContactRole
 
     .NOTES
         Additional information about the function.
@@ -1382,15 +1382,15 @@ function Get-NetboxContactRole {
 
 #endregion
 
-#region File Get-NetboxContentType.ps1
+#region File Get-NBContentType.ps1
 
-function Get-NetboxContentType {
+function Get-NBContentType {
 <#
     .SYNOPSIS
         Get a content type definition from Netbox
 
     .DESCRIPTION
-        A detailed description of the Get-NetboxContentType function.
+        A detailed description of the Get-NBContentType function.
 
     .PARAMETER Model
         A description of the Model parameter.
@@ -1414,7 +1414,7 @@ function Get-NetboxContentType {
         Return the unparsed data from the HTTP request
 
     .EXAMPLE
-        PS C:\> Get-NetboxContentType
+        PS C:\> Get-NBContentType
 
     .NOTES
         Additional information about the function.
@@ -1478,15 +1478,15 @@ function Get-NetboxContentType {
 
 #endregion
 
-#region File Get-NetboxCredential.ps1
+#region File Get-NBCredential.ps1
 
-function Get-NetboxCredential {
+function Get-NBCredential {
     [CmdletBinding()]
     [OutputType([pscredential])]
     param ()
 
     if (-not $script:NetboxConfig.Credential) {
-        throw "Netbox Credentials not set! You may set with Set-NetboxCredential"
+        throw "Netbox Credentials not set! You may set with Set-NBCredential"
     }
 
     $script:NetboxConfig.Credential
@@ -1494,9 +1494,9 @@ function Get-NetboxCredential {
 
 #endregion
 
-#region File Get-NetboxDCIMCable.ps1
+#region File Get-NBDCIMCable.ps1
 
-function Get-NetboxDCIMCable {
+function Get-NBDCIMCable {
     [CmdletBinding()]
     #region Parameters
     param
@@ -1554,9 +1554,9 @@ function Get-NetboxDCIMCable {
 
 #endregion
 
-#region File Get-NetboxDCIMCableTermination.ps1
+#region File Get-NBDCIMCableTermination.ps1
 
-function Get-NetboxDCIMCableTermination {
+function Get-NBDCIMCableTermination {
     [CmdletBinding()]
     #region Parameters
     param
@@ -1594,9 +1594,9 @@ function Get-NetboxDCIMCableTermination {
 
 #endregion
 
-#region File Get-NetboxDCIMConnectedDevice.ps1
+#region File Get-NBDCIMConnectedDevice.ps1
 
-function Get-NetboxDCIMConnectedDevice {
+function Get-NBDCIMConnectedDevice {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $true)][string]$Peer_Device,
@@ -1612,9 +1612,9 @@ function Get-NetboxDCIMConnectedDevice {
 
 #endregion
 
-#region File Get-NetboxDCIMConsolePort.ps1
+#region File Get-NBDCIMConsolePort.ps1
 
-function Get-NetboxDCIMConsolePort {
+function Get-NBDCIMConsolePort {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
@@ -1641,9 +1641,9 @@ function Get-NetboxDCIMConsolePort {
 
 #endregion
 
-#region File Get-NetboxDCIMConsolePortTemplate.ps1
+#region File Get-NBDCIMConsolePortTemplate.ps1
 
-function Get-NetboxDCIMConsolePortTemplate {
+function Get-NBDCIMConsolePortTemplate {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
@@ -1670,9 +1670,9 @@ function Get-NetboxDCIMConsolePortTemplate {
 
 #endregion
 
-#region File Get-NetboxDCIMConsoleServerPort.ps1
+#region File Get-NBDCIMConsoleServerPort.ps1
 
-function Get-NetboxDCIMConsoleServerPort {
+function Get-NBDCIMConsoleServerPort {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
@@ -1699,9 +1699,9 @@ function Get-NetboxDCIMConsoleServerPort {
 
 #endregion
 
-#region File Get-NetboxDCIMConsoleServerPortTemplate.ps1
+#region File Get-NBDCIMConsoleServerPortTemplate.ps1
 
-function Get-NetboxDCIMConsoleServerPortTemplate {
+function Get-NBDCIMConsoleServerPortTemplate {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
@@ -1728,10 +1728,10 @@ function Get-NetboxDCIMConsoleServerPortTemplate {
 
 #endregion
 
-#region File Get-NetboxDCIMDevice.ps1
+#region File Get-NBDCIMDevice.ps1
 
 
-function Get-NetboxDCIMDevice {
+function Get-NBDCIMDevice {
     [CmdletBinding()]
     #region Parameters
     param
@@ -1817,9 +1817,9 @@ function Get-NetboxDCIMDevice {
 
 #endregion
 
-#region File Get-NetboxDCIMDeviceBay.ps1
+#region File Get-NBDCIMDeviceBay.ps1
 
-function Get-NetboxDCIMDeviceBay {
+function Get-NBDCIMDeviceBay {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
@@ -1844,9 +1844,9 @@ function Get-NetboxDCIMDeviceBay {
 
 #endregion
 
-#region File Get-NetboxDCIMDeviceBayTemplate.ps1
+#region File Get-NBDCIMDeviceBayTemplate.ps1
 
-function Get-NetboxDCIMDeviceBayTemplate {
+function Get-NBDCIMDeviceBayTemplate {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
@@ -1871,10 +1871,10 @@ function Get-NetboxDCIMDeviceBayTemplate {
 
 #endregion
 
-#region File Get-NetboxDCIMDeviceRole.ps1
+#region File Get-NBDCIMDeviceRole.ps1
 
 
-function Get-NetboxDCIMDeviceRole {
+function Get-NBDCIMDeviceRole {
     [CmdletBinding()]
     param
     (
@@ -1925,10 +1925,10 @@ function Get-NetboxDCIMDeviceRole {
 
 #endregion
 
-#region File Get-NetboxDCIMDeviceType.ps1
+#region File Get-NBDCIMDeviceType.ps1
 
 
-function Get-NetboxDCIMDeviceType {
+function Get-NBDCIMDeviceType {
     [CmdletBinding()]
     #region Parameters
     param
@@ -1978,9 +1978,9 @@ function Get-NetboxDCIMDeviceType {
 
 #endregion
 
-#region File Get-NetboxDCIMFrontPort.ps1
+#region File Get-NBDCIMFrontPort.ps1
 
-function Get-NetboxDCIMFrontPort {
+function Get-NBDCIMFrontPort {
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param
@@ -2017,9 +2017,9 @@ function Get-NetboxDCIMFrontPort {
 
 #endregion
 
-#region File Get-NetboxDCIMFrontPortTemplate.ps1
+#region File Get-NBDCIMFrontPortTemplate.ps1
 
-function Get-NetboxDCIMFrontPortTemplate {
+function Get-NBDCIMFrontPortTemplate {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
@@ -2046,9 +2046,9 @@ function Get-NetboxDCIMFrontPortTemplate {
 
 #endregion
 
-#region File Get-NetboxDCIMInterface.ps1
+#region File Get-NBDCIMInterface.ps1
 
-function Get-NetboxDCIMInterface {
+function Get-NBDCIMInterface {
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param
@@ -2097,10 +2097,10 @@ function Get-NetboxDCIMInterface {
 
 #endregion
 
-#region File Get-NetboxDCIMInterfaceConnection.ps1
+#region File Get-NBDCIMInterfaceConnection.ps1
 
 
-function Get-NetboxDCIMInterfaceConnection {
+function Get-NBDCIMInterfaceConnection {
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param
@@ -2131,9 +2131,9 @@ function Get-NetboxDCIMInterfaceConnection {
 
 #endregion
 
-#region File Get-NetboxDCIMInterfaceTemplate.ps1
+#region File Get-NBDCIMInterfaceTemplate.ps1
 
-function Get-NetboxDCIMInterfaceTemplate {
+function Get-NBDCIMInterfaceTemplate {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
@@ -2160,9 +2160,9 @@ function Get-NetboxDCIMInterfaceTemplate {
 
 #endregion
 
-#region File Get-NetboxDCIMInventoryItem.ps1
+#region File Get-NBDCIMInventoryItem.ps1
 
-function Get-NetboxDCIMInventoryItem {
+function Get-NBDCIMInventoryItem {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
@@ -2191,9 +2191,9 @@ function Get-NetboxDCIMInventoryItem {
 
 #endregion
 
-#region File Get-NetboxDCIMInventoryItemRole.ps1
+#region File Get-NBDCIMInventoryItemRole.ps1
 
-function Get-NetboxDCIMInventoryItemRole {
+function Get-NBDCIMInventoryItemRole {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
@@ -2218,9 +2218,9 @@ function Get-NetboxDCIMInventoryItemRole {
 
 #endregion
 
-#region File Get-NetboxDCIMInventoryItemTemplate.ps1
+#region File Get-NBDCIMInventoryItemTemplate.ps1
 
-function Get-NetboxDCIMInventoryItemTemplate {
+function Get-NBDCIMInventoryItemTemplate {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
@@ -2246,9 +2246,9 @@ function Get-NetboxDCIMInventoryItemTemplate {
 
 #endregion
 
-#region File Get-NetboxDCIMLocation.ps1
+#region File Get-NBDCIMLocation.ps1
 
-function Get-NetboxDCIMLocation {
+function Get-NBDCIMLocation {
 <#
     .SYNOPSIS
         Get locations from Netbox
@@ -2294,17 +2294,17 @@ function Get-NetboxDCIMLocation {
         Return the raw API response
 
     .EXAMPLE
-        Get-NetboxDCIMLocation
+        Get-NBDCIMLocation
 
         Returns all locations
 
     .EXAMPLE
-        Get-NetboxDCIMLocation -Site_Id 1
+        Get-NBDCIMLocation -Site_Id 1
 
         Returns all locations at site with ID 1
 
     .EXAMPLE
-        Get-NetboxDCIMLocation -Name "Server Room"
+        Get-NBDCIMLocation -Name "Server Room"
 
         Returns locations matching the name "Server Room"
 #>
@@ -2378,9 +2378,9 @@ function Get-NetboxDCIMLocation {
 
 #endregion
 
-#region File Get-NetboxDCIMMACAddress.ps1
+#region File Get-NBDCIMMACAddress.ps1
 
-function Get-NetboxDCIMMACAddress {
+function Get-NBDCIMMACAddress {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
@@ -2408,9 +2408,9 @@ function Get-NetboxDCIMMACAddress {
 
 #endregion
 
-#region File Get-NetboxDCIMManufacturer.ps1
+#region File Get-NBDCIMManufacturer.ps1
 
-function Get-NetboxDCIMManufacturer {
+function Get-NBDCIMManufacturer {
 <#
     .SYNOPSIS
         Get manufacturers from Netbox
@@ -2440,12 +2440,12 @@ function Get-NetboxDCIMManufacturer {
         Return the raw API response
 
     .EXAMPLE
-        Get-NetboxDCIMManufacturer
+        Get-NBDCIMManufacturer
 
         Returns all manufacturers
 
     .EXAMPLE
-        Get-NetboxDCIMManufacturer -Name "Cisco"
+        Get-NBDCIMManufacturer -Name "Cisco"
 
         Returns manufacturers matching the name "Cisco"
 #>
@@ -2503,9 +2503,9 @@ function Get-NetboxDCIMManufacturer {
 
 #endregion
 
-#region File Get-NetboxDCIMModule.ps1
+#region File Get-NBDCIMModule.ps1
 
-function Get-NetboxDCIMModule {
+function Get-NBDCIMModule {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
@@ -2534,9 +2534,9 @@ function Get-NetboxDCIMModule {
 
 #endregion
 
-#region File Get-NetboxDCIMModuleBay.ps1
+#region File Get-NBDCIMModuleBay.ps1
 
-function Get-NetboxDCIMModuleBay {
+function Get-NBDCIMModuleBay {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
@@ -2561,9 +2561,9 @@ function Get-NetboxDCIMModuleBay {
 
 #endregion
 
-#region File Get-NetboxDCIMModuleBayTemplate.ps1
+#region File Get-NBDCIMModuleBayTemplate.ps1
 
-function Get-NetboxDCIMModuleBayTemplate {
+function Get-NBDCIMModuleBayTemplate {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
@@ -2588,9 +2588,9 @@ function Get-NetboxDCIMModuleBayTemplate {
 
 #endregion
 
-#region File Get-NetboxDCIMModuleType.ps1
+#region File Get-NBDCIMModuleType.ps1
 
-function Get-NetboxDCIMModuleType {
+function Get-NBDCIMModuleType {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
@@ -2616,9 +2616,9 @@ function Get-NetboxDCIMModuleType {
 
 #endregion
 
-#region File Get-NetboxDCIMModuleTypeProfile.ps1
+#region File Get-NBDCIMModuleTypeProfile.ps1
 
-function Get-NetboxDCIMModuleTypeProfile {
+function Get-NBDCIMModuleTypeProfile {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
@@ -2642,10 +2642,10 @@ function Get-NetboxDCIMModuleTypeProfile {
 
 #endregion
 
-#region File Get-NetboxDCIMPlatform.ps1
+#region File Get-NBDCIMPlatform.ps1
 
 
-function Get-NetboxDCIMPlatform {
+function Get-NBDCIMPlatform {
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param
@@ -2697,9 +2697,9 @@ function Get-NetboxDCIMPlatform {
 
 #endregion
 
-#region File Get-NetboxDCIMPowerFeed.ps1
+#region File Get-NBDCIMPowerFeed.ps1
 
-function Get-NetboxDCIMPowerFeed {
+function Get-NBDCIMPowerFeed {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
@@ -2727,9 +2727,9 @@ function Get-NetboxDCIMPowerFeed {
 
 #endregion
 
-#region File Get-NetboxDCIMPowerOutlet.ps1
+#region File Get-NBDCIMPowerOutlet.ps1
 
-function Get-NetboxDCIMPowerOutlet {
+function Get-NBDCIMPowerOutlet {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
@@ -2756,9 +2756,9 @@ function Get-NetboxDCIMPowerOutlet {
 
 #endregion
 
-#region File Get-NetboxDCIMPowerOutletTemplate.ps1
+#region File Get-NBDCIMPowerOutletTemplate.ps1
 
-function Get-NetboxDCIMPowerOutletTemplate {
+function Get-NBDCIMPowerOutletTemplate {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
@@ -2785,9 +2785,9 @@ function Get-NetboxDCIMPowerOutletTemplate {
 
 #endregion
 
-#region File Get-NetboxDCIMPowerPanel.ps1
+#region File Get-NBDCIMPowerPanel.ps1
 
-function Get-NetboxDCIMPowerPanel {
+function Get-NBDCIMPowerPanel {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
@@ -2813,9 +2813,9 @@ function Get-NetboxDCIMPowerPanel {
 
 #endregion
 
-#region File Get-NetboxDCIMPowerPort.ps1
+#region File Get-NBDCIMPowerPort.ps1
 
-function Get-NetboxDCIMPowerPort {
+function Get-NBDCIMPowerPort {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
@@ -2842,9 +2842,9 @@ function Get-NetboxDCIMPowerPort {
 
 #endregion
 
-#region File Get-NetboxDCIMPowerPortTemplate.ps1
+#region File Get-NBDCIMPowerPortTemplate.ps1
 
-function Get-NetboxDCIMPowerPortTemplate {
+function Get-NBDCIMPowerPortTemplate {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
@@ -2871,9 +2871,9 @@ function Get-NetboxDCIMPowerPortTemplate {
 
 #endregion
 
-#region File Get-NetboxDCIMRack.ps1
+#region File Get-NBDCIMRack.ps1
 
-function Get-NetboxDCIMRack {
+function Get-NBDCIMRack {
 <#
     .SYNOPSIS
         Get racks from Netbox
@@ -2927,17 +2927,17 @@ function Get-NetboxDCIMRack {
         Return the raw API response
 
     .EXAMPLE
-        Get-NetboxDCIMRack
+        Get-NBDCIMRack
 
         Returns all racks
 
     .EXAMPLE
-        Get-NetboxDCIMRack -Site_Id 1
+        Get-NBDCIMRack -Site_Id 1
 
         Returns all racks at site with ID 1
 
     .EXAMPLE
-        Get-NetboxDCIMRack -Name "Rack-01"
+        Get-NBDCIMRack -Name "Rack-01"
 
         Returns racks matching the name "Rack-01"
 #>
@@ -3020,9 +3020,9 @@ function Get-NetboxDCIMRack {
 
 #endregion
 
-#region File Get-NetboxDCIMRackReservation.ps1
+#region File Get-NBDCIMRackReservation.ps1
 
-function Get-NetboxDCIMRackReservation {
+function Get-NBDCIMRackReservation {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
@@ -3049,9 +3049,9 @@ function Get-NetboxDCIMRackReservation {
 
 #endregion
 
-#region File Get-NetboxDCIMRackRole.ps1
+#region File Get-NBDCIMRackRole.ps1
 
-function Get-NetboxDCIMRackRole {
+function Get-NBDCIMRackRole {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
@@ -3076,9 +3076,9 @@ function Get-NetboxDCIMRackRole {
 
 #endregion
 
-#region File Get-NetboxDCIMRackType.ps1
+#region File Get-NBDCIMRackType.ps1
 
-function Get-NetboxDCIMRackType {
+function Get-NBDCIMRackType {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
@@ -3104,9 +3104,9 @@ function Get-NetboxDCIMRackType {
 
 #endregion
 
-#region File Get-NetboxDCIMRearPort.ps1
+#region File Get-NBDCIMRearPort.ps1
 
-function Get-NetboxDCIMRearPort {
+function Get-NBDCIMRearPort {
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param
@@ -3143,9 +3143,9 @@ function Get-NetboxDCIMRearPort {
 
 #endregion
 
-#region File Get-NetboxDCIMRearPortTemplate.ps1
+#region File Get-NBDCIMRearPortTemplate.ps1
 
-function Get-NetboxDCIMRearPortTemplate {
+function Get-NBDCIMRearPortTemplate {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
@@ -3172,9 +3172,9 @@ function Get-NetboxDCIMRearPortTemplate {
 
 #endregion
 
-#region File Get-NetboxDCIMRegion.ps1
+#region File Get-NBDCIMRegion.ps1
 
-function Get-NetboxDCIMRegion {
+function Get-NBDCIMRegion {
 <#
     .SYNOPSIS
         Get regions from Netbox
@@ -3208,17 +3208,17 @@ function Get-NetboxDCIMRegion {
         Return the raw API response
 
     .EXAMPLE
-        Get-NetboxDCIMRegion
+        Get-NBDCIMRegion
 
         Returns all regions
 
     .EXAMPLE
-        Get-NetboxDCIMRegion -Name "Europe"
+        Get-NBDCIMRegion -Name "Europe"
 
         Returns regions matching the name "Europe"
 
     .EXAMPLE
-        Get-NetboxDCIMRegion -Parent_Id 1
+        Get-NBDCIMRegion -Parent_Id 1
 
         Returns all child regions of region 1
 #>
@@ -3279,10 +3279,10 @@ function Get-NetboxDCIMRegion {
 
 #endregion
 
-#region File Get-NetboxDCIMSite.ps1
+#region File Get-NBDCIMSite.ps1
 
 
-function Get-NetboxDCIMSite {
+function Get-NBDCIMSite {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([pscustomobject])]
     param
@@ -3379,9 +3379,9 @@ function Get-NetboxDCIMSite {
 
 #endregion
 
-#region File Get-NetboxDCIMSiteGroup.ps1
+#region File Get-NBDCIMSiteGroup.ps1
 
-function Get-NetboxDCIMSiteGroup {
+function Get-NBDCIMSiteGroup {
 <#
     .SYNOPSIS
         Get site groups from Netbox
@@ -3415,17 +3415,17 @@ function Get-NetboxDCIMSiteGroup {
         Return the raw API response
 
     .EXAMPLE
-        Get-NetboxDCIMSiteGroup
+        Get-NBDCIMSiteGroup
 
         Returns all site groups
 
     .EXAMPLE
-        Get-NetboxDCIMSiteGroup -Name "Production"
+        Get-NBDCIMSiteGroup -Name "Production"
 
         Returns site groups matching the name "Production"
 
     .EXAMPLE
-        Get-NetboxDCIMSiteGroup -Parent_Id 1
+        Get-NBDCIMSiteGroup -Parent_Id 1
 
         Returns all child site groups of site group 1
 #>
@@ -3486,9 +3486,9 @@ function Get-NetboxDCIMSiteGroup {
 
 #endregion
 
-#region File Get-NetboxDCIMVirtualChassis.ps1
+#region File Get-NBDCIMVirtualChassis.ps1
 
-function Get-NetboxDCIMVirtualChassis {
+function Get-NBDCIMVirtualChassis {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
@@ -3517,9 +3517,9 @@ function Get-NetboxDCIMVirtualChassis {
 
 #endregion
 
-#region File Get-NetboxDCIMVirtualDeviceContext.ps1
+#region File Get-NBDCIMVirtualDeviceContext.ps1
 
-function Get-NetboxDCIMVirtualDeviceContext {
+function Get-NBDCIMVirtualDeviceContext {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
@@ -3548,15 +3548,15 @@ function Get-NetboxDCIMVirtualDeviceContext {
 
 #endregion
 
-#region File Get-NetboxHostname.ps1
+#region File Get-NBHostname.ps1
 
-function Get-NetboxHostname {
+function Get-NBHostname {
     [CmdletBinding()]
     param ()
 
     Write-Verbose "Getting Netbox hostname"
     if ($null -eq $script:NetboxConfig.Hostname) {
-        throw "Netbox Hostname is not set! You may set it with Set-NetboxHostname -Hostname 'hostname.domain.tld'"
+        throw "Netbox Hostname is not set! You may set it with Set-NBHostname -Hostname 'hostname.domain.tld'"
     }
 
     $script:NetboxConfig.Hostname
@@ -3564,15 +3564,15 @@ function Get-NetboxHostname {
 
 #endregion
 
-#region File Get-NetboxHostPort.ps1
+#region File Get-NBHostPort.ps1
 
-function Get-NetboxHostPort {
+function Get-NBHostPort {
     [CmdletBinding()]
     param ()
 
     Write-Verbose "Getting Netbox host port"
     if ($null -eq $script:NetboxConfig.HostPort) {
-        throw "Netbox host port is not set! You may set it with Set-NetboxHostPort -Port 'https'"
+        throw "Netbox host port is not set! You may set it with Set-NBHostPort -Port 'https'"
     }
 
     $script:NetboxConfig.HostPort
@@ -3580,15 +3580,15 @@ function Get-NetboxHostPort {
 
 #endregion
 
-#region File Get-NetboxHostScheme.ps1
+#region File Get-NBHostScheme.ps1
 
-function Get-NetboxHostScheme {
+function Get-NBHostScheme {
     [CmdletBinding()]
     param ()
 
     Write-Verbose "Getting Netbox host scheme"
     if ($null -eq $script:NetboxConfig.Hostscheme) {
-        throw "Netbox host sceme is not set! You may set it with Set-NetboxHostScheme -Scheme 'https'"
+        throw "Netbox host sceme is not set! You may set it with Set-NBHostScheme -Scheme 'https'"
     }
 
     $script:NetboxConfig.HostScheme
@@ -3596,15 +3596,15 @@ function Get-NetboxHostScheme {
 
 #endregion
 
-#region File Get-NetboxInvokeParams.ps1
+#region File Get-NBInvokeParams.ps1
 
-function Get-NetboxInvokeParams {
+function Get-NBInvokeParams {
     [CmdletBinding()]
     param ()
 
     Write-Verbose "Getting Netbox InvokeParams"
     if ($null -eq $script:NetboxConfig.InvokeParams) {
-        throw "Netbox Invoke Params is not set! You may set it with Set-NetboxInvokeParams -InvokeParams ..."
+        throw "Netbox Invoke Params is not set! You may set it with Set-NBInvokeParams -InvokeParams ..."
     }
 
     $script:NetboxConfig.InvokeParams
@@ -3612,9 +3612,9 @@ function Get-NetboxInvokeParams {
 
 #endregion
 
-#region File Get-NetboxIPAMAddress.ps1
+#region File Get-NBIPAMAddress.ps1
 
-function Get-NetboxIPAMAddress {
+function Get-NBIPAMAddress {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param
     (
@@ -3710,10 +3710,10 @@ function Get-NetboxIPAMAddress {
 
 #endregion
 
-#region File Get-NetboxIPAMAddressRange.ps1
+#region File Get-NBIPAMAddressRange.ps1
 
 
-function Get-NetboxIPAMAddressRange {
+function Get-NBIPAMAddressRange {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param
     (
@@ -3788,10 +3788,10 @@ function Get-NetboxIPAMAddressRange {
 
 #endregion
 
-#region File Get-NetboxIPAMAggregate.ps1
+#region File Get-NBIPAMAggregate.ps1
 
 
-function Get-NetboxIPAMAggregate {
+function Get-NBIPAMAggregate {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param
     (
@@ -3859,9 +3859,9 @@ function Get-NetboxIPAMAggregate {
 
 #endregion
 
-#region File Get-NetboxIPAMASN.ps1
+#region File Get-NBIPAMASN.ps1
 
-function Get-NetboxIPAMASN {
+function Get-NBIPAMASN {
 <#
     .SYNOPSIS
         Get ASNs from Netbox
@@ -3897,12 +3897,12 @@ function Get-NetboxIPAMASN {
         Return the raw API response
 
     .EXAMPLE
-        Get-NetboxIPAMASN
+        Get-NBIPAMASN
 
         Returns all ASNs
 
     .EXAMPLE
-        Get-NetboxIPAMASN -ASN 65001
+        Get-NBIPAMASN -ASN 65001
 
         Returns ASN 65001
 #>
@@ -3966,9 +3966,9 @@ function Get-NetboxIPAMASN {
 
 #endregion
 
-#region File Get-NetboxIPAMASNRange.ps1
+#region File Get-NBIPAMASNRange.ps1
 
-function Get-NetboxIPAMASNRange {
+function Get-NBIPAMASNRange {
 <#
     .SYNOPSIS
         Get ASN ranges from Netbox
@@ -4001,12 +4001,12 @@ function Get-NetboxIPAMASNRange {
         Return the raw API response
 
     .EXAMPLE
-        Get-NetboxIPAMASNRange
+        Get-NBIPAMASNRange
 
         Returns all ASN ranges
 
     .EXAMPLE
-        Get-NetboxIPAMASNRange -Name "Private"
+        Get-NBIPAMASNRange -Name "Private"
 
         Returns ASN ranges matching the name "Private"
 #>
@@ -4067,10 +4067,10 @@ function Get-NetboxIPAMASNRange {
 
 #endregion
 
-#region File Get-NetboxIPAMAvailableIP.ps1
+#region File Get-NBIPAMAvailableIP.ps1
 
 
-function Get-NetboxIPAMAvailableIP {
+function Get-NBIPAMAvailableIP {
     <#
     .SYNOPSIS
         A convenience method for returning available IP addresses within a prefix
@@ -4092,12 +4092,12 @@ function Get-NetboxIPAMAvailableIP {
         A description of the NumberOfIPs parameter.
 
     .EXAMPLE
-        Get-NetboxIPAMAvailableIP -Prefix_ID (Get-NetboxIPAMPrefix -Prefix 192.0.2.0/24).id
+        Get-NBIPAMAvailableIP -Prefix_ID (Get-NBIPAMPrefix -Prefix 192.0.2.0/24).id
 
         Get (Next) Available IP on the Prefix 192.0.2.0/24
 
     .EXAMPLE
-        Get-NetboxIPAMAvailableIP -Prefix_ID 2 -NumberOfIPs 3
+        Get-NBIPAMAvailableIP -Prefix_ID 2 -NumberOfIPs 3
 
         Get 3 (Next) Available IP on the Prefix 192.0.2.0/24
 
@@ -4132,9 +4132,9 @@ function Get-NetboxIPAMAvailableIP {
 
 #endregion
 
-#region File Get-NetboxIPAMFHRPGroup.ps1
+#region File Get-NBIPAMFHRPGroup.ps1
 
-function Get-NetboxIPAMFHRPGroup {
+function Get-NBIPAMFHRPGroup {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
@@ -4160,9 +4160,9 @@ function Get-NetboxIPAMFHRPGroup {
 
 #endregion
 
-#region File Get-NetboxIPAMFHRPGroupAssignment.ps1
+#region File Get-NBIPAMFHRPGroupAssignment.ps1
 
-function Get-NetboxIPAMFHRPGroupAssignment {
+function Get-NBIPAMFHRPGroupAssignment {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
@@ -4188,16 +4188,16 @@ function Get-NetboxIPAMFHRPGroupAssignment {
 
 #endregion
 
-#region File Get-NetboxIPAMPrefix.ps1
+#region File Get-NBIPAMPrefix.ps1
 
 
-function Get-NetboxIPAMPrefix {
+function Get-NBIPAMPrefix {
 <#
     .SYNOPSIS
-        A brief description of the Get-NetboxIPAMPrefix function.
+        A brief description of the Get-NBIPAMPrefix function.
 
     .DESCRIPTION
-        A detailed description of the Get-NetboxIPAMPrefix function.
+        A detailed description of the Get-NBIPAMPrefix function.
 
     .PARAMETER Query
         A description of the Query parameter.
@@ -4266,7 +4266,7 @@ function Get-NetboxIPAMPrefix {
         A description of the Raw parameter.
 
     .EXAMPLE
-        PS C:\> Get-NetboxIPAMPrefix
+        PS C:\> Get-NBIPAMPrefix
 
     .NOTES
         Additional information about the function.
@@ -4385,9 +4385,9 @@ function Get-NetboxIPAMPrefix {
 
 #endregion
 
-#region File Get-NetboxIPAMRIR.ps1
+#region File Get-NBIPAMRIR.ps1
 
-function Get-NetboxIPAMRIR {
+function Get-NBIPAMRIR {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
@@ -4413,10 +4413,10 @@ function Get-NetboxIPAMRIR {
 
 #endregion
 
-#region File Get-NetboxIPAMRole.ps1
+#region File Get-NBIPAMRole.ps1
 
 
-function Get-NetboxIPAMRole {
+function Get-NBIPAMRole {
 <#
     .SYNOPSIS
         Get IPAM Prefix/VLAN roles
@@ -4449,7 +4449,7 @@ function Get-NetboxIPAMRole {
         A description of the Raw parameter.
 
     .EXAMPLE
-        PS C:\> Get-NetboxIPAMRole
+        PS C:\> Get-NBIPAMRole
 
     .NOTES
         Additional information about the function.
@@ -4514,9 +4514,9 @@ function Get-NetboxIPAMRole {
 
 #endregion
 
-#region File Get-NetboxIPAMRouteTarget.ps1
+#region File Get-NBIPAMRouteTarget.ps1
 
-function Get-NetboxIPAMRouteTarget {
+function Get-NBIPAMRouteTarget {
 <#
     .SYNOPSIS
         Get route targets from Netbox
@@ -4556,12 +4556,12 @@ function Get-NetboxIPAMRouteTarget {
         Return the raw API response
 
     .EXAMPLE
-        Get-NetboxIPAMRouteTarget
+        Get-NBIPAMRouteTarget
 
         Returns all route targets
 
     .EXAMPLE
-        Get-NetboxIPAMRouteTarget -Name "65001:100"
+        Get-NBIPAMRouteTarget -Name "65001:100"
 
         Returns route targets matching the specified value
 #>
@@ -4628,9 +4628,9 @@ function Get-NetboxIPAMRouteTarget {
 
 #endregion
 
-#region File Get-NetboxIPAMService.ps1
+#region File Get-NBIPAMService.ps1
 
-function Get-NetboxIPAMService {
+function Get-NBIPAMService {
 <#
     .SYNOPSIS
         Get services from Netbox
@@ -4670,12 +4670,12 @@ function Get-NetboxIPAMService {
         Return the raw API response
 
     .EXAMPLE
-        Get-NetboxIPAMService
+        Get-NBIPAMService
 
         Returns all services
 
     .EXAMPLE
-        Get-NetboxIPAMService -Protocol tcp -Port 443
+        Get-NBIPAMService -Protocol tcp -Port 443
 
         Returns TCP services on port 443
 #>
@@ -4743,9 +4743,9 @@ function Get-NetboxIPAMService {
 
 #endregion
 
-#region File Get-NetboxIPAMServiceTemplate.ps1
+#region File Get-NBIPAMServiceTemplate.ps1
 
-function Get-NetboxIPAMServiceTemplate {
+function Get-NBIPAMServiceTemplate {
 <#
     .SYNOPSIS
         Get service templates from Netbox
@@ -4779,12 +4779,12 @@ function Get-NetboxIPAMServiceTemplate {
         Return the raw API response
 
     .EXAMPLE
-        Get-NetboxIPAMServiceTemplate
+        Get-NBIPAMServiceTemplate
 
         Returns all service templates
 
     .EXAMPLE
-        Get-NetboxIPAMServiceTemplate -Name "HTTP"
+        Get-NBIPAMServiceTemplate -Name "HTTP"
 
         Returns service templates matching the name "HTTP"
 #>
@@ -4846,10 +4846,10 @@ function Get-NetboxIPAMServiceTemplate {
 
 #endregion
 
-#region File Get-NetboxIPAMVLAN.ps1
+#region File Get-NBIPAMVLAN.ps1
 
 
-function Get-NetboxIPAMVLAN {
+function Get-NBIPAMVLAN {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param
     (
@@ -4947,9 +4947,9 @@ function Get-NetboxIPAMVLAN {
 
 #endregion
 
-#region File Get-NetboxIPAMVLANGroup.ps1
+#region File Get-NBIPAMVLANGroup.ps1
 
-function Get-NetboxIPAMVLANGroup {
+function Get-NBIPAMVLANGroup {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
@@ -4978,9 +4978,9 @@ function Get-NetboxIPAMVLANGroup {
 
 #endregion
 
-#region File Get-NetboxIPAMVLANTranslationPolicy.ps1
+#region File Get-NBIPAMVLANTranslationPolicy.ps1
 
-function Get-NetboxIPAMVLANTranslationPolicy {
+function Get-NBIPAMVLANTranslationPolicy {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
@@ -5004,9 +5004,9 @@ function Get-NetboxIPAMVLANTranslationPolicy {
 
 #endregion
 
-#region File Get-NetboxIPAMVLANTranslationRule.ps1
+#region File Get-NBIPAMVLANTranslationRule.ps1
 
-function Get-NetboxIPAMVLANTranslationRule {
+function Get-NBIPAMVLANTranslationRule {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param(
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
@@ -5031,9 +5031,9 @@ function Get-NetboxIPAMVLANTranslationRule {
 
 #endregion
 
-#region File Get-NetboxIPAMVRF.ps1
+#region File Get-NBIPAMVRF.ps1
 
-function Get-NetboxIPAMVRF {
+function Get-NBIPAMVRF {
 <#
     .SYNOPSIS
         Get VRFs from Netbox
@@ -5072,17 +5072,17 @@ function Get-NetboxIPAMVRF {
         Return the raw API response
 
     .EXAMPLE
-        Get-NetboxIPAMVRF
+        Get-NBIPAMVRF
 
         Returns all VRFs
 
     .EXAMPLE
-        Get-NetboxIPAMVRF -Name "Production"
+        Get-NBIPAMVRF -Name "Production"
 
         Returns VRFs matching the name "Production"
 
     .EXAMPLE
-        Get-NetboxIPAMVRF -RD "65001:100"
+        Get-NBIPAMVRF -RD "65001:100"
 
         Returns VRFs with the specified route distinguisher
 #>
@@ -5149,10 +5149,10 @@ function Get-NetboxIPAMVRF {
 
 #endregion
 
-#region File Get-NetboxTag.ps1
+#region File Get-NBTag.ps1
 
 
-function Get-NetboxTag {
+function Get-NBTag {
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param
@@ -5185,16 +5185,16 @@ function Get-NetboxTag {
 
 #endregion
 
-#region File Get-NetboxTenant.ps1
+#region File Get-NBTenant.ps1
 
 
-function Get-NetboxTenant {
+function Get-NBTenant {
 <#
     .SYNOPSIS
         Get a tenent from Netbox
 
     .DESCRIPTION
-        A detailed description of the Get-NetboxTenant function.
+        A detailed description of the Get-NBTenant function.
 
     .PARAMETER Name
         The specific name of the tenant. Must match exactly as is defined in Netbox
@@ -5227,7 +5227,7 @@ function Get-NetboxTenant {
         Return the unparsed data from the HTTP request
 
     .EXAMPLE
-        PS C:\> Get-NetboxTenant
+        PS C:\> Get-NBTenant
 
     .NOTES
         Additional information about the function.
@@ -5298,17 +5298,17 @@ function Get-NetboxTenant {
 
 #endregion
 
-#region File Get-NetboxTimeout.ps1
+#region File Get-NBTimeout.ps1
 
 
-function Get-NetboxTimeout {
+function Get-NBTimeout {
     [CmdletBinding()]
     [OutputType([uint16])]
     param ()
 
     Write-Verbose "Getting Netbox Timeout"
     if ($null -eq $script:NetboxConfig.Timeout) {
-        throw "Netbox Timeout is not set! You may set it with Set-NetboxTimeout -TimeoutSeconds [uint16]"
+        throw "Netbox Timeout is not set! You may set it with Set-NBTimeout -TimeoutSeconds [uint16]"
     }
 
     $script:NetboxConfig.Timeout
@@ -5316,10 +5316,10 @@ function Get-NetboxTimeout {
 
 #endregion
 
-#region File Get-NetboxVersion.ps1
+#region File Get-NBVersion.ps1
 
 
-function Get-NetboxVersion {
+function Get-NBVersion {
     [CmdletBinding()]
     param ()
 
@@ -5336,10 +5336,10 @@ function Get-NetboxVersion {
 
 #endregion
 
-#region File Get-NetboxVirtualizationCluster.ps1
+#region File Get-NBVirtualizationCluster.ps1
 
 
-function Get-NetboxVirtualizationCluster {
+function Get-NBVirtualizationCluster {
 <#
     .SYNOPSIS
         Obtains virtualization clusters from Netbox.
@@ -5384,7 +5384,7 @@ function Get-NetboxVirtualizationCluster {
         A description of the Raw parameter.
 
     .EXAMPLE
-        PS C:\> Get-NetboxVirtualizationCluster
+        PS C:\> Get-NBVirtualizationCluster
 
     .NOTES
         Additional information about the function.
@@ -5430,10 +5430,10 @@ function Get-NetboxVirtualizationCluster {
 
 #endregion
 
-#region File Get-NetboxVirtualizationClusterGroup.ps1
+#region File Get-NBVirtualizationClusterGroup.ps1
 
 
-function Get-NetboxVirtualizationClusterGroup {
+function Get-NBVirtualizationClusterGroup {
     [CmdletBinding()]
     param
     (
@@ -5465,10 +5465,10 @@ function Get-NetboxVirtualizationClusterGroup {
 
 #endregion
 
-#region File Get-NetboxVirtualMachine.ps1
+#region File Get-NBVirtualMachine.ps1
 
 
-function Get-NetboxVirtualMachine {
+function Get-NBVirtualMachine {
     <#
     .SYNOPSIS
         Obtains virtual machines from Netbox.
@@ -5546,7 +5546,7 @@ function Get-NetboxVirtualMachine {
         Database IDs of VMs
 
     .EXAMPLE
-        PS C:\> Get-NetboxVirtualMachine
+        PS C:\> Get-NBVirtualMachine
 
     .NOTES
         Additional information about the function.
@@ -5614,10 +5614,10 @@ function Get-NetboxVirtualMachine {
 
 #endregion
 
-#region File Get-NetboxVirtualMachineInterface.ps1
+#region File Get-NBVirtualMachineInterface.ps1
 
 
-function Get-NetboxVirtualMachineInterface {
+function Get-NBVirtualMachineInterface {
     <#
     .SYNOPSIS
         Gets VM interfaces
@@ -5656,7 +5656,7 @@ function Get-NetboxVirtualMachineInterface {
         A description of the Raw parameter.
 
     .EXAMPLE
-        PS C:\> Get-NetboxVirtualMachineInterface
+        PS C:\> Get-NBVirtualMachineInterface
 
     .NOTES
         Additional information about the function.
@@ -5702,9 +5702,9 @@ function Get-NetboxVirtualMachineInterface {
 
 #endregion
 
-#region File Get-NetboxVPNIKEPolicy.ps1
+#region File Get-NBVPNIKEPolicy.ps1
 
-function Get-NetboxVPNIKEPolicy {
+function Get-NBVPNIKEPolicy {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param([Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,[Parameter(ParameterSetName = 'Query')][uint16]$Limit,[Parameter(ParameterSetName = 'Query')][uint16]$Offset,[switch]$Raw)
@@ -5718,9 +5718,9 @@ function Get-NetboxVPNIKEPolicy {
 
 #endregion
 
-#region File Get-NetboxVPNIKEProposal.ps1
+#region File Get-NBVPNIKEProposal.ps1
 
-function Get-NetboxVPNIKEProposal {
+function Get-NBVPNIKEProposal {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param([Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,[Parameter(ParameterSetName = 'Query')][uint16]$Limit,[Parameter(ParameterSetName = 'Query')][uint16]$Offset,[switch]$Raw)
@@ -5734,9 +5734,9 @@ function Get-NetboxVPNIKEProposal {
 
 #endregion
 
-#region File Get-NetboxVPNIPSecPolicy.ps1
+#region File Get-NBVPNIPSecPolicy.ps1
 
-function Get-NetboxVPNIPSecPolicy {
+function Get-NBVPNIPSecPolicy {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param([Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,[Parameter(ParameterSetName = 'Query')][uint16]$Limit,[Parameter(ParameterSetName = 'Query')][uint16]$Offset,[switch]$Raw)
@@ -5750,9 +5750,9 @@ function Get-NetboxVPNIPSecPolicy {
 
 #endregion
 
-#region File Get-NetboxVPNIPSecProfile.ps1
+#region File Get-NBVPNIPSecProfile.ps1
 
-function Get-NetboxVPNIPSecProfile {
+function Get-NBVPNIPSecProfile {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param([Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,[Parameter(ParameterSetName = 'Query')][uint16]$Limit,[Parameter(ParameterSetName = 'Query')][uint16]$Offset,[switch]$Raw)
@@ -5766,9 +5766,9 @@ function Get-NetboxVPNIPSecProfile {
 
 #endregion
 
-#region File Get-NetboxVPNIPSecProposal.ps1
+#region File Get-NBVPNIPSecProposal.ps1
 
-function Get-NetboxVPNIPSecProposal {
+function Get-NBVPNIPSecProposal {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param([Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,[Parameter(ParameterSetName = 'Query')][uint16]$Limit,[Parameter(ParameterSetName = 'Query')][uint16]$Offset,[switch]$Raw)
@@ -5782,9 +5782,9 @@ function Get-NetboxVPNIPSecProposal {
 
 #endregion
 
-#region File Get-NetboxVPNL2VPN.ps1
+#region File Get-NBVPNL2VPN.ps1
 
-function Get-NetboxVPNL2VPN {
+function Get-NBVPNL2VPN {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param([Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,[Parameter(ParameterSetName = 'Query')][string]$Slug,
@@ -5800,9 +5800,9 @@ function Get-NetboxVPNL2VPN {
 
 #endregion
 
-#region File Get-NetboxVPNL2VPNTermination.ps1
+#region File Get-NBVPNL2VPNTermination.ps1
 
-function Get-NetboxVPNL2VPNTermination {
+function Get-NBVPNL2VPNTermination {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param([Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][uint64]$L2VPN_Id,[Parameter(ParameterSetName = 'Query')][uint16]$Limit,[Parameter(ParameterSetName = 'Query')][uint16]$Offset,[switch]$Raw)
@@ -5816,9 +5816,9 @@ function Get-NetboxVPNL2VPNTermination {
 
 #endregion
 
-#region File Get-NetboxVPNTunnel.ps1
+#region File Get-NBVPNTunnel.ps1
 
-function Get-NetboxVPNTunnel {
+function Get-NBVPNTunnel {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([PSCustomObject])]
     param
@@ -5855,9 +5855,9 @@ function Get-NetboxVPNTunnel {
 
 #endregion
 
-#region File Get-NetboxVPNTunnelGroup.ps1
+#region File Get-NBVPNTunnelGroup.ps1
 
-function Get-NetboxVPNTunnelGroup {
+function Get-NBVPNTunnelGroup {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param([Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,[Parameter(ParameterSetName = 'Query')][string]$Slug,
@@ -5872,9 +5872,9 @@ function Get-NetboxVPNTunnelGroup {
 
 #endregion
 
-#region File Get-NetboxVPNTunnelTermination.ps1
+#region File Get-NBVPNTunnelTermination.ps1
 
-function Get-NetboxVPNTunnelTermination {
+function Get-NBVPNTunnelTermination {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param([Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][uint64]$Tunnel_Id,[Parameter(ParameterSetName = 'Query')][string]$Role,
@@ -5889,9 +5889,9 @@ function Get-NetboxVPNTunnelTermination {
 
 #endregion
 
-#region File Get-NetboxWirelessLAN.ps1
+#region File Get-NBWirelessLAN.ps1
 
-function Get-NetboxWirelessLAN {
+function Get-NBWirelessLAN {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param([Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$SSID,[Parameter(ParameterSetName = 'Query')][uint64]$Group_Id,
@@ -5907,9 +5907,9 @@ function Get-NetboxWirelessLAN {
 
 #endregion
 
-#region File Get-NetboxWirelessLANGroup.ps1
+#region File Get-NBWirelessLANGroup.ps1
 
-function Get-NetboxWirelessLANGroup {
+function Get-NBWirelessLANGroup {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param([Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,[Parameter(ParameterSetName = 'Query')][string]$Slug,
@@ -5924,9 +5924,9 @@ function Get-NetboxWirelessLANGroup {
 
 #endregion
 
-#region File Get-NetboxWirelessLink.ps1
+#region File Get-NBWirelessLink.ps1
 
-function Get-NetboxWirelessLink {
+function Get-NBWirelessLink {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     param([Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$SSID,[Parameter(ParameterSetName = 'Query')][string]$Status,
@@ -5986,7 +5986,7 @@ function InvokeNetboxRequest {
         [pscustomobject]$Body = $null,
 
         [ValidateRange(1, 65535)]
-        [uint16]$Timeout = (Get-NetboxTimeout),
+        [uint16]$Timeout = (Get-NBTimeout),
 
         [ValidateSet('GET', 'PATCH', 'PUT', 'POST', 'DELETE', 'OPTIONS', IgnoreCase = $true)]
         [string]$Method = 'GET',
@@ -5994,7 +5994,7 @@ function InvokeNetboxRequest {
         [switch]$Raw
     )
 
-    $creds = Get-NetboxCredential
+    $creds = Get-NBCredential
 
     $Headers.Authorization = "Token {0}" -f $creds.GetNetworkCredential().Password
 
@@ -6008,7 +6008,7 @@ function InvokeNetboxRequest {
         'Verbose'     = $VerbosePreference
     }
 
-    $splat += Get-NetboxInvokeParams
+    $splat += Get-NBInvokeParams
 
     if ($Body) {
         Write-Verbose "BODY: $($Body | ConvertTo-Json -Compress)"
@@ -6069,10 +6069,10 @@ function InvokeNetboxRequest {
 
 #endregion
 
-#region File New-NetboxCircuit.ps1
+#region File New-NBCircuit.ps1
 
 
-function New-NetboxCircuit {
+function New-NBCircuit {
     [CmdletBinding(ConfirmImpact = 'Low',
         SupportsShouldProcess = $true)]
     [OutputType([pscustomobject])]
@@ -6129,10 +6129,10 @@ function New-NetboxCircuit {
 
 #endregion
 
-#region File New-NetboxContact.ps1
+#region File New-NBContact.ps1
 
 
-function New-NetboxContact {
+function New-NBContact {
 <#
     .SYNOPSIS
         Create a new contact in Netbox
@@ -6171,7 +6171,7 @@ function New-NetboxContact {
         A description of the Raw parameter.
 
     .EXAMPLE
-        PS C:\> New-NetboxContact -Name 'Leroy Jenkins' -Email 'leroy.jenkins@example.com'
+        PS C:\> New-NBContact -Name 'Leroy Jenkins' -Email 'leroy.jenkins@example.com'
 
     .NOTES
         Additional information about the function.
@@ -6233,10 +6233,10 @@ function New-NetboxContact {
 
 #endregion
 
-#region File New-NetboxContactAssignment.ps1
+#region File New-NBContactAssignment.ps1
 
 
-function New-NetboxContactAssignment {
+function New-NBContactAssignment {
 <#
     .SYNOPSIS
         Create a new contact role assignment in Netbox
@@ -6263,7 +6263,7 @@ function New-NetboxContactAssignment {
         Return the unparsed data from the HTTP request
 
     .EXAMPLE
-        PS C:\> New-NetboxContactAssignment -Content_Type 'dcim.location' -Object_id 10 -Contact 15 -Role 10 -Priority 'Primary'
+        PS C:\> New-NBContactAssignment -Content_Type 'dcim.location' -Object_id 10 -Contact 15 -Role 10 -Priority 'Primary'
 
     .NOTES
         Valid content types: https://docs.netbox.dev/en/stable/features/contacts/#contacts_1
@@ -6317,10 +6317,10 @@ function New-NetboxContactAssignment {
 
 #endregion
 
-#region File New-NetboxContactRole.ps1
+#region File New-NBContactRole.ps1
 
 
-function New-NetboxContactRole {
+function New-NBContactRole {
 <#
     .SYNOPSIS
         Create a new contact role in Netbox
@@ -6344,7 +6344,7 @@ function New-NetboxContactRole {
         Return the unparsed data from the HTTP request
 
     .EXAMPLE
-        PS C:\> New-NetboxContact -Name 'Leroy Jenkins' -Email 'leroy.jenkins@example.com'
+        PS C:\> New-NBContact -Name 'Leroy Jenkins' -Email 'leroy.jenkins@example.com'
 
     .NOTES
         Additional information about the function.
@@ -6393,9 +6393,9 @@ function New-NetboxContactRole {
 
 #endregion
 
-#region File New-NetboxDCIMCable.ps1
+#region File New-NBDCIMCable.ps1
 
-function New-NetboxDCIMCable {
+function New-NBDCIMCable {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [Parameter(Mandatory = $true)][string]$A_Terminations_Type,
@@ -6426,9 +6426,9 @@ function New-NetboxDCIMCable {
 
 #endregion
 
-#region File New-NetboxDCIMConsolePort.ps1
+#region File New-NBDCIMConsolePort.ps1
 
-function New-NetboxDCIMConsolePort {
+function New-NBDCIMConsolePort {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [Parameter(Mandatory = $true)][uint64]$Device,
@@ -6454,9 +6454,9 @@ function New-NetboxDCIMConsolePort {
 
 #endregion
 
-#region File New-NetboxDCIMConsolePortTemplate.ps1
+#region File New-NBDCIMConsolePortTemplate.ps1
 
-function New-NetboxDCIMConsolePortTemplate {
+function New-NBDCIMConsolePortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [uint64]$Device_Type,
@@ -6478,9 +6478,9 @@ function New-NetboxDCIMConsolePortTemplate {
 
 #endregion
 
-#region File New-NetboxDCIMConsoleServerPort.ps1
+#region File New-NBDCIMConsoleServerPort.ps1
 
-function New-NetboxDCIMConsoleServerPort {
+function New-NBDCIMConsoleServerPort {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [Parameter(Mandatory = $true)][uint64]$Device,
@@ -6506,9 +6506,9 @@ function New-NetboxDCIMConsoleServerPort {
 
 #endregion
 
-#region File New-NetboxDCIMConsoleServerPortTemplate.ps1
+#region File New-NBDCIMConsoleServerPortTemplate.ps1
 
-function New-NetboxDCIMConsoleServerPortTemplate {
+function New-NBDCIMConsoleServerPortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [uint64]$Device_Type,
@@ -6530,10 +6530,10 @@ function New-NetboxDCIMConsoleServerPortTemplate {
 
 #endregion
 
-#region File New-NetboxDCIMDevice.ps1
+#region File New-NBDCIMDevice.ps1
 
 
-function New-NetboxDCIMDevice {
+function New-NBDCIMDevice {
     [CmdletBinding(ConfirmImpact = 'low',
         SupportsShouldProcess = $true)]
     [OutputType([pscustomobject])]
@@ -6599,9 +6599,9 @@ function New-NetboxDCIMDevice {
 
 #endregion
 
-#region File New-NetboxDCIMDeviceBay.ps1
+#region File New-NBDCIMDeviceBay.ps1
 
-function New-NetboxDCIMDeviceBay {
+function New-NBDCIMDeviceBay {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [Parameter(Mandatory = $true)][uint64]$Device,
@@ -6624,9 +6624,9 @@ function New-NetboxDCIMDeviceBay {
 
 #endregion
 
-#region File New-NetboxDCIMDeviceBayTemplate.ps1
+#region File New-NBDCIMDeviceBayTemplate.ps1
 
-function New-NetboxDCIMDeviceBayTemplate {
+function New-NBDCIMDeviceBayTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [Parameter(Mandatory = $true)][uint64]$Device_Type,
@@ -6646,9 +6646,9 @@ function New-NetboxDCIMDeviceBayTemplate {
 
 #endregion
 
-#region File New-NetboxDCIMDeviceRole.ps1
+#region File New-NBDCIMDeviceRole.ps1
 
-function New-NetboxDCIMDeviceRole {
+function New-NBDCIMDeviceRole {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [Parameter(Mandatory = $true)][string]$Name,
@@ -6672,9 +6672,9 @@ function New-NetboxDCIMDeviceRole {
 
 #endregion
 
-#region File New-NetboxDCIMDeviceType.ps1
+#region File New-NBDCIMDeviceType.ps1
 
-function New-NetboxDCIMDeviceType {
+function New-NBDCIMDeviceType {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [Parameter(Mandatory = $true)][uint64]$Manufacturer,
@@ -6704,9 +6704,9 @@ function New-NetboxDCIMDeviceType {
 
 #endregion
 
-#region File New-NetboxDCIMFrontPortTemplate.ps1
+#region File New-NBDCIMFrontPortTemplate.ps1
 
-function New-NetboxDCIMFrontPortTemplate {
+function New-NBDCIMFrontPortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [uint64]$Device_Type,
@@ -6731,9 +6731,9 @@ function New-NetboxDCIMFrontPortTemplate {
 
 #endregion
 
-#region File New-NetboxDCIMInterfaceTemplate.ps1
+#region File New-NBDCIMInterfaceTemplate.ps1
 
-function New-NetboxDCIMInterfaceTemplate {
+function New-NBDCIMInterfaceTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [uint64]$Device_Type,
@@ -6760,9 +6760,9 @@ function New-NetboxDCIMInterfaceTemplate {
 
 #endregion
 
-#region File New-NetboxDCIMInventoryItem.ps1
+#region File New-NBDCIMInventoryItem.ps1
 
-function New-NetboxDCIMInventoryItem {
+function New-NBDCIMInventoryItem {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [Parameter(Mandatory = $true)][uint64]$Device,
@@ -6793,9 +6793,9 @@ function New-NetboxDCIMInventoryItem {
 
 #endregion
 
-#region File New-NetboxDCIMInventoryItemRole.ps1
+#region File New-NBDCIMInventoryItemRole.ps1
 
-function New-NetboxDCIMInventoryItemRole {
+function New-NBDCIMInventoryItemRole {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [Parameter(Mandatory = $true)][string]$Name,
@@ -6817,9 +6817,9 @@ function New-NetboxDCIMInventoryItemRole {
 
 #endregion
 
-#region File New-NetboxDCIMInventoryItemTemplate.ps1
+#region File New-NBDCIMInventoryItemTemplate.ps1
 
-function New-NetboxDCIMInventoryItemTemplate {
+function New-NBDCIMInventoryItemTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [Parameter(Mandatory = $true)][uint64]$Device_Type,
@@ -6845,9 +6845,9 @@ function New-NetboxDCIMInventoryItemTemplate {
 
 #endregion
 
-#region File New-NetboxDCIMLocation.ps1
+#region File New-NBDCIMLocation.ps1
 
-function New-NetboxDCIMLocation {
+function New-NBDCIMLocation {
 <#
     .SYNOPSIS
         Create a new location in Netbox
@@ -6890,12 +6890,12 @@ function New-NetboxDCIMLocation {
         Return the raw API response
 
     .EXAMPLE
-        New-NetboxDCIMLocation -Name "Server Room" -Slug "server-room" -Site 1
+        New-NBDCIMLocation -Name "Server Room" -Slug "server-room" -Site 1
 
         Creates a new location named "Server Room" at site 1
 
     .EXAMPLE
-        New-NetboxDCIMLocation -Name "Floor 2" -Slug "floor-2" -Site 1 -Status active
+        New-NBDCIMLocation -Name "Floor 2" -Slug "floor-2" -Site 1 -Status active
 
         Creates a new active location at site 1
 #>
@@ -6946,9 +6946,9 @@ function New-NetboxDCIMLocation {
 
 #endregion
 
-#region File New-NetboxDCIMMACAddress.ps1
+#region File New-NBDCIMMACAddress.ps1
 
-function New-NetboxDCIMMACAddress {
+function New-NBDCIMMACAddress {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [Parameter(Mandatory = $true)][string]$Mac_Address,
@@ -6971,9 +6971,9 @@ function New-NetboxDCIMMACAddress {
 
 #endregion
 
-#region File New-NetboxDCIMManufacturer.ps1
+#region File New-NBDCIMManufacturer.ps1
 
-function New-NetboxDCIMManufacturer {
+function New-NBDCIMManufacturer {
 <#
     .SYNOPSIS
         Create a new manufacturer in Netbox
@@ -6997,12 +6997,12 @@ function New-NetboxDCIMManufacturer {
         Return the raw API response
 
     .EXAMPLE
-        New-NetboxDCIMManufacturer -Name "Cisco" -Slug "cisco"
+        New-NBDCIMManufacturer -Name "Cisco" -Slug "cisco"
 
         Creates a new manufacturer named "Cisco"
 
     .EXAMPLE
-        New-NetboxDCIMManufacturer -Name "Dell Technologies" -Slug "dell" -Description "Server and storage manufacturer"
+        New-NBDCIMManufacturer -Name "Dell Technologies" -Slug "dell" -Description "Server and storage manufacturer"
 
         Creates a new manufacturer with description
 #>
@@ -7039,9 +7039,9 @@ function New-NetboxDCIMManufacturer {
 
 #endregion
 
-#region File New-NetboxDCIMModule.ps1
+#region File New-NBDCIMModule.ps1
 
-function New-NetboxDCIMModule {
+function New-NBDCIMModule {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [Parameter(Mandatory = $true)][uint64]$Device,
@@ -7069,9 +7069,9 @@ function New-NetboxDCIMModule {
 
 #endregion
 
-#region File New-NetboxDCIMModuleBay.ps1
+#region File New-NBDCIMModuleBay.ps1
 
-function New-NetboxDCIMModuleBay {
+function New-NBDCIMModuleBay {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [Parameter(Mandatory = $true)][uint64]$Device,
@@ -7094,9 +7094,9 @@ function New-NetboxDCIMModuleBay {
 
 #endregion
 
-#region File New-NetboxDCIMModuleBayTemplate.ps1
+#region File New-NBDCIMModuleBayTemplate.ps1
 
-function New-NetboxDCIMModuleBayTemplate {
+function New-NBDCIMModuleBayTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [Parameter(Mandatory = $true)][uint64]$Device_Type,
@@ -7117,9 +7117,9 @@ function New-NetboxDCIMModuleBayTemplate {
 
 #endregion
 
-#region File New-NetboxDCIMModuleType.ps1
+#region File New-NBDCIMModuleType.ps1
 
-function New-NetboxDCIMModuleType {
+function New-NBDCIMModuleType {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [Parameter(Mandatory = $true)][uint64]$Manufacturer,
@@ -7144,9 +7144,9 @@ function New-NetboxDCIMModuleType {
 
 #endregion
 
-#region File New-NetboxDCIMModuleTypeProfile.ps1
+#region File New-NBDCIMModuleTypeProfile.ps1
 
-function New-NetboxDCIMModuleTypeProfile {
+function New-NBDCIMModuleTypeProfile {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [Parameter(Mandatory = $true)][string]$Name,
@@ -7167,9 +7167,9 @@ function New-NetboxDCIMModuleTypeProfile {
 
 #endregion
 
-#region File New-NetboxDCIMPlatform.ps1
+#region File New-NBDCIMPlatform.ps1
 
-function New-NetboxDCIMPlatform {
+function New-NBDCIMPlatform {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [Parameter(Mandatory = $true)][string]$Name,
@@ -7192,9 +7192,9 @@ function New-NetboxDCIMPlatform {
 
 #endregion
 
-#region File New-NetboxDCIMPowerFeed.ps1
+#region File New-NBDCIMPowerFeed.ps1
 
-function New-NetboxDCIMPowerFeed {
+function New-NBDCIMPowerFeed {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [Parameter(Mandatory = $true)][uint64]$Power_Panel,
@@ -7225,9 +7225,9 @@ function New-NetboxDCIMPowerFeed {
 
 #endregion
 
-#region File New-NetboxDCIMPowerOutlet.ps1
+#region File New-NBDCIMPowerOutlet.ps1
 
-function New-NetboxDCIMPowerOutlet {
+function New-NBDCIMPowerOutlet {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [Parameter(Mandatory = $true)][uint64]$Device,
@@ -7254,9 +7254,9 @@ function New-NetboxDCIMPowerOutlet {
 
 #endregion
 
-#region File New-NetboxDCIMPowerOutletTemplate.ps1
+#region File New-NBDCIMPowerOutletTemplate.ps1
 
-function New-NetboxDCIMPowerOutletTemplate {
+function New-NBDCIMPowerOutletTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [uint64]$Device_Type,
@@ -7280,9 +7280,9 @@ function New-NetboxDCIMPowerOutletTemplate {
 
 #endregion
 
-#region File New-NetboxDCIMPowerPanel.ps1
+#region File New-NBDCIMPowerPanel.ps1
 
-function New-NetboxDCIMPowerPanel {
+function New-NBDCIMPowerPanel {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [Parameter(Mandatory = $true)][uint64]$Site,
@@ -7305,9 +7305,9 @@ function New-NetboxDCIMPowerPanel {
 
 #endregion
 
-#region File New-NetboxDCIMPowerPort.ps1
+#region File New-NBDCIMPowerPort.ps1
 
-function New-NetboxDCIMPowerPort {
+function New-NBDCIMPowerPort {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [Parameter(Mandatory = $true)][uint64]$Device,
@@ -7334,9 +7334,9 @@ function New-NetboxDCIMPowerPort {
 
 #endregion
 
-#region File New-NetboxDCIMPowerPortTemplate.ps1
+#region File New-NBDCIMPowerPortTemplate.ps1
 
-function New-NetboxDCIMPowerPortTemplate {
+function New-NBDCIMPowerPortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [uint64]$Device_Type,
@@ -7360,9 +7360,9 @@ function New-NetboxDCIMPowerPortTemplate {
 
 #endregion
 
-#region File New-NetboxDCIMRack.ps1
+#region File New-NBDCIMRack.ps1
 
-function New-NetboxDCIMRack {
+function New-NBDCIMRack {
 <#
     .SYNOPSIS
         Create a new rack in Netbox
@@ -7443,12 +7443,12 @@ function New-NetboxDCIMRack {
         Return the raw API response
 
     .EXAMPLE
-        New-NetboxDCIMRack -Name "Rack-01" -Site 1
+        New-NBDCIMRack -Name "Rack-01" -Site 1
 
         Creates a new rack named "Rack-01" at site 1
 
     .EXAMPLE
-        New-NetboxDCIMRack -Name "Rack-02" -Site 1 -U_Height 48 -Status active
+        New-NBDCIMRack -Name "Rack-02" -Site 1 -U_Height 48 -Status active
 
         Creates a 48U active rack at site 1
 #>
@@ -7528,9 +7528,9 @@ function New-NetboxDCIMRack {
 
 #endregion
 
-#region File New-NetboxDCIMRackReservation.ps1
+#region File New-NBDCIMRackReservation.ps1
 
-function New-NetboxDCIMRackReservation {
+function New-NBDCIMRackReservation {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [Parameter(Mandatory = $true)][uint64]$Rack,
@@ -7554,9 +7554,9 @@ function New-NetboxDCIMRackReservation {
 
 #endregion
 
-#region File New-NetboxDCIMRackRole.ps1
+#region File New-NBDCIMRackRole.ps1
 
-function New-NetboxDCIMRackRole {
+function New-NBDCIMRackRole {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [Parameter(Mandatory = $true)][string]$Name,
@@ -7578,9 +7578,9 @@ function New-NetboxDCIMRackRole {
 
 #endregion
 
-#region File New-NetboxDCIMRackType.ps1
+#region File New-NBDCIMRackType.ps1
 
-function New-NetboxDCIMRackType {
+function New-NBDCIMRackType {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [Parameter(Mandatory = $true)][uint64]$Manufacturer,
@@ -7614,9 +7614,9 @@ function New-NetboxDCIMRackType {
 
 #endregion
 
-#region File New-NetboxDCIMRearPortTemplate.ps1
+#region File New-NBDCIMRearPortTemplate.ps1
 
-function New-NetboxDCIMRearPortTemplate {
+function New-NBDCIMRearPortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [uint64]$Device_Type,
@@ -7640,9 +7640,9 @@ function New-NetboxDCIMRearPortTemplate {
 
 #endregion
 
-#region File New-NetboxDCIMRegion.ps1
+#region File New-NBDCIMRegion.ps1
 
-function New-NetboxDCIMRegion {
+function New-NBDCIMRegion {
 <#
     .SYNOPSIS
         Create a new region in Netbox
@@ -7673,12 +7673,12 @@ function New-NetboxDCIMRegion {
         Return the raw API response
 
     .EXAMPLE
-        New-NetboxDCIMRegion -Name "Europe" -Slug "europe"
+        New-NBDCIMRegion -Name "Europe" -Slug "europe"
 
         Creates a new region named "Europe"
 
     .EXAMPLE
-        New-NetboxDCIMRegion -Name "Netherlands" -Slug "netherlands" -Parent 1
+        New-NBDCIMRegion -Name "Netherlands" -Slug "netherlands" -Parent 1
 
         Creates a new region as a child of region 1
 #>
@@ -7719,7 +7719,7 @@ function New-NetboxDCIMRegion {
 
 #endregion
 
-#region File New-NetboxDCIMSite.ps1
+#region File New-NBDCIMSite.ps1
 
 <#
     .NOTES
@@ -7728,7 +7728,7 @@ function New-NetboxDCIMRegion {
      Created on:    2020-10-02 15:52
      Created by:    Claussen
      Organization:  NEOnet
-     Filename:      New-NetboxDCIMSite.ps1
+     Filename:      New-NBDCIMSite.ps1
     ===========================================================================
     .DESCRIPTION
         A description of the file.
@@ -7736,7 +7736,7 @@ function New-NetboxDCIMRegion {
 
 
 
-function New-NetboxDCIMSite {
+function New-NBDCIMSite {
     <#
     .SYNOPSIS
         Create a new Site to Netbox
@@ -7745,7 +7745,7 @@ function New-NetboxDCIMSite {
         Create a new Site to Netbox
 
     .EXAMPLE
-        New-NetboxDCIMSite -name MySite
+        New-NBDCIMSite -name MySite
 
         Add new Site MySite on Netbox
 
@@ -7810,9 +7810,9 @@ function New-NetboxDCIMSite {
 
 #endregion
 
-#region File New-NetboxDCIMSiteGroup.ps1
+#region File New-NBDCIMSiteGroup.ps1
 
-function New-NetboxDCIMSiteGroup {
+function New-NBDCIMSiteGroup {
 <#
     .SYNOPSIS
         Create a new site group in Netbox
@@ -7843,12 +7843,12 @@ function New-NetboxDCIMSiteGroup {
         Return the raw API response
 
     .EXAMPLE
-        New-NetboxDCIMSiteGroup -Name "Production" -Slug "production"
+        New-NBDCIMSiteGroup -Name "Production" -Slug "production"
 
         Creates a new site group named "Production"
 
     .EXAMPLE
-        New-NetboxDCIMSiteGroup -Name "DR Sites" -Slug "dr-sites" -Parent 1
+        New-NBDCIMSiteGroup -Name "DR Sites" -Slug "dr-sites" -Parent 1
 
         Creates a new site group as a child of site group 1
 #>
@@ -7889,9 +7889,9 @@ function New-NetboxDCIMSiteGroup {
 
 #endregion
 
-#region File New-NetboxDCIMVirtualChassis.ps1
+#region File New-NBDCIMVirtualChassis.ps1
 
-function New-NetboxDCIMVirtualChassis {
+function New-NBDCIMVirtualChassis {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [Parameter(Mandatory = $true)][string]$Name,
@@ -7914,9 +7914,9 @@ function New-NetboxDCIMVirtualChassis {
 
 #endregion
 
-#region File New-NetboxDCIMVirtualDeviceContext.ps1
+#region File New-NBDCIMVirtualDeviceContext.ps1
 
-function New-NetboxDCIMVirtualDeviceContext {
+function New-NBDCIMVirtualDeviceContext {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [Parameter(Mandatory = $true)][string]$Name,
@@ -7943,10 +7943,10 @@ function New-NetboxDCIMVirtualDeviceContext {
 
 #endregion
 
-#region File New-NetboxIPAMAddress.ps1
+#region File New-NBIPAMAddress.ps1
 
 
-function New-NetboxIPAMAddress {
+function New-NBIPAMAddress {
     <#
     .SYNOPSIS
         Create a new IP address to Netbox
@@ -7994,7 +7994,7 @@ function New-NetboxIPAMAddress {
         Return raw results from API service
 
     .EXAMPLE
-        New-NetboxIPAMAddress -Address 192.0.2.1/32
+        New-NBIPAMAddress -Address 192.0.2.1/32
 
         Add new IP Address 192.0.2.1/32 with status active
 
@@ -8058,11 +8058,11 @@ function New-NetboxIPAMAddress {
 
 #endregion
 
-#region File New-NetboxIPAMAddressRange.ps1
+#region File New-NBIPAMAddressRange.ps1
 
 
 
-function New-NetboxIPAMAddressRange {
+function New-NBIPAMAddressRange {
 <#
     .SYNOPSIS
         Create a new IP address range to Netbox
@@ -8108,7 +8108,7 @@ function New-NetboxIPAMAddressRange {
         Return raw results from API service
 
     .EXAMPLE
-        New-NetboxIPAMAddressRange -Start_Address 192.0.2.20/24 -End_Address 192.0.2.20/24
+        New-NBIPAMAddressRange -Start_Address 192.0.2.20/24 -End_Address 192.0.2.20/24
 
         Add new IP Address range from 192.0.2.20/24 to 192.0.2.20/24 with status active
 
@@ -8169,9 +8169,9 @@ function New-NetboxIPAMAddressRange {
 
 #endregion
 
-#region File New-NetboxIPAMAggregate.ps1
+#region File New-NBIPAMAggregate.ps1
 
-function New-NetboxIPAMAggregate {
+function New-NBIPAMAggregate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [Parameter(Mandatory = $true)][string]$Prefix,
@@ -8196,9 +8196,9 @@ function New-NetboxIPAMAggregate {
 
 #endregion
 
-#region File New-NetboxIPAMASN.ps1
+#region File New-NBIPAMASN.ps1
 
-function New-NetboxIPAMASN {
+function New-NBIPAMASN {
 <#
     .SYNOPSIS
         Create a new ASN in Netbox
@@ -8228,12 +8228,12 @@ function New-NetboxIPAMASN {
         Return the raw API response
 
     .EXAMPLE
-        New-NetboxIPAMASN -ASN 65001
+        New-NBIPAMASN -ASN 65001
 
         Creates ASN 65001
 
     .EXAMPLE
-        New-NetboxIPAMASN -ASN 65001 -RIR 1 -Description "Primary ASN"
+        New-NBIPAMASN -ASN 65001 -RIR 1 -Description "Primary ASN"
 
         Creates ASN 65001 with RIR and description
 #>
@@ -8274,9 +8274,9 @@ function New-NetboxIPAMASN {
 
 #endregion
 
-#region File New-NetboxIPAMASNRange.ps1
+#region File New-NBIPAMASNRange.ps1
 
-function New-NetboxIPAMASNRange {
+function New-NBIPAMASNRange {
 <#
     .SYNOPSIS
         Create a new ASN range in Netbox
@@ -8312,7 +8312,7 @@ function New-NetboxIPAMASNRange {
         Return the raw API response
 
     .EXAMPLE
-        New-NetboxIPAMASNRange -Name "Private" -Slug "private" -RIR 1 -Start 64512 -End 65534
+        New-NBIPAMASNRange -Name "Private" -Slug "private" -RIR 1 -Start 64512 -End 65534
 
         Creates a private ASN range
 #>
@@ -8362,9 +8362,9 @@ function New-NetboxIPAMASNRange {
 
 #endregion
 
-#region File New-NetboxIPAMFHRPGroup.ps1
+#region File New-NBIPAMFHRPGroup.ps1
 
-function New-NetboxIPAMFHRPGroup {
+function New-NBIPAMFHRPGroup {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [Parameter(Mandatory = $true)][ValidateSet('vrrp2','vrrp3','carp','clusterxl','hsrp','glbp','other')][string]$Protocol,
@@ -8389,9 +8389,9 @@ function New-NetboxIPAMFHRPGroup {
 
 #endregion
 
-#region File New-NetboxIPAMFHRPGroupAssignment.ps1
+#region File New-NBIPAMFHRPGroupAssignment.ps1
 
-function New-NetboxIPAMFHRPGroupAssignment {
+function New-NBIPAMFHRPGroupAssignment {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [Parameter(Mandatory = $true)][uint64]$Group,
@@ -8411,10 +8411,10 @@ function New-NetboxIPAMFHRPGroupAssignment {
 
 #endregion
 
-#region File New-NetboxIPAMPrefix.ps1
+#region File New-NBIPAMPrefix.ps1
 
 
-function New-NetboxIPAMPrefix {
+function New-NBIPAMPrefix {
     [CmdletBinding(ConfirmImpact = 'low',
         SupportsShouldProcess = $true)]
     [CmdletBinding()]
@@ -8466,9 +8466,9 @@ function New-NetboxIPAMPrefix {
 
 #endregion
 
-#region File New-NetboxIPAMRIR.ps1
+#region File New-NBIPAMRIR.ps1
 
-function New-NetboxIPAMRIR {
+function New-NBIPAMRIR {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [Parameter(Mandatory = $true)][string]$Name,
@@ -8490,9 +8490,9 @@ function New-NetboxIPAMRIR {
 
 #endregion
 
-#region File New-NetboxIPAMRole.ps1
+#region File New-NBIPAMRole.ps1
 
-function New-NetboxIPAMRole {
+function New-NBIPAMRole {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [Parameter(Mandatory = $true)][string]$Name,
@@ -8515,9 +8515,9 @@ function New-NetboxIPAMRole {
 
 #endregion
 
-#region File New-NetboxIPAMRouteTarget.ps1
+#region File New-NBIPAMRouteTarget.ps1
 
-function New-NetboxIPAMRouteTarget {
+function New-NBIPAMRouteTarget {
 <#
     .SYNOPSIS
         Create a new route target in Netbox
@@ -8545,12 +8545,12 @@ function New-NetboxIPAMRouteTarget {
         Return the raw API response
 
     .EXAMPLE
-        New-NetboxIPAMRouteTarget -Name "65001:100"
+        New-NBIPAMRouteTarget -Name "65001:100"
 
         Creates a new route target with value "65001:100"
 
     .EXAMPLE
-        New-NetboxIPAMRouteTarget -Name "65001:200" -Description "Customer A import"
+        New-NBIPAMRouteTarget -Name "65001:200" -Description "Customer A import"
 
         Creates a new route target with description
 #>
@@ -8588,9 +8588,9 @@ function New-NetboxIPAMRouteTarget {
 
 #endregion
 
-#region File New-NetboxIPAMService.ps1
+#region File New-NBIPAMService.ps1
 
-function New-NetboxIPAMService {
+function New-NBIPAMService {
 <#
     .SYNOPSIS
         Create a new service in Netbox
@@ -8630,12 +8630,12 @@ function New-NetboxIPAMService {
         Return the raw API response
 
     .EXAMPLE
-        New-NetboxIPAMService -Name "HTTPS" -Ports @(443) -Protocol tcp -Device 1
+        New-NBIPAMService -Name "HTTPS" -Ports @(443) -Protocol tcp -Device 1
 
         Creates an HTTPS service on device 1
 
     .EXAMPLE
-        New-NetboxIPAMService -Name "DNS" -Ports @(53) -Protocol udp -Virtual_Machine 1
+        New-NBIPAMService -Name "DNS" -Ports @(53) -Protocol udp -Virtual_Machine 1
 
         Creates a DNS service on VM 1
 #>
@@ -8701,9 +8701,9 @@ function New-NetboxIPAMService {
 
 #endregion
 
-#region File New-NetboxIPAMServiceTemplate.ps1
+#region File New-NBIPAMServiceTemplate.ps1
 
-function New-NetboxIPAMServiceTemplate {
+function New-NBIPAMServiceTemplate {
 <#
     .SYNOPSIS
         Create a new service template in Netbox
@@ -8734,12 +8734,12 @@ function New-NetboxIPAMServiceTemplate {
         Return the raw API response
 
     .EXAMPLE
-        New-NetboxIPAMServiceTemplate -Name "HTTPS" -Ports @(443) -Protocol tcp
+        New-NBIPAMServiceTemplate -Name "HTTPS" -Ports @(443) -Protocol tcp
 
         Creates an HTTPS service template
 
     .EXAMPLE
-        New-NetboxIPAMServiceTemplate -Name "Web Server" -Ports @(80, 443) -Protocol tcp
+        New-NBIPAMServiceTemplate -Name "Web Server" -Ports @(80, 443) -Protocol tcp
 
         Creates a web server template with HTTP and HTTPS ports
 #>
@@ -8781,9 +8781,9 @@ function New-NetboxIPAMServiceTemplate {
 
 #endregion
 
-#region File New-NetboxIPAMVLAN.ps1
+#region File New-NBIPAMVLAN.ps1
 
-function New-NetboxIPAMVLAN {
+function New-NBIPAMVLAN {
     <#
     .SYNOPSIS
         Create a new VLAN
@@ -8819,7 +8819,7 @@ function New-NetboxIPAMVLAN {
         IP address in CIDR notation: 192.168.1.1/24
 
     .EXAMPLE
-        PS C:\> Create-NetboxIPAMAddress
+        PS C:\> Create-NBIPAMAddress
 
     .NOTES
         Additional information about the function.
@@ -8868,9 +8868,9 @@ function New-NetboxIPAMVLAN {
 
 #endregion
 
-#region File New-NetboxIPAMVLANGroup.ps1
+#region File New-NBIPAMVLANGroup.ps1
 
-function New-NetboxIPAMVLANGroup {
+function New-NBIPAMVLANGroup {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [Parameter(Mandatory = $true)][string]$Name,
@@ -8895,9 +8895,9 @@ function New-NetboxIPAMVLANGroup {
 
 #endregion
 
-#region File New-NetboxIPAMVLANTranslationPolicy.ps1
+#region File New-NBIPAMVLANTranslationPolicy.ps1
 
-function New-NetboxIPAMVLANTranslationPolicy {
+function New-NBIPAMVLANTranslationPolicy {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [Parameter(Mandatory = $true)][string]$Name,
@@ -8918,9 +8918,9 @@ function New-NetboxIPAMVLANTranslationPolicy {
 
 #endregion
 
-#region File New-NetboxIPAMVLANTranslationRule.ps1
+#region File New-NBIPAMVLANTranslationRule.ps1
 
-function New-NetboxIPAMVLANTranslationRule {
+function New-NBIPAMVLANTranslationRule {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param(
         [Parameter(Mandatory = $true)][uint64]$Policy,
@@ -8942,9 +8942,9 @@ function New-NetboxIPAMVLANTranslationRule {
 
 #endregion
 
-#region File New-NetboxIPAMVRF.ps1
+#region File New-NBIPAMVRF.ps1
 
-function New-NetboxIPAMVRF {
+function New-NBIPAMVRF {
 <#
     .SYNOPSIS
         Create a new VRF in Netbox
@@ -8983,12 +8983,12 @@ function New-NetboxIPAMVRF {
         Return the raw API response
 
     .EXAMPLE
-        New-NetboxIPAMVRF -Name "Production"
+        New-NBIPAMVRF -Name "Production"
 
         Creates a new VRF named "Production"
 
     .EXAMPLE
-        New-NetboxIPAMVRF -Name "Customer-A" -RD "65001:100" -Enforce_Unique $true
+        New-NBIPAMVRF -Name "Customer-A" -RD "65001:100" -Enforce_Unique $true
 
         Creates a new VRF with route distinguisher and unique enforcement
 #>
@@ -9034,10 +9034,10 @@ function New-NetboxIPAMVRF {
 
 #endregion
 
-#region File New-NetboxTenant.ps1
+#region File New-NBTenant.ps1
 
 
-function New-NetboxTenant {
+function New-NBTenant {
 <#
     .SYNOPSIS
         Create a new tenant in Netbox
@@ -9061,7 +9061,7 @@ function New-NetboxTenant {
         Return the unparsed data from the HTTP request
 
     .EXAMPLE
-        PS C:\> New-NetboxTenant -Name 'Contoso Inc' -Slug 'contoso-inc'
+        PS C:\> New-NBTenant -Name 'Contoso Inc' -Slug 'contoso-inc'
 
     .NOTES
         Additional information about the function.
@@ -9110,10 +9110,10 @@ function New-NetboxTenant {
 
 #endregion
 
-#region File New-NetboxVirtualMachine.ps1
+#region File New-NBVirtualMachine.ps1
 
 
-function New-NetboxVirtualMachine {
+function New-NBVirtualMachine {
     [CmdletBinding(ConfirmImpact = 'low',
         SupportsShouldProcess = $true)]
     [OutputType([pscustomobject])]
@@ -9176,9 +9176,9 @@ function New-NetboxVirtualMachine {
 
 #endregion
 
-#region File New-NetboxVPNIKEPolicy.ps1
+#region File New-NBVPNIKEPolicy.ps1
 
-function New-NetboxVPNIKEPolicy {
+function New-NBVPNIKEPolicy {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param([Parameter(Mandatory = $true)][string]$Name,[uint16]$Version,[string]$Mode,[uint64[]]$Proposals,
         [string]$Preshared_Key,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
@@ -9190,9 +9190,9 @@ function New-NetboxVPNIKEPolicy {
 
 #endregion
 
-#region File New-NetboxVPNIKEProposal.ps1
+#region File New-NBVPNIKEProposal.ps1
 
-function New-NetboxVPNIKEProposal {
+function New-NBVPNIKEProposal {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param([Parameter(Mandatory = $true)][string]$Name,[string]$Authentication_Method,[string]$Encryption_Algorithm,
         [string]$Authentication_Algorithm,[uint16]$Group,[uint32]$SA_Lifetime,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
@@ -9204,9 +9204,9 @@ function New-NetboxVPNIKEProposal {
 
 #endregion
 
-#region File New-NetboxVPNIPSecPolicy.ps1
+#region File New-NBVPNIPSecPolicy.ps1
 
-function New-NetboxVPNIPSecPolicy {
+function New-NBVPNIPSecPolicy {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param([Parameter(Mandatory = $true)][string]$Name,[uint64[]]$Proposals,[bool]$Pfs_Group,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
     process {
@@ -9217,9 +9217,9 @@ function New-NetboxVPNIPSecPolicy {
 
 #endregion
 
-#region File New-NetboxVPNIPSecProfile.ps1
+#region File New-NBVPNIPSecProfile.ps1
 
-function New-NetboxVPNIPSecProfile {
+function New-NBVPNIPSecProfile {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param([Parameter(Mandatory = $true)][string]$Name,[string]$Mode,[uint64]$IKE_Policy,[uint64]$IPSec_Policy,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
     process {
@@ -9230,9 +9230,9 @@ function New-NetboxVPNIPSecProfile {
 
 #endregion
 
-#region File New-NetboxVPNIPSecProposal.ps1
+#region File New-NBVPNIPSecProposal.ps1
 
-function New-NetboxVPNIPSecProposal {
+function New-NBVPNIPSecProposal {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param([Parameter(Mandatory = $true)][string]$Name,[string]$Encryption_Algorithm,[string]$Authentication_Algorithm,[uint32]$SA_Lifetime_Seconds,[uint32]$SA_Lifetime_Data,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
     process {
@@ -9243,9 +9243,9 @@ function New-NetboxVPNIPSecProposal {
 
 #endregion
 
-#region File New-NetboxVPNL2VPN.ps1
+#region File New-NBVPNL2VPN.ps1
 
-function New-NetboxVPNL2VPN {
+function New-NBVPNL2VPN {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param([Parameter(Mandatory = $true)][string]$Name,[Parameter(Mandatory = $true)][string]$Slug,
         [uint64]$Identifier,[string]$Type,[string]$Status,[uint64]$Tenant,[string]$Description,[string]$Comments,
@@ -9258,9 +9258,9 @@ function New-NetboxVPNL2VPN {
 
 #endregion
 
-#region File New-NetboxVPNL2VPNTermination.ps1
+#region File New-NBVPNL2VPNTermination.ps1
 
-function New-NetboxVPNL2VPNTermination {
+function New-NBVPNL2VPNTermination {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param([Parameter(Mandatory = $true)][uint64]$L2VPN,[Parameter(Mandatory = $true)][string]$Assigned_Object_Type,[Parameter(Mandatory = $true)][uint64]$Assigned_Object_Id,[hashtable]$Custom_Fields,[switch]$Raw)
     process {
@@ -9271,9 +9271,9 @@ function New-NetboxVPNL2VPNTermination {
 
 #endregion
 
-#region File New-NetboxVPNTunnel.ps1
+#region File New-NBVPNTunnel.ps1
 
-function New-NetboxVPNTunnel {
+function New-NBVPNTunnel {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param
@@ -9302,9 +9302,9 @@ function New-NetboxVPNTunnel {
 
 #endregion
 
-#region File New-NetboxVPNTunnelGroup.ps1
+#region File New-NBVPNTunnelGroup.ps1
 
-function New-NetboxVPNTunnelGroup {
+function New-NBVPNTunnelGroup {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param([Parameter(Mandatory = $true)][string]$Name,[Parameter(Mandatory = $true)][string]$Slug,[string]$Description,[hashtable]$Custom_Fields,[switch]$Raw)
     process {
@@ -9315,9 +9315,9 @@ function New-NetboxVPNTunnelGroup {
 
 #endregion
 
-#region File New-NetboxVPNTunnelTermination.ps1
+#region File New-NBVPNTunnelTermination.ps1
 
-function New-NetboxVPNTunnelTermination {
+function New-NBVPNTunnelTermination {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param([Parameter(Mandatory = $true)][uint64]$Tunnel,[Parameter(Mandatory = $true)][ValidateSet('peer', 'hub', 'spoke')][string]$Role,
         [string]$Termination_Type,[uint64]$Termination_Id,[uint64]$Outside_IP,[hashtable]$Custom_Fields,[switch]$Raw)
@@ -9329,9 +9329,9 @@ function New-NetboxVPNTunnelTermination {
 
 #endregion
 
-#region File New-NetboxWirelessLAN.ps1
+#region File New-NBWirelessLAN.ps1
 
-function New-NetboxWirelessLAN {
+function New-NBWirelessLAN {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param([Parameter(Mandatory = $true)][string]$SSID,[uint64]$Group,[string]$Status,[uint64]$VLAN,[uint64]$Tenant,
         [string]$Auth_Type,[string]$Auth_Cipher,[string]$Auth_PSK,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
@@ -9343,9 +9343,9 @@ function New-NetboxWirelessLAN {
 
 #endregion
 
-#region File New-NetboxWirelessLANGroup.ps1
+#region File New-NBWirelessLANGroup.ps1
 
-function New-NetboxWirelessLANGroup {
+function New-NBWirelessLANGroup {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param([Parameter(Mandatory = $true)][string]$Name,[Parameter(Mandatory = $true)][string]$Slug,[uint64]$Parent,[string]$Description,[hashtable]$Custom_Fields,[switch]$Raw)
     process {
@@ -9356,9 +9356,9 @@ function New-NetboxWirelessLANGroup {
 
 #endregion
 
-#region File New-NetboxWirelessLink.ps1
+#region File New-NBWirelessLink.ps1
 
-function New-NetboxWirelessLink {
+function New-NBWirelessLink {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     param([Parameter(Mandatory = $true)][uint64]$Interface_A,[Parameter(Mandatory = $true)][uint64]$Interface_B,
         [string]$SSID,[string]$Status,[uint64]$Tenant,[string]$Auth_Type,[string]$Auth_Cipher,[string]$Auth_PSK,
@@ -9371,9 +9371,9 @@ function New-NetboxWirelessLink {
 
 #endregion
 
-#region File Remove-NetboxDCIMCable.ps1
+#region File Remove-NBDCIMCable.ps1
 
-function Remove-NetboxDCIMCable {
+function Remove-NBDCIMCable {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -9388,9 +9388,9 @@ function Remove-NetboxDCIMCable {
 
 #endregion
 
-#region File Remove-NetboxDCIMConsolePort.ps1
+#region File Remove-NBDCIMConsolePort.ps1
 
-function Remove-NetboxDCIMConsolePort {
+function Remove-NBDCIMConsolePort {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -9405,9 +9405,9 @@ function Remove-NetboxDCIMConsolePort {
 
 #endregion
 
-#region File Remove-NetboxDCIMConsolePortTemplate.ps1
+#region File Remove-NBDCIMConsolePortTemplate.ps1
 
-function Remove-NetboxDCIMConsolePortTemplate {
+function Remove-NBDCIMConsolePortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -9422,9 +9422,9 @@ function Remove-NetboxDCIMConsolePortTemplate {
 
 #endregion
 
-#region File Remove-NetboxDCIMConsoleServerPort.ps1
+#region File Remove-NBDCIMConsoleServerPort.ps1
 
-function Remove-NetboxDCIMConsoleServerPort {
+function Remove-NBDCIMConsoleServerPort {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -9439,9 +9439,9 @@ function Remove-NetboxDCIMConsoleServerPort {
 
 #endregion
 
-#region File Remove-NetboxDCIMConsoleServerPortTemplate.ps1
+#region File Remove-NBDCIMConsoleServerPortTemplate.ps1
 
-function Remove-NetboxDCIMConsoleServerPortTemplate {
+function Remove-NBDCIMConsoleServerPortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -9456,10 +9456,10 @@ function Remove-NetboxDCIMConsoleServerPortTemplate {
 
 #endregion
 
-#region File Remove-NetboxDCIMDevice.ps1
+#region File Remove-NBDCIMDevice.ps1
 
 
-function Remove-NetboxDCIMDevice {
+function Remove-NBDCIMDevice {
 <#
     .SYNOPSIS
         Delete a device
@@ -9474,7 +9474,7 @@ function Remove-NetboxDCIMDevice {
         Force deletion without any prompts
 
     .EXAMPLE
-        PS C:\> Remove-NetboxDCIMDevice -Id $value1
+        PS C:\> Remove-NBDCIMDevice -Id $value1
 
     .NOTES
         Additional information about the function.
@@ -9497,7 +9497,7 @@ function Remove-NetboxDCIMDevice {
 
     process {
         foreach ($DeviceID in $Id) {
-            $CurrentDevice = Get-NetboxDCIMDevice -Id $DeviceID -ErrorAction Stop
+            $CurrentDevice = Get-NBDCIMDevice -Id $DeviceID -ErrorAction Stop
 
             if ($Force -or $pscmdlet.ShouldProcess("Name: $($CurrentDevice.Name) | ID: $($CurrentDevice.Id)", "Remove")) {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'devices', $CurrentDevice.Id))
@@ -9516,9 +9516,9 @@ function Remove-NetboxDCIMDevice {
 
 #endregion
 
-#region File Remove-NetboxDCIMDeviceBay.ps1
+#region File Remove-NBDCIMDeviceBay.ps1
 
-function Remove-NetboxDCIMDeviceBay {
+function Remove-NBDCIMDeviceBay {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -9533,9 +9533,9 @@ function Remove-NetboxDCIMDeviceBay {
 
 #endregion
 
-#region File Remove-NetboxDCIMDeviceBayTemplate.ps1
+#region File Remove-NBDCIMDeviceBayTemplate.ps1
 
-function Remove-NetboxDCIMDeviceBayTemplate {
+function Remove-NBDCIMDeviceBayTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -9550,9 +9550,9 @@ function Remove-NetboxDCIMDeviceBayTemplate {
 
 #endregion
 
-#region File Remove-NetboxDCIMDeviceRole.ps1
+#region File Remove-NBDCIMDeviceRole.ps1
 
-function Remove-NetboxDCIMDeviceRole {
+function Remove-NBDCIMDeviceRole {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -9567,9 +9567,9 @@ function Remove-NetboxDCIMDeviceRole {
 
 #endregion
 
-#region File Remove-NetboxDCIMDeviceType.ps1
+#region File Remove-NBDCIMDeviceType.ps1
 
-function Remove-NetboxDCIMDeviceType {
+function Remove-NBDCIMDeviceType {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -9584,9 +9584,9 @@ function Remove-NetboxDCIMDeviceType {
 
 #endregion
 
-#region File Remove-NetboxDCIMFrontPort.ps1
+#region File Remove-NBDCIMFrontPort.ps1
 
-function Remove-NetboxDCIMFrontPort {
+function Remove-NBDCIMFrontPort {
 
     [CmdletBinding(ConfirmImpact = 'High',
         SupportsShouldProcess = $true)]
@@ -9605,7 +9605,7 @@ function Remove-NetboxDCIMFrontPort {
 
     process {
         foreach ($FrontPortID in $Id) {
-            $CurrentPort = Get-NetboxDCIMFrontPort -Id $FrontPortID -ErrorAction Stop
+            $CurrentPort = Get-NBDCIMFrontPort -Id $FrontPortID -ErrorAction Stop
 
             if ($Force -or $pscmdlet.ShouldProcess("Name: $($CurrentPort.Name) | ID: $($CurrentPort.Id)", "Remove")) {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'front-ports', $CurrentPort.Id))
@@ -9624,9 +9624,9 @@ function Remove-NetboxDCIMFrontPort {
 
 #endregion
 
-#region File Remove-NetboxDCIMFrontPortTemplate.ps1
+#region File Remove-NBDCIMFrontPortTemplate.ps1
 
-function Remove-NetboxDCIMFrontPortTemplate {
+function Remove-NBDCIMFrontPortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -9641,9 +9641,9 @@ function Remove-NetboxDCIMFrontPortTemplate {
 
 #endregion
 
-#region File Remove-NetboxDCIMInterface.ps1
+#region File Remove-NBDCIMInterface.ps1
 
-function Remove-NetboxDCIMInterface {
+function Remove-NBDCIMInterface {
     <#
     .SYNOPSIS
         Removes an interface
@@ -9658,7 +9658,7 @@ function Remove-NetboxDCIMInterface {
         A description of the Force parameter.
 
     .EXAMPLE
-        		PS C:\> Remove-NetboxDCIMInterface -Id $value1
+        		PS C:\> Remove-NBDCIMInterface -Id $value1
 
     .NOTES
         Additional information about the function.
@@ -9681,7 +9681,7 @@ function Remove-NetboxDCIMInterface {
 
     process {
         foreach ($InterfaceId in $Id) {
-            $CurrentInterface = Get-NetboxDCIMInterface -Id $InterfaceId -ErrorAction Stop
+            $CurrentInterface = Get-NBDCIMInterface -Id $InterfaceId -ErrorAction Stop
 
             if ($Force -or $pscmdlet.ShouldProcess("Name: $($CurrentInterface.Name) | ID: $($CurrentInterface.Id)", "Remove")) {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interfaces', $CurrentInterface.Id))
@@ -9700,10 +9700,10 @@ function Remove-NetboxDCIMInterface {
 
 #endregion
 
-#region File Remove-NetboxDCIMInterfaceConnection.ps1
+#region File Remove-NBDCIMInterfaceConnection.ps1
 
 
-function Remove-NetboxDCIMInterfaceConnection {
+function Remove-NBDCIMInterfaceConnection {
     [CmdletBinding(ConfirmImpact = 'High',
                    SupportsShouldProcess = $true)]
     [OutputType([void])]
@@ -9722,7 +9722,7 @@ function Remove-NetboxDCIMInterfaceConnection {
 
     process {
         foreach ($ConnectionID in $Id) {
-            $CurrentConnection = Get-NetboxDCIMInterfaceConnection -Id $ConnectionID -ErrorAction Stop
+            $CurrentConnection = Get-NBDCIMInterfaceConnection -Id $ConnectionID -ErrorAction Stop
 
             if ($Force -or $pscmdlet.ShouldProcess("Connection ID $($ConnectionID.Id)", "REMOVE")) {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interface-connections', $CurrentConnection.Id))
@@ -9743,9 +9743,9 @@ function Remove-NetboxDCIMInterfaceConnection {
 
 #endregion
 
-#region File Remove-NetboxDCIMInterfaceTemplate.ps1
+#region File Remove-NBDCIMInterfaceTemplate.ps1
 
-function Remove-NetboxDCIMInterfaceTemplate {
+function Remove-NBDCIMInterfaceTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -9760,9 +9760,9 @@ function Remove-NetboxDCIMInterfaceTemplate {
 
 #endregion
 
-#region File Remove-NetboxDCIMInventoryItem.ps1
+#region File Remove-NBDCIMInventoryItem.ps1
 
-function Remove-NetboxDCIMInventoryItem {
+function Remove-NBDCIMInventoryItem {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -9777,9 +9777,9 @@ function Remove-NetboxDCIMInventoryItem {
 
 #endregion
 
-#region File Remove-NetboxDCIMInventoryItemRole.ps1
+#region File Remove-NBDCIMInventoryItemRole.ps1
 
-function Remove-NetboxDCIMInventoryItemRole {
+function Remove-NBDCIMInventoryItemRole {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -9794,9 +9794,9 @@ function Remove-NetboxDCIMInventoryItemRole {
 
 #endregion
 
-#region File Remove-NetboxDCIMInventoryItemTemplate.ps1
+#region File Remove-NBDCIMInventoryItemTemplate.ps1
 
-function Remove-NetboxDCIMInventoryItemTemplate {
+function Remove-NBDCIMInventoryItemTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -9811,9 +9811,9 @@ function Remove-NetboxDCIMInventoryItemTemplate {
 
 #endregion
 
-#region File Remove-NetboxDCIMLocation.ps1
+#region File Remove-NBDCIMLocation.ps1
 
-function Remove-NetboxDCIMLocation {
+function Remove-NBDCIMLocation {
 <#
     .SYNOPSIS
         Remove a location from Netbox
@@ -9828,12 +9828,12 @@ function Remove-NetboxDCIMLocation {
         Return the raw API response
 
     .EXAMPLE
-        Remove-NetboxDCIMLocation -Id 1
+        Remove-NBDCIMLocation -Id 1
 
         Deletes location with ID 1
 
     .EXAMPLE
-        Get-NetboxDCIMLocation -Name "Old Room" | Remove-NetboxDCIMLocation
+        Get-NBDCIMLocation -Name "Old Room" | Remove-NBDCIMLocation
 
         Deletes locations matching the name "Old Room"
 #>
@@ -9861,9 +9861,9 @@ function Remove-NetboxDCIMLocation {
 
 #endregion
 
-#region File Remove-NetboxDCIMMACAddress.ps1
+#region File Remove-NBDCIMMACAddress.ps1
 
-function Remove-NetboxDCIMMACAddress {
+function Remove-NBDCIMMACAddress {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -9878,9 +9878,9 @@ function Remove-NetboxDCIMMACAddress {
 
 #endregion
 
-#region File Remove-NetboxDCIMManufacturer.ps1
+#region File Remove-NBDCIMManufacturer.ps1
 
-function Remove-NetboxDCIMManufacturer {
+function Remove-NBDCIMManufacturer {
 <#
     .SYNOPSIS
         Delete a manufacturer from Netbox
@@ -9898,17 +9898,17 @@ function Remove-NetboxDCIMManufacturer {
         Return the raw API response
 
     .EXAMPLE
-        Remove-NetboxDCIMManufacturer -Id 1
+        Remove-NBDCIMManufacturer -Id 1
 
         Deletes manufacturer with ID 1 (with confirmation)
 
     .EXAMPLE
-        Remove-NetboxDCIMManufacturer -Id 1 -Confirm:$false
+        Remove-NBDCIMManufacturer -Id 1 -Confirm:$false
 
         Deletes manufacturer with ID 1 without confirmation
 
     .EXAMPLE
-        Get-NetboxDCIMManufacturer -Name "OldVendor" | Remove-NetboxDCIMManufacturer
+        Get-NBDCIMManufacturer -Name "OldVendor" | Remove-NBDCIMManufacturer
 
         Deletes manufacturer named "OldVendor"
 #>
@@ -9928,7 +9928,7 @@ function Remove-NetboxDCIMManufacturer {
 
     process {
         foreach ($ManufacturerId in $Id) {
-            $CurrentManufacturer = Get-NetboxDCIMManufacturer -Id $ManufacturerId -ErrorAction Stop
+            $CurrentManufacturer = Get-NBDCIMManufacturer -Id $ManufacturerId -ErrorAction Stop
 
             if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentManufacturer.Name)", "Delete manufacturer")) {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'manufacturers', $CurrentManufacturer.Id))
@@ -9943,9 +9943,9 @@ function Remove-NetboxDCIMManufacturer {
 
 #endregion
 
-#region File Remove-NetboxDCIMModule.ps1
+#region File Remove-NBDCIMModule.ps1
 
-function Remove-NetboxDCIMModule {
+function Remove-NBDCIMModule {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -9960,9 +9960,9 @@ function Remove-NetboxDCIMModule {
 
 #endregion
 
-#region File Remove-NetboxDCIMModuleBay.ps1
+#region File Remove-NBDCIMModuleBay.ps1
 
-function Remove-NetboxDCIMModuleBay {
+function Remove-NBDCIMModuleBay {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -9977,9 +9977,9 @@ function Remove-NetboxDCIMModuleBay {
 
 #endregion
 
-#region File Remove-NetboxDCIMModuleBayTemplate.ps1
+#region File Remove-NBDCIMModuleBayTemplate.ps1
 
-function Remove-NetboxDCIMModuleBayTemplate {
+function Remove-NBDCIMModuleBayTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -9994,9 +9994,9 @@ function Remove-NetboxDCIMModuleBayTemplate {
 
 #endregion
 
-#region File Remove-NetboxDCIMModuleType.ps1
+#region File Remove-NBDCIMModuleType.ps1
 
-function Remove-NetboxDCIMModuleType {
+function Remove-NBDCIMModuleType {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -10011,9 +10011,9 @@ function Remove-NetboxDCIMModuleType {
 
 #endregion
 
-#region File Remove-NetboxDCIMModuleTypeProfile.ps1
+#region File Remove-NBDCIMModuleTypeProfile.ps1
 
-function Remove-NetboxDCIMModuleTypeProfile {
+function Remove-NBDCIMModuleTypeProfile {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -10028,9 +10028,9 @@ function Remove-NetboxDCIMModuleTypeProfile {
 
 #endregion
 
-#region File Remove-NetboxDCIMPlatform.ps1
+#region File Remove-NBDCIMPlatform.ps1
 
-function Remove-NetboxDCIMPlatform {
+function Remove-NBDCIMPlatform {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -10045,9 +10045,9 @@ function Remove-NetboxDCIMPlatform {
 
 #endregion
 
-#region File Remove-NetboxDCIMPowerFeed.ps1
+#region File Remove-NBDCIMPowerFeed.ps1
 
-function Remove-NetboxDCIMPowerFeed {
+function Remove-NBDCIMPowerFeed {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -10062,9 +10062,9 @@ function Remove-NetboxDCIMPowerFeed {
 
 #endregion
 
-#region File Remove-NetboxDCIMPowerOutlet.ps1
+#region File Remove-NBDCIMPowerOutlet.ps1
 
-function Remove-NetboxDCIMPowerOutlet {
+function Remove-NBDCIMPowerOutlet {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -10079,9 +10079,9 @@ function Remove-NetboxDCIMPowerOutlet {
 
 #endregion
 
-#region File Remove-NetboxDCIMPowerOutletTemplate.ps1
+#region File Remove-NBDCIMPowerOutletTemplate.ps1
 
-function Remove-NetboxDCIMPowerOutletTemplate {
+function Remove-NBDCIMPowerOutletTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -10096,9 +10096,9 @@ function Remove-NetboxDCIMPowerOutletTemplate {
 
 #endregion
 
-#region File Remove-NetboxDCIMPowerPanel.ps1
+#region File Remove-NBDCIMPowerPanel.ps1
 
-function Remove-NetboxDCIMPowerPanel {
+function Remove-NBDCIMPowerPanel {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -10113,9 +10113,9 @@ function Remove-NetboxDCIMPowerPanel {
 
 #endregion
 
-#region File Remove-NetboxDCIMPowerPort.ps1
+#region File Remove-NBDCIMPowerPort.ps1
 
-function Remove-NetboxDCIMPowerPort {
+function Remove-NBDCIMPowerPort {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -10130,9 +10130,9 @@ function Remove-NetboxDCIMPowerPort {
 
 #endregion
 
-#region File Remove-NetboxDCIMPowerPortTemplate.ps1
+#region File Remove-NBDCIMPowerPortTemplate.ps1
 
-function Remove-NetboxDCIMPowerPortTemplate {
+function Remove-NBDCIMPowerPortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -10147,9 +10147,9 @@ function Remove-NetboxDCIMPowerPortTemplate {
 
 #endregion
 
-#region File Remove-NetboxDCIMRack.ps1
+#region File Remove-NBDCIMRack.ps1
 
-function Remove-NetboxDCIMRack {
+function Remove-NBDCIMRack {
 <#
     .SYNOPSIS
         Delete a rack from Netbox
@@ -10167,17 +10167,17 @@ function Remove-NetboxDCIMRack {
         Return the raw API response
 
     .EXAMPLE
-        Remove-NetboxDCIMRack -Id 1
+        Remove-NBDCIMRack -Id 1
 
         Deletes rack with ID 1 (with confirmation)
 
     .EXAMPLE
-        Remove-NetboxDCIMRack -Id 1 -Confirm:$false
+        Remove-NBDCIMRack -Id 1 -Confirm:$false
 
         Deletes rack with ID 1 without confirmation
 
     .EXAMPLE
-        Get-NetboxDCIMRack -Name "Rack-01" | Remove-NetboxDCIMRack
+        Get-NBDCIMRack -Name "Rack-01" | Remove-NBDCIMRack
 
         Deletes rack named "Rack-01"
 #>
@@ -10197,7 +10197,7 @@ function Remove-NetboxDCIMRack {
 
     process {
         foreach ($RackId in $Id) {
-            $CurrentRack = Get-NetboxDCIMRack -Id $RackId -ErrorAction Stop
+            $CurrentRack = Get-NBDCIMRack -Id $RackId -ErrorAction Stop
 
             if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentRack.Name)", "Delete rack")) {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'racks', $CurrentRack.Id))
@@ -10212,9 +10212,9 @@ function Remove-NetboxDCIMRack {
 
 #endregion
 
-#region File Remove-NetboxDCIMRackReservation.ps1
+#region File Remove-NBDCIMRackReservation.ps1
 
-function Remove-NetboxDCIMRackReservation {
+function Remove-NBDCIMRackReservation {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -10229,9 +10229,9 @@ function Remove-NetboxDCIMRackReservation {
 
 #endregion
 
-#region File Remove-NetboxDCIMRackRole.ps1
+#region File Remove-NBDCIMRackRole.ps1
 
-function Remove-NetboxDCIMRackRole {
+function Remove-NBDCIMRackRole {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -10246,9 +10246,9 @@ function Remove-NetboxDCIMRackRole {
 
 #endregion
 
-#region File Remove-NetboxDCIMRackType.ps1
+#region File Remove-NBDCIMRackType.ps1
 
-function Remove-NetboxDCIMRackType {
+function Remove-NBDCIMRackType {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -10263,9 +10263,9 @@ function Remove-NetboxDCIMRackType {
 
 #endregion
 
-#region File Remove-NetboxDCIMRearPort.ps1
+#region File Remove-NBDCIMRearPort.ps1
 
-function Remove-NetboxDCIMRearPort {
+function Remove-NBDCIMRearPort {
 
     [CmdletBinding(ConfirmImpact = 'High',
         SupportsShouldProcess = $true)]
@@ -10284,7 +10284,7 @@ function Remove-NetboxDCIMRearPort {
 
     process {
         foreach ($RearPortID in $Id) {
-            $CurrentPort = Get-NetboxDCIMRearPort -Id $RearPortID -ErrorAction Stop
+            $CurrentPort = Get-NBDCIMRearPort -Id $RearPortID -ErrorAction Stop
 
             if ($Force -or $pscmdlet.ShouldProcess("Name: $($CurrentPort.Name) | ID: $($CurrentPort.Id)", "Remove")) {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'rear-ports', $CurrentPort.Id))
@@ -10303,9 +10303,9 @@ function Remove-NetboxDCIMRearPort {
 
 #endregion
 
-#region File Remove-NetboxDCIMRearPortTemplate.ps1
+#region File Remove-NBDCIMRearPortTemplate.ps1
 
-function Remove-NetboxDCIMRearPortTemplate {
+function Remove-NBDCIMRearPortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -10320,9 +10320,9 @@ function Remove-NetboxDCIMRearPortTemplate {
 
 #endregion
 
-#region File Remove-NetboxDCIMRegion.ps1
+#region File Remove-NBDCIMRegion.ps1
 
-function Remove-NetboxDCIMRegion {
+function Remove-NBDCIMRegion {
 <#
     .SYNOPSIS
         Remove a region from Netbox
@@ -10337,12 +10337,12 @@ function Remove-NetboxDCIMRegion {
         Return the raw API response
 
     .EXAMPLE
-        Remove-NetboxDCIMRegion -Id 1
+        Remove-NBDCIMRegion -Id 1
 
         Deletes region with ID 1
 
     .EXAMPLE
-        Get-NetboxDCIMRegion -Name "Old Region" | Remove-NetboxDCIMRegion
+        Get-NBDCIMRegion -Name "Old Region" | Remove-NBDCIMRegion
 
         Deletes regions matching the name "Old Region"
 #>
@@ -10370,7 +10370,7 @@ function Remove-NetboxDCIMRegion {
 
 #endregion
 
-#region File Remove-NetboxDCIMSite.ps1
+#region File Remove-NBDCIMSite.ps1
 
 <#
     .NOTES
@@ -10379,14 +10379,14 @@ function Remove-NetboxDCIMRegion {
      Created on:    2020-10-02 15:52
      Created by:    Claussen
      Organization:  NEOnet
-     Filename:      New-NetboxDCIMSite.ps1
+     Filename:      New-NBDCIMSite.ps1
     ===========================================================================
     .DESCRIPTION
         A description of the file.
 #>
 
 
-function Remove-NetboxDCIMSite {
+function Remove-NBDCIMSite {
     <#
         .SYNOPSIS
             Remove a Site
@@ -10395,12 +10395,12 @@ function Remove-NetboxDCIMSite {
             Remove a DCIM Site from Netbox
 
         .EXAMPLE
-            Remove-NetboxDCIMSite -Id 1
+            Remove-NBDCIMSite -Id 1
 
             Remove DCM Site with id 1
 
         .EXAMPLE
-            Get-NetboxDCIMSite -name My Site | Remove-NetboxDCIMSite -confirm:$false
+            Get-NBDCIMSite -name My Site | Remove-NBDCIMSite -confirm:$false
 
             Remove DCM Site with name My Site without confirmation
 
@@ -10421,7 +10421,7 @@ function Remove-NetboxDCIMSite {
     }
 
     process {
-        $CurrentSite = Get-NetboxDCIMSite -Id $Id -ErrorAction Stop
+        $CurrentSite = Get-NBDCIMSite -Id $Id -ErrorAction Stop
 
         if ($pscmdlet.ShouldProcess("$($CurrentSite.Name)/$($CurrentSite.Id)", "Remove Site")) {
             $Segments = [System.Collections.ArrayList]::new(@('dcim', 'sites', $CurrentSite.Id))
@@ -10439,9 +10439,9 @@ function Remove-NetboxDCIMSite {
 
 #endregion
 
-#region File Remove-NetboxDCIMSiteGroup.ps1
+#region File Remove-NBDCIMSiteGroup.ps1
 
-function Remove-NetboxDCIMSiteGroup {
+function Remove-NBDCIMSiteGroup {
 <#
     .SYNOPSIS
         Remove a site group from Netbox
@@ -10456,12 +10456,12 @@ function Remove-NetboxDCIMSiteGroup {
         Return the raw API response
 
     .EXAMPLE
-        Remove-NetboxDCIMSiteGroup -Id 1
+        Remove-NBDCIMSiteGroup -Id 1
 
         Deletes site group with ID 1
 
     .EXAMPLE
-        Get-NetboxDCIMSiteGroup -Name "Old Group" | Remove-NetboxDCIMSiteGroup
+        Get-NBDCIMSiteGroup -Name "Old Group" | Remove-NBDCIMSiteGroup
 
         Deletes site groups matching the name "Old Group"
 #>
@@ -10489,9 +10489,9 @@ function Remove-NetboxDCIMSiteGroup {
 
 #endregion
 
-#region File Remove-NetboxDCIMVirtualChassis.ps1
+#region File Remove-NBDCIMVirtualChassis.ps1
 
-function Remove-NetboxDCIMVirtualChassis {
+function Remove-NBDCIMVirtualChassis {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -10506,9 +10506,9 @@ function Remove-NetboxDCIMVirtualChassis {
 
 #endregion
 
-#region File Remove-NetboxDCIMVirtualDeviceContext.ps1
+#region File Remove-NBDCIMVirtualDeviceContext.ps1
 
-function Remove-NetboxDCIMVirtualDeviceContext {
+function Remove-NBDCIMVirtualDeviceContext {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -10523,10 +10523,10 @@ function Remove-NetboxDCIMVirtualDeviceContext {
 
 #endregion
 
-#region File Remove-NetboxIPAMAddress.ps1
+#region File Remove-NBIPAMAddress.ps1
 
 
-function Remove-NetboxIPAMAddress {
+function Remove-NBIPAMAddress {
     <#
     .SYNOPSIS
         Remove an IP address from Netbox
@@ -10541,7 +10541,7 @@ function Remove-NetboxIPAMAddress {
         Do not confirm.
 
     .EXAMPLE
-        PS C:\> Remove-NetboxIPAMAddress -Id $value1
+        PS C:\> Remove-NBIPAMAddress -Id $value1
 
     .NOTES
         Additional information about the function.
@@ -10560,7 +10560,7 @@ function Remove-NetboxIPAMAddress {
 
     process {
         foreach ($IPId in $Id) {
-            $CurrentIP = Get-NetboxIPAMAddress -Id $IPId -ErrorAction Stop
+            $CurrentIP = Get-NBIPAMAddress -Id $IPId -ErrorAction Stop
 
             $Segments = [System.Collections.ArrayList]::new(@('ipam', 'ip-addresses', $IPId))
 
@@ -10575,10 +10575,10 @@ function Remove-NetboxIPAMAddress {
 
 #endregion
 
-#region File Remove-NetboxIPAMAddressRange.ps1
+#region File Remove-NBIPAMAddressRange.ps1
 
 
-function Remove-NetboxIPAMAddressRange {
+function Remove-NBIPAMAddressRange {
     <#
     .SYNOPSIS
         Remove an IP address range from Netbox
@@ -10593,7 +10593,7 @@ function Remove-NetboxIPAMAddressRange {
         Do not confirm.
 
     .EXAMPLE
-        PS C:\> Remove-NetboxIPAMAddressRange -Id 1234
+        PS C:\> Remove-NBIPAMAddressRange -Id 1234
 
     .NOTES
         Additional information about the function.
@@ -10612,7 +10612,7 @@ function Remove-NetboxIPAMAddressRange {
 
     process {
         foreach ($Range_Id in $Id) {
-            $CurrentRange = Get-NetboxIPAMAddressRange -Id $Range_Id -ErrorAction Stop
+            $CurrentRange = Get-NBIPAMAddressRange -Id $Range_Id -ErrorAction Stop
 
             $Segments = [System.Collections.ArrayList]::new(@('ipam', 'ip-ranges', $Range_Id))
 
@@ -10627,9 +10627,9 @@ function Remove-NetboxIPAMAddressRange {
 
 #endregion
 
-#region File Remove-NetboxIPAMAggregate.ps1
+#region File Remove-NBIPAMAggregate.ps1
 
-function Remove-NetboxIPAMAggregate {
+function Remove-NBIPAMAggregate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -10646,9 +10646,9 @@ function Remove-NetboxIPAMAggregate {
 
 #endregion
 
-#region File Remove-NetboxIPAMASN.ps1
+#region File Remove-NBIPAMASN.ps1
 
-function Remove-NetboxIPAMASN {
+function Remove-NBIPAMASN {
 <#
     .SYNOPSIS
         Remove an ASN from Netbox
@@ -10663,7 +10663,7 @@ function Remove-NetboxIPAMASN {
         Return the raw API response
 
     .EXAMPLE
-        Remove-NetboxIPAMASN -Id 1
+        Remove-NBIPAMASN -Id 1
 
         Deletes ASN with ID 1
 #>
@@ -10691,9 +10691,9 @@ function Remove-NetboxIPAMASN {
 
 #endregion
 
-#region File Remove-NetboxIPAMASNRange.ps1
+#region File Remove-NBIPAMASNRange.ps1
 
-function Remove-NetboxIPAMASNRange {
+function Remove-NBIPAMASNRange {
 <#
     .SYNOPSIS
         Remove an ASN range from Netbox
@@ -10708,7 +10708,7 @@ function Remove-NetboxIPAMASNRange {
         Return the raw API response
 
     .EXAMPLE
-        Remove-NetboxIPAMASNRange -Id 1
+        Remove-NBIPAMASNRange -Id 1
 
         Deletes ASN range with ID 1
 #>
@@ -10736,9 +10736,9 @@ function Remove-NetboxIPAMASNRange {
 
 #endregion
 
-#region File Remove-NetboxIPAMFHRPGroup.ps1
+#region File Remove-NBIPAMFHRPGroup.ps1
 
-function Remove-NetboxIPAMFHRPGroup {
+function Remove-NBIPAMFHRPGroup {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -10753,9 +10753,9 @@ function Remove-NetboxIPAMFHRPGroup {
 
 #endregion
 
-#region File Remove-NetboxIPAMFHRPGroupAssignment.ps1
+#region File Remove-NBIPAMFHRPGroupAssignment.ps1
 
-function Remove-NetboxIPAMFHRPGroupAssignment {
+function Remove-NBIPAMFHRPGroupAssignment {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -10770,9 +10770,9 @@ function Remove-NetboxIPAMFHRPGroupAssignment {
 
 #endregion
 
-#region File Remove-NetboxIPAMPrefix.ps1
+#region File Remove-NBIPAMPrefix.ps1
 
-function Remove-NetboxIPAMPrefix {
+function Remove-NBIPAMPrefix {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -10789,9 +10789,9 @@ function Remove-NetboxIPAMPrefix {
 
 #endregion
 
-#region File Remove-NetboxIPAMRIR.ps1
+#region File Remove-NBIPAMRIR.ps1
 
-function Remove-NetboxIPAMRIR {
+function Remove-NBIPAMRIR {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -10806,9 +10806,9 @@ function Remove-NetboxIPAMRIR {
 
 #endregion
 
-#region File Remove-NetboxIPAMRole.ps1
+#region File Remove-NBIPAMRole.ps1
 
-function Remove-NetboxIPAMRole {
+function Remove-NBIPAMRole {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -10825,9 +10825,9 @@ function Remove-NetboxIPAMRole {
 
 #endregion
 
-#region File Remove-NetboxIPAMRouteTarget.ps1
+#region File Remove-NBIPAMRouteTarget.ps1
 
-function Remove-NetboxIPAMRouteTarget {
+function Remove-NBIPAMRouteTarget {
 <#
     .SYNOPSIS
         Remove a route target from Netbox
@@ -10842,12 +10842,12 @@ function Remove-NetboxIPAMRouteTarget {
         Return the raw API response
 
     .EXAMPLE
-        Remove-NetboxIPAMRouteTarget -Id 1
+        Remove-NBIPAMRouteTarget -Id 1
 
         Deletes route target with ID 1
 
     .EXAMPLE
-        Get-NetboxIPAMRouteTarget -Name "65001:999" | Remove-NetboxIPAMRouteTarget
+        Get-NBIPAMRouteTarget -Name "65001:999" | Remove-NBIPAMRouteTarget
 
         Deletes route targets matching the specified value
 #>
@@ -10875,9 +10875,9 @@ function Remove-NetboxIPAMRouteTarget {
 
 #endregion
 
-#region File Remove-NetboxIPAMService.ps1
+#region File Remove-NBIPAMService.ps1
 
-function Remove-NetboxIPAMService {
+function Remove-NBIPAMService {
 <#
     .SYNOPSIS
         Remove a service from Netbox
@@ -10892,7 +10892,7 @@ function Remove-NetboxIPAMService {
         Return the raw API response
 
     .EXAMPLE
-        Remove-NetboxIPAMService -Id 1
+        Remove-NBIPAMService -Id 1
 
         Deletes service with ID 1
 #>
@@ -10920,9 +10920,9 @@ function Remove-NetboxIPAMService {
 
 #endregion
 
-#region File Remove-NetboxIPAMServiceTemplate.ps1
+#region File Remove-NBIPAMServiceTemplate.ps1
 
-function Remove-NetboxIPAMServiceTemplate {
+function Remove-NBIPAMServiceTemplate {
 <#
     .SYNOPSIS
         Remove a service template from Netbox
@@ -10937,7 +10937,7 @@ function Remove-NetboxIPAMServiceTemplate {
         Return the raw API response
 
     .EXAMPLE
-        Remove-NetboxIPAMServiceTemplate -Id 1
+        Remove-NBIPAMServiceTemplate -Id 1
 
         Deletes service template with ID 1
 #>
@@ -10965,9 +10965,9 @@ function Remove-NetboxIPAMServiceTemplate {
 
 #endregion
 
-#region File Remove-NetboxIPAMVLAN.ps1
+#region File Remove-NBIPAMVLAN.ps1
 
-function Remove-NetboxIPAMVLAN {
+function Remove-NBIPAMVLAN {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -10984,9 +10984,9 @@ function Remove-NetboxIPAMVLAN {
 
 #endregion
 
-#region File Remove-NetboxIPAMVLANGroup.ps1
+#region File Remove-NBIPAMVLANGroup.ps1
 
-function Remove-NetboxIPAMVLANGroup {
+function Remove-NBIPAMVLANGroup {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -11001,9 +11001,9 @@ function Remove-NetboxIPAMVLANGroup {
 
 #endregion
 
-#region File Remove-NetboxIPAMVLANTranslationPolicy.ps1
+#region File Remove-NBIPAMVLANTranslationPolicy.ps1
 
-function Remove-NetboxIPAMVLANTranslationPolicy {
+function Remove-NBIPAMVLANTranslationPolicy {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -11018,9 +11018,9 @@ function Remove-NetboxIPAMVLANTranslationPolicy {
 
 #endregion
 
-#region File Remove-NetboxIPAMVLANTranslationRule.ps1
+#region File Remove-NBIPAMVLANTranslationRule.ps1
 
-function Remove-NetboxIPAMVLANTranslationRule {
+function Remove-NBIPAMVLANTranslationRule {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -11035,9 +11035,9 @@ function Remove-NetboxIPAMVLANTranslationRule {
 
 #endregion
 
-#region File Remove-NetboxIPAMVRF.ps1
+#region File Remove-NBIPAMVRF.ps1
 
-function Remove-NetboxIPAMVRF {
+function Remove-NBIPAMVRF {
 <#
     .SYNOPSIS
         Remove a VRF from Netbox
@@ -11052,12 +11052,12 @@ function Remove-NetboxIPAMVRF {
         Return the raw API response
 
     .EXAMPLE
-        Remove-NetboxIPAMVRF -Id 1
+        Remove-NBIPAMVRF -Id 1
 
         Deletes VRF with ID 1
 
     .EXAMPLE
-        Get-NetboxIPAMVRF -Name "Test-VRF" | Remove-NetboxIPAMVRF
+        Get-NBIPAMVRF -Name "Test-VRF" | Remove-NBIPAMVRF
 
         Deletes VRFs matching the name "Test-VRF"
 #>
@@ -11085,10 +11085,10 @@ function Remove-NetboxIPAMVRF {
 
 #endregion
 
-#region File Remove-NetboxVirtualMachine.ps1
+#region File Remove-NBVirtualMachine.ps1
 
 
-function Remove-NetboxVirtualMachine {
+function Remove-NBVirtualMachine {
 <#
     .SYNOPSIS
         Delete a virtual machine
@@ -11103,7 +11103,7 @@ function Remove-NetboxVirtualMachine {
         Force deletion without any prompts
 
     .EXAMPLE
-        PS C:\> Remove-NetboxVirtualMachine -Id $value1
+        PS C:\> Remove-NBVirtualMachine -Id $value1
 
     .NOTES
         Additional information about the function.
@@ -11126,7 +11126,7 @@ function Remove-NetboxVirtualMachine {
 
     process {
         foreach ($VMId in $Id) {
-            $CurrentVM = Get-NetboxVirtualMachine -Id $VMId -ErrorAction Stop
+            $CurrentVM = Get-NBVirtualMachine -Id $VMId -ErrorAction Stop
 
             if ($Force -or $pscmdlet.ShouldProcess("$($CurrentVM.Name)/$($CurrentVM.Id)", "Remove")) {
                 $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'virtual-machines', $CurrentVM.Id))
@@ -11145,9 +11145,9 @@ function Remove-NetboxVirtualMachine {
 
 #endregion
 
-#region File Remove-NetboxVPNIKEPolicy.ps1
+#region File Remove-NBVPNIKEPolicy.ps1
 
-function Remove-NetboxVPNIKEPolicy {
+function Remove-NBVPNIKEPolicy {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[switch]$Raw)
     process { if ($PSCmdlet.ShouldProcess($Id, 'Delete IKE policy')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','ike-policies',$Id)) -Method DELETE -Raw:$Raw } }
@@ -11155,9 +11155,9 @@ function Remove-NetboxVPNIKEPolicy {
 
 #endregion
 
-#region File Remove-NetboxVPNIKEProposal.ps1
+#region File Remove-NBVPNIKEProposal.ps1
 
-function Remove-NetboxVPNIKEProposal {
+function Remove-NBVPNIKEProposal {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[switch]$Raw)
     process { if ($PSCmdlet.ShouldProcess($Id, 'Delete IKE proposal')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','ike-proposals',$Id)) -Method DELETE -Raw:$Raw } }
@@ -11165,9 +11165,9 @@ function Remove-NetboxVPNIKEProposal {
 
 #endregion
 
-#region File Remove-NetboxVPNIPSecPolicy.ps1
+#region File Remove-NBVPNIPSecPolicy.ps1
 
-function Remove-NetboxVPNIPSecPolicy {
+function Remove-NBVPNIPSecPolicy {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[switch]$Raw)
     process { if ($PSCmdlet.ShouldProcess($Id, 'Delete IPSec policy')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','ipsec-policies',$Id)) -Method DELETE -Raw:$Raw } }
@@ -11175,9 +11175,9 @@ function Remove-NetboxVPNIPSecPolicy {
 
 #endregion
 
-#region File Remove-NetboxVPNIPSecProfile.ps1
+#region File Remove-NBVPNIPSecProfile.ps1
 
-function Remove-NetboxVPNIPSecProfile {
+function Remove-NBVPNIPSecProfile {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[switch]$Raw)
     process { if ($PSCmdlet.ShouldProcess($Id, 'Delete IPSec profile')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','ipsec-profiles',$Id)) -Method DELETE -Raw:$Raw } }
@@ -11185,9 +11185,9 @@ function Remove-NetboxVPNIPSecProfile {
 
 #endregion
 
-#region File Remove-NetboxVPNIPSecProposal.ps1
+#region File Remove-NBVPNIPSecProposal.ps1
 
-function Remove-NetboxVPNIPSecProposal {
+function Remove-NBVPNIPSecProposal {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[switch]$Raw)
     process { if ($PSCmdlet.ShouldProcess($Id, 'Delete IPSec proposal')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','ipsec-proposals',$Id)) -Method DELETE -Raw:$Raw } }
@@ -11195,9 +11195,9 @@ function Remove-NetboxVPNIPSecProposal {
 
 #endregion
 
-#region File Remove-NetboxVPNL2VPN.ps1
+#region File Remove-NBVPNL2VPN.ps1
 
-function Remove-NetboxVPNL2VPN {
+function Remove-NBVPNL2VPN {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[switch]$Raw)
     process { if ($PSCmdlet.ShouldProcess($Id, 'Delete L2VPN')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','l2vpns',$Id)) -Method DELETE -Raw:$Raw } }
@@ -11205,9 +11205,9 @@ function Remove-NetboxVPNL2VPN {
 
 #endregion
 
-#region File Remove-NetboxVPNL2VPNTermination.ps1
+#region File Remove-NBVPNL2VPNTermination.ps1
 
-function Remove-NetboxVPNL2VPNTermination {
+function Remove-NBVPNL2VPNTermination {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[switch]$Raw)
     process { if ($PSCmdlet.ShouldProcess($Id, 'Delete L2VPN termination')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','l2vpn-terminations',$Id)) -Method DELETE -Raw:$Raw } }
@@ -11215,9 +11215,9 @@ function Remove-NetboxVPNL2VPNTermination {
 
 #endregion
 
-#region File Remove-NetboxVPNTunnel.ps1
+#region File Remove-NBVPNTunnel.ps1
 
-function Remove-NetboxVPNTunnel {
+function Remove-NBVPNTunnel {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     [OutputType([PSCustomObject])]
     param
@@ -11236,9 +11236,9 @@ function Remove-NetboxVPNTunnel {
 
 #endregion
 
-#region File Remove-NetboxVPNTunnelGroup.ps1
+#region File Remove-NBVPNTunnelGroup.ps1
 
-function Remove-NetboxVPNTunnelGroup {
+function Remove-NBVPNTunnelGroup {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[switch]$Raw)
     process { if ($PSCmdlet.ShouldProcess($Id, 'Delete tunnel group')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','tunnel-groups',$Id)) -Method DELETE -Raw:$Raw } }
@@ -11246,9 +11246,9 @@ function Remove-NetboxVPNTunnelGroup {
 
 #endregion
 
-#region File Remove-NetboxVPNTunnelTermination.ps1
+#region File Remove-NBVPNTunnelTermination.ps1
 
-function Remove-NetboxVPNTunnelTermination {
+function Remove-NBVPNTunnelTermination {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[switch]$Raw)
     process { if ($PSCmdlet.ShouldProcess($Id, 'Delete tunnel termination')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','tunnel-terminations',$Id)) -Method DELETE -Raw:$Raw } }
@@ -11256,9 +11256,9 @@ function Remove-NetboxVPNTunnelTermination {
 
 #endregion
 
-#region File Remove-NetboxWirelessLAN.ps1
+#region File Remove-NBWirelessLAN.ps1
 
-function Remove-NetboxWirelessLAN {
+function Remove-NBWirelessLAN {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[switch]$Raw)
     process { if ($PSCmdlet.ShouldProcess($Id, 'Delete wireless LAN')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('wireless','wireless-lans',$Id)) -Method DELETE -Raw:$Raw } }
@@ -11266,9 +11266,9 @@ function Remove-NetboxWirelessLAN {
 
 #endregion
 
-#region File Remove-NetboxWirelessLANGroup.ps1
+#region File Remove-NBWirelessLANGroup.ps1
 
-function Remove-NetboxWirelessLANGroup {
+function Remove-NBWirelessLANGroup {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[switch]$Raw)
     process { if ($PSCmdlet.ShouldProcess($Id, 'Delete wireless LAN group')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('wireless','wireless-lan-groups',$Id)) -Method DELETE -Raw:$Raw } }
@@ -11276,9 +11276,9 @@ function Remove-NetboxWirelessLANGroup {
 
 #endregion
 
-#region File Remove-NetboxWirelessLink.ps1
+#region File Remove-NBWirelessLink.ps1
 
-function Remove-NetboxWirelessLink {
+function Remove-NBWirelessLink {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[switch]$Raw)
     process { if ($PSCmdlet.ShouldProcess($Id, 'Delete wireless link')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('wireless','wireless-links',$Id)) -Method DELETE -Raw:$Raw } }
@@ -11286,9 +11286,9 @@ function Remove-NetboxWirelessLink {
 
 #endregion
 
-#region File Set-NetboxCipherSSL.ps1
+#region File Set-NBCipherSSL.ps1
 
-Function Set-NetboxCipherSSL {
+Function Set-NBCipherSSL {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessforStateChangingFunctions", "")]
     Param(  )
     # Hack for allowing TLS 1.1 and TLS 1.2 (by default it is only SSL3 and TLS (1.0))
@@ -11299,10 +11299,10 @@ Function Set-NetboxCipherSSL {
 
 #endregion
 
-#region File Set-NetboxContact.ps1
+#region File Set-NBContact.ps1
 
 
-function Set-NetboxContact {
+function Set-NBContact {
 <#
     .SYNOPSIS
         Update a contact in Netbox
@@ -11350,7 +11350,7 @@ function Set-NetboxContact {
         A description of the Raw parameter.
 
     .EXAMPLE
-        PS C:\> Set-NetboxContact -Id 10 -Name 'Leroy Jenkins' -Email 'leroy.jenkins@example.com'
+        PS C:\> Set-NBContact -Id 10 -Name 'Leroy Jenkins' -Email 'leroy.jenkins@example.com'
 
     .NOTES
         Additional information about the function.
@@ -11409,7 +11409,7 @@ function Set-NetboxContact {
 
             $URI = BuildNewURI -Segments $URIComponents.Segments
 
-            $CurrentContact = Get-NetboxContact -Id $ContactId -ErrorAction Stop
+            $CurrentContact = Get-NBContact -Id $ContactId -ErrorAction Stop
 
             if ($Force -or $PSCmdlet.ShouldProcess($CurrentContact.Name, 'Update contact')) {
                 InvokeNetboxRequest -URI $URI -Method $Method -Body $URIComponents.Parameters -Raw:$Raw
@@ -11424,11 +11424,11 @@ function Set-NetboxContact {
 
 #endregion
 
-#region File Set-NetboxContactAssignment.ps1
+#region File Set-NBContactAssignment.ps1
 
 
 
-function Set-NetboxContactAssignment {
+function Set-NBContactAssignment {
 <#
     .SYNOPSIS
         Update a contact role assignment in Netbox
@@ -11455,7 +11455,7 @@ function Set-NetboxContactAssignment {
         Return the unparsed data from the HTTP request
 
     .EXAMPLE
-        PS C:\> Set-NetboxContactAssignment -Id 11 -Content_Type 'dcim.location' -Object_id 10 -Contact 15 -Role 10 -Priority 'Primary'
+        PS C:\> Set-NBContactAssignment -Id 11 -Content_Type 'dcim.location' -Object_id 10 -Contact 15 -Role 10 -Priority 'Primary'
 
     .NOTES
         Valid content types: https://docs.netbox.dev/en/stable/features/contacts/#contacts_1
@@ -11498,7 +11498,7 @@ function Set-NetboxContactAssignment {
 
             $URI = BuildNewURI -Segments $URIComponents.Segments
 
-            $CurrentContactAssignment = Get-NetboxContactAssignment -Id $ContactAssignmentId -ErrorAction Stop
+            $CurrentContactAssignment = Get-NBContactAssignment -Id $ContactAssignmentId -ErrorAction Stop
 
             if ($PSCmdlet.ShouldProcess($CurrentContactAssignment.Id, 'Update contact assignment')) {
                 InvokeNetboxRequest -URI $URI -Method $Method -Body $URIComponents.Parameters -Raw:$Raw
@@ -11513,10 +11513,10 @@ function Set-NetboxContactAssignment {
 
 #endregion
 
-#region File Set-NetboxContactRole.ps1
+#region File Set-NBContactRole.ps1
 
 
-function Set-NetboxContactRole {
+function Set-NBContactRole {
 <#
     .SYNOPSIS
         Update a contact role in Netbox
@@ -11540,7 +11540,7 @@ function Set-NetboxContactRole {
         Return the unparsed data from the HTTP request
 
     .EXAMPLE
-        PS C:\> New-NetboxContact -Name 'Leroy Jenkins' -Email 'leroy.jenkins@example.com'
+        PS C:\> New-NBContact -Name 'Leroy Jenkins' -Email 'leroy.jenkins@example.com'
 
     .NOTES
         Additional information about the function.
@@ -11583,7 +11583,7 @@ function Set-NetboxContactRole {
 
             $URI = BuildNewURI -Segments $URIComponents.Segments
 
-            $CurrentContactRole = Get-NetboxContactRole -Id $ContactRoleId -ErrorAction Stop
+            $CurrentContactRole = Get-NBContactRole -Id $ContactRoleId -ErrorAction Stop
 
             if ($Force -or $PSCmdlet.ShouldProcess($CurrentContactRole.Name, 'Update contact role')) {
                 InvokeNetboxRequest -URI $URI -Method $Method -Body $URIComponents.Parameters -Raw:$Raw
@@ -11598,9 +11598,9 @@ function Set-NetboxContactRole {
 
 #endregion
 
-#region File Set-NetboxCredential.ps1
+#region File Set-NBCredential.ps1
 
-function Set-NetboxCredential {
+function Set-NBCredential {
     [CmdletBinding(DefaultParameterSetName = 'CredsObject',
         ConfirmImpact = 'Low',
         SupportsShouldProcess = $true)]
@@ -11635,9 +11635,9 @@ function Set-NetboxCredential {
 
 #endregion
 
-#region File Set-NetboxDCIMCable.ps1
+#region File Set-NBDCIMCable.ps1
 
-function Set-NetboxDCIMCable {
+function Set-NBDCIMCable {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -11665,9 +11665,9 @@ function Set-NetboxDCIMCable {
 
 #endregion
 
-#region File Set-NetboxDCIMConsolePort.ps1
+#region File Set-NBDCIMConsolePort.ps1
 
-function Set-NetboxDCIMConsolePort {
+function Set-NBDCIMConsolePort {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -11694,9 +11694,9 @@ function Set-NetboxDCIMConsolePort {
 
 #endregion
 
-#region File Set-NetboxDCIMConsolePortTemplate.ps1
+#region File Set-NBDCIMConsolePortTemplate.ps1
 
-function Set-NetboxDCIMConsolePortTemplate {
+function Set-NBDCIMConsolePortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -11719,9 +11719,9 @@ function Set-NetboxDCIMConsolePortTemplate {
 
 #endregion
 
-#region File Set-NetboxDCIMConsoleServerPort.ps1
+#region File Set-NBDCIMConsoleServerPort.ps1
 
-function Set-NetboxDCIMConsoleServerPort {
+function Set-NBDCIMConsoleServerPort {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -11748,9 +11748,9 @@ function Set-NetboxDCIMConsoleServerPort {
 
 #endregion
 
-#region File Set-NetboxDCIMConsoleServerPortTemplate.ps1
+#region File Set-NBDCIMConsoleServerPortTemplate.ps1
 
-function Set-NetboxDCIMConsoleServerPortTemplate {
+function Set-NBDCIMConsoleServerPortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -11773,10 +11773,10 @@ function Set-NetboxDCIMConsoleServerPortTemplate {
 
 #endregion
 
-#region File Set-NetboxDCIMDevice.ps1
+#region File Set-NBDCIMDevice.ps1
 
 
-function Set-NetboxDCIMDevice {
+function Set-NBDCIMDevice {
     [CmdletBinding(SupportsShouldProcess = $true)]
     param
     (
@@ -11833,7 +11833,7 @@ function Set-NetboxDCIMDevice {
 
     process {
         foreach ($DeviceID in $Id) {
-            $CurrentDevice = Get-NetboxDCIMDevice -Id $DeviceID -ErrorAction Stop
+            $CurrentDevice = Get-NBDCIMDevice -Id $DeviceID -ErrorAction Stop
 
             if ($Force -or $pscmdlet.ShouldProcess("$($CurrentDevice.Name)", "Set")) {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'devices', $CurrentDevice.Id))
@@ -11854,9 +11854,9 @@ function Set-NetboxDCIMDevice {
 
 #endregion
 
-#region File Set-NetboxDCIMDeviceBay.ps1
+#region File Set-NBDCIMDeviceBay.ps1
 
-function Set-NetboxDCIMDeviceBay {
+function Set-NBDCIMDeviceBay {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -11880,9 +11880,9 @@ function Set-NetboxDCIMDeviceBay {
 
 #endregion
 
-#region File Set-NetboxDCIMDeviceBayTemplate.ps1
+#region File Set-NBDCIMDeviceBayTemplate.ps1
 
-function Set-NetboxDCIMDeviceBayTemplate {
+function Set-NBDCIMDeviceBayTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -11903,9 +11903,9 @@ function Set-NetboxDCIMDeviceBayTemplate {
 
 #endregion
 
-#region File Set-NetboxDCIMDeviceRole.ps1
+#region File Set-NBDCIMDeviceRole.ps1
 
-function Set-NetboxDCIMDeviceRole {
+function Set-NBDCIMDeviceRole {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -11930,9 +11930,9 @@ function Set-NetboxDCIMDeviceRole {
 
 #endregion
 
-#region File Set-NetboxDCIMDeviceType.ps1
+#region File Set-NBDCIMDeviceType.ps1
 
-function Set-NetboxDCIMDeviceType {
+function Set-NBDCIMDeviceType {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -11963,9 +11963,9 @@ function Set-NetboxDCIMDeviceType {
 
 #endregion
 
-#region File Set-NetboxDCIMFrontPort.ps1
+#region File Set-NBDCIMFrontPort.ps1
 
-function Set-NetboxDCIMFrontPort {
+function Set-NBDCIMFrontPort {
     [CmdletBinding(ConfirmImpact = 'Medium',
         SupportsShouldProcess = $true)]
     [OutputType([pscustomobject])]
@@ -12007,7 +12007,7 @@ function Set-NetboxDCIMFrontPort {
 
     process {
         foreach ($FrontPortID in $Id) {
-            $CurrentPort = Get-NetboxDCIMFrontPort -Id $FrontPortID -ErrorAction Stop
+            $CurrentPort = Get-NBDCIMFrontPort -Id $FrontPortID -ErrorAction Stop
 
             $Segments = [System.Collections.ArrayList]::new(@('dcim', 'front-ports', $CurrentPort.Id))
 
@@ -12028,9 +12028,9 @@ function Set-NetboxDCIMFrontPort {
 
 #endregion
 
-#region File Set-NetboxDCIMFrontPortTemplate.ps1
+#region File Set-NBDCIMFrontPortTemplate.ps1
 
-function Set-NetboxDCIMFrontPortTemplate {
+function Set-NBDCIMFrontPortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -12056,9 +12056,9 @@ function Set-NetboxDCIMFrontPortTemplate {
 
 #endregion
 
-#region File Set-NetboxDCIMInterface.ps1
+#region File Set-NBDCIMInterface.ps1
 
-function Set-NetboxDCIMInterface {
+function Set-NBDCIMInterface {
     [CmdletBinding(ConfirmImpact = 'Medium',
         SupportsShouldProcess = $true)]
     [OutputType([pscustomobject])]
@@ -12128,7 +12128,7 @@ function Set-NetboxDCIMInterface {
 
     process {
         foreach ($InterfaceId in $Id) {
-            $CurrentInterface = Get-NetboxDCIMInterface -Id $InterfaceId -ErrorAction Stop
+            $CurrentInterface = Get-NBDCIMInterface -Id $InterfaceId -ErrorAction Stop
 
             $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interfaces', $CurrentInterface.Id))
 
@@ -12149,10 +12149,10 @@ function Set-NetboxDCIMInterface {
 
 #endregion
 
-#region File Set-NetboxDCIMInterfaceConnection.ps1
+#region File Set-NBDCIMInterfaceConnection.ps1
 
 
-function Set-NetboxDCIMInterfaceConnection {
+function Set-NBDCIMInterfaceConnection {
 <#
     .SYNOPSIS
         Update an interface connection
@@ -12176,7 +12176,7 @@ function Set-NetboxDCIMInterfaceConnection {
         A description of the Force parameter.
 
     .EXAMPLE
-        PS C:\> Set-NetboxDCIMInterfaceConnection -Id $value1
+        PS C:\> Set-NBDCIMInterfaceConnection -Id $value1
 
     .NOTES
         Additional information about the function.
@@ -12207,7 +12207,7 @@ function Set-NetboxDCIMInterfaceConnection {
 
     process {
         foreach ($ConnectionID in $Id) {
-            $CurrentConnection = Get-NetboxDCIMInterfaceConnection -Id $ConnectionID -ErrorAction Stop
+            $CurrentConnection = Get-NBDCIMInterfaceConnection -Id $ConnectionID -ErrorAction Stop
 
             $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interface-connections', $CurrentConnection.Id))
 
@@ -12229,9 +12229,9 @@ function Set-NetboxDCIMInterfaceConnection {
 
 #endregion
 
-#region File Set-NetboxDCIMInterfaceTemplate.ps1
+#region File Set-NBDCIMInterfaceTemplate.ps1
 
-function Set-NetboxDCIMInterfaceTemplate {
+function Set-NBDCIMInterfaceTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -12259,9 +12259,9 @@ function Set-NetboxDCIMInterfaceTemplate {
 
 #endregion
 
-#region File Set-NetboxDCIMInventoryItem.ps1
+#region File Set-NBDCIMInventoryItem.ps1
 
-function Set-NetboxDCIMInventoryItem {
+function Set-NBDCIMInventoryItem {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -12293,9 +12293,9 @@ function Set-NetboxDCIMInventoryItem {
 
 #endregion
 
-#region File Set-NetboxDCIMInventoryItemRole.ps1
+#region File Set-NBDCIMInventoryItemRole.ps1
 
-function Set-NetboxDCIMInventoryItemRole {
+function Set-NBDCIMInventoryItemRole {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -12318,9 +12318,9 @@ function Set-NetboxDCIMInventoryItemRole {
 
 #endregion
 
-#region File Set-NetboxDCIMInventoryItemTemplate.ps1
+#region File Set-NBDCIMInventoryItemTemplate.ps1
 
-function Set-NetboxDCIMInventoryItemTemplate {
+function Set-NBDCIMInventoryItemTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -12347,9 +12347,9 @@ function Set-NetboxDCIMInventoryItemTemplate {
 
 #endregion
 
-#region File Set-NetboxDCIMLocation.ps1
+#region File Set-NBDCIMLocation.ps1
 
-function Set-NetboxDCIMLocation {
+function Set-NBDCIMLocation {
 <#
     .SYNOPSIS
         Update a location in Netbox
@@ -12394,12 +12394,12 @@ function Set-NetboxDCIMLocation {
         Return the raw API response
 
     .EXAMPLE
-        Set-NetboxDCIMLocation -Id 1 -Name "Server Room A"
+        Set-NBDCIMLocation -Id 1 -Name "Server Room A"
 
         Updates the name of location 1
 
     .EXAMPLE
-        Set-NetboxDCIMLocation -Id 1 -Status retired
+        Set-NBDCIMLocation -Id 1 -Status retired
 
         Marks location 1 as retired
 #>
@@ -12450,9 +12450,9 @@ function Set-NetboxDCIMLocation {
 
 #endregion
 
-#region File Set-NetboxDCIMMACAddress.ps1
+#region File Set-NBDCIMMACAddress.ps1
 
-function Set-NetboxDCIMMACAddress {
+function Set-NBDCIMMACAddress {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -12476,9 +12476,9 @@ function Set-NetboxDCIMMACAddress {
 
 #endregion
 
-#region File Set-NetboxDCIMManufacturer.ps1
+#region File Set-NBDCIMManufacturer.ps1
 
-function Set-NetboxDCIMManufacturer {
+function Set-NBDCIMManufacturer {
 <#
     .SYNOPSIS
         Update a manufacturer in Netbox
@@ -12505,10 +12505,10 @@ function Set-NetboxDCIMManufacturer {
         Skip confirmation prompts
 
     .EXAMPLE
-        Set-NetboxDCIMManufacturer -Id 1 -Description "Updated description"
+        Set-NBDCIMManufacturer -Id 1 -Description "Updated description"
 
     .EXAMPLE
-        Get-NetboxDCIMManufacturer -Name "Cisco" | Set-NetboxDCIMManufacturer -Description "Network equipment"
+        Get-NBDCIMManufacturer -Name "Cisco" | Set-NBDCIMManufacturer -Description "Network equipment"
 #>
 
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
@@ -12532,7 +12532,7 @@ function Set-NetboxDCIMManufacturer {
 
     process {
         foreach ($ManufacturerId in $Id) {
-            $CurrentManufacturer = Get-NetboxDCIMManufacturer -Id $ManufacturerId -ErrorAction Stop
+            $CurrentManufacturer = Get-NBDCIMManufacturer -Id $ManufacturerId -ErrorAction Stop
 
             if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentManufacturer.Name)", "Update manufacturer")) {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'manufacturers', $CurrentManufacturer.Id))
@@ -12549,9 +12549,9 @@ function Set-NetboxDCIMManufacturer {
 
 #endregion
 
-#region File Set-NetboxDCIMModule.ps1
+#region File Set-NBDCIMModule.ps1
 
-function Set-NetboxDCIMModule {
+function Set-NBDCIMModule {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -12578,9 +12578,9 @@ function Set-NetboxDCIMModule {
 
 #endregion
 
-#region File Set-NetboxDCIMModuleBay.ps1
+#region File Set-NBDCIMModuleBay.ps1
 
-function Set-NetboxDCIMModuleBay {
+function Set-NBDCIMModuleBay {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -12604,9 +12604,9 @@ function Set-NetboxDCIMModuleBay {
 
 #endregion
 
-#region File Set-NetboxDCIMModuleBayTemplate.ps1
+#region File Set-NBDCIMModuleBayTemplate.ps1
 
-function Set-NetboxDCIMModuleBayTemplate {
+function Set-NBDCIMModuleBayTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -12628,9 +12628,9 @@ function Set-NetboxDCIMModuleBayTemplate {
 
 #endregion
 
-#region File Set-NetboxDCIMModuleType.ps1
+#region File Set-NBDCIMModuleType.ps1
 
-function Set-NetboxDCIMModuleType {
+function Set-NBDCIMModuleType {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -12656,9 +12656,9 @@ function Set-NetboxDCIMModuleType {
 
 #endregion
 
-#region File Set-NetboxDCIMModuleTypeProfile.ps1
+#region File Set-NBDCIMModuleTypeProfile.ps1
 
-function Set-NetboxDCIMModuleTypeProfile {
+function Set-NBDCIMModuleTypeProfile {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -12680,9 +12680,9 @@ function Set-NetboxDCIMModuleTypeProfile {
 
 #endregion
 
-#region File Set-NetboxDCIMPlatform.ps1
+#region File Set-NBDCIMPlatform.ps1
 
-function Set-NetboxDCIMPlatform {
+function Set-NBDCIMPlatform {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -12706,9 +12706,9 @@ function Set-NetboxDCIMPlatform {
 
 #endregion
 
-#region File Set-NetboxDCIMPowerFeed.ps1
+#region File Set-NBDCIMPowerFeed.ps1
 
-function Set-NetboxDCIMPowerFeed {
+function Set-NBDCIMPowerFeed {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -12740,9 +12740,9 @@ function Set-NetboxDCIMPowerFeed {
 
 #endregion
 
-#region File Set-NetboxDCIMPowerOutlet.ps1
+#region File Set-NBDCIMPowerOutlet.ps1
 
-function Set-NetboxDCIMPowerOutlet {
+function Set-NBDCIMPowerOutlet {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -12770,9 +12770,9 @@ function Set-NetboxDCIMPowerOutlet {
 
 #endregion
 
-#region File Set-NetboxDCIMPowerOutletTemplate.ps1
+#region File Set-NBDCIMPowerOutletTemplate.ps1
 
-function Set-NetboxDCIMPowerOutletTemplate {
+function Set-NBDCIMPowerOutletTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -12797,9 +12797,9 @@ function Set-NetboxDCIMPowerOutletTemplate {
 
 #endregion
 
-#region File Set-NetboxDCIMPowerPanel.ps1
+#region File Set-NBDCIMPowerPanel.ps1
 
-function Set-NetboxDCIMPowerPanel {
+function Set-NBDCIMPowerPanel {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -12823,9 +12823,9 @@ function Set-NetboxDCIMPowerPanel {
 
 #endregion
 
-#region File Set-NetboxDCIMPowerPort.ps1
+#region File Set-NBDCIMPowerPort.ps1
 
-function Set-NetboxDCIMPowerPort {
+function Set-NBDCIMPowerPort {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -12853,9 +12853,9 @@ function Set-NetboxDCIMPowerPort {
 
 #endregion
 
-#region File Set-NetboxDCIMPowerPortTemplate.ps1
+#region File Set-NBDCIMPowerPortTemplate.ps1
 
-function Set-NetboxDCIMPowerPortTemplate {
+function Set-NBDCIMPowerPortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -12880,9 +12880,9 @@ function Set-NetboxDCIMPowerPortTemplate {
 
 #endregion
 
-#region File Set-NetboxDCIMRack.ps1
+#region File Set-NBDCIMRack.ps1
 
-function Set-NetboxDCIMRack {
+function Set-NBDCIMRack {
 <#
     .SYNOPSIS
         Update a rack in Netbox
@@ -12966,10 +12966,10 @@ function Set-NetboxDCIMRack {
         Skip confirmation prompts
 
     .EXAMPLE
-        Set-NetboxDCIMRack -Id 1 -Description "Updated description"
+        Set-NBDCIMRack -Id 1 -Description "Updated description"
 
     .EXAMPLE
-        Get-NetboxDCIMRack -Name "Rack-01" | Set-NetboxDCIMRack -Status deprecated
+        Get-NBDCIMRack -Name "Rack-01" | Set-NBDCIMRack -Status deprecated
 #>
 
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
@@ -13036,7 +13036,7 @@ function Set-NetboxDCIMRack {
 
     process {
         foreach ($RackId in $Id) {
-            $CurrentRack = Get-NetboxDCIMRack -Id $RackId -ErrorAction Stop
+            $CurrentRack = Get-NBDCIMRack -Id $RackId -ErrorAction Stop
 
             if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentRack.Name)", "Update rack")) {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'racks', $CurrentRack.Id))
@@ -13053,9 +13053,9 @@ function Set-NetboxDCIMRack {
 
 #endregion
 
-#region File Set-NetboxDCIMRackReservation.ps1
+#region File Set-NBDCIMRackReservation.ps1
 
-function Set-NetboxDCIMRackReservation {
+function Set-NBDCIMRackReservation {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -13080,9 +13080,9 @@ function Set-NetboxDCIMRackReservation {
 
 #endregion
 
-#region File Set-NetboxDCIMRackRole.ps1
+#region File Set-NBDCIMRackRole.ps1
 
-function Set-NetboxDCIMRackRole {
+function Set-NBDCIMRackRole {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -13105,9 +13105,9 @@ function Set-NetboxDCIMRackRole {
 
 #endregion
 
-#region File Set-NetboxDCIMRackType.ps1
+#region File Set-NBDCIMRackType.ps1
 
-function Set-NetboxDCIMRackType {
+function Set-NBDCIMRackType {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -13142,10 +13142,10 @@ function Set-NetboxDCIMRackType {
 
 #endregion
 
-#region File Set-NetboxDCIMRearPort.ps1
+#region File Set-NBDCIMRearPort.ps1
 
 
-function Set-NetboxDCIMRearPort {
+function Set-NBDCIMRearPort {
     [CmdletBinding(ConfirmImpact = 'Medium',
                    SupportsShouldProcess = $true)]
     [OutputType([pscustomobject])]
@@ -13185,7 +13185,7 @@ function Set-NetboxDCIMRearPort {
 
     process {
         foreach ($RearPortID in $Id) {
-            $CurrentPort = Get-NetboxDCIMRearPort -Id $RearPortID -ErrorAction Stop
+            $CurrentPort = Get-NBDCIMRearPort -Id $RearPortID -ErrorAction Stop
 
             $Segments = [System.Collections.ArrayList]::new(@('dcim', 'rear-ports', $CurrentPort.Id))
 
@@ -13206,9 +13206,9 @@ function Set-NetboxDCIMRearPort {
 
 #endregion
 
-#region File Set-NetboxDCIMRearPortTemplate.ps1
+#region File Set-NBDCIMRearPortTemplate.ps1
 
-function Set-NetboxDCIMRearPortTemplate {
+function Set-NBDCIMRearPortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -13233,9 +13233,9 @@ function Set-NetboxDCIMRearPortTemplate {
 
 #endregion
 
-#region File Set-NetboxDCIMRegion.ps1
+#region File Set-NBDCIMRegion.ps1
 
-function Set-NetboxDCIMRegion {
+function Set-NBDCIMRegion {
 <#
     .SYNOPSIS
         Update a region in Netbox
@@ -13268,12 +13268,12 @@ function Set-NetboxDCIMRegion {
         Return the raw API response
 
     .EXAMPLE
-        Set-NetboxDCIMRegion -Id 1 -Name "Western Europe"
+        Set-NBDCIMRegion -Id 1 -Name "Western Europe"
 
         Updates the name of region 1
 
     .EXAMPLE
-        Set-NetboxDCIMRegion -Id 1 -Description "Western European countries"
+        Set-NBDCIMRegion -Id 1 -Description "Western European countries"
 
         Updates the description of region 1
 #>
@@ -13315,9 +13315,9 @@ function Set-NetboxDCIMRegion {
 
 #endregion
 
-#region File Set-NetboxDCIMSite.ps1
+#region File Set-NBDCIMSite.ps1
 
-function Set-NetboxDCIMSite {
+function Set-NBDCIMSite {
 <#
     .SYNOPSIS
         Update a site in Netbox
@@ -13377,10 +13377,10 @@ function Set-NetboxDCIMSite {
         Skip confirmation prompts
 
     .EXAMPLE
-        Set-NetboxDCIMSite -Id 1 -Description "Updated description"
+        Set-NBDCIMSite -Id 1 -Description "Updated description"
 
     .EXAMPLE
-        Get-NetboxDCIMSite -Name "Site1" | Set-NetboxDCIMSite -Status planned
+        Get-NBDCIMSite -Name "Site1" | Set-NBDCIMSite -Status planned
 #>
 
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
@@ -13427,7 +13427,7 @@ function Set-NetboxDCIMSite {
 
     process {
         foreach ($SiteID in $Id) {
-            $CurrentSite = Get-NetboxDCIMSite -Id $SiteID -ErrorAction Stop
+            $CurrentSite = Get-NBDCIMSite -Id $SiteID -ErrorAction Stop
 
             if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentSite.Name)", "Update site")) {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'sites', $CurrentSite.Id))
@@ -13444,9 +13444,9 @@ function Set-NetboxDCIMSite {
 
 #endregion
 
-#region File Set-NetboxDCIMSiteGroup.ps1
+#region File Set-NBDCIMSiteGroup.ps1
 
-function Set-NetboxDCIMSiteGroup {
+function Set-NBDCIMSiteGroup {
 <#
     .SYNOPSIS
         Update a site group in Netbox
@@ -13479,12 +13479,12 @@ function Set-NetboxDCIMSiteGroup {
         Return the raw API response
 
     .EXAMPLE
-        Set-NetboxDCIMSiteGroup -Id 1 -Name "Production Sites"
+        Set-NBDCIMSiteGroup -Id 1 -Name "Production Sites"
 
         Updates the name of site group 1
 
     .EXAMPLE
-        Set-NetboxDCIMSiteGroup -Id 1 -Description "All production sites"
+        Set-NBDCIMSiteGroup -Id 1 -Description "All production sites"
 
         Updates the description of site group 1
 #>
@@ -13526,9 +13526,9 @@ function Set-NetboxDCIMSiteGroup {
 
 #endregion
 
-#region File Set-NetboxDCIMVirtualChassis.ps1
+#region File Set-NBDCIMVirtualChassis.ps1
 
-function Set-NetboxDCIMVirtualChassis {
+function Set-NBDCIMVirtualChassis {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -13552,9 +13552,9 @@ function Set-NetboxDCIMVirtualChassis {
 
 #endregion
 
-#region File Set-NetboxDCIMVirtualDeviceContext.ps1
+#region File Set-NBDCIMVirtualDeviceContext.ps1
 
-function Set-NetboxDCIMVirtualDeviceContext {
+function Set-NBDCIMVirtualDeviceContext {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -13582,9 +13582,9 @@ function Set-NetboxDCIMVirtualDeviceContext {
 
 #endregion
 
-#region File Set-NetboxHostName.ps1
+#region File Set-NBHostName.ps1
 
-function Set-NetboxHostName {
+function Set-NBHostName {
     [CmdletBinding(ConfirmImpact = 'Low',
         SupportsShouldProcess = $true)]
     [OutputType([string])]
@@ -13602,9 +13602,9 @@ function Set-NetboxHostName {
 
 #endregion
 
-#region File Set-NetboxHostPort.ps1
+#region File Set-NBHostPort.ps1
 
-function Set-NetboxHostPort {
+function Set-NBHostPort {
     [CmdletBinding(ConfirmImpact = 'Low',
                    SupportsShouldProcess = $true)]
     [OutputType([string])]
@@ -13622,9 +13622,9 @@ function Set-NetboxHostPort {
 
 #endregion
 
-#region File Set-NetboxHostScheme.ps1
+#region File Set-NBHostScheme.ps1
 
-function Set-NetboxHostScheme {
+function Set-NBHostScheme {
     [CmdletBinding(ConfirmImpact = 'Low',
                    SupportsShouldProcess = $true)]
     [OutputType([string])]
@@ -13647,9 +13647,9 @@ function Set-NetboxHostScheme {
 
 #endregion
 
-#region File Set-NetboxInvokeParams.ps1
+#region File Set-NBInvokeParams.ps1
 
-function Set-NetboxInvokeParams {
+function Set-NBInvokeParams {
     [CmdletBinding(ConfirmImpact = 'Low',
         SupportsShouldProcess = $true)]
     [OutputType([string])]
@@ -13666,10 +13666,10 @@ function Set-NetboxInvokeParams {
 
 #endregion
 
-#region File Set-NetboxIPAMAddress.ps1
+#region File Set-NBIPAMAddress.ps1
 
 
-function Set-NetboxIPAMAddress {
+function Set-NBIPAMAddress {
     [CmdletBinding(ConfirmImpact = 'Medium',
         SupportsShouldProcess = $true)]
     param
@@ -13739,7 +13739,7 @@ function Set-NetboxIPAMAddress {
             $Segments = [System.Collections.ArrayList]::new(@('ipam', 'ip-addresses', $IPId))
 
             Write-Verbose "Obtaining IP from ID $IPId"
-            $CurrentIP = Get-NetboxIPAMAddress -Id $IPId -ErrorAction Stop
+            $CurrentIP = Get-NBIPAMAddress -Id $IPId -ErrorAction Stop
 
             if ($Force -or $PSCmdlet.ShouldProcess($CurrentIP.Address, 'Set')) {
                 $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force'
@@ -13754,10 +13754,10 @@ function Set-NetboxIPAMAddress {
 
 #endregion
 
-#region File Set-NetboxIPAMAddressRange.ps1
+#region File Set-NBIPAMAddressRange.ps1
 
 
-function Set-NetboxIPAMAddressRange {
+function Set-NBIPAMAddressRange {
     [CmdletBinding(ConfirmImpact = 'Medium',
                    SupportsShouldProcess = $true)]
     param
@@ -13802,7 +13802,7 @@ function Set-NetboxIPAMAddressRange {
             $Segments = [System.Collections.ArrayList]::new(@('ipam', 'ip-ranges', $RangeID))
 
             Write-Verbose "Obtaining IP range from ID $RangeID"
-            $CurrentRange = Get-NetboxIPAMAddressRange -Id $RangeID -ErrorAction Stop
+            $CurrentRange = Get-NBIPAMAddressRange -Id $RangeID -ErrorAction Stop
 
             if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentRange.Start_Address) - $($CurrentRange.End_Address)", 'Set')) {
                 $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force'
@@ -13817,9 +13817,9 @@ function Set-NetboxIPAMAddressRange {
 
 #endregion
 
-#region File Set-NetboxIPAMAggregate.ps1
+#region File Set-NBIPAMAggregate.ps1
 
-function Set-NetboxIPAMAggregate {
+function Set-NBIPAMAggregate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -13845,9 +13845,9 @@ function Set-NetboxIPAMAggregate {
 
 #endregion
 
-#region File Set-NetboxIPAMASN.ps1
+#region File Set-NBIPAMASN.ps1
 
-function Set-NetboxIPAMASN {
+function Set-NBIPAMASN {
 <#
     .SYNOPSIS
         Update an ASN in Netbox
@@ -13880,7 +13880,7 @@ function Set-NetboxIPAMASN {
         Return the raw API response
 
     .EXAMPLE
-        Set-NetboxIPAMASN -Id 1 -Description "Updated description"
+        Set-NBIPAMASN -Id 1 -Description "Updated description"
 
         Updates the description of ASN 1
 #>
@@ -13923,9 +13923,9 @@ function Set-NetboxIPAMASN {
 
 #endregion
 
-#region File Set-NetboxIPAMASNRange.ps1
+#region File Set-NBIPAMASNRange.ps1
 
-function Set-NetboxIPAMASNRange {
+function Set-NBIPAMASNRange {
 <#
     .SYNOPSIS
         Update an ASN range in Netbox
@@ -13964,7 +13964,7 @@ function Set-NetboxIPAMASNRange {
         Return the raw API response
 
     .EXAMPLE
-        Set-NetboxIPAMASNRange -Id 1 -Description "Updated description"
+        Set-NBIPAMASNRange -Id 1 -Description "Updated description"
 
         Updates the description of ASN range 1
 #>
@@ -14012,9 +14012,9 @@ function Set-NetboxIPAMASNRange {
 
 #endregion
 
-#region File Set-NetboxIPAMFHRPGroup.ps1
+#region File Set-NBIPAMFHRPGroup.ps1
 
-function Set-NetboxIPAMFHRPGroup {
+function Set-NBIPAMFHRPGroup {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -14040,9 +14040,9 @@ function Set-NetboxIPAMFHRPGroup {
 
 #endregion
 
-#region File Set-NetboxIPAMFHRPGroupAssignment.ps1
+#region File Set-NBIPAMFHRPGroupAssignment.ps1
 
-function Set-NetboxIPAMFHRPGroupAssignment {
+function Set-NBIPAMFHRPGroupAssignment {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -14063,10 +14063,10 @@ function Set-NetboxIPAMFHRPGroupAssignment {
 
 #endregion
 
-#region File Set-NetboxIPAMPrefix.ps1
+#region File Set-NBIPAMPrefix.ps1
 
 
-function Set-NetboxIPAMPrefix {
+function Set-NBIPAMPrefix {
     [CmdletBinding(ConfirmImpact = 'Medium',
                    SupportsShouldProcess = $true)]
     param
@@ -14124,7 +14124,7 @@ function Set-NetboxIPAMPrefix {
             $Segments = [System.Collections.ArrayList]::new(@('ipam', 'prefixes', $PrefixId))
 
             Write-Verbose "Obtaining Prefix from ID $PrefixId"
-            $CurrentPrefix = Get-NetboxIPAMPrefix -Id $PrefixId -ErrorAction Stop
+            $CurrentPrefix = Get-NBIPAMPrefix -Id $PrefixId -ErrorAction Stop
 
             if ($Force -or $PSCmdlet.ShouldProcess($CurrentPrefix.Prefix, 'Set')) {
                 $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force'
@@ -14147,9 +14147,9 @@ function Set-NetboxIPAMPrefix {
 
 #endregion
 
-#region File Set-NetboxIPAMRIR.ps1
+#region File Set-NBIPAMRIR.ps1
 
-function Set-NetboxIPAMRIR {
+function Set-NBIPAMRIR {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -14172,9 +14172,9 @@ function Set-NetboxIPAMRIR {
 
 #endregion
 
-#region File Set-NetboxIPAMRole.ps1
+#region File Set-NBIPAMRole.ps1
 
-function Set-NetboxIPAMRole {
+function Set-NBIPAMRole {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -14198,9 +14198,9 @@ function Set-NetboxIPAMRole {
 
 #endregion
 
-#region File Set-NetboxIPAMRouteTarget.ps1
+#region File Set-NBIPAMRouteTarget.ps1
 
-function Set-NetboxIPAMRouteTarget {
+function Set-NBIPAMRouteTarget {
 <#
     .SYNOPSIS
         Update a route target in Netbox
@@ -14230,12 +14230,12 @@ function Set-NetboxIPAMRouteTarget {
         Return the raw API response
 
     .EXAMPLE
-        Set-NetboxIPAMRouteTarget -Id 1 -Description "Updated description"
+        Set-NBIPAMRouteTarget -Id 1 -Description "Updated description"
 
         Updates the description of route target 1
 
     .EXAMPLE
-        Set-NetboxIPAMRouteTarget -Id 1 -Tenant 5
+        Set-NBIPAMRouteTarget -Id 1 -Tenant 5
 
         Assigns route target 1 to tenant 5
 #>
@@ -14275,9 +14275,9 @@ function Set-NetboxIPAMRouteTarget {
 
 #endregion
 
-#region File Set-NetboxIPAMService.ps1
+#region File Set-NBIPAMService.ps1
 
-function Set-NetboxIPAMService {
+function Set-NBIPAMService {
 <#
     .SYNOPSIS
         Update a service in Netbox
@@ -14313,7 +14313,7 @@ function Set-NetboxIPAMService {
         Return the raw API response
 
     .EXAMPLE
-        Set-NetboxIPAMService -Id 1 -Ports @(443, 8443)
+        Set-NBIPAMService -Id 1 -Ports @(443, 8443)
 
         Updates service 1 to listen on ports 443 and 8443
 #>
@@ -14358,9 +14358,9 @@ function Set-NetboxIPAMService {
 
 #endregion
 
-#region File Set-NetboxIPAMServiceTemplate.ps1
+#region File Set-NBIPAMServiceTemplate.ps1
 
-function Set-NetboxIPAMServiceTemplate {
+function Set-NBIPAMServiceTemplate {
 <#
     .SYNOPSIS
         Update a service template in Netbox
@@ -14393,7 +14393,7 @@ function Set-NetboxIPAMServiceTemplate {
         Return the raw API response
 
     .EXAMPLE
-        Set-NetboxIPAMServiceTemplate -Id 1 -Ports @(80, 443, 8080)
+        Set-NBIPAMServiceTemplate -Id 1 -Ports @(80, 443, 8080)
 
         Updates service template 1 with new ports
 #>
@@ -14436,9 +14436,9 @@ function Set-NetboxIPAMServiceTemplate {
 
 #endregion
 
-#region File Set-NetboxIPAMVLAN.ps1
+#region File Set-NBIPAMVLAN.ps1
 
-function Set-NetboxIPAMVLAN {
+function Set-NBIPAMVLAN {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -14467,9 +14467,9 @@ function Set-NetboxIPAMVLAN {
 
 #endregion
 
-#region File Set-NetboxIPAMVLANGroup.ps1
+#region File Set-NBIPAMVLANGroup.ps1
 
-function Set-NetboxIPAMVLANGroup {
+function Set-NBIPAMVLANGroup {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -14495,9 +14495,9 @@ function Set-NetboxIPAMVLANGroup {
 
 #endregion
 
-#region File Set-NetboxIPAMVLANTranslationPolicy.ps1
+#region File Set-NBIPAMVLANTranslationPolicy.ps1
 
-function Set-NetboxIPAMVLANTranslationPolicy {
+function Set-NBIPAMVLANTranslationPolicy {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -14519,9 +14519,9 @@ function Set-NetboxIPAMVLANTranslationPolicy {
 
 #endregion
 
-#region File Set-NetboxIPAMVLANTranslationRule.ps1
+#region File Set-NBIPAMVLANTranslationRule.ps1
 
-function Set-NetboxIPAMVLANTranslationRule {
+function Set-NBIPAMVLANTranslationRule {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
@@ -14544,9 +14544,9 @@ function Set-NetboxIPAMVLANTranslationRule {
 
 #endregion
 
-#region File Set-NetboxIPAMVRF.ps1
+#region File Set-NBIPAMVRF.ps1
 
-function Set-NetboxIPAMVRF {
+function Set-NBIPAMVRF {
 <#
     .SYNOPSIS
         Update a VRF in Netbox
@@ -14588,12 +14588,12 @@ function Set-NetboxIPAMVRF {
         Return the raw API response
 
     .EXAMPLE
-        Set-NetboxIPAMVRF -Id 1 -Name "Production-VRF"
+        Set-NBIPAMVRF -Id 1 -Name "Production-VRF"
 
         Updates the name of VRF 1
 
     .EXAMPLE
-        Set-NetboxIPAMVRF -Id 1 -Enforce_Unique $true
+        Set-NBIPAMVRF -Id 1 -Enforce_Unique $true
 
         Enables unique enforcement for VRF 1
 #>
@@ -14641,10 +14641,10 @@ function Set-NetboxIPAMVRF {
 
 #endregion
 
-#region File Set-NetboxTimeout.ps1
+#region File Set-NBTimeout.ps1
 
 
-function Set-NetboxTimeout {
+function Set-NBTimeout {
     [CmdletBinding(ConfirmImpact = 'Low',
                    SupportsShouldProcess = $true)]
     [OutputType([uint16])]
@@ -14663,9 +14663,9 @@ function Set-NetboxTimeout {
 
 #endregion
 
-#region File Set-NetboxUnstrustedSSL.ps1
+#region File Set-NBUnstrustedSSL.ps1
 
-Function Set-NetboxUntrustedSSL {
+Function Set-NBUntrustedSSL {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessforStateChangingFunctions", "")]
     Param(  )
     # Hack for allowing untrusted SSL certs with https connections
@@ -14687,10 +14687,10 @@ Function Set-NetboxUntrustedSSL {
 
 #endregion
 
-#region File Set-NetboxVirtualMachine.ps1
+#region File Set-NBVirtualMachine.ps1
 
 
-function Set-NetboxVirtualMachine {
+function Set-NBVirtualMachine {
     [CmdletBinding(ConfirmImpact = 'Medium',
         SupportsShouldProcess = $true)]
     param
@@ -14737,7 +14737,7 @@ function Set-NetboxVirtualMachine {
 
         Write-Verbose "Obtaining VM from ID $Id"
 
-        #$CurrentVM = Get-NetboxVirtualMachine -Id $Id -ErrorAction Stop
+        #$CurrentVM = Get-NBVirtualMachine -Id $Id -ErrorAction Stop
 
         Write-Verbose "Finished obtaining VM"
 
@@ -14753,10 +14753,10 @@ function Set-NetboxVirtualMachine {
 
 #endregion
 
-#region File Set-NetboxVirtualMachineInterface.ps1
+#region File Set-NBVirtualMachineInterface.ps1
 
 
-function Set-NetboxVirtualMachineInterface {
+function Set-NBVirtualMachineInterface {
     [CmdletBinding(ConfirmImpact = 'Medium',
                    SupportsShouldProcess = $true)]
     [OutputType([pscustomobject])]
@@ -14788,7 +14788,7 @@ function Set-NetboxVirtualMachineInterface {
     process {
         foreach ($VMI_ID in $Id) {
             Write-Verbose "Obtaining VM Interface..."
-            $CurrentVMI = Get-NetboxVirtualMachineInterface -Id $VMI_ID -ErrorAction Stop
+            $CurrentVMI = Get-NBVirtualMachineInterface -Id $VMI_ID -ErrorAction Stop
             Write-Verbose "Finished obtaining VM Interface"
 
             $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'interfaces', $CurrentVMI.Id))
@@ -14810,9 +14810,9 @@ function Set-NetboxVirtualMachineInterface {
 
 #endregion
 
-#region File Set-NetboxVPNIKEPolicy.ps1
+#region File Set-NBVPNIKEPolicy.ps1
 
-function Set-NetboxVPNIKEPolicy {
+function Set-NBVPNIKEPolicy {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [string]$Name,[uint16]$Version,[string]$Mode,[uint64[]]$Proposals,[string]$Preshared_Key,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
@@ -14824,9 +14824,9 @@ function Set-NetboxVPNIKEPolicy {
 
 #endregion
 
-#region File Set-NetboxVPNIKEProposal.ps1
+#region File Set-NBVPNIKEProposal.ps1
 
-function Set-NetboxVPNIKEProposal {
+function Set-NBVPNIKEProposal {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[string]$Name,
         [string]$Authentication_Method,[string]$Encryption_Algorithm,[string]$Authentication_Algorithm,[uint16]$Group,[uint32]$SA_Lifetime,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
@@ -14838,9 +14838,9 @@ function Set-NetboxVPNIKEProposal {
 
 #endregion
 
-#region File Set-NetboxVPNIPSecPolicy.ps1
+#region File Set-NBVPNIPSecPolicy.ps1
 
-function Set-NetboxVPNIPSecPolicy {
+function Set-NBVPNIPSecPolicy {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[string]$Name,[uint64[]]$Proposals,[bool]$Pfs_Group,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
     process {
@@ -14851,9 +14851,9 @@ function Set-NetboxVPNIPSecPolicy {
 
 #endregion
 
-#region File Set-NetboxVPNIPSecProfile.ps1
+#region File Set-NBVPNIPSecProfile.ps1
 
-function Set-NetboxVPNIPSecProfile {
+function Set-NBVPNIPSecProfile {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[string]$Name,[string]$Mode,[uint64]$IKE_Policy,[uint64]$IPSec_Policy,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
     process {
@@ -14864,9 +14864,9 @@ function Set-NetboxVPNIPSecProfile {
 
 #endregion
 
-#region File Set-NetboxVPNIPSecProposal.ps1
+#region File Set-NBVPNIPSecProposal.ps1
 
-function Set-NetboxVPNIPSecProposal {
+function Set-NBVPNIPSecProposal {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[string]$Name,[string]$Encryption_Algorithm,[string]$Authentication_Algorithm,[uint32]$SA_Lifetime_Seconds,[uint32]$SA_Lifetime_Data,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
     process {
@@ -14877,9 +14877,9 @@ function Set-NetboxVPNIPSecProposal {
 
 #endregion
 
-#region File Set-NetboxVPNL2VPN.ps1
+#region File Set-NBVPNL2VPN.ps1
 
-function Set-NetboxVPNL2VPN {
+function Set-NBVPNL2VPN {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [string]$Name,[string]$Slug,[uint64]$Identifier,[string]$Type,[string]$Status,[uint64]$Tenant,
@@ -14892,9 +14892,9 @@ function Set-NetboxVPNL2VPN {
 
 #endregion
 
-#region File Set-NetboxVPNL2VPNTermination.ps1
+#region File Set-NBVPNL2VPNTermination.ps1
 
-function Set-NetboxVPNL2VPNTermination {
+function Set-NBVPNL2VPNTermination {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[uint64]$L2VPN,[string]$Assigned_Object_Type,[uint64]$Assigned_Object_Id,[hashtable]$Custom_Fields,[switch]$Raw)
     process {
@@ -14905,9 +14905,9 @@ function Set-NetboxVPNL2VPNTermination {
 
 #endregion
 
-#region File Set-NetboxVPNTunnel.ps1
+#region File Set-NBVPNTunnel.ps1
 
-function Set-NetboxVPNTunnel {
+function Set-NBVPNTunnel {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     [OutputType([PSCustomObject])]
     param
@@ -14936,9 +14936,9 @@ function Set-NetboxVPNTunnel {
 
 #endregion
 
-#region File Set-NetboxVPNTunnelGroup.ps1
+#region File Set-NBVPNTunnelGroup.ps1
 
-function Set-NetboxVPNTunnelGroup {
+function Set-NBVPNTunnelGroup {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[string]$Name,[string]$Slug,[string]$Description,[hashtable]$Custom_Fields,[switch]$Raw)
     process {
@@ -14949,9 +14949,9 @@ function Set-NetboxVPNTunnelGroup {
 
 #endregion
 
-#region File Set-NetboxVPNTunnelTermination.ps1
+#region File Set-NBVPNTunnelTermination.ps1
 
-function Set-NetboxVPNTunnelTermination {
+function Set-NBVPNTunnelTermination {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[uint64]$Tunnel,[ValidateSet('peer', 'hub', 'spoke')][string]$Role,[string]$Termination_Type,[uint64]$Termination_Id,[uint64]$Outside_IP,[hashtable]$Custom_Fields,[switch]$Raw)
     process {
@@ -14962,9 +14962,9 @@ function Set-NetboxVPNTunnelTermination {
 
 #endregion
 
-#region File Set-NetboxWirelessLAN.ps1
+#region File Set-NBWirelessLAN.ps1
 
-function Set-NetboxWirelessLAN {
+function Set-NBWirelessLAN {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[string]$SSID,[uint64]$Group,[string]$Status,[uint64]$VLAN,[uint64]$Tenant,
         [string]$Auth_Type,[string]$Auth_Cipher,[string]$Auth_PSK,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
@@ -14976,9 +14976,9 @@ function Set-NetboxWirelessLAN {
 
 #endregion
 
-#region File Set-NetboxWirelessLANGroup.ps1
+#region File Set-NBWirelessLANGroup.ps1
 
-function Set-NetboxWirelessLANGroup {
+function Set-NBWirelessLANGroup {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[string]$Name,[string]$Slug,[uint64]$Parent,[string]$Description,[hashtable]$Custom_Fields,[switch]$Raw)
     process {
@@ -14989,9 +14989,9 @@ function Set-NetboxWirelessLANGroup {
 
 #endregion
 
-#region File Set-NetboxWirelessLink.ps1
+#region File Set-NBWirelessLink.ps1
 
-function Set-NetboxWirelessLink {
+function Set-NBWirelessLink {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[uint64]$Interface_A,[uint64]$Interface_B,
         [string]$SSID,[string]$Status,[uint64]$Tenant,[string]$Auth_Type,[string]$Auth_Cipher,[string]$Auth_PSK,
@@ -15030,10 +15030,10 @@ function SetupNetboxConfigVariable {
 
 #endregion
 
-#region File Test-NetboxAPIConnected.ps1
+#region File Test-NBAPIConnected.ps1
 
 
-function Test-NetboxAPIConnected {
+function Test-NBAPIConnected {
     [CmdletBinding()]
     param ()
 

@@ -21,19 +21,19 @@ curl -s -H "Authorization: Token $TOKEN" "https://$HOST/api/schema/?format=json"
 
 ### Step 2: Create Functions
 For each endpoint, typically create 4 functions:
-1. `Get-Netbox[Module][Resource]` - GET (list/retrieve)
-2. `New-Netbox[Module][Resource]` - POST (create)
-3. `Set-Netbox[Module][Resource]` - PATCH (update)
-4. `Remove-Netbox[Module][Resource]` - DELETE
+1. `Get-NB[Module][Resource]` - GET (list/retrieve)
+2. `New-NB[Module][Resource]` - POST (create)
+3. `Set-NB[Module][Resource]` - PATCH (update)
+4. `Remove-NB[Module][Resource]` - DELETE
 
 ### Step 3: File Structure
 Create files in the appropriate directory:
 ```
 Functions/[Module]/[Resource]/
-├── Get-Netbox[Module][Resource].ps1
-├── New-Netbox[Module][Resource].ps1
-├── Set-Netbox[Module][Resource].ps1
-└── Remove-Netbox[Module][Resource].ps1
+├── Get-NB[Module][Resource].ps1
+├── New-NB[Module][Resource].ps1
+├── Set-NB[Module][Resource].ps1
+└── Remove-NB[Module][Resource].ps1
 ```
 
 ### Step 4: Follow Existing Patterns
@@ -51,8 +51,8 @@ Use existing functions as templates. Key patterns:
 . ./Connect-DevNetbox.ps1
 
 # Test the new functions
-Get-Netbox[Module][Resource]
-New-Netbox[Module][Resource] -Name "test" -WhatIf
+Get-NB[Module][Resource]
+New-NB[Module][Resource] -Name "test" -WhatIf
 ```
 
 ### Step 6: Update Module Manifest
