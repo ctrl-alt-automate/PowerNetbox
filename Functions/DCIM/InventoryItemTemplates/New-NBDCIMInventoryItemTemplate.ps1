@@ -1,5 +1,25 @@
+<#
+.SYNOPSIS
+    Creates a new CIMInventoryItemTemplate in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMInventoryItemTemplate in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMInventoryItemTemplate
+
+    Returns all CIMInventoryItemTemplate objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBDCIMInventoryItemTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][uint64]$Device_Type,
         [Parameter(Mandatory = $true)][string]$Name,

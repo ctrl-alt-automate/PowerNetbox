@@ -1,4 +1,4 @@
-﻿
+
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
@@ -6,7 +6,7 @@ param
 Import-Module Pester
 Remove-Module NetboxPS -Force -ErrorAction SilentlyContinue
 
-$ModulePath = "$PSScriptRoot\..\dist\NetboxPS.psd1"
+ = Join-Path  ".." "NetboxPS" "NetboxPS.psd1"
 
 if (Test-Path $ModulePath) {
     Import-Module $ModulePath -ErrorAction Stop

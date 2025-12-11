@@ -1,5 +1,5 @@
 ﻿
-function Add-NBDCIMInterfaceConnection {
+function New-NBDCIMInterfaceConnection {
     <#
     .SYNOPSIS
         Create a new connection between two interfaces
@@ -17,7 +17,7 @@ function Add-NBDCIMInterfaceConnection {
         Database ID of interface B
 
     .EXAMPLE
-        PS C:\> Add-NBDCIMInterfaceConnection -Interface_A $value1 -Interface_B $value2
+        PS C:\> New-NBDCIMInterfaceConnection -Interface_A $value1 -Interface_B $value2
 
     .NOTES
         Additional information about the function.

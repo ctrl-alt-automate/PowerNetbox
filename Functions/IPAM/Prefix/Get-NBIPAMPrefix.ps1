@@ -1,4 +1,4 @@
-﻿
+
 function Get-NBIPAMPrefix {
 <#
     .SYNOPSIS
@@ -145,10 +145,10 @@ function Get-NBIPAMPrefix {
         [Parameter(ParameterSetName = 'Query')]
         [uint64]$Role_Id,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [switch]$Raw

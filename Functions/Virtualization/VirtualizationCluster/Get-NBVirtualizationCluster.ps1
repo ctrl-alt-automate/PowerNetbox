@@ -1,4 +1,4 @@
-﻿
+
 function Get-NBVirtualizationCluster {
 <#
     .SYNOPSIS
@@ -72,8 +72,10 @@ function Get-NBVirtualizationCluster {
 
         [uint64]$Site_Id,
 
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [switch]$Raw

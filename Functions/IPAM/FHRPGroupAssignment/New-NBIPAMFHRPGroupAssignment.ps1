@@ -1,5 +1,25 @@
+<#
+.SYNOPSIS
+    Creates a new PAMFHRPGroupAssignment in Netbox I module.
+
+.DESCRIPTION
+    Creates a new PAMFHRPGroupAssignment in Netbox I module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBIPAMFHRPGroupAssignment
+
+    Returns all PAMFHRPGroupAssignment objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBIPAMFHRPGroupAssignment {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][uint64]$Group,
         [Parameter(Mandatory = $true)][string]$Interface_Type,

@@ -1,10 +1,28 @@
-﻿
+<#
+.SYNOPSIS
+    Retrieves Devices objects from Netbox DCIM module.
+
+.DESCRIPTION
+    Retrieves Devices objects from Netbox DCIM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBDCIMDeviceRole
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Get-NBDCIMDeviceRole {
     [CmdletBinding()]
+    [OutputType([PSCustomObject])]
     param
     (
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [Parameter(ParameterSetName = 'ById')]

@@ -1,4 +1,23 @@
-﻿
+<#
+.SYNOPSIS
+    Updates an existing imeout in Netbox T module.
+
+.DESCRIPTION
+    Updates an existing imeout in Netbox T module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBTimeout
+
+    Returns all imeout objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+
 function Set-NBTimeout {
     [CmdletBinding(ConfirmImpact = 'Low',
                    SupportsShouldProcess = $true)]

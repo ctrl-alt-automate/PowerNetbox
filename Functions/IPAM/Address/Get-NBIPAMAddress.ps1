@@ -1,5 +1,22 @@
-﻿function Get-NBIPAMAddress {
+<#
+.SYNOPSIS
+    Retrieves Address objects from Netbox IPAM module.
+
+.DESCRIPTION
+    Retrieves Address objects from Netbox IPAM module.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Get-NBIPAMAddress
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Get-NBIPAMAddress {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(ParameterSetName = 'Query',
@@ -54,10 +71,10 @@
         [Parameter(ParameterSetName = 'Query')]
         [object]$Role,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [switch]$Raw

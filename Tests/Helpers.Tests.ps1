@@ -1,4 +1,4 @@
-﻿
+
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param
 (
@@ -6,7 +6,7 @@ param
 Import-Module Pester
 Remove-Module NetboxPS -Force -ErrorAction SilentlyContinue
 
-$ModulePath = "$PSScriptRoot\..\dist\NetboxPS.psd1"
+ = Join-Path  ".." "NetboxPS" "NetboxPS.psd1"
 
 if (Test-Path $ModulePath) {
     Import-Module $ModulePath -ErrorAction Stop
@@ -24,7 +24,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' -Fixture {
     } -ModuleName 'NetboxPS'
 
     InModuleScope -ModuleName 'NetboxPS' -ScriptBlock {
-        Context -Name "Building URIBuilder" -Fixture {
+        Context "Building URIBuilder" {
             It "Should give a basic URI object" {
                 BuildNewURI -HostName 'netbox.domain.com' | Should -BeOfType [System.UriBuilder]
             }
@@ -78,7 +78,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' -Fixture {
             }
         }
 
-        Context -Name "Building URI components" -Fixture {
+        Context "Building URI components" {
             It "Should give a basic hashtable" {
                 $URIComponents = BuildURIComponents -URISegments @('segment1', 'segment2') -ParametersDictionary @{'param1' = 1 }
 
@@ -158,7 +158,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' -Fixture {
             }
         }
 
-        Context -Name "Invoking request tests" -Fixture {
+        Context "Invoking request tests" {
             Mock -CommandName 'Invoke-RestMethod' -Verifiable -MockWith {
                 # Return an object of the items we would normally pass to Invoke-RestMethod
                 return [pscustomobject]@{
@@ -181,7 +181,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' -Fixture {
 
                 $Result = InvokeNetboxRequest -URI $URIBuilder
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result | Should -BeOfType [string]
                 $Result | Should -BeExactly "Only results"
@@ -192,7 +192,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' -Fixture {
 
                 $Result = InvokeNetboxRequest -URI $URIBuilder -Raw
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'GET'
                 $Result.Uri | Should -Be $URIBuilder.Uri.AbsoluteUri
@@ -210,7 +210,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' -Fixture {
                     'bodyparam1' = 'val1'
                 } -Raw
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'POST'
                 $Result.Body | Should -Be '{"bodyparam1":"val1"}'
@@ -229,7 +229,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' -Fixture {
 
                 $Result = InvokeNetboxRequest -URI $URIBuilder -Method POST -Body $Body -Headers $Headers -Raw
 
-                Assert-VerifiableMock
+                Should -InvokeVerifiable
 
                 $Result.Method | Should -Be 'POST'
                 $Result.Body | Should -Be '{"bodyparam1":"val1"}'
@@ -253,10 +253,10 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' -Fixture {
             }
         }
 
-        Context -Name "Validating choices" -Fixture {
-            Context -Name "Virtualization choices" -Fixture {
+        Context "Validating choices" {
+            Context "Virtualization choices" {
                 $MajorObject = 'Virtualization'
-                $script:NetboxConfig.Choices.Virtualization = (Get-Content "$PSScriptRoot\VirtualizationChoices.json" -ErrorAction Stop | ConvertFrom-Json)
+                $script:NetboxConfig.Choices.Virtualization = (Get-Content "/VirtualizationChoices.json" -ErrorAction Stop | ConvertFrom-Json)
 
                 It "Should return a valid integer for status when provided a name" {
                     $Result = ValidateChoice -MajorObject $MajorObject -ChoiceName 'virtual-machine:status' -ProvidedValue 'Active'
@@ -279,11 +279,11 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' -Fixture {
                 }
             }
 
-            Context -Name "IPAM choices" -Fixture {
+            Context "IPAM choices" {
                 $MajorObject = 'IPAM'
-                $script:NetboxConfig.Choices.IPAM = (Get-Content "$PSScriptRoot\IPAMChoices.json" -ErrorAction Stop | ConvertFrom-Json)
+                $script:NetboxConfig.Choices.IPAM = (Get-Content "/IPAMChoices.json" -ErrorAction Stop | ConvertFrom-Json)
 
-                Context -Name "aggregate:family" -Fixture {
+                Context "aggregate:family" {
                     $ChoiceName = 'aggregate:family'
 
                     It "Should return a valid integer when provided a name" {
@@ -307,7 +307,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' -Fixture {
                     }
                 }
 
-                Context -Name "prefix:family" {
+                Context "prefix:family" {
                     $ChoiceName = 'prefix:family'
 
                     It "Should return a valid integer when provided a name" {
@@ -331,7 +331,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' -Fixture {
                     }
                 }
 
-                Context -Name "prefix:status" {
+                Context "prefix:status" {
                     $ChoiceName = 'prefix:status'
 
                     It "Should return a valid integer when provided a name" {
@@ -355,7 +355,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' -Fixture {
                     }
                 }
 
-                Context -Name "ip-address:family" {
+                Context "ip-address:family" {
                     $ChoiceName = 'ip-address:family'
 
                     It "Should return a valid integer when provided a name" {
@@ -379,7 +379,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' -Fixture {
                     }
                 }
 
-                Context -Name "ip-address:status" {
+                Context "ip-address:status" {
                     $ChoiceName = 'ip-address:status'
 
                     It "Should return a valid integer when provided a name" {
@@ -403,7 +403,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' -Fixture {
                     }
                 }
 
-                Context -Name "ip-address:role" {
+                Context "ip-address:role" {
                     $ChoiceName = 'ip-address:role'
 
                     It "Should return a valid integer when provided a name" {
@@ -427,7 +427,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' -Fixture {
                     }
                 }
 
-                Context -Name "vlan:status" {
+                Context "vlan:status" {
                     $ChoiceName = 'vlan:status'
 
                     It "Should return a valid integer when provided a name" {
@@ -451,7 +451,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' -Fixture {
                     }
                 }
 
-                Context -Name "service:protocol" {
+                Context "service:protocol" {
                     $ChoiceName = 'service:protocol'
 
                     It "Should return a valid integer when provided a name" {
@@ -476,11 +476,11 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' -Fixture {
                 }
             }
 
-            Context -Name "DCIM choices" -Fixture {
+            Context "DCIM choices" {
                 $MajorObject = 'DCIM'
-                $script:NetboxConfig.Choices.DCIM = (Get-Content "$PSScriptRoot\DCIMChoices.json" -ErrorAction Stop | ConvertFrom-Json)
+                $script:NetboxConfig.Choices.DCIM = (Get-Content "/DCIMChoices.json" -ErrorAction Stop | ConvertFrom-Json)
 
-                Context -Name "device:face" -Fixture {
+                Context "device:face" {
                     $ChoiceName = 'device:face'
 
                     It "Should return a valid integer when provided a name" {
@@ -504,7 +504,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' -Fixture {
                     }
                 }
 
-                Context -Name "device:status" -Fixture {
+                Context "device:status" {
                     $ChoiceName = 'device:status'
 
                     It "Should return a valid integer when provided a name" {
@@ -528,7 +528,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' -Fixture {
                     }
                 }
 
-                Context -Name "console-port:connection_status" -Fixture {
+                Context "console-port:connection_status" {
                     $ChoiceName = 'console-port:connection_status'
 
                     It "Should return a valid string when provided a name" {
@@ -559,7 +559,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' -Fixture {
                     }
                 }
 
-                Context -Name "interface:form_factor" -Fixture {
+                Context "interface:form_factor" {
                     $ChoiceName = 'interface:form_factor'
 
                     It "Should return a valid integer when provided a name" {
@@ -583,7 +583,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' -Fixture {
                     }
                 }
 
-                Context -Name "interface-connection:connection_status" -Fixture {
+                Context "interface-connection:connection_status" {
                     $ChoiceName = 'interface-connection:connection_status'
 
                     It "Should return a valid string when provided a name" {
@@ -614,7 +614,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' -Fixture {
                     }
                 }
 
-                Context -Name "interface-template:form_factor" -Fixture {
+                Context "interface-template:form_factor" {
                     $ChoiceName = 'interface-template:form_factor'
 
                     It "Should return a valid integer when provided a name" {
@@ -638,7 +638,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' -Fixture {
                     }
                 }
 
-                Context -Name "power-port:connection_status" -Fixture {
+                Context "power-port:connection_status" {
                     $ChoiceName = 'power-port:connection_status'
 
                     It "Should return a valid string when provided a name" {
@@ -669,7 +669,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' -Fixture {
                     }
                 }
 
-                Context -Name "rack:type" -Fixture {
+                Context "rack:type" {
                     $ChoiceName = 'rack:type'
 
                     It "Should return a valid integer when provided a name" {
@@ -693,7 +693,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' -Fixture {
                     }
                 }
 
-                Context -Name "rack:width" -Fixture {
+                Context "rack:width" {
                     $ChoiceName = 'rack:width'
 
                     It "Should return a valid integer when provided a name" {

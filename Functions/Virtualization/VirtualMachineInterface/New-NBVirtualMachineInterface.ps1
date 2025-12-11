@@ -1,6 +1,26 @@
-﻿
-function Add-NBVirtualMachineInterface {
+<#
+.SYNOPSIS
+    Creates a new irtualMachineInterface in Netbox V module.
+
+.DESCRIPTION
+    Creates a new irtualMachineInterface in Netbox V module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBVirtualMachineInterface
+
+    Returns all irtualMachineInterface objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+
+function New-NBVirtualMachineInterface {
     [CmdletBinding()]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(Mandatory = $true)]

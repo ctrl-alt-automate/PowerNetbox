@@ -1,5 +1,25 @@
+<#
+.SYNOPSIS
+    Creates a new CIMCable in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMCable in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMCable
+
+    Returns all CIMCable objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBDCIMCable {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][string]$A_Terminations_Type,
         [Parameter(Mandatory = $true)][uint64[]]$A_Terminations,

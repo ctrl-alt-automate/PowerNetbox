@@ -1,5 +1,25 @@
+<#
+.SYNOPSIS
+    Creates a new CIMRackType in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMRackType in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMRackType
+
+    Returns all CIMRackType objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBDCIMRackType {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][uint64]$Manufacturer,
         [Parameter(Mandatory = $true)][string]$Model,

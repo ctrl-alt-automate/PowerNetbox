@@ -1,7 +1,27 @@
-﻿function Remove-NBDCIMRearPort {
+<#
+.SYNOPSIS
+    Removes a CIMRearPort from Netbox D module.
+
+.DESCRIPTION
+    Removes a CIMRearPort from Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Remove-NBDCIMRearPort
+
+    Returns all CIMRearPort objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Remove-NBDCIMRearPort {
 
     [CmdletBinding(ConfirmImpact = 'High',
         SupportsShouldProcess = $true)]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(Mandatory = $true,

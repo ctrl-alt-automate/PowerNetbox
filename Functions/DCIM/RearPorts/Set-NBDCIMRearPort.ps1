@@ -1,4 +1,23 @@
-﻿
+<#
+.SYNOPSIS
+    Updates an existing CIMRearPort in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMRearPort in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMRearPort
+
+    Returns all CIMRearPort objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+
 function Set-NBDCIMRearPort {
     [CmdletBinding(ConfirmImpact = 'Medium',
                    SupportsShouldProcess = $true)]

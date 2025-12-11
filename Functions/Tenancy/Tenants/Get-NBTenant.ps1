@@ -1,4 +1,4 @@
-﻿
+
 function Get-NBTenant {
 <#
     .SYNOPSIS
@@ -69,10 +69,10 @@ function Get-NBTenant {
         [Parameter(ParameterSetName = 'Query')]
         [hashtable]$CustomFields,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
-        [Parameter(ParameterSetName = 'Query')]
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [switch]$Raw

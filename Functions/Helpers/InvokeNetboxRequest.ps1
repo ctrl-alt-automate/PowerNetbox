@@ -41,42 +41,45 @@ function InvokeNetboxRequest {
         $null = $splat.Add('Body', ($Body | ConvertTo-Json -Compress))
     }
 
-    $result = Invoke-RestMethod @splat
-
-    #region TODO: Handle errors a little more gracefully...
-
-    <#
     try {
-        Write-Verbose "Sending request..."
+        Write-Verbose "Sending request to $($URI.Uri.AbsoluteUri)"
         $result = Invoke-RestMethod @splat
-        Write-Verbose $result
     } catch {
-        Write-Verbose "Caught exception"
-        if ($_.Exception.psobject.properties.Name.contains('Response')) {
-            Write-Verbose "Exception contains a response property"
-            if ($Raw) {
-                Write-Verbose "RAW provided...throwing raw exception"
-                throw $_
+        $errorMessage = $_.Exception.Message
+        $statusCode = $null
+
+        # Try to extract response body for better error messages
+        if ($_.Exception.Response) {
+            $statusCode = [int]$_.Exception.Response.StatusCode
+
+            try {
+                $stream = $_.Exception.Response.GetResponseStream()
+                $reader = [System.IO.StreamReader]::new($stream)
+                $responseBody = $reader.ReadToEnd()
+                $reader.Close()
+
+                if ($responseBody) {
+                    $errorData = $responseBody | ConvertFrom-Json -ErrorAction SilentlyContinue
+                    if ($errorData.detail) {
+                        $errorMessage = $errorData.detail
+                    } elseif ($errorData) {
+                        $errorMessage = $responseBody
+                    }
+                }
+            } catch {
+                # Keep original error message if we can't parse response
+                Write-Verbose "Could not parse error response body: $_"
             }
-
-            Write-Verbose "Converting response to object"
-            $myError = GetNetboxAPIErrorBody -Response $_.Exception.Response | ConvertFrom-Json
-        } else {
-            Write-Verbose "No response property found"
-            $myError = $_
         }
+
+        $errorRecord = [System.Management.Automation.ErrorRecord]::new(
+            [System.Exception]::new("Netbox API Error ($statusCode): $errorMessage"),
+            'NetboxAPIError',
+            [System.Management.Automation.ErrorCategory]::InvalidOperation,
+            $URI.Uri.AbsoluteUri
+        )
+        $PSCmdlet.ThrowTerminatingError($errorRecord)
     }
-
-    Write-Verbose "MyError is $($myError.GetType().FullName)"
-
-    if ($myError -is [Exception]) {
-        throw $_
-    } elseif ($myError -is [pscustomobject]) {
-        throw $myError.detail
-    }
-    #>
-
-    #endregion TODO: Handle errors a little more gracefully...
 
     # If the user wants the raw value from the API... otherwise return only the actual result
     if ($Raw) {

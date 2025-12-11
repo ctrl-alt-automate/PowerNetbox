@@ -1,5 +1,25 @@
+<#
+.SYNOPSIS
+    Creates a new CIMMACAddress in Netbox D module.
+
+.DESCRIPTION
+    Creates a new CIMMACAddress in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBDCIMMACAddress
+
+    Returns all CIMMACAddress objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function New-NBDCIMMACAddress {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)][string]$Mac_Address,
         [uint64]$Assigned_Object_Id,

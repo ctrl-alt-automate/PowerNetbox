@@ -1,4 +1,23 @@
-﻿
+<#
+.SYNOPSIS
+    Creates a new irtualMachine in Netbox V module.
+
+.DESCRIPTION
+    Creates a new irtualMachine in Netbox V module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBVirtualMachine
+
+    Returns all irtualMachine objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+
 function New-NBVirtualMachine {
     [CmdletBinding(ConfirmImpact = 'low',
         SupportsShouldProcess = $true)]

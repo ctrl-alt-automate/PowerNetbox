@@ -1,4 +1,4 @@
-﻿
+
 function Get-NBVirtualMachineInterface {
     <#
     .SYNOPSIS
@@ -64,8 +64,10 @@ function Get-NBVirtualMachineInterface {
 
         [string]$MAC_Address,
 
+        [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
+        [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
         [switch]$Raw

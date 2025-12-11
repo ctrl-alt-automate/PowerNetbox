@@ -1,5 +1,25 @@
+<#
+.SYNOPSIS
+    Updates an existing CIMPowerFeed in Netbox D module.
+
+.DESCRIPTION
+    Updates an existing CIMPowerFeed in Netbox D module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBDCIMPowerFeed
+
+    Returns all CIMPowerFeed objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
 function Set-NBDCIMPowerFeed {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [uint64]$Power_Panel,

@@ -1,4 +1,23 @@
-﻿function Set-NBHostScheme {
+<#
+.SYNOPSIS
+    Updates an existing ostScheme in Netbox H module.
+
+.DESCRIPTION
+    Updates an existing ostScheme in Netbox H module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    Set-NBHostScheme
+
+    Returns all ostScheme objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+function Set-NBHostScheme {
     [CmdletBinding(ConfirmImpact = 'Low',
                    SupportsShouldProcess = $true)]
     [OutputType([string])]

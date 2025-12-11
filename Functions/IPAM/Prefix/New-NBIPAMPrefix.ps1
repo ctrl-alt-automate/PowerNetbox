@@ -1,8 +1,29 @@
-﻿
+<#
+.SYNOPSIS
+    Creates a new PAMPrefix in Netbox I module.
+
+.DESCRIPTION
+    Creates a new PAMPrefix in Netbox I module.
+    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBIPAMPrefix
+
+    Returns all PAMPrefix objects.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+#>
+
 function New-NBIPAMPrefix {
     [CmdletBinding(ConfirmImpact = 'low',
         SupportsShouldProcess = $true)]
+    [OutputType([PSCustomObject])]
     [CmdletBinding()]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(Mandatory = $true)]
