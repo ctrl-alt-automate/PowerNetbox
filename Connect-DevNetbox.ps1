@@ -48,11 +48,11 @@ if ($ConfigOnly) {
 }
 
 # Import module
-$ModulePath = Join-Path $PSScriptRoot 'NetboxPS' 'NetboxPS.psd1'
+$ModulePath = Join-Path $PSScriptRoot 'NetboxPSv4' 'NetboxPSv4.psd1'
 if (-not (Test-Path $ModulePath)) {
     Write-Warning "Built module not found at $ModulePath"
     Write-Warning "Run ./deploy.ps1 first, or importing from source..."
-    $ModulePath = Join-Path $PSScriptRoot 'NetboxPS.psd1'
+    $ModulePath = Join-Path $PSScriptRoot 'NetboxPSv4.psd1'
 }
 
 Write-Host "Importing module from: $ModulePath" -ForegroundColor Cyan

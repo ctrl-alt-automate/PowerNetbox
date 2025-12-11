@@ -1,18 +1,22 @@
-# CLAUDE.md - NetboxPS Development Guide
+# CLAUDE.md - NetboxPSv4 Development Guide
 
 This file provides guidance to Claude Code (or any AI assistant) when working with this codebase.
 
 ## Project Overview
 
-**NetboxPS** is a PowerShell module that provides a wrapper for the [Netbox](https://github.com/netbox-community/netbox) REST API. It allows users to interact with Netbox infrastructure management directly from PowerShell.
+**NetboxPSv4** is a PowerShell module that provides a wrapper for the [Netbox](https://github.com/netbox-community/netbox) REST API. It allows users to interact with Netbox infrastructure management directly from PowerShell.
 
-- **Current Version**: 1.8.5
+> **Note:** This is a fork of [NetboxPS](https://github.com/benclaussen/NetboxPS) published under a new name to provide full Netbox 4.x compatibility.
+
+- **Module Name**: NetboxPSv4 (PSGallery)
+- **Current Version**: 4.4.7
 - **Target Netbox Version**: 4.4.7 (fully compatible)
 - **Minimum Netbox Version**: 2.8.x
 - **PowerShell Version**: 5.1+ (Desktop and Core editions)
-- **Repository**: Fork of https://github.com/benclaussen/NetboxPS
+- **Original Repository**: https://github.com/benclaussen/NetboxPS
+- **Fork Repository**: https://github.com/ctrl-alt-automate/NetboxPS
 - **Issue Tracking**: https://github.com/ctrl-alt-automate/NetboxPS/issues
-- **Total Functions**: 488 public functions across all modules
+- **Total Functions**: 478 public functions across all modules
 
 ## Development Environment
 
@@ -59,7 +63,7 @@ The build process:
 1. Runs PSScriptAnalyzer to fix whitespace issues
 2. Concatenates all `.ps1` files from `Functions/` into a single module
 3. Updates version in manifest
-4. Outputs to `NetboxPS/` directory
+4. Outputs to `NetboxPSv4/` directory
 
 ### Running Tests
 ```powershell
@@ -87,8 +91,12 @@ The project uses GitHub Actions for CI/CD:
 ## Project Structure
 
 ```
-NetboxPS/
-├── Functions/                    # Source files - one function per file (488 functions)
+NetboxPSv4/                           # Module output directory
+├── NetboxPSv4.psd1               # Built manifest
+└── NetboxPSv4.psm1               # Built module
+
+NetboxPS/                             # Repository root
+├── Functions/                    # Source files - one function per file (489 functions)
 │   ├── Circuits/                 # Circuit management (100% coverage)
 │   │   ├── Circuits/             # Get/New/Set/Remove
 │   │   ├── CircuitGroups/        # Get/New/Set/Remove
@@ -210,9 +218,9 @@ NetboxPS/
 │       └── Users/                # Get/New/Set/Remove
 ├── Tests/                        # Pester tests
 ├── .claude/commands/             # Specialized AI agent prompts
-├── NetboxPS/                     # Build output directory
-├── NetboxPS.psd1                 # Module manifest (source)
-├── NetboxPS.psm1                 # Root module file (source)
+├── NetboxPSv4/                   # Build output directory
+├── NetboxPSv4.psd1               # Module manifest (source)
+├── NetboxPSv4.psm1               # Root module file (source)
 ├── Connect-DevNetbox.ps1         # Quick connect helper script
 └── deploy.ps1                    # Build script
 ```
@@ -524,8 +532,8 @@ The agent prompts are stored in `.claude/commands/`:
 ### Module not loading after changes
 ```powershell
 # Remove and reimport
-Remove-Module NetboxPS -Force -ErrorAction SilentlyContinue
-Import-Module ./NetboxPS/NetboxPS.psd1 -Force
+Remove-Module NetboxPSv4 -Force -ErrorAction SilentlyContinue
+Import-Module ./NetboxPSv4/NetboxPSv4.psd1 -Force
 ```
 
 ### SSL/Certificate errors
