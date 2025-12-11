@@ -4,9 +4,9 @@ param
 (
 )
 Import-Module Pester
-Remove-Module NetboxPS -Force -ErrorAction SilentlyContinue
+Remove-Module NetboxPSv4 -Force -ErrorAction SilentlyContinue
 
- = Join-Path  ".." "NetboxPS" "NetboxPS.psd1"
+$ModulePath = Join-Path $PSScriptRoot ".." "NetboxPSv4" "NetboxPSv4.psd1"
 
 if (Test-Path $ModulePath) {
     Import-Module $ModulePath -ErrorAction Stop
@@ -21,9 +21,9 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' -Fixture {
 
     Mock -CommandName 'CheckNetboxIsConnected' -MockWith {
         return $true
-    } -ModuleName 'NetboxPS'
+    } -ModuleName 'NetboxPSv4'
 
-    InModuleScope -ModuleName 'NetboxPS' -ScriptBlock {
+    InModuleScope -ModuleName 'NetboxPSv4' -ScriptBlock {
         Context "Building URIBuilder" {
             It "Should give a basic URI object" {
                 BuildNewURI -HostName 'netbox.domain.com' | Should -BeOfType [System.UriBuilder]
@@ -172,7 +172,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' -Fixture {
                 }
             }
 
-            Mock -CommandName 'Get-NBCredential' -Verifiable -ModuleName 'NetboxPS' -MockWith {
+            Mock -CommandName 'Get-NBCredential' -Verifiable -ModuleName 'NetboxPSv4' -MockWith {
                 return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
             }
 

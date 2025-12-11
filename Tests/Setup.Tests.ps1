@@ -4,9 +4,9 @@ param
 (
 )
 Import-Module Pester
-Remove-Module NetboxPS -Force -ErrorAction SilentlyContinue
+Remove-Module NetboxPSv4 -Force -ErrorAction SilentlyContinue
 
- = Join-Path  ".." "NetboxPS" "NetboxPS.psd1"
+$ModulePath = Join-Path $PSScriptRoot ".." "NetboxPSv4" "NetboxPSv4.psd1"
 
 if (Test-Path $ModulePath) {
     Import-Module $ModulePath -ErrorAction Stop
@@ -56,7 +56,7 @@ Describe "Setup tests" -Tag 'Core', 'Setup' -Fixture {
     Context "Connecting to the API" {
         Mock Get-NBCircuitsChoices {
             return $true
-        } -ModuleName NetboxPS -Verifiable
+        } -ModuleName NetboxPSv4 -Verifiable
 
         $Creds = [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
 
@@ -71,7 +71,7 @@ Describe "Setup tests" -Tag 'Core', 'Setup' -Fixture {
 
 
 
-        Assert-MockCalled -CommandName Get-NBCircuitsChoices -ModuleName NetboxPS
+        Assert-MockCalled -CommandName Get-NBCircuitsChoices -ModuleName NetboxPSv4
     }
     #>
 }
