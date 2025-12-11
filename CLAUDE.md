@@ -12,7 +12,7 @@ This file provides guidance to Claude Code (or any AI assistant) when working wi
 - **PowerShell Version**: 5.1+ (Desktop and Core editions)
 - **Repository**: Fork of https://github.com/benclaussen/NetboxPS
 - **Issue Tracking**: https://github.com/ctrl-alt-automate/NetboxPS/issues
-- **Total Functions**: 350+ public functions across all modules
+- **Total Functions**: 488 public functions across all modules
 
 ## Development Environment
 
@@ -88,12 +88,19 @@ The project uses GitHub Actions for CI/CD:
 
 ```
 NetboxPS/
-├── Functions/                    # Source files - one function per file (360 functions)
-│   ├── Circuits/                 # Circuit management
-│   │   ├── Circuits/
-│   │   ├── Providers/
-│   │   ├── Terminations/
-│   │   └── Types/
+├── Functions/                    # Source files - one function per file (488 functions)
+│   ├── Circuits/                 # Circuit management (100% coverage)
+│   │   ├── Circuits/             # Get/New/Set/Remove
+│   │   ├── CircuitGroups/        # Get/New/Set/Remove
+│   │   ├── CircuitGroupAssignments/
+│   │   ├── Providers/            # Get/New/Set/Remove
+│   │   ├── ProviderAccounts/     # Get/New/Set/Remove
+│   │   ├── ProviderNetworks/     # Get/New/Set/Remove
+│   │   ├── Terminations/         # Get/New/Set/Remove
+│   │   ├── Types/                # Get/New/Set/Remove
+│   │   ├── VirtualCircuits/      # Get/New/Set/Remove
+│   │   ├── VirtualCircuitTypes/  # Get/New/Set/Remove
+│   │   └── VirtualCircuitTerminations/
 │   ├── DCIM/                     # Data Center Infrastructure (100% coverage)
 │   │   ├── Cables/               # Get/New/Set/Remove
 │   │   ├── CableTerminations/    # Get
@@ -138,7 +145,19 @@ NetboxPS/
 │   │   ├── Sites/                # Get/New/Set/Remove
 │   │   ├── VirtualChassis/       # Get/New/Set/Remove
 │   │   └── VirtualDeviceContexts/# Get/New/Set/Remove
-│   ├── Extras/                   # Tags, custom fields, etc.
+│   ├── Extras/                   # Tags, custom fields, etc. (expanded)
+│   │   ├── Bookmarks/            # Get/New/Remove
+│   │   ├── ConfigContexts/       # Get/New/Set/Remove
+│   │   ├── CustomFieldChoiceSets/# Get/New/Set/Remove
+│   │   ├── CustomFields/         # Get/New/Set/Remove
+│   │   ├── CustomLinks/          # Get/New/Set/Remove
+│   │   ├── EventRules/           # Get/New/Set/Remove
+│   │   ├── ExportTemplates/      # Get/New/Set/Remove
+│   │   ├── ImageAttachments/     # Get/Remove
+│   │   ├── JournalEntries/       # Get/New/Set/Remove
+│   │   ├── SavedFilters/         # Get/New/Set/Remove
+│   │   ├── Tags/                 # Get/New/Set/Remove
+│   │   └── Webhooks/             # Get/New/Set/Remove
 │   ├── Helpers/                  # Internal helper functions
 │   ├── IPAM/                     # IP Address Management (100% coverage)
 │   │   ├── Address/              # Get/New/Set/Remove + AvailableIP
@@ -174,10 +193,21 @@ NetboxPS/
 │   │   ├── Tunnel/               # Get/New/Set/Remove
 │   │   ├── TunnelGroup/          # Get/New/Set/Remove
 │   │   └── TunnelTermination/    # Get/New/Set/Remove
-│   └── Wireless/                 # Wireless module (NEW)
-│       ├── WirelessLAN/          # Get/New/Set/Remove
-│       ├── WirelessLANGroup/     # Get/New/Set/Remove
-│       └── WirelessLink/         # Get/New/Set/Remove
+│   ├── Wireless/                 # Wireless module
+│   │   ├── WirelessLAN/          # Get/New/Set/Remove
+│   │   ├── WirelessLANGroup/     # Get/New/Set/Remove
+│   │   └── WirelessLink/         # Get/New/Set/Remove
+│   ├── Core/                     # Core module (NEW)
+│   │   ├── DataFiles/            # Get
+│   │   ├── DataSources/          # Get/New/Set/Remove
+│   │   ├── Jobs/                 # Get
+│   │   ├── ObjectChanges/        # Get
+│   │   └── ObjectTypes/          # Get
+│   └── Users/                    # Users module (NEW)
+│       ├── Groups/               # Get/New/Set/Remove
+│       ├── Permissions/          # Get/New/Set/Remove
+│       ├── Tokens/               # Get/New/Set/Remove
+│       └── Users/                # Get/New/Set/Remove
 ├── Tests/                        # Pester tests
 ├── .claude/commands/             # Specialized AI agent prompts
 ├── NetboxPS/                     # Build output directory
@@ -345,12 +375,12 @@ InvokeNetboxRequest -URI $URI -Method POST -Body $bodyHashtable
 | IPAM | `/api/ipam/` | ✅ **Full** (18 endpoints, 72 functions) |
 | Virtualization | `/api/virtualization/` | ✅ **Full** (5 endpoints, 20 functions) |
 | Tenancy | `/api/tenancy/` | ✅ **Full** (5 endpoints, 20 functions) |
-| Circuits | `/api/circuits/` | Partial (~20%) |
-| Extras | `/api/extras/` | Minimal (~11%) |
+| Circuits | `/api/circuits/` | ✅ **Full** (11 endpoints, 44 functions) |
+| Extras | `/api/extras/` | ✅ **Expanded** (12 endpoints, 45 functions) |
 | VPN | `/api/vpn/` | ✅ **Full** (10 endpoints, 40 functions) |
 | Wireless | `/api/wireless/` | ✅ **Full** (3 endpoints, 12 functions) |
-| Core | `/api/core/` | Not implemented |
-| Users | `/api/users/` | Not implemented |
+| Core | `/api/core/` | ✅ **Full** (5 endpoints, 8 functions) |
+| Users | `/api/users/` | ✅ **Full** (4 endpoints, 16 functions) |
 
 ## Netbox 4.x Compatibility
 
@@ -394,11 +424,11 @@ See [GitHub Issues](https://github.com/ctrl-alt-automate/NetboxPS/issues) for th
 - **Issue #29**: Virtualization module 100% coverage ✅ (11 new functions)
 - **Issue #30**: Tenancy module 100% coverage ✅ (9 new functions)
 
-### In Progress
-- **Issue #31**: Circuits module (~20% → 100%)
-- **Issue #32**: Extras module (~11% → partial)
-- **Issue #33**: Core module (new)
-- **Issue #34**: Users module (new)
+### Completed (Recent)
+- **Issue #31**: Circuits module 100% coverage ✅ (11 endpoints, 44 functions)
+- **Issue #32**: Extras module expansion ✅ (12 endpoints, 45 functions)
+- **Issue #33**: Core module ✅ (5 endpoints, 8 functions)
+- **Issue #34**: Users module ✅ (4 endpoints, 16 functions)
 
 ## Testing API Endpoints
 
