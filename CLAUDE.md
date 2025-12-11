@@ -560,3 +560,6 @@ SSL/TLS certificate handling differs between PowerShell editions:
 # - Desktop: Uses CertificatePolicy callback
 # - Core: Uses -SkipCertificateCheck parameter
 ```
+
+### URL Encoding
+Query string building uses `[System.Uri]::EscapeDataString()` instead of `System.Web.HttpUtility` for cross-platform compatibility. This eliminates the need for the Windows-only `System.Web` assembly.
