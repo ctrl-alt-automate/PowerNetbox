@@ -43,6 +43,10 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             return 30
         }
 
+        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'NetboxPSv4' -MockWith {
+            return @{}
+        }
+
         # Load choices data into module scope
         InModuleScope -ModuleName 'NetboxPSv4' -ArgumentList $script:TestPath -ScriptBlock {
             param($TestPath)
