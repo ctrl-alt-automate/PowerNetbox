@@ -58,7 +58,7 @@ jobs:
       - name: Validate module manifest
         shell: pwsh
         run: |
-          $manifest = Test-ModuleManifest -Path './NetboxPS/NetboxPS.psd1'
+          $manifest = Test-ModuleManifest -Path './NetboxPSv4/NetboxPSv4.psd1'
           Write-Host "Module: $($manifest.Name)"
           Write-Host "Version: $($manifest.Version)"
           Write-Host "Functions: $($manifest.ExportedFunctions.Count)"
@@ -74,6 +74,6 @@ jobs:
           }
 
           Write-Host "Publishing module to PowerShell Gallery..." -ForegroundColor Cyan
-          Publish-Module -Path './NetboxPS' -NuGetApiKey $env:PSGALLERY_API_KEY -Verbose
+          Publish-Module -Path './NetboxPSv4' -NuGetApiKey $env:PSGALLERY_API_KEY -Verbose
 
           Write-Host "✅ Successfully published to PowerShell Gallery!" -ForegroundColor Green
