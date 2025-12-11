@@ -430,6 +430,14 @@ See [GitHub Issues](https://github.com/ctrl-alt-automate/NetboxPS/issues) for th
 - **Issue #33**: Core module ✅ (5 endpoints, 8 functions)
 - **Issue #34**: Users module ✅ (4 endpoints, 16 functions)
 
+### Cross-Platform Compatibility (Completed)
+- **Issue #35**: Fix path handling in deploy.ps1 ✅
+- **Issue #36**: Certificate handling for PS Core ✅
+- **Issue #37**: Remove System.Web dependency ✅
+- **Issue #38**: Standardize line endings/encoding ✅
+- **Issue #39**: StreamReader UTF-8 encoding ✅
+- **Issue #40**: Cross-platform documentation ✅
+
 ## Testing API Endpoints
 
 Use curl to quickly test API endpoints:
@@ -535,6 +543,15 @@ Connect-NBAPI -Hostname "netbox.local" -Credential $cred -SkipCertificateCheck
 
 This module supports Windows, Linux, and macOS with PowerShell 5.1+ and PowerShell Core 7+.
 
+### Platform Support Matrix
+
+| Platform | PowerShell 5.1 | PowerShell 7+ |
+|----------|----------------|---------------|
+| Windows 10/11 | ✅ Full | ✅ Full |
+| Windows Server | ✅ Full | ✅ Full |
+| macOS (Intel/ARM) | ❌ N/A | ✅ Full |
+| Linux (Ubuntu/Debian/RHEL) | ❌ N/A | ✅ Full |
+
 ### Build Script (deploy.ps1)
 The build script uses `Join-Path` for all file paths to ensure cross-platform compatibility:
 ```powershell
@@ -568,3 +585,17 @@ Query string building uses `[System.Uri]::EscapeDataString()` instead of `System
 - `.gitattributes` enforces LF line endings for all text files
 - Build script uses `utf8NoBOM` encoding on PowerShell Core
 - PowerShell Desktop uses `utf8` (with BOM, unavoidable limitation)
+
+### Stream Encoding
+All `StreamReader` instances explicitly specify UTF-8 encoding for consistent behavior:
+```powershell
+$reader = [System.IO.StreamReader]::new($stream, [System.Text.Encoding]::UTF8)
+```
+
+### Cross-Platform Checklist for Contributors
+When adding new code, ensure:
+1. **Paths**: Use `Join-Path` instead of hardcoded separators (`\` or `/`)
+2. **Encoding**: Specify UTF-8 encoding explicitly on file/stream operations
+3. **TLS/SSL**: Don't assume `ServicePointManager` - check `$PSVersionTable.PSEdition`
+4. **Assemblies**: Avoid Windows-only assemblies (e.g., `System.Web`)
+5. **Line endings**: Use `\n` (LF) instead of `\r\n` (CRLF) in string literals
