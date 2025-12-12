@@ -28,7 +28,7 @@ function Get-NBDCIMInterface {
         [Parameter(ValueFromPipelineByPropertyName = $true)]
         [uint64]$Id,
 
-        [uint64]$Name,
+        [string]$Name,
 
         [object]$Form_Factor,
 
