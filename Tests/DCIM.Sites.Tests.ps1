@@ -91,7 +91,8 @@ Describe "DCIM Sites Tests" -Tag 'DCIM', 'Sites' {
         }
 
         It "Should remove a site" {
-            $Result = Remove-NBDCIMSite -Id 10 -Force
+            # Remove-NBDCIMSite uses SupportsShouldProcess, use -Confirm:$false instead of -Force
+            $Result = Remove-NBDCIMSite -Id 10 -Confirm:$false
             Should -Invoke -CommandName 'Get-NBDCIMSite' -Times 1 -Exactly -Scope 'It' -ModuleName 'NetboxPSv4'
             $Result.Method | Should -Be 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/sites/10/'

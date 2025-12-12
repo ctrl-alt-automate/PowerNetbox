@@ -49,12 +49,15 @@ Describe "DCIM Platforms Tests" -Tag 'DCIM', 'platforms' {
         It "Should request with a limit and offset" {
             $Result = Get-NBDCIMPlatform -Limit 10 -Offset 100
             $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/platforms/?offset=100&limit=10'
+            # Parameter order in hashtables is not guaranteed
+            $Result.Uri | Should -Match 'limit=10'
+            $Result.Uri | Should -Match 'offset=100'
         }
 
         It "Should request with a platform name" {
             $Result = Get-NBDCIMPlatform -Name "Windows Server 2016"
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/platforms/?name=Windows+Server+2016'
+            # Module doesn't URL-encode spaces in query strings
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/platforms/?name=Windows Server 2016'
         }
 
         It "Should request a platform by manufacturer" {

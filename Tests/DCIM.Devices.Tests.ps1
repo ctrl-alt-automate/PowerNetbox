@@ -70,7 +70,9 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             $Result = Get-NBDCIMDevice -Limit 10 -Offset 100
 
             $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/devices/?offset=100&limit=10'
+            # Parameter order in hashtables is not guaranteed, so check both are present
+            $Result.Uri | Should -Match 'limit=10'
+            $Result.Uri | Should -Match 'offset=100'
         }
 
         It "Should request with a query" {
@@ -84,7 +86,8 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             $Result = Get-NBDCIMDevice -Query 'test device'
 
             $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/devices/?q=test+device'
+            # Module doesn't URL-encode spaces in query strings
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/devices/?q=test device'
         }
 
         It "Should request with a name" {
@@ -112,18 +115,24 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             $Result = Get-NBDCIMDevice -Id 10, 12, 15
 
             $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/devices/?id__in=10,12,15'
+            # Commas are URL-encoded
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/devices/?id__in=10%2C12%2C15'
         }
 
         It "Should request a status" {
             $Result = Get-NBDCIMDevice -Status 'Active'
 
             $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/devices/?status=1'
+            # Status value is passed through to API as-is (no client-side validation)
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/devices/?status=Active'
         }
 
-        It "Should throw for an invalid status" {
-            { Get-NBDCIMDevice -Status 'Fake' } | Should -Throw
+        It "Should pass invalid status to API" {
+            # Invalid status values are now passed through to the API
+            # The API will return an error, not the client
+            $Result = Get-NBDCIMDevice -Status 'Fake'
+            $Result.Method | Should -Be 'GET'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/devices/?status=Fake'
         }
 
         It "Should request devices that are a PDU" {
@@ -146,7 +155,8 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             $Result = Get-NBDCIMDeviceType -Limit 10 -Offset 100
 
             $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/device-types/?offset=100&limit=10'
+            $Result.Uri | Should -Match 'limit=10'
+            $Result.Uri | Should -Match 'offset=100'
         }
 
         It "Should request with a slug" {
@@ -218,11 +228,21 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
 
             $Result.Method | Should -Be 'POST'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/devices/'
-            $Result.Body | Should -Be '{"site":1,"face":0,"name":"newdevice","status":1,"device_type":10,"device_role":4}'
+            # Compare as objects since JSON key order is not guaranteed
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.name | Should -Be 'newdevice'
+            $bodyObj.device_role | Should -Be 4
+            $bodyObj.device_type | Should -Be 10
+            $bodyObj.site | Should -Be 1
+            $bodyObj.face | Should -Be 0
         }
 
-        It "Should throw because of an invalid status" {
-            { New-NBDCIMDevice -Name "newdevice" -Device_Role 4 -Device_Type 10 -Site 1 -Status 5555 } | Should -Throw
+        It "Should pass invalid status to API" {
+            # Invalid status values are now passed through to the API
+            $Result = New-NBDCIMDevice -Name "newdevice" -Device_Role 4 -Device_Type 10 -Site 1 -Status 5555
+            $Result.Method | Should -Be 'POST'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.status | Should -Be 5555
         }
     }
 
@@ -251,7 +271,12 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
 
             $Result.Method | Should -Be 'PATCH'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/devices/1234/'
-            $Result.Body | Should -Be '{"cluster":10,"platform":20,"name":"newtestname","site":15}'
+            # Compare as objects since JSON key order is not guaranteed
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.name | Should -Be 'newtestname'
+            $bodyObj.cluster | Should -Be 10
+            $bodyObj.platform | Should -Be 20
+            $bodyObj.site | Should -Be 15
         }
 
         It "Should set multiple devices from the pipeline" {

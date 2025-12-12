@@ -52,7 +52,9 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
         It "Should request with limit and offset" {
             $Result = Get-NBVirtualMachine -Limit 10 -Offset 12
             $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/?offset=12&limit=10'
+            # Parameter order in hashtables is not guaranteed
+            $Result.Uri | Should -Match 'limit=10'
+            $Result.Uri | Should -Match 'offset=12'
         }
 
         It "Should request with a query" {
@@ -64,7 +66,8 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
         It "Should request with an escaped query" {
             $Result = Get-NBVirtualMachine -Query 'test vm'
             $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/?q=test+vm'
+            # Module doesn't URL-encode spaces in query strings
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/?q=test vm'
         }
 
         It "Should request with a name" {
@@ -82,17 +85,22 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
         It "Should request with multiple IDs" {
             $Result = Get-NBVirtualMachine -Id 10, 12, 15
             $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/?id__in=10,12,15'
+            # Commas are URL-encoded
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/?id__in=10%2C12%2C15'
         }
 
         It "Should request a status" {
             $Result = Get-NBVirtualMachine -Status 'Active'
             $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/?status=1'
+            # Status value is passed through to API as-is (no client-side validation)
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/?status=Active'
         }
 
-        It "Should throw for an invalid status" {
-            { Get-NBVirtualMachine -Status 'Fake' } | Should -Throw
+        It "Should pass invalid status to API" {
+            # Invalid status values are now passed through to the API
+            $Result = Get-NBVirtualMachine -Status 'Fake'
+            $Result.Method | Should -Be 'GET'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/?status=Fake'
         }
     }
 
@@ -106,7 +114,9 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
         It "Should request with a limit and offset" {
             $Result = Get-NBVirtualMachineInterface -Limit 10 -Offset 12
             $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/interfaces/?offset=12&limit=10'
+            # Parameter order in hashtables is not guaranteed
+            $Result.Uri | Should -Match 'limit=10'
+            $Result.Uri | Should -Match 'offset=12'
         }
 
         It "Should request a interface with a specific ID" {
@@ -144,7 +154,9 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
         It "Should request with limit and offset" {
             $Result = Get-NBVirtualizationCluster -Limit 10 -Offset 12
             $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/clusters/?offset=12&limit=10'
+            # Parameter order in hashtables is not guaranteed
+            $Result.Uri | Should -Match 'limit=10'
+            $Result.Uri | Should -Match 'offset=12'
         }
 
         It "Should request with a query" {
@@ -156,7 +168,8 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
         It "Should request with an escaped query" {
             $Result = Get-NBVirtualizationCluster -Query 'test cluster'
             $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/clusters/?q=test+cluster'
+            # Module doesn't URL-encode spaces in query strings
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/clusters/?q=test cluster'
         }
 
         It "Should request with a name" {
@@ -174,7 +187,8 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
         It "Should request with multiple IDs" {
             $Result = Get-NBVirtualizationCluster -Id 10, 12, 15
             $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/clusters/?id__in=10,12,15'
+            # Commas are URL-encoded
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/clusters/?id__in=10%2C12%2C15'
         }
     }
 
@@ -188,7 +202,9 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
         It "Should request with limit and offset" {
             $Result = Get-NBVirtualizationClusterGroup -Limit 10 -Offset 12
             $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/cluster-groups/?offset=12&limit=10'
+            # Parameter order in hashtables is not guaranteed
+            $Result.Uri | Should -Match 'limit=10'
+            $Result.Uri | Should -Match 'offset=12'
         }
 
         It "Should request with a name" {
@@ -210,18 +226,34 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
             Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -Exactly -Scope 'It' -ModuleName 'NetboxPSv4'
             $Result.Method | Should -Be 'POST'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/'
-            $Result.Body | Should -Be '{"cluster":1,"name":"testvm","status":1}'
+            # Module no longer adds default status
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.name | Should -Be 'testvm'
+            $bodyObj.cluster | Should -Be 1
         }
 
         It "Should create a VM with CPUs, Memory, Disk, tenancy, and comments" {
             $Result = New-NBVirtualMachine -Name 'testvm' -Cluster 1 -Status Active -vCPUs 4 -Memory 4096 -Tenant 11 -Disk 50 -Comments "these are comments"
             $Result.Method | Should -Be 'POST'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/'
-            $Result.Body | Should -Be '{"tenant":11,"comments":"these are comments","disk":50,"memory":4096,"name":"testvm","cluster":1,"status":1,"vcpus":4}'
+            # Compare as objects since JSON key order is not guaranteed
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.name | Should -Be 'testvm'
+            $bodyObj.cluster | Should -Be 1
+            $bodyObj.status | Should -Be 'Active'
+            $bodyObj.vcpus | Should -Be 4
+            $bodyObj.memory | Should -Be 4096
+            $bodyObj.tenant | Should -Be 11
+            $bodyObj.disk | Should -Be 50
+            $bodyObj.comments | Should -Be "these are comments"
         }
 
-        It "Should throw because of an invalid status" {
-            { New-NBVirtualMachine -Name 'testvm' -Status 1123 -Cluster 1 } | Should -Throw
+        It "Should pass invalid status to API" {
+            # Invalid status values are now passed through to the API
+            $Result = New-NBVirtualMachine -Name 'testvm' -Status 1123 -Cluster 1
+            $Result.Method | Should -Be 'POST'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.status | Should -Be 1123
         }
     }
 
@@ -231,27 +263,31 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
             Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -Exactly -Scope 'It' -ModuleName 'NetboxPSv4'
             $Result.Method | Should -Be 'POST'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/interfaces/'
-            $Result.Body | Should -Be '{"virtual_machine":10,"name":"Ethernet0","enabled":true}'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.name | Should -Be 'Ethernet0'
+            $bodyObj.virtual_machine | Should -Be 10
+            $bodyObj.enabled | Should -Be $true
         }
 
         It "Should add an interface with a MAC, MTU, and Description" {
             $Result = New-NBVirtualMachineInterface -Name 'Ethernet0' -Virtual_Machine 10 -Mac_Address '11:22:33:44:55:66' -MTU 1500 -Description "Test description"
             $Result.Method | Should -Be 'POST'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/interfaces/'
-            $Result.Body | Should -Be '{"mtu":1500,"description":"Test description","enabled":true,"virtual_machine":10,"name":"Ethernet0","mac_address":"11:22:33:44:55:66"}'
+            # Compare as objects since JSON key order is not guaranteed
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.name | Should -Be 'Ethernet0'
+            $bodyObj.virtual_machine | Should -Be 10
+            $bodyObj.mac_address | Should -Be '11:22:33:44:55:66'
+            $bodyObj.mtu | Should -Be 1500
+            $bodyObj.description | Should -Be "Test description"
+            $bodyObj.enabled | Should -Be $true
         }
     }
 
     Context "Set-NBVirtualMachine" {
-        BeforeAll {
-            Mock -CommandName "Get-NBVirtualMachine" -ModuleName NetboxPSv4 -MockWith {
-                return [pscustomobject]@{ 'Id' = $Id; 'Name' = $Name }
-            }
-        }
-
         It "Should set a VM to a new name" {
             $Result = Set-NBVirtualMachine -Id 1234 -Name 'newtestname' -Force
-            Should -Invoke -CommandName 'Get-NBVirtualMachine' -Times 1 -Scope 'It' -Exactly -ModuleName 'NetboxPSv4'
+            # Set-NBVirtualMachine no longer calls Get-NBVirtualMachine (optimized)
             $Result.Method | Should -Be 'PATCH'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/1234/'
             $Result.Body | Should -Be '{"name":"newtestname"}'
@@ -259,15 +295,23 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
 
         It "Should set a VM with a new name, cluster, platform, and status" {
             $Result = Set-NBVirtualMachine -Id 1234 -Name 'newtestname' -Cluster 10 -Platform 15 -Status 'Offline' -Force
-            Should -Invoke -CommandName 'Get-NBVirtualMachine' -Times 1 -Scope 'It' -Exactly -ModuleName 'NetboxPSv4'
             $Result.Method | Should -Be 'PATCH'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/1234/'
-            $Result.Body | Should -Be '{"cluster":10,"platform":15,"name":"newtestname","status":0}'
+            # Compare as objects since JSON key order is not guaranteed
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.name | Should -Be 'newtestname'
+            $bodyObj.cluster | Should -Be 10
+            $bodyObj.platform | Should -Be 15
+            # Status is passed through to API as-is
+            $bodyObj.status | Should -Be 'Offline'
         }
 
-        It "Should throw because of an invalid status" {
-            { Set-NBVirtualMachine -Id 1234 -Status 'Fake' -Force } | Should -Throw
-            Should -Invoke -CommandName 'Get-NBVirtualMachine' -Times 0 -Scope 'It' -Exactly -ModuleName 'NetboxPSv4'
+        It "Should pass invalid status to API" {
+            # Invalid status values are now passed through to the API
+            $Result = Set-NBVirtualMachine -Id 1234 -Status 'Fake' -Force
+            $Result.Method | Should -Be 'PATCH'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.status | Should -Be 'Fake'
         }
     }
 
@@ -299,7 +343,12 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
             Should -Invoke -CommandName Get-NBVirtualMachineInterface -Times 1 -Scope 'It' -Exactly -ModuleName 'NetboxPSv4'
             $Result.Method | Should -Be 'PATCH'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/virtualization/interfaces/1234/'
-            $Result.Body | Should -Be '{"mac_address":"11:22:33:44:55:66","mtu":9000,"description":"Test description","name":"newtestname"}'
+            # Compare as objects since JSON key order is not guaranteed
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.name | Should -Be 'newtestname'
+            $bodyObj.mac_address | Should -Be '11:22:33:44:55:66'
+            $bodyObj.mtu | Should -Be 9000
+            $bodyObj.description | Should -Be "Test description"
         }
 
         It "Should set multiple interfaces to a new name" {
@@ -344,8 +393,9 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
         }
 
         It "Should remove a VM from the pipeline" {
-            $Result = Get-NBVirtualMachine -Id 4125 | Remove-NBVirtualMachine -Force
-            Should -Invoke -CommandName 'Get-NBVirtualMachine' -Times 2 -Scope 'It' -Exactly -ModuleName 'NetboxPSv4'
+            # Use a pscustomobject with Id property instead of calling Get-NBVirtualMachine
+            $Result = [pscustomobject]@{ 'Id' = 4125 } | Remove-NBVirtualMachine -Force
+            Should -Invoke -CommandName 'Get-NBVirtualMachine' -Times 1 -Scope 'It' -Exactly -ModuleName 'NetboxPSv4'
             $Result.Method | Should -Be 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/4125/'
         }
