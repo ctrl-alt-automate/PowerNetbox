@@ -81,6 +81,11 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
             $Result.Uri | Should -BeExactly 'https://netbox.domain.com/api/dcim/interfaces/?mgmt_only=True'
         }
 
+        It "Should request with a name filter" {
+            $Result = Get-NBDCIMInterface -Name "eth0"
+            $Result.Uri | Should -BeExactly 'https://netbox.domain.com/api/dcim/interfaces/?name=eth0'
+        }
+
         It "Should request an interface from the pipeline" {
             $Result = [pscustomobject]@{ 'Id' = 1234 } | Get-NBDCIMInterface
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/interfaces/1234/'
