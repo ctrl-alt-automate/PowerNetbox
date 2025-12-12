@@ -2,8 +2,9 @@
 
 [![PowerShell Gallery](https://img.shields.io/powershellgallery/v/PowerNetbox?label=PSGallery&logo=powershell&logoColor=white)](https://www.powershellgallery.com/packages/PowerNetbox)
 [![PowerShell Gallery Downloads](https://img.shields.io/powershellgallery/dt/PowerNetbox?label=Downloads&logo=powershell&logoColor=white)](https://www.powershellgallery.com/packages/PowerNetbox)
+[![Tests](https://github.com/ctrl-alt-automate/PowerNetbox/actions/workflows/test.yml/badge.svg)](https://github.com/ctrl-alt-automate/PowerNetbox/actions/workflows/test.yml)
+[![Lint](https://github.com/ctrl-alt-automate/PowerNetbox/actions/workflows/pssa.yml/badge.svg)](https://github.com/ctrl-alt-automate/PowerNetbox/actions/workflows/pssa.yml)
 [![License](https://img.shields.io/github/license/ctrl-alt-automate/PowerNetbox)](LICENSE)
-[![Tests](https://img.shields.io/badge/Tests-613%20passing-brightgreen)](Tests/)
 [![Netbox Version](https://img.shields.io/badge/Netbox-4.4.8-blue?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyTDIgN2wxMCA1IDEwLTV6TTIgMTdsMTAgNSAxMC01TTIgMTJsMTAgNSAxMC01Ii8+PC9zdmc+)](https://github.com/netbox-community/netbox)
 
 **The** comprehensive PowerShell module for the [Netbox](https://github.com/netbox-community/netbox) REST API with **100% coverage**. Fully compatible with **Netbox 4.4.8**.
