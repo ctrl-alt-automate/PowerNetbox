@@ -250,7 +250,9 @@ function Connect-NBAPI {
         The hostname for the resource such as netbox.domain.com
 
     .PARAMETER Credential
-        Credential object containing the API key in the password. Username is not applicable
+        A PSCredential object. Put the API token in the Password field. The Username field is ignored.
+
+        Example: $cred = [PSCredential]::new('api', (ConvertTo-SecureString 'your-api-token' -AsPlainText -Force))
 
     .PARAMETER Scheme
         Scheme for the URI such as HTTP or HTTPS. Defaults to HTTPS
@@ -262,7 +264,9 @@ function Connect-NBAPI {
         The full URI for the resource such as "https://netbox.domain.com:8443"
 
     .PARAMETER SkipCertificateCheck
-        A description of the SkipCertificateCheck parameter.
+        Skip SSL/TLS certificate validation. Use this for self-signed certificates or test environments.
+        On PowerShell Core (7+), uses the native -SkipCertificateCheck parameter.
+        On PowerShell Desktop (5.1), uses a custom certificate policy callback.
 
     .PARAMETER TimeoutSeconds
         The number of seconds before the HTTP call times out. Defaults to 30 seconds
@@ -627,7 +631,7 @@ function Get-NBCircuit {
         Database ID of circuit. This will query for exactly the IDs provided
 
     .PARAMETER CID
-        Circuit ID
+        Circuit ID. Also accepts -Name alias for consistency with other Get- functions.
 
     .PARAMETER InstallDate
         Date of installation
@@ -639,10 +643,20 @@ function Get-NBCircuit {
         A raw search query... As if you were searching the web site
 
     .PARAMETER Provider
-        The name or ID of the provider. Provide either [string] or [uint64]. String will search provider names, integer will search database IDs
+        The name or database ID of the provider.
+        - String: Searches by provider name (e.g., 'Comcast')
+        - Integer: Searches by database ID (e.g., 1)
+
+    .PARAMETER ProviderId
+        Alias for Provider. Database ID of the provider (uint64).
 
     .PARAMETER Type
-        Type of circuit. Provide either [string] or [uint64]. String will search provider type names, integer will search database IDs
+        The name or database ID of the circuit type.
+        - String: Searches by type name (e.g., 'Internet')
+        - Integer: Searches by database ID (e.g., 1)
+
+    .PARAMETER TypeId
+        Alias for Type. Database ID of the circuit type (uint64).
 
     .PARAMETER Site
         Location/site of circuit. Provide either [string] or [uint64]. String will search site names, integer will search database IDs
@@ -651,13 +665,13 @@ function Get-NBCircuit {
         Tenant assigned to circuit. Provide either [string] or [uint64]. String will search tenant names, integer will search database IDs
 
     .PARAMETER Limit
-        A description of the Limit parameter.
+        Maximum number of results to return (1-1000). Default is determined by Netbox server.
 
     .PARAMETER Offset
-        A description of the Offset parameter.
+        Number of results to skip before returning. Use with Limit for pagination.
 
     .PARAMETER Raw
-        A description of the Raw parameter.
+        Return the raw API response instead of extracting the results array.
 
     .PARAMETER ID__IN
         Multiple unique DB IDs to retrieve
@@ -677,6 +691,7 @@ function Get-NBCircuit {
         [uint64[]]$Id,
 
         [Parameter(ParameterSetName = 'Query')]
+        [Alias('Name')]
         [string]$CID,
 
         [Parameter(ParameterSetName = 'Query')]
@@ -689,9 +704,11 @@ function Get-NBCircuit {
         [string]$Query,
 
         [Parameter(ParameterSetName = 'Query')]
+        [Alias('ProviderId', 'Provider_Id')]
         [object]$Provider,
 
         [Parameter(ParameterSetName = 'Query')]
+        [Alias('TypeId', 'Type_Id')]
         [object]$Type,
 
         [Parameter(ParameterSetName = 'Query')]
