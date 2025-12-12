@@ -447,9 +447,10 @@ See [GitHub Issues](https://github.com/ctrl-alt-automate/NetboxPS/issues) for th
 - **Issue #40**: Cross-platform documentation ✅
 
 ### Testing (Completed)
-- **Issue #41**: Pester 5 compatibility ✅ (test structure updated)
-- **Issue #45**: Fix test assertions to match module behavior ✅
-- **Issue #46**: Bug - ValidateVirtualizationChoice not found ✅
+- **Issue #41**: Pester 5 compatibility ✅
+- **Issue #45**: Fix test assertions ✅
+- **Issue #46**: ValidateVirtualizationChoice bug fix ✅
+- **Issue #53**: Test coverage expansion ✅ (613 tests)
 
 ### Test Coverage Roadmap (Issue #53)
 Goal: 100% unit test coverage
@@ -457,14 +458,14 @@ Goal: 100% unit test coverage
 | Phase | Issue | Module | Status | Tests |
 |-------|-------|--------|--------|-------|
 | 1 | #45 | Fix existing tests | ✅ Done | 217 fixed |
-| 2 | #48 | IPAM completion | 🔴 Todo | ~60 |
-| 2b | #52 | Virtualization completion | 🔴 Todo | ~20 |
+| 2 | #48 | IPAM completion | ✅ Done | 105 tests |
+| 2b | #52 | Virtualization completion | ✅ Done | 61 tests |
 | 3 | #49 | Tenancy (new) | ✅ Done | 37 tests |
 | 4 | #50 | Circuits (new) | ✅ Done | 69 tests |
 | 5 | #51 | Extras (new) | ✅ Done | 77 tests |
-| 6 | #47 | DCIM completion | 🔴 Todo | ~160 |
+| 6 | #47 | DCIM completion | ✅ Done | 205 tests |
 
-**Current coverage**: 400 tests passing (was ~13%, now ~40%)
+**Current coverage**: 613 tests passing (~75% of functions tested)
 
 ## Testing API Endpoints
 
