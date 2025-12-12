@@ -446,6 +446,26 @@ See [GitHub Issues](https://github.com/ctrl-alt-automate/NetboxPS/issues) for th
 - **Issue #39**: StreamReader UTF-8 encoding ✅
 - **Issue #40**: Cross-platform documentation ✅
 
+### Testing (Completed)
+- **Issue #41**: Pester 5 compatibility ✅ (test structure updated)
+- **Issue #45**: Fix test assertions to match module behavior ✅
+- **Issue #46**: Bug - ValidateVirtualizationChoice not found ✅
+
+### Test Coverage Roadmap (Issue #53)
+Goal: 100% unit test coverage
+
+| Phase | Issue | Module | Status | Tests |
+|-------|-------|--------|--------|-------|
+| 1 | #45 | Fix existing tests | ✅ Done | 217 fixed |
+| 2 | #48 | IPAM completion | 🔴 Todo | ~60 |
+| 2b | #52 | Virtualization completion | 🔴 Todo | ~20 |
+| 3 | #49 | Tenancy (new) | ✅ Done | 37 tests |
+| 4 | #50 | Circuits (new) | ✅ Done | 69 tests |
+| 5 | #51 | Extras (new) | ✅ Done | 77 tests |
+| 6 | #47 | DCIM completion | 🔴 Todo | ~160 |
+
+**Current coverage**: 400 tests passing (was ~13%, now ~40%)
+
 ## Testing API Endpoints
 
 Use curl to quickly test API endpoints:
