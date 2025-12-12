@@ -6582,7 +6582,7 @@ function Get-NBIPAMRole {
         Additional information about the function.
 #>
 
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([PSCustomObject])]
     param
     (
@@ -6602,12 +6602,18 @@ function Get-NBIPAMRole {
         [Parameter(ParameterSetName = 'Query')]
         [switch]$Brief,
 
+        [Parameter(ParameterSetName = 'Query')]
+        [Parameter(ParameterSetName = 'ByID')]
         [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
+        [Parameter(ParameterSetName = 'Query')]
+        [Parameter(ParameterSetName = 'ByID')]
         [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
+        [Parameter(ParameterSetName = 'Query')]
+        [Parameter(ParameterSetName = 'ByID')]
         [switch]$Raw
     )
 
