@@ -3,9 +3,9 @@ param()
 
 BeforeAll {
     Import-Module Pester
-    Remove-Module NetboxPSv4 -Force -ErrorAction SilentlyContinue
+    Remove-Module PowerNetbox -Force -ErrorAction SilentlyContinue
 
-    $ModulePath = Join-Path $PSScriptRoot ".." "NetboxPSv4" "NetboxPSv4.psd1"
+    $ModulePath = Join-Path $PSScriptRoot ".." "PowerNetbox" "PowerNetbox.psd1"
     if (Test-Path $ModulePath) {
         Import-Module $ModulePath -ErrorAction Stop
     }
@@ -15,7 +15,7 @@ BeforeAll {
 
 Describe "Helpers tests" -Tag 'Core', 'Helpers' {
     It "Should throw because we are not connected" {
-        InModuleScope -ModuleName 'NetboxPSv4' {
+        InModuleScope -ModuleName 'PowerNetbox' {
             { CheckNetboxIsConnected } | Should -Throw
         }
     }
@@ -23,7 +23,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' {
     Context "Building URIBuilder" {
         BeforeAll {
             # Configure the module's NetboxConfig since BuildNewURI now reads from it directly
-            InModuleScope -ModuleName 'NetboxPSv4' {
+            InModuleScope -ModuleName 'PowerNetbox' {
                 $script:NetboxConfig.Hostname = 'netbox.domain.com'
                 $script:NetboxConfig.HostScheme = 'https'
                 $script:NetboxConfig.HostPort = 443
@@ -31,13 +31,13 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' {
         }
 
         It "Should give a basic URI object" {
-            InModuleScope -ModuleName 'NetboxPSv4' {
+            InModuleScope -ModuleName 'PowerNetbox' {
                 BuildNewURI -SkipConnectedCheck | Should -BeOfType [System.UriBuilder]
             }
         }
 
         It "Should generate a URI using configured hostname" {
-            InModuleScope -ModuleName 'NetboxPSv4' {
+            InModuleScope -ModuleName 'PowerNetbox' {
                 $URIBuilder = BuildNewURI -SkipConnectedCheck
                 $URIBuilder.Host | Should -BeExactly 'netbox.domain.com'
                 $URIBuilder.Path | Should -BeExactly 'api//'
@@ -48,7 +48,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' {
         }
 
         It "Should generate a URI with segments" {
-            InModuleScope -ModuleName 'NetboxPSv4' {
+            InModuleScope -ModuleName 'PowerNetbox' {
                 $URIBuilder = BuildNewURI -Segments 'seg1', 'seg2' -SkipConnectedCheck
                 $URIBuilder.Host | Should -BeExactly 'netbox.domain.com'
                 $URIBuilder.Path | Should -BeExactly 'api/seg1/seg2/'
@@ -57,7 +57,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' {
         }
 
         It "Should generate a URI using HTTP when configured" {
-            InModuleScope -ModuleName 'NetboxPSv4' {
+            InModuleScope -ModuleName 'PowerNetbox' {
                 $script:NetboxConfig.HostScheme = 'http'
                 $script:NetboxConfig.HostPort = 80
                 $URIBuilder = BuildNewURI -Segments 'seg1', 'seg2' -SkipConnectedCheck
@@ -71,7 +71,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' {
         }
 
         It "Should generate a URI on custom port when configured" {
-            InModuleScope -ModuleName 'NetboxPSv4' {
+            InModuleScope -ModuleName 'PowerNetbox' {
                 $script:NetboxConfig.HostPort = 1234
                 $URIBuilder = BuildNewURI -Segments 'seg1', 'seg2' -SkipConnectedCheck
                 $URIBuilder.Scheme | Should -Be 'https'
@@ -83,7 +83,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' {
         }
 
         It "Should generate a URI with parameters" {
-            InModuleScope -ModuleName 'NetboxPSv4' {
+            InModuleScope -ModuleName 'PowerNetbox' {
                 $URIParameters = @{
                     'param1' = 'paramval1'
                 }
@@ -97,7 +97,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' {
 
     Context "Building URI components" {
         It "Should give a basic hashtable" {
-            InModuleScope -ModuleName 'NetboxPSv4' {
+            InModuleScope -ModuleName 'PowerNetbox' {
                 $URIComponents = BuildURIComponents -URISegments @('segment1', 'segment2') -ParametersDictionary @{'param1' = 1 }
 
                 $URIComponents | Should -BeOfType [hashtable]
@@ -112,7 +112,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' {
         }
 
         It "Should add a single ID parameter to the segments" {
-            InModuleScope -ModuleName 'NetboxPSv4' {
+            InModuleScope -ModuleName 'PowerNetbox' {
                 $URIComponents = BuildURIComponents -URISegments @('segment1', 'segment2') -ParametersDictionary @{'id' = 123 }
 
                 $URIComponents | Should -BeOfType [hashtable]
@@ -126,7 +126,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' {
         }
 
         It "Should add multiple IDs to the parameters id__in" {
-            InModuleScope -ModuleName 'NetboxPSv4' {
+            InModuleScope -ModuleName 'PowerNetbox' {
                 $URIComponents = BuildURIComponents -URISegments @('segment1', 'segment2') -ParametersDictionary @{'id' = "123", "456" }
 
                 $URIComponents | Should -BeOfType [hashtable]
@@ -141,7 +141,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' {
         }
 
         It "Should skip a particular parameter name" {
-            InModuleScope -ModuleName 'NetboxPSv4' {
+            InModuleScope -ModuleName 'PowerNetbox' {
                 $URIComponents = BuildURIComponents -URISegments @('segment1', 'segment2') -ParametersDictionary @{'param1' = 1; 'param2' = 2 } -SkipParameterByName 'param2'
 
                 $URIComponents | Should -BeOfType [hashtable]
@@ -157,7 +157,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' {
         }
 
         It "Should add a query (q) parameter" {
-            InModuleScope -ModuleName 'NetboxPSv4' {
+            InModuleScope -ModuleName 'PowerNetbox' {
                 $URIComponents = BuildURIComponents -URISegments @('segment1', 'segment2') -ParametersDictionary @{'query' = 'mytestquery' }
 
                 $URIComponents | Should -BeOfType [hashtable]
@@ -172,7 +172,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' {
         }
 
         It "Should generate custom field parameters" {
-            InModuleScope -ModuleName 'NetboxPSv4' {
+            InModuleScope -ModuleName 'PowerNetbox' {
                 $URIComponents = BuildURIComponents -URISegments @('segment1', 'segment2') -ParametersDictionary @{
                     'CustomFields' = @{
                         'PRTG_Id'     = 1234
@@ -195,13 +195,13 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' {
 
     Context "Invoking request tests" {
         BeforeAll {
-            Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'NetboxPSv4' -MockWith { return $true }
-            Mock -CommandName 'Get-NBTimeout' -ModuleName 'NetboxPSv4' -MockWith { return 5 }
-            Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'NetboxPSv4' -MockWith { return @{} }
-            Mock -CommandName 'Get-NBCredential' -ModuleName 'NetboxPSv4' -MockWith {
+            Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
+            Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 5 }
+            Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
+            Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
                 return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
             }
-            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'NetboxPSv4' -MockWith {
+            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
                 return [pscustomobject]@{
                     'Method'      = $Method
                     'Uri'         = $Uri
@@ -214,7 +214,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' {
             }
 
             # Configure NetboxConfig for BuildNewURI
-            InModuleScope -ModuleName 'NetboxPSv4' {
+            InModuleScope -ModuleName 'PowerNetbox' {
                 $script:NetboxConfig.Hostname = 'netbox.domain.com'
                 $script:NetboxConfig.HostScheme = 'https'
                 $script:NetboxConfig.HostPort = 443
@@ -222,7 +222,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' {
         }
 
         It "Should return direct results instead of the raw request" {
-            InModuleScope -ModuleName 'NetboxPSv4' {
+            InModuleScope -ModuleName 'PowerNetbox' {
                 $URIBuilder = BuildNewURI -Segments 'seg1', 'seg2' -SkipConnectedCheck
                 $Result = InvokeNetboxRequest -URI $URIBuilder
                 $Result | Should -BeOfType [string]
@@ -231,7 +231,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' {
         }
 
         It "Should generate a basic request" {
-            InModuleScope -ModuleName 'NetboxPSv4' {
+            InModuleScope -ModuleName 'PowerNetbox' {
                 $URIBuilder = BuildNewURI -Segments 'seg1', 'seg2' -SkipConnectedCheck
                 $Result = InvokeNetboxRequest -URI $URIBuilder -Raw
                 $Result.Method | Should -Be 'GET'
@@ -244,7 +244,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' {
         }
 
         It "Should generate a POST request with body" {
-            InModuleScope -ModuleName 'NetboxPSv4' {
+            InModuleScope -ModuleName 'PowerNetbox' {
                 $URIBuilder = BuildNewURI -Segments 'seg1', 'seg2' -SkipConnectedCheck
                 $Result = InvokeNetboxRequest -URI $URIBuilder -Method POST -Body @{
                     'bodyparam1' = 'val1'
@@ -255,7 +255,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' {
         }
 
         It "Should generate a POST request with an extra header" {
-            InModuleScope -ModuleName 'NetboxPSv4' {
+            InModuleScope -ModuleName 'PowerNetbox' {
                 $Headers = @{
                     'Connection' = 'keep-alive'
                 }
@@ -273,7 +273,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' {
         }
 
         It "Should throw because of an invalid method" {
-            InModuleScope -ModuleName 'NetboxPSv4' {
+            InModuleScope -ModuleName 'PowerNetbox' {
                 $URI = BuildNewURI -Segments 'seg1', 'seg2' -SkipConnectedCheck
                 { InvokeNetboxRequest -URI $URI -Method 'Fake' } | Should -Throw
             }

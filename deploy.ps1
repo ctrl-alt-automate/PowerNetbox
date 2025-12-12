@@ -58,7 +58,7 @@ Write-Host "Importing required modules" -ForegroundColor Green
 Import-Module "PSScriptAnalyzer", "Microsoft.PowerShell.Utility" -ErrorAction Stop
 
 
-$ModuleName = 'NetboxPSv4'
+$ModuleName = 'PowerNetbox'
 
 # Use UTF-8 without BOM on PS Core, UTF-8 (with BOM) on PS Desktop
 # PS Core 6+ supports 'utf8NoBOM', PS Desktop only supports 'utf8' (with BOM)

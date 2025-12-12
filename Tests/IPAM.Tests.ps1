@@ -12,9 +12,9 @@ param()
 
 BeforeAll {
     Import-Module Pester
-    Remove-Module NetboxPSv4 -Force -ErrorAction SilentlyContinue
+    Remove-Module PowerNetbox -Force -ErrorAction SilentlyContinue
 
-    $ModulePath = Join-Path $PSScriptRoot ".." "NetboxPSv4" "NetboxPSv4.psd1"
+    $ModulePath = Join-Path $PSScriptRoot ".." "PowerNetbox" "PowerNetbox.psd1"
     if (Test-Path $ModulePath) {
         Import-Module $ModulePath -ErrorAction Stop
     }
@@ -24,8 +24,8 @@ BeforeAll {
 
 Describe "IPAM tests" -Tag 'Ipam' {
     BeforeAll {
-        Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'NetboxPSv4' -MockWith { return $true }
-        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'NetboxPSv4' -MockWith {
+        Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
+        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
             return [ordered]@{
                 'Method'      = $Method
                 'Uri'         = $Uri
@@ -35,14 +35,14 @@ Describe "IPAM tests" -Tag 'Ipam' {
                 'Body'        = $Body
             }
         }
-        Mock -CommandName 'Get-NBCredential' -ModuleName 'NetboxPSv4' -MockWith {
+        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
             return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
         }
-        Mock -CommandName 'Get-NBHostname' -ModuleName 'NetboxPSv4' -MockWith { return 'netbox.domain.com' }
-        Mock -CommandName 'Get-NBTimeout' -ModuleName 'NetboxPSv4' -MockWith { return 30 }
-        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'NetboxPSv4' -MockWith { return @{} }
+        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { return 'netbox.domain.com' }
+        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
+        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
 
-        InModuleScope -ModuleName 'NetboxPSv4' -ArgumentList $script:TestPath -ScriptBlock {
+        InModuleScope -ModuleName 'PowerNetbox' -ArgumentList $script:TestPath -ScriptBlock {
             param($TestPath)
             $script:NetboxConfig.Hostname = 'netbox.domain.com'
             $script:NetboxConfig.HostScheme = 'https'
@@ -100,7 +100,7 @@ Describe "IPAM tests" -Tag 'Ipam' {
 
     Context "Set-NBIPAMAddress" {
         BeforeAll {
-            Mock -CommandName "Get-NBIPAMAddress" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBIPAMAddress" -ModuleName PowerNetbox -MockWith {
                 return @{ 'address' = '10.1.1.1/24'; 'id' = $id }
             }
         }
@@ -121,7 +121,7 @@ Describe "IPAM tests" -Tag 'Ipam' {
 
     Context "Remove-NBIPAMAddress" {
         BeforeAll {
-            Mock -CommandName "Get-NBIPAMAddress" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBIPAMAddress" -ModuleName PowerNetbox -MockWith {
                 return @{ 'address' = "10.1.1.1/$Id"; 'id' = $id }
             }
         }
@@ -193,7 +193,7 @@ Describe "IPAM tests" -Tag 'Ipam' {
 
     Context "Set-NBIPAMPrefix" {
         BeforeAll {
-            Mock -CommandName "Get-NBIPAMPrefix" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBIPAMPrefix" -ModuleName PowerNetbox -MockWith {
                 return @{ 'prefix' = '10.0.0.0/24'; 'id' = $id }
             }
         }
@@ -207,7 +207,7 @@ Describe "IPAM tests" -Tag 'Ipam' {
 
     Context "Remove-NBIPAMPrefix" {
         BeforeAll {
-            Mock -CommandName "Get-NBIPAMPrefix" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBIPAMPrefix" -ModuleName PowerNetbox -MockWith {
                 return @{ 'prefix' = '10.0.0.0/24'; 'id' = $id }
             }
         }
@@ -252,7 +252,7 @@ Describe "IPAM tests" -Tag 'Ipam' {
 
     Context "Set-NBIPAMAggregate" {
         BeforeAll {
-            Mock -CommandName "Get-NBIPAMAggregate" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBIPAMAggregate" -ModuleName PowerNetbox -MockWith {
                 return @{ 'prefix' = '10.0.0.0/8'; 'id' = $id }
             }
         }
@@ -266,7 +266,7 @@ Describe "IPAM tests" -Tag 'Ipam' {
 
     Context "Remove-NBIPAMAggregate" {
         BeforeAll {
-            Mock -CommandName "Get-NBIPAMAggregate" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBIPAMAggregate" -ModuleName PowerNetbox -MockWith {
                 return @{ 'prefix' = '10.0.0.0/8'; 'id' = $id }
             }
         }
@@ -311,7 +311,7 @@ Describe "IPAM tests" -Tag 'Ipam' {
 
     Context "Set-NBIPAMVLAN" {
         BeforeAll {
-            Mock -CommandName "Get-NBIPAMVLAN" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBIPAMVLAN" -ModuleName PowerNetbox -MockWith {
                 return @{ 'vid' = 100; 'id' = $id }
             }
         }
@@ -325,7 +325,7 @@ Describe "IPAM tests" -Tag 'Ipam' {
 
     Context "Remove-NBIPAMVLAN" {
         BeforeAll {
-            Mock -CommandName "Get-NBIPAMVLAN" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBIPAMVLAN" -ModuleName PowerNetbox -MockWith {
                 return @{ 'vid' = 100; 'id' = $id }
             }
         }
@@ -372,7 +372,7 @@ Describe "IPAM tests" -Tag 'Ipam' {
 
     Context "Remove-NBIPAMVLANGroup" {
         BeforeAll {
-            Mock -CommandName "Get-NBIPAMVLANGroup" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBIPAMVLANGroup" -ModuleName PowerNetbox -MockWith {
                 return @{ 'name' = 'TestGroup'; 'id' = $id }
             }
         }
@@ -430,7 +430,7 @@ Describe "IPAM tests" -Tag 'Ipam' {
 
     Context "Remove-NBIPAMVRF" {
         BeforeAll {
-            Mock -CommandName "Get-NBIPAMVRF" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBIPAMVRF" -ModuleName PowerNetbox -MockWith {
                 return @{ 'name' = 'TestVRF'; 'id' = $id }
             }
         }
@@ -477,7 +477,7 @@ Describe "IPAM tests" -Tag 'Ipam' {
 
     Context "Remove-NBIPAMRIR" {
         BeforeAll {
-            Mock -CommandName "Get-NBIPAMRIR" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBIPAMRIR" -ModuleName PowerNetbox -MockWith {
                 return @{ 'name' = 'RFC1918'; 'id' = $id }
             }
         }
@@ -525,7 +525,7 @@ Describe "IPAM tests" -Tag 'Ipam' {
 
     Context "Remove-NBIPAMRole" {
         BeforeAll {
-            Mock -CommandName "Get-NBIPAMRole" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBIPAMRole" -ModuleName PowerNetbox -MockWith {
                 return @{ 'name' = 'Production'; 'id' = $id }
             }
         }
@@ -572,7 +572,7 @@ Describe "IPAM tests" -Tag 'Ipam' {
 
     Context "Remove-NBIPAMASN" {
         BeforeAll {
-            Mock -CommandName "Get-NBIPAMASN" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBIPAMASN" -ModuleName PowerNetbox -MockWith {
                 return @{ 'asn' = 65000; 'id' = $id }
             }
         }
@@ -619,7 +619,7 @@ Describe "IPAM tests" -Tag 'Ipam' {
 
     Context "Remove-NBIPAMASNRange" {
         BeforeAll {
-            Mock -CommandName "Get-NBIPAMASNRange" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBIPAMASNRange" -ModuleName PowerNetbox -MockWith {
                 return @{ 'name' = 'Private'; 'id' = $id }
             }
         }
@@ -666,7 +666,7 @@ Describe "IPAM tests" -Tag 'Ipam' {
 
     Context "Remove-NBIPAMRouteTarget" {
         BeforeAll {
-            Mock -CommandName "Get-NBIPAMRouteTarget" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBIPAMRouteTarget" -ModuleName PowerNetbox -MockWith {
                 return @{ 'name' = '65000:100'; 'id' = $id }
             }
         }
@@ -713,7 +713,7 @@ Describe "IPAM tests" -Tag 'Ipam' {
 
     Context "Remove-NBIPAMAddressRange" {
         BeforeAll {
-            Mock -CommandName "Get-NBIPAMAddressRange" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBIPAMAddressRange" -ModuleName PowerNetbox -MockWith {
                 return @{ 'id' = $id }
             }
         }
@@ -760,7 +760,7 @@ Describe "IPAM tests" -Tag 'Ipam' {
 
     Context "Remove-NBIPAMFHRPGroup" {
         BeforeAll {
-            Mock -CommandName "Get-NBIPAMFHRPGroup" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBIPAMFHRPGroup" -ModuleName PowerNetbox -MockWith {
                 return @{ 'id' = $id }
             }
         }
@@ -807,7 +807,7 @@ Describe "IPAM tests" -Tag 'Ipam' {
 
     Context "Remove-NBIPAMFHRPGroupAssignment" {
         BeforeAll {
-            Mock -CommandName "Get-NBIPAMFHRPGroupAssignment" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBIPAMFHRPGroupAssignment" -ModuleName PowerNetbox -MockWith {
                 return @{ 'id' = $id }
             }
         }
@@ -854,7 +854,7 @@ Describe "IPAM tests" -Tag 'Ipam' {
 
     Context "Remove-NBIPAMService" {
         BeforeAll {
-            Mock -CommandName "Get-NBIPAMService" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBIPAMService" -ModuleName PowerNetbox -MockWith {
                 return @{ 'name' = 'HTTP'; 'id' = $id }
             }
         }
@@ -901,7 +901,7 @@ Describe "IPAM tests" -Tag 'Ipam' {
 
     Context "Remove-NBIPAMServiceTemplate" {
         BeforeAll {
-            Mock -CommandName "Get-NBIPAMServiceTemplate" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBIPAMServiceTemplate" -ModuleName PowerNetbox -MockWith {
                 return @{ 'name' = 'SSH'; 'id' = $id }
             }
         }
@@ -948,7 +948,7 @@ Describe "IPAM tests" -Tag 'Ipam' {
 
     Context "Remove-NBIPAMVLANTranslationPolicy" {
         BeforeAll {
-            Mock -CommandName "Get-NBIPAMVLANTranslationPolicy" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBIPAMVLANTranslationPolicy" -ModuleName PowerNetbox -MockWith {
                 return @{ 'name' = 'Policy1'; 'id' = $id }
             }
         }
@@ -995,7 +995,7 @@ Describe "IPAM tests" -Tag 'Ipam' {
 
     Context "Remove-NBIPAMVLANTranslationRule" {
         BeforeAll {
-            Mock -CommandName "Get-NBIPAMVLANTranslationRule" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBIPAMVLANTranslationRule" -ModuleName PowerNetbox -MockWith {
                 return @{ 'id' = $id }
             }
         }

@@ -3,9 +3,9 @@ param()
 
 BeforeAll {
     Import-Module Pester
-    Remove-Module NetboxPSv4 -Force -ErrorAction SilentlyContinue
+    Remove-Module PowerNetbox -Force -ErrorAction SilentlyContinue
 
-    $ModulePath = Join-Path $PSScriptRoot ".." "NetboxPSv4" "NetboxPSv4.psd1"
+    $ModulePath = Join-Path $PSScriptRoot ".." "PowerNetbox" "PowerNetbox.psd1"
     if (Test-Path $ModulePath) {
         Import-Module $ModulePath -ErrorAction Stop
     }

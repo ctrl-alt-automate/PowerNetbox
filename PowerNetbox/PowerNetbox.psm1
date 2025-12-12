@@ -9128,10 +9128,6 @@ function Get-NBVirtualMachine {
     )
 
     process {
-        if ($null -ne $Status) {
-            $PSBoundParameters.Status = ValidateVirtualizationChoice -ProvidedValue $Status -VirtualMachineStatus
-        }
-
         $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'virtual-machines'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters

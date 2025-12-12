@@ -16,9 +16,9 @@ param()
 
 BeforeAll {
     Import-Module Pester
-    Remove-Module NetboxPSv4 -Force -ErrorAction SilentlyContinue
+    Remove-Module PowerNetbox -Force -ErrorAction SilentlyContinue
 
-    $ModulePath = Join-Path $PSScriptRoot ".." "NetboxPSv4" "NetboxPSv4.psd1"
+    $ModulePath = Join-Path $PSScriptRoot ".." "PowerNetbox" "PowerNetbox.psd1"
     if (Test-Path $ModulePath) {
         Import-Module $ModulePath -ErrorAction Stop
     }
@@ -26,8 +26,8 @@ BeforeAll {
 
 Describe "DCIM Additional Tests" -Tag 'DCIM' {
     BeforeAll {
-        Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'NetboxPSv4' -MockWith { return $true }
-        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'NetboxPSv4' -MockWith {
+        Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
+        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
             return [ordered]@{
                 'Method'      = $Method
                 'Uri'         = $Uri
@@ -37,14 +37,14 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
                 'Body'        = $Body
             }
         }
-        Mock -CommandName 'Get-NBCredential' -ModuleName 'NetboxPSv4' -MockWith {
+        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
             return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
         }
-        Mock -CommandName 'Get-NBHostname' -ModuleName 'NetboxPSv4' -MockWith { return 'netbox.domain.com' }
-        Mock -CommandName 'Get-NBTimeout' -ModuleName 'NetboxPSv4' -MockWith { return 30 }
-        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'NetboxPSv4' -MockWith { return @{} }
+        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { return 'netbox.domain.com' }
+        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
+        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
 
-        InModuleScope -ModuleName 'NetboxPSv4' {
+        InModuleScope -ModuleName 'PowerNetbox' {
             $script:NetboxConfig.Hostname = 'netbox.domain.com'
             $script:NetboxConfig.HostScheme = 'https'
             $script:NetboxConfig.HostPort = 443
@@ -75,7 +75,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Set-NBDCIMCable" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMCable" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMCable" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id }
             }
         }
@@ -89,7 +89,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Remove-NBDCIMCable" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMCable" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMCable" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id }
             }
         }
@@ -135,7 +135,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Set-NBDCIMLocation" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMLocation" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMLocation" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'TestLoc' }
             }
         }
@@ -149,7 +149,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Remove-NBDCIMLocation" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMLocation" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMLocation" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'TestLoc' }
             }
         }
@@ -189,7 +189,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Set-NBDCIMRegion" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMRegion" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMRegion" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'TestRegion' }
             }
         }
@@ -203,7 +203,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Remove-NBDCIMRegion" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMRegion" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMRegion" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'TestRegion' }
             }
         }
@@ -242,7 +242,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Set-NBDCIMSiteGroup" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMSiteGroup" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMSiteGroup" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'TestGroup' }
             }
         }
@@ -256,7 +256,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Remove-NBDCIMSiteGroup" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMSiteGroup" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMSiteGroup" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'TestGroup' }
             }
         }
@@ -301,7 +301,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Set-NBDCIMManufacturer" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMManufacturer" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMManufacturer" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'TestMfr' }
             }
         }
@@ -315,7 +315,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Remove-NBDCIMManufacturer" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMManufacturer" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMManufacturer" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'TestMfr' }
             }
         }
@@ -352,7 +352,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Set-NBDCIMRackType" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMRackType" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMRackType" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Model' = 'TestType' }
             }
         }
@@ -366,7 +366,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Remove-NBDCIMRackType" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMRackType" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMRackType" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Model' = 'TestType' }
             }
         }
@@ -403,7 +403,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Set-NBDCIMRackRole" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMRackRole" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMRackRole" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'TestRole' }
             }
         }
@@ -417,7 +417,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Remove-NBDCIMRackRole" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMRackRole" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMRackRole" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'TestRole' }
             }
         }
@@ -454,7 +454,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Set-NBDCIMRackReservation" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMRackReservation" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMRackReservation" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id }
             }
         }
@@ -468,7 +468,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Remove-NBDCIMRackReservation" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMRackReservation" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMRackReservation" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id }
             }
         }
@@ -508,7 +508,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Set-NBDCIMConsolePort" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMConsolePort" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMConsolePort" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'con0' }
             }
         }
@@ -522,7 +522,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Remove-NBDCIMConsolePort" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMConsolePort" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMConsolePort" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'con0' }
             }
         }
@@ -559,7 +559,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Set-NBDCIMConsoleServerPort" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMConsoleServerPort" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMConsoleServerPort" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'port1' }
             }
         }
@@ -573,7 +573,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Remove-NBDCIMConsoleServerPort" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMConsoleServerPort" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMConsoleServerPort" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'port1' }
             }
         }
@@ -610,7 +610,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Set-NBDCIMPowerPort" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMPowerPort" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMPowerPort" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'PSU1' }
             }
         }
@@ -624,7 +624,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Remove-NBDCIMPowerPort" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMPowerPort" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMPowerPort" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'PSU1' }
             }
         }
@@ -661,7 +661,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Set-NBDCIMPowerOutlet" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMPowerOutlet" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMPowerOutlet" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'Outlet1' }
             }
         }
@@ -675,7 +675,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Remove-NBDCIMPowerOutlet" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMPowerOutlet" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMPowerOutlet" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'Outlet1' }
             }
         }
@@ -712,7 +712,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Set-NBDCIMPowerPanel" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMPowerPanel" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMPowerPanel" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'Panel-A' }
             }
         }
@@ -726,7 +726,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Remove-NBDCIMPowerPanel" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMPowerPanel" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMPowerPanel" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'Panel-A' }
             }
         }
@@ -763,7 +763,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Set-NBDCIMPowerFeed" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMPowerFeed" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMPowerFeed" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'Feed-A' }
             }
         }
@@ -777,7 +777,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Remove-NBDCIMPowerFeed" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMPowerFeed" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMPowerFeed" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'Feed-A' }
             }
         }
@@ -814,7 +814,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Set-NBDCIMDeviceBay" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMDeviceBay" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMDeviceBay" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'Bay1' }
             }
         }
@@ -828,7 +828,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Remove-NBDCIMDeviceBay" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMDeviceBay" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMDeviceBay" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'Bay1' }
             }
         }
@@ -865,7 +865,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Set-NBDCIMModule" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMModule" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMModule" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id }
             }
         }
@@ -879,7 +879,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Remove-NBDCIMModule" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMModule" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMModule" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id }
             }
         }
@@ -916,7 +916,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Set-NBDCIMModuleType" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMModuleType" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMModuleType" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Model' = 'SFP' }
             }
         }
@@ -930,7 +930,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Remove-NBDCIMModuleType" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMModuleType" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMModuleType" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Model' = 'SFP' }
             }
         }
@@ -967,7 +967,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Set-NBDCIMModuleBay" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMModuleBay" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMModuleBay" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'ModBay1' }
             }
         }
@@ -981,7 +981,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Remove-NBDCIMModuleBay" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMModuleBay" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMModuleBay" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'ModBay1' }
             }
         }
@@ -1018,7 +1018,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Set-NBDCIMModuleTypeProfile" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMModuleTypeProfile" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMModuleTypeProfile" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'Profile1' }
             }
         }
@@ -1032,7 +1032,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Remove-NBDCIMModuleTypeProfile" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMModuleTypeProfile" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMModuleTypeProfile" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'Profile1' }
             }
         }
@@ -1069,7 +1069,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Set-NBDCIMInventoryItem" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMInventoryItem" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMInventoryItem" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'SFP-1' }
             }
         }
@@ -1083,7 +1083,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Remove-NBDCIMInventoryItem" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMInventoryItem" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMInventoryItem" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'SFP-1' }
             }
         }
@@ -1120,7 +1120,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Set-NBDCIMInventoryItemRole" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMInventoryItemRole" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMInventoryItemRole" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'Optic' }
             }
         }
@@ -1134,7 +1134,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Remove-NBDCIMInventoryItemRole" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMInventoryItemRole" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMInventoryItemRole" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'Optic' }
             }
         }
@@ -1171,7 +1171,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Set-NBDCIMFrontPort" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMFrontPort" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMFrontPort" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'FP1' }
             }
         }
@@ -1185,7 +1185,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Remove-NBDCIMFrontPort" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMFrontPort" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMFrontPort" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'FP1' }
             }
         }
@@ -1222,7 +1222,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Set-NBDCIMRearPort" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMRearPort" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMRearPort" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'RP1' }
             }
         }
@@ -1236,7 +1236,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Remove-NBDCIMRearPort" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMRearPort" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMRearPort" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'RP1' }
             }
         }
@@ -1273,7 +1273,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Set-NBDCIMMACAddress" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMMACAddress" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMMACAddress" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Mac_Address' = '00:11:22:33:44:55' }
             }
         }
@@ -1287,7 +1287,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Remove-NBDCIMMACAddress" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMMACAddress" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMMACAddress" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Mac_Address' = '00:11:22:33:44:55' }
             }
         }
@@ -1324,7 +1324,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Set-NBDCIMVirtualChassis" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMVirtualChassis" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMVirtualChassis" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'VC1' }
             }
         }
@@ -1338,7 +1338,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Remove-NBDCIMVirtualChassis" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMVirtualChassis" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMVirtualChassis" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'VC1' }
             }
         }
@@ -1375,7 +1375,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Set-NBDCIMVirtualDeviceContext" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMVirtualDeviceContext" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMVirtualDeviceContext" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'VDC1' }
             }
         }
@@ -1389,7 +1389,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Remove-NBDCIMVirtualDeviceContext" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMVirtualDeviceContext" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMVirtualDeviceContext" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'VDC1' }
             }
         }

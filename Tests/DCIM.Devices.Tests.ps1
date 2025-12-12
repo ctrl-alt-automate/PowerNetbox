@@ -3,9 +3,9 @@ param()
 
 BeforeAll {
     Import-Module Pester
-    Remove-Module NetboxPSv4 -Force -ErrorAction SilentlyContinue
+    Remove-Module PowerNetbox -Force -ErrorAction SilentlyContinue
 
-    $ModulePath = Join-Path $PSScriptRoot ".." "NetboxPSv4" "NetboxPSv4.psd1"
+    $ModulePath = Join-Path $PSScriptRoot ".." "PowerNetbox" "PowerNetbox.psd1"
     if (Test-Path $ModulePath) {
         Import-Module $ModulePath -ErrorAction Stop
     }
@@ -16,11 +16,11 @@ BeforeAll {
 
 Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
     BeforeAll {
-        Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'NetboxPSv4' -MockWith {
+        Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith {
             return $true
         }
 
-        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'NetboxPSv4' -MockWith {
+        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
             return [ordered]@{
                 'Method'      = $Method
                 'Uri'         = $Uri
@@ -31,24 +31,24 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             }
         }
 
-        Mock -CommandName 'Get-NBCredential' -ModuleName 'NetboxPSv4' -MockWith {
+        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
             return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
         }
 
-        Mock -CommandName 'Get-NBHostname' -ModuleName 'NetboxPSv4' -MockWith {
+        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith {
             return 'netbox.domain.com'
         }
 
-        Mock -CommandName 'Get-NBTimeout' -ModuleName 'NetboxPSv4' -MockWith {
+        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith {
             return 30
         }
 
-        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'NetboxPSv4' -MockWith {
+        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith {
             return @{}
         }
 
         # Set up module internal state and load choices data
-        InModuleScope -ModuleName 'NetboxPSv4' -ArgumentList $script:TestPath -ScriptBlock {
+        InModuleScope -ModuleName 'PowerNetbox' -ArgumentList $script:TestPath -ScriptBlock {
             param($TestPath)
             $script:NetboxConfig.Hostname = 'netbox.domain.com'
             $script:NetboxConfig.HostScheme = 'https'
@@ -185,7 +185,7 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
         It "Should request the default number of device roles" {
             $Result = Get-NBDCIMDeviceRole
 
-            Should -Invoke -CommandName "Invoke-RestMethod" -Times 1 -Scope 'It' -Exactly -ModuleName 'NetboxPSv4'
+            Should -Invoke -CommandName "Invoke-RestMethod" -Times 1 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
 
             $Result.Method | Should -Be 'GET'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/device-roles/'
@@ -224,7 +224,7 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
         It "Should create a new device" {
             $Result = New-NBDCIMDevice -Name "newdevice" -Device_Role 4 -Device_Type 10 -Site 1 -Face 0
 
-            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -Scope 'It' -Exactly -ModuleName 'NetboxPSv4'
+            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
 
             $Result.Method | Should -Be 'POST'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/devices/'
@@ -248,7 +248,7 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
 
     Context "Set-NBDCIMDevice" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMDevice" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMDevice" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{
                     'Id'   = $Id
                     'Name' = $Name
@@ -259,7 +259,7 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
         It "Should set a device to a new name" {
             $Result = Set-NBDCIMDevice -Id 1234 -Name 'newtestname' -Force
 
-            Should -Invoke -CommandName 'Get-NBDCIMDevice' -Times 1 -Scope 'It' -Exactly -ModuleName 'NetboxPSv4'
+            Should -Invoke -CommandName 'Get-NBDCIMDevice' -Times 1 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
 
             $Result.Method | Should -Be 'PATCH'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/devices/1234/'
@@ -292,7 +292,7 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
 
     Context "Remove-NBDCIMDevice" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMDevice" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMDevice" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{
                     'Id'   = $Id
                     'Name' = $Name
