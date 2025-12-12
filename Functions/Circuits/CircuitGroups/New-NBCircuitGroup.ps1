@@ -34,6 +34,7 @@ function New-NBCircuitGroup {
     [OutputType([PSCustomObject])]
     param (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [string]$Slug,

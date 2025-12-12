@@ -34,6 +34,7 @@ function New-NBCustomFieldChoiceSet {
     [OutputType([PSCustomObject])]
     param (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [string]$Description,

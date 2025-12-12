@@ -24,6 +24,7 @@ function Set-NBHostName {
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Hostname
     )
 

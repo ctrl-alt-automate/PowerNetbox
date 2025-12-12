@@ -46,6 +46,7 @@ function New-NBCustomLink {
     [OutputType([PSCustomObject])]
     param (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [Parameter(Mandatory = $true)]
@@ -54,9 +55,11 @@ function New-NBCustomLink {
         [bool]$Enabled,
 
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Link_Text,
 
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Link_Url,
 
         [uint16]$Weight,

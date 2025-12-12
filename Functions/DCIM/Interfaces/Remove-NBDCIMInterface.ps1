@@ -1,4 +1,4 @@
-﻿function Remove-NBDCIMInterface {
+function Remove-NBDCIMInterface {
     <#
     .SYNOPSIS
         Removes an interface
@@ -21,6 +21,7 @@
 
     [CmdletBinding(ConfirmImpact = 'High',
         SupportsShouldProcess = $true)]
+    [OutputType([void])]
     param
     (
         [Parameter(Mandatory = $true,

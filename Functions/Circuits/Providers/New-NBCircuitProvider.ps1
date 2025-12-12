@@ -34,6 +34,7 @@ function New-NBCircuitProvider {
     [OutputType([PSCustomObject])]
     param (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [string]$Slug,

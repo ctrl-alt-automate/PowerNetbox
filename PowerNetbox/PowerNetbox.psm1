@@ -189,6 +189,7 @@ function BuildURIComponents {
 
 function CheckNetboxIsConnected {
     [CmdletBinding()]
+    [OutputType([PSCustomObject])]
     param ()
 
     Write-Verbose "Checking connection status"
@@ -276,10 +277,12 @@ function Connect-NBAPI {
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Manual')]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(ParameterSetName = 'Manual',
                    Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Hostname,
 
         [Parameter(Mandatory = $false)]
@@ -294,6 +297,7 @@ function Connect-NBAPI {
 
         [Parameter(ParameterSetName = 'URI',
                    Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$URI,
 
         [Parameter(Mandatory = $false)]
@@ -430,14 +434,17 @@ public enum $EnumName
 
 function Get-ModelDefinition {
     [CmdletBinding(DefaultParameterSetName = 'ByName')]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(ParameterSetName = 'ByName',
                    Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$ModelName,
 
         [Parameter(ParameterSetName = 'ByPath',
                    Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$URIPath,
 
         [Parameter(ParameterSetName = 'ByPath')]
@@ -663,6 +670,7 @@ function Get-NBCircuit {
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(ParameterSetName = 'ById')]
@@ -928,6 +936,7 @@ function Get-NBCircuitProvider {
 
         [Parameter(ParameterSetName = 'Query',
                    Mandatory = $false)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [Parameter(ParameterSetName = 'Query')]
@@ -1449,6 +1458,7 @@ function Get-NBContact {
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(ParameterSetName = 'Query',
@@ -1570,6 +1580,7 @@ function Get-NBContactAssignment {
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(ParameterSetName = 'Query',
@@ -1673,6 +1684,7 @@ function Get-NBContactRole {
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(ParameterSetName = 'Query',
@@ -1772,6 +1784,7 @@ function Get-NBContentType {
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(ParameterSetName = 'Query',
@@ -6141,6 +6154,7 @@ function Get-NBIPAMAvailableIP {
 #>
 
     [CmdletBinding()]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(Mandatory = $true,
@@ -6346,6 +6360,7 @@ function Get-NBIPAMPrefix {
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(ParameterSetName = 'Query',
@@ -6551,6 +6566,7 @@ function Get-NBIPAMRole {
 #>
 
     [CmdletBinding()]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(ParameterSetName = 'Query',
@@ -8019,6 +8035,7 @@ function Get-NBTenant {
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(ParameterSetName = 'Query',
@@ -8802,6 +8819,7 @@ function Get-NBVirtualizationCluster {
 #>
 
     [CmdletBinding()]
+    [OutputType([PSCustomObject])]
     param
     (
         [string]$Name,
@@ -9081,6 +9099,7 @@ function Get-NBVirtualMachine {
 #>
 
     [CmdletBinding()]
+    [OutputType([PSCustomObject])]
     param
     (
         [Alias('q')]
@@ -9189,6 +9208,7 @@ function Get-NBVirtualMachineInterface {
 #>
 
     [CmdletBinding()]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(ValueFromPipeline = $true)]
@@ -9800,22 +9820,65 @@ function Get-NBWirelessLink {
 
 #region File GetNetboxAPIErrorBody.ps1
 
-
 function GetNetboxAPIErrorBody {
-    param
-    (
+    <#
+    .SYNOPSIS
+        Extracts the response body from a failed HTTP response.
+
+    .DESCRIPTION
+        Safely extracts and returns the response body from an HttpWebResponse,
+        properly disposing of stream resources to prevent memory leaks.
+        Cross-platform compatible with proper UTF-8 encoding.
+
+    .PARAMETER Response
+        The HttpWebResponse object from a failed API call.
+
+    .OUTPUTS
+        [string] The response body content, or empty string if extraction fails.
+
+    .EXAMPLE
+        $body = GetNetboxAPIErrorBody -Response $_.Exception.Response
+    #>
+    [CmdletBinding()]
+    [OutputType([string])]
+    param(
         [Parameter(Mandatory = $true)]
         [System.Net.HttpWebResponse]$Response
     )
 
-    # This takes the $Response stream and turns it into a useable object... generally a string.
-    # If the body is JSON, you should be able to use ConvertFrom-Json
+    $stream = $null
+    $reader = $null
 
-    # Explicitly specify UTF-8 encoding for cross-platform consistency
-    $reader = [System.IO.StreamReader]::new($Response.GetResponseStream(), [System.Text.Encoding]::UTF8)
-    $reader.BaseStream.Position = 0
-    $reader.DiscardBufferedData()
-    $reader.ReadToEnd()
+    try {
+        $stream = $Response.GetResponseStream()
+
+        if ($null -eq $stream) {
+            return [string]::Empty
+        }
+
+        # Explicitly specify UTF-8 encoding for cross-platform consistency
+        $reader = [System.IO.StreamReader]::new($stream, [System.Text.Encoding]::UTF8)
+
+        # Some streams support seeking, reset position if possible
+        if ($stream.CanSeek) {
+            $stream.Position = 0
+        }
+
+        return $reader.ReadToEnd()
+    }
+    catch {
+        Write-Verbose "Could not read response body: $($_.Exception.Message)"
+        return [string]::Empty
+    }
+    finally {
+        # Proper disposal in reverse order of creation
+        if ($null -ne $reader) {
+            $reader.Dispose()
+        }
+        if ($null -ne $stream) {
+            $stream.Dispose()
+        }
+    }
 }
 
 #endregion
@@ -9830,16 +9893,56 @@ function GetNetboxConfigVariable {
 
 #region File InvokeNetboxRequest.ps1
 
-
 function InvokeNetboxRequest {
+    <#
+    .SYNOPSIS
+        Invokes a REST API request to Netbox.
+
+    .DESCRIPTION
+        Core function for all Netbox API communication. Handles authentication,
+        retry logic for transient failures, and comprehensive error handling.
+        Cross-platform compatible (Windows, Linux, macOS).
+
+    .PARAMETER URI
+        The URI builder object containing the API endpoint.
+
+    .PARAMETER Headers
+        Additional headers to include in the request.
+
+    .PARAMETER Body
+        The request body for POST/PATCH/PUT requests.
+
+    .PARAMETER Timeout
+        Request timeout in seconds. Defaults to module timeout setting.
+
+    .PARAMETER Method
+        HTTP method (GET, POST, PATCH, PUT, DELETE, OPTIONS).
+
+    .PARAMETER Raw
+        Return the raw API response instead of just the results array.
+
+    .PARAMETER MaxRetries
+        Maximum number of retry attempts for transient failures. Default: 3.
+
+    .PARAMETER RetryDelayMs
+        Initial delay between retries in milliseconds. Uses exponential backoff. Default: 1000.
+
+    .OUTPUTS
+        [PSCustomObject] The API response or results array.
+
+    .EXAMPLE
+        $result = InvokeNetboxRequest -URI $uri -Method GET
+
+    .EXAMPLE
+        $result = InvokeNetboxRequest -URI $uri -Method POST -Body $data -MaxRetries 5
+    #>
     [CmdletBinding()]
-    param
-    (
+    [OutputType([PSCustomObject])]
+    param(
         [Parameter(Mandatory = $true)]
         [System.UriBuilder]$URI,
 
-        [Hashtable]$Headers = @{
-        },
+        [Hashtable]$Headers = @{},
 
         [pscustomobject]$Body = $null,
 
@@ -9849,16 +9952,24 @@ function InvokeNetboxRequest {
         [ValidateSet('GET', 'PATCH', 'PUT', 'POST', 'DELETE', 'OPTIONS', IgnoreCase = $true)]
         [string]$Method = 'GET',
 
-        [switch]$Raw
+        [switch]$Raw,
+
+        [ValidateRange(1, 10)]
+        [int]$MaxRetries = 3,
+
+        [ValidateRange(100, 30000)]
+        [int]$RetryDelayMs = 1000
     )
 
-    $creds = Get-NBCredential
+    # Retryable HTTP status codes
+    $retryableStatusCodes = @(408, 429, 500, 502, 503, 504)
 
+    $creds = Get-NBCredential
     $Headers.Authorization = "Token {0}" -f $creds.GetNetworkCredential().Password
 
     $splat = @{
         'Method'      = $Method
-        'Uri'         = $URI.Uri.AbsoluteUri # This property auto generates the scheme, hostname, path, and query
+        'Uri'         = $URI.Uri.AbsoluteUri
         'Headers'     = $Headers
         'TimeoutSec'  = $Timeout
         'ContentType' = 'application/json'
@@ -9870,63 +9981,216 @@ function InvokeNetboxRequest {
 
     if ($Body) {
         Write-Verbose "BODY: $($Body | ConvertTo-Json -Compress)"
-        $null = $splat.Add('Body', ($Body | ConvertTo-Json -Compress))
+        $null = $splat.Add('Body', ($Body | ConvertTo-Json -Compress -Depth 10))
     }
 
-    try {
-        Write-Verbose "Sending request to $($URI.Uri.AbsoluteUri)"
-        $result = Invoke-RestMethod @splat
-    } catch {
-        $errorMessage = $_.Exception.Message
-        $statusCode = $null
+    $attempt = 0
+    $lastException = $null
 
-        # Try to extract response body for better error messages
-        if ($_.Exception.Response) {
-            $statusCode = [int]$_.Exception.Response.StatusCode
+    while ($attempt -lt $MaxRetries) {
+        $attempt++
 
-            try {
-                $stream = $_.Exception.Response.GetResponseStream()
-                # Explicitly specify UTF-8 encoding for cross-platform consistency
-                $reader = [System.IO.StreamReader]::new($stream, [System.Text.Encoding]::UTF8)
-                $responseBody = $reader.ReadToEnd()
-                $reader.Close()
+        try {
+            Write-Verbose "[$attempt/$MaxRetries] $Method $($URI.Uri.AbsoluteUri)"
+            $result = Invoke-RestMethod @splat
 
-                if ($responseBody) {
-                    $errorData = $responseBody | ConvertFrom-Json -ErrorAction SilentlyContinue
-                    if ($errorData.detail) {
-                        $errorMessage = $errorData.detail
-                    } elseif ($errorData) {
-                        $errorMessage = $responseBody
-                    }
+            # Success - return result
+            if ($Raw) {
+                Write-Verbose "Returning raw result by choice"
+                return $result
+            }
+            else {
+                if ($result.psobject.Properties.Name -contains 'results') {
+                    Write-Verbose "Found 'results' property, returning results directly"
+                    return $result.Results
                 }
-            } catch {
-                # Keep original error message if we can't parse response
-                Write-Verbose "Could not parse error response body: $_"
+                else {
+                    Write-Verbose "No 'results' property found, returning full response"
+                    return $result
+                }
             }
         }
+        catch {
+            $lastException = $_
+            $statusCode = $null
+            $errorMessage = $_.Exception.Message
+            $responseBody = $null
 
-        $errorRecord = [System.Management.Automation.ErrorRecord]::new(
-            [System.Exception]::new("Netbox API Error ($statusCode): $errorMessage"),
-            'NetboxAPIError',
-            [System.Management.Automation.ErrorCategory]::InvalidOperation,
-            $URI.Uri.AbsoluteUri
-        )
-        $PSCmdlet.ThrowTerminatingError($errorRecord)
-    }
+            # Extract status code and response body
+            if ($_.Exception.Response) {
+                $statusCode = [int]$_.Exception.Response.StatusCode
 
-    # If the user wants the raw value from the API... otherwise return only the actual result
-    if ($Raw) {
-        Write-Verbose "Returning raw result by choice"
-        return $result
-    } else {
-        if ($result.psobject.Properties.Name.Contains('results')) {
-            Write-Verbose "Found Results property on data, returning results directly"
-            return $result.Results
-        } else {
-            Write-Verbose "Did NOT find results property on data, returning raw result"
-            return $result
+                # Use helper function for safe response body extraction (proper disposal)
+                $responseBody = GetNetboxAPIErrorBody -Response $_.Exception.Response
+
+                if ($responseBody) {
+                    try {
+                        $errorData = $responseBody | ConvertFrom-Json -ErrorAction Stop
+                        if ($errorData.detail) {
+                            $errorMessage = $errorData.detail
+                        }
+                        elseif ($errorData.error) {
+                            $errorMessage = $errorData.error
+                        }
+                        elseif ($errorData) {
+                            # Try to format the error object nicely
+                            $errorMessage = ($errorData.PSObject.Properties | ForEach-Object {
+                                "$($_.Name): $($_.Value -join ', ')"
+                            }) -join '; '
+                        }
+                    }
+                    catch {
+                        # Use raw response body if JSON parsing fails
+                        if ($responseBody.Length -lt 500) {
+                            $errorMessage = $responseBody
+                        }
+                    }
+                }
+            }
+
+            # Check if we should retry
+            $shouldRetry = ($statusCode -in $retryableStatusCodes) -and ($attempt -lt $MaxRetries)
+
+            if ($shouldRetry) {
+                # Exponential backoff with jitter
+                $delay = $RetryDelayMs * [Math]::Pow(2, $attempt - 1)
+                $jitter = Get-Random -Minimum 0 -Maximum ($delay * 0.1)
+                $totalDelay = [int]($delay + $jitter)
+
+                $statusName = GetHttpStatusName -StatusCode $statusCode
+                Write-Verbose "Retryable error ($statusCode $statusName). Waiting ${totalDelay}ms before retry..."
+                Start-Sleep -Milliseconds $totalDelay
+                continue
+            }
+
+            # Non-retryable error or max retries reached - throw detailed error
+            $statusName = if ($statusCode) { GetHttpStatusName -StatusCode $statusCode } else { "Unknown" }
+
+            $detailedMessage = BuildDetailedErrorMessage `
+                -StatusCode $statusCode `
+                -StatusName $statusName `
+                -Method $Method `
+                -Endpoint $URI.Uri.AbsoluteUri `
+                -ErrorMessage $errorMessage
+
+            $errorRecord = [System.Management.Automation.ErrorRecord]::new(
+                [System.Exception]::new($detailedMessage),
+                "NetboxAPI.$statusCode",
+                (GetErrorCategory -StatusCode $statusCode),
+                $URI.Uri.AbsoluteUri
+            )
+
+            $PSCmdlet.ThrowTerminatingError($errorRecord)
         }
     }
+}
+
+function GetHttpStatusName {
+    [CmdletBinding()]
+    [OutputType([string])]
+    param([int]$StatusCode)
+
+    $statusNames = @{
+        400 = 'Bad Request'
+        401 = 'Unauthorized'
+        403 = 'Forbidden'
+        404 = 'Not Found'
+        405 = 'Method Not Allowed'
+        408 = 'Request Timeout'
+        409 = 'Conflict'
+        429 = 'Too Many Requests'
+        500 = 'Internal Server Error'
+        502 = 'Bad Gateway'
+        503 = 'Service Unavailable'
+        504 = 'Gateway Timeout'
+    }
+
+    if ($statusNames.ContainsKey($StatusCode)) {
+        return $statusNames[$StatusCode]
+    }
+    return "HTTP $StatusCode"
+}
+
+function GetErrorCategory {
+    [CmdletBinding()]
+    [OutputType([System.Management.Automation.ErrorCategory])]
+    param([int]$StatusCode)
+
+    switch ($StatusCode) {
+        400 { return [System.Management.Automation.ErrorCategory]::InvalidArgument }
+        401 { return [System.Management.Automation.ErrorCategory]::AuthenticationError }
+        403 { return [System.Management.Automation.ErrorCategory]::PermissionDenied }
+        404 { return [System.Management.Automation.ErrorCategory]::ObjectNotFound }
+        405 { return [System.Management.Automation.ErrorCategory]::InvalidOperation }
+        408 { return [System.Management.Automation.ErrorCategory]::OperationTimeout }
+        409 { return [System.Management.Automation.ErrorCategory]::ResourceExists }
+        429 { return [System.Management.Automation.ErrorCategory]::LimitsExceeded }
+        { $_ -ge 500 } { return [System.Management.Automation.ErrorCategory]::ConnectionError }
+        default { return [System.Management.Automation.ErrorCategory]::InvalidOperation }
+    }
+}
+
+function BuildDetailedErrorMessage {
+    [CmdletBinding()]
+    [OutputType([string])]
+    param(
+        [int]$StatusCode,
+        [string]$StatusName,
+        [string]$Method,
+        [string]$Endpoint,
+        [string]$ErrorMessage
+    )
+
+    $troubleshooting = switch ($StatusCode) {
+        401 {
+            @(
+                "- Verify your API token is correct and not expired"
+                "- Check token in Netbox: Admin > API Tokens"
+                "- Ensure token has not been revoked"
+            ) -join "`n"
+        }
+        403 {
+            @(
+                "- Verify your API token has permission for this operation"
+                "- Check object-level permissions in Netbox"
+                "- Ensure the token user has the required role"
+            ) -join "`n"
+        }
+        404 {
+            @(
+                "- Verify the resource ID exists in Netbox"
+                "- Check if the resource was deleted"
+                "- Ensure the API endpoint is correct for your Netbox version"
+            ) -join "`n"
+        }
+        429 {
+            @(
+                "- You are being rate limited by the API"
+                "- Wait a moment and retry your request"
+                "- Consider reducing request frequency"
+            ) -join "`n"
+        }
+        { $_ -ge 500 } {
+            @(
+                "- This is a server-side error in Netbox"
+                "- Check Netbox server logs for details"
+                "- Verify Netbox service is running correctly"
+                "- Try again in a few moments"
+            ) -join "`n"
+        }
+        default {
+            "- Check your request parameters`n- Verify the API endpoint exists"
+        }
+    }
+
+    return @"
+Netbox API Error: $StatusCode $StatusName
+Endpoint: $Method $Endpoint
+Message: $ErrorMessage
+
+Troubleshooting:
+$troubleshooting
+"@
 }
 
 #endregion
@@ -9960,6 +10224,7 @@ function New-NBBookmark {
     [OutputType([PSCustomObject])]
     param (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Object_Type,
 
         [Parameter(Mandatory = $true)]
@@ -10011,6 +10276,7 @@ function New-NBCircuit {
     (
         [Parameter(Mandatory = $true,
             ValueFromPipelineByPropertyName = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$CID,
 
         [Parameter(Mandatory = $true)]
@@ -10098,6 +10364,7 @@ function New-NBCircuitGroup {
     [OutputType([PSCustomObject])]
     param (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [string]$Slug,
@@ -10223,6 +10490,7 @@ function New-NBCircuitProvider {
     [OutputType([PSCustomObject])]
     param (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [string]$Slug,
@@ -10297,6 +10565,7 @@ function New-NBCircuitProviderAccount {
         [string]$Name,
 
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Account,
 
         [string]$Description,
@@ -10365,6 +10634,7 @@ function New-NBCircuitProviderNetwork {
         [uint64]$Provider,
 
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [string]$Service_Id,
@@ -10527,6 +10797,7 @@ function New-NBCircuitType {
     [OutputType([PSCustomObject])]
     param (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [string]$Slug,
@@ -10633,6 +10904,7 @@ function New-NBConfigContext {
     [OutputType([PSCustomObject])]
     param (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [ValidateRange(0, 32767)]
@@ -11028,6 +11300,7 @@ function New-NBCustomField {
     [OutputType([PSCustomObject])]
     param (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [string]$Label,
@@ -11125,6 +11398,7 @@ function New-NBCustomFieldChoiceSet {
     [OutputType([PSCustomObject])]
     param (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [string]$Description,
@@ -11201,6 +11475,7 @@ function New-NBCustomLink {
     [OutputType([PSCustomObject])]
     param (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [Parameter(Mandatory = $true)]
@@ -11209,9 +11484,11 @@ function New-NBCustomLink {
         [bool]$Enabled,
 
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Link_Text,
 
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Link_Url,
 
         [uint16]$Weight,
@@ -11286,6 +11563,7 @@ function New-NBDataSource {
     [OutputType([PSCustomObject])]
     param (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [Parameter(Mandatory = $true)]
@@ -11580,13 +11858,14 @@ function New-NBDCIMConsoleServerPortTemplate {
 #>
 
 function New-NBDCIMDevice {
-    [CmdletBinding(ConfirmImpact = 'low',
+    [CmdletBinding(ConfirmImpact = 'Low',
         SupportsShouldProcess = $true)]
     [OutputType([pscustomobject])]
     #region Parameters
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [Parameter(Mandatory = $true)]
@@ -12477,9 +12756,11 @@ function New-NBDCIMLocation {
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Slug,
 
         [Parameter(Mandatory = $true)]
@@ -12604,9 +12885,11 @@ function New-NBDCIMManufacturer {
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Slug,
 
         [string]$Description,
@@ -13290,6 +13573,7 @@ function New-NBDCIMRack {
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [Parameter(Mandatory = $true)]
@@ -13719,9 +14003,11 @@ function New-NBDCIMRegion {
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Slug,
 
         [uint64]$Parent,
@@ -13788,6 +14074,7 @@ function New-NBDCIMSite {
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [string]$Slug,
@@ -13889,9 +14176,11 @@ function New-NBDCIMSiteGroup {
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Slug,
 
         [uint64]$Parent,
@@ -14079,6 +14368,7 @@ function New-NBEventRule {
     [OutputType([PSCustomObject])]
     param (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [string]$Description,
@@ -14176,6 +14466,7 @@ function New-NBExportTemplate {
     [OutputType([PSCustomObject])]
     param (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [Parameter(Mandatory = $true)]
@@ -14240,6 +14531,7 @@ function New-NBGroup {
     [OutputType([PSCustomObject])]
     param (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [uint64[]]$Permissions,
@@ -14326,6 +14618,7 @@ function New-NBIPAMAddress {
     (
         [Parameter(Mandatory = $true,
             ValueFromPipelineByPropertyName = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Address,
 
         [object]$Status = 'Active',
@@ -14439,9 +14732,11 @@ function New-NBIPAMAddressRange {
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Start_Address,
 
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$End_Address,
 
         [object]$Status = 'Active',
@@ -14659,9 +14954,11 @@ function New-NBIPAMASNRange {
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Slug,
 
         [Parameter(Mandatory = $true)]
@@ -14811,7 +15108,7 @@ function New-NBIPAMFHRPGroupAssignment {
 #>
 
 function New-NBIPAMPrefix {
-    [CmdletBinding(ConfirmImpact = 'low',
+    [CmdletBinding(ConfirmImpact = 'Low',
         SupportsShouldProcess = $true)]
     [OutputType([PSCustomObject])]
     [CmdletBinding()]
@@ -14819,6 +15116,7 @@ function New-NBIPAMPrefix {
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Prefix,
 
         [object]$Status = 'Active',
@@ -14998,6 +15296,7 @@ function New-NBIPAMRouteTarget {
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [uint64]$Tenant,
@@ -15083,6 +15382,7 @@ function New-NBIPAMService {
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [Parameter(Mandatory = $true)]
@@ -15187,6 +15487,7 @@ function New-NBIPAMServiceTemplate {
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [Parameter(Mandatory = $true)]
@@ -15263,7 +15564,7 @@ function New-NBIPAMVLAN {
         Additional information about the function.
 #>
 
-    [CmdletBinding(ConfirmImpact = 'low',
+    [CmdletBinding(ConfirmImpact = 'Low',
         SupportsShouldProcess = $true)]
     [OutputType([pscustomobject])]
     param
@@ -15272,6 +15573,7 @@ function New-NBIPAMVLAN {
         [uint16]$VID,
 
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [object]$Status = 'Active',
@@ -15496,6 +15798,7 @@ function New-NBIPAMVRF {
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [string]$RD,
@@ -15570,12 +15873,14 @@ function New-NBJournalEntry {
     [OutputType([PSCustomObject])]
     param (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Assigned_Object_Type,
 
         [Parameter(Mandatory = $true)]
         [uint64]$Assigned_Object_Id,
 
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Comments,
 
         [ValidateSet('info', 'success', 'warning', 'danger')]
@@ -15646,6 +15951,7 @@ function New-NBPermission {
     [OutputType([PSCustomObject])]
     param (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [string]$Description,
@@ -15728,9 +16034,11 @@ function New-NBSavedFilter {
     [OutputType([PSCustomObject])]
     param (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Slug,
 
         [Parameter(Mandatory = $true)]
@@ -15801,6 +16109,7 @@ function New-NBTag {
     [OutputType([PSCustomObject])]
     param (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [string]$Slug,
@@ -16110,9 +16419,11 @@ function New-NBUser {
     [OutputType([PSCustomObject])]
     param (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Username,
 
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Password,
 
         [string]$First_Name,
@@ -16195,6 +16506,7 @@ function New-NBVirtualCircuit {
     [OutputType([PSCustomObject])]
     param (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Cid,
 
         [Parameter(Mandatory = $true)]
@@ -16336,6 +16648,7 @@ function New-NBVirtualCircuitType {
     [OutputType([PSCustomObject])]
     param (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [string]$Slug,
@@ -16652,12 +16965,13 @@ function New-NBVirtualizationClusterType {
 #>
 
 function New-NBVirtualMachine {
-    [CmdletBinding(ConfirmImpact = 'low',
+    [CmdletBinding(ConfirmImpact = 'Low',
         SupportsShouldProcess = $true)]
     [OutputType([pscustomobject])]
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [uint64]$Site,
@@ -17259,9 +17573,11 @@ function New-NBWebhook {
     [OutputType([PSCustomObject])]
     param (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Payload_Url,
 
         [string]$Description,
@@ -18424,6 +18740,7 @@ function Remove-NBDCIMDevice {
 
     [CmdletBinding(ConfirmImpact = 'High',
                    SupportsShouldProcess = $true)]
+    [OutputType([void])]
     param
     (
         [Parameter(Mandatory = $true,
@@ -18728,6 +19045,7 @@ function Remove-NBDCIMInterface {
 
     [CmdletBinding(ConfirmImpact = 'High',
         SupportsShouldProcess = $true)]
+    [OutputType([void])]
     param
     (
         [Parameter(Mandatory = $true,
@@ -19929,6 +20247,7 @@ function Remove-NBDCIMSite {
 
     [CmdletBinding(ConfirmImpact = 'High',
         SupportsShouldProcess = $true)]
+    [OutputType([void])]
     param
     (
         [Parameter(Mandatory = $true,
@@ -20282,6 +20601,7 @@ function Remove-NBIPAMAddress {
 
     [CmdletBinding(ConfirmImpact = 'High',
         SupportsShouldProcess = $true)]
+    [OutputType([void])]
     param
     (
         [Parameter(Mandatory = $true,
@@ -20334,6 +20654,7 @@ function Remove-NBIPAMAddressRange {
 
     [CmdletBinding(ConfirmImpact = 'High',
                    SupportsShouldProcess = $true)]
+    [OutputType([void])]
     param
     (
         [Parameter(Mandatory = $true,
@@ -21752,6 +22073,7 @@ function Remove-NBVirtualMachine {
 
     [CmdletBinding(ConfirmImpact = 'High',
                    SupportsShouldProcess = $true)]
+    [OutputType([void])]
     param
     (
         [Parameter(Mandatory = $true,
@@ -22326,6 +22648,7 @@ function Set-NBCipherSSL {
     #>
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessForStateChangingFunctions", "")]
     [CmdletBinding()]
+    [OutputType([PSCustomObject])]
     param()
 
     # Only apply to Desktop edition (PS 5.1)
@@ -24665,6 +24988,7 @@ function Set-NBDCIMInterfaceConnection {
 
     [CmdletBinding(ConfirmImpact = 'Medium',
                    SupportsShouldProcess = $true)]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(Mandatory = $true,
@@ -26828,6 +27152,7 @@ function Set-NBHostName {
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Hostname
     )
 
@@ -28830,6 +29155,7 @@ function Set-NBuntrustedSSL {
     #>
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessForStateChangingFunctions", "")]
     [CmdletBinding()]
+    [OutputType([PSCustomObject])]
     param()
 
     # Only apply to Desktop edition (PS 5.1)
@@ -30283,14 +30609,53 @@ function ThrowNetboxRESTError {
 #region File VerifyAPIConnectivity.ps1
 
 function VerifyAPIConnectivity {
+    <#
+    .SYNOPSIS
+        Verifies connectivity to the Netbox API.
+
+    .DESCRIPTION
+        Tests API connectivity by calling the /api/status/ endpoint, which returns
+        Netbox version information and verifies authentication is working.
+        This is the recommended health check endpoint for Netbox 3.x and 4.x.
+
+    .OUTPUTS
+        [PSCustomObject] The status response containing Netbox version info.
+
+    .EXAMPLE
+        $status = VerifyAPIConnectivity
+        Write-Host "Connected to Netbox $($status.'netbox-version')"
+    #>
     [CmdletBinding()]
-    param ()
+    [OutputType([PSCustomObject])]
+    param()
 
-    $uriSegments = [System.Collections.ArrayList]::new(@('extras'))
+    # Use /api/status/ for comprehensive health check
+    # This endpoint returns version info and validates authentication
+    $uriSegments = [System.Collections.ArrayList]::new(@('status'))
 
-    $uri = BuildNewURI -Segments $uriSegments -Parameters @{'format' = 'json' } -SkipConnectedCheck
+    $uri = BuildNewURI -Segments $uriSegments -SkipConnectedCheck
 
-    InvokeNetboxRequest -URI $uri
+    try {
+        $status = InvokeNetboxRequest -URI $uri -Raw
+
+        # Validate we got a proper response
+        if ($status.'netbox-version') {
+            Write-Verbose "Successfully connected to Netbox $($status.'netbox-version')"
+
+            # Store version in module scope for later compatibility checks
+            $script:NetboxVersion = $status.'netbox-version'
+        }
+        else {
+            Write-Warning "Connected to API but received unexpected response format"
+        }
+
+        return $status
+    }
+    catch {
+        # Re-throw with additional context
+        $errorMessage = "Failed to verify Netbox API connectivity: $($_.Exception.Message)"
+        throw [System.Exception]::new($errorMessage, $_.Exception)
+    }
 }
 
 #endregion

@@ -1,4 +1,4 @@
-﻿
+
 function Remove-NBDCIMDevice {
 <#
     .SYNOPSIS
@@ -22,6 +22,7 @@ function Remove-NBDCIMDevice {
 
     [CmdletBinding(ConfirmImpact = 'High',
                    SupportsShouldProcess = $true)]
+    [OutputType([void])]
     param
     (
         [Parameter(Mandatory = $true,

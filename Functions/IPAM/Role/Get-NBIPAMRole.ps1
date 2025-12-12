@@ -39,6 +39,7 @@ function Get-NBIPAMRole {
 #>
 
     [CmdletBinding()]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(ParameterSetName = 'Query',

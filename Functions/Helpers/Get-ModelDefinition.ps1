@@ -1,14 +1,17 @@
-﻿
+
 function Get-ModelDefinition {
     [CmdletBinding(DefaultParameterSetName = 'ByName')]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(ParameterSetName = 'ByName',
                    Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$ModelName,
 
         [Parameter(ParameterSetName = 'ByPath',
                    Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$URIPath,
 
         [Parameter(ParameterSetName = 'ByPath')]

@@ -45,6 +45,7 @@ function Get-NBTenant {
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(ParameterSetName = 'Query',

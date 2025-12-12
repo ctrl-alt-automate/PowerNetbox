@@ -51,6 +51,7 @@ function Get-NBVirtualizationCluster {
 #>
 
     [CmdletBinding()]
+    [OutputType([PSCustomObject])]
     param
     (
         [string]$Name,
