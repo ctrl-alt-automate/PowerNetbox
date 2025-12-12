@@ -1,4 +1,4 @@
-﻿
+
 function Remove-NBIPAMAddress {
     <#
     .SYNOPSIS
@@ -22,6 +22,7 @@ function Remove-NBIPAMAddress {
 
     [CmdletBinding(ConfirmImpact = 'High',
         SupportsShouldProcess = $true)]
+    [OutputType([void])]
     param
     (
         [Parameter(Mandatory = $true,

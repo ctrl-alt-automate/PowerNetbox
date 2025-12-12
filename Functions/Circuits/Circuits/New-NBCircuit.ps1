@@ -26,6 +26,7 @@ function New-NBCircuit {
     (
         [Parameter(Mandatory = $true,
             ValueFromPipelineByPropertyName = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$CID,
 
         [Parameter(Mandatory = $true)]

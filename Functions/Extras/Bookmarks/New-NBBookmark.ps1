@@ -25,6 +25,7 @@ function New-NBBookmark {
     [OutputType([PSCustomObject])]
     param (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Object_Type,
 
         [Parameter(Mandatory = $true)]

@@ -19,7 +19,7 @@
 #>
 
 function New-NBIPAMPrefix {
-    [CmdletBinding(ConfirmImpact = 'low',
+    [CmdletBinding(ConfirmImpact = 'Low',
         SupportsShouldProcess = $true)]
     [OutputType([PSCustomObject])]
     [CmdletBinding()]
@@ -27,6 +27,7 @@ function New-NBIPAMPrefix {
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Prefix,
 
         [object]$Status = 'Active',

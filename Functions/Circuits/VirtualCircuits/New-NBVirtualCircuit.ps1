@@ -46,6 +46,7 @@ function New-NBVirtualCircuit {
     [OutputType([PSCustomObject])]
     param (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Cid,
 
         [Parameter(Mandatory = $true)]

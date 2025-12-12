@@ -14,6 +14,7 @@ function Set-NBCipherSSL {
     #>
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessForStateChangingFunctions", "")]
     [CmdletBinding()]
+    [OutputType([PSCustomObject])]
     param()
 
     # Only apply to Desktop edition (PS 5.1)

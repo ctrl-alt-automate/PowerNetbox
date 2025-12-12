@@ -1,4 +1,4 @@
-﻿
+
 
 function New-NBIPAMAddressRange {
 <#
@@ -60,9 +60,11 @@ function New-NBIPAMAddressRange {
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Start_Address,
 
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$End_Address,
 
         [object]$Status = 'Active',

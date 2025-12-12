@@ -42,6 +42,7 @@ function New-NBCircuitProviderAccount {
         [string]$Name,
 
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Account,
 
         [string]$Description,

@@ -34,12 +34,14 @@ function New-NBJournalEntry {
     [OutputType([PSCustomObject])]
     param (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Assigned_Object_Type,
 
         [Parameter(Mandatory = $true)]
         [uint64]$Assigned_Object_Id,
 
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Comments,
 
         [ValidateSet('info', 'success', 'warning', 'danger')]

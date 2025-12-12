@@ -35,6 +35,7 @@ function Get-NBContentType {
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(ParameterSetName = 'Query',

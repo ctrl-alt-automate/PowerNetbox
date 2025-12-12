@@ -84,6 +84,7 @@ function Get-NBVirtualMachine {
 #>
 
     [CmdletBinding()]
+    [OutputType([PSCustomObject])]
     param
     (
         [Alias('q')]

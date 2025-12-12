@@ -44,9 +44,11 @@ function New-NBDCIMSiteGroup {
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Slug,
 
         [uint64]$Parent,
