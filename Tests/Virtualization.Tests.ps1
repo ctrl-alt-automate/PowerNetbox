@@ -410,4 +410,196 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
             $Result.URI | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/4125/', 'https://netbox.domain.com/api/virtualization/virtual-machines/4132/'
         }
     }
+
+    Context "Remove-NBVirtualMachineInterface" {
+        BeforeAll {
+            Mock -CommandName "Get-NBVirtualMachineInterface" -ModuleName NetboxPSv4 -MockWith {
+                return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'TestInterface' }
+            }
+        }
+
+        It "Should remove a single interface" {
+            $Result = Remove-NBVirtualMachineInterface -Id 100 -Force
+            Should -Invoke -CommandName 'Get-NBVirtualMachineInterface' -Times 1 -Scope 'It' -Exactly -ModuleName 'NetboxPSv4'
+            $Result.Method | Should -Be 'DELETE'
+            $Result.URI | Should -Be 'https://netbox.domain.com/api/virtualization/interfaces/100/'
+        }
+
+        It "Should remove multiple interfaces" {
+            $Result = Remove-NBVirtualMachineInterface -Id 100, 101 -Force
+            Should -Invoke -CommandName 'Get-NBVirtualMachineInterface' -Times 2 -Scope 'It' -Exactly -ModuleName 'NetboxPSv4'
+            $Result.Method | Should -Be 'DELETE', 'DELETE'
+        }
+    }
+
+    #region Cluster CRUD Tests
+    Context "New-NBVirtualizationCluster" {
+        It "Should create a cluster" {
+            $Result = New-NBVirtualizationCluster -Name 'test-cluster' -Type 1
+            $Result.Method | Should -Be 'POST'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/clusters/'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.name | Should -Be 'test-cluster'
+            $bodyObj.type | Should -Be 1
+        }
+
+        It "Should create a cluster with site and group" {
+            $Result = New-NBVirtualizationCluster -Name 'test-cluster' -Type 1 -Site 5 -Group 2
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.site | Should -Be 5
+            $bodyObj.group | Should -Be 2
+        }
+    }
+
+    Context "Set-NBVirtualizationCluster" {
+        BeforeAll {
+            Mock -CommandName "Get-NBVirtualizationCluster" -ModuleName NetboxPSv4 -MockWith {
+                return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'TestCluster' }
+            }
+        }
+
+        It "Should update a cluster" {
+            $Result = Set-NBVirtualizationCluster -Id 1 -Name 'updated-cluster' -Force
+            $Result.Method | Should -Be 'PATCH'
+            $Result.URI | Should -Match '/api/virtualization/clusters/1/'
+        }
+
+        It "Should update cluster description" {
+            $Result = Set-NBVirtualizationCluster -Id 1 -Description 'Updated description' -Force
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.description | Should -Be 'Updated description'
+        }
+    }
+
+    Context "Remove-NBVirtualizationCluster" {
+        BeforeAll {
+            Mock -CommandName "Get-NBVirtualizationCluster" -ModuleName NetboxPSv4 -MockWith {
+                return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'TestCluster' }
+            }
+        }
+
+        It "Should remove a cluster" {
+            $Result = Remove-NBVirtualizationCluster -Id 5 -Force
+            $Result.Method | Should -Be 'DELETE'
+            $Result.URI | Should -Match '/api/virtualization/clusters/5/'
+        }
+    }
+    #endregion
+
+    #region ClusterGroup CRUD Tests
+    Context "New-NBVirtualizationClusterGroup" {
+        It "Should create a cluster group" {
+            $Result = New-NBVirtualizationClusterGroup -Name 'test-group' -Slug 'test-group'
+            $Result.Method | Should -Be 'POST'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/cluster-groups/'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.name | Should -Be 'test-group'
+            $bodyObj.slug | Should -Be 'test-group'
+        }
+    }
+
+    Context "Set-NBVirtualizationClusterGroup" {
+        BeforeAll {
+            Mock -CommandName "Get-NBVirtualizationClusterGroup" -ModuleName NetboxPSv4 -MockWith {
+                return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'TestGroup' }
+            }
+        }
+
+        It "Should update a cluster group" {
+            $Result = Set-NBVirtualizationClusterGroup -Id 1 -Name 'updated-group' -Confirm:$false
+            $Result.Method | Should -Be 'PATCH'
+            $Result.URI | Should -Match '/api/virtualization/cluster-groups/1/'
+        }
+    }
+
+    Context "Remove-NBVirtualizationClusterGroup" {
+        BeforeAll {
+            Mock -CommandName "Get-NBVirtualizationClusterGroup" -ModuleName NetboxPSv4 -MockWith {
+                return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'TestGroup' }
+            }
+        }
+
+        It "Should remove a cluster group" {
+            $Result = Remove-NBVirtualizationClusterGroup -Id 3 -Confirm:$false
+            $Result.Method | Should -Be 'DELETE'
+            $Result.URI | Should -Match '/api/virtualization/cluster-groups/3/'
+        }
+    }
+    #endregion
+
+    #region ClusterType Tests
+    Context "Get-NBVirtualizationClusterType" {
+        It "Should request cluster types" {
+            $Result = Get-NBVirtualizationClusterType
+            $Result.Method | Should -Be 'GET'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/cluster-types/'
+        }
+
+        It "Should request a cluster type by ID" {
+            $Result = Get-NBVirtualizationClusterType -Id 5
+            $Result.Uri | Should -Match '/api/virtualization/cluster-types/5/'
+        }
+
+        It "Should request a cluster type by name" {
+            $Result = Get-NBVirtualizationClusterType -Name 'VMware'
+            $Result.Uri | Should -Match 'name=VMware'
+        }
+
+        It "Should request a cluster type by slug" {
+            $Result = Get-NBVirtualizationClusterType -Slug 'vmware'
+            $Result.Uri | Should -Match 'slug=vmware'
+        }
+    }
+
+    Context "New-NBVirtualizationClusterType" {
+        It "Should create a cluster type" {
+            $Result = New-NBVirtualizationClusterType -Name 'Hyper-V' -Slug 'hyper-v'
+            $Result.Method | Should -Be 'POST'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/cluster-types/'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.name | Should -Be 'Hyper-V'
+            $bodyObj.slug | Should -Be 'hyper-v'
+        }
+
+        It "Should create a cluster type with description" {
+            $Result = New-NBVirtualizationClusterType -Name 'Hyper-V' -Slug 'hyper-v' -Description 'Microsoft Hyper-V'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.description | Should -Be 'Microsoft Hyper-V'
+        }
+    }
+
+    Context "Set-NBVirtualizationClusterType" {
+        BeforeAll {
+            Mock -CommandName "Get-NBVirtualizationClusterType" -ModuleName NetboxPSv4 -MockWith {
+                return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'TestType' }
+            }
+        }
+
+        It "Should update a cluster type" {
+            $Result = Set-NBVirtualizationClusterType -Id 1 -Name 'updated-type' -Confirm:$false
+            $Result.Method | Should -Be 'PATCH'
+            $Result.URI | Should -Match '/api/virtualization/cluster-types/1/'
+        }
+
+        It "Should update cluster type description" {
+            $Result = Set-NBVirtualizationClusterType -Id 1 -Description 'Updated description' -Confirm:$false
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.description | Should -Be 'Updated description'
+        }
+    }
+
+    Context "Remove-NBVirtualizationClusterType" {
+        BeforeAll {
+            Mock -CommandName "Get-NBVirtualizationClusterType" -ModuleName NetboxPSv4 -MockWith {
+                return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'TestType' }
+            }
+        }
+
+        It "Should remove a cluster type" {
+            $Result = Remove-NBVirtualizationClusterType -Id 2 -Confirm:$false
+            $Result.Method | Should -Be 'DELETE'
+            $Result.URI | Should -Match '/api/virtualization/cluster-types/2/'
+        }
+    }
+    #endregion
 }

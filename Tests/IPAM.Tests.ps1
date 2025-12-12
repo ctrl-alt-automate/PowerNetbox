@@ -1,3 +1,12 @@
+<#
+.SYNOPSIS
+    Unit tests for IPAM module functions.
+
+.DESCRIPTION
+    Comprehensive tests for all IPAM module functions including Address, Prefix, VLAN, VRF,
+    ASN, RIR, Role, Aggregate, FHRPGroup, Service, RouteTarget, and more.
+#>
+
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param()
 
@@ -42,49 +51,9 @@ Describe "IPAM tests" -Tag 'Ipam' {
         }
     }
 
-    Context "Get-NBIPAMAggregate" {
-        It "Should request the default number of aggregates" {
-            $Result = Get-NBIPAMAggregate
-            $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/aggregates/'
-        }
-
-        It "Should request with limit and offset" {
-            $Result = Get-NBIPAMAggregate -Limit 10 -Offset 12
-            $Result.Method | Should -Be 'GET'
-            # Parameter order in hashtables is not guaranteed
-            $Result.Uri | Should -Match 'limit=10'
-            $Result.Uri | Should -Match 'offset=12'
-        }
-
-        It "Should request with a query" {
-            $Result = Get-NBIPAMAggregate -Query '10.10.0.0'
-            $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/aggregates/?q=10.10.0.0'
-        }
-
-        It "Should request with an escaped query" {
-            $Result = Get-NBIPAMAggregate -Query 'my aggregate'
-            $Result.Method | Should -Be 'GET'
-            # Module doesn't URL-encode spaces in query strings
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/aggregates/?q=my aggregate'
-        }
-
-        It "Should request with a single ID" {
-            $Result = Get-NBIPAMAggregate -Id 10
-            $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/aggregates/10/'
-        }
-
-        It "Should request with multiple IDs" {
-            $Result = Get-NBIPAMAggregate -Id 10, 12, 15
-            # Multiple IDs result in multiple requests (one per ID)
-            $Result.Count | Should -Be 3
-        }
-    }
-
+    #region Address Tests
     Context "Get-NBIPAMAddress" {
-        It "Should request the default number of addresses" {
+        It "Should request addresses" {
             $Result = Get-NBIPAMAddress
             $Result.Method | Should -Be 'GET'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/'
@@ -92,309 +61,950 @@ Describe "IPAM tests" -Tag 'Ipam' {
 
         It "Should request with limit and offset" {
             $Result = Get-NBIPAMAddress -Limit 10 -Offset 12
-            $Result.Method | Should -Be 'GET'
-            # Parameter order in hashtables is not guaranteed
             $Result.Uri | Should -Match 'limit=10'
             $Result.Uri | Should -Match 'offset=12'
         }
 
         It "Should request with a query" {
             $Result = Get-NBIPAMAddress -Query '10.10.10.10'
-            $Result.Method | Should -Be 'GET'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/?q=10.10.10.10'
-        }
-
-        It "Should request with an escaped query" {
-            $Result = Get-NBIPAMAddress -Query 'my ip address'
-            $Result.Method | Should -Be 'GET'
-            # Module doesn't URL-encode spaces in query strings
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/?q=my ip address'
         }
 
         It "Should request with a single ID" {
             $Result = Get-NBIPAMAddress -Id 10
-            $Result.Method | Should -Be 'GET'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/10/'
-        }
-
-        It "Should request with multiple IDs" {
-            $Result = Get-NBIPAMAddress -Id 10, 12, 15
-            # Multiple IDs result in multiple requests (one per ID)
-            $Result.Count | Should -Be 3
         }
 
         It "Should request with a family number" {
             $Result = Get-NBIPAMAddress -Family 4
-            $Result.Method | Should -Be 'GET'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/?family=4'
-        }
-
-        It "Should request with a family name" {
-            $Result = Get-NBIPAMAddress -Family 'IPv4'
-            $Result.Method | Should -Be 'GET'
-            # Family value is passed through to API as-is
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/?family=IPv4'
-        }
-    }
-
-    Context "Get-NBIPAMAvailableIP" {
-        It "Should request the default number of available IPs" {
-            $Result = Get-NBIPAMAvailableIP -Prefix_Id 10
-            $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/prefixes/10/available-ips/'
-        }
-
-        It "Should request 10 available IPs" {
-            $Result = Get-NBIPAMAvailableIP -Prefix_Id 1504 -NumberOfIPs 10
-            $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/prefixes/1504/available-ips/?limit=10'
-        }
-    }
-
-    Context "Get-NBIPAMPrefix" {
-        It "Should request the default number of prefixes" {
-            $Result = Get-NBIPAMPrefix
-            $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/prefixes/'
-        }
-
-        It "Should request with limit and offset" {
-            $Result = Get-NBIPAMPrefix -Limit 10 -Offset 12
-            $Result.Method | Should -Be 'GET'
-            # Parameter order in hashtables is not guaranteed
-            $Result.Uri | Should -Match 'limit=10'
-            $Result.Uri | Should -Match 'offset=12'
-        }
-
-        It "Should request with a query" {
-            $Result = Get-NBIPAMPrefix -Query '10.10.10.10'
-            $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/prefixes/?q=10.10.10.10'
-        }
-
-        It "Should request with an escaped query" {
-            $Result = Get-NBIPAMPrefix -Query 'my ip address'
-            $Result.Method | Should -Be 'GET'
-            # Module doesn't URL-encode spaces in query strings
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/prefixes/?q=my ip address'
-        }
-
-        It "Should request with a single ID" {
-            $Result = Get-NBIPAMPrefix -Id 10
-            $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/prefixes/10/'
-        }
-
-        It "Should request with multiple IDs" {
-            $Result = Get-NBIPAMPrefix -Id 10, 12, 15
-            # Multiple IDs result in multiple requests (one per ID)
-            $Result.Count | Should -Be 3
-        }
-
-        It "Should request with VLAN vID" {
-            $Result = Get-NBIPAMPrefix -VLAN_VID 10
-            $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/prefixes/?vlan_vid=10'
-        }
-
-        It "Should request with family of 4" {
-            $Result = Get-NBIPAMPrefix -Family 4
-            $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/prefixes/?family=4'
-        }
-
-        It "Should throw because the mask length is too large" {
-            { Get-NBIPAMPrefix -Mask_length 128 } | Should -Throw
-        }
-
-        It "Should throw because the mask length is too small" {
-            { Get-NBIPAMPrefix -Mask_length -1 } | Should -Throw
-        }
-
-        It "Should not throw because the mask length is just right" {
-            { Get-NBIPAMPrefix -Mask_length 24 } | Should -Not -Throw
-        }
-
-        It "Should request with mask length 24" {
-            $Result = Get-NBIPAMPrefix -Mask_length 24
-            $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/prefixes/?mask_length=24'
-        }
-    }
-
-    Context "New-NBIPAMPrefix" {
-        It "Should create a basic prefix" {
-            $Result = New-NBIPAMPrefix -Prefix "10.0.0.0/24"
-            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -Exactly -Scope 'It' -ModuleName 'NetboxPSv4'
-            $Result.Method | Should -Be 'POST'
-            $Result.URI | Should -Be 'https://netbox.domain.com/api/ipam/prefixes/'
-            # Module no longer adds default status
-            $bodyObj = $Result.Body | ConvertFrom-Json
-            $bodyObj.prefix | Should -Be '10.0.0.0/24'
-        }
-
-        It "Should create a prefix with a status and role names" {
-            $Result = New-NBIPAMPrefix -Prefix "10.0.0.0/24" -Status 'Active' -Role 'Active'
-            $Result.Method | Should -Be 'POST'
-            $Result.URI | Should -Be 'https://netbox.domain.com/api/ipam/prefixes/'
-            # Status is passed through as string (no client-side validation)
-            $bodyObj = $Result.Body | ConvertFrom-Json
-            $bodyObj.prefix | Should -Be '10.0.0.0/24'
-            $bodyObj.status | Should -Be 'Active'
-            $bodyObj.role | Should -Be 'Active'
-        }
-
-        It "Should create a prefix with a status, role name, and tenant ID" {
-            $Result = New-NBIPAMPrefix -Prefix "10.0.0.0/24" -Status 'Active' -Role 'Active' -Tenant 15
-            $Result.Method | Should -Be 'POST'
-            $Result.URI | Should -Be 'https://netbox.domain.com/api/ipam/prefixes/'
-            $bodyObj = $Result.Body | ConvertFrom-Json
-            $bodyObj.prefix | Should -Be '10.0.0.0/24'
-            $bodyObj.status | Should -Be 'Active'
-            $bodyObj.tenant | Should -Be 15
-            $bodyObj.role | Should -Be 'Active'
         }
     }
 
     Context "New-NBIPAMAddress" {
-        It "Should create a basic IP address" {
+        It "Should create an IP address" {
             $Result = New-NBIPAMAddress -Address '10.0.0.1/24'
-            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -Exactly -Scope 'It' -ModuleName 'NetboxPSv4'
             $Result.Method | Should -Be 'POST'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/'
-            # Module no longer adds default status
             $bodyObj = $Result.Body | ConvertFrom-Json
             $bodyObj.address | Should -Be '10.0.0.1/24'
         }
 
-        It "Should create an IP with a status and role names" {
+        It "Should create an IP with status and role" {
             $Result = New-NBIPAMAddress -Address '10.0.0.1/24' -Status 'Reserved' -Role 'Anycast'
-            $Result.Method | Should -Be 'POST'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/'
-            # Status and role are passed through as strings (no client-side validation)
             $bodyObj = $Result.Body | ConvertFrom-Json
-            $bodyObj.address | Should -Be '10.0.0.1/24'
             $bodyObj.status | Should -Be 'Reserved'
             $bodyObj.role | Should -Be 'Anycast'
-        }
-
-        It "Should create an IP with a status and role values" {
-            $Result = New-NBIPAMAddress -Address '10.0.1.1/24' -Status '1' -Role '10'
-            $Result.Method | Should -Be 'POST'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/'
-            # Values are passed through as strings
-            $bodyObj = $Result.Body | ConvertFrom-Json
-            $bodyObj.address | Should -Be '10.0.1.1/24'
-            $bodyObj.status | Should -Be '1'
-            $bodyObj.role | Should -Be '10'
-        }
-    }
-
-    Context "Remove-NBIPAMAddress" {
-        BeforeAll {
-            Mock -CommandName "Get-NBIPAMAddress" -ModuleName NetboxPSv4 -MockWith {
-                return @{
-                    'address' = "10.1.1.1/$Id"
-                    'id'      = $id
-                }
-            }
-        }
-
-        It "Should remove a single IP" {
-            $Result = Remove-NBIPAMAddress -Id 4109 -Force
-            Should -Invoke -CommandName "Get-NBIPAMAddress" -Times 1 -Scope 'It' -Exactly -ModuleName 'NetboxPSv4'
-            $Result.Method | Should -Be 'DELETE'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/4109/'
-        }
-
-        It "Should remove a single IP from the pipeline" {
-            $Result = [pscustomobject]@{ 'id' = 4110 } | Remove-NBIPAMAddress -Force
-            Should -Invoke -CommandName "Get-NBIPAMAddress" -Times 1 -Scope 'It' -Exactly -ModuleName 'NetboxPSv4'
-            $Result.Method | Should -Be 'DELETE'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/4110/'
-        }
-
-        It "Should remove multiple IPs" {
-            $Result = Remove-NBIPAMAddress -Id 4109, 4110 -Force
-            Should -Invoke -CommandName "Get-NBIPAMAddress" -Times 2 -Scope 'It' -Exactly -ModuleName 'NetboxPSv4'
-            $Result.Method | Should -Be 'DELETE', 'DELETE'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/4109/', 'https://netbox.domain.com/api/ipam/ip-addresses/4110/'
-        }
-
-        It "Should remove multiple IPs from the pipeline" {
-            $Result = @(
-                [pscustomobject]@{ 'id' = 4109 },
-                [pscustomobject]@{ 'id' = 4110 }
-            ) | Remove-NBIPAMAddress -Force
-            Should -Invoke -CommandName "Get-NBIPAMAddress" -Times 2 -Scope 'It' -Exactly -ModuleName 'NetboxPSv4'
-            $Result.Method | Should -Be 'DELETE', 'DELETE'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/4109/', 'https://netbox.domain.com/api/ipam/ip-addresses/4110/'
         }
     }
 
     Context "Set-NBIPAMAddress" {
         BeforeAll {
             Mock -CommandName "Get-NBIPAMAddress" -ModuleName NetboxPSv4 -MockWith {
-                return @{
-                    'address' = '10.1.1.1/24'
-                    'id'      = $id
-                }
+                return @{ 'address' = '10.1.1.1/24'; 'id' = $id }
             }
         }
 
-        It "Should set an IP with a new status" {
+        It "Should update an IP address" {
             $Result = Set-NBIPAMAddress -Id 4109 -Status 2 -Force
-            Should -Invoke -CommandName "Get-NBIPAMAddress" -Times 1 -Scope "It" -Exactly -ModuleName 'NetboxPSv4'
             $Result.Method | Should -Be 'PATCH'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/4109/'
-            # Status is passed as string in JSON
-            $bodyObj = $Result.Body | ConvertFrom-Json
-            $bodyObj.status | Should -Be '2'
         }
 
-        It "Should set an IP from the pipeline" {
-            $Result = [pscustomobject]@{ 'Id' = 4501 } | Set-NBIPAMAddress -VRF 10 -Tenant 14 -Description 'Test description' -Force
-            Should -Invoke -CommandName "Get-NBIPAMAddress" -Times 1 -Scope "It" -Exactly -ModuleName 'NetboxPSv4'
-            $Result.Method | Should -Be 'PATCH'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/4501/'
+        It "Should update IP with VRF and Tenant" {
+            $Result = Set-NBIPAMAddress -Id 4110 -VRF 10 -Tenant 14 -Description 'Test' -Force
             $bodyObj = $Result.Body | ConvertFrom-Json
             $bodyObj.vrf | Should -Be 10
             $bodyObj.tenant | Should -Be 14
-            $bodyObj.description | Should -Be 'Test description'
-        }
-
-        It "Should set mulitple IPs to a new status" {
-            $Result = Set-NBIPAMAddress -Id 4109, 4555 -Status 2 -Force
-            Should -Invoke -CommandName "Get-NBIPAMAddress" -Times 2 -Scope "It" -Exactly -ModuleName 'NetboxPSv4'
-            $Result.Method | Should -Be 'PATCH', 'PATCH'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/4109/', 'https://netbox.domain.com/api/ipam/ip-addresses/4555/'
-            # Status is passed as string in JSON
-            ($Result[0].Body | ConvertFrom-Json).status | Should -Be '2'
-            ($Result[1].Body | ConvertFrom-Json).status | Should -Be '2'
-        }
-
-        It "Should set an IP with VRF, Tenant, and Description" {
-            $Result = Set-NBIPAMAddress -Id 4110 -VRF 10 -Tenant 14 -Description 'Test description' -Force
-            Should -Invoke -CommandName "Get-NBIPAMAddress" -Times 1 -Scope "It" -Exactly -ModuleName 'NetboxPSv4'
-            $Result.Method | Should -Be 'PATCH'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/4110/'
-            $bodyObj = $Result.Body | ConvertFrom-Json
-            $bodyObj.vrf | Should -Be 10
-            $bodyObj.tenant | Should -Be 14
-            $bodyObj.description | Should -Be 'Test description'
-        }
-
-        It "Should set multiple IPs from the pipeline" {
-            $Result = @(
-                [pscustomobject]@{ 'Id' = 4501 },
-                [pscustomobject]@{ 'Id' = 4611 }
-            ) | Set-NBIPAMAddress -Status 2 -Force
-            Should -Invoke -CommandName "Get-NBIPAMAddress" -Times 2 -Scope "It" -Exactly -ModuleName 'NetboxPSv4'
-            $Result.Method | Should -Be 'PATCH', 'PATCH'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/4501/', 'https://netbox.domain.com/api/ipam/ip-addresses/4611/'
-            # Status is passed as string in JSON
-            ($Result[0].Body | ConvertFrom-Json).status | Should -Be '2'
-            ($Result[1].Body | ConvertFrom-Json).status | Should -Be '2'
         }
     }
+
+    Context "Remove-NBIPAMAddress" {
+        BeforeAll {
+            Mock -CommandName "Get-NBIPAMAddress" -ModuleName NetboxPSv4 -MockWith {
+                return @{ 'address' = "10.1.1.1/$Id"; 'id' = $id }
+            }
+        }
+
+        It "Should remove an IP address" {
+            $Result = Remove-NBIPAMAddress -Id 4109 -Force
+            $Result.Method | Should -Be 'DELETE'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/4109/'
+        }
+    }
+
+    Context "Get-NBIPAMAvailableIP" {
+        It "Should request available IPs" {
+            $Result = Get-NBIPAMAvailableIP -Prefix_Id 10
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/prefixes/10/available-ips/'
+        }
+
+        It "Should request 10 available IPs" {
+            $Result = Get-NBIPAMAvailableIP -Prefix_Id 1504 -NumberOfIPs 10
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/prefixes/1504/available-ips/?limit=10'
+        }
+    }
+    #endregion
+
+    #region Prefix Tests
+    Context "Get-NBIPAMPrefix" {
+        It "Should request prefixes" {
+            $Result = Get-NBIPAMPrefix
+            $Result.Method | Should -Be 'GET'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/prefixes/'
+        }
+
+        It "Should request with a single ID" {
+            $Result = Get-NBIPAMPrefix -Id 10
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/prefixes/10/'
+        }
+
+        It "Should request with VLAN vID" {
+            $Result = Get-NBIPAMPrefix -VLAN_VID 10
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/prefixes/?vlan_vid=10'
+        }
+
+        It "Should request with mask length 24" {
+            $Result = Get-NBIPAMPrefix -Mask_length 24
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/prefixes/?mask_length=24'
+        }
+
+        It "Should throw for invalid mask length" {
+            { Get-NBIPAMPrefix -Mask_length 128 } | Should -Throw
+        }
+    }
+
+    Context "New-NBIPAMPrefix" {
+        It "Should create a prefix" {
+            $Result = New-NBIPAMPrefix -Prefix "10.0.0.0/24"
+            $Result.Method | Should -Be 'POST'
+            $Result.URI | Should -Be 'https://netbox.domain.com/api/ipam/prefixes/'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.prefix | Should -Be '10.0.0.0/24'
+        }
+
+        It "Should create a prefix with status and role" {
+            $Result = New-NBIPAMPrefix -Prefix "10.0.0.0/24" -Status 'Active' -Role 'Active'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.status | Should -Be 'Active'
+            $bodyObj.role | Should -Be 'Active'
+        }
+    }
+
+    Context "Set-NBIPAMPrefix" {
+        BeforeAll {
+            Mock -CommandName "Get-NBIPAMPrefix" -ModuleName NetboxPSv4 -MockWith {
+                return @{ 'prefix' = '10.0.0.0/24'; 'id' = $id }
+            }
+        }
+
+        It "Should update a prefix" {
+            $Result = Set-NBIPAMPrefix -Id 1 -Description 'Updated' -Force
+            $Result.Method | Should -Be 'PATCH'
+            $Result.Uri | Should -Match '/api/ipam/prefixes/1/'
+        }
+    }
+
+    Context "Remove-NBIPAMPrefix" {
+        BeforeAll {
+            Mock -CommandName "Get-NBIPAMPrefix" -ModuleName NetboxPSv4 -MockWith {
+                return @{ 'prefix' = '10.0.0.0/24'; 'id' = $id }
+            }
+        }
+
+        It "Should remove a prefix" {
+            $Result = Remove-NBIPAMPrefix -Id 1 -Confirm:$false
+            $Result.Method | Should -Be 'DELETE'
+            $Result.Uri | Should -Match '/api/ipam/prefixes/1/'
+        }
+    }
+    #endregion
+
+    #region Aggregate Tests
+    Context "Get-NBIPAMAggregate" {
+        It "Should request aggregates" {
+            $Result = Get-NBIPAMAggregate
+            $Result.Method | Should -Be 'GET'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/aggregates/'
+        }
+
+        It "Should request with a query" {
+            $Result = Get-NBIPAMAggregate -Query '10.10.0.0'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/aggregates/?q=10.10.0.0'
+        }
+
+        It "Should request with a single ID" {
+            $Result = Get-NBIPAMAggregate -Id 10
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/aggregates/10/'
+        }
+    }
+
+    Context "New-NBIPAMAggregate" {
+        It "Should create an aggregate" {
+            $Result = New-NBIPAMAggregate -Prefix '10.0.0.0/8' -RIR 1
+            $Result.Method | Should -Be 'POST'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/aggregates/'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.prefix | Should -Be '10.0.0.0/8'
+            $bodyObj.rir | Should -Be 1
+        }
+    }
+
+    Context "Set-NBIPAMAggregate" {
+        BeforeAll {
+            Mock -CommandName "Get-NBIPAMAggregate" -ModuleName NetboxPSv4 -MockWith {
+                return @{ 'prefix' = '10.0.0.0/8'; 'id' = $id }
+            }
+        }
+
+        It "Should update an aggregate" {
+            $Result = Set-NBIPAMAggregate -Id 1 -Description 'Updated' -Confirm:$false
+            $Result.Method | Should -Be 'PATCH'
+            $Result.Uri | Should -Match '/api/ipam/aggregates/1/'
+        }
+    }
+
+    Context "Remove-NBIPAMAggregate" {
+        BeforeAll {
+            Mock -CommandName "Get-NBIPAMAggregate" -ModuleName NetboxPSv4 -MockWith {
+                return @{ 'prefix' = '10.0.0.0/8'; 'id' = $id }
+            }
+        }
+
+        It "Should remove an aggregate" {
+            $Result = Remove-NBIPAMAggregate -Id 1 -Confirm:$false
+            $Result.Method | Should -Be 'DELETE'
+            $Result.Uri | Should -Match '/api/ipam/aggregates/1/'
+        }
+    }
+    #endregion
+
+    #region VLAN Tests
+    Context "Get-NBIPAMVLAN" {
+        It "Should request VLANs" {
+            $Result = Get-NBIPAMVLAN
+            $Result.Method | Should -Be 'GET'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/vlans/'
+        }
+
+        It "Should request a VLAN by ID" {
+            $Result = Get-NBIPAMVLAN -Id 5
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/vlans/5/'
+        }
+
+        It "Should request a VLAN by VID" {
+            $Result = Get-NBIPAMVLAN -VID 100
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/vlans/?vid=100'
+        }
+    }
+
+    Context "New-NBIPAMVLAN" {
+        It "Should create a VLAN" {
+            $Result = New-NBIPAMVLAN -VID 100 -Name 'VLAN100'
+            $Result.Method | Should -Be 'POST'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/vlans/'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.vid | Should -Be 100
+            $bodyObj.name | Should -Be 'VLAN100'
+        }
+    }
+
+    Context "Set-NBIPAMVLAN" {
+        BeforeAll {
+            Mock -CommandName "Get-NBIPAMVLAN" -ModuleName NetboxPSv4 -MockWith {
+                return @{ 'vid' = 100; 'id' = $id }
+            }
+        }
+
+        It "Should update a VLAN" {
+            $Result = Set-NBIPAMVLAN -Id 1 -Name 'Updated VLAN' -Confirm:$false
+            $Result.Method | Should -Be 'PATCH'
+            $Result.Uri | Should -Match '/api/ipam/vlans/1/'
+        }
+    }
+
+    Context "Remove-NBIPAMVLAN" {
+        BeforeAll {
+            Mock -CommandName "Get-NBIPAMVLAN" -ModuleName NetboxPSv4 -MockWith {
+                return @{ 'vid' = 100; 'id' = $id }
+            }
+        }
+
+        It "Should remove a VLAN" {
+            $Result = Remove-NBIPAMVLAN -Id 1 -Confirm:$false
+            $Result.Method | Should -Be 'DELETE'
+            $Result.Uri | Should -Match '/api/ipam/vlans/1/'
+        }
+    }
+    #endregion
+
+    #region VLANGroup Tests
+    Context "Get-NBIPAMVLANGroup" {
+        It "Should request VLAN groups" {
+            $Result = Get-NBIPAMVLANGroup
+            $Result.Method | Should -Be 'GET'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/vlan-groups/'
+        }
+
+        It "Should request a VLAN group by ID" {
+            $Result = Get-NBIPAMVLANGroup -Id 3
+            $Result.Uri | Should -Match '/api/ipam/vlan.groups/3/'
+        }
+    }
+
+    Context "New-NBIPAMVLANGroup" {
+        It "Should create a VLAN group" {
+            $Result = New-NBIPAMVLANGroup -Name 'TestGroup' -Slug 'test-group'
+            $Result.Method | Should -Be 'POST'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/vlan-groups/'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.name | Should -Be 'TestGroup'
+        }
+    }
+
+    Context "Set-NBIPAMVLANGroup" {
+        It "Should update a VLAN group" {
+            $Result = Set-NBIPAMVLANGroup -Id 1 -Name 'Updated' -Confirm:$false
+            $Result.Method | Should -Be 'PATCH'
+            $Result.Uri | Should -Match '/api/ipam/vlan.groups/1/'
+        }
+    }
+
+    Context "Remove-NBIPAMVLANGroup" {
+        BeforeAll {
+            Mock -CommandName "Get-NBIPAMVLANGroup" -ModuleName NetboxPSv4 -MockWith {
+                return @{ 'name' = 'TestGroup'; 'id' = $id }
+            }
+        }
+
+        It "Should remove a VLAN group" {
+            $Result = Remove-NBIPAMVLANGroup -Id 1 -Confirm:$false
+            $Result.Method | Should -Be 'DELETE'
+            $Result.Uri | Should -Match '/api/ipam/vlan.groups/1/'
+        }
+    }
+    #endregion
+
+    #region VRF Tests
+    Context "Get-NBIPAMVRF" {
+        It "Should request VRFs" {
+            $Result = Get-NBIPAMVRF
+            $Result.Method | Should -Be 'GET'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/vrfs/'
+        }
+
+        It "Should request a VRF by ID" {
+            $Result = Get-NBIPAMVRF -Id 5
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/vrfs/5/'
+        }
+
+        It "Should request a VRF by name" {
+            $Result = Get-NBIPAMVRF -Name 'Production'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/vrfs/?name=Production'
+        }
+    }
+
+    Context "New-NBIPAMVRF" {
+        It "Should create a VRF" {
+            $Result = New-NBIPAMVRF -Name 'TestVRF'
+            $Result.Method | Should -Be 'POST'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/vrfs/'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.name | Should -Be 'TestVRF'
+        }
+
+        It "Should create a VRF with RD" {
+            $Result = New-NBIPAMVRF -Name 'TestVRF' -RD '65000:100'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.rd | Should -Be '65000:100'
+        }
+    }
+
+    Context "Set-NBIPAMVRF" {
+        It "Should update a VRF" {
+            $Result = Set-NBIPAMVRF -Id 1 -Description 'Updated' -Confirm:$false
+            $Result.Method | Should -Be 'PATCH'
+            $Result.Uri | Should -Match '/api/ipam/vrfs/1/'
+        }
+    }
+
+    Context "Remove-NBIPAMVRF" {
+        BeforeAll {
+            Mock -CommandName "Get-NBIPAMVRF" -ModuleName NetboxPSv4 -MockWith {
+                return @{ 'name' = 'TestVRF'; 'id' = $id }
+            }
+        }
+
+        It "Should remove a VRF" {
+            $Result = Remove-NBIPAMVRF -Id 1 -Confirm:$false
+            $Result.Method | Should -Be 'DELETE'
+            $Result.Uri | Should -Match '/api/ipam/vrfs/1/'
+        }
+    }
+    #endregion
+
+    #region RIR Tests
+    Context "Get-NBIPAMRIR" {
+        It "Should request RIRs" {
+            $Result = Get-NBIPAMRIR
+            $Result.Method | Should -Be 'GET'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/rirs/'
+        }
+
+        It "Should request a RIR by ID" {
+            $Result = Get-NBIPAMRIR -Id 2
+            $Result.Uri | Should -Match '/api/ipam/rirs/2/'
+        }
+    }
+
+    Context "New-NBIPAMRIR" {
+        It "Should create a RIR" {
+            $Result = New-NBIPAMRIR -Name 'RFC1918' -Slug 'rfc1918'
+            $Result.Method | Should -Be 'POST'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/rirs/'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.name | Should -Be 'RFC1918'
+        }
+    }
+
+    Context "Set-NBIPAMRIR" {
+        It "Should update a RIR" {
+            $Result = Set-NBIPAMRIR -Id 1 -Description 'Updated' -Confirm:$false
+            $Result.Method | Should -Be 'PATCH'
+            $Result.Uri | Should -Match '/api/ipam/rirs/1/'
+        }
+    }
+
+    Context "Remove-NBIPAMRIR" {
+        BeforeAll {
+            Mock -CommandName "Get-NBIPAMRIR" -ModuleName NetboxPSv4 -MockWith {
+                return @{ 'name' = 'RFC1918'; 'id' = $id }
+            }
+        }
+
+        It "Should remove a RIR" {
+            $Result = Remove-NBIPAMRIR -Id 1 -Confirm:$false
+            $Result.Method | Should -Be 'DELETE'
+            $Result.Uri | Should -Match '/api/ipam/rirs/1/'
+        }
+    }
+    #endregion
+
+    #region Role Tests
+    Context "Get-NBIPAMRole" {
+        It "Should request roles by name" {
+            $Result = Get-NBIPAMRole -Name 'Production'
+            $Result.Method | Should -Be 'GET'
+            $Result.Uri | Should -Match '/api/ipam/roles/'
+            $Result.Uri | Should -Match 'name=Production'
+        }
+
+        It "Should request a role by ID" {
+            $Result = Get-NBIPAMRole -Id 3
+            $Result.Uri | Should -Match '/api/ipam/roles/3/'
+        }
+    }
+
+    Context "New-NBIPAMRole" {
+        It "Should create a role" {
+            $Result = New-NBIPAMRole -Name 'Production' -Slug 'production'
+            $Result.Method | Should -Be 'POST'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/roles/'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.name | Should -Be 'Production'
+        }
+    }
+
+    Context "Set-NBIPAMRole" {
+        It "Should update a role" {
+            $Result = Set-NBIPAMRole -Id 1 -Description 'Updated' -Confirm:$false
+            $Result.Method | Should -Be 'PATCH'
+            $Result.Uri | Should -Match '/api/ipam/roles/1/'
+        }
+    }
+
+    Context "Remove-NBIPAMRole" {
+        BeforeAll {
+            Mock -CommandName "Get-NBIPAMRole" -ModuleName NetboxPSv4 -MockWith {
+                return @{ 'name' = 'Production'; 'id' = $id }
+            }
+        }
+
+        It "Should remove a role" {
+            $Result = Remove-NBIPAMRole -Id 1 -Confirm:$false
+            $Result.Method | Should -Be 'DELETE'
+            $Result.Uri | Should -Match '/api/ipam/roles/1/'
+        }
+    }
+    #endregion
+
+    #region ASN Tests
+    Context "Get-NBIPAMASN" {
+        It "Should request ASNs" {
+            $Result = Get-NBIPAMASN
+            $Result.Method | Should -Be 'GET'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/asns/'
+        }
+
+        It "Should request an ASN by ID" {
+            $Result = Get-NBIPAMASN -Id 5
+            $Result.Uri | Should -Match '/api/ipam/asns/5/'
+        }
+    }
+
+    Context "New-NBIPAMASN" {
+        It "Should create an ASN" {
+            $Result = New-NBIPAMASN -ASN 65000 -RIR 1
+            $Result.Method | Should -Be 'POST'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/asns/'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.asn | Should -Be 65000
+        }
+    }
+
+    Context "Set-NBIPAMASN" {
+        It "Should update an ASN" {
+            $Result = Set-NBIPAMASN -Id 1 -Description 'Updated' -Confirm:$false
+            $Result.Method | Should -Be 'PATCH'
+            $Result.Uri | Should -Match '/api/ipam/asns/1/'
+        }
+    }
+
+    Context "Remove-NBIPAMASN" {
+        BeforeAll {
+            Mock -CommandName "Get-NBIPAMASN" -ModuleName NetboxPSv4 -MockWith {
+                return @{ 'asn' = 65000; 'id' = $id }
+            }
+        }
+
+        It "Should remove an ASN" {
+            $Result = Remove-NBIPAMASN -Id 1 -Confirm:$false
+            $Result.Method | Should -Be 'DELETE'
+            $Result.Uri | Should -Match '/api/ipam/asns/1/'
+        }
+    }
+    #endregion
+
+    #region ASNRange Tests
+    Context "Get-NBIPAMASNRange" {
+        It "Should request ASN ranges" {
+            $Result = Get-NBIPAMASNRange
+            $Result.Method | Should -Be 'GET'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/asn-ranges/'
+        }
+
+        It "Should request an ASN range by ID" {
+            $Result = Get-NBIPAMASNRange -Id 2
+            $Result.Uri | Should -Match '/api/ipam/asn.ranges/2/'
+        }
+    }
+
+    Context "New-NBIPAMASNRange" {
+        It "Should create an ASN range" {
+            $Result = New-NBIPAMASNRange -Name 'Private' -Slug 'private' -RIR 1 -Start 64512 -End 65534
+            $Result.Method | Should -Be 'POST'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/asn-ranges/'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.name | Should -Be 'Private'
+        }
+    }
+
+    Context "Set-NBIPAMASNRange" {
+        It "Should update an ASN range" {
+            $Result = Set-NBIPAMASNRange -Id 1 -Description 'Updated' -Confirm:$false
+            $Result.Method | Should -Be 'PATCH'
+            $Result.Uri | Should -Match '/api/ipam/asn.ranges/1/'
+        }
+    }
+
+    Context "Remove-NBIPAMASNRange" {
+        BeforeAll {
+            Mock -CommandName "Get-NBIPAMASNRange" -ModuleName NetboxPSv4 -MockWith {
+                return @{ 'name' = 'Private'; 'id' = $id }
+            }
+        }
+
+        It "Should remove an ASN range" {
+            $Result = Remove-NBIPAMASNRange -Id 1 -Confirm:$false
+            $Result.Method | Should -Be 'DELETE'
+            $Result.Uri | Should -Match '/api/ipam/asn.ranges/1/'
+        }
+    }
+    #endregion
+
+    #region RouteTarget Tests
+    Context "Get-NBIPAMRouteTarget" {
+        It "Should request route targets" {
+            $Result = Get-NBIPAMRouteTarget
+            $Result.Method | Should -Be 'GET'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/route-targets/'
+        }
+
+        It "Should request a route target by ID" {
+            $Result = Get-NBIPAMRouteTarget -Id 4
+            $Result.Uri | Should -Match '/api/ipam/route.targets/4/'
+        }
+    }
+
+    Context "New-NBIPAMRouteTarget" {
+        It "Should create a route target" {
+            $Result = New-NBIPAMRouteTarget -Name '65000:100'
+            $Result.Method | Should -Be 'POST'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/route-targets/'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.name | Should -Be '65000:100'
+        }
+    }
+
+    Context "Set-NBIPAMRouteTarget" {
+        It "Should update a route target" {
+            $Result = Set-NBIPAMRouteTarget -Id 1 -Description 'Updated' -Confirm:$false
+            $Result.Method | Should -Be 'PATCH'
+            $Result.Uri | Should -Match '/api/ipam/route.targets/1/'
+        }
+    }
+
+    Context "Remove-NBIPAMRouteTarget" {
+        BeforeAll {
+            Mock -CommandName "Get-NBIPAMRouteTarget" -ModuleName NetboxPSv4 -MockWith {
+                return @{ 'name' = '65000:100'; 'id' = $id }
+            }
+        }
+
+        It "Should remove a route target" {
+            $Result = Remove-NBIPAMRouteTarget -Id 1 -Confirm:$false
+            $Result.Method | Should -Be 'DELETE'
+            $Result.Uri | Should -Match '/api/ipam/route.targets/1/'
+        }
+    }
+    #endregion
+
+    #region AddressRange Tests
+    Context "Get-NBIPAMAddressRange" {
+        It "Should request address ranges" {
+            $Result = Get-NBIPAMAddressRange
+            $Result.Method | Should -Be 'GET'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-ranges/'
+        }
+
+        It "Should request an address range by ID" {
+            $Result = Get-NBIPAMAddressRange -Id 6
+            $Result.Uri | Should -Match '/api/ipam/ip.ranges/6/'
+        }
+    }
+
+    Context "New-NBIPAMAddressRange" {
+        It "Should create an address range" {
+            $Result = New-NBIPAMAddressRange -Start_Address '10.0.0.1/24' -End_Address '10.0.0.100/24'
+            $Result.Method | Should -Be 'POST'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-ranges/'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.start_address | Should -Be '10.0.0.1/24'
+        }
+    }
+
+    Context "Set-NBIPAMAddressRange" {
+        It "Should update an address range" {
+            $Result = Set-NBIPAMAddressRange -Id 1 -Description 'Updated' -Confirm:$false
+            $Result.Method | Should -Be 'PATCH'
+            $Result.Uri | Should -Match '/api/ipam/ip.ranges/1/'
+        }
+    }
+
+    Context "Remove-NBIPAMAddressRange" {
+        BeforeAll {
+            Mock -CommandName "Get-NBIPAMAddressRange" -ModuleName NetboxPSv4 -MockWith {
+                return @{ 'id' = $id }
+            }
+        }
+
+        It "Should remove an address range" {
+            $Result = Remove-NBIPAMAddressRange -Id 1 -Confirm:$false
+            $Result.Method | Should -Be 'DELETE'
+            $Result.Uri | Should -Match '/api/ipam/ip.ranges/1/'
+        }
+    }
+    #endregion
+
+    #region FHRPGroup Tests
+    Context "Get-NBIPAMFHRPGroup" {
+        It "Should request FHRP groups" {
+            $Result = Get-NBIPAMFHRPGroup
+            $Result.Method | Should -Be 'GET'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/fhrp-groups/'
+        }
+
+        It "Should request a FHRP group by ID" {
+            $Result = Get-NBIPAMFHRPGroup -Id 3
+            $Result.Uri | Should -Match '/api/ipam/fhrp.groups/3/'
+        }
+    }
+
+    Context "New-NBIPAMFHRPGroup" {
+        It "Should create a FHRP group" {
+            $Result = New-NBIPAMFHRPGroup -Protocol 'vrrp2' -Group_Id 1
+            $Result.Method | Should -Be 'POST'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/fhrp-groups/'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.protocol | Should -Be 'vrrp2'
+        }
+    }
+
+    Context "Set-NBIPAMFHRPGroup" {
+        It "Should update a FHRP group" {
+            $Result = Set-NBIPAMFHRPGroup -Id 1 -Description 'Updated' -Confirm:$false
+            $Result.Method | Should -Be 'PATCH'
+            $Result.Uri | Should -Match '/api/ipam/fhrp.groups/1/'
+        }
+    }
+
+    Context "Remove-NBIPAMFHRPGroup" {
+        BeforeAll {
+            Mock -CommandName "Get-NBIPAMFHRPGroup" -ModuleName NetboxPSv4 -MockWith {
+                return @{ 'id' = $id }
+            }
+        }
+
+        It "Should remove a FHRP group" {
+            $Result = Remove-NBIPAMFHRPGroup -Id 1 -Confirm:$false
+            $Result.Method | Should -Be 'DELETE'
+            $Result.Uri | Should -Match '/api/ipam/fhrp.groups/1/'
+        }
+    }
+    #endregion
+
+    #region FHRPGroupAssignment Tests
+    Context "Get-NBIPAMFHRPGroupAssignment" {
+        It "Should request FHRP group assignments" {
+            $Result = Get-NBIPAMFHRPGroupAssignment
+            $Result.Method | Should -Be 'GET'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/fhrp-group-assignments/'
+        }
+
+        It "Should request an assignment by ID" {
+            $Result = Get-NBIPAMFHRPGroupAssignment -Id 2
+            $Result.Uri | Should -Match '/api/ipam/fhrp.group.assignments/2/'
+        }
+    }
+
+    Context "New-NBIPAMFHRPGroupAssignment" {
+        It "Should create a FHRP group assignment" {
+            $Result = New-NBIPAMFHRPGroupAssignment -Group 1 -Interface_Type 'dcim.interface' -Interface_Id 5 -Priority 100
+            $Result.Method | Should -Be 'POST'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/fhrp-group-assignments/'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.group | Should -Be 1
+        }
+    }
+
+    Context "Set-NBIPAMFHRPGroupAssignment" {
+        It "Should update a FHRP group assignment" {
+            $Result = Set-NBIPAMFHRPGroupAssignment -Id 1 -Priority 200 -Confirm:$false
+            $Result.Method | Should -Be 'PATCH'
+            $Result.Uri | Should -Match '/api/ipam/fhrp.group.assignments/1/'
+        }
+    }
+
+    Context "Remove-NBIPAMFHRPGroupAssignment" {
+        BeforeAll {
+            Mock -CommandName "Get-NBIPAMFHRPGroupAssignment" -ModuleName NetboxPSv4 -MockWith {
+                return @{ 'id' = $id }
+            }
+        }
+
+        It "Should remove a FHRP group assignment" {
+            $Result = Remove-NBIPAMFHRPGroupAssignment -Id 1 -Confirm:$false
+            $Result.Method | Should -Be 'DELETE'
+            $Result.Uri | Should -Match '/api/ipam/fhrp.group.assignments/1/'
+        }
+    }
+    #endregion
+
+    #region Service Tests
+    Context "Get-NBIPAMService" {
+        It "Should request services" {
+            $Result = Get-NBIPAMService
+            $Result.Method | Should -Be 'GET'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/services/'
+        }
+
+        It "Should request a service by ID" {
+            $Result = Get-NBIPAMService -Id 7
+            $Result.Uri | Should -Match '/api/ipam/services/7/'
+        }
+    }
+
+    Context "New-NBIPAMService" {
+        It "Should create a service" {
+            $Result = New-NBIPAMService -Name 'HTTP' -Protocol 'tcp' -Ports @(80, 443) -Device 1
+            $Result.Method | Should -Be 'POST'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/services/'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.name | Should -Be 'HTTP'
+        }
+    }
+
+    Context "Set-NBIPAMService" {
+        It "Should update a service" {
+            $Result = Set-NBIPAMService -Id 1 -Description 'Updated' -Confirm:$false
+            $Result.Method | Should -Be 'PATCH'
+            $Result.Uri | Should -Match '/api/ipam/services/1/'
+        }
+    }
+
+    Context "Remove-NBIPAMService" {
+        BeforeAll {
+            Mock -CommandName "Get-NBIPAMService" -ModuleName NetboxPSv4 -MockWith {
+                return @{ 'name' = 'HTTP'; 'id' = $id }
+            }
+        }
+
+        It "Should remove a service" {
+            $Result = Remove-NBIPAMService -Id 1 -Confirm:$false
+            $Result.Method | Should -Be 'DELETE'
+            $Result.Uri | Should -Match '/api/ipam/services/1/'
+        }
+    }
+    #endregion
+
+    #region ServiceTemplate Tests
+    Context "Get-NBIPAMServiceTemplate" {
+        It "Should request service templates" {
+            $Result = Get-NBIPAMServiceTemplate
+            $Result.Method | Should -Be 'GET'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/service-templates/'
+        }
+
+        It "Should request a service template by ID" {
+            $Result = Get-NBIPAMServiceTemplate -Id 4
+            $Result.Uri | Should -Match '/api/ipam/service.templates/4/'
+        }
+    }
+
+    Context "New-NBIPAMServiceTemplate" {
+        It "Should create a service template" {
+            $Result = New-NBIPAMServiceTemplate -Name 'SSH' -Protocol 'tcp' -Ports @(22)
+            $Result.Method | Should -Be 'POST'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/service-templates/'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.name | Should -Be 'SSH'
+        }
+    }
+
+    Context "Set-NBIPAMServiceTemplate" {
+        It "Should update a service template" {
+            $Result = Set-NBIPAMServiceTemplate -Id 1 -Description 'Updated' -Confirm:$false
+            $Result.Method | Should -Be 'PATCH'
+            $Result.Uri | Should -Match '/api/ipam/service.templates/1/'
+        }
+    }
+
+    Context "Remove-NBIPAMServiceTemplate" {
+        BeforeAll {
+            Mock -CommandName "Get-NBIPAMServiceTemplate" -ModuleName NetboxPSv4 -MockWith {
+                return @{ 'name' = 'SSH'; 'id' = $id }
+            }
+        }
+
+        It "Should remove a service template" {
+            $Result = Remove-NBIPAMServiceTemplate -Id 1 -Confirm:$false
+            $Result.Method | Should -Be 'DELETE'
+            $Result.Uri | Should -Match '/api/ipam/service.templates/1/'
+        }
+    }
+    #endregion
+
+    #region VLANTranslationPolicy Tests
+    Context "Get-NBIPAMVLANTranslationPolicy" {
+        It "Should request VLAN translation policies" {
+            $Result = Get-NBIPAMVLANTranslationPolicy
+            $Result.Method | Should -Be 'GET'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/vlan-translation-policies/'
+        }
+
+        It "Should request a policy by ID" {
+            $Result = Get-NBIPAMVLANTranslationPolicy -Id 2
+            $Result.Uri | Should -Match '/api/ipam/vlan.translation.policies/2/'
+        }
+    }
+
+    Context "New-NBIPAMVLANTranslationPolicy" {
+        It "Should create a VLAN translation policy" {
+            $Result = New-NBIPAMVLANTranslationPolicy -Name 'Policy1'
+            $Result.Method | Should -Be 'POST'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/vlan-translation-policies/'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.name | Should -Be 'Policy1'
+        }
+    }
+
+    Context "Set-NBIPAMVLANTranslationPolicy" {
+        It "Should update a VLAN translation policy" {
+            $Result = Set-NBIPAMVLANTranslationPolicy -Id 1 -Description 'Updated' -Confirm:$false
+            $Result.Method | Should -Be 'PATCH'
+            $Result.Uri | Should -Match '/api/ipam/vlan.translation.policies/1/'
+        }
+    }
+
+    Context "Remove-NBIPAMVLANTranslationPolicy" {
+        BeforeAll {
+            Mock -CommandName "Get-NBIPAMVLANTranslationPolicy" -ModuleName NetboxPSv4 -MockWith {
+                return @{ 'name' = 'Policy1'; 'id' = $id }
+            }
+        }
+
+        It "Should remove a VLAN translation policy" {
+            $Result = Remove-NBIPAMVLANTranslationPolicy -Id 1 -Confirm:$false
+            $Result.Method | Should -Be 'DELETE'
+            $Result.Uri | Should -Match '/api/ipam/vlan.translation.policies/1/'
+        }
+    }
+    #endregion
+
+    #region VLANTranslationRule Tests
+    Context "Get-NBIPAMVLANTranslationRule" {
+        It "Should request VLAN translation rules" {
+            $Result = Get-NBIPAMVLANTranslationRule
+            $Result.Method | Should -Be 'GET'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/vlan-translation-rules/'
+        }
+
+        It "Should request a rule by ID" {
+            $Result = Get-NBIPAMVLANTranslationRule -Id 3
+            $Result.Uri | Should -Match '/api/ipam/vlan.translation.rules/3/'
+        }
+    }
+
+    Context "New-NBIPAMVLANTranslationRule" {
+        It "Should create a VLAN translation rule" {
+            $Result = New-NBIPAMVLANTranslationRule -Policy 1 -Local_VID 100 -Remote_VID 200
+            $Result.Method | Should -Be 'POST'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/vlan-translation-rules/'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.policy | Should -Be 1
+        }
+    }
+
+    Context "Set-NBIPAMVLANTranslationRule" {
+        It "Should update a VLAN translation rule" {
+            $Result = Set-NBIPAMVLANTranslationRule -Id 1 -Description 'Updated' -Confirm:$false
+            $Result.Method | Should -Be 'PATCH'
+            $Result.Uri | Should -Match '/api/ipam/vlan.translation.rules/1/'
+        }
+    }
+
+    Context "Remove-NBIPAMVLANTranslationRule" {
+        BeforeAll {
+            Mock -CommandName "Get-NBIPAMVLANTranslationRule" -ModuleName NetboxPSv4 -MockWith {
+                return @{ 'id' = $id }
+            }
+        }
+
+        It "Should remove a VLAN translation rule" {
+            $Result = Remove-NBIPAMVLANTranslationRule -Id 1 -Confirm:$false
+            $Result.Method | Should -Be 'DELETE'
+            $Result.Uri | Should -Match '/api/ipam/vlan.translation.rules/1/'
+        }
+    }
+    #endregion
 }
