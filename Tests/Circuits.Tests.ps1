@@ -13,9 +13,9 @@ param()
 
 BeforeAll {
     Import-Module Pester
-    Remove-Module NetboxPSv4 -Force -ErrorAction SilentlyContinue
+    Remove-Module PowerNetbox -Force -ErrorAction SilentlyContinue
 
-    $ModulePath = Join-Path $PSScriptRoot ".." "NetboxPSv4" "NetboxPSv4.psd1"
+    $ModulePath = Join-Path $PSScriptRoot ".." "PowerNetbox" "PowerNetbox.psd1"
     if (Test-Path $ModulePath) {
         Import-Module $ModulePath -ErrorAction Stop
     }
@@ -23,8 +23,8 @@ BeforeAll {
 
 Describe "Circuits Module Tests" -Tag 'Circuits' {
     BeforeAll {
-        Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'NetboxPSv4' -MockWith { return $true }
-        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'NetboxPSv4' -MockWith {
+        Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
+        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
             return [ordered]@{
                 'Method'      = $Method
                 'Uri'         = $Uri
@@ -34,14 +34,14 @@ Describe "Circuits Module Tests" -Tag 'Circuits' {
                 'Body'        = $Body
             }
         }
-        Mock -CommandName 'Get-NBCredential' -ModuleName 'NetboxPSv4' -MockWith {
+        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
             return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
         }
-        Mock -CommandName 'Get-NBHostname' -ModuleName 'NetboxPSv4' -MockWith { return 'netbox.domain.com' }
-        Mock -CommandName 'Get-NBTimeout' -ModuleName 'NetboxPSv4' -MockWith { return 30 }
-        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'NetboxPSv4' -MockWith { return @{} }
+        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { return 'netbox.domain.com' }
+        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
+        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
 
-        InModuleScope -ModuleName 'NetboxPSv4' {
+        InModuleScope -ModuleName 'PowerNetbox' {
             $script:NetboxConfig.Hostname = 'netbox.domain.com'
             $script:NetboxConfig.HostScheme = 'https'
             $script:NetboxConfig.HostPort = 443
@@ -170,7 +170,7 @@ Describe "Circuits Module Tests" -Tag 'Circuits' {
 
     Context "Remove-NBCircuitType" {
         BeforeAll {
-            Mock -CommandName "Get-NBCircuitType" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBCircuitType" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'TestType' }
             }
         }
@@ -223,7 +223,7 @@ Describe "Circuits Module Tests" -Tag 'Circuits' {
 
     Context "Remove-NBCircuitProvider" {
         BeforeAll {
-            Mock -CommandName "Get-NBCircuitProvider" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBCircuitProvider" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'TestProvider' }
             }
         }
@@ -283,7 +283,7 @@ Describe "Circuits Module Tests" -Tag 'Circuits' {
 
     Context "Remove-NBCircuitTermination" {
         BeforeAll {
-            Mock -CommandName "Get-NBCircuitTermination" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBCircuitTermination" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id }
             }
         }
@@ -336,7 +336,7 @@ Describe "Circuits Module Tests" -Tag 'Circuits' {
 
     Context "Remove-NBCircuitGroup" {
         BeforeAll {
-            Mock -CommandName "Get-NBCircuitGroup" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBCircuitGroup" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'TestGroup' }
             }
         }
@@ -390,7 +390,7 @@ Describe "Circuits Module Tests" -Tag 'Circuits' {
 
     Context "Remove-NBCircuitGroupAssignment" {
         BeforeAll {
-            Mock -CommandName "Get-NBCircuitGroupAssignment" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBCircuitGroupAssignment" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id }
             }
         }
@@ -444,7 +444,7 @@ Describe "Circuits Module Tests" -Tag 'Circuits' {
 
     Context "Remove-NBCircuitProviderAccount" {
         BeforeAll {
-            Mock -CommandName "Get-NBCircuitProviderAccount" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBCircuitProviderAccount" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'TestAccount' }
             }
         }
@@ -497,7 +497,7 @@ Describe "Circuits Module Tests" -Tag 'Circuits' {
 
     Context "Remove-NBCircuitProviderNetwork" {
         BeforeAll {
-            Mock -CommandName "Get-NBCircuitProviderNetwork" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBCircuitProviderNetwork" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'TestNetwork' }
             }
         }
@@ -551,7 +551,7 @@ Describe "Circuits Module Tests" -Tag 'Circuits' {
 
     Context "Remove-NBVirtualCircuit" {
         BeforeAll {
-            Mock -CommandName "Get-NBVirtualCircuit" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBVirtualCircuit" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Cid' = 'VCIR-001' }
             }
         }
@@ -604,7 +604,7 @@ Describe "Circuits Module Tests" -Tag 'Circuits' {
 
     Context "Remove-NBVirtualCircuitType" {
         BeforeAll {
-            Mock -CommandName "Get-NBVirtualCircuitType" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBVirtualCircuitType" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'TestType' }
             }
         }
@@ -652,7 +652,7 @@ Describe "Circuits Module Tests" -Tag 'Circuits' {
 
     Context "Remove-NBVirtualCircuitTermination" {
         BeforeAll {
-            Mock -CommandName "Get-NBVirtualCircuitTermination" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBVirtualCircuitTermination" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id }
             }
         }

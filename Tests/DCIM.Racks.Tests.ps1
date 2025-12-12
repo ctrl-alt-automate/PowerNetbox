@@ -3,9 +3,9 @@ param()
 
 BeforeAll {
     Import-Module Pester
-    Remove-Module NetboxPSv4 -Force -ErrorAction SilentlyContinue
+    Remove-Module PowerNetbox -Force -ErrorAction SilentlyContinue
 
-    $ModulePath = Join-Path $PSScriptRoot ".." "NetboxPSv4" "NetboxPSv4.psd1"
+    $ModulePath = Join-Path $PSScriptRoot ".." "PowerNetbox" "PowerNetbox.psd1"
     if (Test-Path $ModulePath) {
         Import-Module $ModulePath -ErrorAction Stop
     }
@@ -13,8 +13,8 @@ BeforeAll {
 
 Describe "DCIM Racks Tests" -Tag 'DCIM', 'Racks' {
     BeforeAll {
-        Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'NetboxPSv4' -MockWith { return $true }
-        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'NetboxPSv4' -MockWith {
+        Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
+        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
             return [ordered]@{
                 'Method'      = $Method
                 'Uri'         = $Uri
@@ -24,14 +24,14 @@ Describe "DCIM Racks Tests" -Tag 'DCIM', 'Racks' {
                 'Body'        = $Body
             }
         }
-        Mock -CommandName 'Get-NBCredential' -ModuleName 'NetboxPSv4' -MockWith {
+        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
             return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
         }
-        Mock -CommandName 'Get-NBHostname' -ModuleName 'NetboxPSv4' -MockWith { return 'netbox.domain.com' }
-        Mock -CommandName 'Get-NBTimeout' -ModuleName 'NetboxPSv4' -MockWith { return 30 }
-        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'NetboxPSv4' -MockWith { return @{} }
+        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { return 'netbox.domain.com' }
+        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
+        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
 
-        InModuleScope -ModuleName 'NetboxPSv4' {
+        InModuleScope -ModuleName 'PowerNetbox' {
             $script:NetboxConfig.Hostname = 'netbox.domain.com'
             $script:NetboxConfig.HostScheme = 'https'
             $script:NetboxConfig.HostPort = 443
@@ -54,7 +54,7 @@ Describe "DCIM Racks Tests" -Tag 'DCIM', 'Racks' {
     Context "New-NBDCIMRack" {
         It "Should create a new rack" {
             $Result = New-NBDCIMRack -Name "Rack01" -Site 1
-            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -Exactly -Scope 'It' -ModuleName 'NetboxPSv4'
+            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -Exactly -Scope 'It' -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'POST'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/racks/'
             $Result.Body | Should -Match '"name":"Rack01"'
@@ -64,14 +64,14 @@ Describe "DCIM Racks Tests" -Tag 'DCIM', 'Racks' {
 
     Context "Set-NBDCIMRack" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMRack" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMRack" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = $Name }
             }
         }
 
         It "Should update a rack" {
             $Result = Set-NBDCIMRack -Id 1 -Name 'UpdatedRack' -Force
-            Should -Invoke -CommandName 'Get-NBDCIMRack' -Times 1 -Exactly -Scope 'It' -ModuleName 'NetboxPSv4'
+            Should -Invoke -CommandName 'Get-NBDCIMRack' -Times 1 -Exactly -Scope 'It' -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'PATCH'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/racks/1/'
         }
@@ -79,14 +79,14 @@ Describe "DCIM Racks Tests" -Tag 'DCIM', 'Racks' {
 
     Context "Remove-NBDCIMRack" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMRack" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBDCIMRack" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = $Name }
             }
         }
 
         It "Should remove a rack" {
             $Result = Remove-NBDCIMRack -Id 10 -Force
-            Should -Invoke -CommandName 'Get-NBDCIMRack' -Times 1 -Exactly -Scope 'It' -ModuleName 'NetboxPSv4'
+            Should -Invoke -CommandName 'Get-NBDCIMRack' -Times 1 -Exactly -Scope 'It' -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/racks/10/'
         }

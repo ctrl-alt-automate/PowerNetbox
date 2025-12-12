@@ -3,9 +3,9 @@ param()
 
 BeforeAll {
     Import-Module Pester
-    Remove-Module NetboxPSv4 -Force -ErrorAction SilentlyContinue
+    Remove-Module PowerNetbox -Force -ErrorAction SilentlyContinue
 
-    $ModulePath = Join-Path $PSScriptRoot ".." "NetboxPSv4" "NetboxPSv4.psd1"
+    $ModulePath = Join-Path $PSScriptRoot ".." "PowerNetbox" "PowerNetbox.psd1"
     if (Test-Path $ModulePath) {
         Import-Module $ModulePath -ErrorAction Stop
     }
@@ -15,8 +15,8 @@ BeforeAll {
 
 Describe "Virtualization tests" -Tag 'Virtualization' {
     BeforeAll {
-        Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'NetboxPSv4' -MockWith { return $true }
-        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'NetboxPSv4' -MockWith {
+        Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
+        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
             return [ordered]@{
                 'Method'      = $Method
                 'Uri'         = $Uri
@@ -26,14 +26,14 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
                 'Body'        = $Body
             }
         }
-        Mock -CommandName 'Get-NBCredential' -ModuleName 'NetboxPSv4' -MockWith {
+        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
             return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
         }
-        Mock -CommandName 'Get-NBHostname' -ModuleName 'NetboxPSv4' -MockWith { return 'netbox.domain.com' }
-        Mock -CommandName 'Get-NBTimeout' -ModuleName 'NetboxPSv4' -MockWith { return 30 }
-        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'NetboxPSv4' -MockWith { return @{} }
+        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { return 'netbox.domain.com' }
+        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
+        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
 
-        InModuleScope -ModuleName 'NetboxPSv4' -ArgumentList $script:TestPath -ScriptBlock {
+        InModuleScope -ModuleName 'PowerNetbox' -ArgumentList $script:TestPath -ScriptBlock {
             param($TestPath)
             $script:NetboxConfig.Hostname = 'netbox.domain.com'
             $script:NetboxConfig.HostScheme = 'https'
@@ -223,7 +223,7 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
     Context "New-NBVirtualMachine" {
         It "Should create a basic VM" {
             $Result = New-NBVirtualMachine -Name 'testvm' -Cluster 1
-            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -Exactly -Scope 'It' -ModuleName 'NetboxPSv4'
+            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -Exactly -Scope 'It' -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'POST'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/'
             # Module no longer adds default status
@@ -260,7 +260,7 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
     Context "New-NBVirtualMachineInterface" {
         It "Should add a basic interface" {
             $Result = New-NBVirtualMachineInterface -Name 'Ethernet0' -Virtual_Machine 10
-            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -Exactly -Scope 'It' -ModuleName 'NetboxPSv4'
+            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -Exactly -Scope 'It' -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'POST'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/interfaces/'
             $bodyObj = $Result.Body | ConvertFrom-Json
@@ -317,14 +317,14 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
 
     Context "Set-NBVirtualMachineInterface" {
         BeforeAll {
-            Mock -CommandName "Get-NBVirtualMachineInterface" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBVirtualMachineInterface" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = $Name }
             }
         }
 
         It "Should set an interface to a new name" {
             $Result = Set-NBVirtualMachineInterface -Id 1234 -Name 'newtestname' -Force
-            Should -Invoke -CommandName Get-NBVirtualMachineInterface -Times 1 -Scope 'It' -Exactly -ModuleName 'NetboxPSv4'
+            Should -Invoke -CommandName Get-NBVirtualMachineInterface -Times 1 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'PATCH'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/virtualization/interfaces/1234/'
             $Result.Body | Should -Be '{"name":"newtestname"}'
@@ -340,7 +340,7 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
                 Force       = $true
             }
             $Result = Set-NBVirtualMachineInterface @paramSetNetboxVirtualMachineInterface
-            Should -Invoke -CommandName Get-NBVirtualMachineInterface -Times 1 -Scope 'It' -Exactly -ModuleName 'NetboxPSv4'
+            Should -Invoke -CommandName Get-NBVirtualMachineInterface -Times 1 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'PATCH'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/virtualization/interfaces/1234/'
             # Compare as objects since JSON key order is not guaranteed
@@ -353,7 +353,7 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
 
         It "Should set multiple interfaces to a new name" {
             $Result = Set-NBVirtualMachineInterface -Id 1234, 4321 -Name 'newtestname' -Force
-            Should -Invoke -CommandName Get-NBVirtualMachineInterface -Times 2 -Scope 'It' -Exactly -ModuleName 'NetboxPSv4'
+            Should -Invoke -CommandName Get-NBVirtualMachineInterface -Times 2 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'PATCH', 'PATCH'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/virtualization/interfaces/1234/', 'https://netbox.domain.com/api/virtualization/interfaces/4321/'
             $Result.Body | Should -Be '{"name":"newtestname"}', '{"name":"newtestname"}'
@@ -364,7 +364,7 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
                 [pscustomobject]@{ 'Id' = 4123 },
                 [pscustomobject]@{ 'Id' = 4321 }
             ) | Set-NBVirtualMachineInterface -Name 'newtestname' -Force
-            Should -Invoke -CommandName Get-NBVirtualMachineInterface -Times 2 -Scope 'It' -Exactly -ModuleName 'NetboxPSv4'
+            Should -Invoke -CommandName Get-NBVirtualMachineInterface -Times 2 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'PATCH', 'PATCH'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/virtualization/interfaces/4123/', 'https://netbox.domain.com/api/virtualization/interfaces/4321/'
             $Result.Body | Should -Be '{"name":"newtestname"}', '{"name":"newtestname"}'
@@ -373,21 +373,21 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
 
     Context "Remove-NBVirtualMachine" {
         BeforeAll {
-            Mock -CommandName "Get-NBVirtualMachine" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBVirtualMachine" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = $Name }
             }
         }
 
         It "Should remove a single VM" {
             $Result = Remove-NBVirtualMachine -Id 4125 -Force
-            Should -Invoke -CommandName 'Get-NBVirtualMachine' -Times 1 -Scope 'It' -Exactly -ModuleName 'NetboxPSv4'
+            Should -Invoke -CommandName 'Get-NBVirtualMachine' -Times 1 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/4125/'
         }
 
         It "Should remove mulitple VMs" {
             $Result = Remove-NBVirtualMachine -Id 4125, 4132 -Force
-            Should -Invoke -CommandName 'Get-NBVirtualMachine' -Times 2 -Scope 'It' -Exactly -ModuleName 'NetboxPSv4'
+            Should -Invoke -CommandName 'Get-NBVirtualMachine' -Times 2 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'DELETE', 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/4125/', 'https://netbox.domain.com/api/virtualization/virtual-machines/4132/'
         }
@@ -395,7 +395,7 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
         It "Should remove a VM from the pipeline" {
             # Use a pscustomobject with Id property instead of calling Get-NBVirtualMachine
             $Result = [pscustomobject]@{ 'Id' = 4125 } | Remove-NBVirtualMachine -Force
-            Should -Invoke -CommandName 'Get-NBVirtualMachine' -Times 1 -Scope 'It' -Exactly -ModuleName 'NetboxPSv4'
+            Should -Invoke -CommandName 'Get-NBVirtualMachine' -Times 1 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/4125/'
         }
@@ -405,7 +405,7 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
                 [pscustomobject]@{ 'Id' = 4125 },
                 [pscustomobject]@{ 'Id' = 4132 }
             ) | Remove-NBVirtualMachine -Force
-            Should -Invoke -CommandName 'Get-NBVirtualMachine' -Times 2 -Scope 'It' -Exactly -ModuleName 'NetboxPSv4'
+            Should -Invoke -CommandName 'Get-NBVirtualMachine' -Times 2 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'DELETE', 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/4125/', 'https://netbox.domain.com/api/virtualization/virtual-machines/4132/'
         }
@@ -413,21 +413,21 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
 
     Context "Remove-NBVirtualMachineInterface" {
         BeforeAll {
-            Mock -CommandName "Get-NBVirtualMachineInterface" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBVirtualMachineInterface" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'TestInterface' }
             }
         }
 
         It "Should remove a single interface" {
             $Result = Remove-NBVirtualMachineInterface -Id 100 -Force
-            Should -Invoke -CommandName 'Get-NBVirtualMachineInterface' -Times 1 -Scope 'It' -Exactly -ModuleName 'NetboxPSv4'
+            Should -Invoke -CommandName 'Get-NBVirtualMachineInterface' -Times 1 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/virtualization/interfaces/100/'
         }
 
         It "Should remove multiple interfaces" {
             $Result = Remove-NBVirtualMachineInterface -Id 100, 101 -Force
-            Should -Invoke -CommandName 'Get-NBVirtualMachineInterface' -Times 2 -Scope 'It' -Exactly -ModuleName 'NetboxPSv4'
+            Should -Invoke -CommandName 'Get-NBVirtualMachineInterface' -Times 2 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'DELETE', 'DELETE'
         }
     }
@@ -453,7 +453,7 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
 
     Context "Set-NBVirtualizationCluster" {
         BeforeAll {
-            Mock -CommandName "Get-NBVirtualizationCluster" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBVirtualizationCluster" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'TestCluster' }
             }
         }
@@ -473,7 +473,7 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
 
     Context "Remove-NBVirtualizationCluster" {
         BeforeAll {
-            Mock -CommandName "Get-NBVirtualizationCluster" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBVirtualizationCluster" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'TestCluster' }
             }
         }
@@ -500,7 +500,7 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
 
     Context "Set-NBVirtualizationClusterGroup" {
         BeforeAll {
-            Mock -CommandName "Get-NBVirtualizationClusterGroup" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBVirtualizationClusterGroup" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'TestGroup' }
             }
         }
@@ -514,7 +514,7 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
 
     Context "Remove-NBVirtualizationClusterGroup" {
         BeforeAll {
-            Mock -CommandName "Get-NBVirtualizationClusterGroup" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBVirtualizationClusterGroup" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'TestGroup' }
             }
         }
@@ -570,7 +570,7 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
 
     Context "Set-NBVirtualizationClusterType" {
         BeforeAll {
-            Mock -CommandName "Get-NBVirtualizationClusterType" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBVirtualizationClusterType" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'TestType' }
             }
         }
@@ -590,7 +590,7 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
 
     Context "Remove-NBVirtualizationClusterType" {
         BeforeAll {
-            Mock -CommandName "Get-NBVirtualizationClusterType" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBVirtualizationClusterType" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'TestType' }
             }
         }

@@ -3,9 +3,9 @@ param()
 
 BeforeAll {
     Import-Module Pester
-    Remove-Module NetboxPSv4 -Force -ErrorAction SilentlyContinue
+    Remove-Module PowerNetbox -Force -ErrorAction SilentlyContinue
 
-    $ModulePath = Join-Path $PSScriptRoot ".." "NetboxPSv4" "NetboxPSv4.psd1"
+    $ModulePath = Join-Path $PSScriptRoot ".." "PowerNetbox" "PowerNetbox.psd1"
     if (Test-Path $ModulePath) {
         Import-Module $ModulePath -ErrorAction Stop
     }
@@ -15,8 +15,8 @@ BeforeAll {
 
 Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
     BeforeAll {
-        Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'NetboxPSv4' -MockWith { return $true }
-        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'NetboxPSv4' -MockWith {
+        Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
+        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
             return [ordered]@{
                 'Method'      = $Method
                 'Uri'         = $Uri
@@ -26,14 +26,14 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
                 'Body'        = $Body
             }
         }
-        Mock -CommandName 'Get-NBCredential' -ModuleName 'NetboxPSv4' -MockWith {
+        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
             return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
         }
-        Mock -CommandName 'Get-NBHostname' -ModuleName 'NetboxPSv4' -MockWith { return 'netbox.domain.com' }
-        Mock -CommandName 'Get-NBTimeout' -ModuleName 'NetboxPSv4' -MockWith { return 30 }
-        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'NetboxPSv4' -MockWith { return @{} }
+        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { return 'netbox.domain.com' }
+        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
+        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
 
-        InModuleScope -ModuleName 'NetboxPSv4' -ArgumentList $script:TestPath -ScriptBlock {
+        InModuleScope -ModuleName 'PowerNetbox' -ArgumentList $script:TestPath -ScriptBlock {
             param($TestPath)
             $script:NetboxConfig.Hostname = 'netbox.domain.com'
             $script:NetboxConfig.HostScheme = 'https'
@@ -45,7 +45,7 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
     Context "Get-NBDCIMInterface" {
         It "Should request the default number of interfaces" {
             $Result = Get-NBDCIMInterface
-            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -Scope 'It' -Exactly -ModuleName 'NetboxPSv4'
+            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'GET'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/interfaces/'
         }
@@ -139,7 +139,7 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
 
     Context "Set-NBDCIMInterface" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMInterface" -ModuleName "NetboxPSv4" -MockWith {
+            Mock -CommandName "Get-NBDCIMInterface" -ModuleName "PowerNetbox" -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id }
             }
         }
@@ -169,7 +169,7 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
 
     Context "Remove-NBDCIMInterface" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMInterface" -ModuleName "NetboxPSv4" -MockWith {
+            Mock -CommandName "Get-NBDCIMInterface" -ModuleName "PowerNetbox" -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id }
             }
         }
@@ -236,7 +236,7 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
 
     Context "Set-NBDCIMInterfaceConnection" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMInterfaceConnection" -ModuleName 'NetboxPSv4' -MockWith {
+            Mock -CommandName "Get-NBDCIMInterfaceConnection" -ModuleName 'PowerNetbox' -MockWith {
                 [pscustomobject]@{ 'Id' = $Id }
             }
         }
@@ -255,7 +255,7 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
 
     Context "Remove-NBDCIMInterfaceConnection" {
         BeforeAll {
-            Mock -CommandName "Get-NBDCIMInterfaceConnection" -ModuleName 'NetboxPSv4' -MockWith {
+            Mock -CommandName "Get-NBDCIMInterfaceConnection" -ModuleName 'PowerNetbox' -MockWith {
                 [pscustomobject]@{ 'Id' = $Id }
             }
         }

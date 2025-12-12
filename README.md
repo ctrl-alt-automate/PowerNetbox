@@ -1,20 +1,28 @@
-# NetboxPSv4
+# PowerNetbox
 
-[![PowerShell Gallery](https://img.shields.io/powershellgallery/v/NetboxPSv4?label=PSGallery&logo=powershell&logoColor=white)](https://www.powershellgallery.com/packages/NetboxPSv4)
-[![PowerShell Gallery Downloads](https://img.shields.io/powershellgallery/dt/NetboxPSv4?label=Downloads&logo=powershell&logoColor=white)](https://www.powershellgallery.com/packages/NetboxPSv4)
-[![License](https://img.shields.io/github/license/ctrl-alt-automate/NetboxPS)](LICENSE)
-[![Netbox Version](https://img.shields.io/badge/Netbox-4.4.7-blue?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyTDIgN2wxMCA1IDEwLTV6TTIgMTdsMTAgNSAxMC01TTIgMTJsMTAgNSAxMC01Ii8+PC9zdmc+)](https://github.com/netbox-community/netbox)
+[![PowerShell Gallery](https://img.shields.io/powershellgallery/v/PowerNetbox?label=PSGallery&logo=powershell&logoColor=white)](https://www.powershellgallery.com/packages/PowerNetbox)
+[![PowerShell Gallery Downloads](https://img.shields.io/powershellgallery/dt/PowerNetbox?label=Downloads&logo=powershell&logoColor=white)](https://www.powershellgallery.com/packages/PowerNetbox)
+[![License](https://img.shields.io/github/license/ctrl-alt-automate/PowerNetbox)](LICENSE)
+[![Tests](https://img.shields.io/badge/Tests-613%20passing-brightgreen)](Tests/)
+[![Netbox Version](https://img.shields.io/badge/Netbox-4.4.8-blue?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyTDIgN2wxMCA1IDEwLTV6TTIgMTdsMTAgNSAxMC01TTIgMTJsMTAgNSAxMC01Ii8+PC9zdmc+)](https://github.com/netbox-community/netbox)
 
-A comprehensive PowerShell module for the [Netbox](https://github.com/netbox-community/netbox) REST API with **100% API coverage**. Fully compatible with **Netbox 4.4.7** (latest stable release).
+**The** comprehensive PowerShell module for the [Netbox](https://github.com/netbox-community/netbox) REST API with **100% coverage**. Fully compatible with **Netbox 4.4.8**.
 
-> **Note:** This is a fork of [NetboxPS](https://github.com/benclaussen/NetboxPS) published under a new name to provide full Netbox 4.x compatibility and cross-platform support.
+---
 
 ## Acknowledgements
 
-This project is a fork of the original [NetboxPS](https://github.com/benclaussen/NetboxPS) created by **Ben Claussen**. We extend our sincere thanks to Ben and all original contributors for building the foundation of this module.
+This project is a fork of the original **[NetboxPS](https://github.com/benclaussen/NetboxPS)** created by **[Ben Claussen](https://github.com/benclaussen)**.
 
-**Original Author:** [Ben Claussen](https://github.com/benclaussen)
-**Original Repository:** [benclaussen/NetboxPS](https://github.com/benclaussen/NetboxPS)
+We extend our sincere thanks to Ben and all original contributors for building the foundation of this module. Their work made PowerNetbox possible.
+
+| | |
+|---|---|
+| **Original Author** | [Ben Claussen](https://github.com/benclaussen) |
+| **Original Repository** | [benclaussen/NetboxPS](https://github.com/benclaussen/NetboxPS) |
+| **License** | MIT (preserved from original) |
+
+---
 
 ## Features
 
@@ -23,6 +31,7 @@ This project is a fork of the original [NetboxPS](https://github.com/benclaussen
 - **488+ Functions** - Complete CRUD operations for all resources
 - **Pipeline Support** - Full PowerShell pipeline integration
 - **Secure** - Token-based authentication with TLS 1.2/1.3
+- **Well Tested** - 613 unit tests for quality assurance
 
 ### Supported Modules
 
@@ -45,10 +54,10 @@ This project is a fork of the original [NetboxPS](https://github.com/benclaussen
 
 ```powershell
 # Install for current user
-Install-Module -Name NetboxPSv4 -Scope CurrentUser
+Install-Module -Name PowerNetbox -Scope CurrentUser
 
 # Install system-wide (requires admin/root)
-Install-Module -Name NetboxPSv4 -Scope AllUsers
+Install-Module -Name PowerNetbox -Scope AllUsers
 ```
 
 ### Platform-Specific Instructions
@@ -57,11 +66,10 @@ Install-Module -Name NetboxPSv4 -Scope AllUsers
 
 ```powershell
 # PowerShell 5.1 (Windows PowerShell)
-Install-Module -Name NetboxPSv4 -Scope CurrentUser
+Install-Module -Name PowerNetbox -Scope CurrentUser
 
 # PowerShell 7+ (recommended)
-# First install PowerShell 7: https://aka.ms/powershell-release?tag=stable
-pwsh -Command "Install-Module -Name NetboxPSv4 -Scope CurrentUser"
+pwsh -Command "Install-Module -Name PowerNetbox -Scope CurrentUser"
 ```
 
 #### macOS
@@ -70,8 +78,8 @@ pwsh -Command "Install-Module -Name NetboxPSv4 -Scope CurrentUser"
 # Install PowerShell 7 via Homebrew
 brew install powershell/tap/powershell
 
-# Install NetboxPSv4
-pwsh -Command "Install-Module -Name NetboxPSv4 -Scope CurrentUser"
+# Install PowerNetbox
+pwsh -Command "Install-Module -Name PowerNetbox -Scope CurrentUser"
 ```
 
 #### Linux (Ubuntu/Debian)
@@ -85,32 +93,22 @@ sudo dpkg -i packages-microsoft-prod.deb
 sudo apt-get update
 sudo apt-get install -y powershell
 
-# Install NetboxPSv4
-pwsh -Command "Install-Module -Name NetboxPSv4 -Scope CurrentUser"
-```
-
-#### Linux (RHEL/CentOS/Fedora)
-
-```bash
-# Install PowerShell 7
-sudo dnf install powershell
-
-# Install NetboxPSv4
-pwsh -Command "Install-Module -Name NetboxPSv4 -Scope CurrentUser"
+# Install PowerNetbox
+pwsh -Command "Install-Module -Name PowerNetbox -Scope CurrentUser"
 ```
 
 ### Manual Installation
 
 ```powershell
 # Clone the repository
-git clone https://github.com/ctrl-alt-automate/NetboxPS.git
-cd NetboxPS
+git clone https://github.com/ctrl-alt-automate/PowerNetbox.git
+cd PowerNetbox
 
 # Build the module
 ./deploy.ps1 -Environment prod -SkipVersion
 
 # Import the module
-Import-Module ./NetboxPSv4/NetboxPSv4.psd1
+Import-Module ./PowerNetbox/PowerNetbox.psd1
 ```
 
 ## Quick Start
@@ -119,7 +117,7 @@ Import-Module ./NetboxPSv4/NetboxPSv4.psd1
 
 ```powershell
 # Import the module
-Import-Module NetboxPSv4
+Import-Module PowerNetbox
 
 # Connect with API token
 $credential = Get-Credential -UserName 'api' -Message 'Enter your Netbox API token'
@@ -169,28 +167,28 @@ Import-Csv devices.csv | ForEach-Object {
 Get-NBIPAMAddress -Status 'active' -Tenant 1 -Limit 100
 ```
 
+## Migrating from NetboxPS / NetboxPSv4
+
+If you're migrating from the original NetboxPS or NetboxPSv4 module:
+
+```powershell
+# Remove old module
+Remove-Module NetboxPS, NetboxPSv4 -Force -ErrorAction SilentlyContinue
+Uninstall-Module NetboxPS, NetboxPSv4 -Force -ErrorAction SilentlyContinue
+
+# Install PowerNetbox
+Install-Module -Name PowerNetbox -Scope CurrentUser
+
+# Import new module
+Import-Module PowerNetbox
+```
+
+**All function names remain the same** (`Get-NBDCIMDevice`, `New-NBIPAMAddress`, etc.), so your existing scripts should work without modification.
+
 ## Documentation
 
 - **[CLAUDE.md](CLAUDE.md)** - Detailed development guide and API reference
 - **[Netbox API Docs](https://netbox.readthedocs.io/en/stable/rest-api/overview/)** - Official Netbox API documentation
-
-## Migrating from NetboxPS
-
-If you're migrating from the original NetboxPS module:
-
-```powershell
-# Remove old module
-Remove-Module NetboxPS -Force -ErrorAction SilentlyContinue
-Uninstall-Module NetboxPS -Force -ErrorAction SilentlyContinue
-
-# Install NetboxPSv4
-Install-Module -Name NetboxPSv4 -Scope CurrentUser
-
-# Import new module
-Import-Module NetboxPSv4
-```
-
-All function names remain the same (`Get-NBDCIMDevice`, `New-NBIPAMAddress`, etc.), so your existing scripts should work without modification.
 
 ## Requirements
 
@@ -198,7 +196,7 @@ All function names remain the same (`Get-NBDCIMDevice`, `New-NBIPAMAddress`, etc
 |----------|----------------|
 | PowerShell Desktop | 5.1 |
 | PowerShell Core | 7.0+ |
-| Netbox | 2.8+ (tested with 4.4.7) |
+| Netbox | 2.8+ (tested with 4.4.8) |
 
 ### Platform Support
 
@@ -224,18 +222,28 @@ See [CLAUDE.md](CLAUDE.md) for detailed development instructions.
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+Original copyright (c) 2018 Ben Claussen. Fork maintained by ctrl-alt-automate.
+
 ## Changelog
 
-### v4.4.7 (Current) - Initial NetboxPSv4 Release
-- **100% API coverage** for Netbox 4.4.7
+### v4.4.8 (Current) - PowerNetbox Release
+
+- **Version now tracks Netbox releases** (4.4.8 = Netbox 4.4.8)
+- **Rebranded** from NetboxPSv4 to PowerNetbox
+- **100% API coverage** for Netbox 4.4.8
+- **488+ public functions** across all modules
+- **613 unit tests** for quality assurance
 - **Cross-platform support** - Windows, Linux, macOS
-- **478 public functions** across all modules
-- **New modules:** VPN, Wireless, Core, Users
-- Full Circuits and Extras module coverage
-- Improved certificate handling for self-signed certs
-- Removed Windows-only dependencies (System.Web)
-- UTF-8 encoding throughout
-- Published as **NetboxPSv4** on PowerShell Gallery
+- All function names unchanged for backwards compatibility
+- Improved documentation and development guide
+
+### v4.4.7 - NetboxPSv4 Final
+
+- Full Netbox 4.4.7 compatibility
+- New modules: VPN, Wireless, Core, Users
+- Cross-platform support
+- Removed Windows-only dependencies
 
 ### Previous Versions
+
 See the [original NetboxPS repository](https://github.com/benclaussen/NetboxPS) for earlier version history.

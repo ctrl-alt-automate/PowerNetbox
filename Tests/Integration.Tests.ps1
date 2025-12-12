@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Integration tests for NetboxPSv4 module.
+    Integration tests for PowerNetbox module.
 
 .DESCRIPTION
     These tests verify API interaction patterns and response parsing using mock responses.
@@ -18,14 +18,14 @@
 param()
 
 BeforeDiscovery {
-    $script:ModulePath = Join-Path $PSScriptRoot ".." "NetboxPSv4" "NetboxPSv4.psd1"
+    $script:ModulePath = Join-Path $PSScriptRoot ".." "PowerNetbox" "PowerNetbox.psd1"
     $script:LiveTesting = $env:NETBOX_HOST -and $env:NETBOX_TOKEN
 }
 
 BeforeAll {
-    Remove-Module NetboxPSv4 -Force -ErrorAction SilentlyContinue
+    Remove-Module PowerNetbox -Force -ErrorAction SilentlyContinue
 
-    $ModulePath = Join-Path $PSScriptRoot ".." "NetboxPSv4" "NetboxPSv4.psd1"
+    $ModulePath = Join-Path $PSScriptRoot ".." "PowerNetbox" "PowerNetbox.psd1"
     if (Test-Path $ModulePath) {
         Import-Module $ModulePath -ErrorAction Stop
     }
@@ -34,15 +34,15 @@ BeforeAll {
 Describe "Integration Tests - Mock API Responses" -Tag 'Integration', 'Mock' {
     BeforeAll {
         # Mock standard Netbox API responses
-        Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'NetboxPSv4' -MockWith { $true }
-        Mock -CommandName 'Get-NBCredential' -ModuleName 'NetboxPSv4' -MockWith {
+        Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { $true }
+        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
             [PSCredential]::new('api', (ConvertTo-SecureString -String "testtoken" -AsPlainText -Force))
         }
-        Mock -CommandName 'Get-NBHostname' -ModuleName 'NetboxPSv4' -MockWith { 'netbox.test.local' }
-        Mock -CommandName 'Get-NBTimeout' -ModuleName 'NetboxPSv4' -MockWith { return 30 }
-        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'NetboxPSv4' -MockWith { return @{} }
+        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { 'netbox.test.local' }
+        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
+        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
 
-        InModuleScope -ModuleName 'NetboxPSv4' {
+        InModuleScope -ModuleName 'PowerNetbox' {
             $script:NetboxConfig.Hostname = 'netbox.test.local'
             $script:NetboxConfig.HostScheme = 'https'
             $script:NetboxConfig.HostPort = 443
@@ -51,7 +51,7 @@ Describe "Integration Tests - Mock API Responses" -Tag 'Integration', 'Mock' {
 
     Context "DCIM Module - API Path Verification" {
         BeforeAll {
-            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'NetboxPSv4' -MockWith {
+            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
                 return @{
                     count   = 1
                     results = @(
@@ -68,7 +68,7 @@ Describe "Integration Tests - Mock API Responses" -Tag 'Integration', 'Mock' {
         It "Get-NBDCIMDevice uses correct API path" {
             $result = Get-NBDCIMDevice -Limit 1
 
-            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'NetboxPSv4' -ParameterFilter {
+            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -ParameterFilter {
                 $Uri -match '/api/dcim/devices/'
             }
         }
@@ -76,7 +76,7 @@ Describe "Integration Tests - Mock API Responses" -Tag 'Integration', 'Mock' {
         It "Get-NBDCIMSite uses correct API path" {
             $result = Get-NBDCIMSite -Limit 1
 
-            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'NetboxPSv4' -ParameterFilter {
+            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -ParameterFilter {
                 $Uri -match '/api/dcim/sites/'
             }
         }
@@ -84,7 +84,7 @@ Describe "Integration Tests - Mock API Responses" -Tag 'Integration', 'Mock' {
         It "Get-NBDCIMRack uses correct API path" {
             $result = Get-NBDCIMRack -Limit 1
 
-            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'NetboxPSv4' -ParameterFilter {
+            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -ParameterFilter {
                 $Uri -match '/api/dcim/racks/'
             }
         }
@@ -92,7 +92,7 @@ Describe "Integration Tests - Mock API Responses" -Tag 'Integration', 'Mock' {
         It "Get-NBDCIMManufacturer uses correct API path" {
             $result = Get-NBDCIMManufacturer -Limit 1
 
-            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'NetboxPSv4' -ParameterFilter {
+            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -ParameterFilter {
                 $Uri -match '/api/dcim/manufacturers/'
             }
         }
@@ -100,7 +100,7 @@ Describe "Integration Tests - Mock API Responses" -Tag 'Integration', 'Mock' {
 
     Context "IPAM Module - API Path Verification" {
         BeforeAll {
-            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'NetboxPSv4' -MockWith {
+            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
                 return @{
                     count   = 1
                     results = @(@{ id = 1; address = '10.0.0.1/24' })
@@ -111,7 +111,7 @@ Describe "Integration Tests - Mock API Responses" -Tag 'Integration', 'Mock' {
         It "Get-NBIPAMAddress uses correct API path" {
             $result = Get-NBIPAMAddress -Limit 1
 
-            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'NetboxPSv4' -ParameterFilter {
+            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -ParameterFilter {
                 $Uri -match '/api/ipam/ip-addresses/'
             }
         }
@@ -119,7 +119,7 @@ Describe "Integration Tests - Mock API Responses" -Tag 'Integration', 'Mock' {
         It "Get-NBIPAMPrefix uses correct API path" {
             $result = Get-NBIPAMPrefix -Limit 1
 
-            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'NetboxPSv4' -ParameterFilter {
+            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -ParameterFilter {
                 $Uri -match '/api/ipam/prefixes/'
             }
         }
@@ -127,7 +127,7 @@ Describe "Integration Tests - Mock API Responses" -Tag 'Integration', 'Mock' {
         It "Get-NBIPAMVLAN uses correct API path" {
             $result = Get-NBIPAMVLAN -Limit 1
 
-            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'NetboxPSv4' -ParameterFilter {
+            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -ParameterFilter {
                 $Uri -match '/api/ipam/vlans/'
             }
         }
@@ -135,7 +135,7 @@ Describe "Integration Tests - Mock API Responses" -Tag 'Integration', 'Mock' {
         It "Get-NBIPAMVRF uses correct API path" {
             $result = Get-NBIPAMVRF -Limit 1
 
-            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'NetboxPSv4' -ParameterFilter {
+            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -ParameterFilter {
                 $Uri -match '/api/ipam/vrfs/'
             }
         }
@@ -143,7 +143,7 @@ Describe "Integration Tests - Mock API Responses" -Tag 'Integration', 'Mock' {
 
     Context "VPN Module - API Path Verification" {
         BeforeAll {
-            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'NetboxPSv4' -MockWith {
+            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
                 return @{
                     count   = 0
                     results = @()
@@ -154,7 +154,7 @@ Describe "Integration Tests - Mock API Responses" -Tag 'Integration', 'Mock' {
         It "Get-NBVPNTunnel uses correct API path" {
             $result = Get-NBVPNTunnel -Limit 1
 
-            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'NetboxPSv4' -ParameterFilter {
+            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -ParameterFilter {
                 $Uri -match '/api/vpn/tunnels/'
             }
         }
@@ -162,7 +162,7 @@ Describe "Integration Tests - Mock API Responses" -Tag 'Integration', 'Mock' {
         It "Get-NBVPNL2VPN uses correct API path" {
             $result = Get-NBVPNL2VPN -Limit 1
 
-            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'NetboxPSv4' -ParameterFilter {
+            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -ParameterFilter {
                 $Uri -match '/api/vpn/l2vpns/'
             }
         }
@@ -170,7 +170,7 @@ Describe "Integration Tests - Mock API Responses" -Tag 'Integration', 'Mock' {
         It "Get-NBVPNIKEPolicy uses correct API path" {
             $result = Get-NBVPNIKEPolicy -Limit 1
 
-            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'NetboxPSv4' -ParameterFilter {
+            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -ParameterFilter {
                 $Uri -match '/api/vpn/ike-policies/'
             }
         }
@@ -178,7 +178,7 @@ Describe "Integration Tests - Mock API Responses" -Tag 'Integration', 'Mock' {
         It "Get-NBVPNIPSecProfile uses correct API path" {
             $result = Get-NBVPNIPSecProfile -Limit 1
 
-            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'NetboxPSv4' -ParameterFilter {
+            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -ParameterFilter {
                 $Uri -match '/api/vpn/ipsec-profiles/'
             }
         }
@@ -186,7 +186,7 @@ Describe "Integration Tests - Mock API Responses" -Tag 'Integration', 'Mock' {
 
     Context "Wireless Module - API Path Verification" {
         BeforeAll {
-            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'NetboxPSv4' -MockWith {
+            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
                 return @{
                     count   = 0
                     results = @()
@@ -197,7 +197,7 @@ Describe "Integration Tests - Mock API Responses" -Tag 'Integration', 'Mock' {
         It "Get-NBWirelessLAN uses correct API path" {
             $result = Get-NBWirelessLAN -Limit 1
 
-            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'NetboxPSv4' -ParameterFilter {
+            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -ParameterFilter {
                 $Uri -match '/api/wireless/wireless-lans/'
             }
         }
@@ -205,7 +205,7 @@ Describe "Integration Tests - Mock API Responses" -Tag 'Integration', 'Mock' {
         It "Get-NBWirelessLANGroup uses correct API path" {
             $result = Get-NBWirelessLANGroup -Limit 1
 
-            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'NetboxPSv4' -ParameterFilter {
+            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -ParameterFilter {
                 $Uri -match '/api/wireless/wireless-lan-groups/'
             }
         }
@@ -213,7 +213,7 @@ Describe "Integration Tests - Mock API Responses" -Tag 'Integration', 'Mock' {
         It "Get-NBWirelessLink uses correct API path" {
             $result = Get-NBWirelessLink -Limit 1
 
-            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'NetboxPSv4' -ParameterFilter {
+            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -ParameterFilter {
                 $Uri -match '/api/wireless/wireless-links/'
             }
         }
@@ -221,7 +221,7 @@ Describe "Integration Tests - Mock API Responses" -Tag 'Integration', 'Mock' {
 
     Context "Response Parsing" {
         It "Should parse paginated response correctly" {
-            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'NetboxPSv4' -MockWith {
+            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
                 return @{
                     count    = 150
                     next     = 'https://netbox.test.local/api/dcim/devices/?limit=50&offset=50'
@@ -235,13 +235,13 @@ Describe "Integration Tests - Mock API Responses" -Tag 'Integration', 'Mock' {
 
             $result = Get-NBDCIMDevice -Limit 2
             # The module calls Invoke-RestMethod and processes results
-            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'NetboxPSv4' -Times 1
+            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -Times 1
             # Result is returned from InvokeNetboxRequest which extracts .results
             $result | Should -Not -BeNullOrEmpty
         }
 
         It "Should handle empty results" {
-            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'NetboxPSv4' -MockWith {
+            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
                 return @{
                     count   = 0
                     results = @()
@@ -253,7 +253,7 @@ Describe "Integration Tests - Mock API Responses" -Tag 'Integration', 'Mock' {
         }
 
         It "Should handle single object response (by ID)" {
-            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'NetboxPSv4' -MockWith {
+            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
                 return @{
                     id   = 42
                     name = 'specific-device'
@@ -269,7 +269,7 @@ Describe "Integration Tests - Mock API Responses" -Tag 'Integration', 'Mock' {
 
     Context "Error Handling" {
         It "Should handle 404 Not Found gracefully" {
-            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'NetboxPSv4' -MockWith {
+            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
                 $errorRecord = [System.Management.Automation.ErrorRecord]::new(
                     [System.Net.WebException]::new("The remote server returned an error: (404) Not Found."),
                     "WebException",
@@ -283,7 +283,7 @@ Describe "Integration Tests - Mock API Responses" -Tag 'Integration', 'Mock' {
         }
 
         It "Should handle 401 Unauthorized" {
-            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'NetboxPSv4' -MockWith {
+            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
                 $errorRecord = [System.Management.Automation.ErrorRecord]::new(
                     [System.Net.WebException]::new("The remote server returned an error: (401) Unauthorized."),
                     "WebException",
@@ -299,7 +299,7 @@ Describe "Integration Tests - Mock API Responses" -Tag 'Integration', 'Mock' {
 
     Context "SupportsShouldProcess" {
         BeforeAll {
-            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'NetboxPSv4' -MockWith {
+            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
                 return @{ id = 1; name = 'test' }
             }
         }
@@ -308,31 +308,31 @@ Describe "Integration Tests - Mock API Responses" -Tag 'Integration', 'Mock' {
             $result = New-NBDCIMSite -Name 'test-site' -Slug 'test-site' -WhatIf
 
             # With -WhatIf, Invoke-RestMethod should not be called
-            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'NetboxPSv4' -Times 0
+            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -Times 0
         }
 
         It "Set-NBDCIMSite supports -WhatIf" {
-            Mock -CommandName 'Get-NBDCIMSite' -ModuleName 'NetboxPSv4' -MockWith {
+            Mock -CommandName 'Get-NBDCIMSite' -ModuleName 'PowerNetbox' -MockWith {
                 return @{ id = 1; name = 'test-site' }
             }
 
             $result = Set-NBDCIMSite -Id 1 -Description 'Updated' -WhatIf
 
             # The PATCH call should not happen with -WhatIf
-            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'NetboxPSv4' -ParameterFilter {
+            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -ParameterFilter {
                 $Method -eq 'PATCH'
             } -Times 0
         }
 
         It "Remove-NBDCIMSite supports -WhatIf" {
-            Mock -CommandName 'Get-NBDCIMSite' -ModuleName 'NetboxPSv4' -MockWith {
+            Mock -CommandName 'Get-NBDCIMSite' -ModuleName 'PowerNetbox' -MockWith {
                 return @{ id = 1; name = 'test-site' }
             }
 
             $result = Remove-NBDCIMSite -Id 1 -WhatIf
 
             # The DELETE call should not happen with -WhatIf
-            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'NetboxPSv4' -ParameterFilter {
+            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -ParameterFilter {
                 $Method -eq 'DELETE'
             } -Times 0
         }

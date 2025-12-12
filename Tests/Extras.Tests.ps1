@@ -13,9 +13,9 @@ param()
 
 BeforeAll {
     Import-Module Pester
-    Remove-Module NetboxPSv4 -Force -ErrorAction SilentlyContinue
+    Remove-Module PowerNetbox -Force -ErrorAction SilentlyContinue
 
-    $ModulePath = Join-Path $PSScriptRoot ".." "NetboxPSv4" "NetboxPSv4.psd1"
+    $ModulePath = Join-Path $PSScriptRoot ".." "PowerNetbox" "PowerNetbox.psd1"
     if (Test-Path $ModulePath) {
         Import-Module $ModulePath -ErrorAction Stop
     }
@@ -23,8 +23,8 @@ BeforeAll {
 
 Describe "Extras Module Tests" -Tag 'Extras' {
     BeforeAll {
-        Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'NetboxPSv4' -MockWith { return $true }
-        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'NetboxPSv4' -MockWith {
+        Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
+        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
             return [ordered]@{
                 'Method'      = $Method
                 'Uri'         = $Uri
@@ -34,14 +34,14 @@ Describe "Extras Module Tests" -Tag 'Extras' {
                 'Body'        = $Body
             }
         }
-        Mock -CommandName 'Get-NBCredential' -ModuleName 'NetboxPSv4' -MockWith {
+        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
             return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
         }
-        Mock -CommandName 'Get-NBHostname' -ModuleName 'NetboxPSv4' -MockWith { return 'netbox.domain.com' }
-        Mock -CommandName 'Get-NBTimeout' -ModuleName 'NetboxPSv4' -MockWith { return 30 }
-        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'NetboxPSv4' -MockWith { return @{} }
+        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { return 'netbox.domain.com' }
+        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
+        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
 
-        InModuleScope -ModuleName 'NetboxPSv4' {
+        InModuleScope -ModuleName 'PowerNetbox' {
             $script:NetboxConfig.Hostname = 'netbox.domain.com'
             $script:NetboxConfig.HostScheme = 'https'
             $script:NetboxConfig.HostPort = 443
@@ -119,7 +119,7 @@ Describe "Extras Module Tests" -Tag 'Extras' {
 
     Context "Remove-NBTag" {
         BeforeAll {
-            Mock -CommandName "Get-NBTag" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBTag" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'TestTag' }
             }
         }
@@ -178,7 +178,7 @@ Describe "Extras Module Tests" -Tag 'Extras' {
 
     Context "Remove-NBCustomField" {
         BeforeAll {
-            Mock -CommandName "Get-NBCustomField" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBCustomField" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'TestField' }
             }
         }
@@ -230,7 +230,7 @@ Describe "Extras Module Tests" -Tag 'Extras' {
 
     Context "Remove-NBCustomFieldChoiceSet" {
         BeforeAll {
-            Mock -CommandName "Get-NBCustomFieldChoiceSet" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBCustomFieldChoiceSet" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'TestChoiceSet' }
             }
         }
@@ -288,7 +288,7 @@ Describe "Extras Module Tests" -Tag 'Extras' {
 
     Context "Remove-NBConfigContext" {
         BeforeAll {
-            Mock -CommandName "Get-NBConfigContext" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBConfigContext" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'TestContext' }
             }
         }
@@ -341,7 +341,7 @@ Describe "Extras Module Tests" -Tag 'Extras' {
 
     Context "Remove-NBWebhook" {
         BeforeAll {
-            Mock -CommandName "Get-NBWebhook" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBWebhook" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'TestWebhook' }
             }
         }
@@ -394,7 +394,7 @@ Describe "Extras Module Tests" -Tag 'Extras' {
 
     Context "Remove-NBJournalEntry" {
         BeforeAll {
-            Mock -CommandName "Get-NBJournalEntry" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBJournalEntry" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id }
             }
         }
@@ -446,7 +446,7 @@ Describe "Extras Module Tests" -Tag 'Extras' {
 
     Context "Remove-NBExportTemplate" {
         BeforeAll {
-            Mock -CommandName "Get-NBExportTemplate" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBExportTemplate" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'TestTemplate' }
             }
         }
@@ -499,7 +499,7 @@ Describe "Extras Module Tests" -Tag 'Extras' {
 
     Context "Remove-NBSavedFilter" {
         BeforeAll {
-            Mock -CommandName "Get-NBSavedFilter" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBSavedFilter" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'TestFilter' }
             }
         }
@@ -539,7 +539,7 @@ Describe "Extras Module Tests" -Tag 'Extras' {
 
     Context "Remove-NBBookmark" {
         BeforeAll {
-            Mock -CommandName "Get-NBBookmark" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBBookmark" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id }
             }
         }
@@ -591,7 +591,7 @@ Describe "Extras Module Tests" -Tag 'Extras' {
 
     Context "Remove-NBEventRule" {
         BeforeAll {
-            Mock -CommandName "Get-NBEventRule" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBEventRule" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'TestRule' }
             }
         }
@@ -644,7 +644,7 @@ Describe "Extras Module Tests" -Tag 'Extras' {
 
     Context "Remove-NBCustomLink" {
         BeforeAll {
-            Mock -CommandName "Get-NBCustomLink" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBCustomLink" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'TestLink' }
             }
         }
@@ -673,7 +673,7 @@ Describe "Extras Module Tests" -Tag 'Extras' {
 
     Context "Remove-NBImageAttachment" {
         BeforeAll {
-            Mock -CommandName "Get-NBImageAttachment" -ModuleName NetboxPSv4 -MockWith {
+            Mock -CommandName "Get-NBImageAttachment" -ModuleName PowerNetbox -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id }
             }
         }

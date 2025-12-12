@@ -1,21 +1,21 @@
-# CLAUDE.md - NetboxPSv4 Development Guide
+# CLAUDE.md - PowerNetbox Development Guide
 
 This file provides guidance to Claude Code (or any AI assistant) when working with this codebase.
 
 ## Project Overview
 
-**NetboxPSv4** is a PowerShell module that provides a wrapper for the [Netbox](https://github.com/netbox-community/netbox) REST API. It allows users to interact with Netbox infrastructure management directly from PowerShell.
+**PowerNetbox** is a PowerShell module that provides a wrapper for the [Netbox](https://github.com/netbox-community/netbox) REST API. It allows users to interact with Netbox infrastructure management directly from PowerShell.
 
 > **Note:** This is a fork of [NetboxPS](https://github.com/benclaussen/NetboxPS) published under a new name to provide full Netbox 4.x compatibility.
 
-- **Module Name**: NetboxPSv4 (PSGallery)
-- **Current Version**: 4.4.7
-- **Target Netbox Version**: 4.4.7 (fully compatible)
+- **Module Name**: PowerNetbox (PSGallery)
+- **Current Version**: 4.4.8
+- **Target Netbox Version**: 4.4.8 (fully compatible)
 - **Minimum Netbox Version**: 2.8.x
 - **PowerShell Version**: 5.1+ (Desktop and Core editions)
 - **Original Repository**: https://github.com/benclaussen/NetboxPS
-- **Fork Repository**: https://github.com/ctrl-alt-automate/NetboxPS
-- **Issue Tracking**: https://github.com/ctrl-alt-automate/NetboxPS/issues
+- **Fork Repository**: https://github.com/ctrl-alt-automate/PowerNetbox
+- **Issue Tracking**: https://github.com/ctrl-alt-automate/PowerNetbox/issues
 - **Total Functions**: 478 public functions across all modules
 
 ## Development Environment
@@ -63,7 +63,7 @@ The build process:
 1. Runs PSScriptAnalyzer to fix whitespace issues
 2. Concatenates all `.ps1` files from `Functions/` into a single module
 3. Updates version in manifest
-4. Outputs to `NetboxPSv4/` directory
+4. Outputs to `PowerNetbox/` directory
 
 ### Running Tests
 ```powershell
@@ -91,9 +91,9 @@ The project uses GitHub Actions for CI/CD:
 ## Project Structure
 
 ```
-NetboxPSv4/                           # Module output directory
-├── NetboxPSv4.psd1               # Built manifest
-└── NetboxPSv4.psm1               # Built module
+PowerNetbox/                           # Module output directory
+├── PowerNetbox.psd1               # Built manifest
+└── PowerNetbox.psm1               # Built module
 
 NetboxPS/                             # Repository root
 ├── Functions/                    # Source files - one function per file (489 functions)
@@ -218,9 +218,9 @@ NetboxPS/                             # Repository root
 │       └── Users/                # Get/New/Set/Remove
 ├── Tests/                        # Pester tests
 ├── .claude/commands/             # Specialized AI agent prompts
-├── NetboxPSv4/                   # Build output directory
-├── NetboxPSv4.psd1               # Module manifest (source)
-├── NetboxPSv4.psm1               # Root module file (source)
+├── PowerNetbox/                   # Build output directory
+├── PowerNetbox.psd1               # Module manifest (source)
+├── PowerNetbox.psm1               # Root module file (source)
 ├── Connect-DevNetbox.ps1         # Quick connect helper script
 └── deploy.ps1                    # Build script
 ```
@@ -404,8 +404,8 @@ InvokeNetboxRequest -URI $URI -Method POST -Body $bodyHashtable
 - Several fields that were mandatory are now optional
 - New modules added: VPN, Wireless
 
-### Testing Against Netbox 4.4.7
-All 360 functions tested and working correctly against Netbox 4.4.7.
+### Testing Against Netbox 4.4.8
+All 360 functions tested and working correctly against Netbox 4.4.8.
 - **DCIM**: 23 new endpoint types tested (VirtualChassis, VirtualDeviceContext, MACAddress, RackRole, RackType, RackReservation, PowerPanel, PowerFeed, PowerPort, PowerOutlet, ConsolePort, ConsoleServerPort, Module, ModuleType, ModuleBay, DeviceBay, InterfaceTemplate, FrontPortTemplate, RearPortTemplate, InventoryItem, InventoryItemRole, InventoryItemTemplate, ModuleTypeProfile)
 - **IPAM**: 14 endpoint types tested (RIR, VLANGroup, FHRPGroup, FHRPGroupAssignment, VLANTranslationPolicy, VLANTranslationRule, ASN, ASNRange, VRF, RouteTarget, Service, ServiceTemplate, Aggregate, Role)
 - **VPN**: 10 endpoint types tested (Tunnel, TunnelGroup, TunnelTermination, L2VPN, L2VPNTermination, IKEPolicy, IKEProposal, IPSecPolicy, IPSecProfile, IPSecProposal)
@@ -414,7 +414,7 @@ All 360 functions tested and working correctly against Netbox 4.4.7.
 
 ## Roadmap & Issues
 
-See [GitHub Issues](https://github.com/ctrl-alt-automate/NetboxPS/issues) for the full roadmap:
+See [GitHub Issues](https://github.com/ctrl-alt-automate/PowerNetbox/issues) for the full roadmap:
 
 ### Completed
 - **v2.0.0**: Netbox 4.x compatibility ✅
@@ -510,7 +510,7 @@ This project includes specialized slash commands in `.claude/commands/` for diff
 | `/netbox-api [endpoint]` | Netbox API expert | Research endpoint schemas, understand API structure |
 | `/powershell-expert [question]` | PowerShell best practices | Code review, pattern questions, modern PS guidance |
 | `/implement [endpoint]` | Combined implementation workflow | Creating new endpoint functions (uses both experts) |
-| `/test-endpoint [function]` | Compatibility testing | Verify functions work against Netbox 4.4.7 |
+| `/test-endpoint [function]` | Compatibility testing | Verify functions work against Netbox 4.4.8 |
 
 ### Usage Examples
 ```bash
@@ -553,8 +553,8 @@ The agent prompts are stored in `.claude/commands/`:
 ### Module not loading after changes
 ```powershell
 # Remove and reimport
-Remove-Module NetboxPSv4 -Force -ErrorAction SilentlyContinue
-Import-Module ./NetboxPSv4/NetboxPSv4.psd1 -Force
+Remove-Module PowerNetbox -Force -ErrorAction SilentlyContinue
+Import-Module ./PowerNetbox/PowerNetbox.psd1 -Force
 ```
 
 ### SSL/Certificate errors
