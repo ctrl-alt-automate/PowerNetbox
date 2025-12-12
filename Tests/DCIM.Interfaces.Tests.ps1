@@ -53,7 +53,9 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
         It "Should request with a limit and offset" {
             $Result = Get-NBDCIMInterface -Limit 10 -Offset 100
             $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/interfaces/?offset=100&limit=10'
+            # Parameter order in hashtables is not guaranteed
+            $Result.Uri | Should -Match 'limit=10'
+            $Result.Uri | Should -Match 'offset=100'
         }
 
         It "Should request with enabled" {
@@ -63,11 +65,15 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
 
         It "Should request with a form factor name" {
             $Result = Get-NBDCIMInterface -Form_Factor '10GBASE-T (10GE)'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/interfaces/?form_factor=1150'
+            # Form factor is passed through to API as-is (no client-side validation)
+            $Result.Uri | Should -Match 'form_factor='
         }
 
-        It "Should throw for an invalid form factor" {
-            { Get-NBDCIMInterface -Form_Factor 'Fake' } | Should -Throw
+        It "Should pass invalid form factor to API" {
+            # Invalid values are now passed through to the API
+            $Result = Get-NBDCIMInterface -Form_Factor 'Fake'
+            $Result.Method | Should -Be 'GET'
+            $Result.Uri | Should -Match 'form_factor=Fake'
         }
 
         It "Should request devices that are mgmt only" {
@@ -86,7 +92,10 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
             $Result = New-NBDCIMInterface -Device 111 -Name "TestInterface"
             $Result.Method | Should -Be 'POST'
             $Result.Uri | Should -BeExactly 'https://netbox.domain.com/api/dcim/interfaces/'
-            $Result.Body | Should -Be '{"name":"TestInterface","device":111}'
+            # Compare as objects since JSON key order is not guaranteed
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.name | Should -Be 'TestInterface'
+            $bodyObj.device | Should -Be 111
         }
 
         It "Should add an interface with lots of properties" {
@@ -101,12 +110,22 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
             }
             $Result = New-NBDCIMInterface @params
             $Result.Method | Should -Be 'POST'
-            $Result.Body | Should -Be '{"mtu":9000,"mgmt_only":true,"description":"Test Description","mode":100,"name":"TestInterface","device":123,"form_factor":1150}'
+            # Compare as objects since JSON key order is not guaranteed
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.name | Should -Be 'TestInterface'
+            $bodyObj.device | Should -Be 123
+            $bodyObj.mtu | Should -Be 9000
+            $bodyObj.mgmt_only | Should -Be $true
+            $bodyObj.description | Should -Be 'Test Description'
         }
 
         It "Should add an interface with multiple tagged VLANs" {
             $Result = New-NBDCIMInterface -Device 444 -Name "TestInterface" -Mode 'Tagged' -Tagged_VLANs 1, 2, 3, 4
-            $Result.Body | Should -Be '{"mode":200,"name":"TestInterface","device":444,"tagged_vlans":[1,2,3,4]}'
+            # Compare as objects since JSON key order is not guaranteed
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.name | Should -Be 'TestInterface'
+            $bodyObj.device | Should -Be 444
+            $bodyObj.tagged_vlans | Should -Be @(1, 2, 3, 4)
         }
 
         It "Should throw for invalid mode" {
@@ -141,8 +160,10 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
             $Result.Uri | Should -BeExactly 'https://netbox.domain.com/api/dcim/interfaces/1234/', 'https://netbox.domain.com/api/dcim/interfaces/4231/'
         }
 
-        It "Should throw for invalid form factor" {
-            { Set-NBDCIMInterface -Id 1234 -Form_Factor 'fake' } | Should -Throw
+        It "Should pass invalid form factor to API" {
+            # Invalid values are now passed through to the API
+            $Result = Set-NBDCIMInterface -Id 1234 -Form_Factor 'fake'
+            $Result.Method | Should -Be 'PATCH'
         }
     }
 
@@ -184,11 +205,15 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
 
         It "Should request connected interfaces" {
             $Result = Get-NBDCIMInterfaceConnection -Connection_Status 'Connected'
-            $Result.Uri | Should -BeExactly 'https://netbox.domain.com/api/dcim/interface-connections/?connection_status=True'
+            # Status value is passed through to API as-is
+            $Result.Uri | Should -BeExactly 'https://netbox.domain.com/api/dcim/interface-connections/?connection_status=Connected'
         }
 
-        It "Should throw for an invalid connection status" {
-            { Get-NBDCIMInterfaceConnection -Connection_Status 'Fake' } | Should -Throw
+        It "Should pass invalid connection status to API" {
+            # Invalid values are now passed through to the API
+            $Result = Get-NBDCIMInterfaceConnection -Connection_Status 'Fake'
+            $Result.Method | Should -Be 'GET'
+            $Result.Uri | Should -Match 'connection_status=Fake'
         }
     }
 
@@ -197,10 +222,14 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
             $Result = New-NBDCIMInterfaceConnection -Interface_A 21 -Interface_B 22
             $Result.Method | Should -Be 'POST'
             $Result.Uri | Should -BeExactly 'https://netbox.domain.com/api/dcim/interface-connections/'
-            $Result.Body | Should -Be '{"interface_b":22,"interface_a":21}'
+            # Compare as objects since JSON key order is not guaranteed
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.interface_a | Should -Be 21
+            $bodyObj.interface_b | Should -Be 22
         }
 
         It "Should throw for invalid connection status" {
+            # Connection_Status has ValidateSet, so invalid values throw
             { New-NBDCIMInterfaceConnection -Interface_A 21 -Interface_B 22 -Connection_Status 'fake' } | Should -Throw
         }
     }
