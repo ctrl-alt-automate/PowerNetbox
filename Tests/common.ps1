@@ -14,7 +14,7 @@ $token = $env:NETBOX_TOKEN
 
 if (-not $hostname -or -not $token) {
     # Try to load from credential file
-    $credentialFile = Join-Path $PSScriptRoot ".." "credential.ps1"
+    $credentialFile = Join-Path (Join-Path $PSScriptRoot "..") "credential.ps1"
     if (Test-Path $credentialFile) {
         . $credentialFile
     }
