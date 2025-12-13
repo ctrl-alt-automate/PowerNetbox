@@ -231,7 +231,7 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             # Compare as objects since JSON key order is not guaranteed
             $bodyObj = $Result.Body | ConvertFrom-Json
             $bodyObj.name | Should -Be 'newdevice'
-            $bodyObj.device_role | Should -Be 4
+            $bodyObj.role | Should -Be 4
             $bodyObj.device_type | Should -Be 10
             $bodyObj.site | Should -Be 1
             $bodyObj.face | Should -Be 0

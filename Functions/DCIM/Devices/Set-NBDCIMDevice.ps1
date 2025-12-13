@@ -29,7 +29,8 @@ function Set-NBDCIMDevice {
 
         [string]$Name,
 
-        [object]$Device_Role,
+        [Alias('Device_Role')]
+        [object]$Role,
 
         [object]$Device_Type,
 

@@ -9,7 +9,7 @@
     Username for the new user.
 
 .PARAMETER Password
-    Password for the new user.
+    Password for the new user (required).
 
 .PARAMETER First_Name
     First name.
@@ -50,7 +50,6 @@ function New-NBUser {
         [string]$Username,
 
         [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
         [string]$Password,
 
         [string]$First_Name,

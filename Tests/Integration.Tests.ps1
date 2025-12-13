@@ -365,23 +365,17 @@ Describe "Live Integration Tests" -Tag 'Integration', 'Live' -Skip:(-not $script
         }
 
         It "Should list devices" {
-            $devices = Get-NBDCIMDevice -Limit 5
-            # May be empty if no devices configured
-            $devices | Should -Not -Throw
+            { Get-NBDCIMDevice -Limit 5 } | Should -Not -Throw
         }
     }
 
     Context "IPAM Operations" {
         It "Should list prefixes" {
-            $prefixes = Get-NBIPAMPrefix -Limit 5
-            # May be empty if no prefixes configured
-            $prefixes | Should -Not -Throw
+            { Get-NBIPAMPrefix -Limit 5 } | Should -Not -Throw
         }
 
         It "Should list IP addresses" {
-            $addresses = Get-NBIPAMAddress -Limit 5
-            # May be empty if no addresses configured
-            $addresses | Should -Not -Throw
+            { Get-NBIPAMAddress -Limit 5 } | Should -Not -Throw
         }
     }
 
