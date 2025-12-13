@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    name: Pester Tests (${{ matrix.os }}${{ matrix.shell == 'powershell' && ', PS 5.1' || '' }})
+    name: Pester Tests
     runs-on: ${{ matrix.os }}
 
     strategy:
