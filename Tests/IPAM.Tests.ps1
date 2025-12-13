@@ -14,7 +14,7 @@ BeforeAll {
     Import-Module Pester
     Remove-Module PowerNetbox -Force -ErrorAction SilentlyContinue
 
-    $ModulePath = Join-Path $PSScriptRoot ".." "PowerNetbox" "PowerNetbox.psd1"
+    $ModulePath = Join-Path (Join-Path $PSScriptRoot "..") "PowerNetbox/PowerNetbox.psd1"
     if (Test-Path $ModulePath) {
         Import-Module $ModulePath -ErrorAction Stop
     }
