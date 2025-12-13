@@ -65,12 +65,10 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const fs = require('fs');
             const os = '${{ matrix.os }}';
             const shell = '${{ matrix.shell }}';
             const runUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
 
-            // Check if issue already exists for this run
             const issues = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -101,7 +99,6 @@ jobs:
             *This issue was automatically created by GitHub Actions*`;
 
             if (existingIssue) {
-              // Add comment to existing issue
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -109,7 +106,6 @@ jobs:
                 body: `### Additional failure on ${os} (${shell})\n\n${body}`
               });
             } else {
-              // Create new issue
               await github.rest.issues.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -143,11 +139,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: issue.number,
-                body: `## ✅ Tests Passing
-
-All tests are now passing on commit ${context.sha.substring(0, 7)}.
-
-Automatically closing this issue.`
+                body: `## ✅ Tests Passing\n\nAll tests are now passing on commit ${context.sha.substring(0, 7)}.\n\nAutomatically closing this issue.`
               });
 
               await github.rest.issues.update({
