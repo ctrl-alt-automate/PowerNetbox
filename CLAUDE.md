@@ -548,6 +548,66 @@ The agent prompts are stored in `.claude/commands/`:
 - Use conventional commits where possible
 - Reference issue numbers in commits
 
+### Branch Strategy
+
+| Branch | Purpose | Contents |
+|--------|---------|----------|
+| `main` | Clean showcase / releases | Only module source code |
+| `dev` | Active development | Source + dev tooling |
+
+### Dev-Only Files (excluded from main)
+
+These files exist only in the `dev` branch and are excluded from `main`:
+
+| Category | Files | Purpose |
+|----------|-------|---------|
+| AI Development | `.claude/commands/` | Slash commands for Claude Code |
+| AI Development | `CLAUDE.md` | AI assistant instructions |
+| Dev Helpers | `Connect-DevNetbox.ps1` | Quick connect script |
+| Dev Helpers | `.netboxps.config.example.ps1` | Config template |
+| Editor Settings | `.vscode/` | VS Code settings |
+| Build Output | `PowerNetbox/` | Built module (gitignored) |
+
+### Merging dev to main
+
+When merging `dev` to `main`, exclude dev-only files:
+
+```bash
+# Option 1: Selective merge (recommended)
+git checkout main
+git merge dev --no-commit
+git reset HEAD .claude/ CLAUDE.md Connect-DevNetbox.ps1 .netboxps.config.example.ps1 .vscode/
+git checkout -- .claude/ CLAUDE.md Connect-DevNetbox.ps1 .netboxps.config.example.ps1 .vscode/
+git commit -m "Merge dev into main (excluding dev files)"
+
+# Option 2: Cherry-pick specific commits
+git checkout main
+git cherry-pick <commit-hash>
+
+# Option 3: Create release from dev
+git checkout dev
+git tag v4.4.9
+git push origin v4.4.9
+```
+
+### .gitignore (main branch)
+
+The `main` branch `.gitignore` includes entries to prevent accidental addition of dev files:
+
+```gitignore
+# Development files (keep in dev branch only)
+.claude/
+CLAUDE.md
+Connect-DevNetbox.ps1
+.vscode/
+
+# Build output
+PowerNetbox/
+NetboxPSv4/
+```
+
+**Note**: These `.gitignore` entries only prevent NEW files from being added. Files already tracked in `dev` will still come through on merge - use the selective merge approach above.
+
 ## Common Issues
 
 ### Module not loading after changes
