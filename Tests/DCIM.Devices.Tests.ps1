@@ -115,8 +115,8 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             $Result = Get-NBDCIMDevice -Id 10, 12, 15
 
             $Result.Method | Should -Be 'GET'
-            # Commas are URL-encoded
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/devices/?id__in=10%2C12%2C15'
+            # Commas may or may not be URL-encoded depending on PS version
+            $Result.Uri | Should -Match 'id__in=10(%2C|,)12(%2C|,)15'
         }
 
         It "Should request a status" {
