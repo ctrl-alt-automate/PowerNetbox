@@ -30,7 +30,8 @@ function New-NBDCIMDevice {
         [string]$Name,
 
         [Parameter(Mandatory = $true)]
-        [object]$Device_Role,
+        [Alias('Device_Role')]
+        [object]$Role,
 
         [Parameter(Mandatory = $true)]
         [object]$Device_Type,

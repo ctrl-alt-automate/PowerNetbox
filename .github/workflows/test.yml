@@ -8,32 +8,37 @@ on:
 
 jobs:
   test:
-    name: Pester Tests
+    name: Pester Tests (${{ matrix.os }}${{ matrix.shell == 'powershell' && ', PS 5.1' || '' }})
     runs-on: ${{ matrix.os }}
 
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+        shell: [pwsh]
+        include:
+          # Also test PowerShell 5.1 (Desktop) on Windows
+          - os: windows-latest
+            shell: powershell
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Install dependencies
-        shell: pwsh
+        shell: ${{ matrix.shell }}
         run: |
           Set-PSRepository PSGallery -InstallationPolicy Trusted
           Install-Module Pester -Force -Scope CurrentUser -MinimumVersion 5.0.0
           Install-Module PSScriptAnalyzer -Force -Scope CurrentUser
 
       - name: Build module
-        shell: pwsh
+        shell: ${{ matrix.shell }}
         run: |
           ./deploy.ps1 -Environment dev -SkipVersion
 
       - name: Run Pester tests
-        shell: pwsh
+        shell: ${{ matrix.shell }}
         run: |
           $config = New-PesterConfiguration
           $config.Run.Path = './Tests/*.Tests.ps1'
@@ -51,6 +56,106 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: test-results-${{ matrix.os }}
+          name: test-results-${{ matrix.os }}-${{ matrix.shell }}
           path: TestResults.xml
           retention-days: 30
+
+      - name: Create issue on failure
+        if: failure() && github.event_name == 'push'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const os = '${{ matrix.os }}';
+            const shell = '${{ matrix.shell }}';
+            const runUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
+
+            // Check if issue already exists for this run
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'test-failure,automated'
+            });
+
+            const existingIssue = issues.data.find(i =>
+              i.title.includes(context.sha.substring(0, 7))
+            );
+
+            const body = `## Test Failure Report
+
+            | Field | Value |
+            |-------|-------|
+            | **Commit** | ${context.sha.substring(0, 7)} |
+            | **Branch** | ${context.ref.replace('refs/heads/', '')} |
+            | **Platform** | ${os} |
+            | **PowerShell** | ${shell === 'powershell' ? '5.1 (Desktop)' : '7.x (Core)'} |
+            | **Workflow Run** | [View Details](${runUrl}) |
+
+            ### Next Steps
+            1. Check the [workflow run](${runUrl}) for detailed test output
+            2. Download test artifacts for full results
+            3. Fix failing tests and push a new commit
+
+            ---
+            *This issue was automatically created by GitHub Actions*`;
+
+            if (existingIssue) {
+              // Add comment to existing issue
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existingIssue.number,
+                body: `### Additional failure on ${os} (${shell})\n\n${body}`
+              });
+            } else {
+              // Create new issue
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `🔴 Test Failure: ${context.sha.substring(0, 7)} on ${os}`,
+                body: body,
+                labels: ['test-failure', 'automated', 'bug']
+              });
+            }
+
+  # Close test-failure issues when all tests pass
+  close-issues:
+    name: Close Resolved Issues
+    runs-on: ubuntu-latest
+    needs: test
+    if: success() && github.event_name == 'push'
+
+    steps:
+      - name: Close test-failure issues
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'test-failure,automated'
+            });
+
+            for (const issue of issues.data) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `## ✅ Tests Passing
+
+All tests are now passing on commit ${context.sha.substring(0, 7)}.
+
+Automatically closing this issue.`
+              });
+
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                state: 'closed'
+              });
+
+              console.log(`Closed issue #${issue.number}: ${issue.title}`);
+            }

@@ -10308,8 +10308,8 @@ function New-NBCircuit {
         [Parameter(Mandatory = $true)]
         [uint64]$Type,
 
-        #[ValidateSet('Active', 'Planned', 'Provisioning', 'Offline', 'Deprovisioning', 'Decommissioned ')]
-        [uint16]$Status = 'Active',
+        [ValidateSet('active', 'planned', 'provisioning', 'offline', 'deprovisioning', 'decommissioned')]
+        [string]$Status = 'active',
 
         [string]$Description,
 
@@ -11040,7 +11040,6 @@ function New-NBContact {
         [ValidateLength(1, 100)]
         [string]$Name,
 
-        [Parameter(Mandatory = $true)]
         [ValidateLength(0, 254)]
         [string]$Email,
 
@@ -11625,19 +11624,69 @@ function New-NBDataSource {
 
 <#
 .SYNOPSIS
-    Creates a new CIMCable in Netbox D module.
+    Creates a new cable in Netbox DCIM module.
 
 .DESCRIPTION
-    Creates a new CIMCable in Netbox D module.
-    Supports pipeline input for Id parameter where applicable.
+    Creates a new cable connecting two termination points in Netbox.
+    Supports connecting interfaces, console ports, power ports, etc.
+
+.PARAMETER A_Terminations
+    Array of termination objects for the A side. Each object should have:
+    - object_type: The type (e.g., 'dcim.interface', 'dcim.consoleport')
+    - object_id: The ID of the object
+
+.PARAMETER B_Terminations
+    Array of termination objects for the B side. Same format as A_Terminations.
+
+.PARAMETER Type
+    Cable type (e.g., 'cat5', 'cat5e', 'cat6', 'cat6a', 'cat7', 'cat7a', 'cat8',
+    'dac-active', 'dac-passive', 'mrj21-trunk', 'coaxial', 'mmf', 'mmf-om1',
+    'mmf-om2', 'mmf-om3', 'mmf-om4', 'mmf-om5', 'smf', 'smf-os1', 'smf-os2',
+    'aoc', 'power')
+
+.PARAMETER Status
+    Cable status: 'connected', 'planned', 'decommissioning'
+
+.PARAMETER Tenant
+    Tenant ID
+
+.PARAMETER Label
+    Cable label
+
+.PARAMETER Color
+    Cable color (hex code without #)
+
+.PARAMETER Length
+    Cable length
+
+.PARAMETER Length_Unit
+    Length unit: 'm', 'cm', 'ft', 'in'
+
+.PARAMETER Description
+    Cable description
+
+.PARAMETER Comments
+    Additional comments
+
+.PARAMETER Tags
+    Array of tag names or IDs
+
+.PARAMETER Custom_Fields
+    Hashtable of custom field values
 
 .PARAMETER Raw
-    Return the raw API response instead of the results array.
+    Return the raw API response
 
 .EXAMPLE
-    New-NBDCIMCable
+    $termA = @{ object_type = 'dcim.interface'; object_id = 1 }
+    $termB = @{ object_type = 'dcim.interface'; object_id = 2 }
+    New-NBDCIMCable -A_Terminations @($termA) -B_Terminations @($termB)
 
-    Returns all CIMCable objects.
+.EXAMPLE
+    # Connect two interfaces by ID using helper
+    New-NBDCIMCable -A_Terminations @(@{object_type='dcim.interface';object_id=10}) `
+                    -B_Terminations @(@{object_type='dcim.interface';object_id=20}) `
+                    -Type 'cat6' -Status 'connected' -Label 'Patch-001'
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -11646,28 +11695,71 @@ function New-NBDCIMCable {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param(
-        [Parameter(Mandatory = $true)][string]$A_Terminations_Type,
-        [Parameter(Mandatory = $true)][uint64[]]$A_Terminations,
-        [Parameter(Mandatory = $true)][string]$B_Terminations_Type,
-        [Parameter(Mandatory = $true)][uint64[]]$B_Terminations,
+        [Parameter(Mandatory = $true)]
+        [object[]]$A_Terminations,
+
+        [Parameter(Mandatory = $true)]
+        [object[]]$B_Terminations,
+
+        [ValidateSet('cat3', 'cat5', 'cat5e', 'cat6', 'cat6a', 'cat7', 'cat7a', 'cat8',
+                     'dac-active', 'dac-passive', 'mrj21-trunk', 'coaxial',
+                     'mmf', 'mmf-om1', 'mmf-om2', 'mmf-om3', 'mmf-om4', 'mmf-om5',
+                     'smf', 'smf-os1', 'smf-os2', 'aoc', 'power', 'usb')]
         [string]$Type,
-        [string]$Status,
+
+        [ValidateSet('connected', 'planned', 'decommissioning')]
+        [string]$Status = 'connected',
+
         [uint64]$Tenant,
+
         [string]$Label,
+
+        [ValidatePattern('^[0-9a-fA-F]{6}$')]
         [string]$Color,
+
         [decimal]$Length,
+
+        [ValidateSet('m', 'cm', 'ft', 'in', 'km', 'mi')]
         [string]$Length_Unit,
+
         [string]$Description,
+
         [string]$Comments,
-        [string[]]$Tags,
+
+        [object[]]$Tags,
+
         [hashtable]$Custom_Fields,
+
         [switch]$Raw
     )
+
     process {
-        $Segments = [System.Collections.ArrayList]::new(@('dcim','cables'))
-        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
-        if ($PSCmdlet.ShouldProcess($Label, 'Create cable')) {
-            InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments) -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        $Segments = [System.Collections.ArrayList]::new(@('dcim', 'cables'))
+
+        # Build the body manually since terminations need special handling
+        $body = @{
+            a_terminations = $A_Terminations
+            b_terminations = $B_Terminations
+        }
+
+        if ($PSBoundParameters.ContainsKey('Type')) { $body.type = $Type }
+        if ($PSBoundParameters.ContainsKey('Status')) { $body.status = $Status }
+        if ($PSBoundParameters.ContainsKey('Tenant')) { $body.tenant = $Tenant }
+        if ($PSBoundParameters.ContainsKey('Label')) { $body.label = $Label }
+        if ($PSBoundParameters.ContainsKey('Color')) { $body.color = $Color }
+        if ($PSBoundParameters.ContainsKey('Length')) { $body.length = $Length }
+        if ($PSBoundParameters.ContainsKey('Length_Unit')) { $body.length_unit = $Length_Unit }
+        if ($PSBoundParameters.ContainsKey('Description')) { $body.description = $Description }
+        if ($PSBoundParameters.ContainsKey('Comments')) { $body.comments = $Comments }
+        if ($PSBoundParameters.ContainsKey('Tags')) { $body.tags = $Tags }
+        if ($PSBoundParameters.ContainsKey('Custom_Fields')) { $body.custom_fields = $Custom_Fields }
+
+        $URI = BuildNewURI -Segments $Segments
+
+        $displayName = if ($Label) { $Label } else { "Cable" }
+
+        if ($PSCmdlet.ShouldProcess($displayName, 'Create cable')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $body -Raw:$Raw
         }
     }
 }
@@ -11892,7 +11984,8 @@ function New-NBDCIMDevice {
         [string]$Name,
 
         [Parameter(Mandatory = $true)]
-        [object]$Device_Role,
+        [Alias('Device_Role')]
+        [object]$Role,
 
         [Parameter(Mandatory = $true)]
         [object]$Device_Type,
@@ -16405,7 +16498,7 @@ function New-NBToken {
     Username for the new user.
 
 .PARAMETER Password
-    Password for the new user.
+    Password for the new user (required).
 
 .PARAMETER First_Name
     First name.
@@ -16446,7 +16539,6 @@ function New-NBUser {
         [string]$Username,
 
         [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
         [string]$Password,
 
         [string]$First_Name,
@@ -17226,19 +17318,43 @@ function New-NBVPNIKEPolicy {
 
 <#
 .SYNOPSIS
-    Creates a new PNIKEProposal in Netbox V module.
+    Creates a new IKE Proposal in Netbox VPN module.
 
 .DESCRIPTION
-    Creates a new PNIKEProposal in Netbox V module.
-    Supports pipeline input for Id parameter where applicable.
+    Creates a new IKE (Internet Key Exchange) Proposal for VPN configuration.
+
+.PARAMETER Name
+    The name of the IKE proposal (required)
+
+.PARAMETER Authentication_Method
+    Authentication method: 'preshared-keys' or 'certificates' (required)
+
+.PARAMETER Encryption_Algorithm
+    Encryption algorithm (required). Options: 'aes-128-cbc', 'aes-192-cbc', 'aes-256-cbc', etc.
+
+.PARAMETER Authentication_Algorithm
+    Authentication/integrity algorithm (e.g., 'hmac-sha1', 'hmac-sha256', 'hmac-sha384', 'hmac-sha512', 'hmac-md5')
+
+.PARAMETER Group
+    Diffie-Hellman group number (required). Options: 1, 2, 5, 14, 16, 17, 18, 19, 20, 21, 22, 23, 24
+
+.PARAMETER SA_Lifetime
+    Security Association lifetime in seconds
+
+.PARAMETER Description
+    Description of the proposal
+
+.PARAMETER Comments
+    Additional comments
+
+.PARAMETER Custom_Fields
+    Hashtable of custom field values
 
 .PARAMETER Raw
-    Return the raw API response instead of the results array.
+    Return the raw API response
 
 .EXAMPLE
-    New-NBVPNIKEProposal
-
-    Returns all PNIKEProposal objects.
+    New-NBVPNIKEProposal -Name "IKE-Proposal-1" -Authentication_Method "preshared-keys" -Encryption_Algorithm "aes-256-cbc" -Authentication_Algorithm "hmac-sha256" -Group 14
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -17246,11 +17362,47 @@ function New-NBVPNIKEPolicy {
 function New-NBVPNIKEProposal {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
-    param([Parameter(Mandatory = $true)][string]$Name,[string]$Authentication_Method,[string]$Encryption_Algorithm,
-        [string]$Authentication_Algorithm,[uint16]$Group,[uint32]$SA_Lifetime,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
+    param(
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [string]$Name,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('preshared-keys', 'certificates')]
+        [string]$Authentication_Method,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('aes-128-cbc', 'aes-192-cbc', 'aes-256-cbc', 'aes-128-gcm', 'aes-192-gcm', 'aes-256-gcm', '3des-cbc', 'des-cbc')]
+        [string]$Encryption_Algorithm,
+
+        [ValidateSet('hmac-sha1', 'hmac-sha256', 'hmac-sha384', 'hmac-sha512', 'hmac-md5')]
+        [string]$Authentication_Algorithm,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateSet(1, 2, 5, 14, 16, 17, 18, 19, 20, 21, 22, 23, 24)]
+        [uint16]$Group,
+
+        [uint32]$SA_Lifetime,
+
+        [string]$Description,
+
+        [string]$Comments,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
     process {
-        $s = [System.Collections.ArrayList]::new(@('vpn','ike-proposals')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
-        if ($PSCmdlet.ShouldProcess($Name, 'Create IKE proposal')) { InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments) -Method POST -Body $u.Parameters -Raw:$Raw }
+        $Segments = [System.Collections.ArrayList]::new(@('vpn', 'ike-proposals'))
+
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Name, 'Create IKE proposal')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
     }
 }
 
@@ -17293,19 +17445,37 @@ function New-NBVPNIPSecPolicy {
 
 <#
 .SYNOPSIS
-    Creates a new PNIPSecProfile in Netbox V module.
+    Creates a new IPSec Profile in Netbox VPN module.
 
 .DESCRIPTION
-    Creates a new PNIPSecProfile in Netbox V module.
-    Supports pipeline input for Id parameter where applicable.
+    Creates a new IPSec Profile that combines IKE and IPSec policies for VPN configuration.
+
+.PARAMETER Name
+    The name of the IPSec profile (required)
+
+.PARAMETER Mode
+    IPSec mode: 'esp' (Encapsulating Security Payload) or 'ah' (Authentication Header) (required)
+
+.PARAMETER IKE_Policy
+    The IKE policy ID to associate with this profile (required)
+
+.PARAMETER IPSec_Policy
+    The IPSec policy ID to associate with this profile (required)
+
+.PARAMETER Description
+    Description of the profile
+
+.PARAMETER Comments
+    Additional comments
+
+.PARAMETER Custom_Fields
+    Hashtable of custom field values
 
 .PARAMETER Raw
-    Return the raw API response instead of the results array.
+    Return the raw API response
 
 .EXAMPLE
-    New-NBVPNIPSecProfile
-
-    Returns all PNIPSecProfile objects.
+    New-NBVPNIPSecProfile -Name "IPSec-Profile-1" -Mode "esp" -IKE_Policy 1 -IPSec_Policy 1
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -17313,10 +17483,40 @@ function New-NBVPNIPSecPolicy {
 function New-NBVPNIPSecProfile {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
-    param([Parameter(Mandatory = $true)][string]$Name,[string]$Mode,[uint64]$IKE_Policy,[uint64]$IPSec_Policy,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
+    param(
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [string]$Name,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('esp', 'ah')]
+        [string]$Mode,
+
+        [Parameter(Mandatory = $true)]
+        [uint64]$IKE_Policy,
+
+        [Parameter(Mandatory = $true)]
+        [uint64]$IPSec_Policy,
+
+        [string]$Description,
+
+        [string]$Comments,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
     process {
-        $s = [System.Collections.ArrayList]::new(@('vpn','ipsec-profiles')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
-        if ($PSCmdlet.ShouldProcess($Name, 'Create IPSec profile')) { InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments) -Method POST -Body $u.Parameters -Raw:$Raw }
+        $Segments = [System.Collections.ArrayList]::new(@('vpn', 'ipsec-profiles'))
+
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Name, 'Create IPSec profile')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
     }
 }
 
@@ -17326,19 +17526,40 @@ function New-NBVPNIPSecProfile {
 
 <#
 .SYNOPSIS
-    Creates a new PNIPSecProposal in Netbox V module.
+    Creates a new IPSec Proposal in Netbox VPN module.
 
 .DESCRIPTION
-    Creates a new PNIPSecProposal in Netbox V module.
-    Supports pipeline input for Id parameter where applicable.
+    Creates a new IPSec (IP Security) Proposal for VPN configuration.
+
+.PARAMETER Name
+    The name of the IPSec proposal (required)
+
+.PARAMETER Encryption_Algorithm
+    Encryption algorithm (required). Options: 'aes-128-cbc', 'aes-256-cbc', 'aes-256-gcm', etc.
+
+.PARAMETER Authentication_Algorithm
+    Authentication/integrity algorithm (e.g., 'hmac-sha1', 'hmac-sha256', 'hmac-sha384', 'hmac-sha512', 'hmac-md5')
+
+.PARAMETER SA_Lifetime_Seconds
+    Security Association lifetime in seconds
+
+.PARAMETER SA_Lifetime_Data
+    Security Association lifetime in kilobytes
+
+.PARAMETER Description
+    Description of the proposal
+
+.PARAMETER Comments
+    Additional comments
+
+.PARAMETER Custom_Fields
+    Hashtable of custom field values
 
 .PARAMETER Raw
-    Return the raw API response instead of the results array.
+    Return the raw API response
 
 .EXAMPLE
-    New-NBVPNIPSecProposal
-
-    Returns all PNIPSecProposal objects.
+    New-NBVPNIPSecProposal -Name "IPSec-Proposal-1" -Encryption_Algorithm "aes-256-cbc" -Authentication_Algorithm "hmac-sha256"
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -17346,10 +17567,41 @@ function New-NBVPNIPSecProfile {
 function New-NBVPNIPSecProposal {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
-    param([Parameter(Mandatory = $true)][string]$Name,[string]$Encryption_Algorithm,[string]$Authentication_Algorithm,[uint32]$SA_Lifetime_Seconds,[uint32]$SA_Lifetime_Data,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
+    param(
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [string]$Name,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('aes-128-cbc', 'aes-192-cbc', 'aes-256-cbc', 'aes-128-gcm', 'aes-192-gcm', 'aes-256-gcm', '3des-cbc', 'des-cbc')]
+        [string]$Encryption_Algorithm,
+
+        [ValidateSet('hmac-sha1', 'hmac-sha256', 'hmac-sha384', 'hmac-sha512', 'hmac-md5')]
+        [string]$Authentication_Algorithm,
+
+        [uint32]$SA_Lifetime_Seconds,
+
+        [uint32]$SA_Lifetime_Data,
+
+        [string]$Description,
+
+        [string]$Comments,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
     process {
-        $s = [System.Collections.ArrayList]::new(@('vpn','ipsec-proposals')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
-        if ($PSCmdlet.ShouldProcess($Name, 'Create IPSec proposal')) { InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments) -Method POST -Body $u.Parameters -Raw:$Raw }
+        $Segments = [System.Collections.ArrayList]::new(@('vpn', 'ipsec-proposals'))
+
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($Name, 'Create IPSec proposal')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
     }
 }
 
@@ -24475,7 +24727,8 @@ function Set-NBDCIMDevice {
 
         [string]$Name,
 
-        [object]$Device_Role,
+        [Alias('Device_Role')]
+        [object]$Role,
 
         [object]$Device_Type,
 
@@ -27108,6 +27361,9 @@ function Set-NBExportTemplate {
 .PARAMETER Name
     Name of the group.
 
+.PARAMETER Description
+    Description of the group.
+
 .PARAMETER Permissions
     Array of permission IDs.
 
@@ -27128,6 +27384,8 @@ function Set-NBGroup {
         [uint64]$Id,
 
         [string]$Name,
+
+        [string]$Description,
 
         [uint64[]]$Permissions,
 
