@@ -8,37 +8,52 @@ on:
 
 jobs:
   test:
-    name: Pester Tests
+    name: Pester Tests (${{ matrix.os }}, ${{ matrix.pwsh && 'PS 7.x' || 'PS 5.1' }})
     runs-on: ${{ matrix.os }}
 
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        shell: [pwsh]
+        pwsh: [true]
         include:
           # Also test PowerShell 5.1 (Desktop) on Windows
           - os: windows-latest
-            shell: powershell
+            pwsh: false
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install dependencies
-        shell: ${{ matrix.shell }}
+      - name: Install dependencies (pwsh)
+        if: matrix.pwsh
+        shell: pwsh
         run: |
           Set-PSRepository PSGallery -InstallationPolicy Trusted
           Install-Module Pester -Force -Scope CurrentUser -MinimumVersion 5.0.0
           Install-Module PSScriptAnalyzer -Force -Scope CurrentUser
 
-      - name: Build module
-        shell: ${{ matrix.shell }}
+      - name: Install dependencies (powershell)
+        if: '!matrix.pwsh'
+        shell: powershell
         run: |
-          ./deploy.ps1 -Environment dev -SkipVersion
+          Set-PSRepository PSGallery -InstallationPolicy Trusted
+          Install-Module Pester -Force -Scope CurrentUser -MinimumVersion 5.0.0
+          Install-Module PSScriptAnalyzer -Force -Scope CurrentUser
 
-      - name: Run Pester tests
-        shell: ${{ matrix.shell }}
+      - name: Build module (pwsh)
+        if: matrix.pwsh
+        shell: pwsh
+        run: ./deploy.ps1 -Environment dev -SkipVersion
+
+      - name: Build module (powershell)
+        if: '!matrix.pwsh'
+        shell: powershell
+        run: ./deploy.ps1 -Environment dev -SkipVersion
+
+      - name: Run Pester tests (pwsh)
+        if: matrix.pwsh
+        shell: pwsh
         run: |
           $config = New-PesterConfiguration
           $config.Run.Path = './Tests/*.Tests.ps1'
@@ -49,14 +64,28 @@ jobs:
           $config.TestResult.OutputFormat = 'NUnitXml'
           $config.Output.Verbosity = 'Detailed'
           $config.CodeCoverage.Enabled = $false
+          Invoke-Pester -Configuration $config
 
+      - name: Run Pester tests (powershell)
+        if: '!matrix.pwsh'
+        shell: powershell
+        run: |
+          $config = New-PesterConfiguration
+          $config.Run.Path = './Tests/*.Tests.ps1'
+          $config.Run.Exit = $true
+          $config.Filter.ExcludeTag = @('Integration', 'Live')
+          $config.TestResult.Enabled = $true
+          $config.TestResult.OutputPath = 'TestResults.xml'
+          $config.TestResult.OutputFormat = 'NUnitXml'
+          $config.Output.Verbosity = 'Detailed'
+          $config.CodeCoverage.Enabled = $false
           Invoke-Pester -Configuration $config
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: test-results-${{ matrix.os }}-${{ matrix.shell }}
+          name: test-results-${{ matrix.os }}-${{ matrix.pwsh && 'pwsh' || 'ps51' }}
           path: TestResults.xml
           retention-days: 30
 
@@ -66,7 +95,7 @@ jobs:
         with:
           script: |
             const os = '${{ matrix.os }}';
-            const shell = '${{ matrix.shell }}';
+            const ps = '${{ matrix.pwsh }}' === 'true' ? '7.x (Core)' : '5.1 (Desktop)';
             const runUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
 
             const issues = await github.rest.issues.listForRepo({
@@ -87,13 +116,8 @@ jobs:
             | **Commit** | ${context.sha.substring(0, 7)} |
             | **Branch** | ${context.ref.replace('refs/heads/', '')} |
             | **Platform** | ${os} |
-            | **PowerShell** | ${shell === 'powershell' ? '5.1 (Desktop)' : '7.x (Core)'} |
+            | **PowerShell** | ${ps} |
             | **Workflow Run** | [View Details](${runUrl}) |
-
-            ### Next Steps
-            1. Check the [workflow run](${runUrl}) for detailed test output
-            2. Download test artifacts for full results
-            3. Fix failing tests and push a new commit
 
             ---
             *This issue was automatically created by GitHub Actions*`;
@@ -103,7 +127,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: existingIssue.number,
-                body: `### Additional failure on ${os} (${shell})\n\n${body}`
+                body: `### Additional failure on ${os} (${ps})\n\n${body}`
               });
             } else {
               await github.rest.issues.create({
@@ -115,7 +139,6 @@ jobs:
               });
             }
 
-  # Close test-failure issues when all tests pass
   close-issues:
     name: Close Resolved Issues
     runs-on: ubuntu-latest
@@ -148,6 +171,4 @@ jobs:
                 issue_number: issue.number,
                 state: 'closed'
               });
-
-              console.log(`Closed issue #${issue.number}: ${issue.title}`);
             }
