@@ -39,7 +39,7 @@ function Remove-NBDCIMSite {
     (
         [Parameter(Mandatory = $true,
             ValueFromPipelineByPropertyName = $true)]
-        [uint]$Id
+        [uint64]$Id
 
     )
 
