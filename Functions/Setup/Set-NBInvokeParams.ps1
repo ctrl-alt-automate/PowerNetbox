@@ -18,6 +18,7 @@
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 function Set-NBInvokeParams {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', '', Justification = 'Params refers to a collection of invoke parameters')]
     [CmdletBinding(ConfirmImpact = 'Low',
         SupportsShouldProcess = $true)]
     [OutputType([string])]
