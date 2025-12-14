@@ -244,6 +244,40 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             $bodyObj = $Result.Body | ConvertFrom-Json
             $bodyObj.status | Should -Be 5555
         }
+
+        It "Should have Single and Bulk parameter sets" {
+            $cmd = Get-Command New-NBDCIMDevice
+            $cmd.ParameterSets.Name | Should -Contain 'Single'
+            $cmd.ParameterSets.Name | Should -Contain 'Bulk'
+        }
+
+        It "Should have InputObject parameter for bulk mode" {
+            $cmd = Get-Command New-NBDCIMDevice
+            $cmd.Parameters.Keys | Should -Contain 'InputObject'
+            $inputObjParam = $cmd.Parameters['InputObject']
+            $inputObjParam.ParameterSets.Keys | Should -Contain 'Bulk'
+        }
+
+        It "Should have BatchSize parameter with validation" {
+            $cmd = Get-Command New-NBDCIMDevice
+            $cmd.Parameters.Keys | Should -Contain 'BatchSize'
+            $batchSizeParam = $cmd.Parameters['BatchSize']
+            $validateRange = $batchSizeParam.Attributes | Where-Object { $_ -is [System.Management.Automation.ValidateRangeAttribute] }
+            $validateRange | Should -Not -BeNullOrEmpty
+            $validateRange.MinRange | Should -Be 1
+            $validateRange.MaxRange | Should -Be 1000
+        }
+
+        It "Should have Force parameter for bulk mode" {
+            $cmd = Get-Command New-NBDCIMDevice
+            $cmd.Parameters.Keys | Should -Contain 'Force'
+        }
+
+        It "Should use Role alias Device_Role for backwards compatibility" {
+            $cmd = Get-Command New-NBDCIMDevice
+            $roleParam = $cmd.Parameters['Role']
+            $roleParam.Aliases | Should -Contain 'Device_Role'
+        }
     }
 
     Context "Set-NBDCIMDevice" {
