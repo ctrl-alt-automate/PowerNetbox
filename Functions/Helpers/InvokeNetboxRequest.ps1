@@ -114,7 +114,7 @@ function InvokeNetboxRequest {
                 $URI
             }
 
-            Write-Verbose "Fetching page $pageNum..."
+            Write-Verbose "Fetching page ${pageNum}..."
 
             # Make single-page request (recursive call without -All)
             $pageResult = InvokeNetboxRequest -URI $currentUri -Headers $Headers -Body $Body `
@@ -123,7 +123,7 @@ function InvokeNetboxRequest {
             if ($pageResult.results) {
                 $itemCount = $pageResult.results.Count
                 [void]$allResults.AddRange($pageResult.results)
-                Write-Verbose "Page $pageNum: Retrieved $itemCount items (Total: $($allResults.Count))"
+                Write-Verbose "Page ${pageNum}: Retrieved $itemCount items (Total: $($allResults.Count))"
 
                 # Show progress for large datasets
                 if ($pageResult.count -gt 0) {
