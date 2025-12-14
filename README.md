@@ -32,7 +32,7 @@ We extend our sincere thanks to Ben and all original contributors for building t
 - **504+ Functions** - Complete CRUD operations for all resources
 - **Pipeline Support** - Full PowerShell pipeline integration
 - **Secure** - Token-based authentication with TLS 1.2/1.3
-- **Well Tested** - 613 unit tests for quality assurance
+- **Well Tested** - 946 unit tests for quality assurance
 
 ### Supported Modules
 
