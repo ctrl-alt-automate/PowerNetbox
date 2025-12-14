@@ -188,8 +188,19 @@ Import-Module PowerNetbox
 
 ## Documentation
 
+- **[Wiki](https://github.com/ctrl-alt-automate/PowerNetbox/wiki)** - Getting started, examples, and troubleshooting
 - **[Netbox API Docs](https://netbox.readthedocs.io/en/stable/rest-api/overview/)** - Official Netbox API documentation
 - **[GitHub Issues](https://github.com/ctrl-alt-automate/PowerNetbox/issues)** - Report bugs or request features
+
+### Wiki Highlights
+
+| Page | Description |
+|------|-------------|
+| [Getting Started](https://github.com/ctrl-alt-automate/PowerNetbox/wiki/Getting-Started) | Installation and first steps |
+| [Common Workflows](https://github.com/ctrl-alt-automate/PowerNetbox/wiki/Common-Workflows) | Bulk import, VMware sync, reporting |
+| [DCIM Examples](https://github.com/ctrl-alt-automate/PowerNetbox/wiki/DCIM-Examples) | Sites, devices, racks, cables |
+| [IPAM Examples](https://github.com/ctrl-alt-automate/PowerNetbox/wiki/IPAM-Examples) | IP addresses, prefixes, VLANs |
+| [Troubleshooting](https://github.com/ctrl-alt-automate/PowerNetbox/wiki/Troubleshooting) | Common issues and solutions |
 
 ## Requirements
 
