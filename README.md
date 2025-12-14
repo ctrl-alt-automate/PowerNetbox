@@ -188,8 +188,8 @@ Import-Module PowerNetbox
 
 ## Documentation
 
-- **[CLAUDE.md](CLAUDE.md)** - Detailed development guide and API reference
 - **[Netbox API Docs](https://netbox.readthedocs.io/en/stable/rest-api/overview/)** - Official Netbox API documentation
+- **[GitHub Issues](https://github.com/ctrl-alt-automate/PowerNetbox/issues)** - Report bugs or request features
 
 ## Requirements
 
@@ -217,8 +217,6 @@ We welcome contributions! Please follow these guidelines:
 3. Follow [PowerShell Practice and Style Guidelines](https://poshcode.gitbook.io/powershell-practice-and-style/)
 4. Submit a pull request against the `dev` branch
 
-See [CLAUDE.md](CLAUDE.md) for detailed development instructions.
-
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
@@ -227,24 +225,19 @@ Original copyright (c) 2018 Ben Claussen. Fork maintained by ctrl-alt-automate.
 
 ## Changelog
 
-### v4.4.8 (Current) - PowerNetbox Release
+### v4.4.8.1
 
-- **Version now tracks Netbox releases** (4.4.8 = Netbox 4.4.8)
-- **Rebranded** from NetboxPSv4 to PowerNetbox
+- New versioning: `Major.Minor.Patch.ModulePatch` (first 3 digits = Netbox version)
+- PowerShell 5.1 compatibility fix for `Remove-NBDCIMSite`
+- SecureString support for password parameters in User functions
+- Code quality improvements (OutputType, ValidateNotNullOrEmpty)
+
+### v4.4.8
+
+- **Initial PowerNetbox release** (fork of NetboxPS)
 - **100% API coverage** for Netbox 4.4.8
-- **488+ public functions** across all modules
+- **478 public functions** across all modules
 - **613 unit tests** for quality assurance
 - **Cross-platform support** - Windows, Linux, macOS
-- All function names unchanged for backwards compatibility
-- Improved documentation and development guide
-
-### v4.4.7 - NetboxPSv4 Final
-
-- Full Netbox 4.4.7 compatibility
 - New modules: VPN, Wireless, Core, Users
-- Cross-platform support
-- Removed Windows-only dependencies
-
-### Previous Versions
-
-See the [original NetboxPS repository](https://github.com/benclaussen/NetboxPS) for earlier version history.
+- All function names unchanged for backwards compatibility
