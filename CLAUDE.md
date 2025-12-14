@@ -103,10 +103,10 @@ The project documentation is maintained in a separate wiki repository.
 cd /Users/elvis/Developer/work
 git clone https://github.com/ctrl-alt-automate/PowerNetbox.wiki.git
 
-# Edit and push changes
+# Edit and push changes (note: GitHub wiki uses 'master' branch)
 cd PowerNetbox.wiki
 # ... edit markdown files ...
-git add . && git commit -m "Update docs" && git push
+git add . && git commit -m "Update docs" && git push origin main:master
 ```
 
 ### Wiki Structure
@@ -116,7 +116,10 @@ git add . && git commit -m "Update docs" && git push
 | `_Sidebar.md` | Navigation sidebar |
 | `_Footer.md` | Footer on all pages |
 | `Getting-Started.md` | Installation and quick start |
-| `Common-Workflows.md` | Use cases and examples |
+| `Common-Workflows.md` | Use cases, VMware PowerCLI integration |
+| `DCIM-Examples.md` | Sites, devices, racks, cables |
+| `IPAM-Examples.md` | IP addresses, prefixes, VLANs |
+| `Function-Naming.md` | Naming conventions reference |
 | `Troubleshooting.md` | Common issues and solutions |
 
 ## Project Structure
