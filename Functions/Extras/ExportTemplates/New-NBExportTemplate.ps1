@@ -46,6 +46,7 @@ function New-NBExportTemplate {
     [OutputType([PSCustomObject])]
     param (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [Parameter(Mandatory = $true)]

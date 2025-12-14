@@ -1,4 +1,4 @@
-﻿
+
 function Remove-NBVirtualMachine {
 <#
     .SYNOPSIS
@@ -22,6 +22,7 @@ function Remove-NBVirtualMachine {
 
     [CmdletBinding(ConfirmImpact = 'High',
                    SupportsShouldProcess = $true)]
+    [OutputType([void])]
     param
     (
         [Parameter(Mandatory = $true,

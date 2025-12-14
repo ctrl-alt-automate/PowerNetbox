@@ -25,6 +25,7 @@ function New-NBGroup {
     [OutputType([PSCustomObject])]
     param (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [uint64[]]$Permissions,

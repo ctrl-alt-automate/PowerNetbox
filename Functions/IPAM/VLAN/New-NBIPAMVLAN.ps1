@@ -1,4 +1,4 @@
-﻿function New-NBIPAMVLAN {
+function New-NBIPAMVLAN {
     <#
     .SYNOPSIS
         Create a new VLAN
@@ -40,7 +40,7 @@
         Additional information about the function.
 #>
 
-    [CmdletBinding(ConfirmImpact = 'low',
+    [CmdletBinding(ConfirmImpact = 'Low',
         SupportsShouldProcess = $true)]
     [OutputType([pscustomobject])]
     param
@@ -49,6 +49,7 @@
         [uint16]$VID,
 
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [object]$Status = 'Active',

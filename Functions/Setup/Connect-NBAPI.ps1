@@ -1,4 +1,4 @@
-﻿function Connect-NBAPI {
+function Connect-NBAPI {
 <#
     .SYNOPSIS
         Connects to the Netbox API and ensures Credential work properly
@@ -37,10 +37,12 @@
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Manual')]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(ParameterSetName = 'Manual',
                    Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Hostname,
 
         [Parameter(Mandatory = $false)]
@@ -55,6 +57,7 @@
 
         [Parameter(ParameterSetName = 'URI',
                    Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$URI,
 
         [Parameter(Mandatory = $false)]

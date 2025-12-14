@@ -1,4 +1,4 @@
-﻿<#
+<#
     .NOTES
     ===========================================================================
      Created with:  SAPIEN Technologies, Inc., PowerShell Studio 2020 v5.7.181
@@ -34,6 +34,7 @@ function New-NBDCIMSite {
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [string]$Slug,

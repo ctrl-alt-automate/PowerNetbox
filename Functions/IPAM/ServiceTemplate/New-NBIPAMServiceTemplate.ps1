@@ -44,6 +44,7 @@ function New-NBIPAMServiceTemplate {
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [Parameter(Mandatory = $true)]

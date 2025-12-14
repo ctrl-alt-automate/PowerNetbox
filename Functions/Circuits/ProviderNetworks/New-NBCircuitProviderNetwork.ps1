@@ -40,6 +40,7 @@ function New-NBCircuitProviderNetwork {
         [uint64]$Provider,
 
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [string]$Service_Id,

@@ -33,6 +33,7 @@ function Get-NBContactRole {
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(ParameterSetName = 'Query',

@@ -1,4 +1,4 @@
-﻿
+
 function New-NBIPAMAddress {
     <#
     .SYNOPSIS
@@ -62,6 +62,7 @@ function New-NBIPAMAddress {
     (
         [Parameter(Mandatory = $true,
             ValueFromPipelineByPropertyName = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Address,
 
         [object]$Status = 'Active',

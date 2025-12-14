@@ -73,6 +73,7 @@ function New-NBConfigContext {
     [OutputType([PSCustomObject])]
     param (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [ValidateRange(0, 32767)]

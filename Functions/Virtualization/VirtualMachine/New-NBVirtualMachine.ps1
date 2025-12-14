@@ -19,12 +19,13 @@
 #>
 
 function New-NBVirtualMachine {
-    [CmdletBinding(ConfirmImpact = 'low',
+    [CmdletBinding(ConfirmImpact = 'Low',
         SupportsShouldProcess = $true)]
     [OutputType([pscustomobject])]
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [uint64]$Site,
