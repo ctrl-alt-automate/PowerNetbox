@@ -12,7 +12,7 @@
     Username.
 
 .PARAMETER Password
-    Password.
+    Password. Use SecureString for security.
 
 .PARAMETER First_Name
     First name.
@@ -53,7 +53,7 @@ function Set-NBUser {
 
         [string]$Username,
 
-        [string]$Password,
+        [securestring]$Password,
 
         [string]$First_Name,
 
@@ -74,11 +74,22 @@ function Set-NBUser {
 
     process {
         $Segments = [System.Collections.ArrayList]::new(@('users', 'users', $Id))
-        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
-        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        # Build params manually to handle SecureString conversion
+        $params = @{}
+        foreach ($key in $PSBoundParameters.Keys) {
+            if ($key -eq 'Password') {
+                $params['password'] = [System.Net.NetworkCredential]::new('', $Password).Password
+            }
+            elseif ($key -notin 'Id', 'Raw', 'WhatIf', 'Confirm', 'Verbose', 'Debug', 'ErrorAction', 'WarningAction', 'InformationAction', 'ErrorVariable', 'WarningVariable', 'InformationVariable', 'OutVariable', 'OutBuffer', 'PipelineVariable') {
+                $params[$key] = $PSBoundParameters[$key]
+            }
+        }
+
+        $URI = BuildNewURI -Segments $Segments
 
         if ($PSCmdlet.ShouldProcess($Id, 'Update User')) {
-            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $params -Raw:$Raw
         }
     }
 }
