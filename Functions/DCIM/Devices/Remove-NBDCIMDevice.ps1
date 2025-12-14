@@ -1,56 +1,146 @@
-
-function Remove-NBDCIMDevice {
 <#
-    .SYNOPSIS
-        Delete a device
+.SYNOPSIS
+    Deletes one or more devices from Netbox DCIM module.
 
-    .DESCRIPTION
-        Deletes a device from Netbox by ID
+.DESCRIPTION
+    Deletes devices from Netbox by ID. Supports both single device deletion
+    and bulk deletion via pipeline input.
 
-    .PARAMETER Id
-        Database ID of the device
+    For bulk operations, use the -BatchSize parameter to control how many
+    devices are deleted per API request.
 
-    .PARAMETER Force
-        Force deletion without any prompts
+    WARNING: This operation cannot be undone. Deleted devices and their
+    associated data (interfaces, connections, etc.) will be permanently removed.
 
-    .EXAMPLE
-        PS C:\> Remove-NBDCIMDevice -Id $value1
+.PARAMETER Id
+    Database ID(s) of the device(s) to delete. Required for single mode.
 
-    .NOTES
-        Additional information about the function.
+.PARAMETER InputObject
+    Pipeline input for bulk operations. Each object must have an Id property.
+
+.PARAMETER BatchSize
+    Number of devices to delete per API request in bulk mode.
+    Default: 50, Range: 1-1000
+
+.PARAMETER Force
+    Skip confirmation prompts. Use with caution!
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Remove-NBDCIMDevice -Id 123 -Force
+
+    Deletes device 123 without confirmation.
+
+.EXAMPLE
+    Remove-NBDCIMDevice -Id 100, 101, 102 -Force
+
+    Deletes multiple devices by ID.
+
+.EXAMPLE
+    Get-NBDCIMDevice -Status "decommissioning" | Remove-NBDCIMDevice -Force
+
+    Bulk delete all devices in decommissioning status.
+
+.EXAMPLE
+    Get-NBDCIMDevice -Query "temp-*" | Remove-NBDCIMDevice -BatchSize 50 -Force
+
+    Bulk delete devices matching a pattern with batching.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 
-    [CmdletBinding(ConfirmImpact = 'High',
-                   SupportsShouldProcess = $true)]
+function Remove-NBDCIMDevice {
+    [CmdletBinding(SupportsShouldProcess = $true,
+        ConfirmImpact = 'High',
+        DefaultParameterSetName = 'Single')]
     [OutputType([void])]
-    param
-    (
-        [Parameter(Mandatory = $true,
-                   ValueFromPipelineByPropertyName = $true)]
+    param(
+        # Single mode parameters
+        [Parameter(ParameterSetName = 'Single', Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
-        [switch]$Force
+        # Bulk mode parameters
+        [Parameter(ParameterSetName = 'Bulk', Mandatory = $true, ValueFromPipeline = $true)]
+        [PSCustomObject]$InputObject,
+
+        [Parameter(ParameterSetName = 'Bulk')]
+        [ValidateRange(1, 1000)]
+        [int]$BatchSize = 50,
+
+        # Common parameters
+        [Parameter()]
+        [switch]$Force,
+
+        [Parameter()]
+        [switch]$Raw
     )
 
     begin {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim', 'devices'))
+        $URI = BuildNewURI -Segments $Segments
 
+        if ($PSCmdlet.ParameterSetName -eq 'Bulk') {
+            $bulkItems = [System.Collections.ArrayList]::new()
+        }
     }
 
     process {
-        foreach ($DeviceID in $Id) {
-            $CurrentDevice = Get-NBDCIMDevice -Id $DeviceID -ErrorAction Stop
+        if ($PSCmdlet.ParameterSetName -eq 'Single') {
+            foreach ($DeviceID in $Id) {
+                $CurrentDevice = Get-NBDCIMDevice -Id $DeviceID -ErrorAction Stop
 
-            if ($Force -or $pscmdlet.ShouldProcess("Name: $($CurrentDevice.Name) | ID: $($CurrentDevice.Id)", "Remove")) {
-                $Segments = [System.Collections.ArrayList]::new(@('dcim', 'devices', $CurrentDevice.Id))
+                if ($Force -or $PSCmdlet.ShouldProcess("Name: $($CurrentDevice.Name) | ID: $($CurrentDevice.Id)", "Delete device")) {
+                    $DeviceSegments = [System.Collections.ArrayList]::new(@('dcim', 'devices', $CurrentDevice.Id))
 
-                $URI = BuildNewURI -Segments $Segments
+                    $DeviceURI = BuildNewURI -Segments $DeviceSegments
 
-                InvokeNetboxRequest -URI $URI -Method DELETE
+                    InvokeNetboxRequest -URI $DeviceURI -Method DELETE -Raw:$Raw
+                }
+            }
+        }
+        else {
+            # Bulk mode - collect items
+            if ($InputObject) {
+                # Extract Id from object
+                $itemId = if ($InputObject.Id) { $InputObject.Id }
+                          elseif ($InputObject.id) { $InputObject.id }
+                          else { $null }
+
+                if (-not $itemId) {
+                    Write-Error "InputObject must have an 'Id' property for bulk delete" -TargetObject $InputObject
+                    return
+                }
+
+                # Netbox bulk DELETE expects array of objects with 'id'
+                [void]$bulkItems.Add([PSCustomObject]@{ id = $itemId })
             }
         }
     }
 
     end {
+        if ($PSCmdlet.ParameterSetName -eq 'Bulk' -and $bulkItems.Count -gt 0) {
+            $target = "$($bulkItems.Count) device(s) - THIS CANNOT BE UNDONE!"
 
+            if ($Force -or $PSCmdlet.ShouldProcess($target, 'Delete devices (bulk)')) {
+                Write-Verbose "Processing $($bulkItems.Count) devices in bulk DELETE mode with batch size $BatchSize"
+
+                $result = Send-NBBulkRequest -URI $URI -Items $bulkItems.ToArray() -Method DELETE `
+                    -BatchSize $BatchSize -ShowProgress -ActivityName 'Deleting devices'
+
+                # Write summary
+                if ($result.HasErrors) {
+                    Write-Warning $result.GetSummary()
+                    foreach ($failure in $result.Failed) {
+                        Write-Error "Failed to delete device: $($failure.Error)" -TargetObject $failure.Item
+                    }
+                }
+                else {
+                    Write-Verbose $result.GetSummary()
+                }
+            }
+        }
     }
 }

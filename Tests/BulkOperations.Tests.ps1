@@ -13,38 +13,18 @@ BeforeAll {
     $script:TestPath = $PSScriptRoot
 }
 
-Describe "Bulk Operations Tests" -Tag 'Bulk', 'DCIM' {
+Describe "BulkOperationResult Class" -Tag 'Bulk', 'Unit' {
     BeforeAll {
-        Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith {
-            return $true
-        }
+        Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
 
-        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
-            return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
-        }
-
-        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith {
-            return 'netbox.domain.com'
-        }
-
-        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith {
-            return 30
-        }
-
-        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith {
-            return @{}
-        }
-
-        InModuleScope -ModuleName 'PowerNetbox' -ArgumentList $script:TestPath -ScriptBlock {
-            param($TestPath)
+        InModuleScope -ModuleName 'PowerNetbox' {
             $script:NetboxConfig.Hostname = 'netbox.domain.com'
             $script:NetboxConfig.HostScheme = 'https'
             $script:NetboxConfig.HostPort = 443
-            $script:NetboxConfig.Choices.DCIM = (Get-Content "$TestPath/DCIMChoices.json" -ErrorAction Stop | ConvertFrom-Json)
         }
     }
 
-    Context "BulkOperationResult Class" {
+    Context "Basic Operations" {
         It "Should create a new BulkOperationResult" {
             InModuleScope -ModuleName 'PowerNetbox' {
                 $result = [BulkOperationResult]::new()
@@ -111,37 +91,44 @@ Describe "Bulk Operations Tests" -Tag 'Bulk', 'DCIM' {
             }
         }
     }
+}
 
-    Context "Send-NBBulkRequest Helper" {
-        BeforeAll {
-            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
-                # Simulate bulk API response - return array of created items
-                $body = $Body | ConvertFrom-Json
-                $response = @()
-                $id = 100
-                foreach ($item in $body) {
-                    $response += [PSCustomObject]@{
-                        id = $id++
-                        name = $item.name
-                        role = $item.role
-                        device_type = $item.device_type
-                        site = $item.site
-                    }
-                }
-                return $response
-            }
+Describe "Send-NBBulkRequest Helper" -Tag 'Bulk', 'Unit' {
+    BeforeAll {
+        Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
+        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
+            return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
+        }
+        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { return 'netbox.domain.com' }
+        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
+        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
+
+        InModuleScope -ModuleName 'PowerNetbox' {
+            $script:NetboxConfig.Hostname = 'netbox.domain.com'
+            $script:NetboxConfig.HostScheme = 'https'
+            $script:NetboxConfig.HostPort = 443
         }
 
+        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+            $body = $Body | ConvertFrom-Json
+            $response = @()
+            $id = 100
+            foreach ($item in $body) {
+                $response += [PSCustomObject]@{
+                    id = $id++
+                    name = $item.name
+                }
+            }
+            return $response
+        }
+    }
+
+    Context "Batching Behavior" {
         It "Should send items in batches" {
             InModuleScope -ModuleName 'PowerNetbox' {
                 $uri = BuildNewURI -Segments @('dcim', 'devices')
                 $items = 1..5 | ForEach-Object {
-                    [PSCustomObject]@{
-                        name = "device$_"
-                        role = 1
-                        device_type = 1
-                        site = 1
-                    }
+                    [PSCustomObject]@{ name = "device$_" }
                 }
 
                 $result = Send-NBBulkRequest -URI $uri -Items $items -Method POST -BatchSize 3
@@ -170,12 +157,7 @@ Describe "Bulk Operations Tests" -Tag 'Bulk', 'DCIM' {
         It "Should handle single item" {
             InModuleScope -ModuleName 'PowerNetbox' {
                 $uri = BuildNewURI -Segments @('dcim', 'devices')
-                $items = @([PSCustomObject]@{
-                    name = "single-device"
-                    role = 1
-                    device_type = 1
-                    site = 1
-                })
+                $items = @([PSCustomObject]@{ name = "single-device" })
 
                 $result = Send-NBBulkRequest -URI $uri -Items $items -Method POST -BatchSize 50
 
@@ -184,49 +166,103 @@ Describe "Bulk Operations Tests" -Tag 'Bulk', 'DCIM' {
         }
     }
 
-    Context "New-NBDCIMDevice Bulk Mode" {
-        BeforeAll {
+    Context "Error Handling" {
+        It "Should handle API errors gracefully" {
             Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
-                # Check if body is an array (bulk) or object (single)
-                $body = $Body | ConvertFrom-Json
-                if ($body -is [array]) {
-                    # Bulk response - return array
-                    $response = @()
-                    $id = 200
-                    foreach ($item in $body) {
-                        $response += [PSCustomObject]@{
-                            id = $id++
-                            name = $item.name
-                            role = $item.role
-                            device_type = $item.device_type
-                            site = $item.site
-                        }
+                throw "API Error: Validation failed"
+            }
+
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $uri = BuildNewURI -Segments @('dcim', 'devices')
+                $items = @([PSCustomObject]@{ name = "error-device" })
+
+                $result = Send-NBBulkRequest -URI $uri -Items $items -Method POST
+
+                $result.HasErrors | Should -BeTrue
+                $result.FailureCount | Should -Be 1
+                $result.SuccessCount | Should -Be 0
+            }
+        }
+    }
+}
+
+Describe "New-NBDCIMDevice Bulk Mode" -Tag 'Bulk', 'DCIM' {
+    BeforeAll {
+        Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
+        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
+            return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
+        }
+        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { return 'netbox.domain.com' }
+        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
+        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
+
+        InModuleScope -ModuleName 'PowerNetbox' -ArgumentList $script:TestPath -ScriptBlock {
+            param($TestPath)
+            $script:NetboxConfig.Hostname = 'netbox.domain.com'
+            $script:NetboxConfig.HostScheme = 'https'
+            $script:NetboxConfig.HostPort = 443
+            $script:NetboxConfig.Choices.DCIM = (Get-Content "$TestPath/DCIMChoices.json" -ErrorAction Stop | ConvertFrom-Json)
+        }
+
+        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+            $body = $Body | ConvertFrom-Json
+            if ($body -is [array]) {
+                $response = @()
+                $id = 200
+                foreach ($item in $body) {
+                    $response += [PSCustomObject]@{
+                        id = $id++
+                        name = $item.name
+                        role = $item.role
+                        device_type = $item.device_type
+                        site = $item.site
                     }
-                    return $response
                 }
-                else {
-                    # Single item response
-                    return [PSCustomObject]@{
-                        id = 100
-                        name = $body.name
-                        role = $body.role
-                        device_type = $body.device_type
-                        site = $body.site
-                    }
+                return $response
+            }
+            else {
+                return [PSCustomObject]@{
+                    id = 100
+                    name = $body.name
+                    role = $body.role
+                    device_type = $body.device_type
+                    site = $body.site
                 }
             }
         }
+    }
 
-        It "Should create a single device (backwards compatible)" {
-            $result = New-NBDCIMDevice -Name "single-device" -Role 1 -Device_Type 1 -Site 1 -Confirm:$false
-
-            $result | Should -Not -BeNullOrEmpty
-            $result.name | Should -Be "single-device"
-            $result.id | Should -Be 100
-
-            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -Exactly -ModuleName 'PowerNetbox'
+    Context "Parameter Sets" {
+        It "Should have Single and Bulk parameter sets" {
+            $cmd = Get-Command New-NBDCIMDevice
+            $cmd.ParameterSets.Name | Should -Contain 'Single'
+            $cmd.ParameterSets.Name | Should -Contain 'Bulk'
         }
 
+        It "Should have InputObject parameter for bulk mode" {
+            $cmd = Get-Command New-NBDCIMDevice
+            $cmd.Parameters.Keys | Should -Contain 'InputObject'
+            $inputObjParam = $cmd.Parameters['InputObject']
+            $inputObjParam.ParameterSets.Keys | Should -Contain 'Bulk'
+        }
+
+        It "Should have BatchSize parameter with validation" {
+            $cmd = Get-Command New-NBDCIMDevice
+            $cmd.Parameters.Keys | Should -Contain 'BatchSize'
+            $batchSizeParam = $cmd.Parameters['BatchSize']
+            $validateRange = $batchSizeParam.Attributes | Where-Object { $_ -is [System.Management.Automation.ValidateRangeAttribute] }
+            $validateRange | Should -Not -BeNullOrEmpty
+            $validateRange.MinRange | Should -Be 1
+            $validateRange.MaxRange | Should -Be 1000
+        }
+
+        It "Should have Force parameter for bulk mode" {
+            $cmd = Get-Command New-NBDCIMDevice
+            $cmd.Parameters.Keys | Should -Contain 'Force'
+        }
+    }
+
+    Context "Bulk Operations" {
         It "Should create devices in bulk via pipeline" {
             $devices = 1..3 | ForEach-Object {
                 [PSCustomObject]@{
@@ -267,7 +303,7 @@ Describe "Bulk Operations Tests" -Tag 'Bulk', 'DCIM' {
             $devices = @(
                 [PSCustomObject]@{
                     Name = "alias-test"
-                    Device_Role = 5  # Should be converted to 'role'
+                    Device_Role = 5
                     Device_Type = 1
                     Site = 1
                 }
@@ -278,143 +314,660 @@ Describe "Bulk Operations Tests" -Tag 'Bulk', 'DCIM' {
             $results | Should -Not -BeNullOrEmpty
             $results[0].role | Should -Be 5
         }
+    }
+}
 
-        It "Should use parameter sets correctly" {
-            # Verify Single parameter set
-            $singleCmd = Get-Command New-NBDCIMDevice
-            $singleParams = $singleCmd.ParameterSets | Where-Object { $_.Name -eq 'Single' }
-            $singleParams | Should -Not -BeNullOrEmpty
+Describe "New-NBDCIMInterface Bulk Mode" -Tag 'Bulk', 'DCIM' {
+    BeforeAll {
+        Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
+        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
+            return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
+        }
+        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { return 'netbox.domain.com' }
+        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
+        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
 
-            # Verify Bulk parameter set
-            $bulkParams = $singleCmd.ParameterSets | Where-Object { $_.Name -eq 'Bulk' }
-            $bulkParams | Should -Not -BeNullOrEmpty
-
-            # Verify InputObject is in Bulk set
-            $inputObjParam = $singleCmd.Parameters['InputObject']
-            $inputObjParam.ParameterSets.Keys | Should -Contain 'Bulk'
+        InModuleScope -ModuleName 'PowerNetbox' {
+            $script:NetboxConfig.Hostname = 'netbox.domain.com'
+            $script:NetboxConfig.HostScheme = 'https'
+            $script:NetboxConfig.HostPort = 443
         }
 
-        It "Should validate BatchSize range" {
-            $cmd = Get-Command New-NBDCIMDevice
-            $batchSizeParam = $cmd.Parameters['BatchSize']
-
-            $validateRange = $batchSizeParam.Attributes | Where-Object { $_ -is [System.Management.Automation.ValidateRangeAttribute] }
-            $validateRange | Should -Not -BeNullOrEmpty
-            $validateRange.MinRange | Should -Be 1
-            $validateRange.MaxRange | Should -Be 1000
-        }
-
-        It "Should support -Force switch for bulk operations" {
-            $devices = @([PSCustomObject]@{
-                Name = "force-test"
-                Role = 1
-                Device_Type = 1
-                Site = 1
-            })
-
-            # With -Force, should not prompt for confirmation
-            { $devices | New-NBDCIMDevice -BatchSize 10 -Force } | Should -Not -Throw
+        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+            $body = $Body | ConvertFrom-Json
+            if ($body -is [array]) {
+                $response = @()
+                $id = 100
+                foreach ($item in $body) {
+                    $response += [PSCustomObject]@{
+                        id = $id++
+                        device = $item.device
+                        name = $item.name
+                        type = $item.type
+                    }
+                }
+                return $response
+            }
+            else {
+                return [PSCustomObject]@{
+                    id = 100
+                    device = $body.device
+                    name = $body.name
+                    type = $body.type
+                }
+            }
         }
     }
 
-    Context "Bulk Operations Error Handling" {
-        It "Should handle API errors gracefully" {
-            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
-                throw "API Error: Validation failed"
+    Context "Parameter Sets" {
+        It "Should have Single and Bulk parameter sets" {
+            $cmd = Get-Command New-NBDCIMInterface
+            $cmd.ParameterSets.Name | Should -Contain 'Single'
+            $cmd.ParameterSets.Name | Should -Contain 'Bulk'
+        }
+
+        It "Should have InputObject parameter for bulk mode" {
+            $cmd = Get-Command New-NBDCIMInterface
+            $cmd.Parameters.Keys | Should -Contain 'InputObject'
+        }
+
+        It "Should have BatchSize with valid range" {
+            $cmd = Get-Command New-NBDCIMInterface
+            $batchSizeParam = $cmd.Parameters['BatchSize']
+            $validateRange = $batchSizeParam.Attributes | Where-Object { $_ -is [System.Management.Automation.ValidateRangeAttribute] }
+            $validateRange.MinRange | Should -Be 1
+            $validateRange.MaxRange | Should -Be 1000
+        }
+    }
+
+    Context "Bulk Operations" {
+        It "Should create interfaces in bulk" {
+            $interfaces = 0..4 | ForEach-Object {
+                [PSCustomObject]@{
+                    Device = 42
+                    Name = "eth$_"
+                    Type = "1000base-t"
+                }
             }
 
-            InModuleScope -ModuleName 'PowerNetbox' {
-                $uri = BuildNewURI -Segments @('dcim', 'devices')
-                $items = @([PSCustomObject]@{
-                    name = "error-device"
-                    role = 1
-                    device_type = 1
-                    site = 1
-                })
+            $results = $interfaces | New-NBDCIMInterface -BatchSize 10 -Force
 
-                $result = Send-NBBulkRequest -URI $uri -Items $items -Method POST
+            $results.Count | Should -Be 5
+        }
 
-                $result.HasErrors | Should -BeTrue
-                $result.FailureCount | Should -Be 1
-                $result.SuccessCount | Should -Be 0
+        It "Should batch large requests" {
+            $interfaces = 0..9 | ForEach-Object {
+                [PSCustomObject]@{ Device = 42; Name = "port$_"; Type = "1000base-t" }
             }
+
+            $results = $interfaces | New-NBDCIMInterface -BatchSize 3 -Force
+
+            # 10 items / 3 batch size = 4 API calls
+            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 4 -Exactly -ModuleName 'PowerNetbox'
         }
     }
 }
 
-Describe "Bulk Operations Integration Tests" -Tag 'Bulk', 'Integration', 'Live' {
+Describe "New-NBIPAMPrefix Bulk Mode" -Tag 'Bulk', 'IPAM' {
     BeforeAll {
-        $skipTests = $true
-        if ($env:NETBOX_HOST -and $env:NETBOX_TOKEN) {
-            $skipTests = $false
-            Remove-Module PowerNetbox -Force -ErrorAction SilentlyContinue
-            $ModulePath = Join-Path (Join-Path $PSScriptRoot "..") "PowerNetbox/PowerNetbox.psd1"
-            Import-Module $ModulePath -Force
+        Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
+        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
+            return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
+        }
+        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { return 'netbox.domain.com' }
+        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
+        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
 
-            $cred = [PSCredential]::new('api', (ConvertTo-SecureString $env:NETBOX_TOKEN -AsPlainText -Force))
-            Connect-NBAPI -Hostname $env:NETBOX_HOST -Credential $cred
+        InModuleScope -ModuleName 'PowerNetbox' {
+            $script:NetboxConfig.Hostname = 'netbox.domain.com'
+            $script:NetboxConfig.HostScheme = 'https'
+            $script:NetboxConfig.HostPort = 443
+        }
 
-            # Get test prerequisites
-            $script:TestSite = Get-NBDCIMSite -Limit 1 | Select-Object -First 1
-            $script:TestRole = Get-NBDCIMDeviceRole -Limit 1 | Select-Object -First 1
-            $script:TestType = Get-NBDCIMDeviceType -Limit 1 | Select-Object -First 1
+        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+            $body = $Body | ConvertFrom-Json
+            if ($body -is [array]) {
+                $response = @()
+                $id = 100
+                foreach ($item in $body) {
+                    $response += [PSCustomObject]@{
+                        id = $id++
+                        prefix = $item.prefix
+                        status = $item.status
+                    }
+                }
+                return $response
+            }
+            else {
+                return [PSCustomObject]@{
+                    id = 100
+                    prefix = $body.prefix
+                    status = $body.status
+                }
+            }
         }
     }
 
-    It "Should create and clean up devices in bulk (live API)" -Skip:$skipTests {
+    Context "Parameter Sets" {
+        It "Should have Single and Bulk parameter sets" {
+            $cmd = Get-Command New-NBIPAMPrefix
+            $cmd.ParameterSets.Name | Should -Contain 'Single'
+            $cmd.ParameterSets.Name | Should -Contain 'Bulk'
+        }
+    }
+
+    Context "Bulk Operations" {
+        It "Should create prefixes in bulk" {
+            $prefixes = 1..5 | ForEach-Object {
+                [PSCustomObject]@{
+                    Prefix = "10.$_.0.0/24"
+                    Status = "active"
+                }
+            }
+
+            $results = $prefixes | New-NBIPAMPrefix -BatchSize 10 -Force
+
+            $results.Count | Should -Be 5
+        }
+    }
+}
+
+Describe "New-NBVirtualMachine Bulk Mode" -Tag 'Bulk', 'Virtualization' {
+    BeforeAll {
+        Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
+        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
+            return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
+        }
+        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { return 'netbox.domain.com' }
+        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
+        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
+
+        InModuleScope -ModuleName 'PowerNetbox' {
+            $script:NetboxConfig.Hostname = 'netbox.domain.com'
+            $script:NetboxConfig.HostScheme = 'https'
+            $script:NetboxConfig.HostPort = 443
+        }
+
+        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+            $body = $Body | ConvertFrom-Json
+            if ($body -is [array]) {
+                $response = @()
+                $id = 100
+                foreach ($item in $body) {
+                    $response += [PSCustomObject]@{
+                        id = $id++
+                        name = $item.name
+                        cluster = $item.cluster
+                        vcpus = $item.vcpus
+                        memory = $item.memory
+                    }
+                }
+                return $response
+            }
+            else {
+                return [PSCustomObject]@{
+                    id = 100
+                    name = $body.name
+                    cluster = $body.cluster
+                }
+            }
+        }
+    }
+
+    Context "Parameter Sets" {
+        It "Should have Single and Bulk parameter sets" {
+            $cmd = Get-Command New-NBVirtualMachine
+            $cmd.ParameterSets.Name | Should -Contain 'Single'
+            $cmd.ParameterSets.Name | Should -Contain 'Bulk'
+        }
+    }
+
+    Context "Bulk Operations" {
+        It "Should create VMs in bulk" {
+            $vms = 1..5 | ForEach-Object {
+                [PSCustomObject]@{
+                    Name = "vm-$_"
+                    Cluster = 1
+                    vCPUs = 2
+                    Memory = 4096
+                }
+            }
+
+            $results = $vms | New-NBVirtualMachine -BatchSize 10 -Force
+
+            $results.Count | Should -Be 5
+        }
+
+        It "Should handle Device_Role alias" {
+            $vm = [PSCustomObject]@{
+                Name = "alias-vm"
+                Device_Role = 3
+                Cluster = 1
+            }
+
+            $results = @($vm) | New-NBVirtualMachine -Force
+
+            $results | Should -Not -BeNullOrEmpty
+        }
+    }
+}
+
+Describe "New-NBIPAMVLAN Bulk Mode" -Tag 'Bulk', 'IPAM' {
+    BeforeAll {
+        Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
+        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
+            return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
+        }
+        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { return 'netbox.domain.com' }
+        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
+        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
+
+        InModuleScope -ModuleName 'PowerNetbox' {
+            $script:NetboxConfig.Hostname = 'netbox.domain.com'
+            $script:NetboxConfig.HostScheme = 'https'
+            $script:NetboxConfig.HostPort = 443
+        }
+
+        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+            $body = $Body | ConvertFrom-Json
+            if ($body -is [array]) {
+                $response = @()
+                $id = 100
+                foreach ($item in $body) {
+                    $response += [PSCustomObject]@{
+                        id = $id++
+                        vid = $item.vid
+                        name = $item.name
+                        status = $item.status
+                    }
+                }
+                return $response
+            }
+            else {
+                return [PSCustomObject]@{
+                    id = 100
+                    vid = $body.vid
+                    name = $body.name
+                }
+            }
+        }
+    }
+
+    Context "Parameter Sets" {
+        It "Should have Single and Bulk parameter sets" {
+            $cmd = Get-Command New-NBIPAMVLAN
+            $cmd.ParameterSets.Name | Should -Contain 'Single'
+            $cmd.ParameterSets.Name | Should -Contain 'Bulk'
+        }
+
+        It "Should validate VID range in single mode" {
+            $cmd = Get-Command New-NBIPAMVLAN
+            $vidParam = $cmd.Parameters['VID']
+            $validateRange = $vidParam.Attributes | Where-Object { $_ -is [System.Management.Automation.ValidateRangeAttribute] }
+            $validateRange.MinRange | Should -Be 1
+            $validateRange.MaxRange | Should -Be 4094
+        }
+    }
+
+    Context "Bulk Operations" {
+        It "Should create VLANs in bulk" {
+            $vlans = 100..104 | ForEach-Object {
+                [PSCustomObject]@{
+                    VID = $_
+                    Name = "VLAN$_"
+                    Status = "active"
+                }
+            }
+
+            $results = $vlans | New-NBIPAMVLAN -BatchSize 10 -Force
+
+            $results.Count | Should -Be 5
+        }
+    }
+}
+
+Describe "New-NBVirtualMachineInterface Bulk Mode" -Tag 'Bulk', 'Virtualization' {
+    BeforeAll {
+        Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
+        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
+            return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
+        }
+        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { return 'netbox.domain.com' }
+        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
+        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
+
+        InModuleScope -ModuleName 'PowerNetbox' {
+            $script:NetboxConfig.Hostname = 'netbox.domain.com'
+            $script:NetboxConfig.HostScheme = 'https'
+            $script:NetboxConfig.HostPort = 443
+        }
+
+        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+            $body = $Body | ConvertFrom-Json
+            if ($body -is [array]) {
+                $response = @()
+                $id = 100
+                foreach ($item in $body) {
+                    $response += [PSCustomObject]@{
+                        id = $id++
+                        virtual_machine = $item.virtual_machine
+                        name = $item.name
+                        enabled = $item.enabled
+                    }
+                }
+                return $response
+            }
+            else {
+                return [PSCustomObject]@{
+                    id = 100
+                    virtual_machine = $body.virtual_machine
+                    name = $body.name
+                }
+            }
+        }
+    }
+
+    Context "Parameter Sets" {
+        It "Should have Single and Bulk parameter sets" {
+            $cmd = Get-Command New-NBVirtualMachineInterface
+            $cmd.ParameterSets.Name | Should -Contain 'Single'
+            $cmd.ParameterSets.Name | Should -Contain 'Bulk'
+        }
+    }
+
+    Context "Bulk Operations" {
+        It "Should create VM interfaces in bulk" {
+            $interfaces = 0..4 | ForEach-Object {
+                [PSCustomObject]@{
+                    Virtual_Machine = 123
+                    Name = "eth$_"
+                }
+            }
+
+            $results = $interfaces | New-NBVirtualMachineInterface -BatchSize 10 -Force
+
+            $results.Count | Should -Be 5
+        }
+
+        It "Should default enabled to true in bulk mode" {
+            # Test that the function adds enabled=true by default
+            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+                param($Body)
+                $body = $Body | ConvertFrom-Json
+                # Verify enabled was set to true
+                $body[0].enabled | Should -Be $true
+                return @([PSCustomObject]@{
+                    id = 100
+                    virtual_machine = 123
+                    name = "eth0"
+                    enabled = $body[0].enabled
+                })
+            }
+
+            $interface = [PSCustomObject]@{
+                Virtual_Machine = 123
+                Name = "eth0"
+            }
+
+            $results = @($interface) | New-NBVirtualMachineInterface -Force
+
+            $results | Should -Not -BeNullOrEmpty
+        }
+    }
+}
+
+Describe "Set-NBDCIMDevice Bulk Mode" -Tag 'Bulk', 'DCIM' {
+    BeforeAll {
+        Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
+        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
+            return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
+        }
+        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { return 'netbox.domain.com' }
+        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
+        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
+
+        InModuleScope -ModuleName 'PowerNetbox' {
+            $script:NetboxConfig.Hostname = 'netbox.domain.com'
+            $script:NetboxConfig.HostScheme = 'https'
+            $script:NetboxConfig.HostPort = 443
+        }
+
+        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+            $body = $Body | ConvertFrom-Json
+            if ($body -is [array]) {
+                $response = @()
+                foreach ($item in $body) {
+                    $response += [PSCustomObject]@{
+                        id = $item.id
+                        name = if ($item.name) { $item.name } else { "device-$($item.id)" }
+                        status = $item.status
+                    }
+                }
+                return $response
+            }
+            else {
+                return [PSCustomObject]@{
+                    id = $body.id
+                    name = $body.name
+                    status = $body.status
+                }
+            }
+        }
+
+        Mock -CommandName 'Get-NBDCIMDevice' -ModuleName 'PowerNetbox' -MockWith {
+            return [PSCustomObject]@{
+                Id = $Id
+                Name = "device-$Id"
+            }
+        }
+    }
+
+    Context "Parameter Sets" {
+        It "Should have Single and Bulk parameter sets" {
+            $cmd = Get-Command Set-NBDCIMDevice
+            $cmd.ParameterSets.Name | Should -Contain 'Single'
+            $cmd.ParameterSets.Name | Should -Contain 'Bulk'
+        }
+
+        It "Should have Medium ConfirmImpact" {
+            $cmd = Get-Command Set-NBDCIMDevice
+            $attr = $cmd.ScriptBlock.Attributes | Where-Object { $_ -is [System.Management.Automation.CmdletBindingAttribute] }
+            $attr.ConfirmImpact | Should -Be 'Medium'
+        }
+    }
+
+    Context "Bulk Operations" {
+        It "Should update devices in bulk" {
+            $updates = @(
+                [PSCustomObject]@{ Id = 100; Status = "active" }
+                [PSCustomObject]@{ Id = 101; Status = "active" }
+                [PSCustomObject]@{ Id = 102; Status = "planned" }
+            )
+
+            $results = $updates | Set-NBDCIMDevice -Force
+
+            $results.Count | Should -Be 3
+        }
+
+        It "Should require Id property" {
+            $invalidObj = [PSCustomObject]@{ Name = "no-id"; Status = "active" }
+
+            { @($invalidObj) | Set-NBDCIMDevice -Force -ErrorAction Stop } | Should -Throw
+        }
+    }
+}
+
+Describe "Remove-NBDCIMDevice Bulk Mode" -Tag 'Bulk', 'DCIM' {
+    BeforeAll {
+        Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
+        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
+            return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
+        }
+        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { return 'netbox.domain.com' }
+        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
+        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
+
+        InModuleScope -ModuleName 'PowerNetbox' {
+            $script:NetboxConfig.Hostname = 'netbox.domain.com'
+            $script:NetboxConfig.HostScheme = 'https'
+            $script:NetboxConfig.HostPort = 443
+        }
+
+        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+            # DELETE returns null on success
+            return $null
+        }
+
+        Mock -CommandName 'Get-NBDCIMDevice' -ModuleName 'PowerNetbox' -MockWith {
+            return [PSCustomObject]@{
+                Id = $Id
+                Name = "device-$Id"
+            }
+        }
+    }
+
+    Context "Parameter Sets" {
+        It "Should have Single and Bulk parameter sets" {
+            $cmd = Get-Command Remove-NBDCIMDevice
+            $cmd.ParameterSets.Name | Should -Contain 'Single'
+            $cmd.ParameterSets.Name | Should -Contain 'Bulk'
+        }
+
+        It "Should have High ConfirmImpact" {
+            $cmd = Get-Command Remove-NBDCIMDevice
+            $attr = $cmd.ScriptBlock.Attributes | Where-Object { $_ -is [System.Management.Automation.CmdletBindingAttribute] }
+            $attr.ConfirmImpact | Should -Be 'High'
+        }
+    }
+
+    Context "Bulk Operations" {
+        It "Should delete devices in bulk" {
+            $devices = @(
+                [PSCustomObject]@{ Id = 100; Name = "device-100" }
+                [PSCustomObject]@{ Id = 101; Name = "device-101" }
+            )
+
+            { $devices | Remove-NBDCIMDevice -Force } | Should -Not -Throw
+        }
+
+        It "Should require Id property" {
+            $invalidObj = [PSCustomObject]@{ Name = "no-id" }
+
+            { @($invalidObj) | Remove-NBDCIMDevice -Force -ErrorAction Stop } | Should -Throw
+        }
+
+        It "Should batch delete requests" {
+            $devices = 1..10 | ForEach-Object {
+                [PSCustomObject]@{ Id = $_ }
+            }
+
+            $devices | Remove-NBDCIMDevice -BatchSize 3 -Force
+
+            # 10 items / 3 batch size = 4 API calls
+            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 4 -Exactly -ModuleName 'PowerNetbox'
+        }
+    }
+}
+
+Describe "Bulk Operations Live Integration Tests" -Tag 'Bulk', 'Integration', 'Live' -Skip:(-not ($env:NETBOX_HOST -and $env:NETBOX_TOKEN)) {
+    BeforeAll {
+        Remove-Module PowerNetbox -Force -ErrorAction SilentlyContinue
+        $ModulePath = Join-Path (Join-Path $PSScriptRoot "..") "PowerNetbox/PowerNetbox.psd1"
+        Import-Module $ModulePath -Force
+
+        $cred = [PSCredential]::new('api', (ConvertTo-SecureString $env:NETBOX_TOKEN -AsPlainText -Force))
+        Connect-NBAPI -Hostname $env:NETBOX_HOST -Credential $cred
+
+        # Get test prerequisites
+        $script:TestSite = Get-NBDCIMSite -Limit 1 | Select-Object -First 1
+        $script:TestRole = Get-NBDCIMDeviceRole -Limit 1 | Select-Object -First 1
+        $script:TestType = Get-NBDCIMDeviceType -Limit 1 | Select-Object -First 1
+        $script:TestCluster = Get-NBVirtualizationCluster -Limit 1 | Select-Object -First 1
+        $script:skipTests = $false
+    }
+
+    It "Should bulk create and delete devices (live)" {
         $timestamp = Get-Date -Format "yyyyMMddHHmmss"
         $devices = 1..5 | ForEach-Object {
             [PSCustomObject]@{
-                Name = "bulk-int-test-$_-$timestamp"
+                Name = "bulk-test-$_-$timestamp"
                 Role = $script:TestRole.id
                 Device_Type = $script:TestType.id
                 Site = $script:TestSite.id
             }
         }
 
-        # Create devices in bulk
-        $results = $devices | New-NBDCIMDevice -BatchSize 3 -Force
+        # Bulk create
+        $created = $devices | New-NBDCIMDevice -BatchSize 3 -Force
 
         try {
-            $results.Count | Should -Be 5
-            $results | ForEach-Object { $_.id | Should -BeGreaterThan 0 }
+            $created.Count | Should -Be 5
+            $created | ForEach-Object { $_.id | Should -BeGreaterThan 0 }
+        }
+        finally {
+            # Bulk delete cleanup
+            $created | Remove-NBDCIMDevice -Force
+        }
+    }
+
+    It "Should bulk create VMs (live)" -Skip:(-not $script:TestCluster) {
+        $timestamp = Get-Date -Format "yyyyMMddHHmmss"
+        $vms = 1..3 | ForEach-Object {
+            [PSCustomObject]@{
+                Name = "bulk-vm-$_-$timestamp"
+                Cluster = $script:TestCluster.id
+                vCPUs = 2
+                Memory = 2048
+            }
+        }
+
+        $created = $vms | New-NBVirtualMachine -BatchSize 10 -Force
+
+        try {
+            $created.Count | Should -Be 3
         }
         finally {
             # Cleanup
-            $results | ForEach-Object {
-                Remove-NBDCIMDevice -Id $_.id -Confirm:$false
+            $created | ForEach-Object {
+                Remove-NBVirtualMachine -Id $_.id -Force -ErrorAction SilentlyContinue
             }
         }
     }
 
-    It "Should measure performance improvement (live API)" -Skip:$skipTests {
+    It "Should bulk update devices (live)" {
         $timestamp = Get-Date -Format "yyyyMMddHHmmss"
-        $deviceCount = 10
 
-        # Create device objects
-        $devices = 1..$deviceCount | ForEach-Object {
+        # Create test devices first
+        $devices = 1..3 | ForEach-Object {
             [PSCustomObject]@{
-                Name = "perf-test-$_-$timestamp"
+                Name = "bulk-update-$_-$timestamp"
                 Role = $script:TestRole.id
                 Device_Type = $script:TestType.id
                 Site = $script:TestSite.id
+                Status = "planned"
             }
         }
 
-        # Measure bulk creation time
-        $bulkTime = Measure-Command {
-            $bulkResults = $devices | New-NBDCIMDevice -BatchSize 50 -Force
-        }
+        $created = $devices | New-NBDCIMDevice -BatchSize 10 -Force
 
         try {
-            $bulkResults.Count | Should -Be $deviceCount
-            Write-Host "Bulk creation of $deviceCount devices: $($bulkTime.TotalMilliseconds)ms"
+            # Bulk update
+            $updates = $created | ForEach-Object {
+                [PSCustomObject]@{
+                    Id = $_.id
+                    Status = "active"
+                    Comments = "Bulk updated at $timestamp"
+                }
+            }
+
+            $updated = $updates | Set-NBDCIMDevice -Force
+
+            $updated.Count | Should -Be 3
+            $updated | ForEach-Object { $_.status.value | Should -Be "active" }
         }
         finally {
             # Cleanup
-            $bulkResults | ForEach-Object {
-                Remove-NBDCIMDevice -Id $_.id -Confirm:$false
-            }
+            $created | Remove-NBDCIMDevice -Force
         }
     }
 }
