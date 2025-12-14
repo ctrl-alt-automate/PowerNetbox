@@ -1,102 +1,243 @@
 <#
 .SYNOPSIS
-    Updates an existing PAMAddress in Netbox I module.
+    Updates one or more IP addresses in Netbox IPAM module.
 
 .DESCRIPTION
-    Updates an existing PAMAddress in Netbox I module.
-    Supports pipeline input for Id parameter where applicable.
+    Updates existing IP addresses in Netbox IPAM module. Supports both
+    single IP address updates with individual parameters and bulk updates via pipeline input.
+
+    For bulk operations, use the -BatchSize parameter to control how many
+    IP addresses are sent per API request. Each object must have an Id property.
+
+.PARAMETER Id
+    The database ID of the IP address to update. Required for single updates.
+
+.PARAMETER Address
+    The IP address with prefix (e.g., "192.168.1.1/24").
+
+.PARAMETER Status
+    Status of the IP address (e.g., "active", "reserved", "deprecated").
+
+.PARAMETER Tenant
+    The tenant ID.
+
+.PARAMETER VRF
+    The VRF ID.
+
+.PARAMETER Role
+    The role of the IP address.
+
+.PARAMETER NAT_Inside
+    The ID of the inside NAT IP address.
+
+.PARAMETER Custom_Fields
+    Hashtable of custom field values.
+
+.PARAMETER Assigned_Object_Type
+    The type of object assigned to this IP (dcim.interface or virtualization.vminterface).
+
+.PARAMETER Assigned_Object_Id
+    The ID of the assigned object.
+
+.PARAMETER Description
+    Description of the IP address.
+
+.PARAMETER Dns_name
+    DNS name for the IP address.
+
+.PARAMETER InputObject
+    Pipeline input for bulk operations. Each object MUST have an Id property.
+
+.PARAMETER BatchSize
+    Number of IP addresses to update per API request in bulk mode.
+    Default: 50, Range: 1-1000
+
+.PARAMETER Force
+    Skip confirmation prompts.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBIPAMAddress
+    Set-NBIPAMAddress -Id 123 -Status "active"
 
-    Returns all PAMAddress objects.
+    Updates IP address 123 to active status.
+
+.EXAMPLE
+    Get-NBIPAMAddress -Status "deprecated" | ForEach-Object {
+        [PSCustomObject]@{Id = $_.id; Status = "reserved"}
+    } | Set-NBIPAMAddress -Force
+
+    Bulk update all deprecated IP addresses to reserved status.
+
+.EXAMPLE
+    $updates = @(
+        [PSCustomObject]@{Id = 100; Description = "Updated"; Dns_name = "server1.local"}
+        [PSCustomObject]@{Id = 101; Description = "Updated"; Dns_name = "server2.local"}
+    )
+    $updates | Set-NBIPAMAddress -BatchSize 50 -Force
+
+    Bulk update multiple IP addresses with different values.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 
 function Set-NBIPAMAddress {
-    [CmdletBinding(ConfirmImpact = 'Medium',
-        SupportsShouldProcess = $true)]
+    [CmdletBinding(SupportsShouldProcess = $true,
+        ConfirmImpact = 'Medium',
+        DefaultParameterSetName = 'Single')]
     [OutputType([PSCustomObject])]
     param
     (
-        [Parameter(Mandatory = $true,
-            ValueFromPipelineByPropertyName = $true)]
+        # Single mode parameters
+        [Parameter(ParameterSetName = 'Single', Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
+        [Parameter(ParameterSetName = 'Single')]
         [string]$Address,
 
+        [Parameter(ParameterSetName = 'Single')]
         [string]$Status,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Tenant,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$VRF,
 
+        [Parameter(ParameterSetName = 'Single')]
         [object]$Role,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$NAT_Inside,
 
+        [Parameter(ParameterSetName = 'Single')]
         [hashtable]$Custom_Fields,
 
+        [Parameter(ParameterSetName = 'Single')]
         [ValidateSet('dcim.interface', 'virtualization.vminterface', IgnoreCase = $true)]
         [string]$Assigned_Object_Type,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Assigned_Object_Id,
 
+        [Parameter(ParameterSetName = 'Single')]
         [string]$Description,
 
+        [Parameter(ParameterSetName = 'Single')]
         [string]$Dns_name,
 
-        [switch]$Force
+        # Bulk mode parameters
+        [Parameter(ParameterSetName = 'Bulk', Mandatory = $true, ValueFromPipeline = $true)]
+        [PSCustomObject]$InputObject,
+
+        [Parameter(ParameterSetName = 'Bulk')]
+        [ValidateRange(1, 1000)]
+        [int]$BatchSize = 50,
+
+        # Common parameters
+        [Parameter()]
+        [switch]$Force,
+
+        [Parameter()]
+        [switch]$Raw
     )
 
     begin {
-        #        Write-Verbose "Validating enum properties"
-        #        $Segments = [System.Collections.ArrayList]::new(@('ipam', 'ip-addresses', 0))
+        $Segments = [System.Collections.ArrayList]::new(@('ipam', 'ip-addresses'))
+        $URI = BuildNewURI -Segments $Segments
         $Method = 'PATCH'
-        #
-        #        # Value validation
-        #        $ModelDefinition = GetModelDefinitionFromURIPath -Segments $Segments -Method $Method
-        #        $EnumProperties = GetModelEnumProperties -ModelDefinition $ModelDefinition
-        #
-        #        foreach ($Property in $EnumProperties.Keys) {
-        #            if ($PSBoundParameters.ContainsKey($Property)) {
-        #                Write-Verbose "Validating property [$Property] with value [$($PSBoundParameters.$Property)]"
-        #                $PSBoundParameters.$Property = ValidateValue -ModelDefinition $ModelDefinition -Property $Property -ProvidedValue $PSBoundParameters.$Property
-        #            } else {
-        #                Write-Verbose "User did not provide a value for [$Property]"
-        #            }
-        #        }
-        #
-        #        Write-Verbose "Finished enum validation"
+
+        if ($PSCmdlet.ParameterSetName -eq 'Bulk') {
+            $bulkItems = [System.Collections.ArrayList]::new()
+        }
     }
 
     process {
-        foreach ($IPId in $Id) {
-            if ($PSBoundParameters.ContainsKey('Assigned_Object_Type') -or $PSBoundParameters.ContainsKey('Assigned_Object_Id')) {
-                if ((-not [string]::IsNullOrWhiteSpace($Assigned_Object_Id)) -and [string]::IsNullOrWhiteSpace($Assigned_Object_Type)) {
-                    throw "Assigned_Object_Type is required when specifying Assigned_Object_Id"
+        if ($PSCmdlet.ParameterSetName -eq 'Single') {
+            foreach ($IPId in $Id) {
+                if ($PSBoundParameters.ContainsKey('Assigned_Object_Type') -or $PSBoundParameters.ContainsKey('Assigned_Object_Id')) {
+                    if ((-not [string]::IsNullOrWhiteSpace($Assigned_Object_Id)) -and [string]::IsNullOrWhiteSpace($Assigned_Object_Type)) {
+                        throw "Assigned_Object_Type is required when specifying Assigned_Object_Id"
+                    }
+                    elseif ((-not [string]::IsNullOrWhiteSpace($Assigned_Object_Type)) -and [string]::IsNullOrWhiteSpace($Assigned_Object_Id)) {
+                        throw "Assigned_Object_Id is required when specifying Assigned_Object_Type"
+                    }
                 }
-                elseif ((-not [string]::IsNullOrWhiteSpace($Assigned_Object_Type)) -and [string]::IsNullOrWhiteSpace($Assigned_Object_Id)) {
-                    throw "Assigned_Object_Id is required when specifying Assigned_Object_Type"
+
+                $IPSegments = [System.Collections.ArrayList]::new(@('ipam', 'ip-addresses', $IPId))
+
+                if ($Force -or $PSCmdlet.ShouldProcess($IPId, 'Update IP address')) {
+                    $URIComponents = BuildURIComponents -URISegments $IPSegments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force', 'Raw'
+
+                    $IPURI = BuildNewURI -Segments $URIComponents.Segments
+
+                    InvokeNetboxRequest -URI $IPURI -Body $URIComponents.Parameters -Method $Method -Raw:$Raw
                 }
             }
+        }
+        else {
+            # Bulk mode - collect items
+            if ($InputObject) {
+                # Validate that Id is present
+                $itemId = if ($InputObject.Id) { $InputObject.Id }
+                          elseif ($InputObject.id) { $InputObject.id }
+                          else { $null }
 
-            $Segments = [System.Collections.ArrayList]::new(@('ipam', 'ip-addresses', $IPId))
+                if (-not $itemId) {
+                    Write-Error "InputObject must have an 'Id' property for bulk updates" -TargetObject $InputObject
+                    return
+                }
 
-            Write-Verbose "Obtaining IP from ID $IPId"
-            $CurrentIP = Get-NBIPAMAddress -Id $IPId -ErrorAction Stop
+                $item = @{}
+                foreach ($prop in $InputObject.PSObject.Properties) {
+                    $key = $prop.Name.ToLower()
+                    $value = $prop.Value
 
-            if ($Force -or $PSCmdlet.ShouldProcess($CurrentIP.Address, 'Set')) {
-                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force'
+                    # Handle property name mappings
+                    switch ($key) {
+                        'nat_inside' { $key = 'nat_inside' }
+                        'custom_fields' { $key = 'custom_fields' }
+                        'assigned_object_type' { $key = 'assigned_object_type' }
+                        'assigned_object_id' { $key = 'assigned_object_id' }
+                        'dns_name' { $key = 'dns_name' }
+                    }
 
-                $URI = BuildNewURI -Segments $URIComponents.Segments
+                    $item[$key] = $value
+                }
+                [void]$bulkItems.Add([PSCustomObject]$item)
+            }
+        }
+    }
 
-                InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method $Method
+    end {
+        if ($PSCmdlet.ParameterSetName -eq 'Bulk' -and $bulkItems.Count -gt 0) {
+            $target = "$($bulkItems.Count) IP address(es)"
+
+            if ($Force -or $PSCmdlet.ShouldProcess($target, 'Update IP addresses (bulk)')) {
+                Write-Verbose "Processing $($bulkItems.Count) IP addresses in bulk PATCH mode with batch size $BatchSize"
+
+                $result = Send-NBBulkRequest -URI $URI -Items $bulkItems.ToArray() -Method PATCH `
+                    -BatchSize $BatchSize -ShowProgress -ActivityName 'Updating IP addresses'
+
+                # Output succeeded items to pipeline
+                foreach ($item in $result.Succeeded) {
+                    Write-Output $item
+                }
+
+                # Write errors for failed items
+                foreach ($failure in $result.Failed) {
+                    Write-Error "Failed to update IP address: $($failure.Error)" -TargetObject $failure.Item
+                }
+
+                # Write summary
+                if ($result.HasErrors) {
+                    Write-Warning $result.GetSummary()
+                }
+                else {
+                    Write-Verbose $result.GetSummary()
+                }
             }
         }
     }

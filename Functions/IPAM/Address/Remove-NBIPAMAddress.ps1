@@ -1,47 +1,139 @@
+<#
+.SYNOPSIS
+    Deletes one or more IP addresses from Netbox.
 
-function Remove-NBIPAMAddress {
-    <#
-    .SYNOPSIS
-        Remove an IP address from Netbox
+.DESCRIPTION
+    Deletes IP addresses from Netbox IPAM module. Supports both
+    single IP address deletion with the Id parameter and bulk deletion via pipeline input.
 
-    .DESCRIPTION
-        Removes/deletes an IP address from Netbox by ID and optional other filters
+    For bulk operations, use the -BatchSize parameter to control how many
+    IP addresses are deleted per API request. Each object must have an Id property.
 
-    .PARAMETER Id
-        Database ID of the IP address object.
+.PARAMETER Id
+    The database ID(s) of the IP address(es) to delete. Required for single mode.
 
-    .PARAMETER Force
-        Do not confirm.
+.PARAMETER InputObject
+    Pipeline input for bulk operations. Each object MUST have an Id property.
 
-    .EXAMPLE
-        PS C:\> Remove-NBIPAMAddress -Id $value1
+.PARAMETER BatchSize
+    Number of IP addresses to delete per API request in bulk mode.
+    Default: 50, Range: 1-1000
 
-    .NOTES
-        Additional information about the function.
+.PARAMETER Force
+    Skip confirmation prompts.
+
+.EXAMPLE
+    Remove-NBIPAMAddress -Id 123 -Force
+
+    Deletes IP address with ID 123 without confirmation.
+
+.EXAMPLE
+    Get-NBIPAMAddress -Status "deprecated" | Remove-NBIPAMAddress -Force
+
+    Bulk delete all deprecated IP addresses.
+
+.EXAMPLE
+    $ipsToDelete = @(
+        [PSCustomObject]@{Id = 100}
+        [PSCustomObject]@{Id = 101}
+        [PSCustomObject]@{Id = 102}
+    )
+    $ipsToDelete | Remove-NBIPAMAddress -BatchSize 50 -Force
+
+    Bulk delete multiple IP addresses.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 
-    [CmdletBinding(ConfirmImpact = 'High',
-        SupportsShouldProcess = $true)]
+function Remove-NBIPAMAddress {
+    [CmdletBinding(SupportsShouldProcess = $true,
+        ConfirmImpact = 'High',
+        DefaultParameterSetName = 'Single')]
     [OutputType([void])]
     param
     (
-        [Parameter(Mandatory = $true,
-            ValueFromPipelineByPropertyName = $true)]
+        # Single mode parameters
+        [Parameter(ParameterSetName = 'Single', Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
+        # Bulk mode parameters
+        [Parameter(ParameterSetName = 'Bulk', Mandatory = $true, ValueFromPipeline = $true)]
+        [PSCustomObject]$InputObject,
+
+        [Parameter(ParameterSetName = 'Bulk')]
+        [ValidateRange(1, 1000)]
+        [int]$BatchSize = 50,
+
+        # Common parameters
+        [Parameter()]
         [switch]$Force
     )
 
+    begin {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam', 'ip-addresses'))
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ParameterSetName -eq 'Bulk') {
+            $bulkItems = [System.Collections.ArrayList]::new()
+        }
+    }
+
     process {
-        foreach ($IPId in $Id) {
-            $CurrentIP = Get-NBIPAMAddress -Id $IPId -ErrorAction Stop
+        if ($PSCmdlet.ParameterSetName -eq 'Single') {
+            foreach ($IPId in $Id) {
+                $CurrentIP = Get-NBIPAMAddress -Id $IPId -ErrorAction Stop
 
-            $Segments = [System.Collections.ArrayList]::new(@('ipam', 'ip-addresses', $IPId))
+                if ($Force -or $PSCmdlet.ShouldProcess($CurrentIP.Address, "Delete")) {
+                    $IPSegments = [System.Collections.ArrayList]::new(@('ipam', 'ip-addresses', $IPId))
 
-            if ($Force -or $pscmdlet.ShouldProcess($CurrentIP.Address, "Delete")) {
-                $URI = BuildNewURI -Segments $Segments
+                    $IPURI = BuildNewURI -Segments $IPSegments
 
-                InvokeNetboxRequest -URI $URI -Method DELETE
+                    InvokeNetboxRequest -URI $IPURI -Method DELETE
+                }
+            }
+        }
+        else {
+            # Bulk mode - collect items
+            if ($InputObject) {
+                # Validate that Id is present
+                $itemId = if ($InputObject.Id) { $InputObject.Id }
+                          elseif ($InputObject.id) { $InputObject.id }
+                          else { $null }
+
+                if (-not $itemId) {
+                    Write-Error "InputObject must have an 'Id' property for bulk deletes" -TargetObject $InputObject
+                    return
+                }
+
+                $item = @{ id = $itemId }
+                [void]$bulkItems.Add([PSCustomObject]$item)
+            }
+        }
+    }
+
+    end {
+        if ($PSCmdlet.ParameterSetName -eq 'Bulk' -and $bulkItems.Count -gt 0) {
+            $target = "$($bulkItems.Count) IP address(es)"
+
+            if ($Force -or $PSCmdlet.ShouldProcess($target, 'Delete IP addresses (bulk)')) {
+                Write-Verbose "Processing $($bulkItems.Count) IP addresses in bulk DELETE mode with batch size $BatchSize"
+
+                $result = Send-NBBulkRequest -URI $URI -Items $bulkItems.ToArray() -Method DELETE `
+                    -BatchSize $BatchSize -ShowProgress -ActivityName 'Deleting IP addresses'
+
+                # Write errors for failed items
+                foreach ($failure in $result.Failed) {
+                    Write-Error "Failed to delete IP address: $($failure.Error)" -TargetObject $failure.Item
+                }
+
+                # Write summary
+                if ($result.HasErrors) {
+                    Write-Warning $result.GetSummary()
+                }
+                else {
+                    Write-Verbose $result.GetSummary()
+                }
             }
         }
     }
