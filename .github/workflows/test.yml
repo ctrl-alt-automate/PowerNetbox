@@ -29,6 +29,10 @@ jobs:
         if: matrix.pwsh
         shell: pwsh
         run: |
+          # Register PSGallery if not present (required for Windows Server 2025)
+          if (-not (Get-PSRepository -Name PSGallery -ErrorAction SilentlyContinue)) {
+              Register-PSRepository -Default
+          }
           Set-PSRepository PSGallery -InstallationPolicy Trusted
           Install-Module Pester -Force -Scope CurrentUser -MinimumVersion 5.0.0
           Install-Module PSScriptAnalyzer -Force -Scope CurrentUser
@@ -37,6 +41,10 @@ jobs:
         if: '!matrix.pwsh'
         shell: powershell
         run: |
+          # Register PSGallery if not present (required for Windows Server 2025)
+          if (-not (Get-PSRepository -Name PSGallery -ErrorAction SilentlyContinue)) {
+              Register-PSRepository -Default
+          }
           Set-PSRepository PSGallery -InstallationPolicy Trusted
           Install-Module Pester -Force -Scope CurrentUser -MinimumVersion 5.0.0
           Install-Module PSScriptAnalyzer -Force -Scope CurrentUser
