@@ -393,6 +393,149 @@ function Remove-NB[Module][Resource] {
 }
 ```
 
+## Bulk Operations
+
+PowerNetbox supports high-performance bulk operations for creating, updating, and deleting multiple resources in a single API call. This significantly improves performance when working with large datasets.
+
+### Supported Bulk Operations
+
+| Function | Mode | HTTP Method | Description |
+|----------|------|-------------|-------------|
+| `New-NBDCIMDevice` | POST | POST | Create multiple devices |
+| `New-NBDCIMInterface` | POST | POST | Create multiple interfaces |
+| `New-NBIPAMPrefix` | POST | POST | Create multiple prefixes |
+| `New-NBIPAMVLAN` | POST | POST | Create multiple VLANs |
+| `New-NBVirtualMachine` | POST | POST | Create multiple VMs |
+| `New-NBVirtualMachineInterface` | POST | POST | Create multiple VM interfaces |
+| `Set-NBDCIMDevice` | PATCH | PATCH | Update multiple devices |
+| `Remove-NBDCIMDevice` | DELETE | DELETE | Delete multiple devices |
+
+### Bulk Operation Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `-InputObject` | PSCustomObject | - | Pipeline input for bulk mode |
+| `-BatchSize` | int | 50 | Items per API request (1-1000) |
+| `-Force` | switch | - | Skip confirmation prompts |
+
+### Usage Examples
+
+```powershell
+# Bulk create devices
+$devices = 1..100 | ForEach-Object {
+    [PSCustomObject]@{
+        Name = "server-$_"
+        Role = 1
+        Device_Type = 1
+        Site = 1
+        Status = "planned"
+    }
+}
+$devices | New-NBDCIMDevice -BatchSize 50 -Force
+
+# Bulk update devices
+$updates = Get-NBDCIMDevice -Status "planned" | ForEach-Object {
+    [PSCustomObject]@{
+        Id = $_.id
+        Status = "active"
+        Comments = "Deployed $(Get-Date -Format 'yyyy-MM-dd')"
+    }
+}
+$updates | Set-NBDCIMDevice -BatchSize 50 -Force
+
+# Bulk delete devices
+Get-NBDCIMDevice -Status "decommissioning" | Remove-NBDCIMDevice -BatchSize 50 -Force
+
+# Import from CSV
+Import-Csv ./vlans.csv | New-NBIPAMVLAN -BatchSize 100 -Force
+```
+
+### Bulk Operation Internals
+
+Bulk operations use two helper components:
+
+1. **`BulkOperationResult`** class - Tracks success/failure of bulk operations
+   - Properties: `Succeeded`, `Failed`, `HasErrors`, `TotalCount`, `SuccessCount`, `FailedCount`
+   - Methods: `AddSuccess()`, `AddFailure()`, `GetSummary()`
+
+2. **`Send-NBBulkRequest`** function - Handles batching and API calls
+   - Splits items into batches based on `BatchSize`
+   - Shows progress bar with `-ShowProgress`
+   - Returns `BulkOperationResult` object
+
+### Template for Bulk-Enabled NEW Function
+```powershell
+function New-NB[Module][Resource] {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low', DefaultParameterSetName = 'Single')]
+    param(
+        # Single mode parameters
+        [Parameter(ParameterSetName = 'Single', Mandatory = $true)]
+        [string]$Name,
+        # ... other single mode params ...
+
+        # Bulk mode parameters
+        [Parameter(ParameterSetName = 'Bulk', Mandatory = $true, ValueFromPipeline = $true)]
+        [PSCustomObject]$InputObject,
+
+        [Parameter(ParameterSetName = 'Bulk')]
+        [ValidateRange(1, 1000)]
+        [int]$BatchSize = 50,
+
+        [Parameter(ParameterSetName = 'Bulk')]
+        [switch]$Force,
+
+        [Parameter()]
+        [switch]$Raw
+    )
+
+    begin {
+        $Segments = [System.Collections.ArrayList]::new(@('[module]', '[resource]'))
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ParameterSetName -eq 'Bulk') {
+            $bulkItems = [System.Collections.ArrayList]::new()
+        }
+    }
+
+    process {
+        if ($PSCmdlet.ParameterSetName -eq 'Single') {
+            # Single mode - immediate API call
+            $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+            if ($PSCmdlet.ShouldProcess($Name, 'Create [Resource]')) {
+                InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+            }
+        }
+        else {
+            # Bulk mode - collect items
+            if ($InputObject) {
+                $item = @{}
+                foreach ($prop in $InputObject.PSObject.Properties) {
+                    $key = $prop.Name.ToLower()
+                    $item[$key] = $prop.Value
+                }
+                [void]$bulkItems.Add([PSCustomObject]$item)
+            }
+        }
+    }
+
+    end {
+        if ($PSCmdlet.ParameterSetName -eq 'Bulk' -and $bulkItems.Count -gt 0) {
+            $target = "$($bulkItems.Count) [resource](s)"
+            if ($Force -or $PSCmdlet.ShouldProcess($target, 'Create [resources] (bulk)')) {
+                $result = Send-NBBulkRequest -URI $URI -Items $bulkItems.ToArray() -Method POST `
+                    -BatchSize $BatchSize -ShowProgress -ActivityName 'Creating [resources]'
+
+                foreach ($item in $result.Succeeded) { Write-Output $item }
+                foreach ($failure in $result.Failed) {
+                    Write-Error "Failed: $($failure.Error)" -TargetObject $failure.Item
+                }
+                if ($result.HasErrors) { Write-Warning $result.GetSummary() }
+            }
+        }
+    }
+}
+```
+
 ## Key Helper Functions
 
 ### `BuildNewURI`
@@ -479,6 +622,17 @@ See [GitHub Issues](https://github.com/ctrl-alt-automate/PowerNetbox/issues) for
 - **Issue #33**: Core module ✅ (5 endpoints, 8 functions)
 - **Issue #34**: Users module ✅ (4 endpoints, 16 functions)
 
+### Bulk Operations (Completed)
+- **Issue #81**: Bulk operations infrastructure ✅ (BulkOperationResult class, Send-NBBulkRequest helper)
+- **Issue #83**: New-NBDCIMDevice bulk mode ✅
+- **Issue #84**: New-NBDCIMInterface bulk mode ✅
+- **Issue #85**: New-NBIPAMPrefix bulk mode ✅
+- **Issue #86**: New-NBVirtualMachine bulk mode ✅
+- **Issue #87**: Set-NBDCIMDevice bulk PATCH ✅
+- **Issue #88**: Remove-NBDCIMDevice bulk DELETE ✅
+- **Issue #89**: New-NBIPAMVLAN bulk mode ✅
+- **Issue #90**: New-NBVirtualMachineInterface bulk mode ✅
+
 ### Cross-Platform Compatibility (Completed)
 - **Issue #35**: Fix path handling in deploy.ps1 ✅
 - **Issue #36**: Certificate handling for PS Core ✅
@@ -506,7 +660,7 @@ Goal: 100% unit test coverage
 | 5 | #51 | Extras (new) | ✅ Done | 77 tests |
 | 6 | #47 | DCIM completion | ✅ Done | 205 tests |
 
-**Current coverage**: 613 tests passing (~75% of functions tested)
+**Current coverage**: 654 tests passing (~80% of functions tested)
 
 ## Testing API Endpoints
 

@@ -1,11 +1,15 @@
 <#
 .SYNOPSIS
-    Creates a new network interface on a virtual machine in Netbox.
+    Creates one or more network interfaces on virtual machines in Netbox.
 
 .DESCRIPTION
-    Creates a new network interface on a specified virtual machine in the Netbox
-    Virtualization module. VM interfaces are used to assign IP addresses and
-    configure network connectivity for virtual machines.
+    Creates new network interfaces on specified virtual machines. Supports both
+    single interface creation with individual parameters and bulk creation via
+    pipeline input.
+
+    For bulk operations, use the -BatchSize parameter to control how many
+    interfaces are sent per API request. This significantly improves performance
+    when creating many VM interfaces.
 
 .PARAMETER Name
     The name of the interface (e.g., 'eth0', 'ens192', 'Ethernet0').
@@ -18,22 +22,15 @@
 
 .PARAMETER MAC_Address
     The MAC address of the interface in format XX:XX:XX:XX:XX:XX.
-    Accepts both uppercase and lowercase hex characters.
 
 .PARAMETER MTU
-    Maximum Transmission Unit size. Common values:
-    - 1500 for standard Ethernet
-    - 9000 for jumbo frames
-    Valid range: 1-65535
+    Maximum Transmission Unit size. Common values: 1500 (standard), 9000 (jumbo).
 
 .PARAMETER Description
     A description of the interface.
 
 .PARAMETER Mode
-    VLAN mode for the interface:
-    - 'access' - Untagged access port
-    - 'tagged' - Trunk port with tagged VLANs
-    - 'tagged-all' - Trunk port allowing all VLANs
+    VLAN mode for the interface: 'access', 'tagged', or 'tagged-all'.
 
 .PARAMETER Untagged_VLAN
     The database ID of the untagged/native VLAN.
@@ -50,6 +47,17 @@
 .PARAMETER Custom_Fields
     Hashtable of custom field values.
 
+.PARAMETER InputObject
+    Pipeline input for bulk operations. Each object should contain
+    the required properties: Name, Virtual_Machine.
+
+.PARAMETER BatchSize
+    Number of interfaces to create per API request in bulk mode.
+    Default: 50, Range: 1-1000
+
+.PARAMETER Force
+    Skip confirmation prompts for bulk operations.
+
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
@@ -59,74 +67,175 @@
     Creates a new enabled interface named 'eth0' on VM ID 42.
 
 .EXAMPLE
-    New-NBVirtualMachineInterface -Name "ens192" -Virtual_Machine 42 -MAC_Address "00:50:56:AB:CD:EF"
+    $vms = Get-NBVirtualMachine -Cluster 1
+    $interfaces = $vms | ForEach-Object {
+        [PSCustomObject]@{
+            Virtual_Machine = $_.id
+            Name = "eth0"
+            Enabled = $true
+            Description = "Primary interface"
+        }
+    }
+    $interfaces | New-NBVirtualMachineInterface -BatchSize 50 -Force
 
-    Creates a new interface with a specific MAC address.
+    Creates primary interfaces for all VMs in a cluster in bulk.
 
 .EXAMPLE
-    $vm = Get-NBVirtualMachine -Name "webserver01"
-    New-NBVirtualMachineInterface -Name "eth0" -Virtual_Machine $vm.Id -MTU 9000
+    # Create multiple interfaces per VM
+    $vmId = 123
+    $interfaces = @(
+        [PSCustomObject]@{Virtual_Machine=$vmId; Name="eth0"; Description="Management"}
+        [PSCustomObject]@{Virtual_Machine=$vmId; Name="eth1"; Description="Production"}
+        [PSCustomObject]@{Virtual_Machine=$vmId; Name="eth2"; Description="Backup"}
+    )
+    $interfaces | New-NBVirtualMachineInterface -Force
 
-    Creates a new interface with jumbo frame support on a VM found by name.
-
-.EXAMPLE
-    New-NBVirtualMachineInterface -Name "eth0" -Virtual_Machine 42 -Mode "tagged" -Tagged_VLANs 10,20,30
-
-    Creates a trunk interface with multiple tagged VLANs.
+    Creates multiple interfaces on a single VM.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/models/virtualization/vminterface/
 #>
 function New-NBVirtualMachineInterface {
-    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
+    [CmdletBinding(SupportsShouldProcess = $true,
+        ConfirmImpact = 'Low',
+        DefaultParameterSetName = 'Single')]
     [OutputType([PSCustomObject])]
-    param
-    (
-        [Parameter(Mandatory = $true)]
+    param(
+        # Single mode parameters
+        [Parameter(ParameterSetName = 'Single', Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [string]$Name,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter(ParameterSetName = 'Single', Mandatory = $true)]
         [uint64]$Virtual_Machine,
 
+        [Parameter(ParameterSetName = 'Single')]
         [bool]$Enabled = $true,
 
+        [Parameter(ParameterSetName = 'Single')]
         [ValidatePattern('^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$')]
         [string]$MAC_Address,
 
+        [Parameter(ParameterSetName = 'Single')]
         [ValidateRange(1, 65535)]
         [uint16]$MTU,
 
+        [Parameter(ParameterSetName = 'Single')]
         [string]$Description,
 
+        [Parameter(ParameterSetName = 'Single')]
         [ValidateSet('access', 'tagged', 'tagged-all', IgnoreCase = $true)]
         [string]$Mode,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Untagged_VLAN,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64[]]$Tagged_VLANs,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$VRF,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64[]]$Tags,
 
+        [Parameter(ParameterSetName = 'Single')]
         [hashtable]$Custom_Fields,
 
+        # Bulk mode parameters
+        [Parameter(ParameterSetName = 'Bulk', Mandatory = $true, ValueFromPipeline = $true)]
+        [PSCustomObject]$InputObject,
+
+        [Parameter(ParameterSetName = 'Bulk')]
+        [ValidateRange(1, 1000)]
+        [int]$BatchSize = 50,
+
+        [Parameter(ParameterSetName = 'Bulk')]
+        [switch]$Force,
+
+        # Common parameters
+        [Parameter()]
         [switch]$Raw
     )
 
-    process {
+    begin {
         $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'interfaces'))
+        $URI = BuildNewURI -Segments $Segments
 
-        # Ensure Enabled is always included in the body (defaults to true)
-        $PSBoundParameters['Enabled'] = $Enabled
+        if ($PSCmdlet.ParameterSetName -eq 'Bulk') {
+            $bulkItems = [System.Collections.ArrayList]::new()
+        }
+    }
 
-        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+    process {
+        if ($PSCmdlet.ParameterSetName -eq 'Single') {
+            # Ensure Enabled is always included in the body (defaults to true)
+            $PSBoundParameters['Enabled'] = $Enabled
 
-        $URI = BuildNewURI -Segments $URIComponents.Segments
+            $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
 
-        if ($PSCmdlet.ShouldProcess("VM $Virtual_Machine", "Create interface '$Name'")) {
-            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+            if ($PSCmdlet.ShouldProcess("VM $Virtual_Machine", "Create interface '$Name'")) {
+                InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+            }
+        }
+        else {
+            # Bulk mode - collect items
+            if ($InputObject) {
+                $item = @{}
+                foreach ($prop in $InputObject.PSObject.Properties) {
+                    $key = $prop.Name.ToLower()
+                    $value = $prop.Value
+
+                    # Handle property name mappings
+                    switch ($key) {
+                        'virtual_machine' { $key = 'virtual_machine' }
+                        'mac_address' { $key = 'mac_address' }
+                        'untagged_vlan' { $key = 'untagged_vlan' }
+                        'tagged_vlans' { $key = 'tagged_vlans' }
+                        'custom_fields' { $key = 'custom_fields' }
+                    }
+
+                    $item[$key] = $value
+                }
+
+                # Default enabled to true if not specified
+                if (-not $item.ContainsKey('enabled')) {
+                    $item['enabled'] = $true
+                }
+
+                [void]$bulkItems.Add([PSCustomObject]$item)
+            }
+        }
+    }
+
+    end {
+        if ($PSCmdlet.ParameterSetName -eq 'Bulk' -and $bulkItems.Count -gt 0) {
+            $target = "$($bulkItems.Count) interface(s)"
+
+            if ($Force -or $PSCmdlet.ShouldProcess($target, 'Create VM interfaces (bulk)')) {
+                Write-Verbose "Processing $($bulkItems.Count) VM interfaces in bulk mode with batch size $BatchSize"
+
+                $result = Send-NBBulkRequest -URI $URI -Items $bulkItems.ToArray() -Method POST `
+                    -BatchSize $BatchSize -ShowProgress -ActivityName 'Creating VM interfaces'
+
+                # Output succeeded items to pipeline
+                foreach ($item in $result.Succeeded) {
+                    Write-Output $item
+                }
+
+                # Write errors for failed items
+                foreach ($failure in $result.Failed) {
+                    Write-Error "Failed to create VM interface: $($failure.Error)" -TargetObject $failure.Item
+                }
+
+                # Write summary
+                if ($result.HasErrors) {
+                    Write-Warning $result.GetSummary()
+                }
+                else {
+                    Write-Verbose $result.GetSummary()
+                }
+            }
         }
     }
 }
