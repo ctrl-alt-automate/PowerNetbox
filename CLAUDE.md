@@ -88,12 +88,50 @@ The project uses GitHub Actions for CI/CD:
 - **Test**: Pester tests run on ubuntu, windows, and macos
 - **Release**: Tests must pass before PSGallery publish
 
+## GitHub Wiki
+
+The project documentation is maintained in a separate wiki repository.
+
+### Wiki Location
+- **Local**: `/Users/elvis/Developer/work/PowerNetbox.wiki/`
+- **Remote**: `https://github.com/ctrl-alt-automate/PowerNetbox.wiki.git`
+- **Web**: `https://github.com/ctrl-alt-automate/PowerNetbox/wiki`
+
+### Working with the Wiki
+```bash
+# Clone wiki (if not already cloned)
+cd /Users/elvis/Developer/work
+git clone https://github.com/ctrl-alt-automate/PowerNetbox.wiki.git
+
+# Edit and push changes
+cd PowerNetbox.wiki
+# ... edit markdown files ...
+git add . && git commit -m "Update docs" && git push
+```
+
+### Wiki Structure
+| File | Purpose |
+|------|---------|
+| `Home.md` | Landing page (shown first) |
+| `_Sidebar.md` | Navigation sidebar |
+| `_Footer.md` | Footer on all pages |
+| `Getting-Started.md` | Installation and quick start |
+| `Common-Workflows.md` | Use cases and examples |
+| `Troubleshooting.md` | Common issues and solutions |
+
 ## Project Structure
 
 ```
 PowerNetbox/                           # Module output directory
 ├── PowerNetbox.psd1               # Built manifest
 └── PowerNetbox.psm1               # Built module
+
+PowerNetbox.wiki/                     # GitHub Wiki (separate repo)
+├── Home.md                        # Landing page
+├── _Sidebar.md                    # Navigation
+├── Getting-Started.md             # Quick start guide
+├── Common-Workflows.md            # Use cases and examples
+└── Troubleshooting.md             # Common issues
 
 NetboxPS/                             # Repository root
 ├── Functions/                    # Source files - one function per file (489 functions)
