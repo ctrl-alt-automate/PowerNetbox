@@ -403,6 +403,7 @@ PowerNetbox supports high-performance bulk operations for creating, updating, an
 |----------|------|-------------|-------------|
 | `New-NBDCIMDevice` | POST | POST | Create multiple devices |
 | `New-NBDCIMInterface` | POST | POST | Create multiple interfaces |
+| `New-NBIPAMAddress` | POST | POST | Create multiple IP addresses |
 | `New-NBIPAMPrefix` | POST | POST | Create multiple prefixes |
 | `New-NBIPAMVLAN` | POST | POST | Create multiple VLANs |
 | `New-NBVirtualMachine` | POST | POST | Create multiple VMs |
@@ -624,7 +625,7 @@ See [GitHub Issues](https://github.com/ctrl-alt-automate/PowerNetbox/issues) for
 
 ### Bulk Operations (Completed)
 - **Issue #81**: Bulk operations infrastructure ✅ (BulkOperationResult class, Send-NBBulkRequest helper)
-- **Issue #83**: New-NBDCIMDevice bulk mode ✅
+- **Issue #83**: New-NBIPAMAddress bulk mode ✅
 - **Issue #84**: New-NBDCIMInterface bulk mode ✅
 - **Issue #85**: New-NBIPAMPrefix bulk mode ✅
 - **Issue #86**: New-NBVirtualMachine bulk mode ✅
