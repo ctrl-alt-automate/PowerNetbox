@@ -90,7 +90,6 @@ function InvokeNetboxRequest {
     }
 
     $attempt = 0
-    $lastException = $null
 
     while ($attempt -lt $MaxRetries) {
         $attempt++
@@ -116,7 +115,6 @@ function InvokeNetboxRequest {
             }
         }
         catch {
-            $lastException = $_
             $statusCode = $null
             $errorMessage = $_.Exception.Message
             $responseBody = $null
