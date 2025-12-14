@@ -655,7 +655,7 @@ See [GitHub Issues](https://github.com/ctrl-alt-automate/PowerNetbox/issues) for
 - **Issue #41**: Pester 5 compatibility ✅
 - **Issue #45**: Fix test assertions ✅
 - **Issue #46**: ValidateVirtualizationChoice bug fix ✅
-- **Issue #53**: Test coverage expansion ✅ (613 tests)
+- **Issue #53**: Test coverage expansion ✅ (946 tests)
 
 ### Test Coverage Roadmap (Issue #53)
 Goal: 100% unit test coverage
@@ -669,8 +669,10 @@ Goal: 100% unit test coverage
 | 4 | #50 | Circuits (new) | ✅ Done | 69 tests |
 | 5 | #51 | Extras (new) | ✅ Done | 77 tests |
 | 6 | #47 | DCIM completion | ✅ Done | 205 tests |
+| 7 | #91 | VPN & Wireless expansion | ✅ Done | 89 tests |
+| 8 | #99 | Branching (plugin) | ✅ Done | 60 tests |
 
-**Current coverage**: 654 tests passing (~80% of functions tested)
+**Current coverage**: 946 tests passing (~95% of functions tested)
 
 ## Testing API Endpoints
 
