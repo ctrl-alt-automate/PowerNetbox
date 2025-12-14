@@ -542,6 +542,97 @@ curl -s -H "Authorization: Token YOUR_TOKEN" "https://YOUR_HOST/api/dcim/" | pyt
 - Internal helpers (no `-`): `BuildNewURI`, `BuildURIComponents`, `InvokeNetboxRequest`, etc.
 - Backwards compatibility aliases maintained for renamed `Add-*` → `New-*` functions
 
+## Bulk Operations (Issue #81)
+
+PowerNetbox supports bulk API operations for improved performance when creating many resources.
+
+### Usage
+
+```powershell
+# Single device (backwards compatible)
+New-NBDCIMDevice -Name "srv01" -Role 1 -Device_Type 1 -Site 1
+
+# Bulk via pipeline - creates 100 devices in 2 API calls
+1..100 | ForEach-Object {
+    [PSCustomObject]@{
+        Name = "server-$_"
+        Role = 1
+        Device_Type = 1
+        Site = 1
+    }
+} | New-NBDCIMDevice -BatchSize 50 -Force
+```
+
+### Parameters
+
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `-InputObject` | Pipeline input for bulk mode | - |
+| `-BatchSize` | Items per API request (1-1000) | 50 |
+| `-Force` | Skip confirmation prompts | $false |
+
+### Helper Functions
+
+| Function | Description |
+|----------|-------------|
+| `BulkOperationResult` | Class tracking successes, failures, timing |
+| `Send-NBBulkRequest` | Internal helper for batched API calls |
+
+### Supported Endpoints
+
+| Endpoint | Bulk Support | Status |
+|----------|--------------|--------|
+| `New-NBDCIMDevice` | ✅ Full | Implemented |
+| Other `New-NB*` | 🔜 Planned | Future PRs |
+| `Set-NB*` (bulk PATCH) | 🔜 Planned | Future PRs |
+| `Remove-NB*` (bulk DELETE) | 🔜 Planned | Future PRs |
+
+### Implementation Pattern
+
+For adding bulk support to other functions:
+
+```powershell
+function New-NB[Module][Resource] {
+    [CmdletBinding(DefaultParameterSetName = 'Single')]
+    param(
+        # Single mode parameters
+        [Parameter(ParameterSetName = 'Single', Mandatory)]
+        [string]$Name,
+
+        # Bulk mode parameters
+        [Parameter(ParameterSetName = 'Bulk', ValueFromPipeline, Mandatory)]
+        [PSCustomObject]$InputObject,
+
+        [Parameter(ParameterSetName = 'Bulk')]
+        [ValidateRange(1, 1000)]
+        [int]$BatchSize = 50,
+
+        [Parameter(ParameterSetName = 'Bulk')]
+        [switch]$Force
+    )
+
+    begin {
+        if ($PSCmdlet.ParameterSetName -eq 'Bulk') {
+            $bulkItems = [System.Collections.ArrayList]::new()
+        }
+    }
+
+    process {
+        if ($PSCmdlet.ParameterSetName -eq 'Bulk') {
+            [void]$bulkItems.Add($InputObject)
+        } else {
+            # Single item logic
+        }
+    }
+
+    end {
+        if ($bulkItems.Count -gt 0) {
+            Send-NBBulkRequest -URI $URI -Items $bulkItems -Method POST -BatchSize $BatchSize
+        }
+    }
+}
+```
+
 ## Slash Commands (Specialized Agents)
 
 This project includes specialized slash commands in `.claude/commands/` for different expertise areas:
