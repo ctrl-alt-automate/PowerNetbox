@@ -16,7 +16,7 @@ This file provides guidance to Claude Code (or any AI assistant) when working wi
 - **Original Repository**: https://github.com/benclaussen/NetboxPS
 - **Fork Repository**: https://github.com/ctrl-alt-automate/PowerNetbox
 - **Issue Tracking**: https://github.com/ctrl-alt-automate/PowerNetbox/issues
-- **Total Functions**: 478 public functions across all modules
+- **Total Functions**: 494 public functions across all modules
 
 ## Development Environment
 
@@ -252,11 +252,17 @@ NetboxPS/                             # Repository root
 │   │   ├── Jobs/                 # Get
 │   │   ├── ObjectChanges/        # Get
 │   │   └── ObjectTypes/          # Get
-│   └── Users/                    # Users module (NEW)
-│       ├── Groups/               # Get/New/Set/Remove
-│       ├── Permissions/          # Get/New/Set/Remove
-│       ├── Tokens/               # Get/New/Set/Remove
-│       └── Users/                # Get/New/Set/Remove
+│   ├── Users/                    # Users module (NEW)
+│   │   ├── Groups/               # Get/New/Set/Remove
+│   │   ├── Permissions/          # Get/New/Set/Remove
+│   │   ├── Tokens/               # Get/New/Set/Remove
+│   │   └── Users/                # Get/New/Set/Remove
+│   └── Plugins/                  # Plugin modules
+│       └── Branching/            # netbox-branching plugin support
+│           ├── Branch/           # Get/New/Set/Remove + Sync/Merge/Undo
+│           ├── BranchEvent/      # Get
+│           ├── ChangeDiff/       # Get
+│           └── Context/          # Enter/Exit/Get-NBBranchContext + helpers
 ├── Tests/                        # Pester tests
 ├── .claude/commands/             # Specialized AI agent prompts
 ├── PowerNetbox/                   # Build output directory
@@ -574,6 +580,9 @@ InvokeNetboxRequest -URI $URI -Method POST -Body $bodyHashtable
 | Wireless | `/api/wireless/` | ✅ **Full** (3 endpoints, 12 functions) |
 | Core | `/api/core/` | ✅ **Full** (5 endpoints, 8 functions) |
 | Users | `/api/users/` | ✅ **Full** (4 endpoints, 16 functions) |
+| Branching* | `/api/plugins/netbox-branching/` | ✅ **Full** (3 endpoints, 16 functions) |
+
+\* Requires [netbox-branching](https://github.com/netboxlabs/netbox-branching) plugin
 
 ## Netbox 4.x Compatibility
 

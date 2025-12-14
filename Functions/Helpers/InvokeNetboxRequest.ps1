@@ -82,7 +82,10 @@ function InvokeNetboxRequest {
         [int]$MaxRetries = 3,
 
         [ValidateRange(100, 30000)]
-        [int]$RetryDelayMs = 1000
+        [int]$RetryDelayMs = 1000,
+
+        [Parameter()]
+        [string]$Branch
     )
 
     # Handle automatic pagination for GET requests
@@ -159,6 +162,22 @@ function InvokeNetboxRequest {
 
     $creds = Get-NBCredential
     $Headers.Authorization = "Token {0}" -f $creds.GetNetworkCredential().Password
+
+    # Determine effective branch context: explicit param > stack context > main
+    $effectiveBranch = if ($Branch) {
+        $Branch
+    }
+    elseif ($script:NetboxConfig.BranchStack -and $script:NetboxConfig.BranchStack.Count -gt 0) {
+        $script:NetboxConfig.BranchStack.Peek()
+    }
+    else {
+        $null
+    }
+
+    if ($effectiveBranch) {
+        $Headers['X-NetBox-Branch'] = $effectiveBranch
+        Write-Verbose "Using branch context: $effectiveBranch"
+    }
 
     $splat = @{
         'Method'      = $Method
