@@ -36,6 +36,11 @@ function Get-NBContactRole {
     [OutputType([PSCustomObject])]
     param
     (
+        [switch]$All,
+
+        [ValidateRange(1, 1000)]
+        [int]$PageSize = 100,
+
         [Parameter(ParameterSetName = 'Query',
                    Position = 0)]
         [string]$Name,
@@ -71,7 +76,7 @@ function Get-NBContactRole {
 
                 $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
-                InvokeNetboxRequest -URI $uri -Raw:$Raw
+                InvokeNetboxRequest -URI $uri -Raw:$Raw -All:$All -PageSize $PageSize
             }
 
             break
@@ -84,8 +89,7 @@ function Get-NBContactRole {
 
             $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
-            InvokeNetboxRequest -URI $uri -Raw:$Raw
-
+            InvokeNetboxRequest -URI $uri -Raw:$Raw -All:$All -PageSize $PageSize
             break
         }
     }

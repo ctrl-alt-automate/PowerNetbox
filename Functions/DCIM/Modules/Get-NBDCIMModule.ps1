@@ -18,6 +18,11 @@ function Get-NBDCIMModule {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([PSCustomObject])]
     param(
+        [switch]$All,
+
+        [ValidateRange(1, 1000)]
+        [int]$PageSize = 100,
+
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][uint64]$Device_Id,
         [Parameter(ParameterSetName = 'Query')][uint64]$Module_Bay_Id,
@@ -37,7 +42,7 @@ function Get-NBDCIMModule {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','modules',$i)) -Raw:$Raw } }
             default {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim','modules'))
-                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'
                 InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw
             }
         }

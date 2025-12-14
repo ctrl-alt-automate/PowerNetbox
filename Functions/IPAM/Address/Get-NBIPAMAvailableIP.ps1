@@ -38,6 +38,11 @@ function Get-NBIPAMAvailableIP {
     [OutputType([PSCustomObject])]
     param
     (
+        [switch]$All,
+
+        [ValidateRange(1, 1000)]
+        [int]$PageSize = 100,
+
         [Parameter(Mandatory = $true,
             ValueFromPipelineByPropertyName = $true)]
         [Alias('Id')]
@@ -56,6 +61,6 @@ function Get-NBIPAMAvailableIP {
 
         $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
-        InvokeNetboxRequest -URI $uri -Raw:$Raw
+        InvokeNetboxRequest -URI $uri -Raw:$Raw -All:$All -PageSize $PageSize
     }
 }

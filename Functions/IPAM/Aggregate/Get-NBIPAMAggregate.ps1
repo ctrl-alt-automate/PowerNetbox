@@ -19,6 +19,11 @@ function Get-NBIPAMAggregate {
     [OutputType([PSCustomObject])]
     param
     (
+        [switch]$All,
+
+        [ValidateRange(1, 1000)]
+        [int]$PageSize = 100,
+
         [Parameter(ParameterSetName = 'Query')]
         [string]$Query,
 
@@ -63,7 +68,7 @@ process {
 
                 $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
-                InvokeNetboxRequest -URI $uri -Raw:$Raw
+                InvokeNetboxRequest -URI $uri -Raw:$Raw -All:$All -PageSize $PageSize
             }
             break
         }
@@ -75,8 +80,7 @@ process {
 
             $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
-            InvokeNetboxRequest -URI $uri -Raw:$Raw
-
+            InvokeNetboxRequest -URI $uri -Raw:$Raw -All:$All -PageSize $PageSize
             break
         }
     }

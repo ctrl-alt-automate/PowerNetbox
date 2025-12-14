@@ -184,6 +184,76 @@ function BuildURIComponents {
 
 #endregion
 
+#region File BulkOperationResult.ps1
+
+<#
+.SYNOPSIS
+    Class for tracking bulk operation results.
+
+.DESCRIPTION
+    Provides a structured result object for bulk API operations that may
+    have partial successes and failures. Used by Send-NBBulkRequest and
+    bulk-enabled functions.
+
+.EXAMPLE
+    $result = [BulkOperationResult]::new()
+    $result.AddSuccess($item)
+    $result.AddFailure($item, "Validation error")
+#>
+
+class BulkOperationResult {
+    [System.Collections.Generic.List[PSCustomObject]]$Succeeded
+    [System.Collections.Generic.List[PSCustomObject]]$Failed
+    [System.Collections.Generic.List[string]]$Errors
+    [int]$TotalCount
+    [int]$SuccessCount
+    [int]$FailureCount
+    [bool]$HasErrors
+    [timespan]$Duration
+    [datetime]$StartTime
+    [datetime]$EndTime
+
+    BulkOperationResult() {
+        $this.Succeeded = [System.Collections.Generic.List[PSCustomObject]]::new()
+        $this.Failed = [System.Collections.Generic.List[PSCustomObject]]::new()
+        $this.Errors = [System.Collections.Generic.List[string]]::new()
+        $this.TotalCount = 0
+        $this.SuccessCount = 0
+        $this.FailureCount = 0
+        $this.HasErrors = $false
+        $this.StartTime = [datetime]::UtcNow
+    }
+
+    [void] AddSuccess([PSCustomObject]$Item) {
+        $this.Succeeded.Add($Item)
+        $this.SuccessCount++
+        $this.TotalCount++
+    }
+
+    [void] AddFailure([PSCustomObject]$Item, [string]$ErrorMessage) {
+        $failedItem = [PSCustomObject]@{
+            Item = $Item
+            Error = $ErrorMessage
+        }
+        $this.Failed.Add($failedItem)
+        $this.Errors.Add($ErrorMessage)
+        $this.FailureCount++
+        $this.TotalCount++
+        $this.HasErrors = $true
+    }
+
+    [void] Complete() {
+        $this.EndTime = [datetime]::UtcNow
+        $this.Duration = $this.EndTime - $this.StartTime
+    }
+
+    [string] GetSummary() {
+        return "Bulk operation completed: $($this.SuccessCount)/$($this.TotalCount) succeeded, $($this.FailureCount) failed in $($this.Duration.TotalSeconds.ToString('F2'))s"
+    }
+}
+
+#endregion
+
 #region File CheckNetboxIsConnected.ps1
 
 
@@ -435,7 +505,40 @@ public enum $EnumName
 
 #region File Get-ModelDefinition.ps1
 
+<#
+.SYNOPSIS
+    Retrieves the API model definition for a Netbox resource.
 
+.DESCRIPTION
+    Returns the OpenAPI/Swagger model definition for a specified Netbox resource.
+    This is used internally to validate parameters and understand the API schema.
+
+    Can retrieve models by their name (e.g., 'WritableDevice') or by their
+    API URI path (e.g., '/api/dcim/devices/').
+
+.PARAMETER ModelName
+    The name of the model in the API definition (e.g., 'WritableDevice', 'IPAddress').
+
+.PARAMETER URIPath
+    The API URI path to look up the model for (e.g., '/api/dcim/devices/').
+
+.PARAMETER Method
+    The HTTP method to get the model definition for. Defaults to 'post'.
+    Only applies when using URIPath parameter.
+
+.EXAMPLE
+    Get-ModelDefinition -ModelName 'WritableDevice'
+
+    Gets the model definition for the WritableDevice model.
+
+.EXAMPLE
+    Get-ModelDefinition -URIPath '/api/dcim/devices/' -Method 'post'
+
+    Gets the POST request model definition for the devices endpoint.
+
+.LINK
+    Connect-NBAPI
+#>
 function Get-ModelDefinition {
     [CmdletBinding(DefaultParameterSetName = 'ByName')]
     [OutputType([PSCustomObject])]
@@ -5608,6 +5711,7 @@ function Get-NBImageAttachment {
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 function Get-NBInvokeParams {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', '', Justification = 'Params refers to a collection of invoke parameters')]
     [CmdletBinding()]
     [OutputType([PSCustomObject])]
     param ()
@@ -10008,7 +10112,6 @@ function InvokeNetboxRequest {
     }
 
     $attempt = 0
-    $lastException = $null
 
     while ($attempt -lt $MaxRetries) {
         $attempt++
@@ -10034,7 +10137,6 @@ function InvokeNetboxRequest {
             }
         }
         catch {
-            $lastException = $_
             $statusCode = $null
             $errorMessage = $_.Exception.Message
             $responseBody = $null
@@ -11954,87 +12056,224 @@ function New-NBDCIMConsoleServerPortTemplate {
 
 <#
 .SYNOPSIS
-    Creates a new CIMDevice in Netbox D module.
+    Creates one or more devices in Netbox DCIM module.
 
 .DESCRIPTION
-    Creates a new CIMDevice in Netbox D module.
-    Supports pipeline input for Id parameter where applicable.
+    Creates a new device in Netbox DCIM module. Supports both single device
+    creation with individual parameters and bulk creation via pipeline input.
+
+    For bulk operations, use the -BatchSize parameter to control how many
+    devices are sent per API request. This significantly improves performance
+    when creating many devices.
+
+.PARAMETER Name
+    The name of the device. Required for single device creation.
+
+.PARAMETER Role
+    The device role ID or name. Required for single device creation.
+    Alias: Device_Role (backwards compatibility with Netbox 3.x)
+
+.PARAMETER Device_Type
+    The device type ID. Required for single device creation.
+
+.PARAMETER Site
+    The site ID. Required for single device creation.
+
+.PARAMETER InputObject
+    Pipeline input for bulk operations. Each object should contain
+    the required properties: Name, Role, Device_Type, Site.
+
+.PARAMETER BatchSize
+    Number of devices to create per API request in bulk mode.
+    Default: 0 (no batching - backwards compatible single-item mode)
+    Range: 1-1000
+
+.PARAMETER Force
+    Skip confirmation prompts for bulk operations.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBDCIMDevice
+    New-NBDCIMDevice -Name "server01" -Role 1 -Device_Type 1 -Site 1
 
-    Returns all CIMDevice objects.
+    Creates a single device named "server01".
+
+.EXAMPLE
+    $devices = @(
+        [PSCustomObject]@{Name="srv01"; Role=1; Device_Type=1; Site=1}
+        [PSCustomObject]@{Name="srv02"; Role=1; Device_Type=1; Site=1}
+    )
+    $devices | New-NBDCIMDevice -BatchSize 50
+
+    Creates multiple devices using bulk API operations.
+
+.EXAMPLE
+    1..100 | ForEach-Object {
+        [PSCustomObject]@{Name="srv$_"; Role=1; Device_Type=1; Site=1}
+    } | New-NBDCIMDevice -BatchSize 50 -Force
+
+    Creates 100 devices in 2 bulk API calls, skipping confirmation.
+
+.OUTPUTS
+    [PSCustomObject] The created device object(s).
+    [BulkOperationResult] When using -BatchSize, returns bulk operation result.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 
 function New-NBDCIMDevice {
-    [CmdletBinding(ConfirmImpact = 'Low',
-        SupportsShouldProcess = $true)]
-    [OutputType([pscustomobject])]
-    #region Parameters
-    param
-    (
-        [Parameter(Mandatory = $true)]
+    [CmdletBinding(SupportsShouldProcess = $true,
+        ConfirmImpact = 'Low',
+        DefaultParameterSetName = 'Single')]
+    [OutputType([PSCustomObject])]
+    param(
+        # Single mode parameters
+        [Parameter(ParameterSetName = 'Single', Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [string]$Name,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter(ParameterSetName = 'Single', Mandatory = $true)]
         [Alias('Device_Role')]
         [object]$Role,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter(ParameterSetName = 'Single', Mandatory = $true)]
         [object]$Device_Type,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter(ParameterSetName = 'Single', Mandatory = $true)]
         [uint64]$Site,
 
+        [Parameter(ParameterSetName = 'Single')]
         [object]$Status = 'Active',
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Platform,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Tenant,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Cluster,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Rack,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint16]$Position,
 
+        [Parameter(ParameterSetName = 'Single')]
         [object]$Face,
 
+        [Parameter(ParameterSetName = 'Single')]
         [string]$Serial,
 
+        [Parameter(ParameterSetName = 'Single')]
         [string]$Asset_Tag,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Virtual_Chassis,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$VC_Priority,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$VC_Position,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Primary_IP4,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Primary_IP6,
 
+        [Parameter(ParameterSetName = 'Single')]
         [string]$Comments,
 
-        [hashtable]$Custom_Fields
+        [Parameter(ParameterSetName = 'Single')]
+        [hashtable]$Custom_Fields,
+
+        # Bulk mode parameters
+        [Parameter(ParameterSetName = 'Bulk', Mandatory = $true, ValueFromPipeline = $true)]
+        [PSCustomObject]$InputObject,
+
+        [Parameter(ParameterSetName = 'Bulk')]
+        [ValidateRange(1, 1000)]
+        [int]$BatchSize = 50,
+
+        [Parameter(ParameterSetName = 'Bulk')]
+        [switch]$Force,
+
+        # Common parameters
+        [Parameter()]
+        [switch]$Raw
     )
-    #endregion Parameters
 
-    $Segments = [System.Collections.ArrayList]::new(@('dcim', 'devices'))
+    begin {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim', 'devices'))
+        $URI = BuildNewURI -Segments $Segments
 
-    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters
+        # For bulk mode, collect items
+        if ($PSCmdlet.ParameterSetName -eq 'Bulk') {
+            $bulkItems = [System.Collections.ArrayList]::new()
+        }
+    }
 
-    $URI = BuildNewURI -Segments $URIComponents.Segments
+    process {
+        if ($PSCmdlet.ParameterSetName -eq 'Single') {
+            # Original single-item behavior
+            $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
 
-    if ($PSCmdlet.ShouldProcess($Name, 'Create new Device')) {
-        InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method POST
+            if ($PSCmdlet.ShouldProcess($Name, 'Create new Device')) {
+                InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method POST -Raw:$Raw
+            }
+        }
+        else {
+            # Bulk mode - collect items
+            if ($InputObject) {
+                # Convert PSCustomObject to hashtable with lowercase keys for API
+                $item = @{}
+                foreach ($prop in $InputObject.PSObject.Properties) {
+                    $key = $prop.Name.ToLower()
+                    # Handle Device_Role alias
+                    if ($key -eq 'device_role') {
+                        $key = 'role'
+                    }
+                    $item[$key] = $prop.Value
+                }
+                [void]$bulkItems.Add([PSCustomObject]$item)
+            }
+        }
+    }
+
+    end {
+        if ($PSCmdlet.ParameterSetName -eq 'Bulk' -and $bulkItems.Count -gt 0) {
+            $target = "$($bulkItems.Count) device(s)"
+
+            if ($Force -or $PSCmdlet.ShouldProcess($target, 'Create devices (bulk)')) {
+                Write-Verbose "Processing $($bulkItems.Count) devices in bulk mode with batch size $BatchSize"
+
+                $result = Send-NBBulkRequest -URI $URI -Items $bulkItems.ToArray() -Method POST `
+                    -BatchSize $BatchSize -ShowProgress -ActivityName 'Creating devices'
+
+                # Output succeeded items to pipeline
+                foreach ($item in $result.Succeeded) {
+                    Write-Output $item
+                }
+
+                # Write errors for failed items
+                foreach ($failure in $result.Failed) {
+                    Write-Error "Failed to create device: $($failure.Error)" -TargetObject $failure.Item
+                }
+
+                # Write summary
+                if ($result.HasErrors) {
+                    Write-Warning $result.GetSummary()
+                }
+                else {
+                    Write-Verbose $result.GetSummary()
+                }
+            }
+        }
     }
 }
 
@@ -12402,11 +12641,15 @@ function New-NBDCIMFrontPortTemplate {
 
 <#
 .SYNOPSIS
-    Creates a new interface on a device in Netbox.
+    Creates one or more interfaces on devices in Netbox DCIM module.
 
 .DESCRIPTION
-    Creates a new network interface on a specified device in the Netbox DCIM module.
-    Supports various interface types including physical, virtual, LAG, and wireless interfaces.
+    Creates new network interfaces on specified devices. Supports both single interface
+    creation with individual parameters and bulk creation via pipeline input.
+
+    For bulk operations, use the -BatchSize parameter to control how many
+    interfaces are sent per API request. This significantly improves performance
+    when creating many interfaces.
 
 .PARAMETER Device
     The database ID of the device to add the interface to.
@@ -12420,9 +12663,6 @@ function New-NBDCIMFrontPortTemplate {
 
 .PARAMETER Enabled
     Whether the interface is enabled. Defaults to true if not specified.
-
-.PARAMETER Form_Factor
-    Legacy parameter for interface form factor.
 
 .PARAMETER MTU
     Maximum Transmission Unit size (typically 1500 for Ethernet).
@@ -12448,6 +12688,20 @@ function New-NBDCIMFrontPortTemplate {
 .PARAMETER Tagged_VLANs
     Array of VLAN IDs for tagged VLANs (1-4094 each).
 
+.PARAMETER InputObject
+    Pipeline input for bulk operations. Each object should contain
+    the required properties: Device, Name, Type.
+
+.PARAMETER BatchSize
+    Number of interfaces to create per API request in bulk mode.
+    Default: 50, Range: 1-1000
+
+.PARAMETER Force
+    Skip confirmation prompts for bulk operations.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
 .EXAMPLE
     New-NBDCIMInterface -Device 42 -Name "eth0" -Type "1000base-t"
 
@@ -12459,73 +12713,179 @@ function New-NBDCIMFrontPortTemplate {
     Creates a new LAG interface for link aggregation.
 
 .EXAMPLE
-    New-NBDCIMInterface -Device 42 -Name "Gi0/1" -Type "1000base-t" -Mode "Tagged" -Tagged_VLANs 10,20,30
+    $interfaces = 0..47 | ForEach-Object {
+        [PSCustomObject]@{Device=42; Name="eth$_"; Type="1000base-t"}
+    }
+    $interfaces | New-NBDCIMInterface -BatchSize 50 -Force
 
-    Creates a trunk interface with multiple tagged VLANs.
+    Creates 48 interfaces in bulk using a single API call.
+
+.EXAMPLE
+    Import-Csv interfaces.csv | New-NBDCIMInterface -BatchSize 100 -Force
+
+    Bulk import interfaces from a CSV file.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/models/dcim/interface/
 #>
 function New-NBDCIMInterface {
-    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
+    [CmdletBinding(SupportsShouldProcess = $true,
+        ConfirmImpact = 'Low',
+        DefaultParameterSetName = 'Single')]
     [OutputType([PSCustomObject])]
-    param
-    (
-        [Parameter(Mandatory = $true)]
+    param(
+        # Single mode parameters
+        [Parameter(ParameterSetName = 'Single', Mandatory = $true)]
         [uint64]$Device,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter(ParameterSetName = 'Single', Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [string]$Name,
 
+        [Parameter(ParameterSetName = 'Single')]
         [ValidateSet('virtual', 'bridge', 'lag', '100base-tx', '1000base-t', '2.5gbase-t', '5gbase-t', '10gbase-t', '10gbase-cx4', '1000base-x-gbic', '1000base-x-sfp', '10gbase-x-sfpp', '10gbase-x-xfp', '10gbase-x-xenpak', '10gbase-x-x2', '25gbase-x-sfp28', '50gbase-x-sfp56', '40gbase-x-qsfpp', '50gbase-x-sfp28', '100gbase-x-cfp', '100gbase-x-cfp2', '200gbase-x-cfp2', '100gbase-x-cfp4', '100gbase-x-cpak', '100gbase-x-qsfp28', '200gbase-x-qsfp56', '400gbase-x-qsfpdd', '400gbase-x-osfp', '1000base-kx', '10gbase-kr', '10gbase-kx4', '25gbase-kr', '40gbase-kr4', '50gbase-kr', '100gbase-kp4', '100gbase-kr2', '100gbase-kr4', 'ieee802.11a', 'ieee802.11g', 'ieee802.11n', 'ieee802.11ac', 'ieee802.11ad', 'ieee802.11ax', 'ieee802.11ay', 'ieee802.15.1', 'other-wireless', 'gsm', 'cdma', 'lte', 'sonet-oc3', 'sonet-oc12', 'sonet-oc48', 'sonet-oc192', 'sonet-oc768', 'sonet-oc1920', 'sonet-oc3840', '1gfc-sfp', '2gfc-sfp', '4gfc-sfp', '8gfc-sfpp', '16gfc-sfpp', '32gfc-sfp28', '64gfc-qsfpp', '128gfc-qsfp28', 'infiniband-sdr', 'infiniband-ddr', 'infiniband-qdr', 'infiniband-fdr10', 'infiniband-fdr', 'infiniband-edr', 'infiniband-hdr', 'infiniband-ndr', 'infiniband-xdr', 't1', 'e1', 't3', 'e3', 'xdsl', 'docsis', 'gpon', 'xg-pon', 'xgs-pon', 'ng-pon2', 'epon', '10g-epon', 'cisco-stackwise', 'cisco-stackwise-plus', 'cisco-flexstack', 'cisco-flexstack-plus', 'cisco-stackwise-80', 'cisco-stackwise-160', 'cisco-stackwise-320', 'cisco-stackwise-480', 'juniper-vcp', 'extreme-summitstack', 'extreme-summitstack-128', 'extreme-summitstack-256', 'extreme-summitstack-512', 'other', IgnoreCase = $true)]
         [string]$Type,
 
+        [Parameter(ParameterSetName = 'Single')]
         [bool]$Enabled,
 
+        [Parameter(ParameterSetName = 'Single')]
         [object]$Form_Factor,
 
+        [Parameter(ParameterSetName = 'Single')]
         [ValidateRange(1, 65535)]
         [uint16]$MTU,
 
+        [Parameter(ParameterSetName = 'Single')]
         [ValidatePattern('^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$')]
         [string]$MAC_Address,
 
+        [Parameter(ParameterSetName = 'Single')]
         [bool]$MGMT_Only,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$LAG,
 
+        [Parameter(ParameterSetName = 'Single')]
         [string]$Description,
 
+        [Parameter(ParameterSetName = 'Single')]
         [ValidateSet('Access', 'Tagged', 'Tagged All', '100', '200', '300', IgnoreCase = $true)]
         [string]$Mode,
 
+        [Parameter(ParameterSetName = 'Single')]
         [ValidateRange(1, 4094)]
         [uint16]$Untagged_VLAN,
 
+        [Parameter(ParameterSetName = 'Single')]
         [ValidateRange(1, 4094)]
-        [uint16[]]$Tagged_VLANs
+        [uint16[]]$Tagged_VLANs,
+
+        # Bulk mode parameters
+        [Parameter(ParameterSetName = 'Bulk', Mandatory = $true, ValueFromPipeline = $true)]
+        [PSCustomObject]$InputObject,
+
+        [Parameter(ParameterSetName = 'Bulk')]
+        [ValidateRange(1, 1000)]
+        [int]$BatchSize = 50,
+
+        [Parameter(ParameterSetName = 'Bulk')]
+        [switch]$Force,
+
+        # Common parameters
+        [Parameter()]
+        [switch]$Raw
     )
 
+    begin {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interfaces'))
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ParameterSetName -eq 'Bulk') {
+            $bulkItems = [System.Collections.ArrayList]::new()
+        }
+    }
+
     process {
-        # Convert Mode friendly names to API values
-        if (-not [System.String]::IsNullOrWhiteSpace($Mode)) {
-            $PSBoundParameters.Mode = switch ($Mode) {
-                'Access' { 100 }
-                'Tagged' { 200 }
-                'Tagged All' { 300 }
-                default { $_ }
+        if ($PSCmdlet.ParameterSetName -eq 'Single') {
+            # Convert Mode friendly names to API values
+            if (-not [System.String]::IsNullOrWhiteSpace($Mode)) {
+                $PSBoundParameters.Mode = switch ($Mode) {
+                    'Access' { 100 }
+                    'Tagged' { 200 }
+                    'Tagged All' { 300 }
+                    default { $_ }
+                }
+            }
+
+            $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+
+            if ($PSCmdlet.ShouldProcess("Device $Device", "Create interface '$Name'")) {
+                InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method POST -Raw:$Raw
             }
         }
+        else {
+            # Bulk mode - collect items
+            if ($InputObject) {
+                $item = @{}
+                foreach ($prop in $InputObject.PSObject.Properties) {
+                    $key = $prop.Name.ToLower()
+                    $value = $prop.Value
 
-        $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interfaces'))
+                    # Handle property name mappings
+                    switch ($key) {
+                        'mac_address' { $key = 'mac_address' }
+                        'mgmt_only' { $key = 'mgmt_only' }
+                        'untagged_vlan' { $key = 'untagged_vlan' }
+                        'tagged_vlans' { $key = 'tagged_vlans' }
+                        'form_factor' { $key = 'form_factor' }
+                    }
 
-        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters
+                    # Convert Mode friendly names
+                    if ($key -eq 'mode' -and $value -is [string]) {
+                        $value = switch ($value) {
+                            'Access' { 'access' }
+                            'Tagged' { 'tagged' }
+                            'Tagged All' { 'tagged-all' }
+                            default { $value.ToLower() }
+                        }
+                    }
 
-        $URI = BuildNewURI -Segments $URIComponents.Segments
+                    $item[$key] = $value
+                }
+                [void]$bulkItems.Add([PSCustomObject]$item)
+            }
+        }
+    }
 
-        if ($PSCmdlet.ShouldProcess("Device $Device", "Create interface '$Name'")) {
-            InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method POST
+    end {
+        if ($PSCmdlet.ParameterSetName -eq 'Bulk' -and $bulkItems.Count -gt 0) {
+            $target = "$($bulkItems.Count) interface(s)"
+
+            if ($Force -or $PSCmdlet.ShouldProcess($target, 'Create interfaces (bulk)')) {
+                Write-Verbose "Processing $($bulkItems.Count) interfaces in bulk mode with batch size $BatchSize"
+
+                $result = Send-NBBulkRequest -URI $URI -Items $bulkItems.ToArray() -Method POST `
+                    -BatchSize $BatchSize -ShowProgress -ActivityName 'Creating interfaces'
+
+                # Output succeeded items to pipeline
+                foreach ($item in $result.Succeeded) {
+                    Write-Output $item
+                }
+
+                # Write errors for failed items
+                foreach ($failure in $result.Failed) {
+                    Write-Error "Failed to create interface: $($failure.Error)" -TargetObject $failure.Item
+                }
+
+                # Write summary
+                if ($result.HasErrors) {
+                    Write-Warning $result.GetSummary()
+                }
+                else {
+                    Write-Verbose $result.GetSummary()
+                }
+            }
         }
     }
 }
@@ -14670,117 +15030,238 @@ function New-NBGroup {
 
 #region File New-NBIPAMAddress.ps1
 
+<#
+.SYNOPSIS
+    Creates one or more IP addresses in Netbox IPAM module.
 
-function New-NBIPAMAddress {
-    <#
-    .SYNOPSIS
-        Create a new IP address to Netbox
+.DESCRIPTION
+    Creates new IP addresses in Netbox IPAM module. Supports both single IP
+    creation with individual parameters and bulk creation via pipeline input.
 
-    .DESCRIPTION
-        Create a new IP address to Netbox with a status of Active by default.
+    For bulk operations, use the -BatchSize parameter to control how many
+    addresses are sent per API request. This significantly improves performance
+    when creating many IP addresses.
 
-    .PARAMETER Address
-        IP address in CIDR notation: 192.168.1.1/24
+.PARAMETER Address
+    IP address in CIDR notation: 192.168.1.1/24. Required for single mode.
 
-    .PARAMETER Status
-        Status of the IP. Defaults to Active
+.PARAMETER Status
+    Status of the IP. Defaults to 'Active'.
 
-    .PARAMETER Tenant
-        Tenant ID
+.PARAMETER Tenant
+    Tenant ID.
 
-    .PARAMETER VRF
-        VRF ID
+.PARAMETER VRF
+    VRF ID.
 
-    .PARAMETER Role
-        Role such as anycast, loopback, etc... Defaults to nothing
+.PARAMETER Role
+    Role such as anycast, loopback, etc.
 
-    .PARAMETER NAT_Inside
-        ID of IP for NAT
+.PARAMETER NAT_Inside
+    ID of IP for NAT.
 
-    .PARAMETER Custom_Fields
-        Custom field hash table. Will be validated by the API service
+.PARAMETER Custom_Fields
+    Custom field hash table. Will be validated by the API service.
 
-    .PARAMETER Interface
-        ID of interface to apply IP
+.PARAMETER Interface
+    ID of interface to apply IP (deprecated, use Assigned_Object_Id).
 
-    .PARAMETER Description
-        Description of IP address
+.PARAMETER Description
+    Description of IP address.
 
-    .PARAMETER Dns_name
-        DNS Name of IP address (example : netbox.example.com)
+.PARAMETER Dns_name
+    DNS Name of IP address (example: netbox.example.com).
 
-    .PARAMETER Assigned_Object_Type
-        Assigned Object Type dcim.interface or virtualization.vminterface
+.PARAMETER Assigned_Object_Type
+    Assigned Object Type: 'dcim.interface' or 'virtualization.vminterface'.
 
-    .PARAMETER Assigned_Object_Id
-        Assigned Object ID
+.PARAMETER Assigned_Object_Id
+    Assigned Object ID.
 
-    .PARAMETER Raw
-        Return raw results from API service
+.PARAMETER InputObject
+    Pipeline input for bulk operations. Each object should contain
+    at minimum the Address property.
 
-    .EXAMPLE
-        New-NBIPAMAddress -Address 192.0.2.1/32
+.PARAMETER BatchSize
+    Number of IP addresses to create per API request in bulk mode.
+    Default: 50, Range: 1-1000
 
-        Add new IP Address 192.0.2.1/32 with status active
+.PARAMETER Force
+    Skip confirmation prompts for bulk operations.
 
-    .NOTES
-        Additional information about the function.
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBIPAMAddress -Address "192.168.1.1/24"
+
+    Creates a single IP address with status active.
+
+.EXAMPLE
+    New-NBIPAMAddress -Address "10.0.0.1/24" -Status active -Description "Gateway"
+
+    Creates an IP address with description.
+
+.EXAMPLE
+    1..254 | ForEach-Object {
+        [PSCustomObject]@{
+            Address = "192.168.1.$_/24"
+            Status = "active"
+            Description = "Host $_"
+        }
+    } | New-NBIPAMAddress -BatchSize 100 -Force
+
+    Bulk create 254 IP addresses in a subnet.
+
+.EXAMPLE
+    Import-Csv ips.csv | New-NBIPAMAddress -BatchSize 50 -Force
+
+    Bulk import IP addresses from a CSV file.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/models/ipam/ipaddress/
 #>
 
-    [CmdletBinding(ConfirmImpact = 'Low',
-        SupportsShouldProcess = $true)]
-    [OutputType([pscustomobject])]
-    param
-    (
-        [Parameter(Mandatory = $true,
-            ValueFromPipelineByPropertyName = $true)]
+function New-NBIPAMAddress {
+    [CmdletBinding(SupportsShouldProcess = $true,
+        ConfirmImpact = 'Low',
+        DefaultParameterSetName = 'Single')]
+    [OutputType([PSCustomObject])]
+    param(
+        # Single mode parameters
+        [Parameter(ParameterSetName = 'Single', Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [ValidateNotNullOrEmpty()]
         [string]$Address,
 
+        [Parameter(ParameterSetName = 'Single')]
         [object]$Status = 'Active',
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Tenant,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$VRF,
 
+        [Parameter(ParameterSetName = 'Single')]
         [object]$Role,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$NAT_Inside,
 
+        [Parameter(ParameterSetName = 'Single')]
         [hashtable]$Custom_Fields,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Interface,
 
+        [Parameter(ParameterSetName = 'Single')]
         [string]$Description,
 
+        [Parameter(ParameterSetName = 'Single')]
         [string]$Dns_name,
 
+        [Parameter(ParameterSetName = 'Single')]
         [ValidateSet('dcim.interface', 'virtualization.vminterface', IgnoreCase = $true)]
         [string]$Assigned_Object_Type,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Assigned_Object_Id,
 
+        # Bulk mode parameters
+        [Parameter(ParameterSetName = 'Bulk', Mandatory = $true, ValueFromPipeline = $true)]
+        [PSCustomObject]$InputObject,
+
+        [Parameter(ParameterSetName = 'Bulk')]
+        [ValidateRange(1, 1000)]
+        [int]$BatchSize = 50,
+
+        [Parameter(ParameterSetName = 'Bulk')]
+        [switch]$Force,
+
+        # Common parameters
+        [Parameter()]
         [switch]$Raw
     )
 
-    process {
+    begin {
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'ip-addresses'))
-        $Method = 'POST'
+        $URI = BuildNewURI -Segments $Segments
 
-        $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters
+        if ($PSCmdlet.ParameterSetName -eq 'Bulk') {
+            $bulkItems = [System.Collections.ArrayList]::new()
+        }
+    }
 
-        $URI = BuildNewURI -Segments $URIComponents.Segments
+    process {
+        if ($PSCmdlet.ParameterSetName -eq 'Single') {
+            $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
 
-        if ($PSCmdlet.ShouldProcess($Address, 'Create new IP address')) {
-            InvokeNetboxRequest -URI $URI -Method $Method -Body $URIComponents.Parameters -Raw:$Raw
+            if ($PSCmdlet.ShouldProcess($Address, 'Create new IP address')) {
+                InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+            }
+        }
+        else {
+            # Bulk mode - collect items
+            if ($InputObject) {
+                $item = @{}
+                foreach ($prop in $InputObject.PSObject.Properties) {
+                    $key = $prop.Name.ToLower()
+                    $value = $prop.Value
+
+                    # Handle property name mappings
+                    switch ($key) {
+                        'nat_inside' { $key = 'nat_inside' }
+                        'custom_fields' { $key = 'custom_fields' }
+                        'dns_name' { $key = 'dns_name' }
+                        'assigned_object_type' { $key = 'assigned_object_type' }
+                        'assigned_object_id' { $key = 'assigned_object_id' }
+                    }
+
+                    $item[$key] = $value
+                }
+
+                # Validate address is present
+                if (-not $item.ContainsKey('address') -or [string]::IsNullOrWhiteSpace($item['address'])) {
+                    Write-Error "InputObject must have an 'Address' property" -TargetObject $InputObject
+                    return
+                }
+
+                [void]$bulkItems.Add([PSCustomObject]$item)
+            }
+        }
+    }
+
+    end {
+        if ($PSCmdlet.ParameterSetName -eq 'Bulk' -and $bulkItems.Count -gt 0) {
+            $target = "$($bulkItems.Count) IP address(es)"
+
+            if ($Force -or $PSCmdlet.ShouldProcess($target, 'Create IP addresses (bulk)')) {
+                Write-Verbose "Processing $($bulkItems.Count) IP addresses in bulk mode with batch size $BatchSize"
+
+                $result = Send-NBBulkRequest -URI $URI -Items $bulkItems.ToArray() -Method POST `
+                    -BatchSize $BatchSize -ShowProgress -ActivityName 'Creating IP addresses'
+
+                # Output succeeded items to pipeline
+                foreach ($item in $result.Succeeded) {
+                    Write-Output $item
+                }
+
+                # Write errors for failed items
+                foreach ($failure in $result.Failed) {
+                    Write-Error "Failed to create IP address: $($failure.Error)" -TargetObject $failure.Item
+                }
+
+                # Write summary
+                if ($result.HasErrors) {
+                    Write-Warning $result.GetSummary()
+                }
+                else {
+                    Write-Verbose $result.GetSummary()
+                }
+            }
         }
     }
 }
-
-
-
-
-
 
 #endregion
 
@@ -15205,74 +15686,203 @@ function New-NBIPAMFHRPGroupAssignment {
 
 <#
 .SYNOPSIS
-    Creates a new PAMPrefix in Netbox I module.
+    Creates one or more prefixes in Netbox IPAM module.
 
 .DESCRIPTION
-    Creates a new PAMPrefix in Netbox I module.
-    Supports pipeline input for Id parameter where applicable.
+    Creates new IP prefixes in Netbox IPAM module. Supports both single prefix
+    creation with individual parameters and bulk creation via pipeline input.
+
+    For bulk operations, use the -BatchSize parameter to control how many
+    prefixes are sent per API request. This significantly improves performance
+    when creating many prefixes.
+
+.PARAMETER Prefix
+    The IP prefix in CIDR notation (e.g., '10.0.0.0/24').
+
+.PARAMETER Status
+    Status of the prefix. Defaults to 'Active'.
+
+.PARAMETER Tenant
+    The tenant ID for the prefix.
+
+.PARAMETER Role
+    The role ID for the prefix.
+
+.PARAMETER IsPool
+    Whether this prefix is a pool from which child prefixes can be allocated.
+
+.PARAMETER Description
+    A description of the prefix.
+
+.PARAMETER Site
+    The site ID where this prefix is used.
+
+.PARAMETER VRF
+    The VRF ID for this prefix.
+
+.PARAMETER VLAN
+    The VLAN ID associated with this prefix.
+
+.PARAMETER Custom_Fields
+    Hashtable of custom field values.
+
+.PARAMETER InputObject
+    Pipeline input for bulk operations. Each object should contain
+    the required property: Prefix.
+
+.PARAMETER BatchSize
+    Number of prefixes to create per API request in bulk mode.
+    Default: 50, Range: 1-1000
+
+.PARAMETER Force
+    Skip confirmation prompts for bulk operations.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBIPAMPrefix
+    New-NBIPAMPrefix -Prefix "10.0.0.0/24" -Status "active" -Site 1
 
-    Returns all PAMPrefix objects.
+    Creates a single prefix.
+
+.EXAMPLE
+    $prefixes = 1..50 | ForEach-Object {
+        [PSCustomObject]@{Prefix="10.$_.0.0/24"; Status="active"; Site=1}
+    }
+    $prefixes | New-NBIPAMPrefix -BatchSize 50 -Force
+
+    Creates 50 prefixes in bulk using a single API call.
+
+.EXAMPLE
+    Import-Csv subnets.csv | New-NBIPAMPrefix -BatchSize 100 -Force
+
+    Bulk import prefixes from a CSV file.
 
 .LINK
-    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+    https://netbox.readthedocs.io/en/stable/models/ipam/prefix/
 #>
 
 function New-NBIPAMPrefix {
-    [CmdletBinding(ConfirmImpact = 'Low',
-        SupportsShouldProcess = $true)]
+    [CmdletBinding(SupportsShouldProcess = $true,
+        ConfirmImpact = 'Low',
+        DefaultParameterSetName = 'Single')]
     [OutputType([PSCustomObject])]
-    [CmdletBinding()]
-    [OutputType([PSCustomObject])]
-    param
-    (
-        [Parameter(Mandatory = $true)]
+    param(
+        # Single mode parameters
+        [Parameter(ParameterSetName = 'Single', Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [string]$Prefix,
 
+        [Parameter(ParameterSetName = 'Single')]
         [object]$Status = 'Active',
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Tenant,
 
+        [Parameter(ParameterSetName = 'Single')]
         [object]$Role,
 
+        [Parameter(ParameterSetName = 'Single')]
         [bool]$IsPool,
 
+        [Parameter(ParameterSetName = 'Single')]
         [string]$Description,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Site,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$VRF,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$VLAN,
 
+        [Parameter(ParameterSetName = 'Single')]
         [hashtable]$Custom_Fields,
 
+        # Bulk mode parameters
+        [Parameter(ParameterSetName = 'Bulk', Mandatory = $true, ValueFromPipeline = $true)]
+        [PSCustomObject]$InputObject,
+
+        [Parameter(ParameterSetName = 'Bulk')]
+        [ValidateRange(1, 1000)]
+        [int]$BatchSize = 50,
+
+        [Parameter(ParameterSetName = 'Bulk')]
+        [switch]$Force,
+
+        # Common parameters
+        [Parameter()]
         [switch]$Raw
     )
 
-    #    $PSBoundParameters.Status = ValidateIPAMChoice -ProvidedValue $Status -PrefixStatus
+    begin {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam', 'prefixes'))
+        $URI = BuildNewURI -Segments $Segments
 
-    <#
-    # As of 2018/10/18, this does not appear to be a validated IPAM choice
-    if ($null -ne $Role) {
-        $PSBoundParameters.Role = ValidateIPAMChoice -ProvidedValue $Role -PrefixRole
+        if ($PSCmdlet.ParameterSetName -eq 'Bulk') {
+            $bulkItems = [System.Collections.ArrayList]::new()
+        }
     }
-    #>
 
-    $segments = [System.Collections.ArrayList]::new(@('ipam', 'prefixes'))
+    process {
+        if ($PSCmdlet.ParameterSetName -eq 'Single') {
+            $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
 
-    $URIComponents = BuildURIComponents -URISegments $segments -ParametersDictionary $PSBoundParameters
+            if ($PSCmdlet.ShouldProcess($Prefix, 'Create new Prefix')) {
+                InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+            }
+        }
+        else {
+            # Bulk mode - collect items
+            if ($InputObject) {
+                $item = @{}
+                foreach ($prop in $InputObject.PSObject.Properties) {
+                    $key = $prop.Name.ToLower()
+                    $value = $prop.Value
 
-    $URI = BuildNewURI -Segments $URIComponents.Segments
+                    # Handle property name mappings
+                    switch ($key) {
+                        'ispool' { $key = 'is_pool' }
+                        'custom_fields' { $key = 'custom_fields' }
+                    }
 
-    if ($PSCmdlet.ShouldProcess($Prefix, 'Create new Prefix')) {
-        InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+                    $item[$key] = $value
+                }
+                [void]$bulkItems.Add([PSCustomObject]$item)
+            }
+        }
+    }
+
+    end {
+        if ($PSCmdlet.ParameterSetName -eq 'Bulk' -and $bulkItems.Count -gt 0) {
+            $target = "$($bulkItems.Count) prefix(es)"
+
+            if ($Force -or $PSCmdlet.ShouldProcess($target, 'Create prefixes (bulk)')) {
+                Write-Verbose "Processing $($bulkItems.Count) prefixes in bulk mode with batch size $BatchSize"
+
+                $result = Send-NBBulkRequest -URI $URI -Items $bulkItems.ToArray() -Method POST `
+                    -BatchSize $BatchSize -ShowProgress -ActivityName 'Creating prefixes'
+
+                # Output succeeded items to pipeline
+                foreach ($item in $result.Succeeded) {
+                    Write-Output $item
+                }
+
+                # Write errors for failed items
+                foreach ($failure in $result.Failed) {
+                    Write-Error "Failed to create prefix: $($failure.Error)" -TargetObject $failure.Item
+                }
+
+                # Write summary
+                if ($result.HasErrors) {
+                    Write-Warning $result.GetSummary()
+                }
+                else {
+                    Write-Verbose $result.GetSummary()
+                }
+            }
+        }
     }
 }
 
@@ -15638,87 +16248,207 @@ function New-NBIPAMServiceTemplate {
 
 #region File New-NBIPAMVLAN.ps1
 
-function New-NBIPAMVLAN {
-    <#
-    .SYNOPSIS
-        Create a new VLAN
+<#
+.SYNOPSIS
+    Creates one or more VLANs in Netbox IPAM module.
 
-    .DESCRIPTION
-        Create a new VLAN in Netbox with a status of Active by default.
+.DESCRIPTION
+    Creates new VLANs in Netbox IPAM module. Supports both single VLAN
+    creation with individual parameters and bulk creation via pipeline input.
 
-    .PARAMETER VID
-        The VLAN ID.
+    For bulk operations, use the -BatchSize parameter to control how many
+    VLANs are sent per API request. This significantly improves performance
+    when creating many VLANs.
 
-    .PARAMETER Name
-        The name of the VLAN.
+.PARAMETER VID
+    The VLAN ID (1-4094). Required for single VLAN creation.
 
-    .PARAMETER Status
-        Status of the VLAN. Defaults to Active
+.PARAMETER Name
+    The name of the VLAN. Required for single VLAN creation.
 
-    .PARAMETER Tenant
-        Tenant ID
+.PARAMETER Status
+    Status of the VLAN. Defaults to 'Active'.
 
-    .PARAMETER Role
-        Role such as anycast, loopback, etc... Defaults to nothing
+.PARAMETER Tenant
+    The tenant ID.
 
-    .PARAMETER Description
-        Description of IP address
+.PARAMETER Site
+    The site ID.
 
-    .PARAMETER Custom_Fields
-        Custom field hash table. Will be validated by the API service
+.PARAMETER Group
+    The VLAN group ID.
 
-    .PARAMETER Raw
-        Return raw results from API service
+.PARAMETER Role
+    The role ID.
 
-    .PARAMETER Address
-        IP address in CIDR notation: 192.168.1.1/24
+.PARAMETER Description
+    A description of the VLAN.
 
-    .EXAMPLE
-        PS C:\> Create-NBIPAMAddress
+.PARAMETER Custom_Fields
+    Hashtable of custom field values.
 
-    .NOTES
-        Additional information about the function.
+.PARAMETER InputObject
+    Pipeline input for bulk operations. Each object should contain
+    the required properties: VID, Name.
+
+.PARAMETER BatchSize
+    Number of VLANs to create per API request in bulk mode.
+    Default: 50, Range: 1-1000
+
+.PARAMETER Force
+    Skip confirmation prompts for bulk operations.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBIPAMVLAN -VID 100 -Name "Production" -Site 1
+
+    Creates a single VLAN.
+
+.EXAMPLE
+    $vlans = 100..199 | ForEach-Object {
+        [PSCustomObject]@{VID=$_; Name="VLAN$_"; Status="active"; Site=1}
+    }
+    $vlans | New-NBIPAMVLAN -BatchSize 50 -Force
+
+    Creates 100 VLANs in bulk using 2 API calls.
+
+.EXAMPLE
+    Import-Csv vlans.csv | New-NBIPAMVLAN -BatchSize 100 -Force
+
+    Bulk import VLANs from a CSV file.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/models/ipam/vlan/
 #>
 
-    [CmdletBinding(ConfirmImpact = 'Low',
-        SupportsShouldProcess = $true)]
-    [OutputType([pscustomobject])]
-    param
-    (
-        [Parameter(Mandatory = $true)]
+function New-NBIPAMVLAN {
+    [CmdletBinding(SupportsShouldProcess = $true,
+        ConfirmImpact = 'Low',
+        DefaultParameterSetName = 'Single')]
+    [OutputType([PSCustomObject])]
+    param(
+        # Single mode parameters
+        [Parameter(ParameterSetName = 'Single', Mandatory = $true)]
+        [ValidateRange(1, 4094)]
         [uint16]$VID,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter(ParameterSetName = 'Single', Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [string]$Name,
 
+        [Parameter(ParameterSetName = 'Single')]
         [object]$Status = 'Active',
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Tenant,
 
+        [Parameter(ParameterSetName = 'Single')]
+        [uint64]$Site,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [uint64]$Group,
+
+        [Parameter(ParameterSetName = 'Single')]
         [object]$Role,
 
+        [Parameter(ParameterSetName = 'Single')]
         [string]$Description,
 
+        [Parameter(ParameterSetName = 'Single')]
         [hashtable]$Custom_Fields,
 
+        # Bulk mode parameters
+        [Parameter(ParameterSetName = 'Bulk', Mandatory = $true, ValueFromPipeline = $true)]
+        [PSCustomObject]$InputObject,
+
+        [Parameter(ParameterSetName = 'Bulk')]
+        [ValidateRange(1, 1000)]
+        [int]$BatchSize = 50,
+
+        [Parameter(ParameterSetName = 'Bulk')]
+        [switch]$Force,
+
+        # Common parameters
+        [Parameter()]
         [switch]$Raw
     )
 
-    #    $PSBoundParameters.Status = ValidateIPAMChoice -ProvidedValue $Status -VLANStatus
+    begin {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam', 'vlans'))
+        $URI = BuildNewURI -Segments $Segments
 
-    #    if ($null -ne $Role) {
-    #        $PSBoundParameters.Role = ValidateIPAMChoice -ProvidedValue $Role -IPAddressRole
-    #    }
+        if ($PSCmdlet.ParameterSetName -eq 'Bulk') {
+            $bulkItems = [System.Collections.ArrayList]::new()
+        }
+    }
 
-    $segments = [System.Collections.ArrayList]::new(@('ipam', 'vlans'))
+    process {
+        if ($PSCmdlet.ParameterSetName -eq 'Single') {
+            $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
 
-    $URIComponents = BuildURIComponents -URISegments $segments -ParametersDictionary $PSBoundParameters
+            if ($PSCmdlet.ShouldProcess("VLAN $VID ($Name)", 'Create new VLAN')) {
+                InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+            }
+        }
+        else {
+            # Bulk mode - collect items
+            if ($InputObject) {
+                $item = @{}
+                foreach ($prop in $InputObject.PSObject.Properties) {
+                    $key = $prop.Name.ToLower()
+                    $value = $prop.Value
 
-    $URI = BuildNewURI -Segments $URIComponents.Segments
+                    # Handle property name mappings
+                    switch ($key) {
+                        'custom_fields' { $key = 'custom_fields' }
+                    }
 
-    if ($PSCmdlet.ShouldProcess($nae, 'Create new Vlan $($vid)')) {
-        InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+                    # Validate VID range in bulk mode
+                    if ($key -eq 'vid') {
+                        if ($value -lt 1 -or $value -gt 4094) {
+                            Write-Warning "VLAN ID $value is invalid (must be 1-4094), skipping"
+                            return
+                        }
+                    }
+
+                    $item[$key] = $value
+                }
+                [void]$bulkItems.Add([PSCustomObject]$item)
+            }
+        }
+    }
+
+    end {
+        if ($PSCmdlet.ParameterSetName -eq 'Bulk' -and $bulkItems.Count -gt 0) {
+            $target = "$($bulkItems.Count) VLAN(s)"
+
+            if ($Force -or $PSCmdlet.ShouldProcess($target, 'Create VLANs (bulk)')) {
+                Write-Verbose "Processing $($bulkItems.Count) VLANs in bulk mode with batch size $BatchSize"
+
+                $result = Send-NBBulkRequest -URI $URI -Items $bulkItems.ToArray() -Method POST `
+                    -BatchSize $BatchSize -ShowProgress -ActivityName 'Creating VLANs'
+
+                # Output succeeded items to pipeline
+                foreach ($item in $result.Succeeded) {
+                    Write-Output $item
+                }
+
+                # Write errors for failed items
+                foreach ($failure in $result.Failed) {
+                    Write-Error "Failed to create VLAN: $($failure.Error)" -TargetObject $failure.Item
+                }
+
+                # Write summary
+                if ($result.HasErrors) {
+                    Write-Warning $result.GetSummary()
+                }
+                else {
+                    Write-Verbose $result.GetSummary()
+                }
+            }
+        }
     }
 }
 
@@ -16498,7 +17228,7 @@ function New-NBToken {
     Username for the new user.
 
 .PARAMETER Password
-    Password for the new user (required).
+    Password for the new user (required). Use SecureString for security.
 
 .PARAMETER First_Name
     First name.
@@ -16525,7 +17255,8 @@ function New-NBToken {
     Return the raw API response.
 
 .EXAMPLE
-    New-NBUser -Username "newuser" -Password "SecureP@ss123"
+    $securePass = ConvertTo-SecureString "SecureP@ss123" -AsPlainText -Force
+    New-NBUser -Username "newuser" -Password $securePass
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -16539,7 +17270,7 @@ function New-NBUser {
         [string]$Username,
 
         [Parameter(Mandatory = $true)]
-        [string]$Password,
+        [securestring]$Password,
 
         [string]$First_Name,
 
@@ -16560,11 +17291,22 @@ function New-NBUser {
 
     process {
         $Segments = [System.Collections.ArrayList]::new(@('users', 'users'))
-        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
-        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        # Convert SecureString to plain text for API (required by Netbox)
+        $params = @{}
+        foreach ($key in $PSBoundParameters.Keys) {
+            if ($key -eq 'Password') {
+                $params['password'] = [System.Net.NetworkCredential]::new('', $Password).Password
+            }
+            elseif ($key -notin 'Raw', 'WhatIf', 'Confirm', 'Verbose', 'Debug', 'ErrorAction', 'WarningAction', 'InformationAction', 'ErrorVariable', 'WarningVariable', 'InformationVariable', 'OutVariable', 'OutBuffer', 'PipelineVariable') {
+                $params[$key] = $PSBoundParameters[$key]
+            }
+        }
+
+        $URI = BuildNewURI -Segments $Segments
 
         if ($PSCmdlet.ShouldProcess($Username, 'Create User')) {
-            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+            InvokeNetboxRequest -URI $URI -Method POST -Body $params -Raw:$Raw
         }
     }
 }
@@ -17061,85 +17803,234 @@ function New-NBVirtualizationClusterType {
 
 <#
 .SYNOPSIS
-    Creates a new irtualMachine in Netbox V module.
+    Creates one or more virtual machines in Netbox Virtualization module.
 
 .DESCRIPTION
-    Creates a new irtualMachine in Netbox V module.
-    Supports pipeline input for Id parameter where applicable.
+    Creates new virtual machines in Netbox. Supports both single VM
+    creation with individual parameters and bulk creation via pipeline input.
+
+    For bulk operations, use the -BatchSize parameter to control how many
+    VMs are sent per API request. This significantly improves performance
+    when importing VMs from vCenter or other sources.
+
+.PARAMETER Name
+    The name of the virtual machine. Required for single VM creation.
+
+.PARAMETER Site
+    The site ID. Optional in Netbox 4.x.
+
+.PARAMETER Cluster
+    The cluster ID. Optional - VMs can be standalone in Netbox 4.x.
+
+.PARAMETER Tenant
+    The tenant ID.
+
+.PARAMETER Status
+    Status of the VM. Defaults to 'Active'.
+
+.PARAMETER Role
+    The role ID for the VM.
+
+.PARAMETER Platform
+    The platform ID (e.g., VMware, Hyper-V).
+
+.PARAMETER vCPUs
+    Number of virtual CPUs.
+
+.PARAMETER Memory
+    Memory in MB.
+
+.PARAMETER Disk
+    Disk space in GB.
+
+.PARAMETER Primary_IP4
+    Primary IPv4 address ID.
+
+.PARAMETER Primary_IP6
+    Primary IPv6 address ID.
+
+.PARAMETER Custom_Fields
+    Hashtable of custom field values.
+
+.PARAMETER Comments
+    Comments about the VM.
+
+.PARAMETER InputObject
+    Pipeline input for bulk operations. Each object should contain
+    at minimum the Name property.
+
+.PARAMETER BatchSize
+    Number of VMs to create per API request in bulk mode.
+    Default: 50, Range: 1-1000
+
+.PARAMETER Force
+    Skip confirmation prompts for bulk operations.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBVirtualMachine
+    New-NBVirtualMachine -Name "webserver01" -Cluster 1 -vCPUs 4 -Memory 8192
 
-    Returns all irtualMachine objects.
+    Creates a single VM with 4 vCPUs and 8GB RAM.
+
+.EXAMPLE
+    $vms = Get-VM | ForEach-Object {
+        [PSCustomObject]@{
+            Name = $_.Name
+            Cluster = 1
+            vCPUs = $_.NumCpu
+            Memory = $_.MemoryMB
+            Disk = [math]::Round($_.UsedSpaceGB)
+            Status = 'active'
+        }
+    }
+    $vms | New-NBVirtualMachine -BatchSize 100 -Force
+
+    Imports VMs from VMware vCenter in bulk.
 
 .LINK
-    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+    https://netbox.readthedocs.io/en/stable/models/virtualization/virtualmachine/
 #>
 
 function New-NBVirtualMachine {
-    [CmdletBinding(ConfirmImpact = 'Low',
-        SupportsShouldProcess = $true)]
-    [OutputType([pscustomobject])]
-    param
-    (
-        [Parameter(Mandatory = $true)]
+    [CmdletBinding(SupportsShouldProcess = $true,
+        ConfirmImpact = 'Low',
+        DefaultParameterSetName = 'Single')]
+    [OutputType([PSCustomObject])]
+    param(
+        # Single mode parameters
+        [Parameter(ParameterSetName = 'Single', Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [string]$Name,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Site,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Cluster,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Tenant,
 
+        [Parameter(ParameterSetName = 'Single')]
         [object]$Status = 'Active',
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Role,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Platform,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint16]$vCPUs,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Memory,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Disk,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Primary_IP4,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Primary_IP6,
 
+        [Parameter(ParameterSetName = 'Single')]
         [hashtable]$Custom_Fields,
 
-        [string]$Comments
+        [Parameter(ParameterSetName = 'Single')]
+        [string]$Comments,
+
+        # Bulk mode parameters
+        [Parameter(ParameterSetName = 'Bulk', Mandatory = $true, ValueFromPipeline = $true)]
+        [PSCustomObject]$InputObject,
+
+        [Parameter(ParameterSetName = 'Bulk')]
+        [ValidateRange(1, 1000)]
+        [int]$BatchSize = 50,
+
+        [Parameter(ParameterSetName = 'Bulk')]
+        [switch]$Force,
+
+        # Common parameters
+        [Parameter()]
+        [switch]$Raw
     )
 
-    #    $ModelDefinition = $script:NetboxConfig.APIDefinition.definitions.WritableVirtualMachineWithConfigContext
+    begin {
+        $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'virtual-machines'))
+        $URI = BuildNewURI -Segments $Segments
 
-    #    # Validate the status against the APIDefinition
-    #    if ($ModelDefinition.properties.status.enum -inotcontains $Status) {
-    #        throw ("Invalid value [] for Status. Must be one of []" -f $Status, ($ModelDefinition.properties.status.enum -join ', '))
-    #    }
+        if ($PSCmdlet.ParameterSetName -eq 'Bulk') {
+            $bulkItems = [System.Collections.ArrayList]::new()
+        }
+    }
 
-    #$PSBoundParameters.Status = ValidateVirtualizationChoice -ProvidedValue $Status -VirtualMachineStatus
+    process {
+        if ($PSCmdlet.ParameterSetName -eq 'Single') {
+            $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
 
-    # Note: In Netbox 4.x, Site is optional. A VM requires either a Cluster or can be standalone.
-    $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'virtual-machines'))
+            if ($PSCmdlet.ShouldProcess($Name, 'Create new Virtual Machine')) {
+                InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+            }
+        }
+        else {
+            # Bulk mode - collect items
+            if ($InputObject) {
+                $item = @{}
+                foreach ($prop in $InputObject.PSObject.Properties) {
+                    $key = $prop.Name.ToLower()
+                    $value = $prop.Value
 
-    $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters
+                    # Handle property name mappings
+                    switch ($key) {
+                        'vcpus' { $key = 'vcpus' }
+                        'primary_ip4' { $key = 'primary_ip4' }
+                        'primary_ip6' { $key = 'primary_ip6' }
+                        'custom_fields' { $key = 'custom_fields' }
+                        'device_role' { $key = 'role' }  # Backwards compatibility
+                    }
 
-    $URI = BuildNewURI -Segments $URIComponents.Segments
+                    $item[$key] = $value
+                }
+                [void]$bulkItems.Add([PSCustomObject]$item)
+            }
+        }
+    }
 
-    if ($PSCmdlet.ShouldProcess($name, 'Create new Virtual Machine')) {
-        InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters
+    end {
+        if ($PSCmdlet.ParameterSetName -eq 'Bulk' -and $bulkItems.Count -gt 0) {
+            $target = "$($bulkItems.Count) virtual machine(s)"
+
+            if ($Force -or $PSCmdlet.ShouldProcess($target, 'Create virtual machines (bulk)')) {
+                Write-Verbose "Processing $($bulkItems.Count) VMs in bulk mode with batch size $BatchSize"
+
+                $result = Send-NBBulkRequest -URI $URI -Items $bulkItems.ToArray() -Method POST `
+                    -BatchSize $BatchSize -ShowProgress -ActivityName 'Creating virtual machines'
+
+                # Output succeeded items to pipeline
+                foreach ($item in $result.Succeeded) {
+                    Write-Output $item
+                }
+
+                # Write errors for failed items
+                foreach ($failure in $result.Failed) {
+                    Write-Error "Failed to create VM: $($failure.Error)" -TargetObject $failure.Item
+                }
+
+                # Write summary
+                if ($result.HasErrors) {
+                    Write-Warning $result.GetSummary()
+                }
+                else {
+                    Write-Verbose $result.GetSummary()
+                }
+            }
+        }
     }
 }
-
-
-
-
 
 #endregion
 
@@ -17147,12 +18038,16 @@ function New-NBVirtualMachine {
 
 <#
 .SYNOPSIS
-    Creates a new network interface on a virtual machine in Netbox.
+    Creates one or more network interfaces on virtual machines in Netbox.
 
 .DESCRIPTION
-    Creates a new network interface on a specified virtual machine in the Netbox
-    Virtualization module. VM interfaces are used to assign IP addresses and
-    configure network connectivity for virtual machines.
+    Creates new network interfaces on specified virtual machines. Supports both
+    single interface creation with individual parameters and bulk creation via
+    pipeline input.
+
+    For bulk operations, use the -BatchSize parameter to control how many
+    interfaces are sent per API request. This significantly improves performance
+    when creating many VM interfaces.
 
 .PARAMETER Name
     The name of the interface (e.g., 'eth0', 'ens192', 'Ethernet0').
@@ -17165,22 +18060,15 @@ function New-NBVirtualMachine {
 
 .PARAMETER MAC_Address
     The MAC address of the interface in format XX:XX:XX:XX:XX:XX.
-    Accepts both uppercase and lowercase hex characters.
 
 .PARAMETER MTU
-    Maximum Transmission Unit size. Common values:
-    - 1500 for standard Ethernet
-    - 9000 for jumbo frames
-    Valid range: 1-65535
+    Maximum Transmission Unit size. Common values: 1500 (standard), 9000 (jumbo).
 
 .PARAMETER Description
     A description of the interface.
 
 .PARAMETER Mode
-    VLAN mode for the interface:
-    - 'access' - Untagged access port
-    - 'tagged' - Trunk port with tagged VLANs
-    - 'tagged-all' - Trunk port allowing all VLANs
+    VLAN mode for the interface: 'access', 'tagged', or 'tagged-all'.
 
 .PARAMETER Untagged_VLAN
     The database ID of the untagged/native VLAN.
@@ -17197,6 +18085,17 @@ function New-NBVirtualMachine {
 .PARAMETER Custom_Fields
     Hashtable of custom field values.
 
+.PARAMETER InputObject
+    Pipeline input for bulk operations. Each object should contain
+    the required properties: Name, Virtual_Machine.
+
+.PARAMETER BatchSize
+    Number of interfaces to create per API request in bulk mode.
+    Default: 50, Range: 1-1000
+
+.PARAMETER Force
+    Skip confirmation prompts for bulk operations.
+
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
@@ -17206,74 +18105,175 @@ function New-NBVirtualMachine {
     Creates a new enabled interface named 'eth0' on VM ID 42.
 
 .EXAMPLE
-    New-NBVirtualMachineInterface -Name "ens192" -Virtual_Machine 42 -MAC_Address "00:50:56:AB:CD:EF"
+    $vms = Get-NBVirtualMachine -Cluster 1
+    $interfaces = $vms | ForEach-Object {
+        [PSCustomObject]@{
+            Virtual_Machine = $_.id
+            Name = "eth0"
+            Enabled = $true
+            Description = "Primary interface"
+        }
+    }
+    $interfaces | New-NBVirtualMachineInterface -BatchSize 50 -Force
 
-    Creates a new interface with a specific MAC address.
+    Creates primary interfaces for all VMs in a cluster in bulk.
 
 .EXAMPLE
-    $vm = Get-NBVirtualMachine -Name "webserver01"
-    New-NBVirtualMachineInterface -Name "eth0" -Virtual_Machine $vm.Id -MTU 9000
+    # Create multiple interfaces per VM
+    $vmId = 123
+    $interfaces = @(
+        [PSCustomObject]@{Virtual_Machine=$vmId; Name="eth0"; Description="Management"}
+        [PSCustomObject]@{Virtual_Machine=$vmId; Name="eth1"; Description="Production"}
+        [PSCustomObject]@{Virtual_Machine=$vmId; Name="eth2"; Description="Backup"}
+    )
+    $interfaces | New-NBVirtualMachineInterface -Force
 
-    Creates a new interface with jumbo frame support on a VM found by name.
-
-.EXAMPLE
-    New-NBVirtualMachineInterface -Name "eth0" -Virtual_Machine 42 -Mode "tagged" -Tagged_VLANs 10,20,30
-
-    Creates a trunk interface with multiple tagged VLANs.
+    Creates multiple interfaces on a single VM.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/models/virtualization/vminterface/
 #>
 function New-NBVirtualMachineInterface {
-    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
+    [CmdletBinding(SupportsShouldProcess = $true,
+        ConfirmImpact = 'Low',
+        DefaultParameterSetName = 'Single')]
     [OutputType([PSCustomObject])]
-    param
-    (
-        [Parameter(Mandatory = $true)]
+    param(
+        # Single mode parameters
+        [Parameter(ParameterSetName = 'Single', Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [string]$Name,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter(ParameterSetName = 'Single', Mandatory = $true)]
         [uint64]$Virtual_Machine,
 
+        [Parameter(ParameterSetName = 'Single')]
         [bool]$Enabled = $true,
 
+        [Parameter(ParameterSetName = 'Single')]
         [ValidatePattern('^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$')]
         [string]$MAC_Address,
 
+        [Parameter(ParameterSetName = 'Single')]
         [ValidateRange(1, 65535)]
         [uint16]$MTU,
 
+        [Parameter(ParameterSetName = 'Single')]
         [string]$Description,
 
+        [Parameter(ParameterSetName = 'Single')]
         [ValidateSet('access', 'tagged', 'tagged-all', IgnoreCase = $true)]
         [string]$Mode,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Untagged_VLAN,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64[]]$Tagged_VLANs,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$VRF,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64[]]$Tags,
 
+        [Parameter(ParameterSetName = 'Single')]
         [hashtable]$Custom_Fields,
 
+        # Bulk mode parameters
+        [Parameter(ParameterSetName = 'Bulk', Mandatory = $true, ValueFromPipeline = $true)]
+        [PSCustomObject]$InputObject,
+
+        [Parameter(ParameterSetName = 'Bulk')]
+        [ValidateRange(1, 1000)]
+        [int]$BatchSize = 50,
+
+        [Parameter(ParameterSetName = 'Bulk')]
+        [switch]$Force,
+
+        # Common parameters
+        [Parameter()]
         [switch]$Raw
     )
 
-    process {
+    begin {
         $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'interfaces'))
+        $URI = BuildNewURI -Segments $Segments
 
-        # Ensure Enabled is always included in the body (defaults to true)
-        $PSBoundParameters['Enabled'] = $Enabled
+        if ($PSCmdlet.ParameterSetName -eq 'Bulk') {
+            $bulkItems = [System.Collections.ArrayList]::new()
+        }
+    }
 
-        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+    process {
+        if ($PSCmdlet.ParameterSetName -eq 'Single') {
+            # Ensure Enabled is always included in the body (defaults to true)
+            $PSBoundParameters['Enabled'] = $Enabled
 
-        $URI = BuildNewURI -Segments $URIComponents.Segments
+            $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
 
-        if ($PSCmdlet.ShouldProcess("VM $Virtual_Machine", "Create interface '$Name'")) {
-            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+            if ($PSCmdlet.ShouldProcess("VM $Virtual_Machine", "Create interface '$Name'")) {
+                InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+            }
+        }
+        else {
+            # Bulk mode - collect items
+            if ($InputObject) {
+                $item = @{}
+                foreach ($prop in $InputObject.PSObject.Properties) {
+                    $key = $prop.Name.ToLower()
+                    $value = $prop.Value
+
+                    # Handle property name mappings
+                    switch ($key) {
+                        'virtual_machine' { $key = 'virtual_machine' }
+                        'mac_address' { $key = 'mac_address' }
+                        'untagged_vlan' { $key = 'untagged_vlan' }
+                        'tagged_vlans' { $key = 'tagged_vlans' }
+                        'custom_fields' { $key = 'custom_fields' }
+                    }
+
+                    $item[$key] = $value
+                }
+
+                # Default enabled to true if not specified
+                if (-not $item.ContainsKey('enabled')) {
+                    $item['enabled'] = $true
+                }
+
+                [void]$bulkItems.Add([PSCustomObject]$item)
+            }
+        }
+    }
+
+    end {
+        if ($PSCmdlet.ParameterSetName -eq 'Bulk' -and $bulkItems.Count -gt 0) {
+            $target = "$($bulkItems.Count) interface(s)"
+
+            if ($Force -or $PSCmdlet.ShouldProcess($target, 'Create VM interfaces (bulk)')) {
+                Write-Verbose "Processing $($bulkItems.Count) VM interfaces in bulk mode with batch size $BatchSize"
+
+                $result = Send-NBBulkRequest -URI $URI -Items $bulkItems.ToArray() -Method POST `
+                    -BatchSize $BatchSize -ShowProgress -ActivityName 'Creating VM interfaces'
+
+                # Output succeeded items to pipeline
+                foreach ($item in $result.Succeeded) {
+                    Write-Output $item
+                }
+
+                # Write errors for failed items
+                foreach ($failure in $result.Failed) {
+                    Write-Error "Failed to create VM interface: $($failure.Error)" -TargetObject $failure.Item
+                }
+
+                # Write summary
+                if ($result.HasErrors) {
+                    Write-Warning $result.GetSummary()
+                }
+                else {
+                    Write-Verbose $result.GetSummary()
+                }
+            }
         }
     }
 }
@@ -18991,60 +19991,150 @@ function Remove-NBDCIMConsoleServerPortTemplate {
 
 #region File Remove-NBDCIMDevice.ps1
 
-
-function Remove-NBDCIMDevice {
 <#
-    .SYNOPSIS
-        Delete a device
+.SYNOPSIS
+    Deletes one or more devices from Netbox DCIM module.
 
-    .DESCRIPTION
-        Deletes a device from Netbox by ID
+.DESCRIPTION
+    Deletes devices from Netbox by ID. Supports both single device deletion
+    and bulk deletion via pipeline input.
 
-    .PARAMETER Id
-        Database ID of the device
+    For bulk operations, use the -BatchSize parameter to control how many
+    devices are deleted per API request.
 
-    .PARAMETER Force
-        Force deletion without any prompts
+    WARNING: This operation cannot be undone. Deleted devices and their
+    associated data (interfaces, connections, etc.) will be permanently removed.
 
-    .EXAMPLE
-        PS C:\> Remove-NBDCIMDevice -Id $value1
+.PARAMETER Id
+    Database ID(s) of the device(s) to delete. Required for single mode.
 
-    .NOTES
-        Additional information about the function.
+.PARAMETER InputObject
+    Pipeline input for bulk operations. Each object must have an Id property.
+
+.PARAMETER BatchSize
+    Number of devices to delete per API request in bulk mode.
+    Default: 50, Range: 1-1000
+
+.PARAMETER Force
+    Skip confirmation prompts. Use with caution!
+
+.PARAMETER Raw
+    Return the raw API response.
+
+.EXAMPLE
+    Remove-NBDCIMDevice -Id 123 -Force
+
+    Deletes device 123 without confirmation.
+
+.EXAMPLE
+    Remove-NBDCIMDevice -Id 100, 101, 102 -Force
+
+    Deletes multiple devices by ID.
+
+.EXAMPLE
+    Get-NBDCIMDevice -Status "decommissioning" | Remove-NBDCIMDevice -Force
+
+    Bulk delete all devices in decommissioning status.
+
+.EXAMPLE
+    Get-NBDCIMDevice -Query "temp-*" | Remove-NBDCIMDevice -BatchSize 50 -Force
+
+    Bulk delete devices matching a pattern with batching.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 
-    [CmdletBinding(ConfirmImpact = 'High',
-                   SupportsShouldProcess = $true)]
+function Remove-NBDCIMDevice {
+    [CmdletBinding(SupportsShouldProcess = $true,
+        ConfirmImpact = 'High',
+        DefaultParameterSetName = 'Single')]
     [OutputType([void])]
-    param
-    (
-        [Parameter(Mandatory = $true,
-                   ValueFromPipelineByPropertyName = $true)]
+    param(
+        # Single mode parameters
+        [Parameter(ParameterSetName = 'Single', Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
-        [switch]$Force
+        # Bulk mode parameters
+        [Parameter(ParameterSetName = 'Bulk', Mandatory = $true, ValueFromPipeline = $true)]
+        [PSCustomObject]$InputObject,
+
+        [Parameter(ParameterSetName = 'Bulk')]
+        [ValidateRange(1, 1000)]
+        [int]$BatchSize = 50,
+
+        # Common parameters
+        [Parameter()]
+        [switch]$Force,
+
+        [Parameter()]
+        [switch]$Raw
     )
 
     begin {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim', 'devices'))
+        $URI = BuildNewURI -Segments $Segments
 
+        if ($PSCmdlet.ParameterSetName -eq 'Bulk') {
+            $bulkItems = [System.Collections.ArrayList]::new()
+        }
     }
 
     process {
-        foreach ($DeviceID in $Id) {
-            $CurrentDevice = Get-NBDCIMDevice -Id $DeviceID -ErrorAction Stop
+        if ($PSCmdlet.ParameterSetName -eq 'Single') {
+            foreach ($DeviceID in $Id) {
+                $CurrentDevice = Get-NBDCIMDevice -Id $DeviceID -ErrorAction Stop
 
-            if ($Force -or $pscmdlet.ShouldProcess("Name: $($CurrentDevice.Name) | ID: $($CurrentDevice.Id)", "Remove")) {
-                $Segments = [System.Collections.ArrayList]::new(@('dcim', 'devices', $CurrentDevice.Id))
+                if ($Force -or $PSCmdlet.ShouldProcess("Name: $($CurrentDevice.Name) | ID: $($CurrentDevice.Id)", "Delete device")) {
+                    $DeviceSegments = [System.Collections.ArrayList]::new(@('dcim', 'devices', $CurrentDevice.Id))
 
-                $URI = BuildNewURI -Segments $Segments
+                    $DeviceURI = BuildNewURI -Segments $DeviceSegments
 
-                InvokeNetboxRequest -URI $URI -Method DELETE
+                    InvokeNetboxRequest -URI $DeviceURI -Method DELETE -Raw:$Raw
+                }
+            }
+        }
+        else {
+            # Bulk mode - collect items
+            if ($InputObject) {
+                # Extract Id from object
+                $itemId = if ($InputObject.Id) { $InputObject.Id }
+                          elseif ($InputObject.id) { $InputObject.id }
+                          else { $null }
+
+                if (-not $itemId) {
+                    Write-Error "InputObject must have an 'Id' property for bulk delete" -TargetObject $InputObject
+                    return
+                }
+
+                # Netbox bulk DELETE expects array of objects with 'id'
+                [void]$bulkItems.Add([PSCustomObject]@{ id = $itemId })
             }
         }
     }
 
     end {
+        if ($PSCmdlet.ParameterSetName -eq 'Bulk' -and $bulkItems.Count -gt 0) {
+            $target = "$($bulkItems.Count) device(s) - THIS CANNOT BE UNDONE!"
 
+            if ($Force -or $PSCmdlet.ShouldProcess($target, 'Delete devices (bulk)')) {
+                Write-Verbose "Processing $($bulkItems.Count) devices in bulk DELETE mode with batch size $BatchSize"
+
+                $result = Send-NBBulkRequest -URI $URI -Items $bulkItems.ToArray() -Method DELETE `
+                    -BatchSize $BatchSize -ShowProgress -ActivityName 'Deleting devices'
+
+                # Write summary
+                if ($result.HasErrors) {
+                    Write-Warning $result.GetSummary()
+                    foreach ($failure in $result.Failed) {
+                        Write-Error "Failed to delete device: $($failure.Error)" -TargetObject $failure.Item
+                    }
+                }
+                else {
+                    Write-Verbose $result.GetSummary()
+                }
+            }
+        }
     }
 }
 
@@ -20527,7 +21617,7 @@ function Remove-NBDCIMSite {
     (
         [Parameter(Mandatory = $true,
             ValueFromPipelineByPropertyName = $true)]
-        [uint]$Id
+        [uint64]$Id
 
     )
 
@@ -22905,6 +23995,154 @@ function Remove-NBWirelessLink {
 
 #endregion
 
+#region File Send-NBBulkRequest.ps1
+
+<#
+.SYNOPSIS
+    Sends bulk requests to the Netbox API.
+
+.DESCRIPTION
+    Helper function for bulk API operations. Handles batching, progress reporting,
+    and partial failure handling for POST, PATCH, and DELETE operations.
+
+.PARAMETER URI
+    The base URI for the API endpoint.
+
+.PARAMETER Items
+    Array of items to process in bulk.
+
+.PARAMETER Method
+    HTTP method (POST, PATCH, DELETE).
+
+.PARAMETER BatchSize
+    Maximum number of items per API request. Default: 100, Max: 1000.
+
+.PARAMETER ShowProgress
+    Show progress bar during bulk operations.
+
+.PARAMETER ActivityName
+    Name to display in the progress bar.
+
+.OUTPUTS
+    [BulkOperationResult] Object containing succeeded and failed items.
+
+.EXAMPLE
+    $result = Send-NBBulkRequest -URI $uri -Items $devices -Method POST -BatchSize 50
+#>
+
+function Send-NBBulkRequest {
+    [CmdletBinding()]
+    [OutputType([BulkOperationResult])]
+    param(
+        [Parameter(Mandatory = $true)]
+        [System.UriBuilder]$URI,
+
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [array]$Items,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('POST', 'PATCH', 'DELETE')]
+        [string]$Method,
+
+        [ValidateRange(1, 1000)]
+        [int]$BatchSize = 100,
+
+        [switch]$ShowProgress,
+
+        [string]$ActivityName = 'Bulk operation'
+    )
+
+    $result = [BulkOperationResult]::new()
+
+    if ($Items.Count -eq 0) {
+        $result.Complete()
+        return $result
+    }
+
+    # Split items into batches
+    $batches = [System.Collections.ArrayList]::new()
+    for ($i = 0; $i -lt $Items.Count; $i += $BatchSize) {
+        $batch = $Items[$i..([Math]::Min($i + $BatchSize - 1, $Items.Count - 1))]
+        [void]$batches.Add($batch)
+    }
+
+    $totalBatches = $batches.Count
+    $currentBatch = 0
+
+    Write-Verbose "Processing $($Items.Count) items in $totalBatches batch(es) of max $BatchSize"
+
+    foreach ($batch in $batches) {
+        $currentBatch++
+
+        if ($ShowProgress) {
+            $percentComplete = [int](($currentBatch / $totalBatches) * 100)
+            Write-Progress -Activity $ActivityName `
+                -Status "Batch $currentBatch of $totalBatches ($($batch.Count) items)" `
+                -PercentComplete $percentComplete `
+                -CurrentOperation "$Method request"
+        }
+
+        try {
+            Write-Verbose "[$currentBatch/$totalBatches] Sending batch of $($batch.Count) items"
+
+            # For bulk operations, we send an array directly
+            $response = InvokeNetboxRequest -URI $URI -Method $Method -Body $batch -Raw
+
+            # Process response - Netbox returns an array of results for bulk operations
+            if ($response -is [array]) {
+                foreach ($item in $response) {
+                    if ($item.id) {
+                        $result.AddSuccess($item)
+                    }
+                    else {
+                        # Item failed validation but request succeeded
+                        $errorMsg = if ($item.error) { $item.error } else { "Unknown error" }
+                        $result.AddFailure($item, $errorMsg)
+                    }
+                }
+            }
+            elseif ($response.id) {
+                # Single item response (shouldn't happen in bulk, but handle it)
+                $result.AddSuccess($response)
+            }
+            elseif ($null -eq $response -and $Method -eq 'DELETE') {
+                # DELETE operations return null on success
+                foreach ($item in $batch) {
+                    $result.AddSuccess($item)
+                }
+            }
+            else {
+                # Unexpected response format
+                Write-Warning "Unexpected response format from bulk $Method request"
+                foreach ($item in $batch) {
+                    $result.AddSuccess($item)
+                }
+            }
+        }
+        catch {
+            # Entire batch failed - mark all items as failed
+            $errorMessage = $_.Exception.Message
+            Write-Warning "Batch $currentBatch failed: $errorMessage"
+
+            foreach ($item in $batch) {
+                $result.AddFailure($item, $errorMessage)
+            }
+        }
+    }
+
+    if ($ShowProgress) {
+        Write-Progress -Activity $ActivityName -Completed
+    }
+
+    $result.Complete()
+    Write-Verbose $result.GetSummary()
+
+    return $result
+}
+
+#endregion
+
 #region File Set-NBCipherSSL.ps1
 
 function Set-NBCipherSSL {
@@ -24698,99 +25936,281 @@ function Set-NBDCIMConsoleServerPortTemplate {
 
 <#
 .SYNOPSIS
-    Updates an existing CIMDevice in Netbox D module.
+    Updates one or more devices in Netbox DCIM module.
 
 .DESCRIPTION
-    Updates an existing CIMDevice in Netbox D module.
-    Supports pipeline input for Id parameter where applicable.
+    Updates existing devices in Netbox DCIM module. Supports both single device
+    updates with individual parameters and bulk updates via pipeline input.
+
+    For bulk operations, use the -BatchSize parameter to control how many
+    devices are sent per API request. Each object must have an Id property.
+
+.PARAMETER Id
+    The database ID of the device to update. Required for single updates.
+
+.PARAMETER Name
+    The new name for the device.
+
+.PARAMETER Role
+    The device role ID.
+    Alias: Device_Role (backwards compatibility)
+
+.PARAMETER Device_Type
+    The device type ID.
+
+.PARAMETER Site
+    The site ID.
+
+.PARAMETER Status
+    Status of the device.
+
+.PARAMETER Platform
+    The platform ID.
+
+.PARAMETER Tenant
+    The tenant ID.
+
+.PARAMETER Cluster
+    The cluster ID.
+
+.PARAMETER Rack
+    The rack ID.
+
+.PARAMETER Position
+    Position in the rack.
+
+.PARAMETER Face
+    Face of the device in the rack.
+
+.PARAMETER Serial
+    Serial number.
+
+.PARAMETER Asset_Tag
+    Asset tag.
+
+.PARAMETER Comments
+    Comments about the device.
+
+.PARAMETER Custom_Fields
+    Hashtable of custom field values.
+
+.PARAMETER InputObject
+    Pipeline input for bulk operations. Each object MUST have an Id property.
+
+.PARAMETER BatchSize
+    Number of devices to update per API request in bulk mode.
+    Default: 50, Range: 1-1000
+
+.PARAMETER Force
+    Skip confirmation prompts.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBDCIMDevice
+    Set-NBDCIMDevice -Id 123 -Status "active"
 
-    Returns all CIMDevice objects.
+    Updates device 123 to active status.
+
+.EXAMPLE
+    Get-NBDCIMDevice -Status "planned" | ForEach-Object {
+        [PSCustomObject]@{Id = $_.id; Status = "active"}
+    } | Set-NBDCIMDevice -Force
+
+    Bulk update all planned devices to active status.
+
+.EXAMPLE
+    $updates = @(
+        [PSCustomObject]@{Id = 100; Status = "active"; Comments = "Deployed"}
+        [PSCustomObject]@{Id = 101; Status = "active"; Comments = "Deployed"}
+    )
+    $updates | Set-NBDCIMDevice -BatchSize 50 -Force
+
+    Bulk update multiple devices with different values.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 
 function Set-NBDCIMDevice {
-    [CmdletBinding(SupportsShouldProcess = $true)]
+    [CmdletBinding(SupportsShouldProcess = $true,
+        ConfirmImpact = 'Medium',
+        DefaultParameterSetName = 'Single')]
     [OutputType([PSCustomObject])]
-    param
-    (
-        [Parameter(Mandatory = $true,
-                   ValueFromPipelineByPropertyName = $true)]
+    param(
+        # Single mode parameters
+        [Parameter(ParameterSetName = 'Single', Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
+        [Parameter(ParameterSetName = 'Single')]
         [string]$Name,
 
+        [Parameter(ParameterSetName = 'Single')]
         [Alias('Device_Role')]
         [object]$Role,
 
+        [Parameter(ParameterSetName = 'Single')]
         [object]$Device_Type,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Site,
 
+        [Parameter(ParameterSetName = 'Single')]
         [object]$Status,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Platform,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Tenant,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Cluster,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Rack,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint16]$Position,
 
+        [Parameter(ParameterSetName = 'Single')]
         [object]$Face,
 
+        [Parameter(ParameterSetName = 'Single')]
         [string]$Serial,
 
+        [Parameter(ParameterSetName = 'Single')]
         [string]$Asset_Tag,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Virtual_Chassis,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$VC_Priority,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$VC_Position,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Primary_IP4,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Primary_IP6,
 
+        [Parameter(ParameterSetName = 'Single')]
         [string]$Comments,
 
+        [Parameter(ParameterSetName = 'Single')]
         [hashtable]$Custom_Fields,
 
-        [switch]$Force
+        # Bulk mode parameters
+        [Parameter(ParameterSetName = 'Bulk', Mandatory = $true, ValueFromPipeline = $true)]
+        [PSCustomObject]$InputObject,
+
+        [Parameter(ParameterSetName = 'Bulk')]
+        [ValidateRange(1, 1000)]
+        [int]$BatchSize = 50,
+
+        # Common parameters
+        [Parameter()]
+        [switch]$Force,
+
+        [Parameter()]
+        [switch]$Raw
     )
 
     begin {
+        $Segments = [System.Collections.ArrayList]::new(@('dcim', 'devices'))
+        $URI = BuildNewURI -Segments $Segments
 
+        if ($PSCmdlet.ParameterSetName -eq 'Bulk') {
+            $bulkItems = [System.Collections.ArrayList]::new()
+        }
     }
 
     process {
-        foreach ($DeviceID in $Id) {
-            $CurrentDevice = Get-NBDCIMDevice -Id $DeviceID -ErrorAction Stop
+        if ($PSCmdlet.ParameterSetName -eq 'Single') {
+            foreach ($DeviceID in $Id) {
+                $CurrentDevice = Get-NBDCIMDevice -Id $DeviceID -ErrorAction Stop
 
-            if ($Force -or $pscmdlet.ShouldProcess("$($CurrentDevice.Name)", "Set")) {
-                $Segments = [System.Collections.ArrayList]::new(@('dcim', 'devices', $CurrentDevice.Id))
+                if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentDevice.Name)", "Update device")) {
+                    $DeviceSegments = [System.Collections.ArrayList]::new(@('dcim', 'devices', $CurrentDevice.Id))
 
-                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force'
+                    $URIComponents = BuildURIComponents -URISegments $DeviceSegments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force', 'Raw'
 
-                $URI = BuildNewURI -Segments $URIComponents.Segments
+                    $DeviceURI = BuildNewURI -Segments $URIComponents.Segments
 
-                InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method PATCH
+                    InvokeNetboxRequest -URI $DeviceURI -Body $URIComponents.Parameters -Method PATCH -Raw:$Raw
+                }
+            }
+        }
+        else {
+            # Bulk mode - collect items
+            if ($InputObject) {
+                # Validate that Id is present
+                $itemId = if ($InputObject.Id) { $InputObject.Id }
+                          elseif ($InputObject.id) { $InputObject.id }
+                          else { $null }
+
+                if (-not $itemId) {
+                    Write-Error "InputObject must have an 'Id' property for bulk updates" -TargetObject $InputObject
+                    return
+                }
+
+                $item = @{}
+                foreach ($prop in $InputObject.PSObject.Properties) {
+                    $key = $prop.Name.ToLower()
+                    $value = $prop.Value
+
+                    # Handle property name mappings
+                    switch ($key) {
+                        'device_role' { $key = 'role' }
+                        'device_type' { $key = 'device_type' }
+                        'asset_tag' { $key = 'asset_tag' }
+                        'virtual_chassis' { $key = 'virtual_chassis' }
+                        'vc_priority' { $key = 'vc_priority' }
+                        'vc_position' { $key = 'vc_position' }
+                        'primary_ip4' { $key = 'primary_ip4' }
+                        'primary_ip6' { $key = 'primary_ip6' }
+                        'custom_fields' { $key = 'custom_fields' }
+                    }
+
+                    $item[$key] = $value
+                }
+                [void]$bulkItems.Add([PSCustomObject]$item)
             }
         }
     }
 
     end {
+        if ($PSCmdlet.ParameterSetName -eq 'Bulk' -and $bulkItems.Count -gt 0) {
+            $target = "$($bulkItems.Count) device(s)"
 
+            if ($Force -or $PSCmdlet.ShouldProcess($target, 'Update devices (bulk)')) {
+                Write-Verbose "Processing $($bulkItems.Count) devices in bulk PATCH mode with batch size $BatchSize"
+
+                $result = Send-NBBulkRequest -URI $URI -Items $bulkItems.ToArray() -Method PATCH `
+                    -BatchSize $BatchSize -ShowProgress -ActivityName 'Updating devices'
+
+                # Output succeeded items to pipeline
+                foreach ($item in $result.Succeeded) {
+                    Write-Output $item
+                }
+
+                # Write errors for failed items
+                foreach ($failure in $result.Failed) {
+                    Write-Error "Failed to update device: $($failure.Error)" -TargetObject $failure.Item
+                }
+
+                # Write summary
+                if ($result.HasErrors) {
+                    Write-Warning $result.GetSummary()
+                }
+                else {
+                    Write-Verbose $result.GetSummary()
+                }
+            }
+        }
     }
 }
 
@@ -27550,6 +28970,7 @@ function Set-NBHostScheme {
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 function Set-NBInvokeParams {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', '', Justification = 'Params refers to a collection of invoke parameters')]
     [CmdletBinding(ConfirmImpact = 'Low',
         SupportsShouldProcess = $true)]
     [OutputType([string])]
@@ -29395,9 +30816,40 @@ function Set-NBToken {
 
 #region File Set-NBUnstrustedSSL.ps1
 
+<#
+.SYNOPSIS
+    Configures PowerShell to trust all SSL certificates for HTTPS connections.
+
+.DESCRIPTION
+    This function disables SSL certificate validation by implementing a custom
+    ICertificatePolicy that accepts all certificates. This is useful when connecting
+    to Netbox instances that use self-signed certificates.
+
+    WARNING: This reduces security by accepting any certificate. Only use in
+    development environments or when connecting to trusted internal servers.
+
+    Note: This function is only effective on Windows PowerShell (Desktop edition).
+    PowerShell Core uses the -SkipCertificateCheck parameter on Invoke-RestMethod instead.
+
+.EXAMPLE
+    Set-NBUntrustedSSL
+
+    Configures the session to trust all SSL certificates.
+
+.EXAMPLE
+    Set-NBUntrustedSSL
+    Connect-NBAPI -Hostname "netbox.local" -Credential $cred
+
+    Enables untrusted SSL before connecting to a Netbox instance with a self-signed cert.
+
+.LINK
+    Connect-NBAPI
+#>
 Function Set-NBUntrustedSSL {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessforStateChangingFunctions", "")]
-    Param(  )
+    [CmdletBinding()]
+    [OutputType([void])]
+    Param()
     # Hack for allowing untrusted SSL certs with https connections
     Add-Type -TypeDefinition @"
     using System.Net;
@@ -29502,7 +30954,7 @@ public class NetboxTrustAllCertsPolicy : ICertificatePolicy {
     Username.
 
 .PARAMETER Password
-    Password.
+    Password. Use SecureString for security.
 
 .PARAMETER First_Name
     First name.
@@ -29543,7 +30995,7 @@ function Set-NBUser {
 
         [string]$Username,
 
-        [string]$Password,
+        [securestring]$Password,
 
         [string]$First_Name,
 
@@ -29564,11 +31016,22 @@ function Set-NBUser {
 
     process {
         $Segments = [System.Collections.ArrayList]::new(@('users', 'users', $Id))
-        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
-        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        # Build params manually to handle SecureString conversion
+        $params = @{}
+        foreach ($key in $PSBoundParameters.Keys) {
+            if ($key -eq 'Password') {
+                $params['password'] = [System.Net.NetworkCredential]::new('', $Password).Password
+            }
+            elseif ($key -notin 'Id', 'Raw', 'WhatIf', 'Confirm', 'Verbose', 'Debug', 'ErrorAction', 'WarningAction', 'InformationAction', 'ErrorVariable', 'WarningVariable', 'InformationVariable', 'OutVariable', 'OutBuffer', 'PipelineVariable') {
+                $params[$key] = $PSBoundParameters[$key]
+            }
+        }
+
+        $URI = BuildNewURI -Segments $Segments
 
         if ($PSCmdlet.ShouldProcess($Id, 'Update User')) {
-            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $params -Raw:$Raw
         }
     }
 }

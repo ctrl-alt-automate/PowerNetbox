@@ -19,6 +19,11 @@ function Get-NBDCIMPlatform {
     [OutputType([pscustomobject])]
     param
     (
+        [switch]$All,
+
+        [ValidateRange(1, 1000)]
+        [int]$PageSize = 100,
+
         [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
@@ -49,7 +54,7 @@ function Get-NBDCIMPlatform {
 
                 $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
-                InvokeNetboxRequest -URI $URI -Raw:$Raw
+                InvokeNetboxRequest -URI $URI -Raw:$Raw -All:$All -PageSize $PageSize
             }
 
             break
@@ -58,11 +63,11 @@ function Get-NBDCIMPlatform {
         default {
             $Segments = [System.Collections.ArrayList]::new(@('dcim', 'platforms'))
 
-            $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+            $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'
 
             $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
-            InvokeNetboxRequest -URI $URI -Raw:$Raw
+            InvokeNetboxRequest -URI $URI -Raw:$Raw -All:$All -PageSize $PageSize
         }
     }
     }
