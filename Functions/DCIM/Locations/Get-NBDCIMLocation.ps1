@@ -63,6 +63,11 @@ function Get-NBDCIMLocation {
     [OutputType([PSCustomObject])]
     param
     (
+        [switch]$All,
+
+        [ValidateRange(1, 1000)]
+        [int]$PageSize = 100,
+
         [Parameter(ParameterSetName = 'ByID',
                    ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
@@ -109,18 +114,18 @@ function Get-NBDCIMLocation {
 
                     $URI = BuildNewURI -Segments $Segments
 
-                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw -All:$All -PageSize $PageSize
                 }
             }
 
             default {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'locations'))
 
-                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'
 
                 $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
-                InvokeNetboxRequest -URI $URI -Raw:$Raw
+                InvokeNetboxRequest -URI $URI -Raw:$Raw -All:$All -PageSize $PageSize
             }
         }
     }

@@ -19,6 +19,11 @@ function Get-NBCircuitProvider {
     [OutputType([PSCustomObject])]
     param
     (
+        [switch]$All,
+
+        [ValidateRange(1, 1000)]
+        [int]$PageSize = 100,
+
         [Parameter(ParameterSetName = 'ById',
                    Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
@@ -59,7 +64,7 @@ function Get-NBCircuitProvider {
 
                 $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
-                InvokeNetboxRequest -URI $URI -Raw:$Raw
+                InvokeNetboxRequest -URI $URI -Raw:$Raw -All:$All -PageSize $PageSize
             }
         }
 
@@ -70,7 +75,7 @@ function Get-NBCircuitProvider {
 
             $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
-            InvokeNetboxRequest -URI $URI -Raw:$Raw
+            InvokeNetboxRequest -URI $URI -Raw:$Raw -All:$All -PageSize $PageSize
         }
     }
     }

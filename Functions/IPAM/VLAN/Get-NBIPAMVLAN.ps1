@@ -19,6 +19,11 @@ function Get-NBIPAMVLAN {
     [OutputType([PSCustomObject])]
     param
     (
+        [switch]$All,
+
+        [ValidateRange(1, 1000)]
+        [int]$PageSize = 100,
+
         [Parameter(ParameterSetName = 'Query',
                    Position = 0)]
         [ValidateRange(1, 4096)]
@@ -88,7 +93,7 @@ function Get-NBIPAMVLAN {
 
                 $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
-                InvokeNetboxRequest -URI $uri -Raw:$Raw
+                InvokeNetboxRequest -URI $uri -Raw:$Raw -All:$All -PageSize $PageSize
             }
 
             break
@@ -101,8 +106,7 @@ function Get-NBIPAMVLAN {
 
             $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
-            InvokeNetboxRequest -URI $uri -Raw:$Raw
-
+            InvokeNetboxRequest -URI $uri -Raw:$Raw -All:$All -PageSize $PageSize
             break
         }
     }

@@ -19,6 +19,11 @@ function Get-NBCircuitTermination {
     [OutputType([PSCustomObject])]
     param
     (
+        [switch]$All,
+
+        [ValidateRange(1, 1000)]
+        [int]$PageSize = 100,
+
         [Parameter(ParameterSetName = 'ById',
                    ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
@@ -63,7 +68,7 @@ function Get-NBCircuitTermination {
 
                     $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
-                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw -All:$All -PageSize $PageSize
                 }
             }
 
@@ -74,7 +79,7 @@ function Get-NBCircuitTermination {
 
                 $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
-                InvokeNetboxRequest -URI $URI -Raw:$Raw
+                InvokeNetboxRequest -URI $URI -Raw:$Raw -All:$All -PageSize $PageSize
             }
         }
     }

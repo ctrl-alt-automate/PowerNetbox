@@ -19,6 +19,11 @@ function Get-NBTag {
     [OutputType([pscustomobject])]
     param
     (
+        [switch]$All,
+
+        [ValidateRange(1, 1000)]
+        [int]$PageSize = 100,
+
         [Parameter(ValueFromPipelineByPropertyName = $true)]
         [uint64]$Id,
 
@@ -43,6 +48,6 @@ function Get-NBTag {
 
         $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
-        InvokeNetboxRequest -URI $URI -Raw:$Raw
+        InvokeNetboxRequest -URI $URI -Raw:$Raw -All:$All -PageSize $PageSize
     }
 }
