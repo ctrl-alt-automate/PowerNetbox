@@ -9,7 +9,7 @@ This file provides guidance to Claude Code (or any AI assistant) when working wi
 > **Note:** This is a fork of [NetboxPS](https://github.com/benclaussen/NetboxPS) published under a new name to provide full Netbox 4.x compatibility.
 
 - **Module Name**: PowerNetbox (PSGallery)
-- **Current Version**: 4.4.8
+- **Current Version**: 4.4.8.1
 - **Target Netbox Version**: 4.4.8 (fully compatible)
 - **Minimum Netbox Version**: 2.8.x
 - **PowerShell Version**: 5.1+ (Desktop and Core editions)
