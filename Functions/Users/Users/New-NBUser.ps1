@@ -9,7 +9,7 @@
     Username for the new user.
 
 .PARAMETER Password
-    Password for the new user.
+    Password for the new user (required). Use SecureString for security.
 
 .PARAMETER First_Name
     First name.
@@ -36,7 +36,8 @@
     Return the raw API response.
 
 .EXAMPLE
-    New-NBUser -Username "newuser" -Password "SecureP@ss123"
+    $securePass = ConvertTo-SecureString "SecureP@ss123" -AsPlainText -Force
+    New-NBUser -Username "newuser" -Password $securePass
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -50,8 +51,7 @@ function New-NBUser {
         [string]$Username,
 
         [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [string]$Password,
+        [securestring]$Password,
 
         [string]$First_Name,
 
@@ -72,11 +72,22 @@ function New-NBUser {
 
     process {
         $Segments = [System.Collections.ArrayList]::new(@('users', 'users'))
-        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
-        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        # Convert SecureString to plain text for API (required by Netbox)
+        $params = @{}
+        foreach ($key in $PSBoundParameters.Keys) {
+            if ($key -eq 'Password') {
+                $params['password'] = [System.Net.NetworkCredential]::new('', $Password).Password
+            }
+            elseif ($key -notin 'Raw', 'WhatIf', 'Confirm', 'Verbose', 'Debug', 'ErrorAction', 'WarningAction', 'InformationAction', 'ErrorVariable', 'WarningVariable', 'InformationVariable', 'OutVariable', 'OutBuffer', 'PipelineVariable') {
+                $params[$key] = $PSBoundParameters[$key]
+            }
+        }
+
+        $URI = BuildNewURI -Segments $Segments
 
         if ($PSCmdlet.ShouldProcess($Username, 'Create User')) {
-            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+            InvokeNetboxRequest -URI $URI -Method POST -Body $params -Raw:$Raw
         }
     }
 }
