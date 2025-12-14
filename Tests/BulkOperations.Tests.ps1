@@ -472,6 +472,101 @@ Describe "New-NBIPAMPrefix Bulk Mode" -Tag 'Bulk', 'IPAM' {
     }
 }
 
+Describe "New-NBIPAMAddress Bulk Mode" -Tag 'Bulk', 'IPAM' {
+    BeforeAll {
+        Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
+        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
+            return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
+        }
+        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { return 'netbox.domain.com' }
+        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
+        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
+
+        InModuleScope -ModuleName 'PowerNetbox' {
+            $script:NetboxConfig.Hostname = 'netbox.domain.com'
+            $script:NetboxConfig.HostScheme = 'https'
+            $script:NetboxConfig.HostPort = 443
+        }
+
+        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+            $body = $Body | ConvertFrom-Json
+            if ($body -is [array]) {
+                $response = @()
+                $id = 100
+                foreach ($item in $body) {
+                    $response += [PSCustomObject]@{
+                        id = $id++
+                        address = $item.address
+                        status = @{ value = $item.status; label = $item.status }
+                        description = $item.description
+                    }
+                }
+                return $response
+            }
+            else {
+                return [PSCustomObject]@{
+                    id = 100
+                    address = $body.address
+                    status = @{ value = $body.status; label = $body.status }
+                }
+            }
+        }
+    }
+
+    Context "Parameter Sets" {
+        It "Should have Single and Bulk parameter sets" {
+            $cmd = Get-Command New-NBIPAMAddress
+            $cmd.ParameterSets.Name | Should -Contain 'Single'
+            $cmd.ParameterSets.Name | Should -Contain 'Bulk'
+        }
+
+        It "Should have BatchSize parameter with valid range" {
+            $cmd = Get-Command New-NBIPAMAddress
+            $batchParam = $cmd.Parameters['BatchSize']
+            $validateRange = $batchParam.Attributes | Where-Object { $_ -is [System.Management.Automation.ValidateRangeAttribute] }
+            $validateRange.MinRange | Should -Be 1
+            $validateRange.MaxRange | Should -Be 1000
+        }
+    }
+
+    Context "Bulk Operations" {
+        It "Should create IP addresses in bulk" {
+            $addresses = 1..10 | ForEach-Object {
+                [PSCustomObject]@{
+                    Address = "192.168.1.$_/24"
+                    Status = "active"
+                    Description = "Host $_"
+                }
+            }
+
+            $results = $addresses | New-NBIPAMAddress -BatchSize 5 -Force
+
+            $results.Count | Should -Be 10
+            $results[0].address | Should -Be "192.168.1.1/24"
+        }
+
+        It "Should batch requests correctly" {
+            $addresses = 1..25 | ForEach-Object {
+                [PSCustomObject]@{
+                    Address = "10.0.0.$_/24"
+                    Status = "active"
+                }
+            }
+
+            $addresses | New-NBIPAMAddress -BatchSize 10 -Force
+
+            # 25 items / 10 batch size = 3 API calls
+            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 3 -Exactly -ModuleName 'PowerNetbox'
+        }
+
+        It "Should error on missing Address property" {
+            $invalid = @([PSCustomObject]@{ Status = "active" })
+
+            { $invalid | New-NBIPAMAddress -Force -ErrorAction Stop } | Should -Throw
+        }
+    }
+}
+
 Describe "New-NBVirtualMachine Bulk Mode" -Tag 'Bulk', 'Virtualization' {
     BeforeAll {
         Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
