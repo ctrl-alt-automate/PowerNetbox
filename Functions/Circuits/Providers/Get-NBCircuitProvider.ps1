@@ -25,6 +25,7 @@ function Get-NBCircuitProvider {
 
         [Parameter(ParameterSetName = 'Query',
                    Mandatory = $false)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [Parameter(ParameterSetName = 'Query')]

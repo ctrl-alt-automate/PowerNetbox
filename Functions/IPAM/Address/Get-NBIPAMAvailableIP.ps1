@@ -1,4 +1,4 @@
-﻿
+
 function Get-NBIPAMAvailableIP {
     <#
     .SYNOPSIS
@@ -35,6 +35,7 @@ function Get-NBIPAMAvailableIP {
 #>
 
     [CmdletBinding()]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(Mandatory = $true,

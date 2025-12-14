@@ -37,9 +37,11 @@ function New-NBDCIMManufacturer {
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Slug,
 
         [string]$Description,

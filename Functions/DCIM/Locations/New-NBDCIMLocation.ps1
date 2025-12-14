@@ -56,9 +56,11 @@ function New-NBDCIMLocation {
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Slug,
 
         [Parameter(Mandatory = $true)]

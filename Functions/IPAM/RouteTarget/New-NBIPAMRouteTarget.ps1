@@ -41,6 +41,7 @@ function New-NBIPAMRouteTarget {
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [uint64]$Tenant,

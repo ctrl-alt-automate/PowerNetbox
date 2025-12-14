@@ -19,13 +19,14 @@
 #>
 
 function New-NBDCIMDevice {
-    [CmdletBinding(ConfirmImpact = 'low',
+    [CmdletBinding(ConfirmImpact = 'Low',
         SupportsShouldProcess = $true)]
     [OutputType([pscustomobject])]
     #region Parameters
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$Name,
 
         [Parameter(Mandatory = $true)]

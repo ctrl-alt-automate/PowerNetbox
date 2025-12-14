@@ -45,6 +45,7 @@ function Get-NBVirtualMachineInterface {
 #>
 
     [CmdletBinding()]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(ValueFromPipeline = $true)]

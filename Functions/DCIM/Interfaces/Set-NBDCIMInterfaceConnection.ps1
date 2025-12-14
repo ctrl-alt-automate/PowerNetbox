@@ -1,4 +1,4 @@
-﻿
+
 function Set-NBDCIMInterfaceConnection {
 <#
     .SYNOPSIS
@@ -31,6 +31,7 @@ function Set-NBDCIMInterfaceConnection {
 
     [CmdletBinding(ConfirmImpact = 'Medium',
                    SupportsShouldProcess = $true)]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(Mandatory = $true,

@@ -51,6 +51,7 @@ function Get-NBContact {
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(ParameterSetName = 'Query',
