@@ -8,6 +8,8 @@ function InvokeNetboxRequest {
         retry logic for transient failures, and comprehensive error handling.
         Cross-platform compatible (Windows, Linux, macOS).
 
+        Supports automatic pagination when -All is specified for GET requests.
+
     .PARAMETER URI
         The URI builder object containing the API endpoint.
 
@@ -26,6 +28,14 @@ function InvokeNetboxRequest {
     .PARAMETER Raw
         Return the raw API response instead of just the results array.
 
+    .PARAMETER All
+        Automatically fetch all pages of results for GET requests.
+        Uses the 'next' field in API response to paginate.
+
+    .PARAMETER PageSize
+        Number of items per page when using -All. Default: 100.
+        Range: 1-1000.
+
     .PARAMETER MaxRetries
         Maximum number of retry attempts for transient failures. Default: 3.
 
@@ -37,6 +47,10 @@ function InvokeNetboxRequest {
 
     .EXAMPLE
         $result = InvokeNetboxRequest -URI $uri -Method GET
+
+    .EXAMPLE
+        $result = InvokeNetboxRequest -URI $uri -Method GET -All
+        Fetches all pages of results automatically.
 
     .EXAMPLE
         $result = InvokeNetboxRequest -URI $uri -Method POST -Body $data -MaxRetries 5
@@ -59,18 +73,111 @@ function InvokeNetboxRequest {
 
         [switch]$Raw,
 
+        [switch]$All,
+
+        [ValidateRange(1, 1000)]
+        [int]$PageSize = 100,
+
         [ValidateRange(1, 10)]
         [int]$MaxRetries = 3,
 
         [ValidateRange(100, 30000)]
-        [int]$RetryDelayMs = 1000
+        [int]$RetryDelayMs = 1000,
+
+        [Parameter()]
+        [string]$Branch
     )
+
+    # Handle automatic pagination for GET requests
+    if ($All -and $Method -eq 'GET') {
+        Write-Verbose "Automatic pagination enabled with page size $PageSize"
+
+        # Add/update limit parameter in URI for first request (cross-platform)
+        $currentQuery = $URI.Query.TrimStart('?')
+        if ($currentQuery) {
+            # Remove any existing limit parameter
+            $currentQuery = ($currentQuery -split '&' | Where-Object { $_ -notmatch '^limit=' }) -join '&'
+            $URI.Query = "$currentQuery&limit=$PageSize"
+        }
+        else {
+            $URI.Query = "limit=$PageSize"
+        }
+
+        $allResults = [System.Collections.ArrayList]::new()
+        $pageNum = 0
+        $nextUrl = $null
+
+        do {
+            $pageNum++
+            $currentUri = if ($nextUrl) {
+                # Use the next URL from API response
+                [System.UriBuilder]::new($nextUrl)
+            }
+            else {
+                $URI
+            }
+
+            Write-Verbose "Fetching page ${pageNum}..."
+
+            # Make single-page request (recursive call without -All)
+            $pageResult = InvokeNetboxRequest -URI $currentUri -Headers $Headers -Body $Body `
+                -Timeout $Timeout -Method $Method -Raw -MaxRetries $MaxRetries -RetryDelayMs $RetryDelayMs
+
+            if ($pageResult.results) {
+                $itemCount = $pageResult.results.Count
+                [void]$allResults.AddRange($pageResult.results)
+                Write-Verbose "Page ${pageNum}: Retrieved $itemCount items (Total: $($allResults.Count))"
+
+                # Show progress for large datasets
+                if ($pageResult.count -gt 0) {
+                    $percentComplete = [Math]::Min(100, [int](($allResults.Count / $pageResult.count) * 100))
+                    Write-Progress -Activity "Fetching all results" `
+                        -Status "$($allResults.Count) of $($pageResult.count) items" `
+                        -PercentComplete $percentComplete
+                }
+            }
+
+            $nextUrl = $pageResult.next
+
+        } while ($nextUrl)
+
+        Write-Progress -Activity "Fetching all results" -Completed
+
+        if ($Raw) {
+            # Return a synthetic response object with all results
+            return [PSCustomObject]@{
+                count    = $allResults.Count
+                next     = $null
+                previous = $null
+                results  = $allResults.ToArray()
+            }
+        }
+        else {
+            return $allResults.ToArray()
+        }
+    }
 
     # Retryable HTTP status codes
     $retryableStatusCodes = @(408, 429, 500, 502, 503, 504)
 
     $creds = Get-NBCredential
     $Headers.Authorization = "Token {0}" -f $creds.GetNetworkCredential().Password
+
+    # Determine effective branch context: explicit param > stack context > main
+    $effectiveBranch = if ($Branch) {
+        $Branch
+    }
+    elseif ($script:NetboxConfig.BranchStack -and $script:NetboxConfig.BranchStack.Count -gt 0) {
+        $script:NetboxConfig.BranchStack.Peek()
+    }
+    else {
+        $null
+    }
+
+    if ($effectiveBranch) {
+        $Headers['X-NetBox-Branch'] = $effectiveBranch
+        Write-Verbose "Using branch context: $effectiveBranch"
+    }
 
     $splat = @{
         'Method'      = $Method

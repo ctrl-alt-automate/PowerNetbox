@@ -19,6 +19,11 @@ function Get-NBDCIMInterfaceConnection {
     [OutputType([pscustomobject])]
     param
     (
+        [switch]$All,
+
+        [ValidateRange(1, 1000)]
+        [int]$PageSize = 100,
+
         [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
@@ -39,10 +44,10 @@ function Get-NBDCIMInterfaceConnection {
     process {
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interface-connections'))
 
-        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'
 
         $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
-        InvokeNetboxRequest -URI $URI -Raw:$Raw
+        InvokeNetboxRequest -URI $URI -Raw:$Raw -All:$All -PageSize $PageSize
     }
 }

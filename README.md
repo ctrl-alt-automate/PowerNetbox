@@ -29,10 +29,10 @@ We extend our sincere thanks to Ben and all original contributors for building t
 
 - **100% API Coverage** - Full support for all Netbox 4.x API endpoints
 - **Cross-Platform** - Works on Windows, Linux, and macOS
-- **488+ Functions** - Complete CRUD operations for all resources
+- **504+ Functions** - Complete CRUD operations for all resources
 - **Pipeline Support** - Full PowerShell pipeline integration
 - **Secure** - Token-based authentication with TLS 1.2/1.3
-- **Well Tested** - 613 unit tests for quality assurance
+- **Well Tested** - 946 unit tests for quality assurance
 
 ### Supported Modules
 
@@ -48,6 +48,9 @@ We extend our sincere thanks to Ben and all original contributors for building t
 | Extras | 12 | 45 | ✅ Full |
 | Core | 5 | 8 | ✅ Full |
 | Users | 4 | 16 | ✅ Full |
+| Branching* | 3 | 16 | ✅ Full |
+
+\* Requires [netbox-branching](https://github.com/netboxlabs/netbox-branching) plugin
 
 ## Installation
 
@@ -168,6 +171,42 @@ Import-Csv devices.csv | ForEach-Object {
 Get-NBIPAMAddress -Status 'active' -Tenant 1 -Limit 100
 ```
 
+### Branching Support (Plugin Required)
+
+PowerNetbox supports the [netbox-branching](https://github.com/netboxlabs/netbox-branching) plugin for staging changes:
+
+```powershell
+# Check if branching is available
+Test-NBBranchingAvailable
+
+# Create a new branch
+New-NBBranch -Name "feature/new-datacenter" -Description "Planning new DC"
+
+# Enter branch context - all subsequent operations work in this branch
+Enter-NBBranch -Name "feature/new-datacenter"
+    New-NBDCIMSite -Name "DC-New" -Slug "dc-new"
+    New-NBDCIMDevice -Name "server01" -DeviceType 1 -Site 1
+Exit-NBBranch
+
+# Or use Invoke-NBInBranch for exception-safe execution
+Invoke-NBInBranch -Branch "staging" -ScriptBlock {
+    Set-NBDCIMDevice -Id 1 -Status "planned"
+    New-NBIPAMAddress -Address "10.0.0.1/24"
+}
+
+# Review changes in a branch
+Get-NBChangeDiff -Branch_Id 1
+
+# Sync branch with latest main
+Sync-NBBranch -Id 1
+
+# Merge changes to main
+Merge-NBBranch -Id 1
+
+# Revert a merge if needed
+Undo-NBBranchMerge -Id 1
+```
+
 ## Migrating from NetboxPS / NetboxPSv4
 
 If you're migrating from the original NetboxPS or NetboxPSv4 module:
@@ -200,6 +239,7 @@ Import-Module PowerNetbox
 | [Common Workflows](https://github.com/ctrl-alt-automate/PowerNetbox/wiki/Common-Workflows) | Bulk import, VMware sync, reporting |
 | [DCIM Examples](https://github.com/ctrl-alt-automate/PowerNetbox/wiki/DCIM-Examples) | Sites, devices, racks, cables |
 | [IPAM Examples](https://github.com/ctrl-alt-automate/PowerNetbox/wiki/IPAM-Examples) | IP addresses, prefixes, VLANs |
+| [Branching](https://github.com/ctrl-alt-automate/PowerNetbox/wiki/Branching) | Stage changes with branching plugin |
 | [Troubleshooting](https://github.com/ctrl-alt-automate/PowerNetbox/wiki/Troubleshooting) | Common issues and solutions |
 
 ## Requirements

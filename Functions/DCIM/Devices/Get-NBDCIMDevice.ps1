@@ -4,12 +4,30 @@
 
 .DESCRIPTION
     Retrieves Devices objects from Netbox DCIM module.
+    Supports automatic pagination with the -All switch.
+
+.PARAMETER All
+    Automatically fetch all pages of results. Uses the API's pagination
+    to retrieve all items across multiple requests.
+
+.PARAMETER PageSize
+    Number of items per page when using -All. Default: 100.
+    Range: 1-1000.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
     Get-NBDCIMDevice
+    Returns the first page of devices (default limit).
+
+.EXAMPLE
+    Get-NBDCIMDevice -All
+    Returns all devices with automatic pagination.
+
+.EXAMPLE
+    Get-NBDCIMDevice -All -PageSize 200 -Verbose
+    Returns all devices with 200 items per request, showing progress.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -20,6 +38,11 @@ function Get-NBDCIMDevice {
     #region Parameters
     param
     (
+        [switch]$All,
+
+        [ValidateRange(1, 1000)]
+        [int]$PageSize = 100,
+
         [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
@@ -93,10 +116,10 @@ function Get-NBDCIMDevice {
     process {
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'devices'))
 
-        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'
 
         $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
-        InvokeNetboxRequest -URI $URI -Raw:$Raw
+        InvokeNetboxRequest -URI $URI -Raw:$Raw -All:$All -PageSize $PageSize
     }
 }

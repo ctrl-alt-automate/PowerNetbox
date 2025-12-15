@@ -1,81 +1,230 @@
 <#
 .SYNOPSIS
-    Creates a new irtualMachine in Netbox V module.
+    Creates one or more virtual machines in Netbox Virtualization module.
 
 .DESCRIPTION
-    Creates a new irtualMachine in Netbox V module.
-    Supports pipeline input for Id parameter where applicable.
+    Creates new virtual machines in Netbox. Supports both single VM
+    creation with individual parameters and bulk creation via pipeline input.
+
+    For bulk operations, use the -BatchSize parameter to control how many
+    VMs are sent per API request. This significantly improves performance
+    when importing VMs from vCenter or other sources.
+
+.PARAMETER Name
+    The name of the virtual machine. Required for single VM creation.
+
+.PARAMETER Site
+    The site ID. Optional in Netbox 4.x.
+
+.PARAMETER Cluster
+    The cluster ID. Optional - VMs can be standalone in Netbox 4.x.
+
+.PARAMETER Tenant
+    The tenant ID.
+
+.PARAMETER Status
+    Status of the VM. Defaults to 'Active'.
+
+.PARAMETER Role
+    The role ID for the VM.
+
+.PARAMETER Platform
+    The platform ID (e.g., VMware, Hyper-V).
+
+.PARAMETER vCPUs
+    Number of virtual CPUs.
+
+.PARAMETER Memory
+    Memory in MB.
+
+.PARAMETER Disk
+    Disk space in GB.
+
+.PARAMETER Primary_IP4
+    Primary IPv4 address ID.
+
+.PARAMETER Primary_IP6
+    Primary IPv6 address ID.
+
+.PARAMETER Custom_Fields
+    Hashtable of custom field values.
+
+.PARAMETER Comments
+    Comments about the VM.
+
+.PARAMETER InputObject
+    Pipeline input for bulk operations. Each object should contain
+    at minimum the Name property.
+
+.PARAMETER BatchSize
+    Number of VMs to create per API request in bulk mode.
+    Default: 50, Range: 1-1000
+
+.PARAMETER Force
+    Skip confirmation prompts for bulk operations.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBVirtualMachine
+    New-NBVirtualMachine -Name "webserver01" -Cluster 1 -vCPUs 4 -Memory 8192
 
-    Returns all irtualMachine objects.
+    Creates a single VM with 4 vCPUs and 8GB RAM.
+
+.EXAMPLE
+    $vms = Get-VM | ForEach-Object {
+        [PSCustomObject]@{
+            Name = $_.Name
+            Cluster = 1
+            vCPUs = $_.NumCpu
+            Memory = $_.MemoryMB
+            Disk = [math]::Round($_.UsedSpaceGB)
+            Status = 'active'
+        }
+    }
+    $vms | New-NBVirtualMachine -BatchSize 100 -Force
+
+    Imports VMs from VMware vCenter in bulk.
 
 .LINK
-    https://netbox.readthedocs.io/en/stable/rest-api/overview/
+    https://netbox.readthedocs.io/en/stable/models/virtualization/virtualmachine/
 #>
 
 function New-NBVirtualMachine {
-    [CmdletBinding(ConfirmImpact = 'Low',
-        SupportsShouldProcess = $true)]
-    [OutputType([pscustomobject])]
-    param
-    (
-        [Parameter(Mandatory = $true)]
+    [CmdletBinding(SupportsShouldProcess = $true,
+        ConfirmImpact = 'Low',
+        DefaultParameterSetName = 'Single')]
+    [OutputType([PSCustomObject])]
+    param(
+        # Single mode parameters
+        [Parameter(ParameterSetName = 'Single', Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [string]$Name,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Site,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Cluster,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Tenant,
 
+        [Parameter(ParameterSetName = 'Single')]
         [object]$Status = 'Active',
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Role,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Platform,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint16]$vCPUs,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Memory,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Disk,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Primary_IP4,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Primary_IP6,
 
+        [Parameter(ParameterSetName = 'Single')]
         [hashtable]$Custom_Fields,
 
-        [string]$Comments
+        [Parameter(ParameterSetName = 'Single')]
+        [string]$Comments,
+
+        # Bulk mode parameters
+        [Parameter(ParameterSetName = 'Bulk', Mandatory = $true, ValueFromPipeline = $true)]
+        [PSCustomObject]$InputObject,
+
+        [Parameter(ParameterSetName = 'Bulk')]
+        [ValidateRange(1, 1000)]
+        [int]$BatchSize = 50,
+
+        [Parameter(ParameterSetName = 'Bulk')]
+        [switch]$Force,
+
+        # Common parameters
+        [Parameter()]
+        [switch]$Raw
     )
 
-    #    $ModelDefinition = $script:NetboxConfig.APIDefinition.definitions.WritableVirtualMachineWithConfigContext
+    begin {
+        $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'virtual-machines'))
+        $URI = BuildNewURI -Segments $Segments
 
-    #    # Validate the status against the APIDefinition
-    #    if ($ModelDefinition.properties.status.enum -inotcontains $Status) {
-    #        throw ("Invalid value [] for Status. Must be one of []" -f $Status, ($ModelDefinition.properties.status.enum -join ', '))
-    #    }
+        if ($PSCmdlet.ParameterSetName -eq 'Bulk') {
+            $bulkItems = [System.Collections.ArrayList]::new()
+        }
+    }
 
-    #$PSBoundParameters.Status = ValidateVirtualizationChoice -ProvidedValue $Status -VirtualMachineStatus
+    process {
+        if ($PSCmdlet.ParameterSetName -eq 'Single') {
+            $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
 
-    # Note: In Netbox 4.x, Site is optional. A VM requires either a Cluster or can be standalone.
-    $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'virtual-machines'))
+            if ($PSCmdlet.ShouldProcess($Name, 'Create new Virtual Machine')) {
+                InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+            }
+        }
+        else {
+            # Bulk mode - collect items
+            if ($InputObject) {
+                $item = @{}
+                foreach ($prop in $InputObject.PSObject.Properties) {
+                    $key = $prop.Name.ToLower()
+                    $value = $prop.Value
 
-    $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters
+                    # Handle property name mappings
+                    switch ($key) {
+                        'vcpus' { $key = 'vcpus' }
+                        'primary_ip4' { $key = 'primary_ip4' }
+                        'primary_ip6' { $key = 'primary_ip6' }
+                        'custom_fields' { $key = 'custom_fields' }
+                        'device_role' { $key = 'role' }  # Backwards compatibility
+                    }
 
-    $URI = BuildNewURI -Segments $URIComponents.Segments
+                    $item[$key] = $value
+                }
+                [void]$bulkItems.Add([PSCustomObject]$item)
+            }
+        }
+    }
 
-    if ($PSCmdlet.ShouldProcess($name, 'Create new Virtual Machine')) {
-        InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters
+    end {
+        if ($PSCmdlet.ParameterSetName -eq 'Bulk' -and $bulkItems.Count -gt 0) {
+            $target = "$($bulkItems.Count) virtual machine(s)"
+
+            if ($Force -or $PSCmdlet.ShouldProcess($target, 'Create virtual machines (bulk)')) {
+                Write-Verbose "Processing $($bulkItems.Count) VMs in bulk mode with batch size $BatchSize"
+
+                $result = Send-NBBulkRequest -URI $URI -Items $bulkItems.ToArray() -Method POST `
+                    -BatchSize $BatchSize -ShowProgress -ActivityName 'Creating virtual machines'
+
+                # Output succeeded items to pipeline
+                foreach ($item in $result.Succeeded) {
+                    Write-Output $item
+                }
+
+                # Write errors for failed items
+                foreach ($failure in $result.Failed) {
+                    Write-Error "Failed to create VM: $($failure.Error)" -TargetObject $failure.Item
+                }
+
+                # Write summary
+                if ($result.HasErrors) {
+                    Write-Warning $result.GetSummary()
+                }
+                else {
+                    Write-Verbose $result.GetSummary()
+                }
+            }
+        }
     }
 }
-
-
-
-

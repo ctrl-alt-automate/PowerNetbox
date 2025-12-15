@@ -38,10 +38,15 @@ function Get-NBIPAMRole {
         Additional information about the function.
 #>
 
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([PSCustomObject])]
     param
     (
+        [switch]$All,
+
+        [ValidateRange(1, 1000)]
+        [int]$PageSize = 100,
+
         [Parameter(ParameterSetName = 'Query',
                    Position = 0)]
         [string]$Name,
@@ -58,12 +63,18 @@ function Get-NBIPAMRole {
         [Parameter(ParameterSetName = 'Query')]
         [switch]$Brief,
 
+        [Parameter(ParameterSetName = 'Query')]
+        [Parameter(ParameterSetName = 'ByID')]
         [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
+        [Parameter(ParameterSetName = 'Query')]
+        [Parameter(ParameterSetName = 'ByID')]
         [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
+        [Parameter(ParameterSetName = 'Query')]
+        [Parameter(ParameterSetName = 'ByID')]
         [switch]$Raw
     )
 
@@ -77,7 +88,7 @@ function Get-NBIPAMRole {
 
                 $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
-                InvokeNetboxRequest -URI $uri -Raw:$Raw
+                InvokeNetboxRequest -URI $uri -Raw:$Raw -All:$All -PageSize $PageSize
             }
 
             break
@@ -90,8 +101,7 @@ function Get-NBIPAMRole {
 
             $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
-            InvokeNetboxRequest -URI $uri -Raw:$Raw
-
+            InvokeNetboxRequest -URI $uri -Raw:$Raw -All:$All -PageSize $PageSize
             break
         }
     }

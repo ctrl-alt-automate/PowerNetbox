@@ -8,31 +8,59 @@ on:
 
 jobs:
   test:
-    name: Pester Tests
+    name: Pester Tests (${{ matrix.os }}, ${{ matrix.pwsh && 'PS 7.x' || 'PS 5.1' }})
     runs-on: ${{ matrix.os }}
 
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+        pwsh: [true]
+        include:
+          # Also test PowerShell 5.1 (Desktop) on Windows
+          - os: windows-latest
+            pwsh: false
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: Install dependencies (pwsh)
+        if: matrix.pwsh
         shell: pwsh
         run: |
+          # Register PSGallery if not present (required for Windows Server 2025)
+          if (-not (Get-PSRepository -Name PSGallery -ErrorAction SilentlyContinue)) {
+              Register-PSRepository -Default
+          }
           Set-PSRepository PSGallery -InstallationPolicy Trusted
           Install-Module Pester -Force -Scope CurrentUser -MinimumVersion 5.0.0
           Install-Module PSScriptAnalyzer -Force -Scope CurrentUser
 
-      - name: Build module
-        shell: pwsh
+      - name: Install dependencies (powershell)
+        if: '!matrix.pwsh'
+        shell: powershell
         run: |
-          ./deploy.ps1 -Environment dev -SkipVersion
+          # Register PSGallery if not present (required for Windows Server 2025)
+          if (-not (Get-PSRepository -Name PSGallery -ErrorAction SilentlyContinue)) {
+              Register-PSRepository -Default
+          }
+          Set-PSRepository PSGallery -InstallationPolicy Trusted
+          Install-Module Pester -Force -Scope CurrentUser -MinimumVersion 5.0.0
+          Install-Module PSScriptAnalyzer -Force -Scope CurrentUser
 
-      - name: Run Pester tests
+      - name: Build module (pwsh)
+        if: matrix.pwsh
+        shell: pwsh
+        run: ./deploy.ps1 -Environment dev -SkipVersion
+
+      - name: Build module (powershell)
+        if: '!matrix.pwsh'
+        shell: powershell
+        run: ./deploy.ps1 -Environment dev -SkipVersion
+
+      - name: Run Pester tests (pwsh)
+        if: matrix.pwsh
         shell: pwsh
         run: |
           $config = New-PesterConfiguration
@@ -44,13 +72,111 @@ jobs:
           $config.TestResult.OutputFormat = 'NUnitXml'
           $config.Output.Verbosity = 'Detailed'
           $config.CodeCoverage.Enabled = $false
+          Invoke-Pester -Configuration $config
 
+      - name: Run Pester tests (powershell)
+        if: '!matrix.pwsh'
+        shell: powershell
+        run: |
+          $config = New-PesterConfiguration
+          $config.Run.Path = './Tests/*.Tests.ps1'
+          $config.Run.Exit = $true
+          $config.Filter.ExcludeTag = @('Integration', 'Live')
+          $config.TestResult.Enabled = $true
+          $config.TestResult.OutputPath = 'TestResults.xml'
+          $config.TestResult.OutputFormat = 'NUnitXml'
+          $config.Output.Verbosity = 'Detailed'
+          $config.CodeCoverage.Enabled = $false
           Invoke-Pester -Configuration $config
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: test-results-${{ matrix.os }}
+          name: test-results-${{ matrix.os }}-${{ matrix.pwsh && 'pwsh' || 'ps51' }}
           path: TestResults.xml
           retention-days: 30
+
+      - name: Create issue on failure
+        if: failure() && github.event_name == 'push'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const os = '${{ matrix.os }}';
+            const ps = '${{ matrix.pwsh }}' === 'true' ? '7.x (Core)' : '5.1 (Desktop)';
+            const runUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
+
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'test-failure,automated'
+            });
+
+            const existingIssue = issues.data.find(i =>
+              i.title.includes(context.sha.substring(0, 7))
+            );
+
+            const body = `## Test Failure Report
+
+            | Field | Value |
+            |-------|-------|
+            | **Commit** | ${context.sha.substring(0, 7)} |
+            | **Branch** | ${context.ref.replace('refs/heads/', '')} |
+            | **Platform** | ${os} |
+            | **PowerShell** | ${ps} |
+            | **Workflow Run** | [View Details](${runUrl}) |
+
+            ---
+            *This issue was automatically created by GitHub Actions*`;
+
+            if (existingIssue) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existingIssue.number,
+                body: `### Additional failure on ${os} (${ps})\n\n${body}`
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `🔴 Test Failure: ${context.sha.substring(0, 7)} on ${os}`,
+                body: body,
+                labels: ['test-failure', 'automated', 'bug']
+              });
+            }
+
+  close-issues:
+    name: Close Resolved Issues
+    runs-on: ubuntu-latest
+    needs: test
+    if: success() && github.event_name == 'push'
+
+    steps:
+      - name: Close test-failure issues
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'test-failure,automated'
+            });
+
+            for (const issue of issues.data) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `## ✅ Tests Passing\n\nAll tests are now passing on commit ${context.sha.substring(0, 7)}.\n\nAutomatically closing this issue.`
+              });
+
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                state: 'closed'
+              });
+            }

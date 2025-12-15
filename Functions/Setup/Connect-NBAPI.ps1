@@ -10,7 +10,9 @@ function Connect-NBAPI {
         The hostname for the resource such as netbox.domain.com
 
     .PARAMETER Credential
-        Credential object containing the API key in the password. Username is not applicable
+        A PSCredential object. Put the API token in the Password field. The Username field is ignored.
+
+        Example: $cred = [PSCredential]::new('api', (ConvertTo-SecureString 'your-api-token' -AsPlainText -Force))
 
     .PARAMETER Scheme
         Scheme for the URI such as HTTP or HTTPS. Defaults to HTTPS
@@ -22,7 +24,9 @@ function Connect-NBAPI {
         The full URI for the resource such as "https://netbox.domain.com:8443"
 
     .PARAMETER SkipCertificateCheck
-        A description of the SkipCertificateCheck parameter.
+        Skip SSL/TLS certificate validation. Use this for self-signed certificates or test environments.
+        On PowerShell Core (7+), uses the native -SkipCertificateCheck parameter.
+        On PowerShell Desktop (5.1), uses a custom certificate policy callback.
 
     .PARAMETER TimeoutSeconds
         The number of seconds before the HTTP call times out. Defaults to 30 seconds

@@ -18,13 +18,18 @@ function Get-NBDCIMConnectedDevice {
     [CmdletBinding()]
     [OutputType([PSCustomObject])]
     param(
+        [switch]$All,
+
+        [ValidateRange(1, 1000)]
+        [int]$PageSize = 100,
+
         [Parameter(Mandatory = $true)][string]$Peer_Device,
         [Parameter(Mandatory = $true)][string]$Peer_Interface,
         [switch]$Raw
     )
     process {
         $Segments = [System.Collections.ArrayList]::new(@('dcim','connected-device'))
-        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'
         InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw
     }
 }

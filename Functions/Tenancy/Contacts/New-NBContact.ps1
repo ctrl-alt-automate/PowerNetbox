@@ -54,7 +54,6 @@ function New-NBContact {
         [ValidateLength(1, 100)]
         [string]$Name,
 
-        [Parameter(Mandatory = $true)]
         [ValidateLength(0, 254)]
         [string]$Email,
 
