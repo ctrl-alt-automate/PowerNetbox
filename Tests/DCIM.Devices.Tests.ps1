@@ -231,7 +231,7 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             # Compare as objects since JSON key order is not guaranteed
             $bodyObj = $Result.Body | ConvertFrom-Json
             $bodyObj.name | Should -Be 'newdevice'
-            $bodyObj.device_role | Should -Be 4
+            $bodyObj.role | Should -Be 4
             $bodyObj.device_type | Should -Be 10
             $bodyObj.site | Should -Be 1
             $bodyObj.face | Should -Be 0
@@ -243,6 +243,40 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             $Result.Method | Should -Be 'POST'
             $bodyObj = $Result.Body | ConvertFrom-Json
             $bodyObj.status | Should -Be 5555
+        }
+
+        It "Should have Single and Bulk parameter sets" {
+            $cmd = Get-Command New-NBDCIMDevice
+            $cmd.ParameterSets.Name | Should -Contain 'Single'
+            $cmd.ParameterSets.Name | Should -Contain 'Bulk'
+        }
+
+        It "Should have InputObject parameter for bulk mode" {
+            $cmd = Get-Command New-NBDCIMDevice
+            $cmd.Parameters.Keys | Should -Contain 'InputObject'
+            $inputObjParam = $cmd.Parameters['InputObject']
+            $inputObjParam.ParameterSets.Keys | Should -Contain 'Bulk'
+        }
+
+        It "Should have BatchSize parameter with validation" {
+            $cmd = Get-Command New-NBDCIMDevice
+            $cmd.Parameters.Keys | Should -Contain 'BatchSize'
+            $batchSizeParam = $cmd.Parameters['BatchSize']
+            $validateRange = $batchSizeParam.Attributes | Where-Object { $_ -is [System.Management.Automation.ValidateRangeAttribute] }
+            $validateRange | Should -Not -BeNullOrEmpty
+            $validateRange.MinRange | Should -Be 1
+            $validateRange.MaxRange | Should -Be 1000
+        }
+
+        It "Should have Force parameter for bulk mode" {
+            $cmd = Get-Command New-NBDCIMDevice
+            $cmd.Parameters.Keys | Should -Contain 'Force'
+        }
+
+        It "Should use Role alias Device_Role for backwards compatibility" {
+            $cmd = Get-Command New-NBDCIMDevice
+            $roleParam = $cmd.Parameters['Role']
+            $roleParam.Aliases | Should -Contain 'Device_Role'
         }
     }
 

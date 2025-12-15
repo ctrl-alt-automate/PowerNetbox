@@ -74,26 +74,25 @@ Describe "Circuits Module Tests" -Tag 'Circuits' {
     }
 
     Context "New-NBCircuit" {
-        # Note: New-NBCircuit has a bug where Status defaults to 'Active' but is typed as [uint16]
-        # This causes failures. Testing with explicit Status=1 to work around.
         It "Should create a circuit" {
-            $Result = New-NBCircuit -Cid 'CIR-001' -Provider 1 -Type 1 -Status 1 -Force
+            $Result = New-NBCircuit -Cid 'CIR-001' -Provider 1 -Type 1 -Status 'active' -Force
             $Result.Method | Should -Be 'POST'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/circuits/circuits/'
             $bodyObj = $Result.Body | ConvertFrom-Json
             $bodyObj.cid | Should -Be 'CIR-001'
             $bodyObj.provider | Should -Be 1
             $bodyObj.type | Should -Be 1
+            $bodyObj.status | Should -Be 'active'
         }
 
         It "Should create a circuit with commit rate" {
-            $Result = New-NBCircuit -Cid 'CIR-002' -Provider 1 -Type 1 -Status 1 -Commit_Rate 1000 -Force
+            $Result = New-NBCircuit -Cid 'CIR-002' -Provider 1 -Type 1 -Status 'active' -Commit_Rate 1000 -Force
             $bodyObj = $Result.Body | ConvertFrom-Json
             $bodyObj.commit_rate | Should -Be 1000
         }
 
         It "Should create a circuit with description" {
-            $Result = New-NBCircuit -Cid 'CIR-003' -Provider 1 -Type 1 -Status 1 -Description 'Test circuit' -Force
+            $Result = New-NBCircuit -Cid 'CIR-003' -Provider 1 -Type 1 -Status 'active' -Description 'Test circuit' -Force
             $bodyObj = $Result.Body | ConvertFrom-Json
             $bodyObj.description | Should -Be 'Test circuit'
         }

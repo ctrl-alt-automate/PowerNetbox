@@ -51,6 +51,11 @@ function Get-NBVirtualCircuit {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([PSCustomObject])]
     param (
+        [switch]$All,
+
+        [ValidateRange(1, 1000)]
+        [int]$PageSize = 100,
+
         [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
@@ -94,14 +99,14 @@ function Get-NBVirtualCircuit {
                     $Segments = [System.Collections.ArrayList]::new(@('circuits', 'virtual-circuits', $i))
                     $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
                     $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
-                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw -All:$All -PageSize $PageSize
                 }
             }
             default {
                 $Segments = [System.Collections.ArrayList]::new(@('circuits', 'virtual-circuits'))
-                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'
                 $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
-                InvokeNetboxRequest -URI $URI -Raw:$Raw
+                InvokeNetboxRequest -URI $URI -Raw:$Raw -All:$All -PageSize $PageSize
             }
         }
     }

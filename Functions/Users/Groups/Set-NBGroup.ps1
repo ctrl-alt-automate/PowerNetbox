@@ -11,6 +11,9 @@
 .PARAMETER Name
     Name of the group.
 
+.PARAMETER Description
+    Description of the group.
+
 .PARAMETER Permissions
     Array of permission IDs.
 
@@ -31,6 +34,8 @@ function Set-NBGroup {
         [uint64]$Id,
 
         [string]$Name,
+
+        [string]$Description,
 
         [uint64[]]$Permissions,
 

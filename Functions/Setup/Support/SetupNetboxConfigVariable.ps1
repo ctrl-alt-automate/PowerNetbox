@@ -14,6 +14,7 @@
             }
             'APIDefinition' = $null
             'ContentTypes' = $null
+            'BranchStack'   = [System.Collections.Generic.Stack[string]]::new()
         }
     }
 

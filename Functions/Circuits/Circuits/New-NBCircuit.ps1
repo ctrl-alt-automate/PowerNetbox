@@ -35,8 +35,8 @@ function New-NBCircuit {
         [Parameter(Mandatory = $true)]
         [uint64]$Type,
 
-        #[ValidateSet('Active', 'Planned', 'Provisioning', 'Offline', 'Deprovisioning', 'Decommissioned ')]
-        [uint16]$Status = 'Active',
+        [ValidateSet('active', 'planned', 'provisioning', 'offline', 'deprovisioning', 'decommissioned')]
+        [string]$Status = 'active',
 
         [string]$Description,
 

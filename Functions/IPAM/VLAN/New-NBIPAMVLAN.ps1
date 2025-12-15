@@ -1,83 +1,203 @@
-function New-NBIPAMVLAN {
-    <#
-    .SYNOPSIS
-        Create a new VLAN
+<#
+.SYNOPSIS
+    Creates one or more VLANs in Netbox IPAM module.
 
-    .DESCRIPTION
-        Create a new VLAN in Netbox with a status of Active by default.
+.DESCRIPTION
+    Creates new VLANs in Netbox IPAM module. Supports both single VLAN
+    creation with individual parameters and bulk creation via pipeline input.
 
-    .PARAMETER VID
-        The VLAN ID.
+    For bulk operations, use the -BatchSize parameter to control how many
+    VLANs are sent per API request. This significantly improves performance
+    when creating many VLANs.
 
-    .PARAMETER Name
-        The name of the VLAN.
+.PARAMETER VID
+    The VLAN ID (1-4094). Required for single VLAN creation.
 
-    .PARAMETER Status
-        Status of the VLAN. Defaults to Active
+.PARAMETER Name
+    The name of the VLAN. Required for single VLAN creation.
 
-    .PARAMETER Tenant
-        Tenant ID
+.PARAMETER Status
+    Status of the VLAN. Defaults to 'Active'.
 
-    .PARAMETER Role
-        Role such as anycast, loopback, etc... Defaults to nothing
+.PARAMETER Tenant
+    The tenant ID.
 
-    .PARAMETER Description
-        Description of IP address
+.PARAMETER Site
+    The site ID.
 
-    .PARAMETER Custom_Fields
-        Custom field hash table. Will be validated by the API service
+.PARAMETER Group
+    The VLAN group ID.
 
-    .PARAMETER Raw
-        Return raw results from API service
+.PARAMETER Role
+    The role ID.
 
-    .PARAMETER Address
-        IP address in CIDR notation: 192.168.1.1/24
+.PARAMETER Description
+    A description of the VLAN.
 
-    .EXAMPLE
-        PS C:\> Create-NBIPAMAddress
+.PARAMETER Custom_Fields
+    Hashtable of custom field values.
 
-    .NOTES
-        Additional information about the function.
+.PARAMETER InputObject
+    Pipeline input for bulk operations. Each object should contain
+    the required properties: VID, Name.
+
+.PARAMETER BatchSize
+    Number of VLANs to create per API request in bulk mode.
+    Default: 50, Range: 1-1000
+
+.PARAMETER Force
+    Skip confirmation prompts for bulk operations.
+
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBIPAMVLAN -VID 100 -Name "Production" -Site 1
+
+    Creates a single VLAN.
+
+.EXAMPLE
+    $vlans = 100..199 | ForEach-Object {
+        [PSCustomObject]@{VID=$_; Name="VLAN$_"; Status="active"; Site=1}
+    }
+    $vlans | New-NBIPAMVLAN -BatchSize 50 -Force
+
+    Creates 100 VLANs in bulk using 2 API calls.
+
+.EXAMPLE
+    Import-Csv vlans.csv | New-NBIPAMVLAN -BatchSize 100 -Force
+
+    Bulk import VLANs from a CSV file.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/models/ipam/vlan/
 #>
 
-    [CmdletBinding(ConfirmImpact = 'Low',
-        SupportsShouldProcess = $true)]
-    [OutputType([pscustomobject])]
-    param
-    (
-        [Parameter(Mandatory = $true)]
+function New-NBIPAMVLAN {
+    [CmdletBinding(SupportsShouldProcess = $true,
+        ConfirmImpact = 'Low',
+        DefaultParameterSetName = 'Single')]
+    [OutputType([PSCustomObject])]
+    param(
+        # Single mode parameters
+        [Parameter(ParameterSetName = 'Single', Mandatory = $true)]
+        [ValidateRange(1, 4094)]
         [uint16]$VID,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter(ParameterSetName = 'Single', Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [string]$Name,
 
+        [Parameter(ParameterSetName = 'Single')]
         [object]$Status = 'Active',
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Tenant,
 
+        [Parameter(ParameterSetName = 'Single')]
+        [uint64]$Site,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [uint64]$Group,
+
+        [Parameter(ParameterSetName = 'Single')]
         [object]$Role,
 
+        [Parameter(ParameterSetName = 'Single')]
         [string]$Description,
 
+        [Parameter(ParameterSetName = 'Single')]
         [hashtable]$Custom_Fields,
 
+        # Bulk mode parameters
+        [Parameter(ParameterSetName = 'Bulk', Mandatory = $true, ValueFromPipeline = $true)]
+        [PSCustomObject]$InputObject,
+
+        [Parameter(ParameterSetName = 'Bulk')]
+        [ValidateRange(1, 1000)]
+        [int]$BatchSize = 50,
+
+        [Parameter(ParameterSetName = 'Bulk')]
+        [switch]$Force,
+
+        # Common parameters
+        [Parameter()]
         [switch]$Raw
     )
 
-    #    $PSBoundParameters.Status = ValidateIPAMChoice -ProvidedValue $Status -VLANStatus
+    begin {
+        $Segments = [System.Collections.ArrayList]::new(@('ipam', 'vlans'))
+        $URI = BuildNewURI -Segments $Segments
 
-    #    if ($null -ne $Role) {
-    #        $PSBoundParameters.Role = ValidateIPAMChoice -ProvidedValue $Role -IPAddressRole
-    #    }
+        if ($PSCmdlet.ParameterSetName -eq 'Bulk') {
+            $bulkItems = [System.Collections.ArrayList]::new()
+        }
+    }
 
-    $segments = [System.Collections.ArrayList]::new(@('ipam', 'vlans'))
+    process {
+        if ($PSCmdlet.ParameterSetName -eq 'Single') {
+            $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
 
-    $URIComponents = BuildURIComponents -URISegments $segments -ParametersDictionary $PSBoundParameters
+            if ($PSCmdlet.ShouldProcess("VLAN $VID ($Name)", 'Create new VLAN')) {
+                InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+            }
+        }
+        else {
+            # Bulk mode - collect items
+            if ($InputObject) {
+                $item = @{}
+                foreach ($prop in $InputObject.PSObject.Properties) {
+                    $key = $prop.Name.ToLower()
+                    $value = $prop.Value
 
-    $URI = BuildNewURI -Segments $URIComponents.Segments
+                    # Handle property name mappings
+                    switch ($key) {
+                        'custom_fields' { $key = 'custom_fields' }
+                    }
 
-    if ($PSCmdlet.ShouldProcess($nae, 'Create new Vlan $($vid)')) {
-        InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+                    # Validate VID range in bulk mode
+                    if ($key -eq 'vid') {
+                        if ($value -lt 1 -or $value -gt 4094) {
+                            Write-Warning "VLAN ID $value is invalid (must be 1-4094), skipping"
+                            return
+                        }
+                    }
+
+                    $item[$key] = $value
+                }
+                [void]$bulkItems.Add([PSCustomObject]$item)
+            }
+        }
+    }
+
+    end {
+        if ($PSCmdlet.ParameterSetName -eq 'Bulk' -and $bulkItems.Count -gt 0) {
+            $target = "$($bulkItems.Count) VLAN(s)"
+
+            if ($Force -or $PSCmdlet.ShouldProcess($target, 'Create VLANs (bulk)')) {
+                Write-Verbose "Processing $($bulkItems.Count) VLANs in bulk mode with batch size $BatchSize"
+
+                $result = Send-NBBulkRequest -URI $URI -Items $bulkItems.ToArray() -Method POST `
+                    -BatchSize $BatchSize -ShowProgress -ActivityName 'Creating VLANs'
+
+                # Output succeeded items to pipeline
+                foreach ($item in $result.Succeeded) {
+                    Write-Output $item
+                }
+
+                # Write errors for failed items
+                foreach ($failure in $result.Failed) {
+                    Write-Error "Failed to create VLAN: $($failure.Error)" -TargetObject $failure.Item
+                }
+
+                # Write summary
+                if ($result.HasErrors) {
+                    Write-Warning $result.GetSummary()
+                }
+                else {
+                    Write-Verbose $result.GetSummary()
+                }
+            }
+        }
     }
 }

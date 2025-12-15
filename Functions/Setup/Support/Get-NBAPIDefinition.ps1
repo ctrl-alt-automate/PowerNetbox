@@ -19,6 +19,11 @@ function Get-NBAPIDefinition {
     [OutputType([PSCustomObject])]
     param
     (
+        [switch]$All,
+
+        [ValidateRange(1, 1000)]
+        [int]$PageSize = 100,
+
         [ValidateSet('json', 'yaml', IgnoreCase = $true)]
         [string]$Format = 'json'
     )
@@ -33,5 +38,5 @@ function Get-NBAPIDefinition {
 
     $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters -SkipConnectedCheck
 
-    InvokeNetboxRequest -URI $URI
+    InvokeNetboxRequest -URI $URI -All:$All -PageSize $PageSize
 }

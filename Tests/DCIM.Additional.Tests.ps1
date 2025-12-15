@@ -66,10 +66,17 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
     }
 
     Context "New-NBDCIMCable" {
-        It "Should create a cable" {
-            $Result = New-NBDCIMCable -A_Terminations_Type 'dcim.interface' -A_Terminations 1 -B_Terminations_Type 'dcim.interface' -B_Terminations 2
+        It "Should create a cable with termination objects" {
+            $aTerm = @(@{object_type="dcim.interface"; object_id=1})
+            $bTerm = @(@{object_type="dcim.interface"; object_id=2})
+            $Result = New-NBDCIMCable -A_Terminations $aTerm -B_Terminations $bTerm -Confirm:$false
             $Result.Method | Should -Be 'POST'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/cables/'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.a_terminations[0].object_type | Should -Be 'dcim.interface'
+            $bodyObj.a_terminations[0].object_id | Should -Be 1
+            $bodyObj.b_terminations[0].object_type | Should -Be 'dcim.interface'
+            $bodyObj.b_terminations[0].object_id | Should -Be 2
         }
     }
 

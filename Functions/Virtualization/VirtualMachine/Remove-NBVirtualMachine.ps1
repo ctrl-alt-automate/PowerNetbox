@@ -1,56 +1,140 @@
-
-function Remove-NBVirtualMachine {
 <#
-    .SYNOPSIS
-        Delete a virtual machine
+.SYNOPSIS
+    Deletes one or more virtual machines from Netbox.
 
-    .DESCRIPTION
-        Deletes a virtual machine from Netbox by ID
+.DESCRIPTION
+    Deletes virtual machines from Netbox Virtualization module. Supports both
+    single VM deletion with the Id parameter and bulk deletion via pipeline input.
 
-    .PARAMETER Id
-        Database ID of the virtual machine
+    For bulk operations, use the -BatchSize parameter to control how many
+    VMs are deleted per API request. Each object must have an Id property.
 
-    .PARAMETER Force
-        Force deletion without any prompts
+.PARAMETER Id
+    The database ID(s) of the virtual machine(s) to delete. Required for single mode.
 
-    .EXAMPLE
-        PS C:\> Remove-NBVirtualMachine -Id $value1
+.PARAMETER InputObject
+    Pipeline input for bulk operations. Each object MUST have an Id property.
 
-    .NOTES
-        Additional information about the function.
+.PARAMETER BatchSize
+    Number of VMs to delete per API request in bulk mode.
+    Default: 50, Range: 1-1000
+
+.PARAMETER Force
+    Skip confirmation prompts.
+
+.EXAMPLE
+    Remove-NBVirtualMachine -Id 123 -Force
+
+    Deletes VM with ID 123 without confirmation.
+
+.EXAMPLE
+    Get-NBVirtualMachine -Status "decommissioning" | Remove-NBVirtualMachine -Force
+
+    Bulk delete all VMs with decommissioning status.
+
+.EXAMPLE
+    $vmsToDelete = @(
+        [PSCustomObject]@{Id = 100}
+        [PSCustomObject]@{Id = 101}
+        [PSCustomObject]@{Id = 102}
+    )
+    $vmsToDelete | Remove-NBVirtualMachine -BatchSize 50 -Force
+
+    Bulk delete multiple VMs.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 
-    [CmdletBinding(ConfirmImpact = 'High',
-                   SupportsShouldProcess = $true)]
+function Remove-NBVirtualMachine {
+    [CmdletBinding(SupportsShouldProcess = $true,
+        ConfirmImpact = 'High',
+        DefaultParameterSetName = 'Single')]
     [OutputType([void])]
     param
     (
-        [Parameter(Mandatory = $true,
-                   ValueFromPipelineByPropertyName = $true)]
+        # Single mode parameters
+        [Parameter(ParameterSetName = 'Single', Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
+        # Bulk mode parameters
+        [Parameter(ParameterSetName = 'Bulk', Mandatory = $true, ValueFromPipeline = $true)]
+        [PSCustomObject]$InputObject,
+
+        [Parameter(ParameterSetName = 'Bulk')]
+        [ValidateRange(1, 1000)]
+        [int]$BatchSize = 50,
+
+        # Common parameters
+        [Parameter()]
         [switch]$Force
     )
 
     begin {
+        $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'virtual-machines'))
+        $URI = BuildNewURI -Segments $Segments
 
+        if ($PSCmdlet.ParameterSetName -eq 'Bulk') {
+            $bulkItems = [System.Collections.ArrayList]::new()
+        }
     }
 
     process {
-        foreach ($VMId in $Id) {
-            $CurrentVM = Get-NBVirtualMachine -Id $VMId -ErrorAction Stop
+        if ($PSCmdlet.ParameterSetName -eq 'Single') {
+            foreach ($VMId in $Id) {
+                $CurrentVM = Get-NBVirtualMachine -Id $VMId -ErrorAction Stop
 
-            if ($Force -or $pscmdlet.ShouldProcess("$($CurrentVM.Name)/$($CurrentVM.Id)", "Remove")) {
-                $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'virtual-machines', $CurrentVM.Id))
+                if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentVM.Name)/$($CurrentVM.Id)", "Remove")) {
+                    $VMSegments = [System.Collections.ArrayList]::new(@('virtualization', 'virtual-machines', $CurrentVM.Id))
 
-                $URI = BuildNewURI -Segments $Segments
+                    $VMURI = BuildNewURI -Segments $VMSegments
 
-                InvokeNetboxRequest -URI $URI -Method DELETE
+                    InvokeNetboxRequest -URI $VMURI -Method DELETE
+                }
+            }
+        }
+        else {
+            # Bulk mode - collect items
+            if ($InputObject) {
+                # Validate that Id is present
+                $itemId = if ($InputObject.Id) { $InputObject.Id }
+                          elseif ($InputObject.id) { $InputObject.id }
+                          else { $null }
+
+                if (-not $itemId) {
+                    Write-Error "InputObject must have an 'Id' property for bulk deletes" -TargetObject $InputObject
+                    return
+                }
+
+                $item = @{ id = $itemId }
+                [void]$bulkItems.Add([PSCustomObject]$item)
             }
         }
     }
 
     end {
+        if ($PSCmdlet.ParameterSetName -eq 'Bulk' -and $bulkItems.Count -gt 0) {
+            $target = "$($bulkItems.Count) virtual machine(s)"
 
+            if ($Force -or $PSCmdlet.ShouldProcess($target, 'Delete virtual machines (bulk)')) {
+                Write-Verbose "Processing $($bulkItems.Count) VMs in bulk DELETE mode with batch size $BatchSize"
+
+                $result = Send-NBBulkRequest -URI $URI -Items $bulkItems.ToArray() -Method DELETE `
+                    -BatchSize $BatchSize -ShowProgress -ActivityName 'Deleting virtual machines'
+
+                # Write errors for failed items
+                foreach ($failure in $result.Failed) {
+                    Write-Error "Failed to delete VM: $($failure.Error)" -TargetObject $failure.Item
+                }
+
+                # Write summary
+                if ($result.HasErrors) {
+                    Write-Warning $result.GetSummary()
+                }
+                else {
+                    Write-Verbose $result.GetSummary()
+                }
+            }
+        }
     }
 }

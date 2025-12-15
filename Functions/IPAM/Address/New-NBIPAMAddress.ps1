@@ -1,111 +1,232 @@
+<#
+.SYNOPSIS
+    Creates one or more IP addresses in Netbox IPAM module.
 
-function New-NBIPAMAddress {
-    <#
-    .SYNOPSIS
-        Create a new IP address to Netbox
+.DESCRIPTION
+    Creates new IP addresses in Netbox IPAM module. Supports both single IP
+    creation with individual parameters and bulk creation via pipeline input.
 
-    .DESCRIPTION
-        Create a new IP address to Netbox with a status of Active by default.
+    For bulk operations, use the -BatchSize parameter to control how many
+    addresses are sent per API request. This significantly improves performance
+    when creating many IP addresses.
 
-    .PARAMETER Address
-        IP address in CIDR notation: 192.168.1.1/24
+.PARAMETER Address
+    IP address in CIDR notation: 192.168.1.1/24. Required for single mode.
 
-    .PARAMETER Status
-        Status of the IP. Defaults to Active
+.PARAMETER Status
+    Status of the IP. Defaults to 'Active'.
 
-    .PARAMETER Tenant
-        Tenant ID
+.PARAMETER Tenant
+    Tenant ID.
 
-    .PARAMETER VRF
-        VRF ID
+.PARAMETER VRF
+    VRF ID.
 
-    .PARAMETER Role
-        Role such as anycast, loopback, etc... Defaults to nothing
+.PARAMETER Role
+    Role such as anycast, loopback, etc.
 
-    .PARAMETER NAT_Inside
-        ID of IP for NAT
+.PARAMETER NAT_Inside
+    ID of IP for NAT.
 
-    .PARAMETER Custom_Fields
-        Custom field hash table. Will be validated by the API service
+.PARAMETER Custom_Fields
+    Custom field hash table. Will be validated by the API service.
 
-    .PARAMETER Interface
-        ID of interface to apply IP
+.PARAMETER Interface
+    ID of interface to apply IP (deprecated, use Assigned_Object_Id).
 
-    .PARAMETER Description
-        Description of IP address
+.PARAMETER Description
+    Description of IP address.
 
-    .PARAMETER Dns_name
-        DNS Name of IP address (example : netbox.example.com)
+.PARAMETER Dns_name
+    DNS Name of IP address (example: netbox.example.com).
 
-    .PARAMETER Assigned_Object_Type
-        Assigned Object Type dcim.interface or virtualization.vminterface
+.PARAMETER Assigned_Object_Type
+    Assigned Object Type: 'dcim.interface' or 'virtualization.vminterface'.
 
-    .PARAMETER Assigned_Object_Id
-        Assigned Object ID
+.PARAMETER Assigned_Object_Id
+    Assigned Object ID.
 
-    .PARAMETER Raw
-        Return raw results from API service
+.PARAMETER InputObject
+    Pipeline input for bulk operations. Each object should contain
+    at minimum the Address property.
 
-    .EXAMPLE
-        New-NBIPAMAddress -Address 192.0.2.1/32
+.PARAMETER BatchSize
+    Number of IP addresses to create per API request in bulk mode.
+    Default: 50, Range: 1-1000
 
-        Add new IP Address 192.0.2.1/32 with status active
+.PARAMETER Force
+    Skip confirmation prompts for bulk operations.
 
-    .NOTES
-        Additional information about the function.
+.PARAMETER Raw
+    Return the raw API response instead of the results array.
+
+.EXAMPLE
+    New-NBIPAMAddress -Address "192.168.1.1/24"
+
+    Creates a single IP address with status active.
+
+.EXAMPLE
+    New-NBIPAMAddress -Address "10.0.0.1/24" -Status active -Description "Gateway"
+
+    Creates an IP address with description.
+
+.EXAMPLE
+    1..254 | ForEach-Object {
+        [PSCustomObject]@{
+            Address = "192.168.1.$_/24"
+            Status = "active"
+            Description = "Host $_"
+        }
+    } | New-NBIPAMAddress -BatchSize 100 -Force
+
+    Bulk create 254 IP addresses in a subnet.
+
+.EXAMPLE
+    Import-Csv ips.csv | New-NBIPAMAddress -BatchSize 50 -Force
+
+    Bulk import IP addresses from a CSV file.
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/models/ipam/ipaddress/
 #>
 
-    [CmdletBinding(ConfirmImpact = 'Low',
-        SupportsShouldProcess = $true)]
-    [OutputType([pscustomobject])]
-    param
-    (
-        [Parameter(Mandatory = $true,
-            ValueFromPipelineByPropertyName = $true)]
+function New-NBIPAMAddress {
+    [CmdletBinding(SupportsShouldProcess = $true,
+        ConfirmImpact = 'Low',
+        DefaultParameterSetName = 'Single')]
+    [OutputType([PSCustomObject])]
+    param(
+        # Single mode parameters
+        [Parameter(ParameterSetName = 'Single', Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [ValidateNotNullOrEmpty()]
         [string]$Address,
 
+        [Parameter(ParameterSetName = 'Single')]
         [object]$Status = 'Active',
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Tenant,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$VRF,
 
+        [Parameter(ParameterSetName = 'Single')]
         [object]$Role,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$NAT_Inside,
 
+        [Parameter(ParameterSetName = 'Single')]
         [hashtable]$Custom_Fields,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Interface,
 
+        [Parameter(ParameterSetName = 'Single')]
         [string]$Description,
 
+        [Parameter(ParameterSetName = 'Single')]
         [string]$Dns_name,
 
+        [Parameter(ParameterSetName = 'Single')]
         [ValidateSet('dcim.interface', 'virtualization.vminterface', IgnoreCase = $true)]
         [string]$Assigned_Object_Type,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Assigned_Object_Id,
 
+        # Bulk mode parameters
+        [Parameter(ParameterSetName = 'Bulk', Mandatory = $true, ValueFromPipeline = $true)]
+        [PSCustomObject]$InputObject,
+
+        [Parameter(ParameterSetName = 'Bulk')]
+        [ValidateRange(1, 1000)]
+        [int]$BatchSize = 50,
+
+        [Parameter(ParameterSetName = 'Bulk')]
+        [switch]$Force,
+
+        # Common parameters
+        [Parameter()]
         [switch]$Raw
     )
 
-    process {
+    begin {
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'ip-addresses'))
-        $Method = 'POST'
+        $URI = BuildNewURI -Segments $Segments
 
-        $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters
+        if ($PSCmdlet.ParameterSetName -eq 'Bulk') {
+            $bulkItems = [System.Collections.ArrayList]::new()
+        }
+    }
 
-        $URI = BuildNewURI -Segments $URIComponents.Segments
+    process {
+        if ($PSCmdlet.ParameterSetName -eq 'Single') {
+            $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
 
-        if ($PSCmdlet.ShouldProcess($Address, 'Create new IP address')) {
-            InvokeNetboxRequest -URI $URI -Method $Method -Body $URIComponents.Parameters -Raw:$Raw
+            if ($PSCmdlet.ShouldProcess($Address, 'Create new IP address')) {
+                InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+            }
+        }
+        else {
+            # Bulk mode - collect items
+            if ($InputObject) {
+                $item = @{}
+                foreach ($prop in $InputObject.PSObject.Properties) {
+                    $key = $prop.Name.ToLower()
+                    $value = $prop.Value
+
+                    # Handle property name mappings
+                    switch ($key) {
+                        'nat_inside' { $key = 'nat_inside' }
+                        'custom_fields' { $key = 'custom_fields' }
+                        'dns_name' { $key = 'dns_name' }
+                        'assigned_object_type' { $key = 'assigned_object_type' }
+                        'assigned_object_id' { $key = 'assigned_object_id' }
+                    }
+
+                    $item[$key] = $value
+                }
+
+                # Validate address is present
+                if (-not $item.ContainsKey('address') -or [string]::IsNullOrWhiteSpace($item['address'])) {
+                    Write-Error "InputObject must have an 'Address' property" -TargetObject $InputObject
+                    return
+                }
+
+                [void]$bulkItems.Add([PSCustomObject]$item)
+            }
+        }
+    }
+
+    end {
+        if ($PSCmdlet.ParameterSetName -eq 'Bulk' -and $bulkItems.Count -gt 0) {
+            $target = "$($bulkItems.Count) IP address(es)"
+
+            if ($Force -or $PSCmdlet.ShouldProcess($target, 'Create IP addresses (bulk)')) {
+                Write-Verbose "Processing $($bulkItems.Count) IP addresses in bulk mode with batch size $BatchSize"
+
+                $result = Send-NBBulkRequest -URI $URI -Items $bulkItems.ToArray() -Method POST `
+                    -BatchSize $BatchSize -ShowProgress -ActivityName 'Creating IP addresses'
+
+                # Output succeeded items to pipeline
+                foreach ($item in $result.Succeeded) {
+                    Write-Output $item
+                }
+
+                # Write errors for failed items
+                foreach ($failure in $result.Failed) {
+                    Write-Error "Failed to create IP address: $($failure.Error)" -TargetObject $failure.Item
+                }
+
+                # Write summary
+                if ($result.HasErrors) {
+                    Write-Warning $result.GetSummary()
+                }
+                else {
+                    Write-Verbose $result.GetSummary()
+                }
+            }
         }
     }
 }
-
-
-
-
-

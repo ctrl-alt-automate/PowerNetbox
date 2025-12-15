@@ -1,81 +1,240 @@
 <#
 .SYNOPSIS
-    Updates an existing irtualMachine in Netbox V module.
+    Updates one or more virtual machines in Netbox Virtualization module.
 
 .DESCRIPTION
-    Updates an existing irtualMachine in Netbox V module.
-    Supports pipeline input for Id parameter where applicable.
+    Updates existing virtual machines in Netbox Virtualization module. Supports both
+    single VM updates with individual parameters and bulk updates via pipeline input.
+
+    For bulk operations, use the -BatchSize parameter to control how many
+    VMs are sent per API request. Each object must have an Id property.
+
+.PARAMETER Id
+    The database ID of the virtual machine to update. Required for single updates.
+
+.PARAMETER Name
+    The new name for the VM.
+
+.PARAMETER Role
+    The device role ID.
+
+.PARAMETER Cluster
+    The cluster ID.
+
+.PARAMETER Status
+    Status of the VM.
+
+.PARAMETER Platform
+    The platform ID.
+
+.PARAMETER Primary_IP4
+    The primary IPv4 address ID.
+
+.PARAMETER Primary_IP6
+    The primary IPv6 address ID.
+
+.PARAMETER VCPUs
+    Number of virtual CPUs.
+
+.PARAMETER Memory
+    Memory in MB.
+
+.PARAMETER Disk
+    Disk size in GB.
+
+.PARAMETER Tenant
+    The tenant ID.
+
+.PARAMETER Comments
+    Comments about the VM.
+
+.PARAMETER Custom_Fields
+    Hashtable of custom field values.
+
+.PARAMETER InputObject
+    Pipeline input for bulk operations. Each object MUST have an Id property.
+
+.PARAMETER BatchSize
+    Number of VMs to update per API request in bulk mode.
+    Default: 50, Range: 1-1000
+
+.PARAMETER Force
+    Skip confirmation prompts.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBVirtualMachine
+    Set-NBVirtualMachine -Id 123 -Status "active"
 
-    Returns all irtualMachine objects.
+    Updates VM 123 to active status.
+
+.EXAMPLE
+    Get-NBVirtualMachine -Status "offline" | ForEach-Object {
+        [PSCustomObject]@{Id = $_.id; Status = "active"}
+    } | Set-NBVirtualMachine -Force
+
+    Bulk update all offline VMs to active status.
+
+.EXAMPLE
+    $updates = @(
+        [PSCustomObject]@{Id = 100; Status = "active"; Comments = "Migrated"}
+        [PSCustomObject]@{Id = 101; Status = "active"; Comments = "Migrated"}
+    )
+    $updates | Set-NBVirtualMachine -BatchSize 50 -Force
+
+    Bulk update multiple VMs with different values.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 
 function Set-NBVirtualMachine {
-    [CmdletBinding(ConfirmImpact = 'Medium',
-        SupportsShouldProcess = $true)]
+    [CmdletBinding(SupportsShouldProcess = $true,
+        ConfirmImpact = 'Medium',
+        DefaultParameterSetName = 'Single')]
     [OutputType([PSCustomObject])]
-    param
-    (
-        [Parameter(Mandatory = $true,
-            ValueFromPipelineByPropertyName = $true)]
+    param(
+        # Single mode parameters
+        [Parameter(ParameterSetName = 'Single', Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [uint64]$Id,
 
+        [Parameter(ParameterSetName = 'Single')]
         [string]$Name,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Role,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Cluster,
 
+        [Parameter(ParameterSetName = 'Single')]
         [object]$Status,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Platform,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Primary_IP4,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Primary_IP6,
 
+        [Parameter(ParameterSetName = 'Single')]
         [byte]$VCPUs,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Memory,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Disk,
 
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Tenant,
 
+        [Parameter(ParameterSetName = 'Single')]
         [string]$Comments,
 
+        [Parameter(ParameterSetName = 'Single')]
         [hashtable]$Custom_Fields,
 
-        [switch]$Force
+        # Bulk mode parameters
+        [Parameter(ParameterSetName = 'Bulk', Mandatory = $true, ValueFromPipeline = $true)]
+        [PSCustomObject]$InputObject,
+
+        [Parameter(ParameterSetName = 'Bulk')]
+        [ValidateRange(1, 1000)]
+        [int]$BatchSize = 50,
+
+        # Common parameters
+        [Parameter()]
+        [switch]$Force,
+
+        [Parameter()]
+        [switch]$Raw
     )
 
-    #    if ($null -ne $Status) {
-    #        $PSBoundParameters.Status = ValidateVirtualizationChoice -ProvidedValue $Status -VirtualMachineStatus
-    #    }
+    begin {
+        $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'virtual-machines'))
+        $URI = BuildNewURI -Segments $Segments
+
+        if ($PSCmdlet.ParameterSetName -eq 'Bulk') {
+            $bulkItems = [System.Collections.ArrayList]::new()
+        }
+    }
 
     process {
-        $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'virtual-machines', $Id))
+        if ($PSCmdlet.ParameterSetName -eq 'Single') {
+            $VMSegments = [System.Collections.ArrayList]::new(@('virtualization', 'virtual-machines', $Id))
 
-        Write-Verbose "Obtaining VM from ID $Id"
+            if ($Force -or $PSCmdlet.ShouldProcess($Id, "Update virtual machine")) {
+                $URIComponents = BuildURIComponents -URISegments $VMSegments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force', 'Raw'
 
-        #$CurrentVM = Get-NBVirtualMachine -Id $Id -ErrorAction Stop
+                $VMURI = BuildNewURI -Segments $URIComponents.Segments
 
-        Write-Verbose "Finished obtaining VM"
+                InvokeNetboxRequest -URI $VMURI -Body $URIComponents.Parameters -Method PATCH -Raw:$Raw
+            }
+        }
+        else {
+            # Bulk mode - collect items
+            if ($InputObject) {
+                # Validate that Id is present
+                $itemId = if ($InputObject.Id) { $InputObject.Id }
+                          elseif ($InputObject.id) { $InputObject.id }
+                          else { $null }
 
-        if ($Force -or $pscmdlet.ShouldProcess($ID, "Set properties on VM ID")) {
-            $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force'
+                if (-not $itemId) {
+                    Write-Error "InputObject must have an 'Id' property for bulk updates" -TargetObject $InputObject
+                    return
+                }
 
-            $URI = BuildNewURI -Segments $URIComponents.Segments
+                $item = @{}
+                foreach ($prop in $InputObject.PSObject.Properties) {
+                    $key = $prop.Name.ToLower()
+                    $value = $prop.Value
 
-            InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method PATCH
+                    # Handle property name mappings
+                    switch ($key) {
+                        'primary_ip4' { $key = 'primary_ip4' }
+                        'primary_ip6' { $key = 'primary_ip6' }
+                        'custom_fields' { $key = 'custom_fields' }
+                    }
+
+                    $item[$key] = $value
+                }
+                [void]$bulkItems.Add([PSCustomObject]$item)
+            }
+        }
+    }
+
+    end {
+        if ($PSCmdlet.ParameterSetName -eq 'Bulk' -and $bulkItems.Count -gt 0) {
+            $target = "$($bulkItems.Count) virtual machine(s)"
+
+            if ($Force -or $PSCmdlet.ShouldProcess($target, 'Update virtual machines (bulk)')) {
+                Write-Verbose "Processing $($bulkItems.Count) VMs in bulk PATCH mode with batch size $BatchSize"
+
+                $result = Send-NBBulkRequest -URI $URI -Items $bulkItems.ToArray() -Method PATCH `
+                    -BatchSize $BatchSize -ShowProgress -ActivityName 'Updating virtual machines'
+
+                # Output succeeded items to pipeline
+                foreach ($item in $result.Succeeded) {
+                    Write-Output $item
+                }
+
+                # Write errors for failed items
+                foreach ($failure in $result.Failed) {
+                    Write-Error "Failed to update VM: $($failure.Error)" -TargetObject $failure.Item
+                }
+
+                # Write summary
+                if ($result.HasErrors) {
+                    Write-Warning $result.GetSummary()
+                }
+                else {
+                    Write-Verbose $result.GetSummary()
+                }
+            }
         }
     }
 }
