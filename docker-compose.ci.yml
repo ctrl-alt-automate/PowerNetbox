@@ -1,0 +1,164 @@
+# docker-compose.ci.yml
+# ======================
+# Lightweight Netbox stack for CI/CD integration testing
+#
+# Usage:
+#   # Start with default version (4.4.8)
+#   docker compose -f docker-compose.ci.yml up -d
+#
+#   # Start with specific version
+#   NETBOX_VERSION=v4.5.0-3.2.0 docker compose -f docker-compose.ci.yml up -d
+#
+#   # Stop and cleanup
+#   docker compose -f docker-compose.ci.yml down -v
+#
+# Default credentials (CI/CD only - NOT for production!):
+#   URL:       http://localhost:8000
+#   Username:  admin
+#   Password:  admin
+#   API Token: 0123456789abcdef0123456789abcdef01234567
+#
+# Note: This configuration is optimized for fast startup in CI environments.
+#       Do NOT use these credentials or settings in production.
+
+services:
+  # ==========================================================================
+  # PostgreSQL Database
+  # ==========================================================================
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: netbox
+      POSTGRES_PASSWORD: netbox
+      POSTGRES_DB: netbox
+    volumes:
+      - netbox-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U netbox -d netbox"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - netbox-network
+    restart: unless-stopped
+
+  # ==========================================================================
+  # Redis - Task Queue
+  # ==========================================================================
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - netbox-redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - netbox-network
+    restart: unless-stopped
+
+  # ==========================================================================
+  # Redis - Cache
+  # ==========================================================================
+  redis-cache:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - netbox-network
+    restart: unless-stopped
+
+  # ==========================================================================
+  # Netbox Application
+  # ==========================================================================
+  netbox:
+    image: netboxcommunity/netbox:${NETBOX_VERSION:-v4.4.8-3.1.0}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      redis-cache:
+        condition: service_healthy
+    environment:
+      # ----------------------------------------------------------------------
+      # Database Configuration
+      # ----------------------------------------------------------------------
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: netbox
+      DB_USER: netbox
+      DB_PASSWORD: netbox
+
+      # ----------------------------------------------------------------------
+      # Redis Configuration
+      # ----------------------------------------------------------------------
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      REDIS_DATABASE: "0"
+      REDIS_CACHE_HOST: redis-cache
+      REDIS_CACHE_PORT: "6379"
+      REDIS_CACHE_DATABASE: "1"
+
+      # ----------------------------------------------------------------------
+      # Security Settings (CI/CD only!)
+      # ----------------------------------------------------------------------
+      # WARNING: These are insecure defaults for testing only!
+      SECRET_KEY: "ci-test-secret-key-not-for-production-use-$(openssl rand -hex 32)"
+      ALLOWED_HOSTS: "*"
+      CORS_ORIGIN_ALLOW_ALL: "true"
+
+      # ----------------------------------------------------------------------
+      # Superuser Auto-Creation
+      # ----------------------------------------------------------------------
+      # Creates admin user with known credentials for testing
+      SUPERUSER_NAME: admin
+      SUPERUSER_EMAIL: admin@example.com
+      SUPERUSER_PASSWORD: admin
+      SUPERUSER_API_TOKEN: "0123456789abcdef0123456789abcdef01234567"
+      SKIP_SUPERUSER: "false"
+
+      # ----------------------------------------------------------------------
+      # Performance / CI Optimization
+      # ----------------------------------------------------------------------
+      # Skip non-essential startup tasks for faster boot
+      SKIP_STARTUP_SCRIPTS: "false"
+
+      # Disable metrics collection
+      METRICS_ENABLED: "false"
+
+      # Reduce logging verbosity
+      LOGLEVEL: "WARNING"
+
+    ports:
+      - "8000:8080"
+    healthcheck:
+      # Wait for API to respond
+      test: ["CMD", "curl", "-sf", "http://localhost:8080/api/"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 120s  # Netbox needs time for DB migrations on first run
+    networks:
+      - netbox-network
+    restart: unless-stopped
+
+# ==========================================================================
+# Volumes - Persist data between restarts (but not between CI runs)
+# ==========================================================================
+volumes:
+  netbox-postgres-data:
+  netbox-redis-data:
+
+# ==========================================================================
+# Network - Isolated bridge network for the stack
+# ==========================================================================
+networks:
+  netbox-network:
+    driver: bridge

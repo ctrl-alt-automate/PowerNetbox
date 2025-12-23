@@ -343,7 +343,65 @@ Describe "Live Integration Tests" -Tag 'Integration', 'Live' -Skip:(-not $script
     BeforeAll {
         $secureToken = ConvertTo-SecureString -String $env:NETBOX_TOKEN -AsPlainText -Force
         $credential = [PSCredential]::new('api', $secureToken)
-        Connect-NBAPI -Hostname $env:NETBOX_HOST -Credential $credential -SkipCertificateCheck
+
+        # Determine scheme - default to http for Docker CI, https for cloud
+        $scheme = $env:NETBOX_SCHEME
+        if ([string]::IsNullOrEmpty($scheme)) {
+            # Docker CI uses http on localhost
+            if ($env:NETBOX_HOST -match 'localhost|127\.0\.0\.1') {
+                $scheme = 'http'
+            }
+            else {
+                $scheme = 'https'
+            }
+        }
+
+        $connectParams = @{
+            Hostname   = $env:NETBOX_HOST
+            Credential = $credential
+            Scheme     = $scheme
+        }
+
+        # Only skip certificate check for https
+        if ($scheme -eq 'https') {
+            $connectParams['SkipCertificateCheck'] = $true
+        }
+
+        Connect-NBAPI @connectParams
+
+        # Generate unique test prefix for this run
+        $script:TestRunId = [guid]::NewGuid().ToString().Substring(0, 8)
+        $script:TestPrefix = "LiveTest-$($script:TestRunId)"
+
+        # Track created resources for cleanup
+        $script:CreatedResources = @{
+            Sites     = [System.Collections.ArrayList]::new()
+            Tenants   = [System.Collections.ArrayList]::new()
+            Addresses = [System.Collections.ArrayList]::new()
+            Prefixes  = [System.Collections.ArrayList]::new()
+        }
+
+        Write-Host "Test Run ID: $script:TestRunId" -ForegroundColor Cyan
+    }
+
+    AfterAll {
+        Write-Host "`nCleaning up live test resources..." -ForegroundColor Yellow
+
+        # Cleanup in reverse dependency order
+        foreach ($id in $script:CreatedResources.Addresses) {
+            Remove-NBIPAMAddress -Id $id -Confirm:$false -ErrorAction SilentlyContinue
+        }
+        foreach ($id in $script:CreatedResources.Prefixes) {
+            Remove-NBIPAMPrefix -Id $id -Confirm:$false -ErrorAction SilentlyContinue
+        }
+        foreach ($id in $script:CreatedResources.Sites) {
+            Remove-NBDCIMSite -Id $id -Confirm:$false -ErrorAction SilentlyContinue
+        }
+        foreach ($id in $script:CreatedResources.Tenants) {
+            Remove-NBTenant -Id $id -Confirm:$false -ErrorAction SilentlyContinue
+        }
+
+        Write-Host "Cleanup complete." -ForegroundColor Green
     }
 
     Context "API Connectivity" {
@@ -355,27 +413,153 @@ Describe "Live Integration Tests" -Tag 'Integration', 'Live' -Skip:(-not $script
             $version = Get-NBVersion
             $version | Should -Not -BeNullOrEmpty
             $version.'netbox-version' | Should -Match '^\d+\.\d+\.\d+'
+            Write-Host "  Netbox version: $($version.'netbox-version')" -ForegroundColor Green
+        }
+
+        It "Should have correct hostname" {
+            Get-NBHostname | Should -Be $env:NETBOX_HOST
         }
     }
 
-    Context "DCIM Operations" {
-        It "Should list sites" {
-            $sites = Get-NBDCIMSite -Limit 5
-            $sites | Should -Not -BeNullOrEmpty
+    Context "DCIM Sites CRUD" {
+        BeforeAll {
+            $script:TestSiteName = "$($script:TestPrefix)-Site"
+            $script:TestSiteSlug = $script:TestSiteName.ToLower() -replace '[^a-z0-9-]', '-'
         }
 
-        It "Should list devices" {
-            { Get-NBDCIMDevice -Limit 5 } | Should -Not -Throw
+        It "Should create a new site" {
+            $site = New-NBDCIMSite -Name $script:TestSiteName -Slug $script:TestSiteSlug -Status 'active'
+
+            $site | Should -Not -BeNullOrEmpty
+            $site.name | Should -Be $script:TestSiteName
+
+            $script:TestSiteId = $site.id
+            [void]$script:CreatedResources.Sites.Add($site.id)
+
+            Write-Host "  Created site: $($site.name) (ID: $($site.id))" -ForegroundColor Green
+        }
+
+        It "Should get the site by ID" {
+            $site = Get-NBDCIMSite -Id $script:TestSiteId
+
+            $site | Should -Not -BeNullOrEmpty
+            $site.id | Should -Be $script:TestSiteId
+        }
+
+        It "Should update the site" {
+            $site = Set-NBDCIMSite -Id $script:TestSiteId -Description "$script:TestPrefix - Updated"
+
+            $site.description | Should -BeLike "*Updated*"
+        }
+
+        It "Should delete the site" {
+            { Remove-NBDCIMSite -Id $script:TestSiteId -Confirm:$false } | Should -Not -Throw
+
+            $script:CreatedResources.Sites.Remove($script:TestSiteId)
         }
     }
 
-    Context "IPAM Operations" {
-        It "Should list prefixes" {
-            { Get-NBIPAMPrefix -Limit 5 } | Should -Not -Throw
+    Context "IPAM Address CRUD" {
+        BeforeAll {
+            $octet3 = Get-Random -Minimum 1 -Maximum 254
+            $octet4 = Get-Random -Minimum 1 -Maximum 254
+            $script:TestAddress = "10.99.$octet3.$octet4/32"
         }
 
-        It "Should list IP addresses" {
-            { Get-NBIPAMAddress -Limit 5 } | Should -Not -Throw
+        It "Should create a new IP address" {
+            $ip = New-NBIPAMAddress -Address $script:TestAddress -Status 'active' -Description "$script:TestPrefix-IP"
+
+            $ip | Should -Not -BeNullOrEmpty
+            $ip.address | Should -Be $script:TestAddress
+
+            $script:TestAddressId = $ip.id
+            [void]$script:CreatedResources.Addresses.Add($ip.id)
+
+            Write-Host "  Created IP: $($ip.address) (ID: $($ip.id))" -ForegroundColor Green
+        }
+
+        It "Should get the IP address by ID" {
+            $ip = Get-NBIPAMAddress -Id $script:TestAddressId
+
+            $ip | Should -Not -BeNullOrEmpty
+            $ip.id | Should -Be $script:TestAddressId
+        }
+
+        It "Should delete the IP address" {
+            { Remove-NBIPAMAddress -Id $script:TestAddressId -Confirm:$false } | Should -Not -Throw
+
+            $script:CreatedResources.Addresses.Remove($script:TestAddressId)
+        }
+    }
+
+    Context "IPAM Prefix CRUD" {
+        BeforeAll {
+            $octet2 = Get-Random -Minimum 1 -Maximum 254
+            $script:TestPrefixValue = "10.$octet2.0.0/24"
+        }
+
+        It "Should create a new prefix" {
+            $prefix = New-NBIPAMPrefix -Prefix $script:TestPrefixValue -Status 'active' -Description "$script:TestPrefix-Prefix"
+
+            $prefix | Should -Not -BeNullOrEmpty
+            $prefix.prefix | Should -Be $script:TestPrefixValue
+
+            $script:TestPrefixId = $prefix.id
+            [void]$script:CreatedResources.Prefixes.Add($prefix.id)
+
+            Write-Host "  Created prefix: $($prefix.prefix) (ID: $($prefix.id))" -ForegroundColor Green
+        }
+
+        It "Should delete the prefix" {
+            { Remove-NBIPAMPrefix -Id $script:TestPrefixId -Confirm:$false } | Should -Not -Throw
+
+            $script:CreatedResources.Prefixes.Remove($script:TestPrefixId)
+        }
+    }
+
+    Context "Tenancy Tenant CRUD" {
+        BeforeAll {
+            $script:TestTenantName = "$($script:TestPrefix)-Tenant"
+            $script:TestTenantSlug = $script:TestTenantName.ToLower() -replace '[^a-z0-9-]', '-'
+        }
+
+        It "Should create a new tenant" {
+            $tenant = New-NBTenant -Name $script:TestTenantName -Slug $script:TestTenantSlug
+
+            $tenant | Should -Not -BeNullOrEmpty
+            $tenant.name | Should -Be $script:TestTenantName
+
+            $script:TestTenantId = $tenant.id
+            [void]$script:CreatedResources.Tenants.Add($tenant.id)
+
+            Write-Host "  Created tenant: $($tenant.name) (ID: $($tenant.id))" -ForegroundColor Green
+        }
+
+        It "Should delete the tenant" {
+            { Remove-NBTenant -Id $script:TestTenantId -Confirm:$false } | Should -Not -Throw
+
+            $script:CreatedResources.Tenants.Remove($script:TestTenantId)
+        }
+    }
+
+    Context "Pagination" {
+        It "Should support -All switch" {
+            { Get-NBDCIMSite -All } | Should -Not -Throw
+        }
+
+        It "Should support -Limit and -Offset" {
+            { Get-NBDCIMSite -Limit 10 -Offset 0 } | Should -Not -Throw
+        }
+    }
+
+    Context "Error Handling" {
+        It "Should throw on non-existent ID" {
+            { Get-NBDCIMSite -Id 999999999 } | Should -Throw
+        }
+
+        It "Should return empty for non-existent name" {
+            $result = Get-NBDCIMSite -Name "NonExistent-$([guid]::NewGuid())"
+            $result | Should -BeNullOrEmpty
         }
     }
 
@@ -396,6 +580,12 @@ Describe "Live Integration Tests" -Tag 'Integration', 'Live' -Skip:(-not $script
 
         It "Should query wireless links without error" {
             { Get-NBWirelessLink -Limit 1 } | Should -Not -Throw
+        }
+    }
+
+    Context "Version Compatibility" {
+        It "Should use /api/core/object-types/ endpoint (Netbox 4.x)" {
+            { Get-NBObjectType -Limit 1 } | Should -Not -Throw
         }
     }
 }
