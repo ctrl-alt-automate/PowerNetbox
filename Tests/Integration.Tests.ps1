@@ -414,54 +414,75 @@ Describe "Live Integration Tests" -Tag 'Integration', 'Live' -Skip:(-not $script
     AfterAll {
         Write-Host "`nCleaning up live test resources..." -ForegroundColor Yellow
 
+        # Track cleanup errors for reporting
+        $cleanupErrors = [System.Collections.ArrayList]::new()
+
+        # Helper function for safe resource removal
+        function Remove-TestResource {
+            param($ResourceType, $Id, $RemoveCommand)
+            try {
+                & $RemoveCommand -Id $Id -Confirm:$false -ErrorAction Stop
+            }
+            catch {
+                [void]$cleanupErrors.Add("Failed to remove $ResourceType ID ${Id}: $($_.Exception.Message)")
+            }
+        }
+
         # Cleanup in reverse dependency order (most dependent first)
 
         # Level 1: Most dependent resources
         foreach ($id in $script:CreatedResources.Devices) {
-            Remove-NBDCIMDevice -Id $id -Confirm:$false -ErrorAction SilentlyContinue
+            Remove-TestResource -ResourceType 'Device' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBDCIMDevice -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
         }
         foreach ($id in $script:CreatedResources.VMs) {
-            Remove-NBVirtualMachine -Id $id -Confirm:$false -ErrorAction SilentlyContinue
+            Remove-TestResource -ResourceType 'VM' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBVirtualMachine -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
         }
         foreach ($id in $script:CreatedResources.Interfaces) {
-            Remove-NBDCIMInterface -Id $id -Confirm:$false -ErrorAction SilentlyContinue
+            Remove-TestResource -ResourceType 'Interface' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBDCIMInterface -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
         }
 
         # Level 2: Mid-level resources
         foreach ($id in $script:CreatedResources.Addresses) {
-            Remove-NBIPAMAddress -Id $id -Confirm:$false -ErrorAction SilentlyContinue
+            Remove-TestResource -ResourceType 'Address' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBIPAMAddress -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
         }
         foreach ($id in $script:CreatedResources.Prefixes) {
-            Remove-NBIPAMPrefix -Id $id -Confirm:$false -ErrorAction SilentlyContinue
+            Remove-TestResource -ResourceType 'Prefix' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBIPAMPrefix -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
         }
         foreach ($id in $script:CreatedResources.VLANs) {
-            Remove-NBIPAMVLAN -Id $id -Confirm:$false -ErrorAction SilentlyContinue
+            Remove-TestResource -ResourceType 'VLAN' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBIPAMVLAN -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
         }
 
         # Level 3: Reference data
         foreach ($id in $script:CreatedResources.DeviceTypes) {
-            Remove-NBDCIMDeviceType -Id $id -Confirm:$false -ErrorAction SilentlyContinue
+            Remove-TestResource -ResourceType 'DeviceType' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBDCIMDeviceType -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
         }
         foreach ($id in $script:CreatedResources.DeviceRoles) {
-            Remove-NBDCIMDeviceRole -Id $id -Confirm:$false -ErrorAction SilentlyContinue
+            Remove-TestResource -ResourceType 'DeviceRole' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBDCIMDeviceRole -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
         }
         foreach ($id in $script:CreatedResources.Manufacturers) {
-            Remove-NBDCIMManufacturer -Id $id -Confirm:$false -ErrorAction SilentlyContinue
+            Remove-TestResource -ResourceType 'Manufacturer' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBDCIMManufacturer -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
         }
         foreach ($id in $script:CreatedResources.Clusters) {
-            Remove-NBVirtualizationCluster -Id $id -Confirm:$false -ErrorAction SilentlyContinue
+            Remove-TestResource -ResourceType 'Cluster' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBVirtualizationCluster -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
         }
         foreach ($id in $script:CreatedResources.ClusterTypes) {
-            Remove-NBVirtualizationClusterType -Id $id -Confirm:$false -ErrorAction SilentlyContinue
+            Remove-TestResource -ResourceType 'ClusterType' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBVirtualizationClusterType -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
         }
         foreach ($id in $script:CreatedResources.Sites) {
-            Remove-NBDCIMSite -Id $id -Confirm:$false -ErrorAction SilentlyContinue
+            Remove-TestResource -ResourceType 'Site' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBDCIMSite -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
         }
         foreach ($id in $script:CreatedResources.Tenants) {
-            Remove-NBTenant -Id $id -Confirm:$false -ErrorAction SilentlyContinue
+            Remove-TestResource -ResourceType 'Tenant' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBTenant -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
         }
 
-        Write-Host "Cleanup complete." -ForegroundColor Green
+        # Report any cleanup errors
+        if ($cleanupErrors.Count -gt 0) {
+            Write-Warning "Cleanup completed with $($cleanupErrors.Count) error(s):"
+            $cleanupErrors | ForEach-Object { Write-Warning "  - $_" }
+        }
+        else {
+            Write-Host "Cleanup complete." -ForegroundColor Green
+        }
     }
 
     Context "API Connectivity" {
@@ -547,6 +568,12 @@ Describe "Live Integration Tests" -Tag 'Integration', 'Live' -Skip:(-not $script
             $ip.id | Should -Be $script:TestAddressId
         }
 
+        It "Should update the IP address" {
+            $ip = Set-NBIPAMAddress -Id $script:TestAddressId -Description "$script:TestPrefix - Updated IP"
+
+            $ip.description | Should -BeLike "*Updated*"
+        }
+
         It "Should delete the IP address" {
             { Remove-NBIPAMAddress -Id $script:TestAddressId -Confirm:$false } | Should -Not -Throw
 
@@ -572,6 +599,20 @@ Describe "Live Integration Tests" -Tag 'Integration', 'Live' -Skip:(-not $script
             Write-Host "  Created prefix: $($prefix.prefix) (ID: $($prefix.id))" -ForegroundColor Green
         }
 
+        It "Should get the prefix by ID" {
+            $prefix = Get-NBIPAMPrefix -Id $script:TestPrefixId
+
+            $prefix | Should -Not -BeNullOrEmpty
+            $prefix.id | Should -Be $script:TestPrefixId
+            $prefix.prefix | Should -Be $script:TestPrefixValue
+        }
+
+        It "Should update the prefix" {
+            $prefix = Set-NBIPAMPrefix -Id $script:TestPrefixId -Description "$script:TestPrefix - Updated Prefix"
+
+            $prefix.description | Should -BeLike "*Updated*"
+        }
+
         It "Should delete the prefix" {
             { Remove-NBIPAMPrefix -Id $script:TestPrefixId -Confirm:$false } | Should -Not -Throw
 
@@ -595,6 +636,20 @@ Describe "Live Integration Tests" -Tag 'Integration', 'Live' -Skip:(-not $script
             [void]$script:CreatedResources.Tenants.Add($tenant.id)
 
             Write-Host "  Created tenant: $($tenant.name) (ID: $($tenant.id))" -ForegroundColor Green
+        }
+
+        It "Should get the tenant by ID" {
+            $tenant = Get-NBTenant -Id $script:TestTenantId
+
+            $tenant | Should -Not -BeNullOrEmpty
+            $tenant.id | Should -Be $script:TestTenantId
+            $tenant.name | Should -Be $script:TestTenantName
+        }
+
+        It "Should update the tenant" {
+            $tenant = Set-NBTenant -Id $script:TestTenantId -Description "$script:TestPrefix - Updated Tenant"
+
+            $tenant.description | Should -BeLike "*Updated*"
         }
 
         It "Should delete the tenant" {
