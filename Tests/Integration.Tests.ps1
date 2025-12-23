@@ -432,7 +432,9 @@ Describe "Live Integration Tests" -Tag 'Integration', 'Live' -Skip:(-not $script
         }
 
         It "Should have correct hostname" {
-            Get-NBHostname | Should -Be $env:NETBOX_HOST
+            # Get-NBHostname returns just the hostname part (port is stored separately)
+            $expectedHostname = if ($env:NETBOX_HOST -match '^(.+):\d+$') { $Matches[1] } else { $env:NETBOX_HOST }
+            Get-NBHostname | Should -Be $expectedHostname
         }
     }
 
