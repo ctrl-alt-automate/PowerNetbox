@@ -344,11 +344,21 @@ Describe "Live Integration Tests" -Tag 'Integration', 'Live' -Skip:(-not $script
         $secureToken = ConvertTo-SecureString -String $env:NETBOX_TOKEN -AsPlainText -Force
         $credential = [PSCredential]::new('api', $secureToken)
 
+        # Parse hostname and port (supports "hostname" or "hostname:port" format)
+        $hostValue = $env:NETBOX_HOST
+        $hostname = $hostValue
+        $port = $null
+
+        if ($hostValue -match '^(.+):(\d+)$') {
+            $hostname = $Matches[1]
+            $port = [int]$Matches[2]
+        }
+
         # Determine scheme - default to http for Docker CI, https for cloud
         $scheme = $env:NETBOX_SCHEME
         if ([string]::IsNullOrEmpty($scheme)) {
             # Docker CI uses http on localhost
-            if ($env:NETBOX_HOST -match 'localhost|127\.0\.0\.1') {
+            if ($hostname -match 'localhost|127\.0\.0\.1') {
                 $scheme = 'http'
             }
             else {
@@ -357,9 +367,14 @@ Describe "Live Integration Tests" -Tag 'Integration', 'Live' -Skip:(-not $script
         }
 
         $connectParams = @{
-            Hostname   = $env:NETBOX_HOST
+            Hostname   = $hostname
             Credential = $credential
             Scheme     = $scheme
+        }
+
+        # Add port if specified
+        if ($port) {
+            $connectParams['Port'] = $port
         }
 
         # Only skip certificate check for https
