@@ -27,7 +27,7 @@ on:
       netbox_version:
         description: 'Netbox Docker image tag (e.g., v4.4.8-3.1.0)'
         required: false
-        default: 'v4.4.8-3.1.0'
+        default: 'v4.4.8-3.4.2'
         type: string
   # Run weekly to catch upstream Netbox changes
   schedule:
@@ -57,7 +57,7 @@ jobs:
           # ----------------------------------------------------------
           # Stable version - MUST pass
           # ----------------------------------------------------------
-          - netbox: "v4.4.8-3.1.0"
+          - netbox: "v4.4.8-3.4.2"
             netbox_short: "4.4.8"
             experimental: false
 

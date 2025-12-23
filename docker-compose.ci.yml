@@ -78,7 +78,7 @@ services:
   # Netbox Application
   # ==========================================================================
   netbox:
-    image: netboxcommunity/netbox:${NETBOX_VERSION:-v4.4.8-3.1.0}
+    image: netboxcommunity/netbox:${NETBOX_VERSION:-v4.4.8-3.4.2}
     depends_on:
       postgres:
         condition: service_healthy
