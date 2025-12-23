@@ -9,7 +9,7 @@ This file provides guidance to Claude Code (or any AI assistant) when working wi
 > **Note:** This is a fork of [NetboxPS](https://github.com/benclaussen/NetboxPS) published under a new name to provide full Netbox 4.x compatibility.
 
 - **Module Name**: PowerNetbox (PSGallery)
-- **Current Version**: 4.4.8.1
+- **Current Version**: 4.4.8.2
 - **Target Netbox Version**: 4.4.8 (fully compatible)
 - **Minimum Netbox Version**: 2.8.x
 - **PowerShell Version**: 5.1+ (Desktop and Core editions)
@@ -17,6 +17,8 @@ This file provides guidance to Claude Code (or any AI assistant) when working wi
 - **Fork Repository**: https://github.com/ctrl-alt-automate/PowerNetbox
 - **Issue Tracking**: https://github.com/ctrl-alt-automate/PowerNetbox/issues
 - **Total Functions**: 494 public functions across all modules
+- **Unit Tests**: 946 (mock-based, cross-platform)
+- **Integration Tests**: 79 (Docker-based, live API)
 
 ## Development Environment
 
@@ -85,8 +87,41 @@ Invoke-Pester ./Tests/Integration.Tests.ps1 -Tag 'Live'
 ### CI/CD Workflows
 The project uses GitHub Actions for CI/CD:
 - **Lint**: PSScriptAnalyzer runs on push/PR to check code quality
-- **Test**: Pester tests run on ubuntu, windows, and macos
+- **Test**: Unit tests (mock-based) run on ubuntu, windows, and macos
+- **Integration**: Docker-based live API tests run on ubuntu (see below)
 - **Release**: Tests must pass before PSGallery publish
+
+### Docker Integration Testing
+
+Integration tests run against a real Netbox instance via Docker Compose:
+
+```bash
+# Start local Netbox stack
+docker compose -f docker-compose.ci.yml up -d
+
+# Wait for Netbox to be healthy (2-3 minutes on first run)
+# Default credentials: admin/admin
+# API Token: 0123456789abcdef0123456789abcdef01234567
+
+# Run integration tests
+$env:NETBOX_HOST = 'localhost:8000'
+$env:NETBOX_TOKEN = '0123456789abcdef0123456789abcdef01234567'
+Invoke-Pester ./Tests/Integration.Tests.ps1 -Tag 'Live'
+
+# Cleanup
+docker compose -f docker-compose.ci.yml down -v
+```
+
+The Docker stack includes:
+- **PostgreSQL 15**: Database backend
+- **Redis 7**: Task queue and cache
+- **Netbox 4.4.8**: Application server (configurable via `NETBOX_VERSION`)
+
+Integration tests perform full CRUD cycles on:
+- Sites, Devices, Interfaces (DCIM)
+- Prefixes, Addresses, VLANs (IPAM)
+- VMs, Clusters (Virtualization)
+- Tenants (Tenancy)
 
 ## GitHub Wiki
 
@@ -631,6 +666,7 @@ See [GitHub Issues](https://github.com/ctrl-alt-automate/PowerNetbox/issues) for
 - **Issue #32**: Extras module expansion ✅ (12 endpoints, 45 functions)
 - **Issue #33**: Core module ✅ (5 endpoints, 8 functions)
 - **Issue #34**: Users module ✅ (4 endpoints, 16 functions)
+- **Issue #109**: Docker-based integration testing ✅ (79 live API tests)
 
 ### Bulk Operations (Completed)
 - **Issue #81**: Bulk operations infrastructure ✅ (BulkOperationResult class, Send-NBBulkRequest helper)
@@ -852,6 +888,19 @@ The agent prompts are stored in `.claude/commands/`:
 |--------|---------|----------|
 | `main` | Clean showcase / releases | Only module source code |
 | `dev` | Active development | Source + dev tooling |
+| `beta` | Netbox 4.5 compatibility | Pre-release testing |
+
+### Netbox 4.5 Milestone
+
+The `beta` branch tracks Netbox 4.5 compatibility (issues #101-#108):
+- **#101**: Test against Netbox 4.5 beta
+- **#102**: object_type renamed to related_object_type (bookmarks)
+- **#103**: event_types field replaces type_* booleans (event-rules)
+- **#104**: Nested device serializer changes
+- **#105**: Cable termination_a/b_type field changes
+- **#106**: New circuit assignment features
+- **#107**: New VDC/virtual-chassis fields
+- **#108**: Module/ModuleBay adoption changes
 
 ### Dev-Only Files (excluded from main)
 
