@@ -139,8 +139,8 @@ services:
     ports:
       - "8000:8080"
     healthcheck:
-      # Wait for API to respond
-      test: ["CMD", "curl", "-sf", "http://localhost:8080/api/"]
+      # Use /login/ endpoint - doesn't require auth and returns 200
+      test: ["CMD", "curl", "-sf", "http://localhost:8080/login/"]
       interval: 10s
       timeout: 5s
       retries: 30
