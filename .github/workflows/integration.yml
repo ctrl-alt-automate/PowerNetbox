@@ -117,11 +117,11 @@ jobs:
 
             if [ "$STATUS" = "healthy" ]; then
               echo ""
-              echo "Netbox is healthy! Verifying API..."
+              echo "Netbox is healthy! Verifying web server..."
 
-              # Double-check API is responding
-              if curl -sf http://localhost:8000/api/ > /dev/null 2>&1; then
-                echo "API is responding!"
+              # Double-check web server is responding (use /login/ - no auth required)
+              if curl -sf http://localhost:8000/login/ > /dev/null 2>&1; then
+                echo "Netbox web server is responding!"
                 exit 0
               fi
             fi
