@@ -3,7 +3,7 @@
 # Lightweight Netbox stack for CI/CD integration testing
 #
 # Usage:
-#   # Start with default version (4.4.8)
+#   # Start with default version (4.4.9)
 #   docker compose -f docker-compose.ci.yml up -d
 #
 #   # Start with specific version
@@ -78,7 +78,7 @@ services:
   # Netbox Application
   # ==========================================================================
   netbox:
-    image: netboxcommunity/netbox:${NETBOX_VERSION:-v4.4.8-3.4.2}
+    image: netboxcommunity/netbox:${NETBOX_VERSION:-v4.4.9-3.4.2}
     depends_on:
       postgres:
         condition: service_healthy
