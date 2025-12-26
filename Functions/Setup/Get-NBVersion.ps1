@@ -27,5 +27,5 @@ function Get-NBVersion {
 
     $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters -SkipConnectedCheck
 
-    InvokeNetboxRequest -URI $URI -All:$All -PageSize $PageSize
+    InvokeNetboxRequest -URI $URI
 }
