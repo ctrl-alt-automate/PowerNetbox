@@ -284,4 +284,84 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' {
 
     # NOTE: ValidateChoice tests removed - function no longer exists in the module
     # The module now passes values directly to the API without client-side validation
+
+    Context "ConvertTo-NetboxVersion" {
+        It "Should parse standard three-part version" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $result = ConvertTo-NetboxVersion -VersionString "4.4.8"
+                $result | Should -BeOfType [System.Version]
+                $result | Should -Be ([version]"4.4.8")
+            }
+        }
+
+        It "Should parse Docker-suffixed version" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $result = ConvertTo-NetboxVersion -VersionString "4.2.9-Docker-3.2.1"
+                $result | Should -Be ([version]"4.2.9")
+            }
+        }
+
+        It "Should parse two-part version" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $result = ConvertTo-NetboxVersion -VersionString "4.4"
+                $result | Should -Be ([version]"4.4")
+            }
+        }
+
+        It "Should parse version with v prefix" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $result = ConvertTo-NetboxVersion -VersionString "v4.4.9-dev"
+                $result | Should -Be ([version]"4.4.9")
+            }
+        }
+
+        It "Should return null for null input" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $result = ConvertTo-NetboxVersion -VersionString $null
+                $result | Should -BeNullOrEmpty
+            }
+        }
+
+        It "Should return null for empty string" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $result = ConvertTo-NetboxVersion -VersionString ""
+                $result | Should -BeNullOrEmpty
+            }
+        }
+
+        It "Should return null for whitespace" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $result = ConvertTo-NetboxVersion -VersionString "   "
+                $result | Should -BeNullOrEmpty
+            }
+        }
+
+        It "Should return null for invalid format" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $result = ConvertTo-NetboxVersion -VersionString "invalid"
+                $result | Should -BeNullOrEmpty
+            }
+        }
+
+        It "Should return null for single number" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $result = ConvertTo-NetboxVersion -VersionString "4"
+                $result | Should -BeNullOrEmpty
+            }
+        }
+
+        It "Should support pipeline input" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $result = "4.4.8" | ConvertTo-NetboxVersion
+                $result | Should -Be ([version]"4.4.8")
+            }
+        }
+
+        It "Should handle version with build metadata" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $result = ConvertTo-NetboxVersion -VersionString "4.4.9+build.123"
+                $result | Should -Be ([version]"4.4.9")
+            }
+        }
+    }
 }
