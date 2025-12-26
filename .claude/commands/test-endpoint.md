@@ -20,16 +20,16 @@ HOST="zwqg2756.cloud.netboxapp.com"
 ### Step 2: Test the Function
 ```powershell
 # Test GET function
-Get-NB[Module][Resource] -Verbose
+Get-Netbox[Module][Resource] -Verbose
 
 # Test with filters
-Get-NB[Module][Resource] -Name "test" -Verbose
+Get-Netbox[Module][Resource] -Name "test" -Verbose
 
 # Test with ID
-Get-NB[Module][Resource] -Id 1 -Verbose
+Get-Netbox[Module][Resource] -Id 1 -Verbose
 
 # Test raw output
-Get-NB[Module][Resource] -Raw
+Get-Netbox[Module][Resource] -Raw
 ```
 
 ### Step 3: Compare with Direct API Call
@@ -42,7 +42,7 @@ curl -s -H "Authorization: Token $TOKEN" "https://$HOST/api/[module]/[resource]/
 
 Report findings in this format:
 
-#### Function: `Get-NB[Module][Resource]`
+#### Function: `Get-Netbox[Module][Resource]`
 - **Status**: ✅ Working / ⚠️ Partial / ❌ Broken
 - **Netbox Version Tested**: 4.4.7
 - **Issues Found**:
