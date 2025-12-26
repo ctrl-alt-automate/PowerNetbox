@@ -249,7 +249,7 @@ Import-Module PowerNetbox
 |----------|----------------|
 | PowerShell Desktop | 5.1 |
 | PowerShell Core | 7.0+ |
-| Netbox | 2.8+ (tested with 4.4.9) |
+| Netbox | 4.1+ (tested with 4.4.9) |
 
 ### Platform Support
 
