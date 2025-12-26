@@ -1,0 +1,58 @@
+# CODEOWNERS - Automatic review assignment
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# These owners will be automatically requested for review when someone opens
+# a pull request that modifies code they own.
+#
+# Order matters: later rules override earlier ones
+
+# Default owner for everything
+* @ctrl-alt-automate
+
+# =============================================================================
+# Module Owners
+# =============================================================================
+# Each module can have specific owners for specialized review
+
+# Core infrastructure
+/Functions/Setup/                    @ctrl-alt-automate
+/Functions/Helpers/                  @ctrl-alt-automate
+
+# DCIM Module (largest module, most critical)
+/Functions/DCIM/                     @ctrl-alt-automate
+
+# IPAM Module
+/Functions/IPAM/                     @ctrl-alt-automate
+
+# Other modules
+/Functions/Virtualization/           @ctrl-alt-automate
+/Functions/Circuits/                 @ctrl-alt-automate
+/Functions/Tenancy/                  @ctrl-alt-automate
+/Functions/VPN/                      @ctrl-alt-automate
+/Functions/Wireless/                 @ctrl-alt-automate
+/Functions/Extras/                   @ctrl-alt-automate
+/Functions/Core/                     @ctrl-alt-automate
+/Functions/Users/                    @ctrl-alt-automate
+
+# Plugins (may have different owners)
+/Functions/Plugins/                  @ctrl-alt-automate
+
+# =============================================================================
+# Critical Files (require explicit review)
+# =============================================================================
+
+# Module manifest and loader
+PowerNetbox.psd1                     @ctrl-alt-automate
+PowerNetbox.psm1                     @ctrl-alt-automate
+
+# Build and deployment
+deploy.ps1                           @ctrl-alt-automate
+
+# CI/CD workflows
+/.github/workflows/                  @ctrl-alt-automate
+
+# Tests
+/Tests/                              @ctrl-alt-automate
+
+# Documentation
+README.md                            @ctrl-alt-automate
