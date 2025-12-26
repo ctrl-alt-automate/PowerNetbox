@@ -280,6 +280,13 @@ Original copyright (c) 2018 Ben Claussen. Fork maintained by ctrl-alt-automate.
 
 ## Changelog
 
+### v4.4.9.1
+
+- **Cross-platform error handling** - Fixed type casting error on PowerShell Core 7.x (#100)
+- **Central version parsing** - New `ConvertTo-NetboxVersion` helper for consistent version detection (#111)
+- **Improved compatibility** - Handles Docker-suffixed versions like `4.2.9-Docker-3.2.1`
+- **952 unit tests** - Added tests for version parsing and error handling
+
 ### v4.4.9.0
 
 - **Full Netbox 4.4.9 compatibility** - Tested with latest stable release
