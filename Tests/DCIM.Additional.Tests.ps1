@@ -107,6 +107,64 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
             $Result.URI | Should -Match '/api/dcim/cables/3/'
         }
     }
+
+    Context "Cable Profile Support (4.5+)" {
+        It "Should include Profile in New-NBDCIMCable body on Netbox 4.5+" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.ParsedVersion = [version]'4.5.0'
+            }
+            $aTerm = @(@{object_type="dcim.interface"; object_id=1})
+            $bTerm = @(@{object_type="dcim.interface"; object_id=2})
+            $Result = New-NBDCIMCable -A_Terminations $aTerm -B_Terminations $bTerm -Profile '1c4p-4c1p' -Confirm:$false
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.profile | Should -Be '1c4p-4c1p'
+        }
+
+        It "Should exclude Profile from New-NBDCIMCable body on Netbox 4.4.x" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.ParsedVersion = [version]'4.4.9'
+            }
+            $aTerm = @(@{object_type="dcim.interface"; object_id=1})
+            $bTerm = @(@{object_type="dcim.interface"; object_id=2})
+            $Result = New-NBDCIMCable -A_Terminations $aTerm -B_Terminations $bTerm -Profile '1c4p-4c1p' -Confirm:$false -WarningAction SilentlyContinue
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.PSObject.Properties.Name | Should -Not -Contain 'profile'
+        }
+
+        It "Should include Profile in Set-NBDCIMCable body on Netbox 4.5+" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.ParsedVersion = [version]'4.5.0'
+            }
+            $Result = Set-NBDCIMCable -Id 1 -Profile '2c4p' -Confirm:$false
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.profile | Should -Be '2c4p'
+        }
+
+        It "Should exclude Profile from Set-NBDCIMCable body on Netbox 4.4.x" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.ParsedVersion = [version]'4.4.9'
+            }
+            $Result = Set-NBDCIMCable -Id 1 -Profile '2c4p' -Confirm:$false -WarningAction SilentlyContinue
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.PSObject.Properties.Name | Should -Not -Contain 'profile'
+        }
+
+        It "Should include Profile filter in Get-NBDCIMCable on Netbox 4.5+" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.ParsedVersion = [version]'4.5.0'
+            }
+            $Result = Get-NBDCIMCable -Profile '1c4p-4c1p'
+            $Result.Uri | Should -Match 'profile=1c4p-4c1p'
+        }
+
+        It "Should exclude Profile filter from Get-NBDCIMCable on Netbox 4.4.x" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.ParsedVersion = [version]'4.4.9'
+            }
+            $Result = Get-NBDCIMCable -Profile '1c4p-4c1p' -WarningAction SilentlyContinue
+            $Result.Uri | Should -Not -Match 'profile='
+        }
+    }
     #endregion
 
     #region Locations
