@@ -220,4 +220,50 @@ Describe "GetNetboxAPIErrorBody Cross-Platform" -Tag 'CrossPlatform', 'Helper' {
         $functionContent = Get-Content ./Functions/Helpers/GetNetboxAPIErrorBody.ps1 -Raw
         $functionContent | Should -Match 'UTF8'
     }
+
+    It "Should handle HttpResponseMessage type (PowerShell Core)" {
+        # The function should check for HttpResponseMessage type
+        $functionContent = Get-Content ./Functions/Helpers/GetNetboxAPIErrorBody.ps1 -Raw
+        $functionContent | Should -Match 'System\.Net\.Http\.HttpResponseMessage'
+        $functionContent | Should -Match 'ReadAsStringAsync'
+    }
+
+    It "Should handle HttpWebResponse type (PowerShell Desktop)" {
+        # The function should check for HttpWebResponse type
+        $functionContent = Get-Content ./Functions/Helpers/GetNetboxAPIErrorBody.ps1 -Raw
+        $functionContent | Should -Match 'System\.Net\.HttpWebResponse'
+        $functionContent | Should -Match 'GetResponseStream'
+    }
+
+    It "Should not have strongly typed parameter constraint" {
+        # Verify the parameter accepts any type (System.Object) rather than a specific type
+        InModuleScope -ModuleName 'PowerNetbox' {
+            $command = Get-Command GetNetboxAPIErrorBody
+            $param = $command.Parameters['Response']
+            $param.ParameterType.FullName | Should -Be 'System.Object'
+        }
+    }
+
+    It "Should extract body from HttpResponseMessage on PowerShell Core" -Skip:($PSVersionTable.PSEdition -ne 'Core') {
+        InModuleScope -ModuleName 'PowerNetbox' {
+            # Create a mock HttpResponseMessage with content
+            $content = [System.Net.Http.StringContent]::new('{"error": "Test error message"}', [System.Text.Encoding]::UTF8, 'application/json')
+            $response = [System.Net.Http.HttpResponseMessage]::new([System.Net.HttpStatusCode]::Forbidden)
+            $response.Content = $content
+
+            $result = GetNetboxAPIErrorBody -Response $response
+            $result | Should -Match 'Test error message'
+
+            $response.Dispose()
+        }
+    }
+
+    It "Should return empty string for unknown response types" {
+        InModuleScope -ModuleName 'PowerNetbox' {
+            # Pass an object that is neither HttpWebResponse nor HttpResponseMessage
+            $unknownResponse = [PSCustomObject]@{ StatusCode = 403 }
+            $result = GetNetboxAPIErrorBody -Response $unknownResponse
+            $result | Should -Be ''
+        }
+    }
 }
