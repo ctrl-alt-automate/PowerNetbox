@@ -79,27 +79,13 @@ function Get-NBContentType {
     # We use 'extras' as the default for maximum compatibility across all 4.x versions
     $ObjectTypesEndpoint = @('extras', 'object-types')
 
-    # Check if we have version info and can use the newer endpoint
-    if ($script:NetboxConfig -and $script:NetboxConfig.NetboxVersion) {
-        $versionString = $script:NetboxConfig.NetboxVersion.'netbox-version'
-        if ($versionString) {
-            # Extract just the version number (e.g., "4.2.9" from "4.2.9-Docker-3.2.1")
-            if ($versionString -match '^(\d+\.\d+\.?\d*)') {
-                $versionPart = $Matches[1]
-                try {
-                    if ([version]$versionPart -ge [version]'4.4') {
-                        $ObjectTypesEndpoint = @('core', 'object-types')
-                        Write-Verbose "Using /api/core/object-types/ endpoint (Netbox $versionString)"
-                    } else {
-                        Write-Verbose "Using /api/extras/object-types/ endpoint (Netbox $versionString)"
-                    }
-                } catch {
-                    Write-Verbose "Could not parse version '$versionPart', using extras endpoint"
-                }
-            } else {
-                Write-Verbose "Could not extract version from '$versionString', using extras endpoint"
-            }
-        }
+    # Use cached ParsedVersion from Connect-NBAPI (set by ConvertTo-NetboxVersion)
+    $version = $script:NetboxConfig.ParsedVersion
+    if ($version -and $version -ge [version]'4.4') {
+        $ObjectTypesEndpoint = @('core', 'object-types')
+        Write-Verbose "Using /api/core/object-types/ endpoint (Netbox $version)"
+    } else {
+        Write-Verbose "Using /api/extras/object-types/ endpoint (Netbox $version)"
     }
 
     switch ($PSCmdlet.ParameterSetName) {
