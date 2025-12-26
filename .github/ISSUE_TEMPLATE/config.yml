@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question / Support
+    url: https://github.com/ctrl-alt-automate/PowerNetbox/discussions
+    about: Ask questions and get help from the community
+  - name: Netbox Documentation
+    url: https://netbox.readthedocs.io/
+    about: Check the official Netbox documentation
+  - name: PowerNetbox Wiki
+    url: https://github.com/ctrl-alt-automate/PowerNetbox/wiki
+    about: Browse the PowerNetbox wiki for guides and examples
