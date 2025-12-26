@@ -508,4 +508,194 @@ Describe "Users Module Tests" -Tag 'Users' {
         }
     }
     #endregion
+
+    #region OwnerGroup Tests (Netbox 4.5+)
+    Context "Get-NBOwnerGroup" {
+        It "Should request owner groups" {
+            $Result = Get-NBOwnerGroup
+            $Result.Method | Should -Be 'GET'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/users/owner-groups/'
+        }
+
+        It "Should request an owner group by ID" {
+            $Result = Get-NBOwnerGroup -Id 5
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/users/owner-groups/5/'
+        }
+
+        It "Should request an owner group by name" {
+            $Result = Get-NBOwnerGroup -Name 'NetworkTeam'
+            $Result.Uri | Should -Match 'name=NetworkTeam'
+        }
+
+        It "Should request with limit and offset" {
+            $Result = Get-NBOwnerGroup -Limit 10 -Offset 20
+            $Result.Uri | Should -Match 'limit=10'
+            $Result.Uri | Should -Match 'offset=20'
+        }
+    }
+
+    Context "New-NBOwnerGroup" {
+        It "Should create an owner group" {
+            $Result = New-NBOwnerGroup -Name 'TestGroup' -Confirm:$false
+            $Result.Method | Should -Be 'POST'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/users/owner-groups/'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.name | Should -Be 'TestGroup'
+        }
+
+        It "Should create an owner group with description" {
+            $Result = New-NBOwnerGroup -Name 'TestGroup' -Description 'Test description' -Confirm:$false
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.description | Should -Be 'Test description'
+        }
+
+        It "Should support -WhatIf" {
+            $Result = New-NBOwnerGroup -Name 'WhatIfGroup' -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+    }
+
+    Context "Set-NBOwnerGroup" {
+        It "Should update an owner group" {
+            $Result = Set-NBOwnerGroup -Id 1 -Name 'UpdatedGroup' -Confirm:$false
+            $Result.Method | Should -Be 'PATCH'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/users/owner-groups/1/'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.name | Should -Be 'UpdatedGroup'
+        }
+
+        It "Should support pipeline input by property name" {
+            $Result = [PSCustomObject]@{ Id = 15 } | Set-NBOwnerGroup -Name 'Piped' -Confirm:$false
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/users/owner-groups/15/'
+        }
+
+        It "Should support -WhatIf" {
+            $Result = Set-NBOwnerGroup -Id 1 -Name 'WhatIf' -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+    }
+
+    Context "Remove-NBOwnerGroup" {
+        It "Should delete an owner group" {
+            $Result = Remove-NBOwnerGroup -Id 1 -Confirm:$false
+            $Result.Method | Should -Be 'DELETE'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/users/owner-groups/1/'
+        }
+
+        It "Should support pipeline input by property name" {
+            $Result = [PSCustomObject]@{ Id = 20 } | Remove-NBOwnerGroup -Confirm:$false
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/users/owner-groups/20/'
+        }
+
+        It "Should support -WhatIf" {
+            $Result = Remove-NBOwnerGroup -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+    }
+    #endregion
+
+    #region Owner Tests (Netbox 4.5+)
+    Context "Get-NBOwner" {
+        It "Should request owners" {
+            $Result = Get-NBOwner
+            $Result.Method | Should -Be 'GET'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/users/owners/'
+        }
+
+        It "Should request an owner by ID" {
+            $Result = Get-NBOwner -Id 5
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/users/owners/5/'
+        }
+
+        It "Should request an owner by name" {
+            $Result = Get-NBOwner -Name 'NetworkOps'
+            $Result.Uri | Should -Match 'name=NetworkOps'
+        }
+
+        It "Should request owners by group ID" {
+            $Result = Get-NBOwner -Group_Id 3
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/users/owners/?group_id=3'
+        }
+
+        It "Should request with limit and offset" {
+            $Result = Get-NBOwner -Limit 10 -Offset 20
+            $Result.Uri | Should -Match 'limit=10'
+            $Result.Uri | Should -Match 'offset=20'
+        }
+    }
+
+    Context "New-NBOwner" {
+        It "Should create an owner" {
+            $Result = New-NBOwner -Name 'TestOwner' -Confirm:$false
+            $Result.Method | Should -Be 'POST'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/users/owners/'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.name | Should -Be 'TestOwner'
+        }
+
+        It "Should create an owner with group" {
+            $Result = New-NBOwner -Name 'TestOwner' -Group 1 -Confirm:$false
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.group | Should -Be 1
+        }
+
+        It "Should create an owner with users" {
+            $Result = New-NBOwner -Name 'TestOwner' -Users 1, 2, 3 -Confirm:$false
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.users | Should -Contain 1
+            $bodyObj.users | Should -Contain 2
+            $bodyObj.users | Should -Contain 3
+        }
+
+        It "Should support -WhatIf" {
+            $Result = New-NBOwner -Name 'WhatIfOwner' -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+    }
+
+    Context "Set-NBOwner" {
+        It "Should update an owner" {
+            $Result = Set-NBOwner -Id 1 -Name 'UpdatedOwner' -Confirm:$false
+            $Result.Method | Should -Be 'PATCH'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/users/owners/1/'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.name | Should -Be 'UpdatedOwner'
+        }
+
+        It "Should update owner users" {
+            $Result = Set-NBOwner -Id 1 -Users 4, 5 -Confirm:$false
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.users | Should -Contain 4
+            $bodyObj.users | Should -Contain 5
+        }
+
+        It "Should support pipeline input by property name" {
+            $Result = [PSCustomObject]@{ Id = 15 } | Set-NBOwner -Name 'Piped' -Confirm:$false
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/users/owners/15/'
+        }
+
+        It "Should support -WhatIf" {
+            $Result = Set-NBOwner -Id 1 -Name 'WhatIf' -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+    }
+
+    Context "Remove-NBOwner" {
+        It "Should delete an owner" {
+            $Result = Remove-NBOwner -Id 1 -Confirm:$false
+            $Result.Method | Should -Be 'DELETE'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/users/owners/1/'
+        }
+
+        It "Should support pipeline input by property name" {
+            $Result = [PSCustomObject]@{ Id = 20 } | Remove-NBOwner -Confirm:$false
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/users/owners/20/'
+        }
+
+        It "Should support -WhatIf" {
+            $Result = Remove-NBOwner -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+    }
+    #endregion
 }

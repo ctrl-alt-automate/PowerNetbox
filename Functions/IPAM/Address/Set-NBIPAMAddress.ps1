@@ -45,6 +45,9 @@
 .PARAMETER Dns_name
     DNS name for the IP address.
 
+.PARAMETER Owner
+    The owner ID for object ownership (Netbox 4.5+ only).
+
 .PARAMETER InputObject
     Pipeline input for bulk operations. Each object MUST have an Id property.
 
@@ -127,6 +130,9 @@ function Set-NBIPAMAddress {
 
         [Parameter(ParameterSetName = 'Single')]
         [string]$Dns_name,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [uint64]$Owner,
 
         # Bulk mode parameters
         [Parameter(ParameterSetName = 'Bulk', Mandatory = $true, ValueFromPipeline = $true)]
