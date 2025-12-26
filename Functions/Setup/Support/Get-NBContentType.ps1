@@ -1,37 +1,45 @@
 function Get-NBContentType {
 <#
     .SYNOPSIS
-        Get a content type definition from Netbox
+        Get a content type (object type) definition from Netbox
 
     .DESCRIPTION
-        A detailed description of the Get-NBContentType function.
+        Retrieves content type / object type definitions from Netbox.
+        Supports Netbox 4.0+ with automatic endpoint detection:
+        - Netbox 4.4+: /api/core/object-types/
+        - Netbox 4.0-4.3: /api/extras/object-types/
 
     .PARAMETER Model
-        A description of the Model parameter.
+        Filter by model name (e.g., 'device', 'site')
 
     .PARAMETER Id
-        The database ID of the contact role
+        The database ID of the content type
 
     .PARAMETER App_Label
-        A description of the App_Label parameter.
+        Filter by app label (e.g., 'dcim', 'ipam')
 
     .PARAMETER Query
-        A standard search query that will match one or more contact roles.
+        A standard search query
 
     .PARAMETER Limit
-        Limit the number of results to this number
+        Limit the number of results
 
     .PARAMETER Offset
-        Start the search at this index in results
+        Start the search at this index
 
     .PARAMETER Raw
         Return the unparsed data from the HTTP request
 
     .EXAMPLE
-        PS C:\> Get-NBContentType
+        PS C:\> Get-NBContentType -App_Label 'dcim'
+        Get all DCIM content types
+
+    .EXAMPLE
+        PS C:\> Get-NBContentType -Model 'device'
+        Get the device content type
 
     .NOTES
-        Additional information about the function.
+        Backward compatible with Netbox 4.0+
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]
@@ -65,11 +73,25 @@ function Get-NBContentType {
         [switch]$Raw
     )
 
+    # Determine the correct endpoint based on Netbox version
+    # - Netbox 4.4+: /api/core/object-types/ (primary)
+    # - Netbox 4.0-4.3: /api/extras/object-types/ (legacy, still works in 4.4 for backward compat)
+    # We use 'extras' as the default for maximum compatibility across all 4.x versions
+    $ObjectTypesEndpoint = @('extras', 'object-types')
+
+    # Use cached ParsedVersion from Connect-NBAPI (set by ConvertTo-NetboxVersion)
+    $version = $script:NetboxConfig.ParsedVersion
+    if ($version -and $version -ge [version]'4.4') {
+        $ObjectTypesEndpoint = @('core', 'object-types')
+        Write-Verbose "Using /api/core/object-types/ endpoint (Netbox $version)"
+    } else {
+        Write-Verbose "Using /api/extras/object-types/ endpoint (Netbox $version)"
+    }
+
     switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($ContentType_ID in $Id) {
-                # Netbox 4.x moved content-types from /extras/ to /core/object-types/
-                $Segments = [System.Collections.ArrayList]::new(@('core', 'object-types', $ContentType_ID))
+                $Segments = [System.Collections.ArrayList]::new(@($ObjectTypesEndpoint[0], $ObjectTypesEndpoint[1], $ContentType_ID))
 
                 $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id'
 
@@ -82,8 +104,7 @@ function Get-NBContentType {
         }
 
         default {
-            # Netbox 4.x moved content-types from /extras/ to /core/object-types/
-            $Segments = [System.Collections.ArrayList]::new(@('core', 'object-types'))
+            $Segments = [System.Collections.ArrayList]::new(@($ObjectTypesEndpoint[0], $ObjectTypesEndpoint[1]))
 
             $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters
 

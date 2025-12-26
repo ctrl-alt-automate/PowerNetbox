@@ -1,0 +1,333 @@
+# Compatibility Tests
+# ===================
+# Test PowerNetbox against multiple Netbox versions to determine minimum version
+#
+# This workflow tests against Netbox 4.0 - 4.4 to identify:
+# - Which functions work with which versions
+# - Breaking API changes between versions
+# - Minimum supported version
+#
+# Trigger manually or on compatibility-test branches
+
+name: Compatibility Tests
+
+on:
+  push:
+    branches: [compatibility-test-*]
+  workflow_dispatch:
+    inputs:
+      test_versions:
+        description: 'Netbox versions to test (comma-separated)'
+        required: false
+        default: '4.1.11,4.2.9,4.3.7,4.4.9'
+        type: string
+
+env:
+  NETBOX_TOKEN: "0123456789abcdef0123456789abcdef01234567"
+  COMPOSE_PROJECT_NAME: "powernetbox"
+
+jobs:
+  # ============================================================
+  # Compatibility Matrix Tests
+  # ============================================================
+  compatibility:
+    name: Netbox ${{ matrix.netbox_short }}
+    runs-on: ubuntu-latest
+    continue-on-error: true  # Don't fail workflow if one version fails
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Netbox 4.1.x - Oldest 4.x we want to support
+          - netbox: "v4.1.11-3.0.2"
+            netbox_short: "4.1.11"
+            expected_failures:
+              - "Get-NBCoreObjectType"  # /api/core/object-types/ not available
+              - "Get-NBCoreObjectChange"  # Still in /api/extras/
+
+          # Netbox 4.2.x
+          - netbox: "v4.2.9-3.2.1"
+            netbox_short: "4.2.9"
+            expected_failures:
+              - "Get-NBCoreObjectType"
+
+          # Netbox 4.3.x - Last before 4.4 changes
+          - netbox: "v4.3.7-3.3.0"
+            netbox_short: "4.3.7"
+            expected_failures:
+              - "Get-NBCoreObjectType"
+
+          # Netbox 4.4.x - Current stable (reference)
+          - netbox: "v4.4.9-3.4.2"
+            netbox_short: "4.4.9"
+            expected_failures: []
+
+    env:
+      NETBOX_VERSION: ${{ matrix.netbox }}
+      NETBOX_HOST: "localhost:8000"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Start Netbox ${{ matrix.netbox_short }}
+        run: |
+          echo "Starting Netbox ${{ matrix.netbox_short }}..."
+          docker compose -f docker-compose.ci.yml pull
+          docker compose -f docker-compose.ci.yml up -d
+
+      - name: Wait for Netbox
+        run: |
+          echo "Waiting for Netbox to be ready..."
+          MAX_WAIT=300
+          ELAPSED=0
+          while [ $ELAPSED -lt $MAX_WAIT ]; do
+            HEALTH=$(docker inspect --format='{{.State.Health.Status}}' powernetbox-netbox-1 2>/dev/null || echo "starting")
+            echo "[${ELAPSED}s] Status: $HEALTH"
+            if [ "$HEALTH" = "healthy" ]; then
+              curl -sf http://localhost:8000/login/ > /dev/null 2>&1 && exit 0
+            fi
+            [ "$HEALTH" = "unhealthy" ] && docker compose -f docker-compose.ci.yml logs netbox --tail 50 && exit 1
+            sleep 10
+            ELAPSED=$((ELAPSED + 10))
+          done
+          exit 1
+
+      - name: Display Netbox version
+        run: |
+          echo "=== Netbox ${{ matrix.netbox_short }} API ==="
+          curl -s http://localhost:8000/api/status/ | jq '{"version": .["netbox-version"], "python": .["python-version"]}'
+
+          echo ""
+          echo "=== Available API endpoints ==="
+          echo "Core module:"
+          curl -s http://localhost:8000/api/core/ -H "Authorization: Token $NETBOX_TOKEN" 2>/dev/null | jq -r 'keys[]' || echo "Not available"
+
+          echo ""
+          echo "Extras module:"
+          curl -s http://localhost:8000/api/extras/ -H "Authorization: Token $NETBOX_TOKEN" 2>/dev/null | jq -r 'keys[]' | head -20
+
+      - name: Install PowerShell dependencies
+        shell: pwsh
+        run: |
+          Set-PSRepository PSGallery -InstallationPolicy Trusted
+          Install-Module Pester -Force -Scope CurrentUser -MinimumVersion 5.0.0
+
+      - name: Build module
+        shell: pwsh
+        run: |
+          ./deploy.ps1 -Environment dev -SkipVersion
+          Import-Module ./PowerNetbox/PowerNetbox.psd1 -Force
+
+      # Run targeted compatibility tests for problematic endpoints
+      - name: Test Core/Extras endpoints compatibility
+        id: core_tests
+        shell: pwsh
+        continue-on-error: true
+        env:
+          NETBOX_HOST: ${{ env.NETBOX_HOST }}
+          NETBOX_TOKEN: ${{ env.NETBOX_TOKEN }}
+        run: |
+          Import-Module ./PowerNetbox/PowerNetbox.psd1 -Force
+
+          # Connect to Netbox
+          $secureToken = ConvertTo-SecureString $env:NETBOX_TOKEN -AsPlainText -Force
+          $cred = [PSCredential]::new('api', $secureToken)
+          Connect-NBAPI -Hostname $env:NETBOX_HOST -Credential $cred -SkipCertificateCheck
+
+          $version = (Get-NBVersion).'netbox-version'
+          Write-Host "Testing against Netbox $version" -ForegroundColor Cyan
+          Write-Host ""
+
+          $results = @()
+
+          # Test 1: Get-NBContentType (object-types endpoint)
+          Write-Host "Test 1: Get-NBContentType" -ForegroundColor Yellow
+          try {
+              $types = Get-NBContentType -Limit 1
+              if ($types) {
+                  Write-Host "  PASS: Retrieved $($types.Count) content type(s)" -ForegroundColor Green
+                  $results += @{Test="Get-NBContentType"; Status="PASS"; Details="Retrieved content types"}
+              }
+          } catch {
+              Write-Host "  FAIL: $($_.Exception.Message)" -ForegroundColor Red
+              $results += @{Test="Get-NBContentType"; Status="FAIL"; Details=$_.Exception.Message}
+          }
+
+          # Test 2: Core Data Sources
+          Write-Host "Test 2: Get-NBCoreDataSource" -ForegroundColor Yellow
+          try {
+              $sources = Get-NBCoreDataSource -Limit 1 -ErrorAction Stop
+              Write-Host "  PASS: Core data sources available" -ForegroundColor Green
+              $results += @{Test="Get-NBCoreDataSource"; Status="PASS"; Details="Available"}
+          } catch {
+              Write-Host "  FAIL: $($_.Exception.Message)" -ForegroundColor Red
+              $results += @{Test="Get-NBCoreDataSource"; Status="FAIL"; Details=$_.Exception.Message}
+          }
+
+          # Test 3: Core Jobs
+          Write-Host "Test 3: Get-NBCoreJob" -ForegroundColor Yellow
+          try {
+              $jobs = Get-NBCoreJob -Limit 1 -ErrorAction Stop
+              Write-Host "  PASS: Core jobs available" -ForegroundColor Green
+              $results += @{Test="Get-NBCoreJob"; Status="PASS"; Details="Available"}
+          } catch {
+              Write-Host "  FAIL: $($_.Exception.Message)" -ForegroundColor Red
+              $results += @{Test="Get-NBCoreJob"; Status="FAIL"; Details=$_.Exception.Message}
+          }
+
+          # Test 4: Core Object Changes
+          Write-Host "Test 4: Get-NBCoreObjectChange" -ForegroundColor Yellow
+          try {
+              $changes = Get-NBCoreObjectChange -Limit 1 -ErrorAction Stop
+              Write-Host "  PASS: Core object changes available" -ForegroundColor Green
+              $results += @{Test="Get-NBCoreObjectChange"; Status="PASS"; Details="Available"}
+          } catch {
+              Write-Host "  FAIL: $($_.Exception.Message)" -ForegroundColor Red
+              $results += @{Test="Get-NBCoreObjectChange"; Status="FAIL"; Details=$_.Exception.Message}
+          }
+
+          # Test 5: VPN Module
+          Write-Host "Test 5: Get-NBVPNTunnel" -ForegroundColor Yellow
+          try {
+              $tunnels = Get-NBVPNTunnel -Limit 1 -ErrorAction Stop
+              Write-Host "  PASS: VPN tunnels available" -ForegroundColor Green
+              $results += @{Test="Get-NBVPNTunnel"; Status="PASS"; Details="Available"}
+          } catch {
+              Write-Host "  FAIL: $($_.Exception.Message)" -ForegroundColor Red
+              $results += @{Test="Get-NBVPNTunnel"; Status="FAIL"; Details=$_.Exception.Message}
+          }
+
+          # Test 6: Wireless Module
+          Write-Host "Test 6: Get-NBWirelessLAN" -ForegroundColor Yellow
+          try {
+              $wlans = Get-NBWirelessLAN -Limit 1 -ErrorAction Stop
+              Write-Host "  PASS: Wireless LANs available" -ForegroundColor Green
+              $results += @{Test="Get-NBWirelessLAN"; Status="PASS"; Details="Available"}
+          } catch {
+              Write-Host "  FAIL: $($_.Exception.Message)" -ForegroundColor Red
+              $results += @{Test="Get-NBWirelessLAN"; Status="FAIL"; Details=$_.Exception.Message}
+          }
+
+          # Test 7: Basic DCIM (should always work)
+          Write-Host "Test 7: Get-NBDCIMSite" -ForegroundColor Yellow
+          try {
+              $sites = Get-NBDCIMSite -Limit 1 -ErrorAction Stop
+              Write-Host "  PASS: DCIM sites available" -ForegroundColor Green
+              $results += @{Test="Get-NBDCIMSite"; Status="PASS"; Details="Available"}
+          } catch {
+              Write-Host "  FAIL: $($_.Exception.Message)" -ForegroundColor Red
+              $results += @{Test="Get-NBDCIMSite"; Status="FAIL"; Details=$_.Exception.Message}
+          }
+
+          # Test 8: Basic IPAM (should always work)
+          Write-Host "Test 8: Get-NBIPAMPrefix" -ForegroundColor Yellow
+          try {
+              $prefixes = Get-NBIPAMPrefix -Limit 1 -ErrorAction Stop
+              Write-Host "  PASS: IPAM prefixes available" -ForegroundColor Green
+              $results += @{Test="Get-NBIPAMPrefix"; Status="PASS"; Details="Available"}
+          } catch {
+              Write-Host "  FAIL: $($_.Exception.Message)" -ForegroundColor Red
+              $results += @{Test="Get-NBIPAMPrefix"; Status="FAIL"; Details=$_.Exception.Message}
+          }
+
+          # Summary
+          Write-Host ""
+          Write-Host "========================================" -ForegroundColor Cyan
+          Write-Host " Compatibility Test Results for Netbox $version" -ForegroundColor Cyan
+          Write-Host "========================================" -ForegroundColor Cyan
+
+          $passed = ($results | Where-Object { $_.Status -eq 'PASS' }).Count
+          $failed = ($results | Where-Object { $_.Status -eq 'FAIL' }).Count
+          $total = $results.Count
+
+          Write-Host "Passed: $passed / $total" -ForegroundColor $(if ($failed -eq 0) { 'Green' } else { 'Yellow' })
+          Write-Host "Failed: $failed / $total" -ForegroundColor $(if ($failed -eq 0) { 'Green' } else { 'Red' })
+          Write-Host ""
+
+          foreach ($r in $results) {
+              $color = if ($r.Status -eq 'PASS') { 'Green' } else { 'Red' }
+              Write-Host "  [$($r.Status)] $($r.Test): $($r.Details)" -ForegroundColor $color
+          }
+
+          # Export results
+          $results | ConvertTo-Json | Out-File "compatibility-results-${{ matrix.netbox_short }}.json"
+
+      - name: Run full integration tests
+        id: integration_tests
+        shell: pwsh
+        continue-on-error: true
+        env:
+          NETBOX_HOST: ${{ env.NETBOX_HOST }}
+          NETBOX_TOKEN: ${{ env.NETBOX_TOKEN }}
+        run: |
+          $config = New-PesterConfiguration
+          $config.Run.Path = './Tests/Integration.Tests.ps1'
+          $config.Run.Exit = $false
+          $config.Filter.Tag = @('Integration')
+          $config.TestResult.Enabled = $true
+          $config.TestResult.OutputPath = "IntegrationTestResults-${{ matrix.netbox_short }}.xml"
+          $config.TestResult.OutputFormat = 'NUnitXml'
+          $config.Output.Verbosity = 'Detailed'
+
+          Invoke-Pester -Configuration $config
+
+      - name: Upload compatibility results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: compatibility-${{ matrix.netbox_short }}
+          path: |
+            compatibility-results-${{ matrix.netbox_short }}.json
+            IntegrationTestResults-${{ matrix.netbox_short }}.xml
+          retention-days: 30
+
+      - name: Cleanup
+        if: always()
+        run: docker compose -f docker-compose.ci.yml down -v --remove-orphans
+
+  # ============================================================
+  # Summary - Aggregate all version results
+  # ============================================================
+  summary:
+    name: Compatibility Summary
+    runs-on: ubuntu-latest
+    needs: compatibility
+    if: always()
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: results
+
+      - name: Generate compatibility matrix
+        run: |
+          echo "# PowerNetbox Compatibility Matrix" > compatibility-report.md
+          echo "" >> compatibility-report.md
+          echo "| Test | 4.1.11 | 4.2.9 | 4.3.7 | 4.4.9 |" >> compatibility-report.md
+          echo "|------|--------|-------|-------|-------|" >> compatibility-report.md
+
+          # Parse results from each version
+          for version in 4.1.11 4.2.9 4.3.7 4.4.9; do
+            if [ -f "results/compatibility-$version/compatibility-results-$version.json" ]; then
+              echo "Found results for $version"
+              cat "results/compatibility-$version/compatibility-results-$version.json"
+            else
+              echo "No results for $version"
+            fi
+          done
+
+          echo ""
+          echo "See artifact files for detailed results."
+
+      - name: Upload summary report
+        uses: actions/upload-artifact@v4
+        with:
+          name: compatibility-summary
+          path: compatibility-report.md
+          retention-days: 90

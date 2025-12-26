@@ -241,6 +241,7 @@ Import-Module PowerNetbox
 | [DCIM Examples](https://github.com/ctrl-alt-automate/PowerNetbox/wiki/DCIM-Examples) | Sites, devices, racks, cables |
 | [IPAM Examples](https://github.com/ctrl-alt-automate/PowerNetbox/wiki/IPAM-Examples) | IP addresses, prefixes, VLANs |
 | [Branching](https://github.com/ctrl-alt-automate/PowerNetbox/wiki/Branching) | Stage changes with branching plugin |
+| [Compatibility](https://github.com/ctrl-alt-automate/PowerNetbox/wiki/Compatibility) | Netbox version support matrix |
 | [Troubleshooting](https://github.com/ctrl-alt-automate/PowerNetbox/wiki/Troubleshooting) | Common issues and solutions |
 
 ## Requirements
@@ -249,7 +250,9 @@ Import-Module PowerNetbox
 |----------|----------------|
 | PowerShell Desktop | 5.1 |
 | PowerShell Core | 7.0+ |
-| Netbox | 2.8+ (tested with 4.4.9) |
+| Netbox | 4.1+ (tested with 4.4.9) |
+
+> **Version Compatibility:** See the [Compatibility Guide](https://github.com/ctrl-alt-automate/PowerNetbox/wiki/Compatibility) for detailed information about supported Netbox versions and API differences.
 
 ### Platform Support
 
