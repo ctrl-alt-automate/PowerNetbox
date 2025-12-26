@@ -12,6 +12,12 @@ function Connect-NBAPI {
     .PARAMETER Credential
         A PSCredential object. Put the API token in the Password field. The Username field is ignored.
 
+        Supports both token formats:
+        - v1 (legacy): 40-character hex token, uses 'Token' auth header
+        - v2 (4.5+): Starts with 'nbt_', uses 'Bearer' auth header
+
+        The correct auth header is automatically detected based on token format.
+
         Example: $cred = [PSCredential]::new('api', (ConvertTo-SecureString 'your-api-token' -AsPlainText -Force))
 
     .PARAMETER Scheme

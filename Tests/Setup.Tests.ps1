@@ -49,4 +49,53 @@ Describe "Setup tests" -Tag 'Core', 'Setup' {
             (Get-NBCredential).GetNetworkCredential().Password | Should -BeExactly 'faketoken'
         }
     }
+
+    Context "Token v2 Bearer Authentication" {
+        BeforeAll {
+            Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
+            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+                return [ordered]@{
+                    'Method'      = $Method
+                    'Uri'         = $Uri
+                    'Headers'     = $Headers
+                    'Timeout'     = $Timeout
+                    'ContentType' = $ContentType
+                    'Body'        = $Body
+                }
+            }
+            Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { return 'netbox.domain.com' }
+            Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
+            Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
+
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.Hostname = 'netbox.domain.com'
+                $script:NetboxConfig.HostScheme = 'https'
+                $script:NetboxConfig.HostPort = 443
+            }
+        }
+
+        It "Should use Token auth header for v1 legacy tokens" {
+            $v1Token = '0123456789abcdef0123456789abcdef01234567'
+            Set-NBCredential -Token (ConvertTo-SecureString -String $v1Token -AsPlainText -Force)
+
+            $Result = Get-NBDCIMSite
+            $Result.Headers.Authorization | Should -Be "Token $v1Token"
+        }
+
+        It "Should use Bearer auth header for v2 nbt_ tokens" {
+            $v2Token = 'nbt_abc123def456.ghijklmnopqrstuvwxyz1234567890'
+            Set-NBCredential -Token (ConvertTo-SecureString -String $v2Token -AsPlainText -Force)
+
+            $Result = Get-NBDCIMSite
+            $Result.Headers.Authorization | Should -Be "Bearer $v2Token"
+        }
+
+        It "Should use Token auth for tokens not starting with nbt_" {
+            $legacyToken = 'mylegacytoken12345'
+            Set-NBCredential -Token (ConvertTo-SecureString -String $legacyToken -AsPlainText -Force)
+
+            $Result = Get-NBDCIMSite
+            $Result.Headers.Authorization | Should -Be "Token $legacyToken"
+        }
+    }
 }

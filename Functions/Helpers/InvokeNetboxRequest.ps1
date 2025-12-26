@@ -161,7 +161,16 @@ function InvokeNetboxRequest {
     $retryableStatusCodes = @(408, 429, 500, 502, 503, 504)
 
     $creds = Get-NBCredential
-    $Headers.Authorization = "Token {0}" -f $creds.GetNetworkCredential().Password
+    $token = $creds.GetNetworkCredential().Password
+
+    # Detect token format: v2 tokens start with 'nbt_' and use Bearer auth
+    if ($token -match '^nbt_') {
+        $Headers.Authorization = "Bearer $token"
+    }
+    else {
+        # Legacy v1 token format
+        $Headers.Authorization = "Token $token"
+    }
 
     # Determine effective branch context: explicit param > stack context > main
     $effectiveBranch = if ($Branch) {
