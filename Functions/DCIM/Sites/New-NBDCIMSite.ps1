@@ -65,6 +65,8 @@ function New-NBDCIMSite {
 
         [string]$Comments,
 
+        [uint64]$Owner,
+
         [switch]$Raw
     )
 

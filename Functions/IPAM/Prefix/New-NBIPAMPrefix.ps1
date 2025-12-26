@@ -40,6 +40,9 @@
 .PARAMETER Custom_Fields
     Hashtable of custom field values.
 
+.PARAMETER Owner
+    The owner ID for object ownership (Netbox 4.5+ only).
+
 .PARAMETER InputObject
     Pipeline input for bulk operations. Each object should contain
     the required property: Prefix.
@@ -113,6 +116,9 @@ function New-NBIPAMPrefix {
 
         [Parameter(ParameterSetName = 'Single')]
         [hashtable]$Custom_Fields,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [uint64]$Owner,
 
         # Bulk mode parameters
         [Parameter(ParameterSetName = 'Bulk', Mandatory = $true, ValueFromPipeline = $true)]

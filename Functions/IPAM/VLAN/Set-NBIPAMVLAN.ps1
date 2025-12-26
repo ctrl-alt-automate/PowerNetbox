@@ -33,6 +33,7 @@ function Set-NBIPAMVLAN {
         [string]$Comments,
         [string[]]$Tags,
         [hashtable]$Custom_Fields,
+        [uint64]$Owner,
         [switch]$Raw
     )
     process {

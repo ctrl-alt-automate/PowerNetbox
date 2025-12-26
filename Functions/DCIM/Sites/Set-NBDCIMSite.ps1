@@ -54,6 +54,9 @@ function Set-NBDCIMSite {
     .PARAMETER Custom_Fields
         A hashtable of custom fields and values
 
+    .PARAMETER Owner
+        The owner ID for object ownership (Netbox 4.5+ only).
+
     .PARAMETER Force
         Skip confirmation prompts
 
@@ -102,6 +105,8 @@ function Set-NBDCIMSite {
         [string]$Comments,
 
         [hashtable]$Custom_Fields,
+
+        [uint64]$Owner,
 
         [switch]$Force
     )

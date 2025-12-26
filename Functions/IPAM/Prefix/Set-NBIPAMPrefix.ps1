@@ -48,6 +48,8 @@ function Set-NBIPAMPrefix {
 
         [switch]$Is_Pool,
 
+        [uint64]$Owner,
+
         [switch]$Force
     )
 

@@ -38,6 +38,9 @@
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
+.PARAMETER Owner
+    The owner ID for object ownership (Netbox 4.5+ only).
+
 .EXAMPLE
     New-NBDCIMDevice -Name "server01" -Role 1 -Device_Type 1 -Site 1
 
@@ -135,6 +138,9 @@ function New-NBDCIMDevice {
 
         [Parameter(ParameterSetName = 'Single')]
         [hashtable]$Custom_Fields,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [uint64]$Owner,
 
         # Bulk mode parameters
         [Parameter(ParameterSetName = 'Bulk', Mandatory = $true, ValueFromPipeline = $true)]

@@ -46,6 +46,9 @@
 .PARAMETER Assigned_Object_Id
     Assigned Object ID.
 
+.PARAMETER Owner
+    The owner ID for object ownership (Netbox 4.5+ only).
+
 .PARAMETER InputObject
     Pipeline input for bulk operations. Each object should contain
     at minimum the Address property.
@@ -134,6 +137,9 @@ function New-NBIPAMAddress {
 
         [Parameter(ParameterSetName = 'Single')]
         [uint64]$Assigned_Object_Id,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [uint64]$Owner,
 
         # Bulk mode parameters
         [Parameter(ParameterSetName = 'Bulk', Mandatory = $true, ValueFromPipeline = $true)]
