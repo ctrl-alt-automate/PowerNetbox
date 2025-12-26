@@ -1023,8 +1023,11 @@ Describe "Live Integration Tests" -Tag 'Integration', 'Live' -Skip:(-not $script
     }
 
     Context "Version Compatibility" {
-        It "Should use /api/core/object-types/ endpoint (Netbox 4.x)" {
-            { Get-NBObjectType -Limit 1 } | Should -Not -Throw
+        It "Should query content types with backward-compatible function" {
+            # Get-NBContentType automatically detects Netbox version:
+            # - Netbox 4.4+: uses /api/core/object-types/
+            # - Netbox 4.0-4.3: uses /api/extras/object-types/
+            { Get-NBContentType -Limit 1 } | Should -Not -Throw
         }
     }
 }
