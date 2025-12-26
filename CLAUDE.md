@@ -14,6 +14,41 @@
 | Repository | https://github.com/ctrl-alt-automate/PowerNetbox |
 | Functions | 494 public functions |
 | Tests | 946 unit + 79 integration |
+| Wiki | https://github.com/ctrl-alt-automate/PowerNetbox/wiki |
+
+---
+
+## Compatibility Testing
+
+Automated compatibility testing against multiple Netbox versions via GitHub Actions.
+
+### Test Matrix Results
+
+| Netbox | Status | Notes |
+|--------|--------|-------|
+| 4.4.9 | ✅ 79/79 | Primary target |
+| 4.3.7 | ✅ 79/79 | Full support |
+| 4.2.9 | ⚠️ 23/79 | Docker image bug (`/api/status/` returns null) |
+| 4.1.11 | ✅ 79/79 | Minimum supported |
+
+### Running Compatibility Tests
+
+```bash
+# Trigger manually
+gh workflow run compatibility.yml
+
+# Or push to compatibility-test-* branch
+git checkout -b compatibility-test-fix
+git push origin compatibility-test-fix
+```
+
+### Version Detection (Issue #111)
+
+**Known Issue**: Version parsing inconsistency between `Connect-NBAPI` and `Get-NBContentType`.
+
+See: https://github.com/ctrl-alt-automate/PowerNetbox/issues/111
+
+**Workaround**: `Get-NBContentType` uses `/api/extras/object-types/` by default (works on all 4.x versions).
 
 ---
 
@@ -355,6 +390,15 @@ git add . && git commit -m "Update" && git push origin main:master
 | SSL errors | `Connect-NBAPI -SkipCertificateCheck` |
 | 403 errors | Check token permissions, verify endpoint exists |
 | Can't switch branch | `git stash` build output first |
+| Version parsing errors | Use `Get-NBContentType` (backward compat) instead of `Get-NBObjectType` |
+
+---
+
+## Open Issues
+
+| Issue | Description | Priority |
+|-------|-------------|----------|
+| [#111](https://github.com/ctrl-alt-automate/PowerNetbox/issues/111) | Version detection inconsistency, need central helper | Medium |
 
 ---
 
