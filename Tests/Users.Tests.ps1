@@ -46,6 +46,81 @@ Describe "Users Module Tests" -Tag 'Users' {
         }
     }
 
+    #region Deprecation Tests
+    Context "Test-NBDeprecatedParameter" {
+        It "Should return false when parameter is not used" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $result = Test-NBDeprecatedParameter -ParameterName 'Is_Staff' -DeprecatedInVersion '4.5.0' -BoundParameters @{}
+                $result | Should -Be $false
+            }
+        }
+
+        It "Should return true and warn when parameter is used on Netbox 4.5+" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.ParsedVersion = [version]'4.5.0'
+                $result = Test-NBDeprecatedParameter -ParameterName 'Is_Staff' -DeprecatedInVersion '4.5.0' -BoundParameters @{ Is_Staff = $true } -WarningVariable warnings -WarningAction SilentlyContinue
+                $result | Should -Be $true
+            }
+        }
+
+        It "Should return false when parameter is used on Netbox 4.4.x" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.ParsedVersion = [version]'4.4.9'
+                $result = Test-NBDeprecatedParameter -ParameterName 'Is_Staff' -DeprecatedInVersion '4.5.0' -BoundParameters @{ Is_Staff = $true }
+                $result | Should -Be $false
+            }
+        }
+
+        It "Should return false when version is not set" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.ParsedVersion = $null
+                $result = Test-NBDeprecatedParameter -ParameterName 'Is_Staff' -DeprecatedInVersion '4.5.0' -BoundParameters @{ Is_Staff = $true }
+                $result | Should -Be $false
+            }
+        }
+    }
+
+    Context "Is_Staff Deprecation" {
+        It "Should include Is_Staff in request body on Netbox 4.4.x" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.ParsedVersion = [version]'4.4.9'
+            }
+            $securePass = ConvertTo-SecureString "TestPass123" -AsPlainText -Force
+            $Result = New-NBUser -Username 'testuser' -Password $securePass -Is_Staff $true -Confirm:$false
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.is_staff | Should -Be $true
+        }
+
+        It "Should exclude Is_Staff from request body on Netbox 4.5+" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.ParsedVersion = [version]'4.5.0'
+            }
+            $securePass = ConvertTo-SecureString "TestPass123" -AsPlainText -Force
+            $Result = New-NBUser -Username 'testuser' -Password $securePass -Is_Staff $true -Confirm:$false -WarningAction SilentlyContinue
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.PSObject.Properties.Name | Should -Not -Contain 'is_staff'
+        }
+
+        It "Should exclude Is_Staff from Set-NBUser on Netbox 4.5+" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.ParsedVersion = [version]'4.5.0'
+            }
+            $Result = Set-NBUser -Id 1 -Is_Staff $true -Confirm:$false -WarningAction SilentlyContinue
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.PSObject.Properties.Name | Should -Not -Contain 'is_staff'
+        }
+
+        It "Should include Is_Staff in Set-NBUser on Netbox 4.4.x" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.ParsedVersion = [version]'4.4.9'
+            }
+            $Result = Set-NBUser -Id 1 -Is_Staff $false -Confirm:$false
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.is_staff | Should -Be $false
+        }
+    }
+    #endregion
+
     #region User Tests
     Context "Get-NBUser" {
         It "Should request users" {
