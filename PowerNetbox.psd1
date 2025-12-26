@@ -12,7 +12,7 @@
 RootModule = 'PowerNetbox.psm1'
 
 # Version number of this module.
-ModuleVersion = '4.4.8.2'
+ModuleVersion = '4.4.9.0'
 
 # Supported PSEditions
 CompatiblePSEditions = 'Desktop', 'Core'
@@ -69,11 +69,12 @@ ClrVersion = '2.0.50727'
 NestedModules = @()
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-FunctionsToExport = 'Clear-NBCredential', 'Connect-NBAPI', 'Enter-NBBranch',
-               'Exit-NBBranch', 'Get-ModelDefinition', 'Get-NBAPIDefinition',
-               'Get-NBBookmark', 'Get-NBBranch', 'Get-NBBranchContext',
-               'Get-NBBranchEvent', 'Get-NBChangeDiff', 'Get-NBCircuit',
-               'Get-NBCircuitGroup', 'Get-NBCircuitGroupAssignment',
+FunctionsToExport = 'Aliases', 'BuildNewURI', 'BuildURIComponents', 'BulkOperationResult',
+               'CheckNetboxIsConnected', 'Clear-NBCredential', 'Connect-NBAPI',
+               'CreateEnum', 'Enter-NBBranch', 'Exit-NBBranch', 'Get-ModelDefinition',
+               'Get-NBAPIDefinition', 'Get-NBBookmark', 'Get-NBBranch',
+               'Get-NBBranchContext', 'Get-NBBranchEvent', 'Get-NBChangeDiff',
+               'Get-NBCircuit', 'Get-NBCircuitGroup', 'Get-NBCircuitGroupAssignment',
                'Get-NBCircuitProvider', 'Get-NBCircuitProviderAccount',
                'Get-NBCircuitProviderNetwork', 'Get-NBCircuitTermination',
                'Get-NBCircuitType', 'Get-NBConfigContext', 'Get-NBContact',
@@ -124,12 +125,14 @@ FunctionsToExport = 'Clear-NBCredential', 'Connect-NBAPI', 'Enter-NBBranch',
                'Get-NBVPNL2VPNTermination', 'Get-NBVPNTunnel',
                'Get-NBVPNTunnelGroup', 'Get-NBVPNTunnelTermination', 'Get-NBWebhook',
                'Get-NBWirelessLAN', 'Get-NBWirelessLANGroup', 'Get-NBWirelessLink',
-               'Invoke-NBInBranch', 'Merge-NBBranch', 'New-NBBookmark', 'New-NBBranch',
-               'New-NBCircuit', 'New-NBCircuitGroup', 'New-NBCircuitGroupAssignment',
-               'New-NBCircuitProvider', 'New-NBCircuitProviderAccount',
-               'New-NBCircuitProviderNetwork', 'New-NBCircuitTermination',
-               'New-NBCircuitType', 'New-NBConfigContext', 'New-NBContact',
-               'New-NBContactAssignment', 'New-NBContactRole', 'New-NBCustomField',
+               'GetNetboxAPIErrorBody', 'GetNetboxConfigVariable',
+               'Invoke-NBInBranch', 'InvokeNetboxRequest', 'Merge-NBBranch',
+               'New-NBBookmark', 'New-NBBranch', 'New-NBCircuit', 'New-NBCircuitGroup',
+               'New-NBCircuitGroupAssignment', 'New-NBCircuitProvider',
+               'New-NBCircuitProviderAccount', 'New-NBCircuitProviderNetwork',
+               'New-NBCircuitTermination', 'New-NBCircuitType',
+               'New-NBConfigContext', 'New-NBContact', 'New-NBContactAssignment',
+               'New-NBContactRole', 'New-NBCustomField',
                'New-NBCustomFieldChoiceSet', 'New-NBCustomLink', 'New-NBDataSource',
                'New-NBDCIMCable', 'New-NBDCIMConsolePort',
                'New-NBDCIMConsolePortTemplate', 'New-NBDCIMConsoleServerPort',
@@ -273,8 +276,9 @@ FunctionsToExport = 'Clear-NBCredential', 'Connect-NBAPI', 'Enter-NBBranch',
                'Set-NBVPNL2VPNTermination', 'Set-NBVPNTunnel',
                'Set-NBVPNTunnelGroup', 'Set-NBVPNTunnelTermination', 'Set-NBWebhook',
                'Set-NBWirelessLAN', 'Set-NBWirelessLANGroup', 'Set-NBWirelessLink',
-               'Sync-NBBranch', 'Test-NBAPIConnected', 'Test-NBBranchingAvailable',
-               'Undo-NBBranchMerge'
+               'SetupNetboxConfigVariable', 'Sync-NBBranch', 'Test-NBAPIConnected',
+               'Test-NBBranchingAvailable', 'ThrowNetboxRESTError',
+               'Undo-NBBranchMerge', 'VerifyAPIConnectivity'
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = @()
@@ -314,15 +318,13 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = 'v4.4.8 - PowerNetbox Release (matches Netbox 4.4.8)
-- Module version now tracks Netbox stable releases
-- Renamed from NetboxPSv4 to PowerNetbox
-- Full Netbox 4.4.8 compatibility
-- 488+ public functions with 100% API coverage
+        ReleaseNotes = 'v4.4.9 - PowerNetbox Release (matches Netbox 4.4.9)
+- Full Netbox 4.4.9 compatibility
+- Netbox 4.4.9 is a bugfix release with no breaking API changes
+- 494+ public functions with 100% API coverage
+- 946 unit tests, 79 integration tests
 - Cross-platform support (Windows, Linux, macOS)
-- 613 unit tests for quality assurance
-- All function names unchanged (Get-NBDCIMDevice, etc.)
-- Fork of NetboxPS by Ben Claussen - thank you!'
+- Docker-based CI/CD integration testing'
 
         # Prerelease string of this module
         # Prerelease = ''

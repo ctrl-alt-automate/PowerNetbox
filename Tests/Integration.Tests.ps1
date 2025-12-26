@@ -343,7 +343,146 @@ Describe "Live Integration Tests" -Tag 'Integration', 'Live' -Skip:(-not $script
     BeforeAll {
         $secureToken = ConvertTo-SecureString -String $env:NETBOX_TOKEN -AsPlainText -Force
         $credential = [PSCredential]::new('api', $secureToken)
-        Connect-NBAPI -Hostname $env:NETBOX_HOST -Credential $credential -SkipCertificateCheck
+
+        # Parse hostname and port (supports "hostname" or "hostname:port" format)
+        $hostValue = $env:NETBOX_HOST
+        $hostname = $hostValue
+        $port = $null
+
+        if ($hostValue -match '^(.+):(\d+)$') {
+            $hostname = $Matches[1]
+            $port = [int]$Matches[2]
+        }
+
+        # Determine scheme - default to http for Docker CI, https for cloud
+        $scheme = $env:NETBOX_SCHEME
+        if ([string]::IsNullOrEmpty($scheme)) {
+            # Docker CI uses http on localhost
+            if ($hostname -match 'localhost|127\.0\.0\.1') {
+                $scheme = 'http'
+            }
+            else {
+                $scheme = 'https'
+            }
+        }
+
+        $connectParams = @{
+            Hostname   = $hostname
+            Credential = $credential
+            Scheme     = $scheme
+        }
+
+        # Add port if specified
+        if ($port) {
+            $connectParams['Port'] = $port
+        }
+
+        # Only skip certificate check for https
+        if ($scheme -eq 'https') {
+            $connectParams['SkipCertificateCheck'] = $true
+        }
+
+        Connect-NBAPI @connectParams
+
+        # Generate unique test prefix for this run
+        $script:TestRunId = [guid]::NewGuid().ToString().Substring(0, 8)
+        $script:TestPrefix = "LiveTest-$($script:TestRunId)"
+
+        # Track created resources for cleanup (order matters - delete dependents first)
+        $script:CreatedResources = @{
+            # Level 1: Most dependent resources (delete first)
+            Devices         = [System.Collections.ArrayList]::new()
+            VMs             = [System.Collections.ArrayList]::new()
+            Interfaces      = [System.Collections.ArrayList]::new()
+            # Level 2: Mid-level resources
+            Addresses       = [System.Collections.ArrayList]::new()
+            Prefixes        = [System.Collections.ArrayList]::new()
+            VLANs           = [System.Collections.ArrayList]::new()
+            # Level 3: Reference data
+            DeviceTypes     = [System.Collections.ArrayList]::new()
+            DeviceRoles     = [System.Collections.ArrayList]::new()
+            Manufacturers   = [System.Collections.ArrayList]::new()
+            Clusters        = [System.Collections.ArrayList]::new()
+            ClusterTypes    = [System.Collections.ArrayList]::new()
+            Sites           = [System.Collections.ArrayList]::new()
+            Tenants         = [System.Collections.ArrayList]::new()
+        }
+
+        Write-Host "Test Run ID: $script:TestRunId" -ForegroundColor Cyan
+    }
+
+    AfterAll {
+        Write-Host "`nCleaning up live test resources..." -ForegroundColor Yellow
+
+        # Track cleanup errors for reporting
+        $cleanupErrors = [System.Collections.ArrayList]::new()
+
+        # Helper function for safe resource removal
+        function Remove-TestResource {
+            param($ResourceType, $Id, $RemoveCommand)
+            try {
+                & $RemoveCommand -Id $Id -Confirm:$false -ErrorAction Stop
+            }
+            catch {
+                [void]$cleanupErrors.Add("Failed to remove $ResourceType ID ${Id}: $($_.Exception.Message)")
+            }
+        }
+
+        # Cleanup in reverse dependency order (most dependent first)
+
+        # Level 1: Most dependent resources
+        foreach ($id in $script:CreatedResources.Devices) {
+            Remove-TestResource -ResourceType 'Device' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBDCIMDevice -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
+        }
+        foreach ($id in $script:CreatedResources.VMs) {
+            Remove-TestResource -ResourceType 'VM' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBVirtualMachine -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
+        }
+        foreach ($id in $script:CreatedResources.Interfaces) {
+            Remove-TestResource -ResourceType 'Interface' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBDCIMInterface -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
+        }
+
+        # Level 2: Mid-level resources
+        foreach ($id in $script:CreatedResources.Addresses) {
+            Remove-TestResource -ResourceType 'Address' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBIPAMAddress -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
+        }
+        foreach ($id in $script:CreatedResources.Prefixes) {
+            Remove-TestResource -ResourceType 'Prefix' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBIPAMPrefix -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
+        }
+        foreach ($id in $script:CreatedResources.VLANs) {
+            Remove-TestResource -ResourceType 'VLAN' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBIPAMVLAN -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
+        }
+
+        # Level 3: Reference data
+        foreach ($id in $script:CreatedResources.DeviceTypes) {
+            Remove-TestResource -ResourceType 'DeviceType' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBDCIMDeviceType -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
+        }
+        foreach ($id in $script:CreatedResources.DeviceRoles) {
+            Remove-TestResource -ResourceType 'DeviceRole' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBDCIMDeviceRole -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
+        }
+        foreach ($id in $script:CreatedResources.Manufacturers) {
+            Remove-TestResource -ResourceType 'Manufacturer' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBDCIMManufacturer -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
+        }
+        foreach ($id in $script:CreatedResources.Clusters) {
+            Remove-TestResource -ResourceType 'Cluster' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBVirtualizationCluster -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
+        }
+        foreach ($id in $script:CreatedResources.ClusterTypes) {
+            Remove-TestResource -ResourceType 'ClusterType' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBVirtualizationClusterType -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
+        }
+        foreach ($id in $script:CreatedResources.Sites) {
+            Remove-TestResource -ResourceType 'Site' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBDCIMSite -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
+        }
+        foreach ($id in $script:CreatedResources.Tenants) {
+            Remove-TestResource -ResourceType 'Tenant' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBTenant -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
+        }
+
+        # Report any cleanup errors
+        if ($cleanupErrors.Count -gt 0) {
+            Write-Warning "Cleanup completed with $($cleanupErrors.Count) error(s):"
+            $cleanupErrors | ForEach-Object { Write-Warning "  - $_" }
+        }
+        else {
+            Write-Host "Cleanup complete." -ForegroundColor Green
+        }
     }
 
     Context "API Connectivity" {
@@ -355,27 +494,511 @@ Describe "Live Integration Tests" -Tag 'Integration', 'Live' -Skip:(-not $script
             $version = Get-NBVersion
             $version | Should -Not -BeNullOrEmpty
             $version.'netbox-version' | Should -Match '^\d+\.\d+\.\d+'
+            Write-Host "  Netbox version: $($version.'netbox-version')" -ForegroundColor Green
+        }
+
+        It "Should have correct hostname" {
+            # Get-NBHostname returns just the hostname part (port is stored separately)
+            $expectedHostname = if ($env:NETBOX_HOST -match '^(.+):\d+$') { $Matches[1] } else { $env:NETBOX_HOST }
+            Get-NBHostname | Should -Be $expectedHostname
         }
     }
 
-    Context "DCIM Operations" {
-        It "Should list sites" {
-            $sites = Get-NBDCIMSite -Limit 5
-            $sites | Should -Not -BeNullOrEmpty
+    Context "DCIM Sites CRUD" {
+        BeforeAll {
+            $script:TestSiteName = "$($script:TestPrefix)-Site"
+            $script:TestSiteSlug = $script:TestSiteName.ToLower() -replace '[^a-z0-9-]', '-'
         }
 
-        It "Should list devices" {
-            { Get-NBDCIMDevice -Limit 5 } | Should -Not -Throw
+        It "Should create a new site" {
+            $site = New-NBDCIMSite -Name $script:TestSiteName -Slug $script:TestSiteSlug -Status 'active'
+
+            $site | Should -Not -BeNullOrEmpty
+            $site.name | Should -Be $script:TestSiteName
+
+            $script:TestSiteId = $site.id
+            [void]$script:CreatedResources.Sites.Add($site.id)
+
+            Write-Host "  Created site: $($site.name) (ID: $($site.id))" -ForegroundColor Green
+        }
+
+        It "Should get the site by ID" {
+            $site = Get-NBDCIMSite -Id $script:TestSiteId
+
+            $site | Should -Not -BeNullOrEmpty
+            $site.id | Should -Be $script:TestSiteId
+        }
+
+        It "Should update the site" {
+            $site = Set-NBDCIMSite -Id $script:TestSiteId -Description "$script:TestPrefix - Updated"
+
+            $site.description | Should -BeLike "*Updated*"
+        }
+
+        It "Should delete the site" {
+            { Remove-NBDCIMSite -Id $script:TestSiteId -Confirm:$false } | Should -Not -Throw
+
+            $script:CreatedResources.Sites.Remove($script:TestSiteId)
         }
     }
 
-    Context "IPAM Operations" {
-        It "Should list prefixes" {
-            { Get-NBIPAMPrefix -Limit 5 } | Should -Not -Throw
+    Context "IPAM Address CRUD" {
+        BeforeAll {
+            $octet3 = Get-Random -Minimum 1 -Maximum 254
+            $octet4 = Get-Random -Minimum 1 -Maximum 254
+            $script:TestAddress = "10.99.$octet3.$octet4/32"
         }
 
-        It "Should list IP addresses" {
-            { Get-NBIPAMAddress -Limit 5 } | Should -Not -Throw
+        It "Should create a new IP address" {
+            $ip = New-NBIPAMAddress -Address $script:TestAddress -Status 'active' -Description "$script:TestPrefix-IP"
+
+            $ip | Should -Not -BeNullOrEmpty
+            $ip.address | Should -Be $script:TestAddress
+
+            $script:TestAddressId = $ip.id
+            [void]$script:CreatedResources.Addresses.Add($ip.id)
+
+            Write-Host "  Created IP: $($ip.address) (ID: $($ip.id))" -ForegroundColor Green
+        }
+
+        It "Should get the IP address by ID" {
+            $ip = Get-NBIPAMAddress -Id $script:TestAddressId
+
+            $ip | Should -Not -BeNullOrEmpty
+            $ip.id | Should -Be $script:TestAddressId
+        }
+
+        It "Should update the IP address" {
+            $ip = Set-NBIPAMAddress -Id $script:TestAddressId -Description "$script:TestPrefix - Updated IP"
+
+            $ip.description | Should -BeLike "*Updated*"
+        }
+
+        It "Should delete the IP address" {
+            { Remove-NBIPAMAddress -Id $script:TestAddressId -Confirm:$false } | Should -Not -Throw
+
+            $script:CreatedResources.Addresses.Remove($script:TestAddressId)
+        }
+    }
+
+    Context "IPAM Prefix CRUD" {
+        BeforeAll {
+            $octet2 = Get-Random -Minimum 1 -Maximum 254
+            $script:TestPrefixValue = "10.$octet2.0.0/24"
+        }
+
+        It "Should create a new prefix" {
+            $prefix = New-NBIPAMPrefix -Prefix $script:TestPrefixValue -Status 'active' -Description "$script:TestPrefix-Prefix"
+
+            $prefix | Should -Not -BeNullOrEmpty
+            $prefix.prefix | Should -Be $script:TestPrefixValue
+
+            $script:TestPrefixId = $prefix.id
+            [void]$script:CreatedResources.Prefixes.Add($prefix.id)
+
+            Write-Host "  Created prefix: $($prefix.prefix) (ID: $($prefix.id))" -ForegroundColor Green
+        }
+
+        It "Should get the prefix by ID" {
+            $prefix = Get-NBIPAMPrefix -Id $script:TestPrefixId
+
+            $prefix | Should -Not -BeNullOrEmpty
+            $prefix.id | Should -Be $script:TestPrefixId
+            $prefix.prefix | Should -Be $script:TestPrefixValue
+        }
+
+        It "Should update the prefix" {
+            $prefix = Set-NBIPAMPrefix -Id $script:TestPrefixId -Description "$script:TestPrefix - Updated Prefix"
+
+            $prefix.description | Should -BeLike "*Updated*"
+        }
+
+        It "Should delete the prefix" {
+            { Remove-NBIPAMPrefix -Id $script:TestPrefixId -Confirm:$false } | Should -Not -Throw
+
+            $script:CreatedResources.Prefixes.Remove($script:TestPrefixId)
+        }
+    }
+
+    Context "Tenancy Tenant CRUD" {
+        BeforeAll {
+            $script:TestTenantName = "$($script:TestPrefix)-Tenant"
+            $script:TestTenantSlug = $script:TestTenantName.ToLower() -replace '[^a-z0-9-]', '-'
+        }
+
+        It "Should create a new tenant" {
+            $tenant = New-NBTenant -Name $script:TestTenantName -Slug $script:TestTenantSlug
+
+            $tenant | Should -Not -BeNullOrEmpty
+            $tenant.name | Should -Be $script:TestTenantName
+
+            $script:TestTenantId = $tenant.id
+            [void]$script:CreatedResources.Tenants.Add($tenant.id)
+
+            Write-Host "  Created tenant: $($tenant.name) (ID: $($tenant.id))" -ForegroundColor Green
+        }
+
+        It "Should get the tenant by ID" {
+            $tenant = Get-NBTenant -Id $script:TestTenantId
+
+            $tenant | Should -Not -BeNullOrEmpty
+            $tenant.id | Should -Be $script:TestTenantId
+            $tenant.name | Should -Be $script:TestTenantName
+        }
+
+        It "Should update the tenant" {
+            $tenant = Set-NBTenant -Id $script:TestTenantId -Description "$script:TestPrefix - Updated Tenant"
+
+            $tenant.description | Should -BeLike "*Updated*"
+        }
+
+        It "Should delete the tenant" {
+            { Remove-NBTenant -Id $script:TestTenantId -Confirm:$false } | Should -Not -Throw
+
+            $script:CreatedResources.Tenants.Remove($script:TestTenantId)
+        }
+    }
+
+    Context "IPAM VLAN CRUD" {
+        BeforeAll {
+            $script:TestVlanVid = Get-Random -Minimum 100 -Maximum 4000
+            $script:TestVlanName = "$($script:TestPrefix)-VLAN-$($script:TestVlanVid)"
+        }
+
+        It "Should create a new VLAN" {
+            $vlan = New-NBIPAMVLAN -Vid $script:TestVlanVid -Name $script:TestVlanName -Status 'active'
+
+            $vlan | Should -Not -BeNullOrEmpty
+            $vlan.vid | Should -Be $script:TestVlanVid
+            $vlan.name | Should -Be $script:TestVlanName
+
+            $script:TestVlanId = $vlan.id
+            [void]$script:CreatedResources.VLANs.Add($vlan.id)
+
+            Write-Host "  Created VLAN: $($vlan.name) (VID: $($vlan.vid), ID: $($vlan.id))" -ForegroundColor Green
+        }
+
+        It "Should get the VLAN by ID" {
+            $vlan = Get-NBIPAMVLAN -Id $script:TestVlanId
+
+            $vlan | Should -Not -BeNullOrEmpty
+            $vlan.id | Should -Be $script:TestVlanId
+            $vlan.vid | Should -Be $script:TestVlanVid
+        }
+
+        It "Should update the VLAN" {
+            $vlan = Set-NBIPAMVLAN -Id $script:TestVlanId -Description "$script:TestPrefix - Updated VLAN"
+
+            $vlan.description | Should -BeLike "*Updated*"
+        }
+
+        It "Should delete the VLAN" {
+            { Remove-NBIPAMVLAN -Id $script:TestVlanId -Confirm:$false } | Should -Not -Throw
+
+            $script:CreatedResources.VLANs.Remove($script:TestVlanId)
+        }
+    }
+
+    Context "DCIM Manufacturer CRUD" {
+        BeforeAll {
+            $script:TestManufacturerName = "$($script:TestPrefix)-Manufacturer"
+            $script:TestManufacturerSlug = $script:TestManufacturerName.ToLower() -replace '[^a-z0-9-]', '-'
+        }
+
+        It "Should create a new manufacturer" {
+            $manufacturer = New-NBDCIMManufacturer -Name $script:TestManufacturerName -Slug $script:TestManufacturerSlug
+
+            $manufacturer | Should -Not -BeNullOrEmpty
+            $manufacturer.name | Should -Be $script:TestManufacturerName
+
+            $script:TestManufacturerId = $manufacturer.id
+            [void]$script:CreatedResources.Manufacturers.Add($manufacturer.id)
+
+            Write-Host "  Created manufacturer: $($manufacturer.name) (ID: $($manufacturer.id))" -ForegroundColor Green
+        }
+
+        It "Should get the manufacturer by ID" {
+            $manufacturer = Get-NBDCIMManufacturer -Id $script:TestManufacturerId
+
+            $manufacturer | Should -Not -BeNullOrEmpty
+            $manufacturer.id | Should -Be $script:TestManufacturerId
+        }
+
+        It "Should update the manufacturer" {
+            $manufacturer = Set-NBDCIMManufacturer -Id $script:TestManufacturerId -Description "$script:TestPrefix - Updated"
+
+            $manufacturer.description | Should -BeLike "*Updated*"
+        }
+    }
+
+    Context "DCIM DeviceRole CRUD" {
+        BeforeAll {
+            $script:TestDeviceRoleName = "$($script:TestPrefix)-Role"
+            $script:TestDeviceRoleSlug = $script:TestDeviceRoleName.ToLower() -replace '[^a-z0-9-]', '-'
+        }
+
+        It "Should create a new device role" {
+            $role = New-NBDCIMDeviceRole -Name $script:TestDeviceRoleName -Slug $script:TestDeviceRoleSlug -Color '0000ff'
+
+            $role | Should -Not -BeNullOrEmpty
+            $role.name | Should -Be $script:TestDeviceRoleName
+
+            $script:TestDeviceRoleId = $role.id
+            [void]$script:CreatedResources.DeviceRoles.Add($role.id)
+
+            Write-Host "  Created device role: $($role.name) (ID: $($role.id))" -ForegroundColor Green
+        }
+
+        It "Should get the device role by ID" {
+            $role = Get-NBDCIMDeviceRole -Id $script:TestDeviceRoleId
+
+            $role | Should -Not -BeNullOrEmpty
+            $role.id | Should -Be $script:TestDeviceRoleId
+        }
+    }
+
+    Context "DCIM DeviceType CRUD" {
+        BeforeAll {
+            $script:TestDeviceTypeName = "$($script:TestPrefix)-Type"
+            $script:TestDeviceTypeSlug = $script:TestDeviceTypeName.ToLower() -replace '[^a-z0-9-]', '-'
+        }
+
+        It "Should create a new device type" {
+            # DeviceType requires a Manufacturer
+            $deviceType = New-NBDCIMDeviceType -Model $script:TestDeviceTypeName -Slug $script:TestDeviceTypeSlug -Manufacturer $script:TestManufacturerId
+
+            $deviceType | Should -Not -BeNullOrEmpty
+            $deviceType.model | Should -Be $script:TestDeviceTypeName
+
+            $script:TestDeviceTypeId = $deviceType.id
+            [void]$script:CreatedResources.DeviceTypes.Add($deviceType.id)
+
+            Write-Host "  Created device type: $($deviceType.model) (ID: $($deviceType.id))" -ForegroundColor Green
+        }
+
+        It "Should get the device type by ID" {
+            $deviceType = Get-NBDCIMDeviceType -Id $script:TestDeviceTypeId
+
+            $deviceType | Should -Not -BeNullOrEmpty
+            $deviceType.id | Should -Be $script:TestDeviceTypeId
+        }
+    }
+
+    Context "DCIM Device CRUD" {
+        BeforeAll {
+            # Create a site for the device (if not already created)
+            $script:TestDeviceSiteName = "$($script:TestPrefix)-DeviceSite"
+            $script:TestDeviceSiteSlug = $script:TestDeviceSiteName.ToLower() -replace '[^a-z0-9-]', '-'
+
+            $site = New-NBDCIMSite -Name $script:TestDeviceSiteName -Slug $script:TestDeviceSiteSlug -Status 'active'
+            $script:TestDeviceSiteId = $site.id
+            [void]$script:CreatedResources.Sites.Add($site.id)
+
+            $script:TestDeviceName = "$($script:TestPrefix)-Device"
+        }
+
+        It "Should create a new device" {
+            $device = New-NBDCIMDevice -Name $script:TestDeviceName `
+                -Site $script:TestDeviceSiteId `
+                -Device_Type $script:TestDeviceTypeId `
+                -Role $script:TestDeviceRoleId `
+                -Status 'active'
+
+            $device | Should -Not -BeNullOrEmpty
+            $device.name | Should -Be $script:TestDeviceName
+
+            $script:TestDeviceId = $device.id
+            [void]$script:CreatedResources.Devices.Add($device.id)
+
+            Write-Host "  Created device: $($device.name) (ID: $($device.id))" -ForegroundColor Green
+        }
+
+        It "Should get the device by ID" {
+            $device = Get-NBDCIMDevice -Id $script:TestDeviceId
+
+            $device | Should -Not -BeNullOrEmpty
+            $device.id | Should -Be $script:TestDeviceId
+            $device.name | Should -Be $script:TestDeviceName
+        }
+
+        It "Should update the device" {
+            $device = Set-NBDCIMDevice -Id $script:TestDeviceId -Comments "$script:TestPrefix - Updated device"
+
+            $device.comments | Should -BeLike "*Updated*"
+        }
+
+        It "Should delete the device" {
+            { Remove-NBDCIMDevice -Id $script:TestDeviceId -Confirm:$false } | Should -Not -Throw
+
+            $script:CreatedResources.Devices.Remove($script:TestDeviceId)
+        }
+    }
+
+    Context "DCIM Interface CRUD" {
+        BeforeAll {
+            # Create a device for interface testing
+            $script:TestInterfaceDeviceName = "$($script:TestPrefix)-IntfDevice"
+
+            $device = New-NBDCIMDevice -Name $script:TestInterfaceDeviceName `
+                -Site $script:TestDeviceSiteId `
+                -Device_Type $script:TestDeviceTypeId `
+                -Role $script:TestDeviceRoleId `
+                -Status 'active'
+            $script:TestInterfaceDeviceId = $device.id
+            [void]$script:CreatedResources.Devices.Add($device.id)
+
+            $script:TestInterfaceName = "eth0"
+        }
+
+        It "Should create a new interface" {
+            $interface = New-NBDCIMInterface -Device $script:TestInterfaceDeviceId `
+                -Name $script:TestInterfaceName `
+                -Type '1000base-t'
+
+            $interface | Should -Not -BeNullOrEmpty
+            $interface.name | Should -Be $script:TestInterfaceName
+
+            $script:TestInterfaceId = $interface.id
+            [void]$script:CreatedResources.Interfaces.Add($interface.id)
+
+            Write-Host "  Created interface: $($interface.name) (ID: $($interface.id))" -ForegroundColor Green
+        }
+
+        It "Should get the interface by ID" {
+            $interface = Get-NBDCIMInterface -Id $script:TestInterfaceId
+
+            $interface | Should -Not -BeNullOrEmpty
+            $interface.id | Should -Be $script:TestInterfaceId
+        }
+
+        It "Should update the interface" {
+            $interface = Set-NBDCIMInterface -Id $script:TestInterfaceId -Description "$script:TestPrefix - Updated"
+
+            $interface.description | Should -BeLike "*Updated*"
+        }
+
+        It "Should delete the interface" {
+            { Remove-NBDCIMInterface -Id $script:TestInterfaceId -Confirm:$false } | Should -Not -Throw
+
+            $script:CreatedResources.Interfaces.Remove($script:TestInterfaceId)
+        }
+    }
+
+    Context "Virtualization ClusterType CRUD" {
+        BeforeAll {
+            $script:TestClusterTypeName = "$($script:TestPrefix)-ClusterType"
+            $script:TestClusterTypeSlug = $script:TestClusterTypeName.ToLower() -replace '[^a-z0-9-]', '-'
+        }
+
+        It "Should create a new cluster type" {
+            $clusterType = New-NBVirtualizationClusterType -Name $script:TestClusterTypeName -Slug $script:TestClusterTypeSlug
+
+            $clusterType | Should -Not -BeNullOrEmpty
+            $clusterType.name | Should -Be $script:TestClusterTypeName
+
+            $script:TestClusterTypeId = $clusterType.id
+            [void]$script:CreatedResources.ClusterTypes.Add($clusterType.id)
+
+            Write-Host "  Created cluster type: $($clusterType.name) (ID: $($clusterType.id))" -ForegroundColor Green
+        }
+
+        It "Should get the cluster type by ID" {
+            $clusterType = Get-NBVirtualizationClusterType -Id $script:TestClusterTypeId
+
+            $clusterType | Should -Not -BeNullOrEmpty
+            $clusterType.id | Should -Be $script:TestClusterTypeId
+        }
+    }
+
+    Context "Virtualization Cluster CRUD" {
+        BeforeAll {
+            $script:TestClusterName = "$($script:TestPrefix)-Cluster"
+        }
+
+        It "Should create a new cluster" {
+            $cluster = New-NBVirtualizationCluster -Name $script:TestClusterName -Type $script:TestClusterTypeId
+
+            $cluster | Should -Not -BeNullOrEmpty
+            $cluster.name | Should -Be $script:TestClusterName
+
+            $script:TestClusterId = $cluster.id
+            [void]$script:CreatedResources.Clusters.Add($cluster.id)
+
+            Write-Host "  Created cluster: $($cluster.name) (ID: $($cluster.id))" -ForegroundColor Green
+        }
+
+        It "Should get the cluster by ID" {
+            $cluster = Get-NBVirtualizationCluster -Id $script:TestClusterId
+
+            $cluster | Should -Not -BeNullOrEmpty
+            $cluster.id | Should -Be $script:TestClusterId
+        }
+
+        It "Should update the cluster" {
+            $cluster = Set-NBVirtualizationCluster -Id $script:TestClusterId -Comments "$script:TestPrefix - Updated"
+
+            $cluster.comments | Should -BeLike "*Updated*"
+        }
+    }
+
+    Context "Virtualization VM CRUD" {
+        BeforeAll {
+            $script:TestVMName = "$($script:TestPrefix)-VM"
+        }
+
+        It "Should create a new virtual machine" {
+            $vm = New-NBVirtualMachine -Name $script:TestVMName `
+                -Cluster $script:TestClusterId `
+                -Status 'active'
+
+            $vm | Should -Not -BeNullOrEmpty
+            $vm.name | Should -Be $script:TestVMName
+
+            $script:TestVMId = $vm.id
+            [void]$script:CreatedResources.VMs.Add($vm.id)
+
+            Write-Host "  Created VM: $($vm.name) (ID: $($vm.id))" -ForegroundColor Green
+        }
+
+        It "Should get the VM by ID" {
+            $vm = Get-NBVirtualMachine -Id $script:TestVMId
+
+            $vm | Should -Not -BeNullOrEmpty
+            $vm.id | Should -Be $script:TestVMId
+            $vm.name | Should -Be $script:TestVMName
+        }
+
+        It "Should update the VM" {
+            $vm = Set-NBVirtualMachine -Id $script:TestVMId -Comments "$script:TestPrefix - Updated VM"
+
+            $vm.comments | Should -BeLike "*Updated*"
+        }
+
+        It "Should delete the VM" {
+            { Remove-NBVirtualMachine -Id $script:TestVMId -Confirm:$false } | Should -Not -Throw
+
+            $script:CreatedResources.VMs.Remove($script:TestVMId)
+        }
+    }
+
+    Context "Pagination" {
+        It "Should support -All switch" {
+            { Get-NBDCIMSite -All } | Should -Not -Throw
+        }
+
+        It "Should support -Limit and -Offset" {
+            { Get-NBDCIMSite -Limit 10 -Offset 0 } | Should -Not -Throw
+        }
+    }
+
+    Context "Error Handling" {
+        It "Should throw on non-existent ID" {
+            { Get-NBDCIMSite -Id 999999999 } | Should -Throw
+        }
+
+        It "Should return empty for non-existent name" {
+            $result = Get-NBDCIMSite -Name "NonExistent-$([guid]::NewGuid())"
+            $result | Should -BeNullOrEmpty
         }
     }
 
@@ -396,6 +1019,12 @@ Describe "Live Integration Tests" -Tag 'Integration', 'Live' -Skip:(-not $script
 
         It "Should query wireless links without error" {
             { Get-NBWirelessLink -Limit 1 } | Should -Not -Throw
+        }
+    }
+
+    Context "Version Compatibility" {
+        It "Should use /api/core/object-types/ endpoint (Netbox 4.x)" {
+            { Get-NBObjectType -Limit 1 } | Should -Not -Throw
         }
     }
 }
