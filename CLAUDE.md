@@ -9,6 +9,7 @@
 | Module Name | PowerNetbox (PSGallery) |
 | Current Version | 4.4.9.0 |
 | Target Netbox | 4.4.9 |
+| Minimum Netbox | 4.1+ |
 | PowerShell | 5.1+ (Desktop and Core) |
 | Repository | https://github.com/ctrl-alt-automate/PowerNetbox |
 | Functions | 494 public functions |
