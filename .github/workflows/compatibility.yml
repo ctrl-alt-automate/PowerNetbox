@@ -2,11 +2,10 @@
 # ===================
 # Test PowerNetbox against multiple Netbox versions to determine minimum version
 #
-# This workflow tests against Netbox 4.1 - 4.5 to identify:
+# This workflow tests against Netbox 4.0 - 4.4 to identify:
 # - Which functions work with which versions
 # - Breaking API changes between versions
 # - Minimum supported version
-# - Beta/pre-release compatibility
 #
 # Trigger manually or on compatibility-test branches
 
@@ -20,13 +19,8 @@ on:
       test_versions:
         description: 'Netbox versions to test (comma-separated)'
         required: false
-        default: '4.1.11,4.2.9,4.3.7,4.4.9,4.5.0-beta1'
+        default: '4.1.11,4.2.9,4.3.7,4.4.9'
         type: string
-      include_beta:
-        description: 'Include beta/pre-release versions'
-        required: false
-        default: true
-        type: boolean
 
 env:
   NETBOX_TOKEN: "0123456789abcdef0123456789abcdef01234567"
@@ -68,18 +62,6 @@ jobs:
           - netbox: "v4.4.9-3.4.2"
             netbox_short: "4.4.9"
             expected_failures: []
-
-          # Netbox 4.5.x - Beta (next major)
-          # Breaking changes in 4.5:
-          # - is_staff removed from User model (#101)
-          # - Token v2 with Bearer auth (#102)
-          # - New: cable-profiles, authentication-check (#103, #105)
-          # - New fields: VM.interface_count, Token.allowed_ips (#106)
-          - netbox: "v4.5.0-beta1-3.4.2"
-            netbox_short: "4.5.0-beta1"
-            is_beta: true
-            expected_failures:
-              - "is_staff parameter deprecated"  # User model change
 
     env:
       NETBOX_VERSION: ${{ matrix.netbox }}
@@ -253,83 +235,6 @@ jobs:
               $results += @{Test="Get-NBIPAMPrefix"; Status="FAIL"; Details=$_.Exception.Message}
           }
 
-          # ============================================================
-          # Netbox 4.5+ Specific Tests (New Endpoints/Features)
-          # ============================================================
-          $parsedVersion = $script:NetboxConfig.ParsedVersion
-          $is45OrNewer = $parsedVersion -and $parsedVersion -ge [version]'4.5'
-
-          if ($is45OrNewer) {
-              Write-Host ""
-              Write-Host "=== Netbox 4.5+ Specific Tests ===" -ForegroundColor Magenta
-
-              # Test 4.5-1: Cable Profiles endpoint (#103)
-              Write-Host "Test 4.5-1: Cable Profiles endpoint" -ForegroundColor Yellow
-              try {
-                  $response = Invoke-RestMethod -Uri "http://$($env:NETBOX_HOST)/api/dcim/cable-profiles/" `
-                      -Headers @{ 'Authorization' = "Token $($env:NETBOX_TOKEN)" } -ErrorAction Stop
-                  Write-Host "  PASS: Cable profiles endpoint available" -ForegroundColor Green
-                  $results += @{Test="CableProfiles-Endpoint"; Status="PASS"; Details="Available in 4.5+"}
-              } catch {
-                  Write-Host "  FAIL: $($_.Exception.Message)" -ForegroundColor Red
-                  $results += @{Test="CableProfiles-Endpoint"; Status="FAIL"; Details=$_.Exception.Message}
-              }
-
-              # Test 4.5-2: Authentication check endpoint (#105)
-              Write-Host "Test 4.5-2: Authentication check endpoint" -ForegroundColor Yellow
-              try {
-                  $response = Invoke-RestMethod -Uri "http://$($env:NETBOX_HOST)/api/users/authentication-check/" `
-                      -Headers @{ 'Authorization' = "Token $($env:NETBOX_TOKEN)" } -ErrorAction Stop
-                  Write-Host "  PASS: Authentication check endpoint available" -ForegroundColor Green
-                  $results += @{Test="AuthCheck-Endpoint"; Status="PASS"; Details="Available in 4.5+"}
-              } catch {
-                  Write-Host "  FAIL: $($_.Exception.Message)" -ForegroundColor Red
-                  $results += @{Test="AuthCheck-Endpoint"; Status="FAIL"; Details=$_.Exception.Message}
-              }
-
-              # Test 4.5-3: Token v2 API changes (#102)
-              Write-Host "Test 4.5-3: Token v2 API endpoint" -ForegroundColor Yellow
-              try {
-                  $response = Invoke-RestMethod -Uri "http://$($env:NETBOX_HOST)/api/users/tokens/" `
-                      -Headers @{ 'Authorization' = "Token $($env:NETBOX_TOKEN)" } -ErrorAction Stop
-                  # Check if allowed_ips field exists in schema
-                  $hasAllowedIps = $response.results | Where-Object { $_.PSObject.Properties.Name -contains 'allowed_ips' }
-                  if ($hasAllowedIps -or $response.results.Count -eq 0) {
-                      Write-Host "  PASS: Token API available (v2 schema check pending)" -ForegroundColor Green
-                      $results += @{Test="TokenV2-API"; Status="PASS"; Details="Available in 4.5+"}
-                  }
-              } catch {
-                  Write-Host "  FAIL: $($_.Exception.Message)" -ForegroundColor Red
-                  $results += @{Test="TokenV2-API"; Status="FAIL"; Details=$_.Exception.Message}
-              }
-
-              # Test 4.5-4: is_staff field deprecation check (#101)
-              Write-Host "Test 4.5-4: User model is_staff deprecation" -ForegroundColor Yellow
-              try {
-                  $response = Invoke-RestMethod -Uri "http://$($env:NETBOX_HOST)/api/users/users/?limit=1" `
-                      -Headers @{ 'Authorization' = "Token $($env:NETBOX_TOKEN)" } -ErrorAction Stop
-                  if ($response.results.Count -gt 0) {
-                      $hasIsStaff = $response.results[0].PSObject.Properties.Name -contains 'is_staff'
-                      if (-not $hasIsStaff) {
-                          Write-Host "  PASS: is_staff removed (expected in 4.5+)" -ForegroundColor Green
-                          $results += @{Test="IsStaff-Removed"; Status="PASS"; Details="Deprecated field removed in 4.5+"}
-                      } else {
-                          Write-Host "  INFO: is_staff still present" -ForegroundColor Yellow
-                          $results += @{Test="IsStaff-Removed"; Status="INFO"; Details="Field still present (may be transitional)"}
-                      }
-                  } else {
-                      Write-Host "  SKIP: No users to test" -ForegroundColor Gray
-                      $results += @{Test="IsStaff-Removed"; Status="SKIP"; Details="No users available"}
-                  }
-              } catch {
-                  Write-Host "  FAIL: $($_.Exception.Message)" -ForegroundColor Red
-                  $results += @{Test="IsStaff-Removed"; Status="FAIL"; Details=$_.Exception.Message}
-              }
-          } else {
-              Write-Host ""
-              Write-Host "Skipping 4.5+ specific tests (version: $version)" -ForegroundColor Gray
-          }
-
           # Summary
           Write-Host ""
           Write-Host "========================================" -ForegroundColor Cyan
@@ -404,13 +309,11 @@ jobs:
         run: |
           echo "# PowerNetbox Compatibility Matrix" > compatibility-report.md
           echo "" >> compatibility-report.md
-          echo "Generated: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> compatibility-report.md
-          echo "" >> compatibility-report.md
-          echo "| Test | 4.1.11 | 4.2.9 | 4.3.7 | 4.4.9 | 4.5.0-beta1 |" >> compatibility-report.md
-          echo "|------|--------|-------|-------|-------|-------------|" >> compatibility-report.md
+          echo "| Test | 4.1.11 | 4.2.9 | 4.3.7 | 4.4.9 |" >> compatibility-report.md
+          echo "|------|--------|-------|-------|-------|" >> compatibility-report.md
 
           # Parse results from each version
-          for version in 4.1.11 4.2.9 4.3.7 4.4.9 4.5.0-beta1; do
+          for version in 4.1.11 4.2.9 4.3.7 4.4.9; do
             if [ -f "results/compatibility-$version/compatibility-results-$version.json" ]; then
               echo "Found results for $version"
               cat "results/compatibility-$version/compatibility-results-$version.json"
@@ -419,12 +322,7 @@ jobs:
             fi
           done
 
-          echo "" >> compatibility-report.md
-          echo "## Legend" >> compatibility-report.md
-          echo "- **PASS**: Function works correctly" >> compatibility-report.md
-          echo "- **FAIL**: Function fails (may be expected for older versions)" >> compatibility-report.md
-          echo "- **N/A**: Endpoint not available in this version" >> compatibility-report.md
-          echo "" >> compatibility-report.md
+          echo ""
           echo "See artifact files for detailed results."
 
       - name: Upload summary report
