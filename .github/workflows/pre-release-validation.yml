@@ -1,5 +1,5 @@
-# Pre-Release Validation v2
-# =========================
+# Pre-Release Validation v2.1
+# ============================
 # Comprehensive test suite for release candidates
 #
 # This workflow runs EVERYTHING before a release:
