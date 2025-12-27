@@ -7,6 +7,10 @@
     Front ports represent the front-facing ports on patch panels or other devices
     that connect to rear ports for pass-through cabling.
 
+    NOTE: Netbox 4.5+ uses a new port mapping model. The Rear_Port and Rear_Port_Position
+    parameters are deprecated on 4.5+ and will be automatically converted to the new
+    Rear_Ports array format.
+
 .PARAMETER Device
     The database ID of the device to add the front port to.
 
@@ -20,9 +24,22 @@
     - Coax: 'f', 'n', 'bnc'
     - Other: 'splice', 'other'
 
+.PARAMETER Rear_Ports
+    Array of rear port mappings for Netbox 4.5+. Each mapping should be a hashtable
+    or PSCustomObject with the following properties:
+    - rear_port: (Required) The database ID of the rear port
+    - rear_port_position: (Optional) Position on the rear port (1-1024)
+    - position: (Optional) Position on the front port (defaults to 1)
+
 .PARAMETER Rear_Port
+    DEPRECATED on Netbox 4.5+. Use Rear_Ports instead.
     The database ID of the rear port that this front port maps to.
-    Required for establishing the pass-through connection.
+    On Netbox 4.5+, this will be automatically converted to Rear_Ports format.
+
+.PARAMETER Rear_Port_Position
+    DEPRECATED on Netbox 4.5+. Use Rear_Ports instead.
+    The position on the rear port (for rear ports with multiple positions).
+    Defaults to 1 if not specified.
 
 .PARAMETER Module
     The database ID of the module within the device (for modular devices).
@@ -32,10 +49,6 @@
 
 .PARAMETER Color
     The color of the port in 6-character hex format (e.g., 'ff0000' for red).
-
-.PARAMETER Rear_Port_Position
-    The position on the rear port (for rear ports with multiple positions).
-    Defaults to 1 if not specified.
 
 .PARAMETER Description
     A description of the front port.
@@ -50,18 +63,22 @@
     New-NBDCIMFrontPort -Device 42 -Name "Port 1" -Type "8p8c" -Rear_Port 100
 
     Creates a new RJ-45 front port named 'Port 1' on device 42, mapped to rear port 100.
+    Works on both Netbox 4.4 and 4.5+ (auto-converts on 4.5+).
 
 .EXAMPLE
-    New-NBDCIMFrontPort -Device 42 -Name "Fiber-01" -Type "lc" -Rear_Port 100 -Color "00ff00"
+    New-NBDCIMFrontPort -Device 42 -Name "Port 1" -Type "8p8c" -Rear_Ports @(
+        @{ rear_port = 100; rear_port_position = 1 }
+    )
 
-    Creates a new LC fiber front port with a green color indicator.
+    Creates a front port using the new Netbox 4.5+ port mapping format.
 
 .EXAMPLE
-    1..24 | ForEach-Object {
-        New-NBDCIMFrontPort -Device 42 -Name "Port $_" -Type "8p8c" -Rear_Port (100 + $_)
-    }
+    New-NBDCIMFrontPort -Device 42 -Name "Fiber-01" -Type "lc" -Rear_Ports @(
+        @{ rear_port = 100; rear_port_position = 1; position = 1 },
+        @{ rear_port = 101; rear_port_position = 1; position = 2 }
+    )
 
-    Creates 24 front ports on a patch panel, each mapped to a corresponding rear port.
+    Creates a front port with multiple rear port mappings (fiber pair swapping).
 
 .LINK
     https://netbox.readthedocs.io/en/stable/models/dcim/frontport/
@@ -87,7 +104,10 @@ function New-NBDCIMFrontPort {
             'splice', 'other', IgnoreCase = $true)]
         [string]$Type,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter()]
+        [PSObject[]]$Rear_Ports,
+
+        [Parameter()]
         [uint64]$Rear_Port,
 
         [uint64]$Module,
@@ -108,11 +128,57 @@ function New-NBDCIMFrontPort {
     )
 
     process {
+        # Detect Netbox version for port mapping format
+        $netboxVersion = $null
+        $is45OrHigher = $false
+        try {
+            $status = Get-NBVersion -ErrorAction SilentlyContinue
+            if ($status.'netbox-version') {
+                $netboxVersion = ConvertTo-NetboxVersion -VersionString $status.'netbox-version'
+                $is45OrHigher = $netboxVersion -ge [version]'4.5.0'
+            }
+        }
+        catch {
+            Write-Verbose "Could not detect Netbox version, assuming 4.4 format"
+        }
+
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'front-ports'))
 
-        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters
+        # Use BuildURIComponents but skip port mapping params (handled separately)
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Rear_Ports', 'Rear_Port', 'Rear_Port_Position'
 
         $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        # Handle port mappings based on version and provided parameters
+        if ($Rear_Ports) {
+            # New format explicitly provided
+            if (-not $is45OrHigher) {
+                Write-Warning "Rear_Ports parameter is only supported on Netbox 4.5+. Current version: $netboxVersion"
+            }
+            $URIComponents.Parameters['rear_ports'] = $Rear_Ports
+        }
+        elseif ($PSBoundParameters.ContainsKey('Rear_Port')) {
+            # Old format provided
+            if ($is45OrHigher) {
+                Write-Warning "Rear_Port parameter is deprecated on Netbox 4.5+. Use Rear_Ports instead. Auto-converting to new format."
+                # Convert to new format
+                $mapping = @{
+                    rear_port = $Rear_Port
+                    position  = 1
+                }
+                if ($PSBoundParameters.ContainsKey('Rear_Port_Position')) {
+                    $mapping['rear_port_position'] = $Rear_Port_Position
+                }
+                $URIComponents.Parameters['rear_ports'] = @($mapping)
+            }
+            else {
+                # Netbox 4.4 - use old format
+                $URIComponents.Parameters['rear_port'] = $Rear_Port
+                if ($PSBoundParameters.ContainsKey('Rear_Port_Position')) {
+                    $URIComponents.Parameters['rear_port_position'] = $Rear_Port_Position
+                }
+            }
+        }
 
         if ($PSCmdlet.ShouldProcess("Device $Device", "Create front port '$Name'")) {
             InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method POST

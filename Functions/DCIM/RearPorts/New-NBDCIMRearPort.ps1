@@ -7,6 +7,9 @@
     Rear ports represent the back-facing ports on patch panels or other devices
     that connect to front ports for pass-through cabling.
 
+    NOTE: Netbox 4.5+ introduces bidirectional port mappings. You can now specify
+    front port mappings directly when creating a rear port using the Front_Ports parameter.
+
 .PARAMETER Device
     The database ID of the device to add the rear port to.
 
@@ -19,6 +22,13 @@
     - Fiber: 'lc', 'lc-apc', 'sc', 'sc-apc', 'st', 'mpo', 'mtrj'
     - Coax: 'f', 'n', 'bnc'
     - Other: 'splice', 'other'
+
+.PARAMETER Front_Ports
+    Array of front port mappings for Netbox 4.5+ (bidirectional mapping).
+    Each mapping should be a hashtable or PSCustomObject with:
+    - front_port: (Required) The database ID of the front port
+    - front_port_position: (Required) Position on the front port (1-1024)
+    - position: (Required) Position on the rear port (1-1024)
 
 .PARAMETER Module
     The database ID of the module within the device (for modular devices).
@@ -53,6 +63,13 @@
     Creates a new LC fiber rear port that supports 2 front port positions.
 
 .EXAMPLE
+    New-NBDCIMRearPort -Device 42 -Name "Rear 1" -Type "8p8c" -Front_Ports @(
+        @{ front_port = 100; front_port_position = 1; position = 1 }
+    )
+
+    Creates a rear port with bidirectional front port mapping (Netbox 4.5+).
+
+.EXAMPLE
     1..24 | ForEach-Object {
         New-NBDCIMRearPort -Device 42 -Name "Rear $_" -Type "8p8c"
     }
@@ -83,6 +100,9 @@ function New-NBDCIMRearPort {
             'splice', 'other', IgnoreCase = $true)]
         [string]$Type,
 
+        [Parameter()]
+        [PSObject[]]$Front_Ports,
+
         [uint64]$Module,
 
         [string]$Label,
@@ -103,9 +123,33 @@ function New-NBDCIMRearPort {
     process {
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'rear-ports'))
 
-        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters
+        # Use BuildURIComponents but skip Front_Ports (handled separately)
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Front_Ports'
 
         $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        # Handle Front_Ports for Netbox 4.5+ bidirectional mapping
+        if ($Front_Ports) {
+            # Check if Netbox version supports this
+            $is45OrHigher = $false
+            try {
+                $status = Get-NBVersion -ErrorAction SilentlyContinue
+                if ($status.'netbox-version') {
+                    $netboxVersion = ConvertTo-NetboxVersion -VersionString $status.'netbox-version'
+                    $is45OrHigher = $netboxVersion -ge [version]'4.5.0'
+                }
+            }
+            catch {
+                Write-Verbose "Could not detect Netbox version"
+            }
+
+            if (-not $is45OrHigher) {
+                Write-Warning "Front_Ports parameter is only supported on Netbox 4.5+. This parameter will be ignored on older versions."
+            }
+            else {
+                $URIComponents.Parameters['front_ports'] = $Front_Ports
+            }
+        }
 
         if ($PSCmdlet.ShouldProcess("Device $Device", "Create rear port '$Name'")) {
             InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method POST
