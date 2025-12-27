@@ -1,0 +1,463 @@
+# Pre-Release Validation
+# ======================
+# Comprehensive test suite for release candidates
+#
+# This workflow runs EVERYTHING before a release:
+# - Unit tests on all platforms (Ubuntu, Windows, macOS)
+# - Unit tests on all PowerShell versions (5.1, 7.x)
+# - Integration tests against all supported Netbox versions
+# - PSScriptAnalyzer code quality checks
+# - Module import verification
+# - Generates a comprehensive release readiness report
+#
+# Trigger: Manual only (workflow_dispatch)
+# Duration: ~15-20 minutes
+# Use: Before merging to main / creating a release
+
+name: Pre-Release Validation
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version being validated (e.g., 4.5.0)'
+        required: true
+        type: string
+      skip_integration:
+        description: 'Skip integration tests (faster, unit tests only)'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  NETBOX_TOKEN: "0123456789abcdef0123456789abcdef01234567"
+  COMPOSE_PROJECT_NAME: "powernetbox"
+
+jobs:
+  # ============================================================
+  # Stage 1: Unit Tests - Full Platform Matrix
+  # ============================================================
+  unit-tests:
+    name: Unit [${{ matrix.os }}, ${{ matrix.pwsh && 'PS7' || 'PS5.1' }}]
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        pwsh: [true]
+        include:
+          # PowerShell 5.1 (Desktop) on Windows only
+          - os: windows-latest
+            pwsh: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies (pwsh)
+        if: matrix.pwsh
+        shell: pwsh
+        run: |
+          if (-not (Get-PSRepository -Name PSGallery -ErrorAction SilentlyContinue)) {
+              Register-PSRepository -Default
+          }
+          Set-PSRepository PSGallery -InstallationPolicy Trusted
+          Install-Module Pester -Force -Scope CurrentUser -MinimumVersion 5.0.0
+          Install-Module PSScriptAnalyzer -Force -Scope CurrentUser
+
+      - name: Install dependencies (powershell 5.1)
+        if: '!matrix.pwsh'
+        shell: powershell
+        run: |
+          if (-not (Get-PSRepository -Name PSGallery -ErrorAction SilentlyContinue)) {
+              Register-PSRepository -Default
+          }
+          Set-PSRepository PSGallery -InstallationPolicy Trusted
+          Install-Module Pester -Force -Scope CurrentUser -MinimumVersion 5.0.0
+          Install-Module PSScriptAnalyzer -Force -Scope CurrentUser
+
+      - name: Build module (pwsh)
+        if: matrix.pwsh
+        shell: pwsh
+        run: ./deploy.ps1 -Environment dev -SkipVersion
+
+      - name: Build module (powershell 5.1)
+        if: '!matrix.pwsh'
+        shell: powershell
+        run: ./deploy.ps1 -Environment dev -SkipVersion
+
+      - name: Run unit tests (pwsh)
+        if: matrix.pwsh
+        shell: pwsh
+        run: |
+          $config = New-PesterConfiguration
+          $config.Run.Path = './Tests/*.Tests.ps1'
+          $config.Run.Exit = $true
+          $config.Filter.ExcludeTag = @('Integration', 'Live')
+          $config.TestResult.Enabled = $true
+          $config.TestResult.OutputPath = 'TestResults.xml'
+          $config.TestResult.OutputFormat = 'NUnitXml'
+          $config.Output.Verbosity = 'Normal'
+          Invoke-Pester -Configuration $config
+
+      - name: Run unit tests (powershell 5.1)
+        if: '!matrix.pwsh'
+        shell: powershell
+        run: |
+          $config = New-PesterConfiguration
+          $config.Run.Path = './Tests/*.Tests.ps1'
+          $config.Run.Exit = $true
+          $config.Filter.ExcludeTag = @('Integration', 'Live')
+          $config.TestResult.Enabled = $true
+          $config.TestResult.OutputPath = 'TestResults.xml'
+          $config.TestResult.OutputFormat = 'NUnitXml'
+          $config.Output.Verbosity = 'Normal'
+          Invoke-Pester -Configuration $config
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unit-tests-${{ matrix.os }}-${{ matrix.pwsh && 'ps7' || 'ps51' }}
+          path: TestResults.xml
+          retention-days: 30
+
+  # ============================================================
+  # Stage 2: Code Quality - PSScriptAnalyzer
+  # ============================================================
+  code-quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install PSScriptAnalyzer
+        shell: pwsh
+        run: |
+          Set-PSRepository PSGallery -InstallationPolicy Trusted
+          Install-Module PSScriptAnalyzer -Force -Scope CurrentUser
+
+      - name: Run PSScriptAnalyzer
+        id: pssa
+        shell: pwsh
+        run: |
+          Write-Host "Running PSScriptAnalyzer on Functions/..." -ForegroundColor Cyan
+
+          $results = Invoke-ScriptAnalyzer -Path ./Functions -Recurse -Settings PSGallery
+
+          $errors = $results | Where-Object { $_.Severity -eq 'Error' }
+          $warnings = $results | Where-Object { $_.Severity -eq 'Warning' }
+          $info = $results | Where-Object { $_.Severity -eq 'Information' }
+
+          Write-Host ""
+          Write-Host "=== PSScriptAnalyzer Results ===" -ForegroundColor Cyan
+          Write-Host "Errors:   $($errors.Count)" -ForegroundColor $(if ($errors.Count -gt 0) { 'Red' } else { 'Green' })
+          Write-Host "Warnings: $($warnings.Count)" -ForegroundColor $(if ($warnings.Count -gt 0) { 'Yellow' } else { 'Green' })
+          Write-Host "Info:     $($info.Count)" -ForegroundColor Gray
+
+          if ($errors.Count -gt 0) {
+              Write-Host ""
+              Write-Host "=== Errors ===" -ForegroundColor Red
+              $errors | ForEach-Object {
+                  Write-Host "  $($_.ScriptName):$($_.Line) - $($_.RuleName): $($_.Message)" -ForegroundColor Red
+              }
+          }
+
+          # Export results
+          $results | ConvertTo-Json | Out-File "pssa-results.json"
+
+          # Fail on errors
+          if ($errors.Count -gt 0) {
+              Write-Host ""
+              Write-Host "::error::PSScriptAnalyzer found $($errors.Count) error(s)"
+              exit 1
+          }
+
+      - name: Upload PSSA results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: code-quality-pssa
+          path: pssa-results.json
+          retention-days: 30
+
+  # ============================================================
+  # Stage 3: Integration Tests - All Netbox Versions
+  # ============================================================
+  integration-tests:
+    name: Integration [Netbox ${{ matrix.netbox_short }}]
+    runs-on: ubuntu-latest
+    if: ${{ !inputs.skip_integration }}
+    needs: [unit-tests]  # Only run if unit tests pass
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - netbox: "v4.1.11-3.0.2"
+            netbox_short: "4.1.11"
+          - netbox: "v4.2.9-3.2.1"
+            netbox_short: "4.2.9"
+          - netbox: "v4.3.7-3.3.0"
+            netbox_short: "4.3.7"
+          - netbox: "v4.4.9-3.4.2"
+            netbox_short: "4.4.9"
+
+    env:
+      NETBOX_VERSION: ${{ matrix.netbox }}
+      NETBOX_HOST: "localhost:8000"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Start Netbox ${{ matrix.netbox_short }}
+        run: |
+          echo "Starting Netbox ${{ matrix.netbox_short }}..."
+          docker compose -f docker-compose.ci.yml pull
+          docker compose -f docker-compose.ci.yml up -d
+
+      - name: Wait for Netbox
+        run: |
+          echo "Waiting for Netbox to be ready..."
+          MAX_WAIT=300
+          ELAPSED=0
+          while [ $ELAPSED -lt $MAX_WAIT ]; do
+            HEALTH=$(docker inspect --format='{{.State.Health.Status}}' powernetbox-netbox-1 2>/dev/null || echo "starting")
+            echo "[${ELAPSED}s] Status: $HEALTH"
+            if [ "$HEALTH" = "healthy" ]; then
+              curl -sf http://localhost:8000/login/ > /dev/null 2>&1 && exit 0
+            fi
+            [ "$HEALTH" = "unhealthy" ] && docker compose -f docker-compose.ci.yml logs netbox --tail 50 && exit 1
+            sleep 10
+            ELAPSED=$((ELAPSED + 10))
+          done
+          exit 1
+
+      - name: Install PowerShell dependencies
+        shell: pwsh
+        run: |
+          Set-PSRepository PSGallery -InstallationPolicy Trusted
+          Install-Module Pester -Force -Scope CurrentUser -MinimumVersion 5.0.0
+
+      - name: Build module
+        shell: pwsh
+        run: |
+          ./deploy.ps1 -Environment dev -SkipVersion
+          Import-Module ./PowerNetbox/PowerNetbox.psd1 -Force
+
+      - name: Run integration tests
+        shell: pwsh
+        env:
+          NETBOX_HOST: ${{ env.NETBOX_HOST }}
+          NETBOX_TOKEN: ${{ env.NETBOX_TOKEN }}
+        run: |
+          $config = New-PesterConfiguration
+          $config.Run.Path = './Tests/Integration.Tests.ps1'
+          $config.Run.Exit = $true
+          $config.Filter.Tag = @('Integration')
+          $config.TestResult.Enabled = $true
+          $config.TestResult.OutputPath = 'IntegrationResults.xml'
+          $config.TestResult.OutputFormat = 'NUnitXml'
+          $config.Output.Verbosity = 'Detailed'
+          Invoke-Pester -Configuration $config
+
+      - name: Upload integration results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: integration-tests-${{ matrix.netbox_short }}
+          path: IntegrationResults.xml
+          retention-days: 30
+
+      - name: Cleanup
+        if: always()
+        run: docker compose -f docker-compose.ci.yml down -v --remove-orphans
+
+  # ============================================================
+  # Stage 4: Module Verification
+  # ============================================================
+  module-verification:
+    name: Module Verification
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build and verify module
+        shell: pwsh
+        run: |
+          Write-Host "=== Building Module ===" -ForegroundColor Cyan
+          ./deploy.ps1 -Environment prod -SkipVersion
+
+          Write-Host ""
+          Write-Host "=== Importing Module ===" -ForegroundColor Cyan
+          Import-Module ./PowerNetbox/PowerNetbox.psd1 -Force -ErrorAction Stop
+
+          Write-Host ""
+          Write-Host "=== Module Info ===" -ForegroundColor Cyan
+          $module = Get-Module PowerNetbox
+          Write-Host "Name:    $($module.Name)"
+          Write-Host "Version: $($module.Version)"
+
+          $commands = Get-Command -Module PowerNetbox
+          $publicCommands = $commands | Where-Object { $_.Name -match '-' }
+
+          Write-Host ""
+          Write-Host "=== Command Statistics ===" -ForegroundColor Cyan
+          Write-Host "Total commands:  $($commands.Count)"
+          Write-Host "Public commands: $($publicCommands.Count)"
+
+          # Verify minimum expected commands
+          $expectedMinimum = 400
+          if ($publicCommands.Count -lt $expectedMinimum) {
+              Write-Host "::error::Expected at least $expectedMinimum public commands, found $($publicCommands.Count)"
+              exit 1
+          }
+
+          Write-Host ""
+          Write-Host "=== Command Breakdown ===" -ForegroundColor Cyan
+          $breakdown = $publicCommands | Group-Object { ($_.Name -split '-')[0] } | Sort-Object Count -Descending
+          foreach ($group in $breakdown) {
+              Write-Host "  $($group.Name): $($group.Count)"
+          }
+
+          # Export command list
+          $publicCommands | Select-Object Name | ConvertTo-Json | Out-File "command-list.json"
+
+      - name: Upload command list
+        uses: actions/upload-artifact@v4
+        with:
+          name: module-verification
+          path: command-list.json
+          retention-days: 30
+
+  # ============================================================
+  # Final: Release Readiness Report
+  # ============================================================
+  release-report:
+    name: Release Readiness Report
+    runs-on: ubuntu-latest
+    needs: [unit-tests, code-quality, integration-tests, module-verification]
+    if: always()
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Generate release report
+        shell: pwsh
+        run: |
+          $version = "${{ inputs.version }}"
+          $skipIntegration = "${{ inputs.skip_integration }}" -eq 'true'
+
+          # Collect job results
+          $unitTests = "${{ needs.unit-tests.result }}"
+          $codeQuality = "${{ needs.code-quality.result }}"
+          $integration = if ($skipIntegration) { "skipped" } else { "${{ needs.integration-tests.result }}" }
+          $moduleVerify = "${{ needs.module-verification.result }}"
+
+          # Determine overall status
+          $allPassed = ($unitTests -eq 'success') -and
+                       ($codeQuality -eq 'success') -and
+                       ($moduleVerify -eq 'success') -and
+                       ($skipIntegration -or $integration -eq 'success')
+
+          $overallStatus = if ($allPassed) { "READY" } else { "NOT READY" }
+          $statusEmoji = if ($allPassed) { "✅" } else { "❌" }
+
+          # Generate report
+          $report = @"
+          # $statusEmoji Pre-Release Validation Report
+
+          **Version:** $version
+          **Date:** $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')
+          **Status:** **$overallStatus**
+
+          ## Test Results
+
+          | Stage | Result | Details |
+          |-------|--------|---------|
+          | Unit Tests (4 platforms) | $(if ($unitTests -eq 'success') { '✅ PASS' } else { '❌ FAIL' }) | Ubuntu, Windows, macOS × PS 5.1/7.x |
+          | Code Quality (PSSA) | $(if ($codeQuality -eq 'success') { '✅ PASS' } else { '❌ FAIL' }) | PSScriptAnalyzer |
+          | Integration Tests | $(if ($skipIntegration) { '⏭️ SKIPPED' } elseif ($integration -eq 'success') { '✅ PASS' } else { '❌ FAIL' }) | Netbox 4.1, 4.2, 4.3, 4.4 |
+          | Module Verification | $(if ($moduleVerify -eq 'success') { '✅ PASS' } else { '❌ FAIL' }) | Import, command count |
+
+          ## Platform Matrix
+
+          | Platform | PowerShell | Status |
+          |----------|------------|--------|
+          | Ubuntu | 7.x | $(if ($unitTests -eq 'success') { '✅' } else { '❓' }) |
+          | Windows | 7.x | $(if ($unitTests -eq 'success') { '✅' } else { '❓' }) |
+          | Windows | 5.1 | $(if ($unitTests -eq 'success') { '✅' } else { '❓' }) |
+          | macOS | 7.x | $(if ($unitTests -eq 'success') { '✅' } else { '❓' }) |
+
+          ## Netbox Compatibility
+
+          | Version | Status |
+          |---------|--------|
+          | 4.1.11 | $(if ($skipIntegration) { '⏭️' } elseif ($integration -eq 'success') { '✅' } else { '❓' }) |
+          | 4.2.9 | $(if ($skipIntegration) { '⏭️' } elseif ($integration -eq 'success') { '✅' } else { '❓' }) |
+          | 4.3.7 | $(if ($skipIntegration) { '⏭️' } elseif ($integration -eq 'success') { '✅' } else { '❓' }) |
+          | 4.4.9 | $(if ($skipIntegration) { '⏭️' } elseif ($integration -eq 'success') { '✅' } else { '❓' }) |
+
+          ## Release Checklist
+
+          - [$(if ($unitTests -eq 'success') { 'x' } else { ' ' })] All unit tests pass
+          - [$(if ($codeQuality -eq 'success') { 'x' } else { ' ' })] No PSScriptAnalyzer errors
+          - [$(if ($skipIntegration -or $integration -eq 'success') { 'x' } else { ' ' })] Integration tests pass (all Netbox versions)
+          - [$(if ($moduleVerify -eq 'success') { 'x' } else { ' ' })] Module loads correctly
+          - [ ] Version updated in PowerNetbox.psd1
+          - [ ] CHANGELOG updated
+          - [ ] PR approved
+
+          ## Next Steps
+
+          $(if ($allPassed) {
+          @"
+          1. Merge to main branch
+          2. Create release tag: ``v$version``
+          3. GitHub Actions will publish to PSGallery
+          "@
+          } else {
+          @"
+          1. Review failed tests above
+          2. Fix issues and push updates
+          3. Re-run this validation workflow
+          "@
+          })
+
+          ---
+          *Generated by Pre-Release Validation workflow*
+          "@
+
+          # Output report
+          Write-Host $report
+          $report | Out-File "release-report.md"
+
+          # Set job summary
+          $report | Out-File -FilePath $env:GITHUB_STEP_SUMMARY
+
+          # Fail if not ready
+          if (-not $allPassed) {
+              Write-Host ""
+              Write-Host "::error::Release validation FAILED - see report above"
+              exit 1
+          }
+
+      - name: Upload release report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: release-report
+          path: release-report.md
+          retention-days: 90
