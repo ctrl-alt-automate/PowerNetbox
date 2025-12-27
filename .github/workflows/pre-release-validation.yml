@@ -164,12 +164,17 @@ jobs:
           Write-Host "=== Running Tests with Code Coverage ===" -ForegroundColor Cyan
           Write-Host ""
 
-          # Get all function files for coverage
-          $functionFiles = Get-ChildItem -Path ./Functions -Filter *.ps1 -Recurse |
-                           Where-Object { $_.Name -notmatch '\.Tests\.ps1$' } |
-                           Select-Object -ExpandProperty FullName
+          # The module is built by concatenating all Functions/*.ps1 into PowerNetbox.psm1
+          # So we need to analyze coverage on the built module, not the source files
+          $moduleFile = './PowerNetbox/PowerNetbox.psm1'
 
-          Write-Host "Analyzing coverage for $($functionFiles.Count) function files..." -ForegroundColor Yellow
+          if (-not (Test-Path $moduleFile)) {
+              Write-Host "ERROR: Built module not found at $moduleFile" -ForegroundColor Red
+              exit 1
+          }
+
+          $moduleSize = (Get-Item $moduleFile).Length / 1KB
+          Write-Host "Analyzing coverage for built module ($([math]::Round($moduleSize, 1)) KB)..." -ForegroundColor Yellow
 
           $config = New-PesterConfiguration
           $config.Run.Path = './Tests/*.Tests.ps1'
@@ -177,9 +182,9 @@ jobs:
           $config.Filter.ExcludeTag = @('Integration', 'Live')
           $config.Output.Verbosity = 'Normal'
 
-          # Enable code coverage
+          # Enable code coverage on the built module file
           $config.CodeCoverage.Enabled = $true
-          $config.CodeCoverage.Path = $functionFiles
+          $config.CodeCoverage.Path = @($moduleFile)
           $config.CodeCoverage.OutputPath = 'coverage.xml'
           $config.CodeCoverage.OutputFormat = 'JaCoCo'
 
@@ -208,32 +213,28 @@ jobs:
           Write-Host "Missed:    $missedCommands commands"
           Write-Host ""
 
-          # Find functions with 0% coverage
-          $missedFiles = $coverage.CommandsMissed |
-                         Group-Object File |
-                         ForEach-Object {
-                             $file = $_.Name
-                             $fileName = Split-Path $file -Leaf
-                             $totalInFile = ($coverage.CommandsAnalyzed | Where-Object { $_.File -eq $file }).Count
-                             $missedInFile = $_.Count
-                             if ($totalInFile -eq $missedInFile -and $totalInFile -gt 0) {
-                                 $fileName -replace '\.ps1$', ''
-                             }
-                         } | Where-Object { $_ } | Select-Object -First 20
-
-          $missedFunctionsStr = if ($missedFiles.Count -gt 0) {
-              ($missedFiles | Select-Object -First 10) -join ', '
-          } else {
-              "None"
+          # Find uncovered function names by looking at the missed commands
+          # The concatenated module has #region markers we can use
+          $uncoveredFunctions = @()
+          if ($coverage.CommandsMissed) {
+              # Group missed commands by their function context
+              $uncoveredFunctions = $coverage.CommandsMissed |
+                  Where-Object { $_.Function -and $_.Function -ne '<ScriptBlock>' } |
+                  Group-Object Function |
+                  Sort-Object Count -Descending |
+                  Select-Object -First 10 -ExpandProperty Name
           }
 
-          if ($missedFiles.Count -gt 0) {
-              Write-Host "Functions with 0% coverage (first 10):" -ForegroundColor Yellow
-              $missedFiles | Select-Object -First 10 | ForEach-Object {
+          $missedFunctionsStr = if ($uncoveredFunctions.Count -gt 0) {
+              $uncoveredFunctions -join ', '
+          } else {
+              "All functions have some coverage"
+          }
+
+          if ($uncoveredFunctions.Count -gt 0) {
+              Write-Host "Functions with lowest coverage (by missed commands):" -ForegroundColor Yellow
+              $uncoveredFunctions | ForEach-Object {
                   Write-Host "  - $_" -ForegroundColor Yellow
-              }
-              if ($missedFiles.Count -gt 10) {
-                  Write-Host "  ... and $($missedFiles.Count - 10) more" -ForegroundColor Yellow
               }
           }
 
@@ -250,7 +251,7 @@ jobs:
               TotalCommands = $totalCommands
               MissedCommands = $missedCommands
               Threshold = ${{ inputs.coverage_threshold }}
-              MissedFunctions = $missedFiles
+              UncoveredFunctions = $uncoveredFunctions
           } | ConvertTo-Json -Depth 5 | Out-File "coverage-report.json"
 
           # Check threshold
