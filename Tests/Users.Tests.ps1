@@ -368,6 +368,18 @@ Describe "Users Module Tests" -Tag 'Users' {
             $bodyObj.write_enabled | Should -Be $true
         }
 
+        It "Should create a token with Enabled parameter (Netbox 4.5+)" {
+            $Result = New-NBToken -User 1 -Enabled $true -Confirm:$false
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.enabled | Should -Be $true
+        }
+
+        It "Should create a disabled token" {
+            $Result = New-NBToken -User 1 -Enabled $false -Confirm:$false
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.enabled | Should -Be $false
+        }
+
         It "Should support -WhatIf" {
             $Result = New-NBToken -User 1 -WhatIf
             $Result | Should -BeNullOrEmpty
@@ -387,6 +399,12 @@ Describe "Users Module Tests" -Tag 'Users' {
             $Result = Set-NBToken -Id 2 -Write_Enabled $false -Confirm:$false
             $bodyObj = $Result.Body | ConvertFrom-Json
             $bodyObj.write_enabled | Should -Be $false
+        }
+
+        It "Should update token enabled status (Netbox 4.5+)" {
+            $Result = Set-NBToken -Id 3 -Enabled $false -Confirm:$false
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.enabled | Should -Be $false
         }
 
         It "Should support pipeline input by property name" {

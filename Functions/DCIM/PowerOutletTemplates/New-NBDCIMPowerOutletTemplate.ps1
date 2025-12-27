@@ -29,6 +29,7 @@ function New-NBDCIMPowerOutletTemplate {
         [uint64]$Power_Port,
         [string]$Feed_Leg,
         [string]$Description,
+        [string]$Color,
         [switch]$Raw
     )
     process {

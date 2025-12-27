@@ -51,6 +51,10 @@
 .PARAMETER Custom_Fields
     Hashtable of custom field values.
 
+.PARAMETER Start_On_Boot
+    Boot behavior for the VM (Netbox 4.5+ only).
+    Values: 'on', 'off', 'laststate'
+
 .PARAMETER InputObject
     Pipeline input for bulk operations. Each object MUST have an Id property.
 
@@ -137,6 +141,10 @@ function Set-NBVirtualMachine {
 
         [Parameter(ParameterSetName = 'Single')]
         [hashtable]$Custom_Fields,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [ValidateSet('on', 'off', 'laststate', IgnoreCase = $true)]
+        [string]$Start_On_Boot,
 
         # Bulk mode parameters
         [Parameter(ParameterSetName = 'Bulk', Mandatory = $true, ValueFromPipeline = $true)]
