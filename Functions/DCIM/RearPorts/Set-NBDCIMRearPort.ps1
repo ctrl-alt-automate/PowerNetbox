@@ -1,18 +1,68 @@
 <#
 .SYNOPSIS
-    Updates an existing CIMRearPort in Netbox D module.
+    Updates an existing rear port in Netbox DCIM module.
 
 .DESCRIPTION
-    Updates an existing CIMRearPort in Netbox D module.
-    Supports pipeline input for Id parameter where applicable.
+    Updates an existing rear port in Netbox DCIM module.
+    Supports pipeline input for Id parameter.
 
-.PARAMETER Raw
-    Return the raw API response instead of the results array.
+    NOTE: Netbox 4.5+ introduces bidirectional port mappings. You can now specify
+    front port mappings directly when updating a rear port using the Front_Ports parameter.
+
+.PARAMETER Id
+    The database ID of the rear port to update.
+
+.PARAMETER Device
+    The database ID of the device.
+
+.PARAMETER Module
+    The database ID of the module within the device.
+
+.PARAMETER Name
+    The name of the rear port.
+
+.PARAMETER Label
+    A physical label for the port.
+
+.PARAMETER Type
+    The connector type of the rear port.
+
+.PARAMETER Color
+    The color of the port in 6-character hex format.
+
+.PARAMETER Positions
+    The number of front port positions this rear port supports.
+
+.PARAMETER Front_Ports
+    Array of front port mappings for Netbox 4.5+ (bidirectional mapping).
+    Each mapping should be a hashtable or PSCustomObject with:
+    - front_port: (Required) The database ID of the front port
+    - front_port_position: (Required) Position on the front port (1-1024)
+    - position: (Required) Position on the rear port (1-1024)
+
+.PARAMETER Description
+    A description of the rear port.
+
+.PARAMETER Mark_Connected
+    Whether to mark this port as connected.
+
+.PARAMETER Tags
+    Array of tag IDs to assign to this rear port.
+
+.PARAMETER Force
+    Skip confirmation prompt.
 
 .EXAMPLE
-    Set-NBDCIMRearPort
+    Set-NBDCIMRearPort -Id 1 -Name "Rear 1 Updated"
 
-    Returns all CIMRearPort objects.
+    Updates the name of rear port with ID 1.
+
+.EXAMPLE
+    Set-NBDCIMRearPort -Id 1 -Front_Ports @(
+        @{ front_port = 100; front_port_position = 1; position = 1 }
+    )
+
+    Updates the front port mappings using Netbox 4.5+ bidirectional format.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -20,12 +70,12 @@
 
 function Set-NBDCIMRearPort {
     [CmdletBinding(ConfirmImpact = 'Medium',
-                   SupportsShouldProcess = $true)]
+        SupportsShouldProcess = $true)]
     [OutputType([pscustomobject])]
     param
     (
         [Parameter(Mandatory = $true,
-                   ValueFromPipelineByPropertyName = $true)]
+            ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
         [uint64]$Device,
@@ -43,17 +93,37 @@ function Set-NBDCIMRearPort {
 
         [uint16]$Positions,
 
+        [Parameter()]
+        [PSObject[]]$Front_Ports,
+
         [string]$Description,
 
         [bool]$Mark_Connected,
 
-        [uint16[]]$Tags,
+        [uint64[]]$Tags,
 
         [switch]$Force
     )
 
     begin {
+        # Detect Netbox version for bidirectional port mapping support
+        $is45OrHigher = $false
+        if ($Front_Ports) {
+            try {
+                $status = Get-NBVersion -ErrorAction SilentlyContinue
+                if ($status.'netbox-version') {
+                    $netboxVersion = ConvertTo-NetboxVersion -VersionString $status.'netbox-version'
+                    $is45OrHigher = $netboxVersion -ge [version]'4.5.0'
+                }
+            }
+            catch {
+                Write-Verbose "Could not detect Netbox version"
+            }
 
+            if (-not $is45OrHigher) {
+                Write-Warning "Front_Ports parameter is only supported on Netbox 4.5+. This parameter will be ignored on older versions."
+            }
+        }
     }
 
     process {
@@ -62,9 +132,14 @@ function Set-NBDCIMRearPort {
 
             $Segments = [System.Collections.ArrayList]::new(@('dcim', 'rear-ports', $CurrentPort.Id))
 
-            $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id'
+            $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force', 'Front_Ports'
 
             $URI = BuildNewURI -Segments $Segments
+
+            # Handle Front_Ports for Netbox 4.5+ bidirectional mapping
+            if ($Front_Ports -and $is45OrHigher) {
+                $URIComponents.Parameters['front_ports'] = $Front_Ports
+            }
 
             if ($Force -or $pscmdlet.ShouldProcess("Rear Port ID $($CurrentPort.Id)", "Set")) {
                 InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method PATCH
@@ -73,6 +148,5 @@ function Set-NBDCIMRearPort {
     }
 
     end {
-
     }
 }
