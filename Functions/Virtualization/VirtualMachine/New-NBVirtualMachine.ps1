@@ -52,6 +52,10 @@
 .PARAMETER Comments
     Comments about the VM.
 
+.PARAMETER Start_On_Boot
+    Boot behavior for the VM (Netbox 4.5+ only).
+    Values: 'on', 'off', 'laststate'
+
 .PARAMETER InputObject
     Pipeline input for bulk operations. Each object should contain
     at minimum the Name property.
@@ -139,6 +143,10 @@ function New-NBVirtualMachine {
 
         [Parameter(ParameterSetName = 'Single')]
         [string]$Comments,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [ValidateSet('on', 'off', 'laststate', IgnoreCase = $true)]
+        [string]$Start_On_Boot,
 
         # Bulk mode parameters
         [Parameter(ParameterSetName = 'Bulk', Mandatory = $true, ValueFromPipeline = $true)]

@@ -23,6 +23,9 @@
 .PARAMETER Allowed_Ips
     Array of allowed IP addresses/networks.
 
+.PARAMETER Enabled
+    Whether the token is enabled (Netbox 4.5+ only). Defaults to true.
+
 .PARAMETER Raw
     Return the raw API response.
 
@@ -48,6 +51,8 @@ function New-NBToken {
         [bool]$Write_Enabled,
 
         [string[]]$Allowed_Ips,
+
+        [bool]$Enabled,
 
         [switch]$Raw
     )

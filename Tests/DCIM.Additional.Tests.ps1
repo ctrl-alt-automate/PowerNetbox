@@ -1466,4 +1466,37 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         }
     }
     #endregion
+
+    #region PowerOutletTemplates (Color field - Netbox 4.5+)
+    Context "New-NBDCIMPowerOutletTemplate" {
+        It "Should create a power outlet template" {
+            $Result = New-NBDCIMPowerOutletTemplate -Device_Type 1 -Name 'Outlet1'
+            $Result.Method | Should -Be 'POST'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/power-outlet-templates/'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.device_type | Should -Be 1
+            $bodyObj.name | Should -Be 'Outlet1'
+        }
+
+        It "Should create a power outlet template with Color (Netbox 4.5+)" {
+            $Result = New-NBDCIMPowerOutletTemplate -Device_Type 1 -Name 'Outlet1' -Color 'aa1409'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.color | Should -Be 'aa1409'
+        }
+    }
+
+    Context "Set-NBDCIMPowerOutletTemplate" {
+        It "Should update a power outlet template" {
+            $Result = Set-NBDCIMPowerOutletTemplate -Id 1 -Description 'Updated' -Confirm:$false
+            $Result.Method | Should -Be 'PATCH'
+            $Result.URI | Should -Match '/api/dcim/power-outlet-templates/1/'
+        }
+
+        It "Should update a power outlet template with Color (Netbox 4.5+)" {
+            $Result = Set-NBDCIMPowerOutletTemplate -Id 1 -Color 'f44336' -Confirm:$false
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.color | Should -Be 'f44336'
+        }
+    }
+    #endregion
 }
