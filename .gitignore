@@ -12,8 +12,19 @@ concatenated.ps1
 
 # Local configuration (contains secrets)
 .netboxps.config.ps1
+.netboxps.config.example.ps1
 *.local.ps1
 
 # API keys and secrets
 .psgallery.key
 *.apikey
+
+# Development files (keep in dev branch only)
+.claude/
+CLAUDE.md
+Connect-DevNetbox.ps1
+.vscode/
+
+# Build output
+PowerNetbox/
+NetboxPSv4/
