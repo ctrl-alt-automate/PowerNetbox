@@ -1030,4 +1030,132 @@ Describe "Live Integration Tests" -Tag 'Integration', 'Live' -Skip:(-not $script
             { Get-NBContentType -Limit 1 } | Should -Not -Throw
         }
     }
+
+    Context "Port Mapping (Netbox 4.5+)" -Tag 'PortMapping', 'Netbox45' {
+        BeforeAll {
+            # Check Netbox version
+            $status = Get-NBVersion
+            $versionString = $status.'netbox-version'
+            if ($versionString -match '^\d+\.\d+') {
+                $version = [version]($versionString -replace '-.*$')
+                $script:Is45OrHigher = $version -ge [version]'4.5.0'
+            }
+            else {
+                $script:Is45OrHigher = $false
+            }
+
+            if ($script:Is45OrHigher) {
+                # Find or create a test device
+                $script:TestDevice = Get-NBDCIMDevice -Name "$script:TestPrefix-PatchPanel" | Select-Object -First 1
+                if (-not $script:TestDevice) {
+                    # Need site, manufacturer, device type, device role
+                    $site = Get-NBDCIMSite | Select-Object -First 1
+                    if (-not $site) {
+                        $site = New-NBDCIMSite -Name "$script:TestPrefix-Site" -Slug "$script:TestPrefix-site".ToLower()
+                        [void]$script:CreatedResources.Sites.Add($site.id)
+                    }
+                    $mfr = Get-NBDCIMManufacturer | Select-Object -First 1
+                    if (-not $mfr) {
+                        $mfr = New-NBDCIMManufacturer -Name "$script:TestPrefix-Mfr" -Slug "$script:TestPrefix-mfr".ToLower()
+                        [void]$script:CreatedResources.Manufacturers.Add($mfr.id)
+                    }
+                    $devType = Get-NBDCIMDeviceType | Select-Object -First 1
+                    if (-not $devType) {
+                        $devType = New-NBDCIMDeviceType -Model "$script:TestPrefix-PP24" -Slug "$script:TestPrefix-pp24".ToLower() -Manufacturer $mfr.id
+                        [void]$script:CreatedResources.DeviceTypes.Add($devType.id)
+                    }
+                    $devRole = Get-NBDCIMDeviceRole | Select-Object -First 1
+                    if (-not $devRole) {
+                        $devRole = New-NBDCIMDeviceRole -Name "$script:TestPrefix-PatchPanel" -Slug "$script:TestPrefix-patchpanel".ToLower()
+                        [void]$script:CreatedResources.DeviceRoles.Add($devRole.id)
+                    }
+                    $script:TestDevice = New-NBDCIMDevice -Name "$script:TestPrefix-PatchPanel" -Site $site.id -Device_Type $devType.id -Role $devRole.id
+                    [void]$script:CreatedResources.Devices.Add($script:TestDevice.id)
+                }
+
+                # Track port resources for cleanup
+                $script:CreatedPorts = @{
+                    RearPorts  = [System.Collections.ArrayList]::new()
+                    FrontPorts = [System.Collections.ArrayList]::new()
+                }
+            }
+        }
+
+        AfterAll {
+            if ($script:Is45OrHigher -and $script:CreatedPorts) {
+                # Cleanup ports (FrontPorts first, then RearPorts)
+                foreach ($id in $script:CreatedPorts.FrontPorts) {
+                    try { Remove-NBDCIMFrontPort -Id $id -Confirm:$false -ErrorAction SilentlyContinue } catch {}
+                }
+                foreach ($id in $script:CreatedPorts.RearPorts) {
+                    try { Remove-NBDCIMRearPort -Id $id -Confirm:$false -ErrorAction SilentlyContinue } catch {}
+                }
+            }
+        }
+
+        It "Should create RearPort without port mappings" {
+            if (-not $script:Is45OrHigher) { Set-ItResult -Skipped -Because "Requires Netbox 4.5+"; return }
+            $rp = New-NBDCIMRearPort -Device $script:TestDevice.id -Name "$script:TestPrefix-RP1" -Type '8p8c' -Positions 2
+            $rp | Should -Not -BeNullOrEmpty
+            $rp.id | Should -BeGreaterThan 0
+            [void]$script:CreatedPorts.RearPorts.Add($rp.id)
+            $script:TestRearPort = $rp
+        }
+
+        It "Should create FrontPort with Rear_Ports array" {
+            if (-not $script:Is45OrHigher) { Set-ItResult -Skipped -Because "Requires Netbox 4.5+"; return }
+            $fp = New-NBDCIMFrontPort -Device $script:TestDevice.id -Name "$script:TestPrefix-FP1" -Type '8p8c' -Rear_Ports @(
+                @{ rear_port = $script:TestRearPort.id; rear_port_position = 1; position = 1 }
+            )
+            $fp | Should -Not -BeNullOrEmpty
+            $fp.rear_ports | Should -Not -BeNullOrEmpty
+            $fp.rear_ports[0].rear_port | Should -Be $script:TestRearPort.id
+            [void]$script:CreatedPorts.FrontPorts.Add($fp.id)
+            $script:TestFrontPort = $fp
+        }
+
+        It "Should update FrontPort Rear_Ports" {
+            if (-not $script:Is45OrHigher) { Set-ItResult -Skipped -Because "Requires Netbox 4.5+"; return }
+            $fp = Set-NBDCIMFrontPort -Id $script:TestFrontPort.id -Rear_Ports @(
+                @{ rear_port = $script:TestRearPort.id; rear_port_position = 2; position = 1 }
+            ) -Force
+            $fp.rear_ports[0].rear_port_position | Should -Be 2
+        }
+
+        It "Should update RearPort with Front_Ports (bidirectional)" {
+            if (-not $script:Is45OrHigher) { Set-ItResult -Skipped -Because "Requires Netbox 4.5+"; return }
+            # Create a RearPort first
+            $rp2 = New-NBDCIMRearPort -Device $script:TestDevice.id -Name "$script:TestPrefix-RP2" -Type '8p8c' -Positions 1
+            [void]$script:CreatedPorts.RearPorts.Add($rp2.id)
+
+            # Create a FrontPort without mapping using REST API directly
+            $hostname = Get-NBHostname
+            $port = Get-NBHostPort
+            $scheme = Get-NBHostScheme
+            $cred = Get-NBCredential
+            $baseUrl = "${scheme}://${hostname}:${port}/api/dcim/front-ports/"
+            $headers = @{
+                'Authorization' = "Bearer $($cred.GetNetworkCredential().Password)"
+                'Content-Type'  = 'application/json'
+            }
+            $body = @{ device = $script:TestDevice.id; name = "$script:TestPrefix-FP2"; type = '8p8c' } | ConvertTo-Json
+            $fp2 = Invoke-RestMethod -Uri $baseUrl -Method POST -Headers $headers -Body $body
+            [void]$script:CreatedPorts.FrontPorts.Add($fp2.id)
+            $script:TestFP2 = $fp2
+
+            # Update RearPort with bidirectional Front_Ports
+            $rp2Updated = Set-NBDCIMRearPort -Id $rp2.id -Front_Ports @(
+                @{ front_port = $fp2.id; front_port_position = 1; position = 1 }
+            ) -Force
+            $rp2Updated.front_ports | Should -Not -BeNullOrEmpty
+            $rp2Updated.front_ports[0].front_port | Should -Be $fp2.id
+        }
+
+        It "Should sync bidirectional mapping to FrontPort" {
+            if (-not $script:Is45OrHigher) { Set-ItResult -Skipped -Because "Requires Netbox 4.5+"; return }
+            # The FrontPort created above should now have rear_ports populated
+            $fp2 = Get-NBDCIMFrontPort -Id $script:TestFP2.id
+            $fp2.rear_ports | Should -Not -BeNullOrEmpty
+        }
+    }
 }

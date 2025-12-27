@@ -1227,10 +1227,25 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
     }
 
     Context "Add-NBDCIMFrontPort" {
-        It "Should create a front port" {
+        It "Should create a front port with legacy parameters" {
             $Result = Add-NBDCIMFrontPort -Device 1 -Name 'FP1' -Type '8p8c' -Rear_Port 1 -Rear_Port_Position 1
             $Result.Method | Should -Be 'POST'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/front-ports/'
+        }
+
+        It "Should create a front port with Rear_Ports array (4.5+ format)" {
+            # Mock version detection to return 4.5
+            Mock -CommandName "Get-NBVersion" -ModuleName PowerNetbox -MockWith {
+                return @{ 'netbox-version' = '4.5.0' }
+            }
+            $rearPorts = @(
+                @{ rear_port = 100; rear_port_position = 1; position = 1 }
+            )
+            $Result = Add-NBDCIMFrontPort -Device 1 -Name 'FP2' -Type 'lc' -Rear_Ports $rearPorts
+            $Result.Method | Should -Be 'POST'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.rear_ports | Should -Not -BeNullOrEmpty
+            $bodyObj.rear_ports[0].rear_port | Should -Be 100
         }
     }
 
@@ -1245,6 +1260,20 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
             $Result = Set-NBDCIMFrontPort -Id 1 -Description 'Updated' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
             $Result.URI | Should -Match '/api/dcim/front-ports/1/'
+        }
+
+        It "Should update a front port with Rear_Ports array (4.5+ format)" {
+            Mock -CommandName "Get-NBVersion" -ModuleName PowerNetbox -MockWith {
+                return @{ 'netbox-version' = '4.5.0' }
+            }
+            $rearPorts = @(
+                @{ rear_port = 200; rear_port_position = 2; position = 1 }
+            )
+            $Result = Set-NBDCIMFrontPort -Id 1 -Rear_Ports $rearPorts -Confirm:$false
+            $Result.Method | Should -Be 'PATCH'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.rear_ports | Should -Not -BeNullOrEmpty
+            $bodyObj.rear_ports[0].rear_port | Should -Be 200
         }
     }
 
@@ -1283,6 +1312,20 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
             $Result.Method | Should -Be 'POST'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/rear-ports/'
         }
+
+        It "Should create a rear port with Front_Ports array (4.5+ bidirectional)" {
+            Mock -CommandName "Get-NBVersion" -ModuleName PowerNetbox -MockWith {
+                return @{ 'netbox-version' = '4.5.0' }
+            }
+            $frontPorts = @(
+                @{ front_port = 50; front_port_position = 1; position = 1 }
+            )
+            $Result = Add-NBDCIMRearPort -Device 1 -Name 'RP2' -Type 'lc' -Front_Ports $frontPorts
+            $Result.Method | Should -Be 'POST'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.front_ports | Should -Not -BeNullOrEmpty
+            $bodyObj.front_ports[0].front_port | Should -Be 50
+        }
     }
 
     Context "Set-NBDCIMRearPort" {
@@ -1296,6 +1339,20 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
             $Result = Set-NBDCIMRearPort -Id 1 -Description 'Updated' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
             $Result.URI | Should -Match '/api/dcim/rear-ports/1/'
+        }
+
+        It "Should update a rear port with Front_Ports array (4.5+ bidirectional)" {
+            Mock -CommandName "Get-NBVersion" -ModuleName PowerNetbox -MockWith {
+                return @{ 'netbox-version' = '4.5.0' }
+            }
+            $frontPorts = @(
+                @{ front_port = 75; front_port_position = 2; position = 1 }
+            )
+            $Result = Set-NBDCIMRearPort -Id 1 -Front_Ports $frontPorts -Confirm:$false
+            $Result.Method | Should -Be 'PATCH'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.front_ports | Should -Not -BeNullOrEmpty
+            $bodyObj.front_ports[0].front_port | Should -Be 75
         }
     }
 
