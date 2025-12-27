@@ -85,6 +85,8 @@ services:
   # ==========================================================================
   netbox:
     image: netboxcommunity/netbox:${NETBOX_VERSION:-v4.4.9-3.4.2}
+    # Override user setting for CI compatibility (4.5.0+ uses 'unit:root' which may not exist)
+    user: ""
     depends_on:
       postgres:
         condition: service_healthy
