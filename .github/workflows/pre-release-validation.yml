@@ -179,6 +179,7 @@ jobs:
           $config = New-PesterConfiguration
           $config.Run.Path = './Tests/*.Tests.ps1'
           $config.Run.Exit = $false
+          $config.Run.PassThru = $true  # REQUIRED for Invoke-Pester to return result object
           $config.Filter.ExcludeTag = @('Integration', 'Live')
           $config.Output.Verbosity = 'Normal'
 
@@ -190,49 +191,12 @@ jobs:
 
           $result = Invoke-Pester -Configuration $config
 
-          # Debug: Show result type and structure
-          Write-Host "=== DEBUG ===" -ForegroundColor Magenta
-          Write-Host "Result is null: $($null -eq $result)"
-          Write-Host "Result type: $($result.GetType().FullName)"
-          Write-Host "CodeCoverage is null: $($null -eq $result.CodeCoverage)"
-          if ($result.CodeCoverage) {
-              Write-Host "CodeCoverage type: $($result.CodeCoverage.GetType().FullName)"
-              # Try to access properties safely
-              try {
-                  $props = $result.CodeCoverage.PSObject.Properties
-                  Write-Host "Properties found: $($props.Count)"
-                  foreach ($p in $props) {
-                      Write-Host "  $($p.Name) = $($p.Value)"
-                  }
-              } catch {
-                  Write-Host "Error getting properties: $_"
-              }
-          }
-          Write-Host "=== END DEBUG ===" -ForegroundColor Magenta
-
-          # Get coverage - safely read properties
+          # Get coverage metrics from result
           $coverage = $result.CodeCoverage
-          $totalCommands = 0
-          $coveredCommands = 0
-          $missedCommands = 0
-          $coveragePercent = 0
-
-          if ($coverage) {
-              if ($coverage.PSObject.Properties['CommandsAnalyzedCount']) {
-                  $totalCommands = [int]$coverage.CommandsAnalyzedCount
-              }
-              if ($coverage.PSObject.Properties['CommandsExecutedCount']) {
-                  $coveredCommands = [int]$coverage.CommandsExecutedCount
-              }
-              if ($coverage.PSObject.Properties['CommandsMissedCount']) {
-                  $missedCommands = [int]$coverage.CommandsMissedCount
-              }
-              if ($coverage.PSObject.Properties['CoveragePercent']) {
-                  $coveragePercent = [math]::Round([double]$coverage.CoveragePercent, 2)
-              } elseif ($totalCommands -gt 0) {
-                  $coveragePercent = [math]::Round(($coveredCommands / $totalCommands) * 100, 2)
-              }
-          }
+          $totalCommands = [int]$coverage.CommandsAnalyzedCount
+          $coveredCommands = [int]$coverage.CommandsExecutedCount
+          $missedCommands = [int]$coverage.CommandsMissedCount
+          $coveragePercent = [math]::Round($coverage.CoveragePercent, 2)
 
           Write-Host ""
           Write-Host "========================================" -ForegroundColor Cyan
