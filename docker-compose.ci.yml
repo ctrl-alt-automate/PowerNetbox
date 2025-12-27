@@ -122,8 +122,8 @@ services:
       ALLOWED_HOSTS: "*"
       CORS_ORIGIN_ALLOW_ALL: "true"
 
-      # Netbox 4.5.0+ requires pepper for v2 token HMAC validation
-      API_TOKEN_PEPPER_1: "ci-pepper-not-for-production-use-only-for-testing"
+      # Netbox 4.5.0+ requires pepper for v2 token HMAC validation (min 50 chars)
+      API_TOKEN_PEPPER_1: "ci-pepper-not-for-production-use-only-for-testing-must-be-at-least-50-characters"
 
       # ----------------------------------------------------------------------
       # Superuser Auto-Creation
