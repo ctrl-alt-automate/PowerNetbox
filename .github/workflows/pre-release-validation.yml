@@ -190,36 +190,22 @@ jobs:
 
           $result = Invoke-Pester -Configuration $config
 
-          # Calculate coverage - Pester 5.x uses different property names
+          # Debug: Show CodeCoverage structure
+          Write-Host "=== DEBUG: CodeCoverage ===" -ForegroundColor Magenta
+          $result.CodeCoverage | Get-Member -MemberType Property | ForEach-Object { Write-Host "Property: $($_.Name)" }
+          $result.CodeCoverage | Format-List | Out-String | Write-Host
+          Write-Host "=== END DEBUG ===" -ForegroundColor Magenta
+
+          # Get coverage - read properties directly
           $coverage = $result.CodeCoverage
-
-          # Pester 5.x uses NumberOfCommandsAnalyzed, NumberOfCommandsExecuted, etc.
-          $totalCommands = if ($null -ne $coverage.NumberOfCommandsAnalyzed) {
-              $coverage.NumberOfCommandsAnalyzed
-          } elseif ($null -ne $coverage.CommandsAnalyzedCount) {
-              $coverage.CommandsAnalyzedCount
+          $totalCommands = $coverage.CommandsAnalyzedCount
+          $coveredCommands = $coverage.CommandsExecutedCount
+          $missedCommands = $coverage.CommandsMissedCount
+          $coveragePercent = if ($coverage.CoveragePercent) {
+              [math]::Round($coverage.CoveragePercent, 2)
+          } elseif ($totalCommands -and $totalCommands -gt 0) {
+              [math]::Round(($coveredCommands / $totalCommands) * 100, 2)
           } else { 0 }
-
-          $coveredCommands = if ($null -ne $coverage.NumberOfCommandsExecuted) {
-              $coverage.NumberOfCommandsExecuted
-          } elseif ($null -ne $coverage.CommandsExecutedCount) {
-              $coverage.CommandsExecutedCount
-          } else { 0 }
-
-          $missedCommands = if ($null -ne $coverage.NumberOfCommandsMissed) {
-              $coverage.NumberOfCommandsMissed
-          } elseif ($null -ne $coverage.CommandsMissedCount) {
-              $coverage.CommandsMissedCount
-          } else { 0 }
-
-          # Pester 5.x has CoveragePercent directly
-          if ($null -ne $coverage.CoveragePercent) {
-              $coveragePercent = [math]::Round($coverage.CoveragePercent, 2)
-          } elseif ($totalCommands -gt 0) {
-              $coveragePercent = [math]::Round(($coveredCommands / $totalCommands) * 100, 2)
-          } else {
-              $coveragePercent = 0
-          }
 
           Write-Host ""
           Write-Host "========================================" -ForegroundColor Cyan
