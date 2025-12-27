@@ -115,19 +115,65 @@ jobs:
           done
           exit 1
 
+      # Netbox 4.5.0+ uses v2 tokens with Bearer auth
+      # This step creates a token and exports it for use in subsequent steps
+      - name: Setup API Token
+        id: token
+        run: |
+          echo "Testing v1 token authentication..."
+          V1_TOKEN="0123456789abcdef0123456789abcdef01234567"
+
+          # Test if v1 token works
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Token $V1_TOKEN" http://localhost:8000/api/status/)
+
+          if [ "$RESPONSE" = "200" ]; then
+            echo "V1 token works - using legacy token"
+            echo "token=$V1_TOKEN" >> $GITHUB_OUTPUT
+            echo "auth_header=Token $V1_TOKEN" >> $GITHUB_OUTPUT
+          else
+            echo "V1 token failed (HTTP $RESPONSE) - creating v2 token for Netbox 4.5.0+"
+
+            # Create a v2 token via Django management command
+            TOKEN_OUTPUT=$(docker exec powernetbox-netbox-1 /opt/netbox/venv/bin/python /opt/netbox/netbox/manage.py shell -c "
+          from users.models import Token, User
+          from django.contrib.auth import get_user_model
+          User = get_user_model()
+          user = User.objects.filter(username='admin').first()
+          if not user:
+              user = User.objects.create_superuser('admin', 'admin@example.com', 'admin')
+          # Create v2 token and capture the plaintext
+          token = Token(user=user)
+          full_token = token.generate()
+          token.token = full_token
+          token.save()
+          print(f'nbt_{token.key}.{full_token}')
+          " 2>&1 | grep -E '^nbt_')
+
+            if [ -n "$TOKEN_OUTPUT" ]; then
+              echo "Created v2 token: ${TOKEN_OUTPUT:0:20}..."
+              echo "token=$TOKEN_OUTPUT" >> $GITHUB_OUTPUT
+              echo "auth_header=Bearer $TOKEN_OUTPUT" >> $GITHUB_OUTPUT
+            else
+              echo "ERROR: Failed to create token"
+              docker exec powernetbox-netbox-1 /opt/netbox/venv/bin/python /opt/netbox/netbox/manage.py shell -c "from users.models import Token; print(Token.objects.all())"
+              exit 1
+            fi
+          fi
+
       - name: Display Netbox version
         run: |
           echo "=== Netbox ${{ matrix.netbox_short }} API ==="
-          curl -s http://localhost:8000/api/status/ | jq '{"version": .["netbox-version"], "python": .["python-version"]}'
+          echo "Using auth: ${{ steps.token.outputs.auth_header && 'Bearer ***' || 'Token ***' }}"
+          curl -s -H "Authorization: ${{ steps.token.outputs.auth_header }}" http://localhost:8000/api/status/ | jq '{"version": .["netbox-version"], "python": .["python-version"]}'
 
           echo ""
           echo "=== Available API endpoints ==="
           echo "Core module:"
-          curl -s http://localhost:8000/api/core/ -H "Authorization: Token $NETBOX_TOKEN" 2>/dev/null | jq -r 'keys[]' || echo "Not available"
+          curl -s http://localhost:8000/api/core/ -H "Authorization: ${{ steps.token.outputs.auth_header }}" 2>/dev/null | jq -r 'keys[]' || echo "Not available"
 
           echo ""
           echo "Extras module:"
-          curl -s http://localhost:8000/api/extras/ -H "Authorization: Token $NETBOX_TOKEN" 2>/dev/null | jq -r 'keys[]' | head -20
+          curl -s http://localhost:8000/api/extras/ -H "Authorization: ${{ steps.token.outputs.auth_header }}" 2>/dev/null | jq -r 'keys[]' | head -20
 
       - name: Install PowerShell dependencies
         shell: pwsh
@@ -148,11 +194,11 @@ jobs:
         continue-on-error: true
         env:
           NETBOX_HOST: ${{ env.NETBOX_HOST }}
-          NETBOX_TOKEN: ${{ env.NETBOX_TOKEN }}
+          NETBOX_TOKEN: ${{ steps.token.outputs.token }}
         run: |
           Import-Module ./PowerNetbox/PowerNetbox.psd1 -Force
 
-          # Connect to Netbox
+          # Connect to Netbox (PowerNetbox auto-detects v1/v2 token format)
           $secureToken = ConvertTo-SecureString $env:NETBOX_TOKEN -AsPlainText -Force
           $cred = [PSCredential]::new('api', $secureToken)
           Connect-NBAPI -Hostname $env:NETBOX_HOST -Credential $cred -SkipCertificateCheck
@@ -266,8 +312,9 @@ jobs:
               # Test 4.5-1: Cable Profiles endpoint (#103)
               Write-Host "Test 4.5-1: Cable Profiles endpoint" -ForegroundColor Yellow
               try {
+                  $authHeader = if ($env:NETBOX_TOKEN -match '^nbt_') { "Bearer $($env:NETBOX_TOKEN)" } else { "Token $($env:NETBOX_TOKEN)" }
                   $response = Invoke-RestMethod -Uri "http://$($env:NETBOX_HOST)/api/dcim/cable-profiles/" `
-                      -Headers @{ 'Authorization' = "Token $($env:NETBOX_TOKEN)" } -ErrorAction Stop
+                      -Headers @{ 'Authorization' = $authHeader } -ErrorAction Stop
                   Write-Host "  PASS: Cable profiles endpoint available" -ForegroundColor Green
                   $results += @{Test="CableProfiles-Endpoint"; Status="PASS"; Details="Available in 4.5+"}
               } catch {
@@ -279,7 +326,7 @@ jobs:
               Write-Host "Test 4.5-2: Authentication check endpoint" -ForegroundColor Yellow
               try {
                   $response = Invoke-RestMethod -Uri "http://$($env:NETBOX_HOST)/api/users/authentication-check/" `
-                      -Headers @{ 'Authorization' = "Token $($env:NETBOX_TOKEN)" } -ErrorAction Stop
+                      -Headers @{ 'Authorization' = $authHeader } -ErrorAction Stop
                   Write-Host "  PASS: Authentication check endpoint available" -ForegroundColor Green
                   $results += @{Test="AuthCheck-Endpoint"; Status="PASS"; Details="Available in 4.5+"}
               } catch {
@@ -291,7 +338,7 @@ jobs:
               Write-Host "Test 4.5-3: Token v2 API endpoint" -ForegroundColor Yellow
               try {
                   $response = Invoke-RestMethod -Uri "http://$($env:NETBOX_HOST)/api/users/tokens/" `
-                      -Headers @{ 'Authorization' = "Token $($env:NETBOX_TOKEN)" } -ErrorAction Stop
+                      -Headers @{ 'Authorization' = $authHeader } -ErrorAction Stop
                   # Check if allowed_ips field exists in schema
                   $hasAllowedIps = $response.results | Where-Object { $_.PSObject.Properties.Name -contains 'allowed_ips' }
                   if ($hasAllowedIps -or $response.results.Count -eq 0) {
@@ -307,7 +354,7 @@ jobs:
               Write-Host "Test 4.5-4: User model is_staff deprecation" -ForegroundColor Yellow
               try {
                   $response = Invoke-RestMethod -Uri "http://$($env:NETBOX_HOST)/api/users/users/?limit=1" `
-                      -Headers @{ 'Authorization' = "Token $($env:NETBOX_TOKEN)" } -ErrorAction Stop
+                      -Headers @{ 'Authorization' = $authHeader } -ErrorAction Stop
                   if ($response.results.Count -gt 0) {
                       $hasIsStaff = $response.results[0].PSObject.Properties.Name -contains 'is_staff'
                       if (-not $hasIsStaff) {
@@ -358,7 +405,7 @@ jobs:
         continue-on-error: true
         env:
           NETBOX_HOST: ${{ env.NETBOX_HOST }}
-          NETBOX_TOKEN: ${{ env.NETBOX_TOKEN }}
+          NETBOX_TOKEN: ${{ steps.token.outputs.token }}
         run: |
           $config = New-PesterConfiguration
           $config.Run.Path = './Tests/Integration.Tests.ps1'
