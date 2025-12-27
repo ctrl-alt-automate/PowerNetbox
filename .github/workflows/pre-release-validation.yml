@@ -179,6 +179,7 @@ jobs:
           $config = New-PesterConfiguration
           $config.Run.Path = './Tests/*.Tests.ps1'
           $config.Run.Exit = $false
+          $config.Run.PassThru = $true  # REQUIRED for Invoke-Pester to return result object
           $config.Filter.ExcludeTag = @('Integration', 'Live')
           $config.Output.Verbosity = 'Normal'
 
@@ -190,23 +191,12 @@ jobs:
 
           $result = Invoke-Pester -Configuration $config
 
-          # Debug: Dump the CodeCoverage structure to understand Pester 5.x format
-          Write-Host ""
-          Write-Host "=== DEBUG: CodeCoverage Structure ===" -ForegroundColor Magenta
-          $result.CodeCoverage | Format-List * | Out-String | Write-Host
-          Write-Host "=== END DEBUG ===" -ForegroundColor Magenta
-          Write-Host ""
-
-          # Get coverage data - Pester 5.x uses these property names
+          # Get coverage metrics from result
           $coverage = $result.CodeCoverage
           $totalCommands = [int]$coverage.CommandsAnalyzedCount
           $coveredCommands = [int]$coverage.CommandsExecutedCount
           $missedCommands = [int]$coverage.CommandsMissedCount
-          $coveragePercent = if ($coverage.CoveragePercent) {
-              [math]::Round([double]$coverage.CoveragePercent, 2)
-          } elseif ($totalCommands -gt 0) {
-              [math]::Round(($coveredCommands / $totalCommands) * 100, 2)
-          } else { 0 }
+          $coveragePercent = [math]::Round($coverage.CoveragePercent, 2)
 
           Write-Host ""
           Write-Host "========================================" -ForegroundColor Cyan
