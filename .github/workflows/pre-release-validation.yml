@@ -190,13 +190,32 @@ jobs:
 
           $result = Invoke-Pester -Configuration $config
 
-          # Calculate coverage
+          # Calculate coverage - Pester 5.x uses different property names
           $coverage = $result.CodeCoverage
-          $coveredCommands = $coverage.CommandsExecutedCount
-          $totalCommands = $coverage.CommandsAnalyzedCount
-          $missedCommands = $coverage.CommandsMissedCount
 
-          if ($totalCommands -gt 0) {
+          # Pester 5.x uses NumberOfCommandsAnalyzed, NumberOfCommandsExecuted, etc.
+          $totalCommands = if ($null -ne $coverage.NumberOfCommandsAnalyzed) {
+              $coverage.NumberOfCommandsAnalyzed
+          } elseif ($null -ne $coverage.CommandsAnalyzedCount) {
+              $coverage.CommandsAnalyzedCount
+          } else { 0 }
+
+          $coveredCommands = if ($null -ne $coverage.NumberOfCommandsExecuted) {
+              $coverage.NumberOfCommandsExecuted
+          } elseif ($null -ne $coverage.CommandsExecutedCount) {
+              $coverage.CommandsExecutedCount
+          } else { 0 }
+
+          $missedCommands = if ($null -ne $coverage.NumberOfCommandsMissed) {
+              $coverage.NumberOfCommandsMissed
+          } elseif ($null -ne $coverage.CommandsMissedCount) {
+              $coverage.CommandsMissedCount
+          } else { 0 }
+
+          # Pester 5.x has CoveragePercent directly
+          if ($null -ne $coverage.CoveragePercent) {
+              $coveragePercent = [math]::Round($coverage.CoveragePercent, 2)
+          } elseif ($totalCommands -gt 0) {
               $coveragePercent = [math]::Round(($coveredCommands / $totalCommands) * 100, 2)
           } else {
               $coveragePercent = 0
