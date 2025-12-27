@@ -408,3 +408,89 @@ git add . && git commit -m "Update" && git push origin main:master
 - Use `[System.Uri]::EscapeDataString()` for URL encoding
 - Check `$PSVersionTable.PSEdition` for PS version-specific code
 - Desktop uses `ServicePointManager`, Core uses `-SkipCertificateCheck`
+
+---
+
+## Testing Strategy & CI/CD
+
+### Test Pyramid Philosophy
+
+```
+         /\
+        /  \     E2E / Live API (few, slow, expensive)
+       /----\
+      /      \   Integration tests (Docker-based)
+     /--------\
+    /          \ Unit tests (many, fast, mocked)
+   --------------
+```
+
+**Principle**: Fast feedback on every commit, comprehensive validation before release.
+
+### CI Workflows
+
+| Workflow | Trigger | Duration | Purpose |
+|----------|---------|----------|---------|
+| `test.yml` | Push/PR | ~4 min | Unit tests (3 OS × 2 PS versions) |
+| `integration.yml` | Push/PR | ~5 min | Docker-based integration tests |
+| `compatibility.yml` | Manual | ~20 min | Test all Netbox versions (4.1-4.4) |
+| `pssa.yml` | Push/PR | ~1 min | PSScriptAnalyzer code quality |
+| `pre-release-validation.yml` | Manual | ~15-20 min | **Full validation before release** |
+| `release.yml` | Tag | ~3 min | Publish to PSGallery |
+
+### Quality Gates
+
+| Stage | When | What |
+|-------|------|------|
+| Commit to dev | Every push | Unit tests + PSSA |
+| PR to dev | Before merge | Full unit tests (all platforms) |
+| PR to main | Before merge | Unit + Integration tests |
+| Pre-release | Before tagging | **Everything** (run manually) |
+| Release | On tag | PSGallery publish |
+
+### Pre-Release Validation Workflow
+
+**ALWAYS run before creating a release.** This is the "test everything" button.
+
+```bash
+# Run via GitHub CLI
+gh workflow run pre-release-validation.yml --field version=4.5.0
+
+# Or via GitHub UI:
+# Actions → Pre-Release Validation → Run workflow
+```
+
+**What it tests:**
+- Unit tests on 4 platform combinations (Ubuntu/Windows/macOS × PS 5.1/7.x)
+- PSScriptAnalyzer code quality
+- Integration tests against Netbox 4.1, 4.2, 4.3, 4.4
+- Module import verification
+
+**Output:** Release Readiness Report with pass/fail for each stage.
+
+### When to Use Which Workflow
+
+| Scenario | Workflow |
+|----------|----------|
+| Regular development | Automatic (test.yml, integration.yml) |
+| Testing specific Netbox version | `gh workflow run integration.yml --field netbox_version=v4.3.7-3.3.0` |
+| Compatibility investigation | `gh workflow run compatibility.yml` |
+| **Before releasing** | `gh workflow run pre-release-validation.yml --field version=X.Y.Z` |
+
+### Release Checklist
+
+1. [ ] All CI checks pass on dev branch
+2. [ ] Run pre-release-validation workflow
+3. [ ] Verify Release Readiness Report shows all green
+4. [ ] Update version in `PowerNetbox.psd1`
+5. [ ] Update CHANGELOG (if exists)
+6. [ ] Merge dev → main
+7. [ ] Create release tag: `gh release create vX.Y.Z.W`
+
+### NO Test Branch Needed
+
+We use **CI workflow gates** instead of a dedicated test branch:
+- Faster feedback loops
+- Less branch management overhead
+- Same guarantees via automated pipelines
+- Manual "full validation" workflow for releases
