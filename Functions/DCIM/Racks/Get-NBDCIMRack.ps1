@@ -1,4 +1,4 @@
-function Get-NBDDCIM Rack {
+function Get-NBDCIMRack {
 <#
     .SYNOPSIS
         Get racks from Netbox

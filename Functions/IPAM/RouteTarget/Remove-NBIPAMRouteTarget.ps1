@@ -1,4 +1,4 @@
-function Remove-NBIIPAM Route Target {
+function Remove-NBIPAMRouteTarget {
 <#
     .SYNOPSIS
         Remove a route target from Netbox

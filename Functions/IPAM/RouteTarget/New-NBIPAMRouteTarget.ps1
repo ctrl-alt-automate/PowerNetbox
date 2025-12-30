@@ -1,4 +1,4 @@
-function New-NBIIPAM Route Target {
+function New-NBIPAMRouteTarget {
 <#
     .SYNOPSIS
         Create a new route target in Netbox

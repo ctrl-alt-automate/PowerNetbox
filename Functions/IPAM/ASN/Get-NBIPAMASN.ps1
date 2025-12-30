@@ -1,4 +1,4 @@
-function Get-NBIIPAM ASN {
+function Get-NBIPAMASN {
 <#
     .SYNOPSIS
         Get ASNs from Netbox

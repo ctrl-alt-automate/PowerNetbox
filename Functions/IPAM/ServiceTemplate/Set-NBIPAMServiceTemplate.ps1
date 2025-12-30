@@ -1,4 +1,4 @@
-function Set-NBIIPAM ServiceTemplate {
+function Set-NBIPAMServiceTemplate {
 <#
     .SYNOPSIS
         Update a service template in Netbox

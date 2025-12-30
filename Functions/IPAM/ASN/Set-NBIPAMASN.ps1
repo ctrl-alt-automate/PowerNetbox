@@ -1,4 +1,4 @@
-function Set-NBIIPAM ASN {
+function Set-NBIPAMASN {
 <#
     .SYNOPSIS
         Update an ASN in Netbox

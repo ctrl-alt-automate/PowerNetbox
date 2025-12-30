@@ -10,16 +10,7 @@ function Set-NBuntrustedSSL {
         on Invoke-RestMethod directly.
 
     .NOTES
-        This function should only be called on PowerShell Desktop edition.
-        Security Warning: Only use in development/testing environments.
-    #>
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessForStateChangingFunctions", "")]
-    [CmdletBinding()]
-    [OutputType([PSCustomObject])]
-    param()
-
-    # Only apply to Desktop edition (PS 5.1)
-    if ($PSVersionTable.PSEdition -ne 'Desktop') {
+        This function Set-NBuntrustedSSL {
         Write-Verbose "Skipping certificate callback - not needed for PowerShell Core"
         return
     }

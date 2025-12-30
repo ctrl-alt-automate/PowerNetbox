@@ -1,4 +1,4 @@
-function Get-NBDDCIM Location {
+function Get-NBDCIMLocation {
 <#
     .SYNOPSIS
         Get locations from Netbox

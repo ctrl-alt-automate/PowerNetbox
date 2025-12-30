@@ -1,4 +1,4 @@
-function Get-NBDDCIM Region {
+function Get-NBDCIMRegion {
 <#
     .SYNOPSIS
         Get regions from Netbox

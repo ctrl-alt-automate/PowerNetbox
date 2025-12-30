@@ -37,7 +37,7 @@
 .LINK
     https://netbox.readthedocs.io/en/stable/models/virtualization/clustergroup/
 #>
-function New-NBVVirtualization ClusterGroup {
+function New-NBVirtualizationClusterGroup {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param

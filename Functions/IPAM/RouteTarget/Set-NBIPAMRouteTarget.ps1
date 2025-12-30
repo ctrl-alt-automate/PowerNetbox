@@ -1,4 +1,4 @@
-function Set-NBIIPAM Route Target {
+function Set-NBIPAMRouteTarget {
 <#
     .SYNOPSIS
         Update a route target in Netbox

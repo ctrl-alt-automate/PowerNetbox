@@ -1,4 +1,4 @@
-function New-NBIIPAM ASNRange {
+function New-NBIPAMASNRange {
 <#
     .SYNOPSIS
         Create a new ASN range in Netbox

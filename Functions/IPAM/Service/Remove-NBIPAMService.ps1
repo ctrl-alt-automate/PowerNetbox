@@ -1,4 +1,4 @@
-function Remove-NBIIPAM Service {
+function Remove-NBIPAMService {
 <#
     .SYNOPSIS
         Remove a service from Netbox

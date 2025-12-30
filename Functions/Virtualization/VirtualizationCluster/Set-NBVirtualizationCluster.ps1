@@ -58,7 +58,7 @@
 .LINK
     https://netbox.readthedocs.io/en/stable/models/virtualization/cluster/
 #>
-function Set-NBVVirtualization Cluster {
+function Set-NBVirtualizationCluster {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
     [OutputType([PSCustomObject])]
     param

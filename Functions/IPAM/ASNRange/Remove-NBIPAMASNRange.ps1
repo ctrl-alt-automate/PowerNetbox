@@ -1,4 +1,4 @@
-function Remove-NBIIPAM ASNRange {
+function Remove-NBIPAMASNRange {
 <#
     .SYNOPSIS
         Remove an ASN range from Netbox

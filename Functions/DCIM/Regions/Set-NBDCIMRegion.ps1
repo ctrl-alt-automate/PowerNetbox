@@ -1,4 +1,4 @@
-function Set-NBDDCIM Region {
+function Set-NBDCIMRegion {
 <#
     .SYNOPSIS
         Update a region in Netbox

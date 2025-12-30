@@ -1,4 +1,4 @@
-function Set-NBDDCIM Rack {
+function Set-NBDCIMRack {
 <#
     .SYNOPSIS
         Update a rack in Netbox

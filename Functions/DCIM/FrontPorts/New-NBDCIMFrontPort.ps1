@@ -66,7 +66,7 @@
 .LINK
     https://netbox.readthedocs.io/en/stable/models/dcim/frontport/
 #>
-function New-NBDDCIM Front Port {
+function New-NBDCIMFrontPort {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param

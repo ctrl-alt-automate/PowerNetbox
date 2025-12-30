@@ -1,4 +1,4 @@
-function Get-NBIIPAM VRF {
+function Get-NBIPAMVRF {
 <#
     .SYNOPSIS
         Get VRFs from Netbox

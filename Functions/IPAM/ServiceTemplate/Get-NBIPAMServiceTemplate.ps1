@@ -1,4 +1,4 @@
-function Get-NBIIPAM ServiceTemplate {
+function Get-NBIPAMServiceTemplate {
 <#
     .SYNOPSIS
         Get service templates from Netbox

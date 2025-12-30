@@ -1,4 +1,4 @@
-function Set-NBDDCIM Site {
+function Set-NBDCIMSite {
 <#
     .SYNOPSIS
         Update a site in Netbox

@@ -53,7 +53,7 @@
 .LINK
     https://netbox.readthedocs.io/en/stable/models/virtualization/cluster/
 #>
-function New-NBVVirtualization Cluster {
+function New-NBVirtualizationCluster {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param

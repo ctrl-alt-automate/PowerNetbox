@@ -1,4 +1,4 @@
-function New-NBDDCIM Manufacturer {
+function New-NBDCIMManufacturer {
 <#
     .SYNOPSIS
         Create a new manufacturer in Netbox

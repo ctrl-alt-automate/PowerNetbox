@@ -89,7 +89,7 @@
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 
-function Set-NBVVirtual Machine {
+function Set-NBVirtualMachine {
     [CmdletBinding(SupportsShouldProcess = $true,
         ConfirmImpact = 'Medium',
         DefaultParameterSetName = 'Single')]

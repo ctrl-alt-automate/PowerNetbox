@@ -1,4 +1,4 @@
-function Set-NBDDCIM Location {
+function Set-NBDCIMLocation {
 <#
     .SYNOPSIS
         Update a location in Netbox

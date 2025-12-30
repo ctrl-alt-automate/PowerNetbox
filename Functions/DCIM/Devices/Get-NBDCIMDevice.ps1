@@ -32,7 +32,7 @@
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Get-NBDDCIM Device {
+function Get-NBDCIMDevice {
     [CmdletBinding()]
     [OutputType([PSCustomObject])]
     #region Parameters

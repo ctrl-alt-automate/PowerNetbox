@@ -1,4 +1,4 @@
-function New-NBDDCIM Region {
+function New-NBDCIMRegion {
 <#
     .SYNOPSIS
         Create a new region in Netbox

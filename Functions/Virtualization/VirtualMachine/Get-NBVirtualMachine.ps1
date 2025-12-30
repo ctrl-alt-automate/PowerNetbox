@@ -1,5 +1,5 @@
 
-function Get-NBVVirtual Machine {
+function Get-NBVirtualMachine {
     <#
     .SYNOPSIS
         Obtains virtual machines from Netbox.

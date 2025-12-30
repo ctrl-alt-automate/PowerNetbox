@@ -95,7 +95,7 @@
 .LINK
     https://netbox.readthedocs.io/en/stable/models/virtualization/vminterface/
 #>
-function New-NBVVirtual MachineInterface {
+function New-NBVirtualMachineInterface {
     [CmdletBinding(SupportsShouldProcess = $true,
         ConfirmImpact = 'Low',
         DefaultParameterSetName = 'Single')]

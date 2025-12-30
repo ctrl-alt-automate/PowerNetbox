@@ -1,4 +1,4 @@
-function New-NBDDCIM SiteGroup {
+function New-NBDCIMSiteGroup {
 <#
     .SYNOPSIS
         Create a new site group in Netbox

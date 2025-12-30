@@ -1,4 +1,4 @@
-function New-NBIIPAM ServiceTemplate {
+function New-NBIPAMServiceTemplate {
 <#
     .SYNOPSIS
         Create a new service template in Netbox

@@ -1,4 +1,4 @@
-function Remove-NBDDCIM Rack {
+function Remove-NBDCIMRack {
 <#
     .SYNOPSIS
         Delete a rack from Netbox

@@ -13,7 +13,7 @@
 
 
 
-function New-NBDDCIM Site {
+function New-NBDCIMSite {
     <#
     .SYNOPSIS
         Create a new Site to Netbox

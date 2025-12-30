@@ -1,4 +1,4 @@
-function Remove-NBIIPAM ServiceTemplate {
+function Remove-NBIPAMServiceTemplate {
 <#
     .SYNOPSIS
         Remove a service template from Netbox

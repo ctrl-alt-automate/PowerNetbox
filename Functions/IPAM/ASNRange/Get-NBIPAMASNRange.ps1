@@ -1,4 +1,4 @@
-function Get-NBIIPAM ASNRange {
+function Get-NBIPAMASNRange {
 <#
     .SYNOPSIS
         Get ASN ranges from Netbox

@@ -1,4 +1,4 @@
-function Remove-NBIIPAM VRF {
+function Remove-NBIPAMVRF {
 <#
     .SYNOPSIS
         Remove a VRF from Netbox

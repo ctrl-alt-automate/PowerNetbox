@@ -96,7 +96,7 @@
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 
-function Set-NBDDCIM Device {
+function Set-NBDCIMDevice {
     [CmdletBinding(SupportsShouldProcess = $true,
         ConfirmImpact = 'Medium',
         DefaultParameterSetName = 'Single')]

@@ -14,7 +14,7 @@
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Get-NBDDCIM InterfaceConnection {
+function Get-NBDCIMInterfaceConnection {
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param

@@ -43,7 +43,7 @@
 .LINK
     https://netbox.readthedocs.io/en/stable/models/virtualization/clustergroup/
 #>
-function Set-NBVVirtualization ClusterGroup {
+function Set-NBVirtualizationClusterGroup {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
     [OutputType([PSCustomObject])]
     param

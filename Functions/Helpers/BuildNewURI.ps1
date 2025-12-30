@@ -1,44 +1,11 @@
-﻿
+
 function BuildNewURI {
 <#
     .SYNOPSIS
         Create a new URI for Netbox
 
     .DESCRIPTION
-        Internal function used to build a URIBuilder object.
-
-    .PARAMETER Hostname
-        Hostname of the Netbox API
-
-    .PARAMETER Segments
-        Array of strings for each segment in the URL path
-
-    .PARAMETER Parameters
-        Hashtable of query parameters to include
-
-    .PARAMETER HTTPS
-        Whether to use HTTPS or HTTP
-
-    .EXAMPLE
-        PS C:\> BuildNewURI -Segments @('dcim', 'devices')
-#>
-
-    [CmdletBinding()]
-    [OutputType([System.UriBuilder])]
-    param
-    (
-        [Parameter(Mandatory = $false)]
-        [string[]]$Segments,
-
-        [Parameter(Mandatory = $false)]
-        [hashtable]$Parameters,
-
-        [switch]$SkipConnectedCheck
-    )
-
-    Write-Verbose "Building URI"
-
-    if (-not $SkipConnectedCheck) {
+        Internal function BuildNewURI {
         # There is no point in continuing if we have not successfully connected to an API
         $null = CheckNetboxIsConnected
     }

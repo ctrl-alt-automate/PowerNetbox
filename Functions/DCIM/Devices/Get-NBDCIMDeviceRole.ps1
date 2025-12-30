@@ -14,7 +14,7 @@
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Get-NBDDCIM Device Role {
+function Get-NBDCIMDeviceRole {
     [CmdletBinding()]
     [OutputType([PSCustomObject])]
     param

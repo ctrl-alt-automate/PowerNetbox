@@ -1,4 +1,4 @@
-function Remove-NBDDCIM Location {
+function Remove-NBDCIMLocation {
 <#
     .SYNOPSIS
         Remove a location from Netbox

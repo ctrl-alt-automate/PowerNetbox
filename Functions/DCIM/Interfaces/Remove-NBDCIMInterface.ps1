@@ -1,4 +1,4 @@
-function Remove-NBDDCIM Interface {
+function Remove-NBDCIMInterface {
     <#
     .SYNOPSIS
         Removes an interface
