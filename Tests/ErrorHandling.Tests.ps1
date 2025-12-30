@@ -35,8 +35,10 @@ BeforeAll {
         )
 
         # Create a mock response object with the StatusCode property
+        # Note: Use raw integer for StatusCode because PS 5.1's HttpStatusCode enum
+        # doesn't include newer codes like 429 (TooManyRequests)
         $mockResponse = [PSCustomObject]@{
-            StatusCode = [System.Net.HttpStatusCode]$StatusCode
+            StatusCode = $StatusCode
             StatusDescription = $StatusDescription
         }
 
