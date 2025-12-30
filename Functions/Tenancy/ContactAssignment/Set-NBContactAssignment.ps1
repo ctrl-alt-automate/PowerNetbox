@@ -1,4 +1,4 @@
-﻿
+
 
 function Set-NBContactAssignment {
 <#
@@ -63,6 +63,7 @@ function Set-NBContactAssignment {
     }
 
     process {
+        Write-Verbose "Updating Contact Assignment"
         foreach ($ContactAssignmentId in $Id) {
             $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'contact-assignments', $ContactAssignmentId))
 

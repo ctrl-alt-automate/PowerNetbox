@@ -63,6 +63,7 @@ function Get-NBCircuitGroupAssignment {
     )
 
     process {
+        Write-Verbose "Retrieving Circuit Group Assignment"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {
                 foreach ($i in $Id) {

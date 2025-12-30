@@ -90,6 +90,7 @@ function Get-NBIPAMService {
     )
 
     process {
+        Write-Verbose "Retrieving I PA MS er vi ce"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
                 foreach ($ServiceId in $Id) {

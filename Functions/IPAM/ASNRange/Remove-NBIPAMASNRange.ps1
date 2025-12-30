@@ -29,6 +29,7 @@ function Remove-NBIPAMASNRange {
     )
 
     process {
+        Write-Verbose "Removing I PA MA SN Ra ng e"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'asn-ranges', $Id))
 
         $URI = BuildNewURI -Segments $Segments

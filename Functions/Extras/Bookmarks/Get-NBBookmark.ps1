@@ -63,6 +63,7 @@ function Get-NBBookmark {
     )
 
     process {
+        Write-Verbose "Retrieving Bookmark"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {
                 foreach ($i in $Id) {

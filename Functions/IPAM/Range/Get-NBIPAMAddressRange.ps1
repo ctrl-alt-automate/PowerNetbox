@@ -65,6 +65,7 @@ function Get-NBIPAMAddressRange {
     )
 
     process {
+        Write-Verbose "Retrieving I PA MA dd re ss Ra ng e"
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($Range_ID in $Id) {

@@ -38,6 +38,7 @@ function Get-NBDCIMVirtualDeviceContext {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Retrieving D CI MV ir tu al De vi ce Co nt ex t"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','virtual-device-contexts',$i)) -Raw:$Raw } }
             default {

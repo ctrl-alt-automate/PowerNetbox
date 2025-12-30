@@ -84,6 +84,7 @@ function Get-NBTenant {
     )
 
     process {
+        Write-Verbose "Retrieving Tenant"
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($Tenant_ID in $Id) {

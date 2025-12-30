@@ -64,6 +64,7 @@ function New-NBTenantGroup {
     )
 
     process {
+        Write-Verbose "Creating Tenant Group"
         # Auto-generate slug from name if not provided
         if (-not $PSBoundParameters.ContainsKey('Slug')) {
             $PSBoundParameters['Slug'] = ($Name -replace '\s+', '-').ToLower()

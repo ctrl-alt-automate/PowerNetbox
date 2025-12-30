@@ -29,6 +29,7 @@ function New-NBDCIMModuleTypeProfile {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Creating D CI MM od ul eT yp eP ro fi le"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','module-type-profiles'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create module type profile')) {

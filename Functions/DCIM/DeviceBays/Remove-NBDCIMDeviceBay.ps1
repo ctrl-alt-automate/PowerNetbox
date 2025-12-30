@@ -25,6 +25,7 @@ function Remove-NBDCIMDeviceBay {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Removing D CI MD ev ic eB ay"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete device bay')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','device-bays',$Id)) -Method DELETE -Raw:$Raw
         }

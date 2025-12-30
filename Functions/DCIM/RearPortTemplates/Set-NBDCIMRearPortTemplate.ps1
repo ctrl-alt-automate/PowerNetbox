@@ -33,6 +33,7 @@ function Set-NBDCIMRearPortTemplate {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Updating D CI MR ea rP or tT em pl at e"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','rear-port-templates',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update rear port template')) {

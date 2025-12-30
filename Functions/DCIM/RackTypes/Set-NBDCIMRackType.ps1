@@ -43,6 +43,7 @@ function Set-NBDCIMRackType {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Updating D CI MR ac kT yp e"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','rack-types',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update rack type')) {

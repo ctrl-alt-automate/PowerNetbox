@@ -28,6 +28,7 @@ function Remove-NBCircuitGroupAssignment {
     )
 
     process {
+        Write-Verbose "Removing Circuit Group Assignment"
         $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuit-group-assignments', $Id))
         $URI = BuildNewURI -Segments $Segments
 

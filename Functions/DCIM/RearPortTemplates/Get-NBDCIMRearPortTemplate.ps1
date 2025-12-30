@@ -36,6 +36,7 @@ function Get-NBDCIMRearPortTemplate {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Retrieving D CI MR ea rP or tT em pl at e"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','rear-port-templates',$i)) -Raw:$Raw } }
             default {

@@ -28,6 +28,7 @@ function Remove-NBPermission {
     )
 
     process {
+        Write-Verbose "Removing Permission"
         $Segments = [System.Collections.ArrayList]::new(@('users', 'permissions', $Id))
         $URI = BuildNewURI -Segments $Segments
 

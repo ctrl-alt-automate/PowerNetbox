@@ -1,4 +1,4 @@
-﻿
+
 function New-NBContact {
 <#
     .SYNOPSIS
@@ -77,6 +77,7 @@ function New-NBContact {
     )
 
     process {
+        Write-Verbose "Creating Contact"
         $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'contacts'))
         $Method = 'POST'
 

@@ -119,6 +119,7 @@ function Set-NBConfigContext {
     )
 
     process {
+        Write-Verbose "Updating Config Context"
         $Segments = [System.Collections.ArrayList]::new(@('extras', 'config-contexts', $Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
         $URI = BuildNewURI -Segments $URIComponents.Segments

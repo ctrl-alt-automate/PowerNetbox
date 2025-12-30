@@ -66,6 +66,7 @@ function Get-NBObjectType {
     )
 
     process {
+        Write-Verbose "Retrieving Object Type"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {
                 foreach ($i in $Id) {

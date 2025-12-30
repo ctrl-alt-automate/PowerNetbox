@@ -31,6 +31,7 @@ function New-NBDCIMPlatform {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Creating D CI MP la tf or m"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','platforms'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create platform')) {

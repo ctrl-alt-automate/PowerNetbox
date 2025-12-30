@@ -66,6 +66,7 @@ function Get-NBContactRole {
     )
 
     process {
+        Write-Verbose "Retrieving Contact Role"
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($ContactRole_ID in $Id) {

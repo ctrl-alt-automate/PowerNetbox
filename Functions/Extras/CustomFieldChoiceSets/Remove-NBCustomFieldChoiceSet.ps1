@@ -28,6 +28,7 @@ function Remove-NBCustomFieldChoiceSet {
     )
 
     process {
+        Write-Verbose "Removing Custom Field Choice Set"
         $Segments = [System.Collections.ArrayList]::new(@('extras', 'custom-field-choice-sets', $Id))
         $URI = BuildNewURI -Segments $Segments
 

@@ -28,6 +28,7 @@ function Remove-NBTag {
     )
 
     process {
+        Write-Verbose "Removing Tag"
         $Segments = [System.Collections.ArrayList]::new(@('extras', 'tags', $Id))
         $URI = BuildNewURI -Segments $Segments
 

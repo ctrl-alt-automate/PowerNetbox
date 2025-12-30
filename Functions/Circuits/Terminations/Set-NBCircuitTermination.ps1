@@ -84,6 +84,7 @@ function Set-NBCircuitTermination {
     )
 
     process {
+        Write-Verbose "Updating Circuit Termination"
         $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuit-terminations', $Id))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'

@@ -28,6 +28,7 @@ function Remove-NBImageAttachment {
     )
 
     process {
+        Write-Verbose "Removing Image Attachment"
         $Segments = [System.Collections.ArrayList]::new(@('extras', 'image-attachments', $Id))
         $URI = BuildNewURI -Segments $Segments
 

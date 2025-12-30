@@ -58,6 +58,7 @@ function Set-NBDCIMFrontPort {
     }
 
     process {
+        Write-Verbose "Updating D CI MF ro nt Po rt"
         foreach ($FrontPortID in $Id) {
             $CurrentPort = Get-NBDCIMFrontPort -Id $FrontPortID -ErrorAction Stop
 

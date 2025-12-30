@@ -70,6 +70,7 @@ function Get-NBBranchEvent {
     )
 
     process {
+        Write-Verbose "Retrieving Branch Event"
         CheckNetboxIsConnected
 
         switch ($PSCmdlet.ParameterSetName) {

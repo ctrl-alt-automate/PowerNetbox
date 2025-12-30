@@ -84,6 +84,7 @@ function Get-NBContactAssignment {
     )
 
     process {
+        Write-Verbose "Retrieving Contact Assignment"
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($ContactAssignment_ID in $Id) {

@@ -89,6 +89,7 @@ function Get-NBIPAMRouteTarget {
     )
 
     process {
+        Write-Verbose "Retrieving I PA MR ou te Ta rg et"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
                 foreach ($RTId in $Id) {

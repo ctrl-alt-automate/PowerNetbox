@@ -86,6 +86,7 @@ function New-NBVirtualizationCluster {
     )
 
     process {
+        Write-Verbose "Creating Virtualization Cluster"
         $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'clusters'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'

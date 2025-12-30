@@ -33,6 +33,7 @@ function Remove-NBDCIMInterface {
     }
 
     process {
+        Write-Verbose "Removing D CI MI nt er fa ce"
         foreach ($InterfaceId in $Id) {
             $CurrentInterface = Get-NBDCIMInterface -Id $InterfaceId -ErrorAction Stop
 

@@ -58,6 +58,7 @@ function Get-NBDCIMInterface {
     )
 
     process {
+        Write-Verbose "Retrieving D CI MI nt er fa ce"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interfaces'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters

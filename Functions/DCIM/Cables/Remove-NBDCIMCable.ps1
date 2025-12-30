@@ -25,6 +25,7 @@ function Remove-NBDCIMCable {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Removing D CI MC ab le"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete cable')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','cables',$Id)) -Method DELETE -Raw:$Raw
         }

@@ -114,6 +114,7 @@ function Get-NBDCIMDevice {
     #endregion Parameters
 
     process {
+        Write-Verbose "Retrieving D CI MD ev ic e"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'devices'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'

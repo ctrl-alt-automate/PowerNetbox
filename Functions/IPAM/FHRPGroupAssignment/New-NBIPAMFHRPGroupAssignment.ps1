@@ -28,6 +28,7 @@ function New-NBIPAMFHRPGroupAssignment {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Creating I PA MF HR PG ro up As si gn me nt"
         $Segments = [System.Collections.ArrayList]::new(@('ipam','fhrp-group-assignments'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess("Group $Group Interface $Interface_Id", 'Create FHRP group assignment')) {

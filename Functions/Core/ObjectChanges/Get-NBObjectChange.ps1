@@ -85,6 +85,7 @@ function Get-NBObjectChange {
     )
 
     process {
+        Write-Verbose "Retrieving Object Change"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {
                 foreach ($i in $Id) {

@@ -45,6 +45,7 @@ function Get-NBDCIMDeviceRole {
     )
 
     process {
+        Write-Verbose "Retrieving D CI MD ev ic eR ol e"
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($DRId in $Id) {

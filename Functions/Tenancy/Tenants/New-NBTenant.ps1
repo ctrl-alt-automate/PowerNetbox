@@ -1,4 +1,4 @@
-﻿
+
 function New-NBTenant {
 <#
     .SYNOPSIS
@@ -51,6 +51,7 @@ function New-NBTenant {
     )
 
     process {
+        Write-Verbose "Creating Tenant"
         $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'tenants'))
         $Method = 'POST'
 

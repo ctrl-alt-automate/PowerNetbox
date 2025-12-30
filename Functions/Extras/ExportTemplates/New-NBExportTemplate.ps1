@@ -70,6 +70,7 @@ function New-NBExportTemplate {
     )
 
     process {
+        Write-Verbose "Creating Export Template"
         $Segments = [System.Collections.ArrayList]::new(@('extras', 'export-templates'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         $URI = BuildNewURI -Segments $URIComponents.Segments

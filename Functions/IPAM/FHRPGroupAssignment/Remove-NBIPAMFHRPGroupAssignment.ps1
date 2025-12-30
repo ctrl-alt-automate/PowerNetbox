@@ -25,6 +25,7 @@ function Remove-NBIPAMFHRPGroupAssignment {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Removing I PA MF HR PG ro up As si gn me nt"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete FHRP group assignment')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('ipam','fhrp-group-assignments',$Id)) -Method DELETE -Raw:$Raw
         }

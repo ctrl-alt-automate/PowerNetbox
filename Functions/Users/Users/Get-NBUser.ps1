@@ -102,6 +102,7 @@ function Get-NBUser {
     )
 
     process {
+        Write-Verbose "Retrieving User"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {
                 foreach ($i in $Id) {

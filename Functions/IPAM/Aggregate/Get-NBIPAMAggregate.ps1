@@ -55,6 +55,7 @@ function Get-NBIPAMAggregate {
     )
 
 process {
+        Write-Verbose "Retrieving I PA MA gg re ga te"
         #    if ($null -ne $Family) {
         #        $PSBoundParameters.Family = ValidateIPAMChoice -ProvidedValue $Family -AggregateFamily
         #    }

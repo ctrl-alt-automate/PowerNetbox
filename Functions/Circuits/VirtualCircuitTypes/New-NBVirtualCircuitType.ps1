@@ -50,6 +50,7 @@ function New-NBVirtualCircuitType {
     )
 
     process {
+        Write-Verbose "Creating Virtual Circuit Type"
         $Segments = [System.Collections.ArrayList]::new(@('circuits', 'virtual-circuit-types'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         $URI = BuildNewURI -Segments $URIComponents.Segments

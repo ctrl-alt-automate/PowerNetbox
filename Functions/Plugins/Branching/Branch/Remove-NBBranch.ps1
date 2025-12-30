@@ -38,6 +38,7 @@ function Remove-NBBranch {
     )
 
     process {
+        Write-Verbose "Removing Branch"
         CheckNetboxIsConnected
 
         $Segments = [System.Collections.ArrayList]::new(@('plugins', 'netbox-branching', 'branches', $Id))

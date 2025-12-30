@@ -36,6 +36,7 @@ function Set-NBDCIMVirtualDeviceContext {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Updating D CI MV ir tu al De vi ce Co nt ex t"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','virtual-device-contexts',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update virtual device context')) {

@@ -81,6 +81,7 @@ function Get-NBPermission {
     )
 
     process {
+        Write-Verbose "Retrieving Permission"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {
                 foreach ($i in $Id) {

@@ -54,6 +54,7 @@ function Set-NBCircuitType {
     )
 
     process {
+        Write-Verbose "Updating Circuit Type"
         $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuit-types', $Id))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'

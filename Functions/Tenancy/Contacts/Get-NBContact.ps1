@@ -95,6 +95,7 @@ function Get-NBContact {
     )
 
     process {
+        Write-Verbose "Retrieving Contact"
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($Contact_ID in $Id) {

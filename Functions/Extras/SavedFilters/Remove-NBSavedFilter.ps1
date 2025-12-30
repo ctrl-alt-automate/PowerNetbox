@@ -28,6 +28,7 @@ function Remove-NBSavedFilter {
     )
 
     process {
+        Write-Verbose "Removing Saved Filter"
         $Segments = [System.Collections.ArrayList]::new(@('extras', 'saved-filters', $Id))
         $URI = BuildNewURI -Segments $Segments
 

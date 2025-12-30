@@ -111,6 +111,7 @@ function Get-NBCircuit {
     )
 
     process {
+        Write-Verbose "Retrieving Circuit"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {
                 foreach ($i in $ID) {

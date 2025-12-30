@@ -55,6 +55,7 @@ function New-NBCircuitProviderAccount {
     )
 
     process {
+        Write-Verbose "Creating Circuit Provider Account"
         $Segments = [System.Collections.ArrayList]::new(@('circuits', 'provider-accounts'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         $URI = BuildNewURI -Segments $URIComponents.Segments

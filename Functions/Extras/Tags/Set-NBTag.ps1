@@ -54,6 +54,7 @@ function Set-NBTag {
     )
 
     process {
+        Write-Verbose "Updating Tag"
         $Segments = [System.Collections.ArrayList]::new(@('extras', 'tags', $Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
         $URI = BuildNewURI -Segments $URIComponents.Segments

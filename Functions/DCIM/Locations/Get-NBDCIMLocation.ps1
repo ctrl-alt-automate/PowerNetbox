@@ -107,6 +107,7 @@ function Get-NBDCIMLocation {
     )
 
     process {
+        Write-Verbose "Retrieving D CI ML oc at io n"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
                 foreach ($LocationId in $Id) {

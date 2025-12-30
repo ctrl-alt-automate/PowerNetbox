@@ -69,6 +69,7 @@ function Set-NBPermission {
     )
 
     process {
+        Write-Verbose "Updating Permission"
         $Segments = [System.Collections.ArrayList]::new(@('users', 'permissions', $Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
         $URI = BuildNewURI -Segments $URIComponents.Segments

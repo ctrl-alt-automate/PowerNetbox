@@ -69,6 +69,7 @@ function Get-NBImageAttachment {
     )
 
     process {
+        Write-Verbose "Retrieving Image Attachment"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {
                 foreach ($i in $Id) {

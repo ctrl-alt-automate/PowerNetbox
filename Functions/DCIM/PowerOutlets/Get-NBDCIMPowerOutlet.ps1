@@ -36,6 +36,7 @@ function Get-NBDCIMPowerOutlet {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Retrieving D CI MP ow er Ou tl et"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','power-outlets',$i)) -Raw:$Raw } }
             default {

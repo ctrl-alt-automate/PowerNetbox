@@ -66,6 +66,7 @@ function New-NBDataSource {
     )
 
     process {
+        Write-Verbose "Creating Data Source"
         $Segments = [System.Collections.ArrayList]::new(@('core', 'data-sources'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         $URI = BuildNewURI -Segments $URIComponents.Segments

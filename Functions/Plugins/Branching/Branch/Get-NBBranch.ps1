@@ -95,6 +95,7 @@ function Get-NBBranch {
     )
 
     process {
+        Write-Verbose "Retrieving Branch"
         CheckNetboxIsConnected
 
         switch ($PSCmdlet.ParameterSetName) {

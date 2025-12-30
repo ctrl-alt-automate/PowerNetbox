@@ -28,6 +28,7 @@ function Remove-NBCircuitTermination {
     )
 
     process {
+        Write-Verbose "Removing Circuit Termination"
         $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuit-terminations', $Id))
 
         $URI = BuildNewURI -Segments $Segments

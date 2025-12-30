@@ -36,6 +36,7 @@ function Get-NBDCIMConsoleServerPort {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Retrieving D CI MC on so le Se rv er Po rt"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','console-server-ports',$i)) -Raw:$Raw } }
             default {

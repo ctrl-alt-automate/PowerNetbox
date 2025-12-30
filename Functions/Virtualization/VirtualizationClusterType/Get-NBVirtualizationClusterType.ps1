@@ -80,6 +80,7 @@ function Get-NBVirtualizationClusterType {
     )
 
     process {
+        Write-Verbose "Retrieving Virtualization Cluster Type"
         $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'cluster-types'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'

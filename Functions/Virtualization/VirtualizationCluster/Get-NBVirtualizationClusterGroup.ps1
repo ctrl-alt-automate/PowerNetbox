@@ -45,6 +45,7 @@ function Get-NBVirtualizationClusterGroup {
     )
 
     process {
+        Write-Verbose "Retrieving Virtualization Cluster Group"
         $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'cluster-groups'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters
