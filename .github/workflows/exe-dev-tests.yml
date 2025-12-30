@@ -131,33 +131,29 @@ jobs:
         if: ${{ github.event.inputs.test_scope == 'full' }}
         shell: pwsh
         run: |
-          Write-Host "=== Debug: Testing raw POST request ===" -ForegroundColor Cyan
+          Write-Host "=== Debug: Testing POST with HTTP/1.1 ===" -ForegroundColor Cyan
+          Write-Host "PowerShell: $($PSVersionTable.PSVersion)" -ForegroundColor Gray
 
           $body = @{ name = "debug-test-site"; slug = "debug-test-site" } | ConvertTo-Json
-          $headers = @{
-            'Authorization' = "Token $env:NETBOX_TOKEN"
-            'Content-Type' = 'application/json'
-            'Accept' = 'application/json'
-          }
 
-          Write-Host "POST to https://$env:NETBOX_HOST/api/dcim/sites/"
-          Write-Host "Body: $body"
+          # Use curl as workaround for PowerShell SSL issues
+          Write-Host "POST via curl to https://$env:NETBOX_HOST/api/dcim/sites/"
+          $result = curl -s -X POST "https://$($env:NETBOX_HOST)/api/dcim/sites/" `
+            -H "Authorization: Token $($env:NETBOX_TOKEN)" `
+            -H "Content-Type: application/json" `
+            -H "Accept: application/json" `
+            -d $body --insecure
 
-          try {
-            $response = Invoke-RestMethod -Uri "https://$env:NETBOX_HOST/api/dcim/sites/" `
-              -Method POST -Headers $headers -Body $body -SkipCertificateCheck
+          $response = $result | ConvertFrom-Json
+          if ($response.id) {
             Write-Host "SUCCESS: Created site with ID $($response.id)" -ForegroundColor Green
 
             # Cleanup
-            Invoke-RestMethod -Uri "https://$env:NETBOX_HOST/api/dcim/sites/$($response.id)/" `
-              -Method DELETE -Headers $headers -SkipCertificateCheck
+            curl -s -X DELETE "https://$($env:NETBOX_HOST)/api/dcim/sites/$($response.id)/" `
+              -H "Authorization: Token $($env:NETBOX_TOKEN)" --insecure | Out-Null
             Write-Host "Cleaned up test site" -ForegroundColor Gray
-          } catch {
-            Write-Host "FAILED: $($_.Exception.Message)" -ForegroundColor Red
-            Write-Host "Exception type: $($_.Exception.GetType().FullName)" -ForegroundColor Red
-            if ($_.Exception.Response) {
-              Write-Host "Status: $($_.Exception.Response.StatusCode)" -ForegroundColor Red
-            }
+          } else {
+            Write-Host "FAILED: $result" -ForegroundColor Red
             exit 1
           }
 
