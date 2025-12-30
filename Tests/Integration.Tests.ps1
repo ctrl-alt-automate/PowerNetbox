@@ -1259,9 +1259,9 @@ Describe "Live Integration Tests" -Tag 'Integration', 'Live' -Skip:(-not $script
 
         # IKE Policy CRUD
         It "Should create an IKE policy" {
+            # Note: Mode is only valid for IKEv1, not IKEv2
             $policy = New-NBVPNIKEPolicy -Name $script:TestIKEPolicyName `
                 -Version 2 `
-                -Mode 'main' `
                 -Proposals @($script:TestIKEProposalId)
             $policy | Should -Not -BeNullOrEmpty
             $policy.name | Should -Be $script:TestIKEPolicyName
