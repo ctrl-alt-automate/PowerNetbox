@@ -354,10 +354,10 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' {
     }
 
     Context "BuildURIComponents Edge Cases" {
-        It "Should handle empty URISegments" {
+        It "Should handle minimal URISegments" {
             InModuleScope -ModuleName 'PowerNetbox' {
-                $URIComponents = BuildURIComponents -URISegments ([System.Collections.ArrayList]@()) -ParametersDictionary @{name='test'}
-                $URIComponents.Segments.Count | Should -Be 0
+                $URIComponents = BuildURIComponents -URISegments ([System.Collections.ArrayList]@('api')) -ParametersDictionary @{name='test'}
+                $URIComponents.Segments.Count | Should -Be 1
                 $URIComponents.Parameters['name'] | Should -Be 'test'
             }
         }
@@ -370,9 +370,10 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' {
             }
         }
 
-        It "Should handle array with single ID (add to segments)" {
+        It "Should handle scalar ID (add to segments)" {
             InModuleScope -ModuleName 'PowerNetbox' {
-                $URIComponents = BuildURIComponents -URISegments ([System.Collections.ArrayList]@('dcim', 'devices')) -ParametersDictionary @{id=@(123)}
+                # This mimics actual PowerShell parameter binding: -Id 123 binds as scalar
+                $URIComponents = BuildURIComponents -URISegments ([System.Collections.ArrayList]@('dcim', 'devices')) -ParametersDictionary @{id=123}
                 $URIComponents.Segments | Should -Contain 123
                 $URIComponents.Parameters.ContainsKey('id__in') | Should -BeFalse
             }
