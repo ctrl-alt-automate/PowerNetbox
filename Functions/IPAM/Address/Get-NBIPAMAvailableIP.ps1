@@ -9,16 +9,16 @@ function Get-NBIPAMAvailableIP {
         (up to MAX_PAGE_SIZE, if set) may be passed, however results will not be paginated
 
     .PARAMETER Prefix_ID
-        A description of the Prefix_ID parameter.
+        Database ID of the prefix to get available IPs from.
 
     .PARAMETER Limit
-        A description of the Limit parameter.
+        Maximum number of available IPs to return.
 
     .PARAMETER Raw
-        A description of the Raw parameter.
+        Return the raw API response.
 
     .PARAMETER NumberOfIPs
-        A description of the NumberOfIPs parameter.
+        Number of available IPs to return (alias for Limit).
 
     .EXAMPLE
         Get-NBIPAMAvailableIP -Prefix_ID (Get-NBIPAMPrefix -Prefix 192.0.2.0/24).id
@@ -30,8 +30,6 @@ function Get-NBIPAMAvailableIP {
 
         Get 3 (Next) Available IP on the Prefix 192.0.2.0/24
 
-    .NOTES
-        Additional information about the function.
 #>
 
     [CmdletBinding()]

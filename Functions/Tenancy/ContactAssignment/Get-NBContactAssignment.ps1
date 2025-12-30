@@ -5,28 +5,29 @@ function Get-NBContactAssignment {
         Get a contact Assignment from Netbox
 
     .DESCRIPTION
-        A detailed description of the Get-NBContactAssignment function.
+        Retrieves contact assignments from Netbox. Contact assignments link contacts
+        to objects (devices, sites, circuits, etc.) with a specific role.
 
     .PARAMETER Name
-        The specific name of the contact Assignment. Must match exactly as is defined in Netbox
+        The specific name of the contact assignment.
 
     .PARAMETER Id
-        The database ID of the contact Assignment
+        The database ID of the contact assignment.
 
     .PARAMETER Content_Type_Id
-        A description of the Content_Type_Id parameter.
+        Filter by content type database ID.
 
     .PARAMETER Content_Type
-        A description of the Content_Type parameter.
+        Filter by content type name (e.g., 'dcim.device', 'dcim.site').
 
     .PARAMETER Object_Id
-        A description of the Object_Id parameter.
+        Filter by the assigned object's database ID.
 
     .PARAMETER Contact_Id
-        A description of the Contact_Id parameter.
+        Filter by contact database ID.
 
     .PARAMETER Role_Id
-        A description of the Role_Id parameter.
+        Filter by contact role database ID.
 
     .PARAMETER Limit
         Limit the number of results to this number
@@ -40,8 +41,6 @@ function Get-NBContactAssignment {
     .EXAMPLE
         PS C:\> Get-NBContactAssignment
 
-    .NOTES
-        Additional information about the function.
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]

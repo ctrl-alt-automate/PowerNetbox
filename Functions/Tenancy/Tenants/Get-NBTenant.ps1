@@ -2,10 +2,11 @@
 function Get-NBTenant {
 <#
     .SYNOPSIS
-        Get a tenent from Netbox
+        Get a tenant from Netbox
 
     .DESCRIPTION
-        A detailed description of the Get-NBTenant function.
+        Retrieves tenant objects from Netbox. Tenants represent organizations or
+        customers that own or use resources tracked in Netbox.
 
     .PARAMETER Name
         The specific name of the tenant. Must match exactly as is defined in Netbox
@@ -40,8 +41,6 @@ function Get-NBTenant {
     .EXAMPLE
         PS C:\> Get-NBTenant
 
-    .NOTES
-        Additional information about the function.
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]

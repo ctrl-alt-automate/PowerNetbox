@@ -2,82 +2,80 @@
 function Get-NBIPAMPrefix {
 <#
     .SYNOPSIS
-        A brief description of the Get-NBIPAMPrefix function.
+        Retrieves IP prefixes from Netbox IPAM module.
 
     .DESCRIPTION
-        A detailed description of the Get-NBIPAMPrefix function.
+        Retrieves IP prefix objects from Netbox. Prefixes represent IP network ranges
+        (IPv4 or IPv6) and can be organized hierarchically within VRFs.
 
     .PARAMETER Query
-        A description of the Query parameter.
+        General search query to match prefixes.
 
     .PARAMETER Id
-        A description of the Id parameter.
+        Database ID of the prefix.
 
     .PARAMETER Limit
-        A description of the Limit parameter.
+        Maximum number of results to return (1-1000).
 
     .PARAMETER Offset
-        A description of the Offset parameter.
+        Number of results to skip for pagination.
 
     .PARAMETER Family
-        A description of the Family parameter.
+        IP address family (4 for IPv4, 6 for IPv6).
 
     .PARAMETER Is_Pool
-        A description of the Is_Pool parameter.
+        Filter for prefixes marked as IP pools.
 
     .PARAMETER Within
-        Should be a CIDR notation prefix such as '10.0.0.0/16'
+        Return prefixes within a parent prefix (CIDR notation, e.g., '10.0.0.0/16').
 
     .PARAMETER Within_Include
-        Should be a CIDR notation prefix such as '10.0.0.0/16'
+        Return prefixes within or equal to a prefix (CIDR notation, e.g., '10.0.0.0/16').
 
     .PARAMETER Contains
-        A description of the Contains parameter.
+        Return prefixes containing an IP or subnet.
 
     .PARAMETER Mask_Length
-        CIDR mask length value
+        CIDR mask length value.
 
     .PARAMETER VRF
-        A description of the VRF parameter.
+        Filter by VRF name.
 
     .PARAMETER VRF_Id
-        A description of the VRF_Id parameter.
+        Filter by VRF database ID.
 
     .PARAMETER Tenant
-        A description of the Tenant parameter.
+        Filter by tenant name.
 
     .PARAMETER Tenant_Id
-        A description of the Tenant_Id parameter.
+        Filter by tenant database ID.
 
     .PARAMETER Site
-        A description of the Site parameter.
+        Filter by site name.
 
     .PARAMETER Site_Id
-        A description of the Site_Id parameter.
+        Filter by site database ID.
 
     .PARAMETER Vlan_VId
-        A description of the Vlan_VId parameter.
+        Filter by VLAN ID number.
 
     .PARAMETER Vlan_Id
-        A description of the Vlan_Id parameter.
+        Filter by VLAN database ID.
 
     .PARAMETER Status
-        A description of the Status parameter.
+        Filter by prefix status (e.g., 'active', 'reserved', 'deprecated').
 
     .PARAMETER Role
-        A description of the Role parameter.
+        Filter by IPAM role name.
 
     .PARAMETER Role_Id
-        A description of the Role_Id parameter.
+        Filter by IPAM role database ID.
 
     .PARAMETER Raw
-        A description of the Raw parameter.
+        Return the raw API response instead of extracting the results array.
 
     .EXAMPLE
         PS C:\> Get-NBIPAMPrefix
-
-    .NOTES
-        Additional information about the function.
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]

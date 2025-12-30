@@ -5,7 +5,8 @@ function Get-NBContactRole {
         Get a contact role from Netbox
 
     .DESCRIPTION
-        A detailed description of the Get-NBContactRole function.
+        Retrieves contact roles from Netbox. Contact roles define the relationship
+        type between a contact and an object (e.g., Owner, Technical, Billing).
 
     .PARAMETER Name
         The specific name of the contact role. Must match exactly as is defined in Netbox
@@ -28,8 +29,6 @@ function Get-NBContactRole {
     .EXAMPLE
         PS C:\> Get-NBContactRole
 
-    .NOTES
-        Additional information about the function.
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]

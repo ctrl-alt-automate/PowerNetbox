@@ -8,25 +8,22 @@ function Set-NBDCIMInterfaceConnection {
         Update an interface connection
 
     .PARAMETER Id
-        A description of the Id parameter.
+        Database ID of the interface connection to update.
 
     .PARAMETER Connection_Status
-        A description of the Connection_Status parameter.
+        Status of the connection (e.g., 'connected', 'planned').
 
     .PARAMETER Interface_A
-        A description of the Interface_A parameter.
+        Database ID of the first interface in the connection.
 
     .PARAMETER Interface_B
-        A description of the Interface_B parameter.
+        Database ID of the second interface in the connection.
 
     .PARAMETER Force
-        A description of the Force parameter.
+        Skip confirmation prompts.
 
     .EXAMPLE
-        PS C:\> Set-NBDCIMInterfaceConnection -Id $value1
-
-    .NOTES
-        Additional information about the function.
+        PS C:\> Set-NBDCIMInterfaceConnection -Id 1 -Connection_Status 'connected'
 #>
 
     [CmdletBinding(ConfirmImpact = 'Medium',

@@ -16,8 +16,6 @@ function Remove-NBIPAMAddressRange {
     .EXAMPLE
         PS C:\> Remove-NBIPAMAddressRange -Id 1234
 
-    .NOTES
-        Additional information about the function.
 #>
 
     [CmdletBinding(ConfirmImpact = 'High',

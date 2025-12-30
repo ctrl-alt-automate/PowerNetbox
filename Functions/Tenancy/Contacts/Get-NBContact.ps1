@@ -46,8 +46,6 @@ function Get-NBContact {
     .EXAMPLE
         PS C:\> Get-NBContact
 
-    .NOTES
-        Additional information about the function.
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]
