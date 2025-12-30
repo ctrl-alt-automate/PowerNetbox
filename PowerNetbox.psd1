@@ -174,6 +174,7 @@ FunctionsToExport = 'Aliases', 'BuildNewURI', 'BuildURIComponents', 'BulkOperati
                'New-NBVPNL2VPNTermination', 'New-NBVPNTunnel',
                'New-NBVPNTunnelGroup', 'New-NBVPNTunnelTermination', 'New-NBWebhook',
                'New-NBWirelessLAN', 'New-NBWirelessLANGroup', 'New-NBWirelessLink',
+               'Register-NBArgumentCompleters',
                'Remove-NBBookmark', 'Remove-NBBranch', 'Remove-NBCircuit',
                'Remove-NBCircuitGroup', 'Remove-NBCircuitGroupAssignment',
                'Remove-NBCircuitProvider', 'Remove-NBCircuitProviderAccount',
