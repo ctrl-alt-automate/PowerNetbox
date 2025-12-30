@@ -25,6 +25,9 @@ CLAUDE.md
 Connect-DevNetbox.ps1
 .vscode/
 
+# Test VM configuration (contains tokens)
+.netbox-test-vms.ps1
+
 # Build output
 PowerNetbox/
 NetboxPSv4/
