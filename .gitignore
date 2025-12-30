@@ -17,3 +17,6 @@ concatenated.ps1
 # API keys and secrets
 .psgallery.key
 *.apikey
+
+# Test VM configuration (contains tokens)
+.netbox-test-vms.ps1
