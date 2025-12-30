@@ -1,0 +1,454 @@
+# exe.dev Live Tests
+# ==================
+# Test PowerNetbox against live exe.dev Netbox instances
+#
+# This workflow:
+# - Tests against real Netbox instances hosted on exe.dev
+# - Validates across multiple Netbox versions (4.3.7, 4.4.9, 4.5.0)
+# - Requires repository secrets for API tokens
+# - Manual trigger only (no Docker needed)
+#
+# Required Secrets:
+# - EXEDEV_TOKEN_437: API token for Netbox 4.3.7 (badger-victor)
+# - EXEDEV_TOKEN_449: API token for Netbox 4.4.9 (plasma-paint)
+# - EXEDEV_TOKEN_450: API token for Netbox 4.5.0-beta1 (zulu-how, v2 format)
+
+name: exe.dev Live Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_vm:
+        description: 'Which VM(s) to test'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - stable (4.4.9)
+          - minimum (4.3.7)
+          - beta (4.5.0)
+      test_scope:
+        description: 'Test scope'
+        required: true
+        default: 'quick'
+        type: choice
+        options:
+          - quick
+          - full
+
+jobs:
+  # ============================================================
+  # Netbox 4.4.9 (Stable - Primary Target)
+  # ============================================================
+  test-stable:
+    name: Netbox 4.4.9 (Stable)
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.test_vm == 'all' || github.event.inputs.test_vm == 'stable (4.4.9)' }}
+
+    env:
+      NETBOX_HOST: "plasma-paint.exe.xyz"
+      NETBOX_TOKEN: ${{ secrets.EXEDEV_TOKEN_449 }}
+      NETBOX_VERSION: "4.4.9"
+
+    steps:
+      - name: Check for required secret
+        run: |
+          if [ -z "${{ secrets.EXEDEV_TOKEN_449 }}" ]; then
+            echo "::error::Secret EXEDEV_TOKEN_449 not configured"
+            echo "Configure this secret in repository settings to enable exe.dev testing"
+            exit 1
+          fi
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install PowerShell dependencies
+        shell: pwsh
+        run: |
+          Set-PSRepository PSGallery -InstallationPolicy Trusted
+          Install-Module Pester -Force -Scope CurrentUser -MinimumVersion 5.0.0
+
+      - name: Build PowerNetbox module
+        shell: pwsh
+        run: |
+          ./deploy.ps1 -Environment dev -SkipVersion
+          Import-Module ./PowerNetbox/PowerNetbox.psd1 -Force
+          Write-Host "Module loaded with $((Get-Command -Module PowerNetbox).Count) commands"
+
+      - name: Test connection to Netbox 4.4.9
+        shell: pwsh
+        run: |
+          Import-Module ./PowerNetbox/PowerNetbox.psd1 -Force
+
+          $secureToken = ConvertTo-SecureString $env:NETBOX_TOKEN -AsPlainText -Force
+          $cred = [PSCredential]::new('api', $secureToken)
+
+          Write-Host "Connecting to $env:NETBOX_HOST..." -ForegroundColor Cyan
+          Connect-NBAPI -Hostname $env:NETBOX_HOST -Credential $cred -Scheme https -SkipCertificateCheck
+
+          $version = Get-NBVersion
+          Write-Host "Connected to Netbox $($version.'netbox-version')" -ForegroundColor Green
+
+      - name: Run quick tests
+        if: ${{ github.event.inputs.test_scope == 'quick' }}
+        shell: pwsh
+        run: |
+          Import-Module ./PowerNetbox/PowerNetbox.psd1 -Force
+
+          $secureToken = ConvertTo-SecureString $env:NETBOX_TOKEN -AsPlainText -Force
+          $cred = [PSCredential]::new('api', $secureToken)
+          Connect-NBAPI -Hostname $env:NETBOX_HOST -Credential $cred -Scheme https -SkipCertificateCheck
+
+          Write-Host "Running quick API tests..." -ForegroundColor Cyan
+
+          # Test core endpoints
+          $tests = @(
+            @{ Name = "Get-NBDCIMSite"; Cmd = { Get-NBDCIMSite -Limit 1 } }
+            @{ Name = "Get-NBIPAMPrefix"; Cmd = { Get-NBIPAMPrefix -Limit 1 } }
+            @{ Name = "Get-NBContentType"; Cmd = { Get-NBContentType -Limit 1 } }
+            @{ Name = "Get-NBVersion"; Cmd = { Get-NBVersion } }
+          )
+
+          $passed = 0
+          $failed = 0
+          foreach ($test in $tests) {
+            try {
+              $null = & $test.Cmd
+              Write-Host "  [PASS] $($test.Name)" -ForegroundColor Green
+              $passed++
+            } catch {
+              Write-Host "  [FAIL] $($test.Name): $($_.Exception.Message)" -ForegroundColor Red
+              $failed++
+            }
+          }
+
+          Write-Host ""
+          Write-Host "Results: $passed passed, $failed failed" -ForegroundColor $(if ($failed -eq 0) { 'Green' } else { 'Red' })
+          if ($failed -gt 0) { exit 1 }
+
+      - name: Run full integration tests
+        if: ${{ github.event.inputs.test_scope == 'full' }}
+        shell: pwsh
+        env:
+          NETBOX_SCHEME: "https"
+        run: |
+          $config = New-PesterConfiguration
+          $config.Run.Path = './Tests/Integration.Tests.ps1'
+          $config.Run.Exit = $true
+          $config.Filter.Tag = @('Integration')
+          $config.TestResult.Enabled = $true
+          $config.TestResult.OutputPath = 'ExeDevTestResults-449.xml'
+          $config.TestResult.OutputFormat = 'NUnitXml'
+          $config.Output.Verbosity = 'Detailed'
+
+          Invoke-Pester -Configuration $config
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always() && github.event.inputs.test_scope == 'full'
+        with:
+          name: exedev-results-449
+          path: ExeDevTestResults-449.xml
+          retention-days: 30
+
+  # ============================================================
+  # Netbox 4.3.7 (Minimum Supported)
+  # ============================================================
+  test-minimum:
+    name: Netbox 4.3.7 (Minimum)
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.test_vm == 'all' || github.event.inputs.test_vm == 'minimum (4.3.7)' }}
+
+    env:
+      NETBOX_HOST: "badger-victor.exe.xyz"
+      NETBOX_TOKEN: ${{ secrets.EXEDEV_TOKEN_437 }}
+      NETBOX_VERSION: "4.3.7"
+
+    steps:
+      - name: Check for required secret
+        run: |
+          if [ -z "${{ secrets.EXEDEV_TOKEN_437 }}" ]; then
+            echo "::error::Secret EXEDEV_TOKEN_437 not configured"
+            echo "Configure this secret in repository settings to enable exe.dev testing"
+            exit 1
+          fi
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install PowerShell dependencies
+        shell: pwsh
+        run: |
+          Set-PSRepository PSGallery -InstallationPolicy Trusted
+          Install-Module Pester -Force -Scope CurrentUser -MinimumVersion 5.0.0
+
+      - name: Build PowerNetbox module
+        shell: pwsh
+        run: |
+          ./deploy.ps1 -Environment dev -SkipVersion
+          Import-Module ./PowerNetbox/PowerNetbox.psd1 -Force
+
+      - name: Test connection to Netbox 4.3.7
+        shell: pwsh
+        run: |
+          Import-Module ./PowerNetbox/PowerNetbox.psd1 -Force
+
+          $secureToken = ConvertTo-SecureString $env:NETBOX_TOKEN -AsPlainText -Force
+          $cred = [PSCredential]::new('api', $secureToken)
+
+          Write-Host "Connecting to $env:NETBOX_HOST..." -ForegroundColor Cyan
+          Connect-NBAPI -Hostname $env:NETBOX_HOST -Credential $cred -Scheme https -SkipCertificateCheck
+
+          $version = Get-NBVersion
+          Write-Host "Connected to Netbox $($version.'netbox-version')" -ForegroundColor Green
+
+      - name: Run quick tests
+        if: ${{ github.event.inputs.test_scope == 'quick' }}
+        shell: pwsh
+        run: |
+          Import-Module ./PowerNetbox/PowerNetbox.psd1 -Force
+
+          $secureToken = ConvertTo-SecureString $env:NETBOX_TOKEN -AsPlainText -Force
+          $cred = [PSCredential]::new('api', $secureToken)
+          Connect-NBAPI -Hostname $env:NETBOX_HOST -Credential $cred -Scheme https -SkipCertificateCheck
+
+          Write-Host "Running quick API tests..." -ForegroundColor Cyan
+
+          $tests = @(
+            @{ Name = "Get-NBDCIMSite"; Cmd = { Get-NBDCIMSite -Limit 1 } }
+            @{ Name = "Get-NBIPAMPrefix"; Cmd = { Get-NBIPAMPrefix -Limit 1 } }
+            @{ Name = "Get-NBContentType"; Cmd = { Get-NBContentType -Limit 1 } }
+            @{ Name = "Get-NBVersion"; Cmd = { Get-NBVersion } }
+          )
+
+          $passed = 0
+          $failed = 0
+          foreach ($test in $tests) {
+            try {
+              $null = & $test.Cmd
+              Write-Host "  [PASS] $($test.Name)" -ForegroundColor Green
+              $passed++
+            } catch {
+              Write-Host "  [FAIL] $($test.Name): $($_.Exception.Message)" -ForegroundColor Red
+              $failed++
+            }
+          }
+
+          Write-Host ""
+          Write-Host "Results: $passed passed, $failed failed" -ForegroundColor $(if ($failed -eq 0) { 'Green' } else { 'Red' })
+          if ($failed -gt 0) { exit 1 }
+
+      - name: Run full integration tests
+        if: ${{ github.event.inputs.test_scope == 'full' }}
+        shell: pwsh
+        env:
+          NETBOX_SCHEME: "https"
+        run: |
+          $config = New-PesterConfiguration
+          $config.Run.Path = './Tests/Integration.Tests.ps1'
+          $config.Run.Exit = $true
+          $config.Filter.Tag = @('Integration')
+          $config.TestResult.Enabled = $true
+          $config.TestResult.OutputPath = 'ExeDevTestResults-437.xml'
+          $config.TestResult.OutputFormat = 'NUnitXml'
+          $config.Output.Verbosity = 'Detailed'
+
+          Invoke-Pester -Configuration $config
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always() && github.event.inputs.test_scope == 'full'
+        with:
+          name: exedev-results-437
+          path: ExeDevTestResults-437.xml
+          retention-days: 30
+
+  # ============================================================
+  # Netbox 4.5.0-beta1 (Beta - v2 Tokens)
+  # ============================================================
+  test-beta:
+    name: Netbox 4.5.0-beta1 (Beta)
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.test_vm == 'all' || github.event.inputs.test_vm == 'beta (4.5.0)' }}
+
+    env:
+      NETBOX_HOST: "zulu-how.exe.xyz"
+      NETBOX_TOKEN: ${{ secrets.EXEDEV_TOKEN_450 }}
+      NETBOX_VERSION: "4.5.0-beta1"
+
+    steps:
+      - name: Check for required secret
+        run: |
+          if [ -z "${{ secrets.EXEDEV_TOKEN_450 }}" ]; then
+            echo "::error::Secret EXEDEV_TOKEN_450 not configured"
+            echo "Configure this secret in repository settings to enable exe.dev testing"
+            exit 1
+          fi
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install PowerShell dependencies
+        shell: pwsh
+        run: |
+          Set-PSRepository PSGallery -InstallationPolicy Trusted
+          Install-Module Pester -Force -Scope CurrentUser -MinimumVersion 5.0.0
+
+      - name: Build PowerNetbox module
+        shell: pwsh
+        run: |
+          ./deploy.ps1 -Environment dev -SkipVersion
+          Import-Module ./PowerNetbox/PowerNetbox.psd1 -Force
+
+      - name: Test v2 token authentication
+        shell: pwsh
+        run: |
+          Write-Host "============================================" -ForegroundColor Cyan
+          Write-Host " Testing v2 Token Authentication" -ForegroundColor Cyan
+          Write-Host "============================================" -ForegroundColor Cyan
+
+          # Detect v2 token format
+          $token = $env:NETBOX_TOKEN
+          $isV2Token = $token -match '^nbt_[A-Za-z0-9]+\.[A-Za-z0-9]+$'
+
+          if ($isV2Token) {
+            Write-Host "Detected v2 token format (nbt_<KEY>.<SECRET>)" -ForegroundColor Green
+          } else {
+            Write-Host "Token appears to be v1 format" -ForegroundColor Yellow
+          }
+
+          # Test with Token header
+          Write-Host ""
+          Write-Host "Test 1: Authorization: Token header" -ForegroundColor Yellow
+          $headers = @{
+            'Authorization' = "Token $token"
+            'Accept' = 'application/json'
+          }
+          try {
+            $response = Invoke-RestMethod -Uri "https://$env:NETBOX_HOST/api/status/" -Headers $headers -SkipCertificateCheck
+            Write-Host "  PASS: Token header works" -ForegroundColor Green
+          } catch {
+            Write-Host "  FAIL: $($_.Exception.Message)" -ForegroundColor Red
+          }
+
+          # Test with Bearer header
+          Write-Host "Test 2: Authorization: Bearer header" -ForegroundColor Yellow
+          $headers = @{
+            'Authorization' = "Bearer $token"
+            'Accept' = 'application/json'
+          }
+          try {
+            $response = Invoke-RestMethod -Uri "https://$env:NETBOX_HOST/api/status/" -Headers $headers -SkipCertificateCheck
+            Write-Host "  PASS: Bearer header works" -ForegroundColor Green
+            Write-Host "  Netbox version: $($response.'netbox-version')" -ForegroundColor Gray
+          } catch {
+            Write-Host "  FAIL: $($_.Exception.Message)" -ForegroundColor Red
+          }
+
+      - name: Test connection to Netbox 4.5.0-beta1
+        shell: pwsh
+        run: |
+          Import-Module ./PowerNetbox/PowerNetbox.psd1 -Force
+
+          $secureToken = ConvertTo-SecureString $env:NETBOX_TOKEN -AsPlainText -Force
+          $cred = [PSCredential]::new('api', $secureToken)
+
+          Write-Host "Connecting to $env:NETBOX_HOST..." -ForegroundColor Cyan
+          Connect-NBAPI -Hostname $env:NETBOX_HOST -Credential $cred -Scheme https -SkipCertificateCheck
+
+          $version = Get-NBVersion
+          Write-Host "Connected to Netbox $($version.'netbox-version')" -ForegroundColor Green
+
+      - name: Run quick tests
+        if: ${{ github.event.inputs.test_scope == 'quick' }}
+        shell: pwsh
+        run: |
+          Import-Module ./PowerNetbox/PowerNetbox.psd1 -Force
+
+          $secureToken = ConvertTo-SecureString $env:NETBOX_TOKEN -AsPlainText -Force
+          $cred = [PSCredential]::new('api', $secureToken)
+          Connect-NBAPI -Hostname $env:NETBOX_HOST -Credential $cred -Scheme https -SkipCertificateCheck
+
+          Write-Host "Running quick API tests..." -ForegroundColor Cyan
+
+          $tests = @(
+            @{ Name = "Get-NBDCIMSite"; Cmd = { Get-NBDCIMSite -Limit 1 } }
+            @{ Name = "Get-NBIPAMPrefix"; Cmd = { Get-NBIPAMPrefix -Limit 1 } }
+            @{ Name = "Get-NBContentType"; Cmd = { Get-NBContentType -Limit 1 } }
+            @{ Name = "Get-NBVersion"; Cmd = { Get-NBVersion } }
+          )
+
+          $passed = 0
+          $failed = 0
+          foreach ($test in $tests) {
+            try {
+              $null = & $test.Cmd
+              Write-Host "  [PASS] $($test.Name)" -ForegroundColor Green
+              $passed++
+            } catch {
+              Write-Host "  [FAIL] $($test.Name): $($_.Exception.Message)" -ForegroundColor Red
+              $failed++
+            }
+          }
+
+          Write-Host ""
+          Write-Host "Results: $passed passed, $failed failed" -ForegroundColor $(if ($failed -eq 0) { 'Green' } else { 'Red' })
+          if ($failed -gt 0) { exit 1 }
+
+      - name: Run full integration tests
+        if: ${{ github.event.inputs.test_scope == 'full' }}
+        shell: pwsh
+        env:
+          NETBOX_SCHEME: "https"
+        run: |
+          $config = New-PesterConfiguration
+          $config.Run.Path = './Tests/Integration.Tests.ps1'
+          $config.Run.Exit = $true
+          $config.Filter.Tag = @('Integration')
+          $config.TestResult.Enabled = $true
+          $config.TestResult.OutputPath = 'ExeDevTestResults-450.xml'
+          $config.TestResult.OutputFormat = 'NUnitXml'
+          $config.Output.Verbosity = 'Detailed'
+
+          Invoke-Pester -Configuration $config
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always() && github.event.inputs.test_scope == 'full'
+        with:
+          name: exedev-results-450
+          path: ExeDevTestResults-450.xml
+          retention-days: 30
+
+  # ============================================================
+  # Summary
+  # ============================================================
+  summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [test-stable, test-minimum, test-beta]
+    if: always()
+
+    steps:
+      - name: Report results
+        run: |
+          echo "## exe.dev Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| VM | Version | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|:---|:--------|:-------|" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ needs.test-stable.result }}" != "skipped" ]; then
+            echo "| plasma-paint | 4.4.9 | ${{ needs.test-stable.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ "${{ needs.test-minimum.result }}" != "skipped" ]; then
+            echo "| badger-victor | 4.3.7 | ${{ needs.test-minimum.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ "${{ needs.test-beta.result }}" != "skipped" ]; then
+            echo "| zulu-how | 4.5.0-beta1 | ${{ needs.test-beta.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Scope: ${{ github.event.inputs.test_scope }}" >> $GITHUB_STEP_SUMMARY
