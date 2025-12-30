@@ -964,6 +964,257 @@ Describe "Remove-NBDCIMDevice Bulk Mode" -Tag 'Bulk', 'DCIM' {
     }
 }
 
+Describe "Send-NBBulkRequest Edge Cases" -Tag 'Bulk', 'Unit' {
+    BeforeAll {
+        Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
+        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
+            return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
+        }
+        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { return 'netbox.domain.com' }
+        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
+        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
+
+        InModuleScope -ModuleName 'PowerNetbox' {
+            $script:NetboxConfig.Hostname = 'netbox.domain.com'
+            $script:NetboxConfig.HostScheme = 'https'
+            $script:NetboxConfig.HostPort = 443
+        }
+    }
+
+    Context "BatchSize Boundary Tests" {
+        BeforeEach {
+            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+                $body = $Body | ConvertFrom-Json
+                $response = @()
+                $id = 100
+                foreach ($item in $body) {
+                    $response += [PSCustomObject]@{ id = $id++; name = $item.name }
+                }
+                return $response
+            }
+        }
+
+        It "Should handle BatchSize = 1 (maximum API calls)" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $uri = BuildNewURI -Segments @('dcim', 'devices')
+                $items = 1..5 | ForEach-Object { [PSCustomObject]@{ name = "device$_" } }
+
+                $result = Send-NBBulkRequest -URI $uri -Items $items -Method POST -BatchSize 1
+
+                $result.SuccessCount | Should -Be 5
+            }
+
+            # 5 items with batch size 1 = 5 API calls
+            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 5 -Exactly -ModuleName 'PowerNetbox'
+        }
+
+        It "Should handle BatchSize = 1000 (maximum allowed)" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $uri = BuildNewURI -Segments @('dcim', 'devices')
+                $items = 1..100 | ForEach-Object { [PSCustomObject]@{ name = "device$_" } }
+
+                $result = Send-NBBulkRequest -URI $uri -Items $items -Method POST -BatchSize 1000
+
+                $result.SuccessCount | Should -Be 100
+            }
+
+            # All 100 items in single batch
+            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -Exactly -ModuleName 'PowerNetbox'
+        }
+
+        It "Should batch correctly when items exactly match BatchSize" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $uri = BuildNewURI -Segments @('dcim', 'devices')
+                $items = 1..10 | ForEach-Object { [PSCustomObject]@{ name = "device$_" } }
+
+                $result = Send-NBBulkRequest -URI $uri -Items $items -Method POST -BatchSize 10
+
+                $result.SuccessCount | Should -Be 10
+            }
+
+            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -Exactly -ModuleName 'PowerNetbox'
+        }
+
+        It "Should calculate batches correctly with odd remainder" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $uri = BuildNewURI -Segments @('dcim', 'devices')
+                # 13 items, batch 5 = [5, 5, 3]
+                $items = 1..13 | ForEach-Object { [PSCustomObject]@{ name = "device$_" } }
+
+                $result = Send-NBBulkRequest -URI $uri -Items $items -Method POST -BatchSize 5
+
+                $result.SuccessCount | Should -Be 13
+            }
+
+            # Should make 3 API calls (5 + 5 + 3)
+            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 3 -Exactly -ModuleName 'PowerNetbox'
+        }
+    }
+
+    Context "Mixed Success/Failure Scenarios" {
+        It "Should continue processing remaining batches after one fails" {
+            $callCount = 0
+            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+                $script:callCount++
+                if ($script:callCount -eq 2) {
+                    throw "API Error"
+                }
+                $body = $Body | ConvertFrom-Json
+                $response = @()
+                $id = 100 + ($script:callCount - 1) * 10
+                foreach ($item in $body) {
+                    $response += [PSCustomObject]@{ id = $id++; name = $item.name }
+                }
+                return $response
+            }
+
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:callCount = 0
+                $uri = BuildNewURI -Segments @('dcim', 'devices')
+                # 9 items, batch 3 = [3, 3, 3] - middle batch fails
+                $items = 1..9 | ForEach-Object { [PSCustomObject]@{ name = "device$_" } }
+
+                $result = Send-NBBulkRequest -URI $uri -Items $items -Method POST -BatchSize 3
+
+                # First batch: 3 success, Second batch: 3 failed, Third batch: 3 success
+                $result.SuccessCount | Should -Be 6
+                $result.FailureCount | Should -Be 3
+                $result.HasErrors | Should -BeTrue
+            }
+
+            # Should still call API 3 times (doesn't stop on error)
+            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 3 -Exactly -ModuleName 'PowerNetbox'
+        }
+
+        It "Should preserve error messages in failure records" {
+            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+                throw "Validation failed: Invalid role ID"
+            }
+
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $uri = BuildNewURI -Segments @('dcim', 'devices')
+                $originalItem = [PSCustomObject]@{ name = "device1"; role = 999 }
+                $items = @($originalItem)
+
+                $result = Send-NBBulkRequest -URI $uri -Items $items -Method POST
+
+                $result.Failed.Count | Should -Be 1
+                $result.Failed[0].Error | Should -Match "Validation failed"
+                $result.Failed[0].Item.name | Should -Be "device1"
+            }
+        }
+    }
+
+    Context "DELETE Operation Handling" {
+        It "Should handle null response from DELETE" {
+            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+                return $null  # DELETE returns null on success
+            }
+
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $uri = BuildNewURI -Segments @('dcim', 'devices')
+                $items = 1..3 | ForEach-Object { [PSCustomObject]@{ id = $_ } }
+
+                $result = Send-NBBulkRequest -URI $uri -Items $items -Method DELETE
+
+                # Null response = success for DELETE
+                $result.SuccessCount | Should -Be 3
+                $result.FailureCount | Should -Be 0
+            }
+        }
+    }
+
+    Context "Empty and Null Input Handling" {
+        It "Should not invoke API when items collection is empty" {
+            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+                throw "Should not be called"
+            }
+
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $uri = BuildNewURI -Segments @('dcim', 'devices')
+                $items = @()
+
+                $result = Send-NBBulkRequest -URI $uri -Items $items -Method POST
+
+                $result.TotalCount | Should -Be 0
+                $result.SuccessCount | Should -Be 0
+                $result.HasErrors | Should -BeFalse
+            }
+
+            # Verify Invoke-RestMethod was never called
+            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 0 -Exactly -ModuleName 'PowerNetbox'
+        }
+
+        It "Should handle -ShowProgress with empty items" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $uri = BuildNewURI -Segments @('dcim', 'devices')
+
+                { Send-NBBulkRequest -URI $uri -Items @() -Method POST -ShowProgress } | Should -Not -Throw
+            }
+        }
+    }
+
+    Context "Progress and Non-Throwing Behavior" {
+        It "Should not throw exception during bulk operation failure" {
+            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+                throw "Critical API Error"
+            }
+
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $uri = BuildNewURI -Segments @('dcim', 'devices')
+                $items = 1..5 | ForEach-Object { [PSCustomObject]@{ name = "device$_" } }
+
+                # Should NOT throw - should return result with failures
+                { Send-NBBulkRequest -URI $uri -Items $items -Method POST -BatchSize 2 } | Should -Not -Throw
+            }
+        }
+    }
+}
+
+Describe "BulkOperationResult Edge Cases" -Tag 'Bulk', 'Unit' {
+    BeforeAll {
+        Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
+
+        InModuleScope -ModuleName 'PowerNetbox' {
+            $script:NetboxConfig.Hostname = 'netbox.domain.com'
+            $script:NetboxConfig.HostScheme = 'https'
+            $script:NetboxConfig.HostPort = 443
+        }
+    }
+
+    It "Should report comprehensive error summary with multiple failures" {
+        InModuleScope -ModuleName 'PowerNetbox' {
+            $result = [BulkOperationResult]::new()
+
+            $result.AddSuccess([PSCustomObject]@{ id = 1 })
+            $result.AddSuccess([PSCustomObject]@{ id = 2 })
+            $result.AddFailure([PSCustomObject]@{ name = "fail1" }, "Validation error 1")
+            $result.AddFailure([PSCustomObject]@{ name = "fail2" }, "Validation error 2")
+            $result.AddSuccess([PSCustomObject]@{ id = 3 })
+            $result.Complete()
+
+            $summary = $result.GetSummary()
+
+            $summary | Should -Match "3/5 succeeded"
+            $summary | Should -Match "2 failed"
+        }
+    }
+
+    It "Should track all error messages" {
+        InModuleScope -ModuleName 'PowerNetbox' {
+            $result = [BulkOperationResult]::new()
+
+            $result.AddFailure([PSCustomObject]@{ name = "fail1" }, "Error A")
+            $result.AddFailure([PSCustomObject]@{ name = "fail2" }, "Error B")
+            $result.Complete()
+
+            $result.Errors.Count | Should -Be 2
+            $result.Errors | Should -Contain "Error A"
+            $result.Errors | Should -Contain "Error B"
+        }
+    }
+}
+
 Describe "Bulk Operations Live Integration Tests" -Tag 'Bulk', 'Integration', 'Live' -Skip:(-not ($env:NETBOX_HOST -and $env:NETBOX_TOKEN)) {
     BeforeAll {
         Remove-Module PowerNetbox -Force -ErrorAction SilentlyContinue

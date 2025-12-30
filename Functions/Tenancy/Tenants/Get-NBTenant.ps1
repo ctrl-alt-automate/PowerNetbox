@@ -25,7 +25,7 @@ function Get-NBTenant {
     .PARAMETER GroupID
         The database ID of the group in Netbox
 
-    .PARAMETER CustomFields
+    .PARAMETER Custom_Fields
         Hashtable in the format @{"field_name" = "value"} to search
 
     .PARAMETER Limit
@@ -73,7 +73,7 @@ function Get-NBTenant {
         [uint64]$GroupID,
 
         [Parameter(ParameterSetName = 'Query')]
-        [hashtable]$CustomFields,
+        [hashtable]$Custom_Fields,
 
         [ValidateRange(1, 1000)]
         [uint16]$Limit,
