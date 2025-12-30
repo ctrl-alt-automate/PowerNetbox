@@ -68,7 +68,7 @@ function Remove-NBDCIMDevice {
 
         [Parameter(ParameterSetName = 'Bulk')]
         [ValidateRange(1, 1000)]
-        [int]$BatchSize = 50,
+        [int]$BatchSize = 100,
 
         # Common parameters
         [Parameter()]

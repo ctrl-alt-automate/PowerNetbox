@@ -32,15 +32,19 @@ jobs:
       - name: Run PSScriptAnalyzer
         shell: pwsh
         run: |
-          $settingsPath = '.vscode/PSScriptAnalyzerSettings.psd1'
+          # Use project settings file (falls back to defaults if not found)
+          $settingsPath = './PSScriptAnalyzerSettings.psd1'
           $settings = if (Test-Path $settingsPath) { $settingsPath } else { $null }
 
           Write-Host "Analyzing Functions directory..." -ForegroundColor Cyan
+          if ($settings) {
+              Write-Host "Using settings: $settingsPath" -ForegroundColor Gray
+          }
 
           $splat = @{
               Path     = './Functions'
               Recurse  = $true
-              Severity = 'Error', 'Warning'
+              Severity = 'Error', 'Warning', 'Information'
           }
           if ($settings) {
               $splat['Settings'] = $settings
