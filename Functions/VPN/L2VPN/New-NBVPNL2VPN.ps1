@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Creates a new PNL2VPN in Netbox V module.
+    Creates a new VPN L2VPN in Netbox VPN module.
 
 .DESCRIPTION
-    Creates a new PNL2VPN in Netbox V module.
+    Creates a new VPN L2VPN in Netbox VPN module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBVPNL2VPN
+    New-NBVVPN L2VPN
 
-    Returns all PNL2VPN objects.
+    Returns all VPN L2VPN objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function New-NBVPNL2VPN {
+function New-NBVVPN L2VPN {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true)][string]$Name,[Parameter(Mandatory = $true)][string]$Slug,

@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Updates an existing CIMInventoryItem in Netbox D module.
+    Updates an existing DCIM Inventory Item in Netbox DCIM module.
 
 .DESCRIPTION
-    Updates an existing CIMInventoryItem in Netbox D module.
+    Updates an existing DCIM Inventory Item in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBDCIMInventoryItem
+    Set-NBDDCIM Inventory Item
 
-    Returns all CIMInventoryItem objects.
+    Returns all DCIM Inventory Item objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Set-NBDCIMInventoryItem {
+function Set-NBDDCIM Inventory Item {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     [OutputType([PSCustomObject])]
     param(
@@ -40,7 +40,7 @@ function Set-NBDCIMInventoryItem {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating D CI MI nv en to ry It em"
+        Write-Verbose "Updating DCIM Inventory Item"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','inventory-items',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update inventory item')) {

@@ -59,14 +59,14 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBIPAMAddress -Id 123 -Status "active"
+    Set-NBIIPAM Address -Id 123 -Status "active"
 
     Updates IP address 123 to active status.
 
 .EXAMPLE
-    Get-NBIPAMAddress -Status "deprecated" | ForEach-Object {
+    Get-NBIIPAM Address -Status "deprecated" | ForEach-Object {
         [PSCustomObject]@{Id = $_.id; Status = "reserved"}
-    } | Set-NBIPAMAddress -Force
+    } | Set-NBIIPAM Address -Force
 
     Bulk update all deprecated IP addresses to reserved status.
 
@@ -75,7 +75,7 @@
         [PSCustomObject]@{Id = 100; Description = "Updated"; Dns_name = "server1.local"}
         [PSCustomObject]@{Id = 101; Description = "Updated"; Dns_name = "server2.local"}
     )
-    $updates | Set-NBIPAMAddress -BatchSize 50 -Force
+    $updates | Set-NBIIPAM Address -BatchSize 50 -Force
 
     Bulk update multiple IP addresses with different values.
 
@@ -83,7 +83,7 @@
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 
-function Set-NBIPAMAddress {
+function Set-NBIIPAM Address {
     [CmdletBinding(SupportsShouldProcess = $true,
         ConfirmImpact = 'Medium',
         DefaultParameterSetName = 'Single')]

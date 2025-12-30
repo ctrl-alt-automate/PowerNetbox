@@ -9,12 +9,12 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBDCIMSite
+    Get-NBDDCIM Site
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Get-NBDCIMSite {
+function Get-NBDDCIM Site {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([pscustomobject])]
     param
@@ -58,13 +58,13 @@ function Get-NBDCIMSite {
         [string]$Contact_Email,
 
         [Parameter(ParameterSetName = 'Query')]
-        [uint64]$Tenant_Group_ID,
+        [uint64]$Tenant_Group_Id,
 
         [Parameter(ParameterSetName = 'Query')]
         [string]$Tenant_Group,
 
         [Parameter(ParameterSetName = 'Query')]
-        [uint64]$Tenant_ID,
+        [uint64]$Tenant_Id,
 
         [Parameter(ParameterSetName = 'Query')]
         [string]$Tenant,
@@ -73,7 +73,7 @@ function Get-NBDCIMSite {
         [string]$Status,
 
         [Parameter(ParameterSetName = 'Query')]
-        [uint64]$Region_ID,
+        [uint64]$Region_Id,
 
         [Parameter(ParameterSetName = 'Query')]
         [string]$Region,
@@ -88,10 +88,10 @@ function Get-NBDCIMSite {
     )
 
     process {
-        Write-Verbose "Retrieving D CI MS it e"
+        Write-Verbose "Retrieving DCIM Site"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {
-                foreach ($Site_ID in $ID) {
+                foreach ($Site_Id in $ID) {
                     $Segments = [System.Collections.ArrayList]::new(@('dcim', 'sites', $Site_Id))
 
                     $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName "Id"

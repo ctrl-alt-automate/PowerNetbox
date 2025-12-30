@@ -29,22 +29,22 @@
     Return the raw API response.
 
 .EXAMPLE
-    Remove-NBDCIMDevice -Id 123 -Force
+    Remove-NBDDCIM Device -Id 123 -Force
 
     Deletes device 123 without confirmation.
 
 .EXAMPLE
-    Remove-NBDCIMDevice -Id 100, 101, 102 -Force
+    Remove-NBDDCIM Device -Id 100, 101, 102 -Force
 
     Deletes multiple devices by ID.
 
 .EXAMPLE
-    Get-NBDCIMDevice -Status "decommissioning" | Remove-NBDCIMDevice -Force
+    Get-NBDDCIM Device -Status "decommissioning" | Remove-NBDDCIM Device -Force
 
     Bulk delete all devices in decommissioning status.
 
 .EXAMPLE
-    Get-NBDCIMDevice -Query "temp-*" | Remove-NBDCIMDevice -BatchSize 50 -Force
+    Get-NBDDCIM Device -Query "temp-*" | Remove-NBDDCIM Device -BatchSize 50 -Force
 
     Bulk delete devices matching a pattern with batching.
 
@@ -52,7 +52,7 @@
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 
-function Remove-NBDCIMDevice {
+function Remove-NBDDCIM Device {
     [CmdletBinding(SupportsShouldProcess = $true,
         ConfirmImpact = 'High',
         DefaultParameterSetName = 'Single')]
@@ -90,7 +90,7 @@ function Remove-NBDCIMDevice {
     process {
         if ($PSCmdlet.ParameterSetName -eq 'Single') {
             foreach ($DeviceID in $Id) {
-                $CurrentDevice = Get-NBDCIMDevice -Id $DeviceID -ErrorAction Stop
+                $CurrentDevice = Get-NBDDCIM Device -Id $DeviceID -ErrorAction Stop
 
                 if ($Force -or $PSCmdlet.ShouldProcess("Name: $($CurrentDevice.Name) | ID: $($CurrentDevice.Id)", "Delete device")) {
                     $DeviceSegments = [System.Collections.ArrayList]::new(@('dcim', 'devices', $CurrentDevice.Id))

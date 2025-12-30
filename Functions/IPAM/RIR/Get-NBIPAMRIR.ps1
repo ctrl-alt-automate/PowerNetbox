@@ -9,12 +9,12 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBIPAMRIR
+    Get-NBIIPAM RIR
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Get-NBIPAMRIR {
+function Get-NBIIPAM RIR {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([PSCustomObject])]
     param(
@@ -35,7 +35,7 @@ function Get-NBIPAMRIR {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Retrieving I PA MR IR"
+        Write-Verbose "Retrieving IPAM RIR"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('ipam','rirs',$i)) -Raw:$Raw } }
             default {

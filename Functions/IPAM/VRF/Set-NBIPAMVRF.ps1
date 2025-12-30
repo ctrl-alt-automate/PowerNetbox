@@ -1,4 +1,4 @@
-function Set-NBIPAMVRF {
+function Set-NBIIPAM VRF {
 <#
     .SYNOPSIS
         Update a VRF in Netbox
@@ -40,12 +40,12 @@ function Set-NBIPAMVRF {
         Return the raw API response
 
     .EXAMPLE
-        Set-NBIPAMVRF -Id 1 -Name "Production-VRF"
+        Set-NBIIPAM VRF -Id 1 -Name "Production-VRF"
 
         Updates the name of VRF 1
 
     .EXAMPLE
-        Set-NBIPAMVRF -Id 1 -Enforce_Unique $true
+        Set-NBIIPAM VRF -Id 1 -Enforce_Unique $true
 
         Enables unique enforcement for VRF 1
 #>
@@ -79,7 +79,7 @@ function Set-NBIPAMVRF {
     )
 
     process {
-        Write-Verbose "Updating I PA MV RF"
+        Write-Verbose "Updating IPAM VRF"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'vrfs', $Id))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'

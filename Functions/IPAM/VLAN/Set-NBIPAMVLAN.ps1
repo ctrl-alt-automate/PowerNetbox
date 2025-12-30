@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Updates an existing PAMVLAN in Netbox I module.
+    Updates an existing IPAM VLAN in Netbox IPAM module.
 
 .DESCRIPTION
-    Updates an existing PAMVLAN in Netbox I module.
+    Updates an existing IPAM VLAN in Netbox IPAM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBIPAMVLAN
+    Set-NBIIPAM VLAN
 
-    Returns all PAMVLAN objects.
+    Returns all IPAM VLAN objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Set-NBIPAMVLAN {
+function Set-NBIIPAM VLAN {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     [OutputType([PSCustomObject])]
     param(
@@ -36,7 +36,7 @@ function Set-NBIPAMVLAN {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating I PA MV LA N"
+        Write-Verbose "Updating IPAM VLAN"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'vlans', $Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
         $URI = BuildNewURI -Segments $URIComponents.Segments

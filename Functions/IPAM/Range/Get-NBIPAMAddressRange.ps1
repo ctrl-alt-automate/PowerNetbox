@@ -9,12 +9,12 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBIPAMAddressRange
+    Get-NBIIPAM AddressRange
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Get-NBIPAMAddressRange {
+function Get-NBIIPAM AddressRange {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([PSCustomObject])]
     param
@@ -65,7 +65,7 @@ function Get-NBIPAMAddressRange {
     )
 
     process {
-        Write-Verbose "Retrieving I PA MA dd re ss Ra ng e"
+        Write-Verbose "Retrieving IPAM Address Ra ng e"
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($Range_ID in $Id) {

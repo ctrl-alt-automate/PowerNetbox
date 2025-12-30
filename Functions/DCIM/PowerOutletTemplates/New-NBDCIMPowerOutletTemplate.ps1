@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Creates a new CIMPowerOutletTemplate in Netbox D module.
+    Creates a new DCIM Power OutletTemplate in Netbox DCIM module.
 
 .DESCRIPTION
-    Creates a new CIMPowerOutletTemplate in Netbox D module.
+    Creates a new DCIM Power OutletTemplate in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBDCIMPowerOutletTemplate
+    New-NBDDCIM Power OutletTemplate
 
-    Returns all CIMPowerOutletTemplate objects.
+    Returns all DCIM Power OutletTemplate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function New-NBDCIMPowerOutletTemplate {
+function New-NBDDCIM Power OutletTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param(
@@ -32,7 +32,7 @@ function New-NBDCIMPowerOutletTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating D CI MP ow er Ou tl et Te mp la te"
+        Write-Verbose "Creating DCIM Power Outlet Te mp la te"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','power-outlet-templates'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create power outlet template')) {

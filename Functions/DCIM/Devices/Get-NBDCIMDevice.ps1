@@ -18,21 +18,21 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBDCIMDevice
+    Get-NBDDCIM Device
     Returns the first page of devices (default limit).
 
 .EXAMPLE
-    Get-NBDCIMDevice -All
+    Get-NBDDCIM Device -All
     Returns all devices with automatic pagination.
 
 .EXAMPLE
-    Get-NBDCIMDevice -All -PageSize 200 -Verbose
+    Get-NBDDCIM Device -All -PageSize 200 -Verbose
     Returns all devices with 200 items per request, showing progress.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Get-NBDCIMDevice {
+function Get-NBDDCIM Device {
     [CmdletBinding()]
     [OutputType([PSCustomObject])]
     #region Parameters
@@ -114,7 +114,7 @@ function Get-NBDCIMDevice {
     #endregion Parameters
 
     process {
-        Write-Verbose "Retrieving D CI MD ev ic e"
+        Write-Verbose "Retrieving DCIM Device"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'devices'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'

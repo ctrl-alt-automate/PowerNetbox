@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Updates an existing CIMPowerOutlet in Netbox D module.
+    Updates an existing DCIM Power Outlet in Netbox DCIM module.
 
 .DESCRIPTION
-    Updates an existing CIMPowerOutlet in Netbox D module.
+    Updates an existing DCIM Power Outlet in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBDCIMPowerOutlet
+    Set-NBDDCIM Power Outlet
 
-    Returns all CIMPowerOutlet objects.
+    Returns all DCIM Power Outlet objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Set-NBDCIMPowerOutlet {
+function Set-NBDDCIM Power Outlet {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     [OutputType([PSCustomObject])]
     param(
@@ -36,7 +36,7 @@ function Set-NBDCIMPowerOutlet {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating D CI MP ow er Ou tl et"
+        Write-Verbose "Updating DCIM Power Outlet"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','power-outlets',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update power outlet')) {

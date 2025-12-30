@@ -1,4 +1,4 @@
-function Remove-NBIPAMASNRange {
+function Remove-NBIIPAM ASNRange {
 <#
     .SYNOPSIS
         Remove an ASN range from Netbox
@@ -13,7 +13,7 @@ function Remove-NBIPAMASNRange {
         Return the raw API response
 
     .EXAMPLE
-        Remove-NBIPAMASNRange -Id 1
+        Remove-NBIIPAM ASNRange -Id 1
 
         Deletes ASN range with ID 1
 #>
@@ -29,7 +29,7 @@ function Remove-NBIPAMASNRange {
     )
 
     process {
-        Write-Verbose "Removing I PA MA SN Ra ng e"
+        Write-Verbose "Removing IPAM ASN Ra ng e"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'asn-ranges', $Id))
 
         $URI = BuildNewURI -Segments $Segments

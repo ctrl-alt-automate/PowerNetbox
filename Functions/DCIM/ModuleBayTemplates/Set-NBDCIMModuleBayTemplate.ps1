@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Updates an existing CIMModuleBayTemplate in Netbox D module.
+    Updates an existing DCIM Module BayTemplate in Netbox DCIM module.
 
 .DESCRIPTION
-    Updates an existing CIMModuleBayTemplate in Netbox D module.
+    Updates an existing DCIM Module BayTemplate in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBDCIMModuleBayTemplate
+    Set-NBDDCIM Module BayTemplate
 
-    Returns all CIMModuleBayTemplate objects.
+    Returns all DCIM Module BayTemplate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Set-NBDCIMModuleBayTemplate {
+function Set-NBDDCIM Module BayTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     [OutputType([PSCustomObject])]
     param(
@@ -30,7 +30,7 @@ function Set-NBDCIMModuleBayTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating D CI MM od ul eB ay Te mp la te"
+        Write-Verbose "Updating DCIM ModuleB ay Te mp la te"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','module-bay-templates',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update module bay template')) {

@@ -9,12 +9,12 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBIPAMVLANTranslationRule
+    Get-NBIIPAM VLANTranslationRule
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Get-NBIPAMVLANTranslationRule {
+function Get-NBIIPAM VLANTranslationRule {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([PSCustomObject])]
     param(
@@ -34,7 +34,7 @@ function Get-NBIPAMVLANTranslationRule {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Retrieving I PA MV LA NT ra ns la ti on Ru le"
+        Write-Verbose "Retrieving IPAM VLANT ra ns la ti on Ru le"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('ipam','vlan-translation-rules',$i)) -Raw:$Raw } }
             default {

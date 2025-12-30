@@ -20,14 +20,14 @@
 
 .EXAMPLE
     Invoke-NBInBranch -Branch "feature/test" -ScriptBlock {
-        New-NBDCIMDevice -Name "test-server" -DeviceType 1 -Site 1
+        New-NBDDCIM Device -Name "test-server" -DeviceType 1 -Site 1
     }
     Create a device within a branch.
 
 .EXAMPLE
     $results = Invoke-NBInBranch -Branch "staging" -ScriptBlock {
-        Get-NBDCIMDevice -Status "planned"
-        Get-NBIPAMAddress -Status "reserved"
+        Get-NBDDCIM Device -Status "planned"
+        Get-NBIIPAM Address -Status "reserved"
     }
     Execute multiple operations and capture results.
 
@@ -36,6 +36,7 @@
     Exit-NBBranch
 #>
 function Invoke-NBInBranch {
+    Write-Verbose "Invoking In Branch"
     [CmdletBinding()]
     [OutputType([object])]
     param(

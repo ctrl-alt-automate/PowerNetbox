@@ -446,7 +446,7 @@ function Register-NBArgumentCompleters {
     }
 
     # Status completers - context-specific
-    $deviceCommands = $moduleCommands | Where-Object { $_.Name -match 'Device|VM|VirtualMachine' }
+    $deviceCommands = $moduleCommands | Where-Object { $_.Name -match 'Device|VM|VVirtual Machine' }
     $ipamCommands = $moduleCommands | Where-Object { $_.Name -match 'IPAM|Prefix|Address|VLAN' }
     $cableCommands = $moduleCommands | Where-Object { $_.Name -match 'Cable' }
     $circuitCommands = $moduleCommands | Where-Object { $_.Name -match 'Circuit' }

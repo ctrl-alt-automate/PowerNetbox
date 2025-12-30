@@ -1,4 +1,4 @@
-function Remove-NBIPAMRouteTarget {
+function Remove-NBIIPAM Route Target {
 <#
     .SYNOPSIS
         Remove a route target from Netbox
@@ -13,12 +13,12 @@ function Remove-NBIPAMRouteTarget {
         Return the raw API response
 
     .EXAMPLE
-        Remove-NBIPAMRouteTarget -Id 1
+        Remove-NBIIPAM Route Target -Id 1
 
         Deletes route target with ID 1
 
     .EXAMPLE
-        Get-NBIPAMRouteTarget -Name "65001:999" | Remove-NBIPAMRouteTarget
+        Get-NBIIPAM Route Target -Name "65001:999" | Remove-NBIIPAM Route Target
 
         Deletes route targets matching the specified value
 #>
@@ -34,7 +34,7 @@ function Remove-NBIPAMRouteTarget {
     )
 
     process {
-        Write-Verbose "Removing I PA MR ou te Ta rg et"
+        Write-Verbose "Removing IPAM Route Target"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'route-targets', $Id))
 
         $URI = BuildNewURI -Segments $Segments

@@ -31,24 +31,24 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBVirtualizationClusterType
+    Get-NBVVirtualization ClusterType
 
     Returns all cluster types.
 
 .EXAMPLE
-    Get-NBVirtualizationClusterType -Name "VMware*"
+    Get-NBVVirtualization ClusterType -Name "VMware*"
 
     Returns cluster types matching the name pattern.
 
 .EXAMPLE
-    Get-NBVirtualizationClusterType -Id 1
+    Get-NBVVirtualization ClusterType -Id 1
 
     Returns the cluster type with ID 1.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/models/virtualization/clustertype/
 #>
-function Get-NBVirtualizationClusterType {
+function Get-NBVVirtualization ClusterType {
     [CmdletBinding()]
     [OutputType([PSCustomObject])]
     param

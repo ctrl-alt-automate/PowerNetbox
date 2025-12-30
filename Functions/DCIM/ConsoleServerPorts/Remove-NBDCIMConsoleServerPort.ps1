@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Removes a CIMConsoleServerPort from Netbox D module.
+    Removes a DCIM Console Server Port from Netbox DCIM module.
 
 .DESCRIPTION
-    Removes a CIMConsoleServerPort from Netbox D module.
+    Removes a DCIM Console Server Port from Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBDCIMConsoleServerPort
+    Remove-NBDDCIM Console Server Port
 
-    Returns all CIMConsoleServerPort objects.
+    Returns all DCIM Console Server Port objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Remove-NBDCIMConsoleServerPort {
+function Remove-NBDDCIM Console Server Port {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     [OutputType([PSCustomObject])]
     param(
@@ -25,7 +25,7 @@ function Remove-NBDCIMConsoleServerPort {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing D CI MC on so le Se rv er Po rt"
+        Write-Verbose "Removing DCIM Console Server Port"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete console server port')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','console-server-ports',$Id)) -Method DELETE -Raw:$Raw
         }

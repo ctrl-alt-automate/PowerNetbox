@@ -67,7 +67,7 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBVirtualMachine -Name "webserver01" -Cluster 1 -vCPUs 4 -Memory 8192
+    New-NBVVirtual Machine -Name "webserver01" -Cluster 1 -vCPUs 4 -Memory 8192
 
     Creates a single VM with 4 vCPUs and 8GB RAM.
 
@@ -82,7 +82,7 @@
             Status = 'active'
         }
     }
-    $vms | New-NBVirtualMachine -BatchSize 100 -Force
+    $vms | New-NBVVirtual Machine -BatchSize 100 -Force
 
     Imports VMs from VMware vCenter in bulk.
 
@@ -90,7 +90,7 @@
     https://netbox.readthedocs.io/en/stable/models/virtualization/virtualmachine/
 #>
 
-function New-NBVirtualMachine {
+function New-NBVVirtual Machine {
     [CmdletBinding(SupportsShouldProcess = $true,
         ConfirmImpact = 'Low',
         DefaultParameterSetName = 'Single')]

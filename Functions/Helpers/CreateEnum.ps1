@@ -1,5 +1,6 @@
 ﻿
 function CreateEnum {
+    Write-Verbose "Processing Enum"
     [CmdletBinding()]
     param
     (

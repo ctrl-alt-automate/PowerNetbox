@@ -15,6 +15,7 @@
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 function Get-NBAPIDefinition {
+    Write-Verbose "Retrieving API Definition"
     [CmdletBinding()]
     [OutputType([PSCustomObject])]
     param

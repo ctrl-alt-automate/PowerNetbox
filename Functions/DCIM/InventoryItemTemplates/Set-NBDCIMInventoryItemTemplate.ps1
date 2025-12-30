@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Updates an existing CIMInventoryItemTemplate in Netbox D module.
+    Updates an existing DCIM Inventory ItemTemplate in Netbox DCIM module.
 
 .DESCRIPTION
-    Updates an existing CIMInventoryItemTemplate in Netbox D module.
+    Updates an existing DCIM Inventory ItemTemplate in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBDCIMInventoryItemTemplate
+    Set-NBDDCIM Inventory ItemTemplate
 
-    Returns all CIMInventoryItemTemplate objects.
+    Returns all DCIM Inventory ItemTemplate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Set-NBDCIMInventoryItemTemplate {
+function Set-NBDDCIM Inventory ItemTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     [OutputType([PSCustomObject])]
     param(
@@ -35,7 +35,7 @@ function Set-NBDCIMInventoryItemTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating D CI MI nv en to ry It em Te mp la te"
+        Write-Verbose "Updating DCIM Inventory Item Te mp la te"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','inventory-item-templates',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update inventory item template')) {

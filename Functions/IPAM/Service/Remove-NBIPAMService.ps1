@@ -1,4 +1,4 @@
-function Remove-NBIPAMService {
+function Remove-NBIIPAM Service {
 <#
     .SYNOPSIS
         Remove a service from Netbox
@@ -13,7 +13,7 @@ function Remove-NBIPAMService {
         Return the raw API response
 
     .EXAMPLE
-        Remove-NBIPAMService -Id 1
+        Remove-NBIIPAM Service -Id 1
 
         Deletes service with ID 1
 #>
@@ -29,7 +29,7 @@ function Remove-NBIPAMService {
     )
 
     process {
-        Write-Verbose "Removing I PA MS er vi ce"
+        Write-Verbose "Removing IPAM Service"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'services', $Id))
 
         $URI = BuildNewURI -Segments $Segments

@@ -29,7 +29,7 @@ function Get-NBCircuitTermination {
         [uint64[]]$Id,
 
         [Parameter(ParameterSetName = 'Query')]
-        [string]$Circuit_ID,
+        [string]$Circuit_Id,
 
         [Parameter(ParameterSetName = 'Query')]
         [string]$Term_Side,
@@ -41,13 +41,13 @@ function Get-NBCircuitTermination {
         [string]$Query,
 
         [Parameter(ParameterSetName = 'Query')]
-        [string]$Site_ID,
+        [string]$Site_Id,
 
         [Parameter(ParameterSetName = 'Query')]
         [string]$Site,
 
         [Parameter(ParameterSetName = 'Query')]
-        [string]$XConnect_ID,
+        [string]$XConnect_Id,
 
         [ValidateRange(1, 1000)]
         [uint16]$Limit,

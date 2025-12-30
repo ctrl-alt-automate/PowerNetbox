@@ -36,12 +36,12 @@
     Return the raw API response
 
 .EXAMPLE
-    New-NBVPNIKEProposal -Name "IKE-Proposal-1" -Authentication_Method "preshared-keys" -Encryption_Algorithm "aes-256-cbc" -Authentication_Algorithm "hmac-sha256" -Group 14
+    New-NBVVPN IKE Proposal -Name "IKE-Proposal-1" -Authentication_Method "preshared-keys" -Encryption_Algorithm "aes-256-cbc" -Authentication_Algorithm "hmac-sha256" -Group 14
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function New-NBVPNIKEProposal {
+function New-NBVVPN IKE Proposal {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param(
@@ -76,7 +76,7 @@ function New-NBVPNIKEProposal {
     )
 
     process {
-        Write-Verbose "Creating V PN IK EP ro po sa l"
+        Write-Verbose "Creating VPN IKE Proposal"
         $Segments = [System.Collections.ArrayList]::new(@('vpn', 'ike-proposals'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'

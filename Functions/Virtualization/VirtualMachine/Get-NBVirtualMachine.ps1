@@ -1,5 +1,5 @@
 
-function Get-NBVirtualMachine {
+function Get-NBVVirtual Machine {
     <#
     .SYNOPSIS
         Obtains virtual machines from Netbox.
@@ -28,13 +28,13 @@ function Get-NBVirtualMachine {
     .PARAMETER Tenant
         String value of tenant
 
-    .PARAMETER Tenant_ID
+    .PARAMETER Tenant_Id
         Database ID of the tenant.
 
     .PARAMETER Platform
         String value of the platform
 
-    .PARAMETER Platform_ID
+    .PARAMETER Platform_Id
         Database ID of the platform
 
     .PARAMETER Cluster_Group
@@ -77,7 +77,7 @@ function Get-NBVirtualMachine {
         Database IDs of VMs
 
     .EXAMPLE
-        PS C:\> Get-NBVirtualMachine
+        PS C:\> Get-NBVVirtual Machine
 #>
 
     [CmdletBinding()]
@@ -100,11 +100,11 @@ function Get-NBVirtualMachine {
 
         [string]$Tenant,
 
-        [uint64]$Tenant_ID,
+        [uint64]$Tenant_Id,
 
         [string]$Platform,
 
-        [uint64]$Platform_ID,
+        [uint64]$Platform_Id,
 
         [string]$Cluster_Group,
 

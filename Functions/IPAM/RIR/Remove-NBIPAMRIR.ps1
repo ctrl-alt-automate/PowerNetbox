@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Removes a PAMRIR from Netbox I module.
+    Removes a IPAM RIR from Netbox IPAM module.
 
 .DESCRIPTION
-    Removes a PAMRIR from Netbox I module.
+    Removes a IPAM RIR from Netbox IPAM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBIPAMRIR
+    Remove-NBIIPAM RIR
 
-    Returns all PAMRIR objects.
+    Returns all IPAM RIR objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Remove-NBIPAMRIR {
+function Remove-NBIIPAM RIR {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     [OutputType([PSCustomObject])]
     param(
@@ -25,7 +25,7 @@ function Remove-NBIPAMRIR {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing I PA MR IR"
+        Write-Verbose "Removing IPAM RIR"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete RIR')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('ipam','rirs',$Id)) -Method DELETE -Raw:$Raw
         }

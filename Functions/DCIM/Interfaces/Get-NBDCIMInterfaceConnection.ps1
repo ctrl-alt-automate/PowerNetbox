@@ -9,12 +9,12 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBDCIMInterfaceConnection
+    Get-NBDDCIM InterfaceConnection
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Get-NBDCIMInterfaceConnection {
+function Get-NBDDCIM InterfaceConnection {
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param
@@ -42,7 +42,7 @@ function Get-NBDCIMInterfaceConnection {
     )
 
     process {
-        Write-Verbose "Retrieving D CI MI nt er fa ce Co nn ec ti on"
+        Write-Verbose "Retrieving DCIM Interface Co nn ec ti on"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interface-connections'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'

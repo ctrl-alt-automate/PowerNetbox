@@ -9,12 +9,12 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBDCIMPlatform
+    Get-NBDDCIM Platform
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Get-NBDCIMPlatform {
+function Get-NBDDCIM Platform {
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param
@@ -45,7 +45,7 @@ function Get-NBDCIMPlatform {
     )
 
     process {
-        Write-Verbose "Retrieving D CI MP la tf or m"
+        Write-Verbose "Retrieving DCIM Platform"
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($PlatformID in $Id) {

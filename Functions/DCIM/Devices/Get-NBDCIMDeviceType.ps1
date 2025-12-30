@@ -9,12 +9,12 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBDCIMDeviceType
+    Get-NBDDCIM Device Type
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Get-NBDCIMDeviceType {
+function Get-NBDDCIM Device Type {
     [CmdletBinding()]
     [OutputType([PSCustomObject])]
     #region Parameters
@@ -62,7 +62,7 @@ function Get-NBDCIMDeviceType {
     )
 
     process {
-        Write-Verbose "Retrieving D CI MD ev ic eT yp e"
+        Write-Verbose "Retrieving DCIM DeviceT yp e"
         #endregion Parameters
 
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'device-types'))

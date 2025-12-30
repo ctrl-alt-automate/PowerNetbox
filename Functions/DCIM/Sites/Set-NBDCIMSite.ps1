@@ -1,4 +1,4 @@
-function Set-NBDCIMSite {
+function Set-NBDDCIM Site {
 <#
     .SYNOPSIS
         Update a site in Netbox
@@ -58,10 +58,10 @@ function Set-NBDCIMSite {
         Skip confirmation prompts
 
     .EXAMPLE
-        Set-NBDCIMSite -Id 1 -Description "Updated description"
+        Set-NBDDCIM Site -Id 1 -Description "Updated description"
 
     .EXAMPLE
-        Get-NBDCIMSite -Name "Site1" | Set-NBDCIMSite -Status planned
+        Get-NBDDCIM Site -Name "Site1" | Set-NBDDCIM Site -Status planned
 #>
 
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
@@ -107,9 +107,9 @@ function Set-NBDCIMSite {
     )
 
     process {
-        Write-Verbose "Updating D CI MS it e"
+        Write-Verbose "Updating DCIM Site"
         foreach ($SiteID in $Id) {
-            $CurrentSite = Get-NBDCIMSite -Id $SiteID -ErrorAction Stop
+            $CurrentSite = Get-NBDDCIM Site -Id $SiteID -ErrorAction Stop
 
             if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentSite.Name)", "Update site")) {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'sites', $CurrentSite.Id))

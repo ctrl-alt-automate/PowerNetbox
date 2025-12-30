@@ -15,6 +15,7 @@
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 function Get-NBCredential {
+    Write-Verbose "Retrieving Credential"
     [CmdletBinding()]
     [OutputType([pscredential])]
     param ()

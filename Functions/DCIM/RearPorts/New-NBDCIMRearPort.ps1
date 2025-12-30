@@ -43,18 +43,18 @@
     Array of tag IDs to assign to this rear port.
 
 .EXAMPLE
-    New-NBDCIMRearPort -Device 42 -Name "Rear 1" -Type "8p8c"
+    New-NBDDCIM Rear Port -Device 42 -Name "Rear 1" -Type "8p8c"
 
     Creates a new RJ-45 rear port named 'Rear 1' on device 42.
 
 .EXAMPLE
-    New-NBDCIMRearPort -Device 42 -Name "Fiber-Rear-01" -Type "lc" -Positions 2
+    New-NBDDCIM Rear Port -Device 42 -Name "Fiber-Rear-01" -Type "lc" -Positions 2
 
     Creates a new LC fiber rear port that supports 2 front port positions.
 
 .EXAMPLE
     1..24 | ForEach-Object {
-        New-NBDCIMRearPort -Device 42 -Name "Rear $_" -Type "8p8c"
+        New-NBDDCIM Rear Port -Device 42 -Name "Rear $_" -Type "8p8c"
     }
 
     Creates 24 rear ports on a patch panel.
@@ -62,7 +62,7 @@
 .LINK
     https://netbox.readthedocs.io/en/stable/models/dcim/rearport/
 #>
-function New-NBDCIMRearPort {
+function New-NBDDCIM Rear Port {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param
@@ -101,7 +101,7 @@ function New-NBDCIMRearPort {
     )
 
     process {
-        Write-Verbose "Creating D CI MR ea rP or t"
+        Write-Verbose "Creating DCIM Rear Port"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'rear-ports'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters

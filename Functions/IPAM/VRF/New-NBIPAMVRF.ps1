@@ -1,4 +1,4 @@
-function New-NBIPAMVRF {
+function New-NBIIPAM VRF {
 <#
     .SYNOPSIS
         Create a new VRF in Netbox
@@ -37,12 +37,12 @@ function New-NBIPAMVRF {
         Return the raw API response
 
     .EXAMPLE
-        New-NBIPAMVRF -Name "Production"
+        New-NBIIPAM VRF -Name "Production"
 
         Creates a new VRF named "Production"
 
     .EXAMPLE
-        New-NBIPAMVRF -Name "Customer-A" -RD "65001:100" -Enforce_Unique $true
+        New-NBIIPAM VRF -Name "Customer-A" -RD "65001:100" -Enforce_Unique $true
 
         Creates a new VRF with route distinguisher and unique enforcement
 #>
@@ -75,7 +75,7 @@ function New-NBIPAMVRF {
     )
 
     process {
-        Write-Verbose "Creating I PA MV RF"
+        Write-Verbose "Creating IPAM VRF"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'vrfs'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'

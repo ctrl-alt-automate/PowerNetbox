@@ -1,25 +1,26 @@
 <#
 .SYNOPSIS
-    Removes a PNTunnelGroup from Netbox V module.
+    Removes a VPN TunnelGroup from Netbox VPN module.
 
 .DESCRIPTION
-    Removes a PNTunnelGroup from Netbox V module.
+    Removes a VPN TunnelGroup from Netbox VPN module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBVPNTunnelGroup
+    Remove-NBVVPN TunnelGroup
 
-    Returns all PNTunnelGroup objects.
+    Returns all VPN TunnelGroup objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Remove-NBVPNTunnelGroup {
+function Remove-NBVVPN TunnelGroup {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[switch]$Raw)
-    process { if ($PSCmdlet.ShouldProcess($Id, 'Delete tunnel group')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','tunnel-groups',$Id)) -Method DELETE -Raw:$Raw } }
+    process {
+        Write-Verbose "Removing VPN Tunnel Group" if ($PSCmdlet.ShouldProcess($Id, 'Delete tunnel group')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','tunnel-groups',$Id)) -Method DELETE -Raw:$Raw } }
 }

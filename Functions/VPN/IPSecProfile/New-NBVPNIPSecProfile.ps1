@@ -30,12 +30,12 @@
     Return the raw API response
 
 .EXAMPLE
-    New-NBVPNIPSecProfile -Name "IPSec-Profile-1" -Mode "esp" -IKE_Policy 1 -IPSec_Policy 1
+    New-NBVVPN IPSec Profile -Name "IPSec-Profile-1" -Mode "esp" -IKE_Policy 1 -IPSec_Policy 1
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function New-NBVPNIPSecProfile {
+function New-NBVVPN IPSec Profile {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param(
@@ -63,7 +63,7 @@ function New-NBVPNIPSecProfile {
     )
 
     process {
-        Write-Verbose "Creating V PN IP Se cP ro fi le"
+        Write-Verbose "Creating VPN IPSec Profile"
         $Segments = [System.Collections.ArrayList]::new(@('vpn', 'ipsec-profiles'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'

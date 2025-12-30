@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Creates a new CIMFrontPortTemplate in Netbox D module.
+    Creates a new DCIM Front PortTemplate in Netbox DCIM module.
 
 .DESCRIPTION
-    Creates a new CIMFrontPortTemplate in Netbox D module.
+    Creates a new DCIM Front PortTemplate in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBDCIMFrontPortTemplate
+    New-NBDDCIM Front PortTemplate
 
-    Returns all CIMFrontPortTemplate objects.
+    Returns all DCIM Front PortTemplate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function New-NBDCIMFrontPortTemplate {
+function New-NBDDCIM Front PortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param(
@@ -33,7 +33,7 @@ function New-NBDCIMFrontPortTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating D CI MF ro nt Po rt Te mp la te"
+        Write-Verbose "Creating DCIM Front Port Te mp la te"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','front-port-templates'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create front port template')) {

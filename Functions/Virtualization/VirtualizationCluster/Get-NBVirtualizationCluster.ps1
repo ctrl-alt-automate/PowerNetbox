@@ -1,5 +1,5 @@
 
-function Get-NBVirtualizationCluster {
+function Get-NBVVirtualization Cluster {
 <#
     .SYNOPSIS
         Obtains virtualization clusters from Netbox.
@@ -44,7 +44,7 @@ function Get-NBVirtualizationCluster {
         Return the raw API response instead of extracting the results array.
 
     .EXAMPLE
-        PS C:\> Get-NBVirtualizationCluster
+        PS C:\> Get-NBVVirtualization Cluster
 #>
 
     [CmdletBinding()]

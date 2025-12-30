@@ -56,18 +56,18 @@
 .EXAMPLE
     $termA = @{ object_type = 'dcim.interface'; object_id = 1 }
     $termB = @{ object_type = 'dcim.interface'; object_id = 2 }
-    New-NBDCIMCable -A_Terminations @($termA) -B_Terminations @($termB)
+    New-NBDDCIM Cable -A_Terminations @($termA) -B_Terminations @($termB)
 
 .EXAMPLE
     # Connect two interfaces by ID using helper
-    New-NBDCIMCable -A_Terminations @(@{object_type='dcim.interface';object_id=10}) `
+    New-NBDDCIM Cable -A_Terminations @(@{object_type='dcim.interface';object_id=10}) `
                     -B_Terminations @(@{object_type='dcim.interface';object_id=20}) `
                     -Type 'cat6' -Status 'connected' -Label 'Patch-001'
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function New-NBDCIMCable {
+function New-NBDDCIM Cable {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param(
@@ -110,7 +110,7 @@ function New-NBDCIMCable {
     )
 
     process {
-        Write-Verbose "Creating D CI MC ab le"
+        Write-Verbose "Creating DCIM Cable"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'cables'))
 
         # Build the body manually since terminations need special handling

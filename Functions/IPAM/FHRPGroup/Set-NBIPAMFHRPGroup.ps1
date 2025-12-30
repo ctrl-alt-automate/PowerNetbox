@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Updates an existing PAMFHRPGroup in Netbox I module.
+    Updates an existing IPAM FHRP Group in Netbox IPAM module.
 
 .DESCRIPTION
-    Updates an existing PAMFHRPGroup in Netbox I module.
+    Updates an existing IPAM FHRP Group in Netbox IPAM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBIPAMFHRPGroup
+    Set-NBIIPAM FHRP Group
 
-    Returns all PAMFHRPGroup objects.
+    Returns all IPAM FHRP Group objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Set-NBIPAMFHRPGroup {
+function Set-NBIIPAM FHRP Group {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     [OutputType([PSCustomObject])]
     param(
@@ -34,7 +34,7 @@ function Set-NBIPAMFHRPGroup {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating I PA MF HR PG ro up"
+        Write-Verbose "Updating IPAM FHRP Group"
         $Segments = [System.Collections.ArrayList]::new(@('ipam','fhrp-groups',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update FHRP group')) {

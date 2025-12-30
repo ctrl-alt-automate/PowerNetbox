@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Updates an existing CIMDeviceBay in Netbox D module.
+    Updates an existing DCIM Device Bay in Netbox DCIM module.
 
 .DESCRIPTION
-    Updates an existing CIMDeviceBay in Netbox D module.
+    Updates an existing DCIM Device Bay in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBDCIMDeviceBay
+    Set-NBDDCIM Device Bay
 
-    Returns all CIMDeviceBay objects.
+    Returns all DCIM Device Bay objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Set-NBDCIMDeviceBay {
+function Set-NBDDCIM Device Bay {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     [OutputType([PSCustomObject])]
     param(
@@ -32,7 +32,7 @@ function Set-NBDCIMDeviceBay {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating D CI MD ev ic eB ay"
+        Write-Verbose "Updating DCIM DeviceB ay"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','device-bays',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update device bay')) {

@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Creates a new CIMInterfaceTemplate in Netbox D module.
+    Creates a new DCIM Interface Template in Netbox DCIM module.
 
 .DESCRIPTION
-    Creates a new CIMInterfaceTemplate in Netbox D module.
+    Creates a new DCIM Interface Template in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBDCIMInterfaceTemplate
+    New-NBDDCIM Interface Template
 
-    Returns all CIMInterfaceTemplate objects.
+    Returns all DCIM Interface Template objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function New-NBDCIMInterfaceTemplate {
+function New-NBDDCIM Interface Template {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param(
@@ -35,7 +35,7 @@ function New-NBDCIMInterfaceTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating D CI MI nt er fa ce Te mp la te"
+        Write-Verbose "Creating DCIM Interface Te mp la te"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','interface-templates'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create interface template')) {

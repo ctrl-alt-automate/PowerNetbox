@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Removes a CIMRackType from Netbox D module.
+    Removes a DCIM RackType from Netbox DCIM module.
 
 .DESCRIPTION
-    Removes a CIMRackType from Netbox D module.
+    Removes a DCIM RackType from Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBDCIMRackType
+    Remove-NBDDCIM RackType
 
-    Returns all CIMRackType objects.
+    Returns all DCIM RackType objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Remove-NBDCIMRackType {
+function Remove-NBDDCIM RackType {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     [OutputType([PSCustomObject])]
     param(
@@ -25,7 +25,7 @@ function Remove-NBDCIMRackType {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing D CI MR ac kT yp e"
+        Write-Verbose "Removing DCIM RackT yp e"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete rack type')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','rack-types',$Id)) -Method DELETE -Raw:$Raw
         }

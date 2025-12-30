@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Updates an existing CIMMACAddress in Netbox D module.
+    Updates an existing DCIM MAC Address in Netbox DCIM module.
 
 .DESCRIPTION
-    Updates an existing CIMMACAddress in Netbox D module.
+    Updates an existing DCIM MAC Address in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBDCIMMACAddress
+    Set-NBDDCIM MAC Address
 
-    Returns all CIMMACAddress objects.
+    Returns all DCIM MAC Address objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Set-NBDCIMMACAddress {
+function Set-NBDDCIM MAC Address {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     [OutputType([PSCustomObject])]
     param(
@@ -32,7 +32,7 @@ function Set-NBDCIMMACAddress {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating D CI MM AC Ad dr es s"
+        Write-Verbose "Updating DCIM MAC Address"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','mac-addresses',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update MAC address')) {

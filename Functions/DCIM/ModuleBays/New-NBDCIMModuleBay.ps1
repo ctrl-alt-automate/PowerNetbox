@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Creates a new CIMModuleBay in Netbox D module.
+    Creates a new DCIM Module Bay in Netbox DCIM module.
 
 .DESCRIPTION
-    Creates a new CIMModuleBay in Netbox D module.
+    Creates a new DCIM Module Bay in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBDCIMModuleBay
+    New-NBDDCIM Module Bay
 
-    Returns all CIMModuleBay objects.
+    Returns all DCIM Module Bay objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function New-NBDCIMModuleBay {
+function New-NBDDCIM Module Bay {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param(
@@ -31,7 +31,7 @@ function New-NBDCIMModuleBay {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating D CI MM od ul eB ay"
+        Write-Verbose "Creating DCIM ModuleB ay"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','module-bays'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create module bay')) {

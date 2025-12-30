@@ -1,4 +1,4 @@
-function Get-NBDCIMSiteGroup {
+function Get-NBDDCIM SiteGroup {
 <#
     .SYNOPSIS
         Get site groups from Netbox
@@ -32,17 +32,17 @@ function Get-NBDCIMSiteGroup {
         Return the raw API response
 
     .EXAMPLE
-        Get-NBDCIMSiteGroup
+        Get-NBDDCIM SiteGroup
 
         Returns all site groups
 
     .EXAMPLE
-        Get-NBDCIMSiteGroup -Name "Production"
+        Get-NBDDCIM SiteGroup -Name "Production"
 
         Returns site groups matching the name "Production"
 
     .EXAMPLE
-        Get-NBDCIMSiteGroup -Parent_Id 1
+        Get-NBDDCIM SiteGroup -Parent_Id 1
 
         Returns all child site groups of site group 1
 #>
@@ -82,7 +82,7 @@ function Get-NBDCIMSiteGroup {
     )
 
     process {
-        Write-Verbose "Retrieving D CI MS it eG ro up"
+        Write-Verbose "Retrieving DCIM SiteG ro up"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
                 foreach ($SiteGroupId in $Id) {

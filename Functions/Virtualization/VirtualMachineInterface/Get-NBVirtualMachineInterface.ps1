@@ -1,5 +1,5 @@
 
-function Get-NBVirtualMachineInterface {
+function Get-NBVVirtual MachineInterface {
     <#
     .SYNOPSIS
         Gets VM interfaces
@@ -38,7 +38,7 @@ function Get-NBVirtualMachineInterface {
         Return the raw API response instead of extracting the results array.
 
     .EXAMPLE
-        PS C:\> Get-NBVirtualMachineInterface
+        PS C:\> Get-NBVVirtual MachineInterface
 #>
 
     [CmdletBinding()]

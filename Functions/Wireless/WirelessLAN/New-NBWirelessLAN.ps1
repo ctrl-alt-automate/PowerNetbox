@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Creates a new irelessLAN in Netbox W module.
+    Creates a new Wireless LAN in Netbox Wireless module.
 
 .DESCRIPTION
-    Creates a new irelessLAN in Netbox W module.
+    Creates a new Wireless LAN in Netbox Wireless module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBWirelessLAN
+    New-NBWWireless LAN
 
-    Returns all irelessLAN objects.
+    Returns all Wireless LAN objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function New-NBWirelessLAN {
+function New-NBWWireless LAN {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true)][string]$SSID,[uint64]$Group,[string]$Status,[uint64]$VLAN,[uint64]$Tenant,

@@ -65,14 +65,14 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBVirtualMachine -Id 123 -Status "active"
+    Set-NBVVirtual Machine -Id 123 -Status "active"
 
     Updates VM 123 to active status.
 
 .EXAMPLE
-    Get-NBVirtualMachine -Status "offline" | ForEach-Object {
+    Get-NBVVirtual Machine -Status "offline" | ForEach-Object {
         [PSCustomObject]@{Id = $_.id; Status = "active"}
-    } | Set-NBVirtualMachine -Force
+    } | Set-NBVVirtual Machine -Force
 
     Bulk update all offline VMs to active status.
 
@@ -81,7 +81,7 @@
         [PSCustomObject]@{Id = 100; Status = "active"; Comments = "Migrated"}
         [PSCustomObject]@{Id = 101; Status = "active"; Comments = "Migrated"}
     )
-    $updates | Set-NBVirtualMachine -BatchSize 50 -Force
+    $updates | Set-NBVVirtual Machine -BatchSize 50 -Force
 
     Bulk update multiple VMs with different values.
 
@@ -89,7 +89,7 @@
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 
-function Set-NBVirtualMachine {
+function Set-NBVVirtual Machine {
     [CmdletBinding(SupportsShouldProcess = $true,
         ConfirmImpact = 'Medium',
         DefaultParameterSetName = 'Single')]

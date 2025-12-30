@@ -18,6 +18,7 @@
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 function Clear-NBCredential {
+    Write-Verbose "Clearing Credential"
     [CmdletBinding(ConfirmImpact = 'Medium', SupportsShouldProcess = $true)]
     [OutputType([PSCustomObject])]
     param

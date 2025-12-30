@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Creates a new PAMVLANTranslationPolicy in Netbox I module.
+    Creates a new IPAM VLANTranslationPolicy in Netbox IPAM module.
 
 .DESCRIPTION
-    Creates a new PAMVLANTranslationPolicy in Netbox I module.
+    Creates a new IPAM VLANTranslationPolicy in Netbox IPAM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBIPAMVLANTranslationPolicy
+    New-NBIIPAM VLANTranslationPolicy
 
-    Returns all PAMVLANTranslationPolicy objects.
+    Returns all IPAM VLANTranslationPolicy objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function New-NBIPAMVLANTranslationPolicy {
+function New-NBIIPAM VLANTranslationPolicy {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param(
@@ -29,7 +29,7 @@ function New-NBIPAMVLANTranslationPolicy {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating I PA MV LA NT ra ns la ti on Po li cy"
+        Write-Verbose "Creating IPAM VLANT ra ns la ti on Po li cy"
         $Segments = [System.Collections.ArrayList]::new(@('ipam','vlan-translation-policies'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create VLAN translation policy')) {

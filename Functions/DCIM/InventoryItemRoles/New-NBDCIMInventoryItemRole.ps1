@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Creates a new CIMInventoryItemRole in Netbox D module.
+    Creates a new DCIM Inventory ItemRole in Netbox DCIM module.
 
 .DESCRIPTION
-    Creates a new CIMInventoryItemRole in Netbox D module.
+    Creates a new DCIM Inventory ItemRole in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBDCIMInventoryItemRole
+    New-NBDDCIM Inventory ItemRole
 
-    Returns all CIMInventoryItemRole objects.
+    Returns all DCIM Inventory ItemRole objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function New-NBDCIMInventoryItemRole {
+function New-NBDDCIM Inventory ItemRole {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param(
@@ -30,7 +30,7 @@ function New-NBDCIMInventoryItemRole {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating D CI MI nv en to ry It em Ro le"
+        Write-Verbose "Creating DCIM Inventory Item Ro le"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','inventory-item-roles'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create inventory item role')) {

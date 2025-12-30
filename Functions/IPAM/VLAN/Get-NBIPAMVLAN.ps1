@@ -9,12 +9,12 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBIPAMVLAN
+    Get-NBIIPAM VLAN
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Get-NBIPAMVLAN {
+function Get-NBIIPAM VLAN {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([PSCustomObject])]
     param
@@ -84,7 +84,7 @@ function Get-NBIPAMVLAN {
     )
 
     process {
-        Write-Verbose "Retrieving I PA MV LA N"
+        Write-Verbose "Retrieving IPAM VLAN"
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($VLAN_ID in $Id) {

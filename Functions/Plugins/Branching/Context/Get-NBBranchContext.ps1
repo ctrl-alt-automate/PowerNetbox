@@ -30,6 +30,7 @@
     Exit-NBBranch
 #>
 function Get-NBBranchContext {
+    Write-Verbose "Retrieving Branch Context"
     [CmdletBinding()]
     [OutputType([string])]
     param(

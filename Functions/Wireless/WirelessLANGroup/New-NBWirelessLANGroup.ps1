@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Creates a new irelessLANGroup in Netbox W module.
+    Creates a new Wireless LANGroup in Netbox Wireless module.
 
 .DESCRIPTION
-    Creates a new irelessLANGroup in Netbox W module.
+    Creates a new Wireless LANGroup in Netbox Wireless module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBWirelessLANGroup
+    New-NBWWireless LANGroup
 
-    Returns all irelessLANGroup objects.
+    Returns all Wireless LANGroup objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function New-NBWirelessLANGroup {
+function New-NBWWireless LANGroup {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true)][string]$Name,[Parameter(Mandatory = $true)][string]$Slug,[uint64]$Parent,[string]$Description,[hashtable]$Custom_Fields,[switch]$Raw)

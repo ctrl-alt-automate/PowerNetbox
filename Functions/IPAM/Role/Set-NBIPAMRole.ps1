@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Updates an existing PAMRole in Netbox I module.
+    Updates an existing IPAM Role in Netbox IPAM module.
 
 .DESCRIPTION
-    Updates an existing PAMRole in Netbox I module.
+    Updates an existing IPAM Role in Netbox IPAM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBIPAMRole
+    Set-NBIIPAM Role
 
-    Returns all PAMRole objects.
+    Returns all IPAM Role objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Set-NBIPAMRole {
+function Set-NBIIPAM Role {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     [OutputType([PSCustomObject])]
     param(
@@ -31,7 +31,7 @@ function Set-NBIPAMRole {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating I PA MR ol e"
+        Write-Verbose "Updating IPAM Role"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'roles', $Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
         $URI = BuildNewURI -Segments $URIComponents.Segments
