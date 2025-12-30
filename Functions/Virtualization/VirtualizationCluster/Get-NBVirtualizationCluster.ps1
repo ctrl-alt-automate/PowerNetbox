@@ -41,13 +41,10 @@ function Get-NBVirtualizationCluster {
         Database ID of the site.
 
     .PARAMETER Raw
-        A description of the Raw parameter.
+        Return the raw API response instead of extracting the results array.
 
     .EXAMPLE
         PS C:\> Get-NBVirtualizationCluster
-
-    .NOTES
-        Additional information about the function.
 #>
 
     [CmdletBinding()]

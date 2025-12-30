@@ -65,7 +65,7 @@ function Get-NBVirtualMachine {
         Database ID of the role.
 
     .PARAMETER Raw
-        A description of the Raw parameter.
+        Return the raw API response instead of extracting the results array.
 
     .PARAMETER TenantID
         Database ID of tenant
@@ -78,9 +78,6 @@ function Get-NBVirtualMachine {
 
     .EXAMPLE
         PS C:\> Get-NBVirtualMachine
-
-    .NOTES
-        Additional information about the function.
 #>
 
     [CmdletBinding()]

@@ -17,16 +17,13 @@ function Set-NBContactRole {
         Short description of the contact role
 
     .PARAMETER Custom_Fields
-        A description of the Custom_Fields parameter.
+        Hashtable of custom field values.
 
     .PARAMETER Raw
-        Return the unparsed data from the HTTP request
+        Return the raw API response instead of the updated object.
 
     .EXAMPLE
-        PS C:\> New-NBContact -Name 'Leroy Jenkins' -Email 'leroy.jenkins@example.com'
-
-    .NOTES
-        Additional information about the function.
+        PS C:\> Set-NBContactRole -Id 1 -Name 'Updated Role Name'
 #>
 
     [CmdletBinding(ConfirmImpact = 'Low',
