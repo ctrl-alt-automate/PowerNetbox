@@ -8,6 +8,10 @@
 # - Requires repository secrets for API tokens
 # - Manual trigger only (no Docker needed)
 #
+# LIMITATION: Full integration tests (POST/PATCH/DELETE) fail on Linux
+# due to PowerShell Core bug with SkipCertificateCheck + POST requests.
+# Use "quick" scope for exe.dev, "full" tests run on Docker CI (HTTP).
+#
 # Required Secrets:
 # - EXEDEV_TOKEN_437: API token for Netbox 4.3.7 (badger-victor)
 # - EXEDEV_TOKEN_449: API token for Netbox 4.4.9 (plasma-paint)
@@ -29,7 +33,7 @@ on:
           - minimum (4.3.7)
           - beta (4.5.0)
       test_scope:
-        description: 'Test scope'
+        description: 'Test scope (full requires valid SSL certs)'
         required: true
         default: 'quick'
         type: choice
@@ -127,16 +131,52 @@ jobs:
           Write-Host "Results: $passed passed, $failed failed" -ForegroundColor $(if ($failed -eq 0) { 'Green' } else { 'Red' })
           if ($failed -gt 0) { exit 1 }
 
+      - name: Debug POST request test
+        if: ${{ github.event.inputs.test_scope == 'full' }}
+        shell: pwsh
+        run: |
+          Write-Host "=== Debug: Testing POST with HTTP/1.1 ===" -ForegroundColor Cyan
+          Write-Host "PowerShell: $($PSVersionTable.PSVersion)" -ForegroundColor Gray
+
+          $body = @{ name = "debug-test-site"; slug = "debug-test-site" } | ConvertTo-Json
+
+          # Use curl as workaround for PowerShell SSL issues
+          Write-Host "POST via curl to https://$env:NETBOX_HOST/api/dcim/sites/"
+          $result = curl -s -X POST "https://$($env:NETBOX_HOST)/api/dcim/sites/" `
+            -H "Authorization: Token $($env:NETBOX_TOKEN)" `
+            -H "Content-Type: application/json" `
+            -H "Accept: application/json" `
+            -d $body --insecure
+
+          $response = $result | ConvertFrom-Json
+          if ($response.id) {
+            Write-Host "SUCCESS: Created site with ID $($response.id)" -ForegroundColor Green
+
+            # Cleanup
+            curl -s -X DELETE "https://$($env:NETBOX_HOST)/api/dcim/sites/$($response.id)/" `
+              -H "Authorization: Token $($env:NETBOX_TOKEN)" --insecure | Out-Null
+            Write-Host "Cleaned up test site" -ForegroundColor Gray
+          } else {
+            Write-Host "FAILED: $result" -ForegroundColor Red
+            exit 1
+          }
+
       - name: Run full integration tests
         if: ${{ github.event.inputs.test_scope == 'full' }}
         shell: pwsh
         env:
           NETBOX_SCHEME: "https"
+          # Workaround for PowerShell Core SSL issues on Linux
+          DOTNET_SYSTEM_NET_HTTP_USESOCKETSHTTPHANDLER: "0"
         run: |
+          # Force TLS 1.2 for compatibility
+          [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
+
+          # Only run Live tests, skip mock tests that might interfere
           $config = New-PesterConfiguration
           $config.Run.Path = './Tests/Integration.Tests.ps1'
           $config.Run.Exit = $true
-          $config.Filter.Tag = @('Integration')
+          $config.Filter.Tag = @('Live')
           $config.TestResult.Enabled = $true
           $config.TestResult.OutputPath = 'ExeDevTestResults-449.xml'
           $config.TestResult.OutputFormat = 'NUnitXml'
@@ -239,16 +279,47 @@ jobs:
           Write-Host "Results: $passed passed, $failed failed" -ForegroundColor $(if ($failed -eq 0) { 'Green' } else { 'Red' })
           if ($failed -gt 0) { exit 1 }
 
+      - name: Debug POST request test
+        if: ${{ github.event.inputs.test_scope == 'full' }}
+        shell: pwsh
+        run: |
+          Write-Host "=== Debug: Testing raw POST request ===" -ForegroundColor Cyan
+
+          $body = @{ name = "debug-test-site"; slug = "debug-test-site" } | ConvertTo-Json
+          $headers = @{
+            'Authorization' = "Token $env:NETBOX_TOKEN"
+            'Content-Type' = 'application/json'
+            'Accept' = 'application/json'
+          }
+
+          Write-Host "POST to https://$env:NETBOX_HOST/api/dcim/sites/"
+
+          try {
+            $response = Invoke-RestMethod -Uri "https://$env:NETBOX_HOST/api/dcim/sites/" `
+              -Method POST -Headers $headers -Body $body -SkipCertificateCheck
+            Write-Host "SUCCESS: Created site with ID $($response.id)" -ForegroundColor Green
+
+            Invoke-RestMethod -Uri "https://$env:NETBOX_HOST/api/dcim/sites/$($response.id)/" `
+              -Method DELETE -Headers $headers -SkipCertificateCheck
+            Write-Host "Cleaned up test site" -ForegroundColor Gray
+          } catch {
+            Write-Host "FAILED: $($_.Exception.Message)" -ForegroundColor Red
+            exit 1
+          }
+
       - name: Run full integration tests
         if: ${{ github.event.inputs.test_scope == 'full' }}
         shell: pwsh
         env:
           NETBOX_SCHEME: "https"
+          DOTNET_SYSTEM_NET_HTTP_USESOCKETSHTTPHANDLER: "0"
         run: |
+          [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
+
           $config = New-PesterConfiguration
           $config.Run.Path = './Tests/Integration.Tests.ps1'
           $config.Run.Exit = $true
-          $config.Filter.Tag = @('Integration')
+          $config.Filter.Tag = @('Live')
           $config.TestResult.Enabled = $true
           $config.TestResult.OutputPath = 'ExeDevTestResults-437.xml'
           $config.TestResult.OutputFormat = 'NUnitXml'
@@ -396,16 +467,47 @@ jobs:
           Write-Host "Results: $passed passed, $failed failed" -ForegroundColor $(if ($failed -eq 0) { 'Green' } else { 'Red' })
           if ($failed -gt 0) { exit 1 }
 
+      - name: Debug POST request test
+        if: ${{ github.event.inputs.test_scope == 'full' }}
+        shell: pwsh
+        run: |
+          Write-Host "=== Debug: Testing raw POST request ===" -ForegroundColor Cyan
+
+          $body = @{ name = "debug-test-site"; slug = "debug-test-site" } | ConvertTo-Json
+          $headers = @{
+            'Authorization' = "Token $env:NETBOX_TOKEN"
+            'Content-Type' = 'application/json'
+            'Accept' = 'application/json'
+          }
+
+          Write-Host "POST to https://$env:NETBOX_HOST/api/dcim/sites/"
+
+          try {
+            $response = Invoke-RestMethod -Uri "https://$env:NETBOX_HOST/api/dcim/sites/" `
+              -Method POST -Headers $headers -Body $body -SkipCertificateCheck
+            Write-Host "SUCCESS: Created site with ID $($response.id)" -ForegroundColor Green
+
+            Invoke-RestMethod -Uri "https://$env:NETBOX_HOST/api/dcim/sites/$($response.id)/" `
+              -Method DELETE -Headers $headers -SkipCertificateCheck
+            Write-Host "Cleaned up test site" -ForegroundColor Gray
+          } catch {
+            Write-Host "FAILED: $($_.Exception.Message)" -ForegroundColor Red
+            exit 1
+          }
+
       - name: Run full integration tests
         if: ${{ github.event.inputs.test_scope == 'full' }}
         shell: pwsh
         env:
           NETBOX_SCHEME: "https"
+          DOTNET_SYSTEM_NET_HTTP_USESOCKETSHTTPHANDLER: "0"
         run: |
+          [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
+
           $config = New-PesterConfiguration
           $config.Run.Path = './Tests/Integration.Tests.ps1'
           $config.Run.Exit = $true
-          $config.Filter.Tag = @('Integration')
+          $config.Filter.Tag = @('Live')
           $config.TestResult.Enabled = $true
           $config.TestResult.OutputPath = 'ExeDevTestResults-450.xml'
           $config.TestResult.OutputFormat = 'NUnitXml'
