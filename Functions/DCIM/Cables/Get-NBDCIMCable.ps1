@@ -14,7 +14,7 @@
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Get-NBDDCIM Cable {
+function Get-NBDCIMCable {
     [CmdletBinding()]
     [OutputType([PSCustomObject])]
     #region Parameters

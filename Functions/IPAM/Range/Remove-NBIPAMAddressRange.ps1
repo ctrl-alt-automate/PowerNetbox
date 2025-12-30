@@ -1,5 +1,5 @@
 
-function Remove-NBIIPAM AddressRange {
+function Remove-NBIPAMAddressRange {
     <#
     .SYNOPSIS
         Remove an IP address range from Netbox

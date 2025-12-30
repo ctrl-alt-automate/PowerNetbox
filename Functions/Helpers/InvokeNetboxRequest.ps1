@@ -4,64 +4,7 @@ function InvokeNetboxRequest {
         Invokes a REST API request to Netbox.
 
     .DESCRIPTION
-        Core function for all Netbox API communication. Handles authentication,
-        retry logic for transient failures, and comprehensive error handling.
-        Cross-platform compatible (Windows, Linux, macOS).
-
-        Supports automatic pagination when -All is specified for GET requests.
-
-    .PARAMETER URI
-        The URI builder object containing the API endpoint.
-
-    .PARAMETER Headers
-        Additional headers to include in the request.
-
-    .PARAMETER Body
-        The request body for POST/PATCH/PUT requests.
-
-    .PARAMETER Timeout
-        Request timeout in seconds. Defaults to module timeout setting.
-
-    .PARAMETER Method
-        HTTP method (GET, POST, PATCH, PUT, DELETE, OPTIONS).
-
-    .PARAMETER Raw
-        Return the raw API response instead of just the results array.
-
-    .PARAMETER All
-        Automatically fetch all pages of results for GET requests.
-        Uses the 'next' field in API response to paginate.
-
-    .PARAMETER PageSize
-        Number of items per page when using -All. Default: 100.
-        Range: 1-1000.
-
-    .PARAMETER MaxRetries
-        Maximum number of retry attempts for transient failures. Default: 3.
-
-    .PARAMETER RetryDelayMs
-        Initial delay between retries in milliseconds. Uses exponential backoff. Default: 1000.
-
-    .OUTPUTS
-        [PSCustomObject] The API response or results array.
-
-    .EXAMPLE
-        $result = InvokeNetboxRequest -URI $uri -Method GET
-
-    .EXAMPLE
-        $result = InvokeNetboxRequest -URI $uri -Method GET -All
-        Fetches all pages of results automatically.
-
-    .EXAMPLE
-        $result = InvokeNetboxRequest -URI $uri -Method POST -Body $data -MaxRetries 5
-    #>
-    [CmdletBinding()]
-    [OutputType([PSCustomObject])]
-    param(
-        [Parameter(Mandatory = $true)]
-        [System.UriBuilder]$URI,
-
-        [Hashtable]$Headers = @{},
+        Core function InvokeNetboxRequest {},
 
         [pscustomobject]$Body = $null,
 

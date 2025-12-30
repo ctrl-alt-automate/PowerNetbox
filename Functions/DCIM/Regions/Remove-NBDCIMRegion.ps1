@@ -1,4 +1,4 @@
-function Remove-NBDDCIM Region {
+function Remove-NBDCIMRegion {
 <#
     .SYNOPSIS
         Remove a region from Netbox

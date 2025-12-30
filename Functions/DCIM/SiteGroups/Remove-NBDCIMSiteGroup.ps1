@@ -1,4 +1,4 @@
-function Remove-NBDDCIM SiteGroup {
+function Remove-NBDCIMSiteGroup {
 <#
     .SYNOPSIS
         Remove a site group from Netbox

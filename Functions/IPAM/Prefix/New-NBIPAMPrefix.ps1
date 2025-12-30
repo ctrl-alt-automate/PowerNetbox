@@ -76,7 +76,7 @@
     https://netbox.readthedocs.io/en/stable/models/ipam/prefix/
 #>
 
-function New-NBIIPAM Prefix {
+function New-NBIPAMPrefix {
     [CmdletBinding(SupportsShouldProcess = $true,
         ConfirmImpact = 'Low',
         DefaultParameterSetName = 'Single')]

@@ -1,5 +1,5 @@
 
-function Get-NBVVirtual MachineInterface {
+function Get-NBVirtualMachineInterface {
     <#
     .SYNOPSIS
         Gets VM interfaces

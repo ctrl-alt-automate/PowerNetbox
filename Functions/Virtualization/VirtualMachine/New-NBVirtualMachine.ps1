@@ -90,7 +90,7 @@
     https://netbox.readthedocs.io/en/stable/models/virtualization/virtualmachine/
 #>
 
-function New-NBVVirtual Machine {
+function New-NBVirtualMachine {
     [CmdletBinding(SupportsShouldProcess = $true,
         ConfirmImpact = 'Low',
         DefaultParameterSetName = 'Single')]

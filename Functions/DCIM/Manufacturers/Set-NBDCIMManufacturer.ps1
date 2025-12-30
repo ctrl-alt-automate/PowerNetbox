@@ -1,4 +1,4 @@
-function Set-NBDDCIM Manufacturer {
+function Set-NBDCIMManufacturer {
 <#
     .SYNOPSIS
         Update a manufacturer in Netbox

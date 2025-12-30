@@ -14,7 +14,7 @@
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Get-NBDDCIM Front Port {
+function Get-NBDCIMFrontPort {
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param

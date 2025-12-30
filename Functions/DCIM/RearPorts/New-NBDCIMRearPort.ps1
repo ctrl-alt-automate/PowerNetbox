@@ -62,7 +62,7 @@
 .LINK
     https://netbox.readthedocs.io/en/stable/models/dcim/rearport/
 #>
-function New-NBDDCIM Rear Port {
+function New-NBDCIMRearPort {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param

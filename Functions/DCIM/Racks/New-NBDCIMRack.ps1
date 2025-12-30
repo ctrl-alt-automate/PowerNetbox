@@ -1,4 +1,4 @@
-function New-NBDDCIM Rack {
+function New-NBDCIMRack {
 <#
     .SYNOPSIS
         Create a new rack in Netbox

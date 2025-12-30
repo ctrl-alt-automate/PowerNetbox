@@ -87,7 +87,7 @@
 .LINK
     https://netbox.readthedocs.io/en/stable/models/dcim/interface/
 #>
-function New-NBDDCIM Interface {
+function New-NBDCIMInterface {
     [CmdletBinding(SupportsShouldProcess = $true,
         ConfirmImpact = 'Low',
         DefaultParameterSetName = 'Single')]

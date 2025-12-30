@@ -1,4 +1,4 @@
-function Remove-NBIIPAM ASN {
+function Remove-NBIPAMASN {
 <#
     .SYNOPSIS
         Remove an ASN from Netbox

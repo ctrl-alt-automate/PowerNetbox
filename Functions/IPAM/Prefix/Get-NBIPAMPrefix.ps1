@@ -1,5 +1,5 @@
 
-function Get-NBIIPAM Prefix {
+function Get-NBIPAMPrefix {
 <#
     .SYNOPSIS
         Retrieves IP prefixes from Netbox IPAM module.

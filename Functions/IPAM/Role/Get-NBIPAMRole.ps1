@@ -1,5 +1,5 @@
 
-function Get-NBIIPAM Role {
+function Get-NBIPAMRole {
 <#
     .SYNOPSIS
         Get IPAM Prefix/VLAN roles

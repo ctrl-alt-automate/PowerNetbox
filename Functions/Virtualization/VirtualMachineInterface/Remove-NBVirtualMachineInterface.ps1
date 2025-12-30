@@ -39,7 +39,7 @@
 .LINK
     https://netbox.readthedocs.io/en/stable/models/virtualization/vminterface/
 #>
-function Remove-NBVVirtual MachineInterface {
+function Remove-NBVirtualMachineInterface {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
     [OutputType([PSCustomObject])]
     param

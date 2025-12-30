@@ -14,7 +14,7 @@
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Get-NBIIPAM VLANTranslationRule {
+function Get-NBIPAMVLANTranslationRule {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([PSCustomObject])]
     param(

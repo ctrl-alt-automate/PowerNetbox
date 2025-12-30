@@ -1,4 +1,4 @@
-function New-NBDDCIM Location {
+function New-NBDCIMLocation {
 <#
     .SYNOPSIS
         Create a new location in Netbox

@@ -1,4 +1,4 @@
-function Set-NBDDCIM SiteGroup {
+function Set-NBDCIMSiteGroup {
 <#
     .SYNOPSIS
         Update a site group in Netbox

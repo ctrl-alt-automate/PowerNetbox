@@ -37,7 +37,7 @@
 .LINK
     https://netbox.readthedocs.io/en/stable/models/virtualization/clustertype/
 #>
-function New-NBVVirtualization ClusterType {
+function New-NBVirtualizationClusterType {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param

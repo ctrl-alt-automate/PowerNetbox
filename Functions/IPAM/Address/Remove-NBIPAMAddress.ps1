@@ -46,7 +46,7 @@
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 
-function Remove-NBIIPAM Address {
+function Remove-NBIPAMAddress {
     [CmdletBinding(SupportsShouldProcess = $true,
         ConfirmImpact = 'High',
         DefaultParameterSetName = 'Single')]

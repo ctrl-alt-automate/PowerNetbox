@@ -28,7 +28,7 @@
 .LINK
     https://netbox.readthedocs.io/en/stable/models/virtualization/clustertype/
 #>
-function Remove-NBVVirtualization ClusterType {
+function Remove-NBVirtualizationClusterType {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
     [OutputType([PSCustomObject])]
     param

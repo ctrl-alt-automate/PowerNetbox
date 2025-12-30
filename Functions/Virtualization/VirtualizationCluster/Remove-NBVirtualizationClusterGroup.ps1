@@ -28,7 +28,7 @@
 .LINK
     https://netbox.readthedocs.io/en/stable/models/virtualization/clustergroup/
 #>
-function Remove-NBVVirtualization ClusterGroup {
+function Remove-NBVirtualizationClusterGroup {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
     [OutputType([PSCustomObject])]
     param

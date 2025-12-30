@@ -1,6 +1,6 @@
 
 
-function New-NBIIPAM AddressRange {
+function New-NBIPAMAddressRange {
 <#
     .SYNOPSIS
         Create a new IP address range to Netbox

@@ -18,7 +18,7 @@
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 
-function Set-NBVVirtual MachineInterface {
+function Set-NBVirtualMachineInterface {
     [CmdletBinding(ConfirmImpact = 'Medium',
                    SupportsShouldProcess = $true)]
     [OutputType([pscustomobject])]

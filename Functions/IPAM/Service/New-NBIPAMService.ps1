@@ -1,4 +1,4 @@
-function New-NBIIPAM Service {
+function New-NBIPAMService {
 <#
     .SYNOPSIS
         Create a new service in Netbox

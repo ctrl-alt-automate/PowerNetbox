@@ -18,7 +18,7 @@
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 
-function Remove-NBDDCIM InterfaceConnection {
+function Remove-NBDCIMInterfaceConnection {
     [CmdletBinding(ConfirmImpact = 'High',
                    SupportsShouldProcess = $true)]
     [OutputType([void])]

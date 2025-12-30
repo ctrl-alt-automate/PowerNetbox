@@ -1,4 +1,4 @@
-function Get-NBDDCIM SiteGroup {
+function Get-NBDCIMSiteGroup {
 <#
     .SYNOPSIS
         Get site groups from Netbox

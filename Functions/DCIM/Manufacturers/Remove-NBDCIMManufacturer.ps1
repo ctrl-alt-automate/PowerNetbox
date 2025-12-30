@@ -1,4 +1,4 @@
-function Remove-NBDDCIM Manufacturer {
+function Remove-NBDCIMManufacturer {
 <#
     .SYNOPSIS
         Delete a manufacturer from Netbox

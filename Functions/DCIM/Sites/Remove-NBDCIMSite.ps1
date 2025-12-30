@@ -12,7 +12,7 @@
 #>
 
 
-function Remove-NBDDCIM Site {
+function Remove-NBDCIMSite {
     <#
         .SYNOPSIS
             Remove a Site

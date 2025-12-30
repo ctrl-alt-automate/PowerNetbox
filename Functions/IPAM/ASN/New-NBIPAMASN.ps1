@@ -1,4 +1,4 @@
-function New-NBIIPAM ASN {
+function New-NBIPAMASN {
 <#
     .SYNOPSIS
         Create a new ASN in Netbox

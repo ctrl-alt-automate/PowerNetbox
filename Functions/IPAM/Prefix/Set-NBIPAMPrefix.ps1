@@ -18,7 +18,7 @@
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 
-function Set-NBIIPAM Prefix {
+function Set-NBIPAMPrefix {
     [CmdletBinding(ConfirmImpact = 'Medium',
                    SupportsShouldProcess = $true)]
     [OutputType([PSCustomObject])]

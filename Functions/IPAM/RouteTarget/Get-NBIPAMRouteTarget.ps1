@@ -1,4 +1,4 @@
-function Get-NBIIPAM Route Target {
+function Get-NBIPAMRouteTarget {
 <#
     .SYNOPSIS
         Get route targets from Netbox

@@ -1,4 +1,4 @@
-function Set-NBIIPAM VRF {
+function Set-NBIPAMVRF {
 <#
     .SYNOPSIS
         Update a VRF in Netbox

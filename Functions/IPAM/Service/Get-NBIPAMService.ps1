@@ -1,4 +1,4 @@
-function Get-NBIIPAM Service {
+function Get-NBIPAMService {
 <#
     .SYNOPSIS
         Get services from Netbox

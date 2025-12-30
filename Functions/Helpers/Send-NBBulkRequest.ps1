@@ -3,35 +3,7 @@
     Sends bulk requests to the Netbox API.
 
 .DESCRIPTION
-    Helper function for bulk API operations. Handles batching, progress reporting,
-    and partial failure handling for POST, PATCH, and DELETE operations.
-
-.PARAMETER URI
-    The base URI for the API endpoint.
-
-.PARAMETER Items
-    Array of items to process in bulk.
-
-.PARAMETER Method
-    HTTP method (POST, PATCH, DELETE).
-
-.PARAMETER BatchSize
-    Maximum number of items per API request. Default: 100, Max: 1000.
-
-.PARAMETER ShowProgress
-    Show progress bar during bulk operations.
-
-.PARAMETER ActivityName
-    Name to display in the progress bar.
-
-.OUTPUTS
-    [BulkOperationResult] Object containing succeeded and failed items.
-
-.EXAMPLE
-    $result = Send-NBBulkRequest -URI $uri -Items $devices -Method POST -BatchSize 50
-#>
-
-function Send-NBBulkRequest {
+    Helper function Send-NBBulkRequest {
     [CmdletBinding()]
     [OutputType([BulkOperationResult])]
     param(

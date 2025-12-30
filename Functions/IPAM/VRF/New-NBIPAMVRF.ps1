@@ -1,4 +1,4 @@
-function New-NBIIPAM VRF {
+function New-NBIPAMVRF {
 <#
     .SYNOPSIS
         Create a new VRF in Netbox

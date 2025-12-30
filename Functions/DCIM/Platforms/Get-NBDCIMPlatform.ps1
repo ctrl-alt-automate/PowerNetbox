@@ -14,7 +14,7 @@
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Get-NBDDCIM Platform {
+function Get-NBDCIMPlatform {
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param

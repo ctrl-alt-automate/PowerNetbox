@@ -73,7 +73,7 @@
     https://netbox.readthedocs.io/en/stable/models/ipam/vlan/
 #>
 
-function New-NBIIPAM VLAN {
+function New-NBIPAMVLAN {
     [CmdletBinding(SupportsShouldProcess = $true,
         ConfirmImpact = 'Low',
         DefaultParameterSetName = 'Single')]

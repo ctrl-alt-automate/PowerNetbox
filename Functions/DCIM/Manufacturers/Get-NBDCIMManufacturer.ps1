@@ -1,4 +1,4 @@
-function Get-NBDDCIM Manufacturer {
+function Get-NBDCIMManufacturer {
 <#
     .SYNOPSIS
         Get manufacturers from Netbox

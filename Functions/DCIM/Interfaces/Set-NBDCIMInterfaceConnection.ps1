@@ -1,5 +1,5 @@
 
-function Set-NBDDCIM InterfaceConnection {
+function Set-NBDCIMInterfaceConnection {
 <#
     .SYNOPSIS
         Update an interface connection

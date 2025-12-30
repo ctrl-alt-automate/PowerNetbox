@@ -1,4 +1,4 @@
-function Set-NBIIPAM Service {
+function Set-NBIPAMService {
 <#
     .SYNOPSIS
         Update a service in Netbox

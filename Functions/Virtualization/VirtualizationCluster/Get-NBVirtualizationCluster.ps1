@@ -1,5 +1,5 @@
 
-function Get-NBVVirtualization Cluster {
+function Get-NBVirtualizationCluster {
 <#
     .SYNOPSIS
         Obtains virtualization clusters from Netbox.

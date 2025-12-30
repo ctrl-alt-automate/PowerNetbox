@@ -90,7 +90,7 @@
     https://netbox.readthedocs.io/en/stable/models/ipam/ipaddress/
 #>
 
-function New-NBIIPAM Address {
+function New-NBIPAMAddress {
     [CmdletBinding(SupportsShouldProcess = $true,
         ConfirmImpact = 'Low',
         DefaultParameterSetName = 'Single')]

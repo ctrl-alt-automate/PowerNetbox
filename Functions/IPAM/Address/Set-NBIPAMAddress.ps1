@@ -83,7 +83,7 @@
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 
-function Set-NBIIPAM Address {
+function Set-NBIPAMAddress {
     [CmdletBinding(SupportsShouldProcess = $true,
         ConfirmImpact = 'Medium',
         DefaultParameterSetName = 'Single')]

@@ -430,15 +430,7 @@ function Register-NBArgumentCompleters {
     .SYNOPSIS
         Registers all argument completers for PowerNetbox functions.
     .DESCRIPTION
-        Call this function to enable tab completion for common parameter values
-        across all PowerNetbox functions.
-    #>
-    [CmdletBinding()]
-    param()
-
-    # Get all PowerNetbox commands
-    $moduleCommands = Get-Command -Module PowerNetbox -ErrorAction SilentlyContinue |
-        Where-Object { $_.CommandType -eq 'Function' }
+        Call this function ArgumentCompleters { $_.CommandType -eq 'Function' }
 
     if (-not $moduleCommands) {
         Write-Verbose "PowerNetbox module not loaded, skipping completer registration"

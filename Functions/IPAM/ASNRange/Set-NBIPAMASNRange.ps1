@@ -1,4 +1,4 @@
-function Set-NBIIPAM ASNRange {
+function Set-NBIPAMASNRange {
 <#
     .SYNOPSIS
         Update an ASN range in Netbox
