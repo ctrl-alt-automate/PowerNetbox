@@ -56,11 +56,11 @@
 .EXAMPLE
     $termA = @{ object_type = 'dcim.interface'; object_id = 1 }
     $termB = @{ object_type = 'dcim.interface'; object_id = 2 }
-    New-NBDDCIM Cable -A_Terminations @($termA) -B_Terminations @($termB)
+    New-NBDCIMCable -A_Terminations @($termA) -B_Terminations @($termB)
 
 .EXAMPLE
     # Connect two interfaces by ID using helper
-    New-NBDDCIM Cable -A_Terminations @(@{object_type='dcim.interface';object_id=10}) `
+    New-NBDCIMCable -A_Terminations @(@{object_type='dcim.interface';object_id=10}) `
                     -B_Terminations @(@{object_type='dcim.interface';object_id=20}) `
                     -Type 'cat6' -Status 'connected' -Label 'Patch-001'
 
@@ -110,7 +110,7 @@ function New-NBDCIMCable {
     )
 
     process {
-        Write-Verbose "Creating DCIM Cable"
+        Write-Verbose "Creating D CI MC ab le"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'cables'))
 
         # Build the body manually since terminations need special handling

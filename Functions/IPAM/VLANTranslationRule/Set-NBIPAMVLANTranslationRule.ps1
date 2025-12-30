@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Updates an existing IPAM VLANTranslationRule in Netbox IPAM module.
+    Updates an existing PAMVLANTranslationRule in Netbox I module.
 
 .DESCRIPTION
-    Updates an existing IPAM VLANTranslationRule in Netbox IPAM module.
+    Updates an existing PAMVLANTranslationRule in Netbox I module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBIIPAM VLANTranslationRule
+    Set-NBIPAMVLANTranslationRule
 
-    Returns all IPAM VLANTranslationRule objects.
+    Returns all PAMVLANTranslationRule objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -31,7 +31,7 @@ function Set-NBIPAMVLANTranslationRule {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating IPAM VLANT ra ns la ti on Ru le"
+        Write-Verbose "Updating I PA MV LA NT ra ns la ti on Ru le"
         $Segments = [System.Collections.ArrayList]::new(@('ipam','vlan-translation-rules',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update VLAN translation rule')) {

@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Removes a IPAM Prefix from Netbox IPAM module.
+    Removes a PAMPrefix from Netbox I module.
 
 .DESCRIPTION
-    Removes a IPAM Prefix from Netbox IPAM module.
+    Removes a PAMPrefix from Netbox I module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBIIPAM Prefix
+    Remove-NBIPAMPrefix
 
-    Returns all IPAM Prefix objects.
+    Returns all PAMPrefix objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -25,7 +25,7 @@ function Remove-NBIPAMPrefix {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing IPAM Prefix"
+        Write-Verbose "Removing I PA MP re fi x"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete prefix')) {
             $Segments = [System.Collections.ArrayList]::new(@('ipam', 'prefixes', $Id))
             $URI = BuildNewURI -Segments $Segments

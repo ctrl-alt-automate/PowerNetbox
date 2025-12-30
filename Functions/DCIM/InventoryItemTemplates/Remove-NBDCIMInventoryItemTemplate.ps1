@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Removes a DCIM Inventory ItemTemplate from Netbox DCIM module.
+    Removes a CIMInventoryItemTemplate from Netbox D module.
 
 .DESCRIPTION
-    Removes a DCIM Inventory ItemTemplate from Netbox DCIM module.
+    Removes a CIMInventoryItemTemplate from Netbox D module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBDDCIM Inventory ItemTemplate
+    Remove-NBDCIMInventoryItemTemplate
 
-    Returns all DCIM Inventory ItemTemplate objects.
+    Returns all CIMInventoryItemTemplate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -25,7 +25,7 @@ function Remove-NBDCIMInventoryItemTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing DCIM Inventory Item Te mp la te"
+        Write-Verbose "Removing D CI MI nv en to ry It em Te mp la te"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete inventory item template')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','inventory-item-templates',$Id)) -Method DELETE -Raw:$Raw
         }

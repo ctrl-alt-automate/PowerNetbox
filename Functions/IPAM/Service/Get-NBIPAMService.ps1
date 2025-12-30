@@ -38,12 +38,12 @@ function Get-NBIPAMService {
         Return the raw API response
 
     .EXAMPLE
-        Get-NBIIPAM Service
+        Get-NBIPAMService
 
         Returns all services
 
     .EXAMPLE
-        Get-NBIIPAM Service -Protocol tcp -Port 443
+        Get-NBIPAMService -Protocol tcp -Port 443
 
         Returns TCP services on port 443
 #>
@@ -90,7 +90,7 @@ function Get-NBIPAMService {
     )
 
     process {
-        Write-Verbose "Retrieving IPAM Service"
+        Write-Verbose "Retrieving I PA MS er vi ce"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
                 foreach ($ServiceId in $Id) {

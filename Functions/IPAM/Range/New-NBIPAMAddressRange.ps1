@@ -46,7 +46,7 @@ function New-NBIPAMAddressRange {
         Return raw results from API service
 
     .EXAMPLE
-        New-NBIIPAM AddressRange -Start_Address 192.0.2.20/24 -End_Address 192.0.2.20/24
+        New-NBIPAMAddressRange -Start_Address 192.0.2.20/24 -End_Address 192.0.2.20/24
 
         Add new IP Address range from 192.0.2.20/24 to 192.0.2.20/24 with status active
 
@@ -89,7 +89,7 @@ function New-NBIPAMAddressRange {
     )
 
     process {
-        Write-Verbose "Creating IPAM Address Ra ng e"
+        Write-Verbose "Creating I PA MA dd re ss Ra ng e"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'ip-ranges'))
         $Method = 'POST'
 

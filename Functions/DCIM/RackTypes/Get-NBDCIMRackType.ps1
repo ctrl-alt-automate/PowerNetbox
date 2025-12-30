@@ -9,7 +9,7 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBDDCIM RackType
+    Get-NBDCIMRackType
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -35,7 +35,7 @@ function Get-NBDCIMRackType {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Retrieving DCIM RackT yp e"
+        Write-Verbose "Retrieving D CI MR ac kT yp e"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','rack-types',$i)) -Raw:$Raw } }
             default {

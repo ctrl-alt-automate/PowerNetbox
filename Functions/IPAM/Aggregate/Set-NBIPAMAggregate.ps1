@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Updates an existing IPAM Aggregate in Netbox IPAM module.
+    Updates an existing PAMAggregate in Netbox I module.
 
 .DESCRIPTION
-    Updates an existing IPAM Aggregate in Netbox IPAM module.
+    Updates an existing PAMAggregate in Netbox I module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBIIPAM Aggregate
+    Set-NBIPAMAggregate
 
-    Returns all IPAM Aggregate objects.
+    Returns all PAMAggregate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -33,7 +33,7 @@ function Set-NBIPAMAggregate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating IPAM Aggregate"
+        Write-Verbose "Updating I PA MA gg re ga te"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'aggregates', $Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
         $URI = BuildNewURI -Segments $URIComponents.Segments

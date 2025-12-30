@@ -38,7 +38,7 @@ function Get-NBVirtualMachineInterface {
         Return the raw API response instead of extracting the results array.
 
     .EXAMPLE
-        PS C:\> Get-NBVVirtual MachineInterface
+        PS C:\> Get-NBVirtualMachineInterface
 #>
 
     [CmdletBinding()]

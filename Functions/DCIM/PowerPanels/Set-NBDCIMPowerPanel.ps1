@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Updates an existing DCIM Power Panel in Netbox DCIM module.
+    Updates an existing CIMPowerPanel in Netbox D module.
 
 .DESCRIPTION
-    Updates an existing DCIM Power Panel in Netbox DCIM module.
+    Updates an existing CIMPowerPanel in Netbox D module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBDDCIM Power Panel
+    Set-NBDCIMPowerPanel
 
-    Returns all DCIM Power Panel objects.
+    Returns all CIMPowerPanel objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -32,7 +32,7 @@ function Set-NBDCIMPowerPanel {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating DCIM Power Panel"
+        Write-Verbose "Updating D CI MP ow er Pa ne l"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','power-panels',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update power panel')) {

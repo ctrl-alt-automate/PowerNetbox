@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Updates an existing DCIM Module Type Profile in Netbox DCIM module.
+    Updates an existing CIMModuleTypeProfile in Netbox D module.
 
 .DESCRIPTION
-    Updates an existing DCIM Module Type Profile in Netbox DCIM module.
+    Updates an existing CIMModuleTypeProfile in Netbox D module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBDDCIM Module Type Profile
+    Set-NBDCIMModuleTypeProfile
 
-    Returns all DCIM Module Type Profile objects.
+    Returns all CIMModuleTypeProfile objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -30,7 +30,7 @@ function Set-NBDCIMModuleTypeProfile {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating DCIM ModuleT yp eP ro fi le"
+        Write-Verbose "Updating D CI MM od ul eT yp eP ro fi le"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','module-type-profiles',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update module type profile')) {

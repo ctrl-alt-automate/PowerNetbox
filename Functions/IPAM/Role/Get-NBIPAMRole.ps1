@@ -32,7 +32,7 @@ function Get-NBIPAMRole {
         Return the raw API response instead of extracting the results array.
 
     .EXAMPLE
-        PS C:\> Get-NBIIPAM Role
+        PS C:\> Get-NBIPAMRole
 
 #>
 
@@ -77,7 +77,7 @@ function Get-NBIPAMRole {
     )
 
     process {
-        Write-Verbose "Retrieving IPAM Role"
+        Write-Verbose "Retrieving I PA MR ol e"
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($Role_ID in $Id) {

@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Removes a DCIM Interface Template from Netbox DCIM module.
+    Removes a CIMInterfaceTemplate from Netbox D module.
 
 .DESCRIPTION
-    Removes a DCIM Interface Template from Netbox DCIM module.
+    Removes a CIMInterfaceTemplate from Netbox D module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBDDCIM Interface Template
+    Remove-NBDCIMInterfaceTemplate
 
-    Returns all DCIM Interface Template objects.
+    Returns all CIMInterfaceTemplate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -25,7 +25,7 @@ function Remove-NBDCIMInterfaceTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing DCIM Interface Te mp la te"
+        Write-Verbose "Removing D CI MI nt er fa ce Te mp la te"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete interface template')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','interface-templates',$Id)) -Method DELETE -Raw:$Raw
         }

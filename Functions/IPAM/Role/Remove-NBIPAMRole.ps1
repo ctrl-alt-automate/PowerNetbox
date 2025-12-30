@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Removes a IPAM Role from Netbox IPAM module.
+    Removes a PAMRole from Netbox I module.
 
 .DESCRIPTION
-    Removes a IPAM Role from Netbox IPAM module.
+    Removes a PAMRole from Netbox I module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBIIPAM Role
+    Remove-NBIPAMRole
 
-    Returns all IPAM Role objects.
+    Returns all PAMRole objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -25,7 +25,7 @@ function Remove-NBIPAMRole {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing IPAM Role"
+        Write-Verbose "Removing I PA MR ol e"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete IPAM role')) {
             $Segments = [System.Collections.ArrayList]::new(@('ipam', 'roles', $Id))
             $URI = BuildNewURI -Segments $Segments

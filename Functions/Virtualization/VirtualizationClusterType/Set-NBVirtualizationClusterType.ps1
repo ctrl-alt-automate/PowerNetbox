@@ -4,7 +4,7 @@
 
 .DESCRIPTION
     Updates an existing cluster type in the Netbox virtualization module.
-    Supports pipeline input from Get-NBVVirtualization ClusterType.
+    Supports pipeline input from Get-NBVirtualizationClusterType.
 
 .PARAMETER Id
     The database ID of the cluster type to update. Accepts pipeline input.
@@ -31,12 +31,12 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBVVirtualization ClusterType -Id 1 -Description "VMware vSphere 8.0"
+    Set-NBVirtualizationClusterType -Id 1 -Description "VMware vSphere 8.0"
 
     Updates the description of cluster type ID 1.
 
 .EXAMPLE
-    Get-NBVVirtualization ClusterType -Slug "kvm" | Set-NBVVirtualization ClusterType -Name "KVM/QEMU"
+    Get-NBVirtualizationClusterType -Slug "kvm" | Set-NBVirtualizationClusterType -Name "KVM/QEMU"
 
     Updates a cluster type found by slug via pipeline.
 
@@ -69,7 +69,7 @@ function Set-NBVirtualizationClusterType {
     process {
         Write-Verbose "Updating Virtualization Cluster Type"
         foreach ($TypeId in $Id) {
-            $CurrentType = Get-NBVVirtualization ClusterType -Id $TypeId -ErrorAction Stop
+            $CurrentType = Get-NBVirtualizationClusterType -Id $TypeId -ErrorAction Stop
 
             $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'cluster-types', $CurrentType.Id))
 

@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Creates a new DCIM Module BayTemplate in Netbox DCIM module.
+    Creates a new CIMModuleBayTemplate in Netbox D module.
 
 .DESCRIPTION
-    Creates a new DCIM Module BayTemplate in Netbox DCIM module.
+    Creates a new CIMModuleBayTemplate in Netbox D module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBDDCIM Module BayTemplate
+    New-NBDCIMModuleBayTemplate
 
-    Returns all DCIM Module BayTemplate objects.
+    Returns all CIMModuleBayTemplate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -29,7 +29,7 @@ function New-NBDCIMModuleBayTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating DCIM ModuleB ay Te mp la te"
+        Write-Verbose "Creating D CI MM od ul eB ay Te mp la te"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','module-bay-templates'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create module bay template')) {

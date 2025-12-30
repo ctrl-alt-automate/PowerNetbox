@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Updates an existing DCIM Interface in Netbox DCIM module.
+    Updates an existing CIMInterface in Netbox D module.
 
 .DESCRIPTION
-    Updates an existing DCIM Interface in Netbox DCIM module.
+    Updates an existing CIMInterface in Netbox D module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBDDCIM Interface
+    Set-NBDCIMInterface
 
-    Returns all DCIM Interface objects.
+    Returns all CIMInterface objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -86,9 +86,9 @@ function Set-NBDCIMInterface {
     }
 
     process {
-        Write-Verbose "Updating DCIM Interface"
+        Write-Verbose "Updating D CI MI nt er fa ce"
         foreach ($InterfaceId in $Id) {
-            $CurrentInterface = Get-NBDDCIM Interface -Id $InterfaceId -ErrorAction Stop
+            $CurrentInterface = Get-NBDCIMInterface -Id $InterfaceId -ErrorAction Stop
 
             $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interfaces', $CurrentInterface.Id))
 

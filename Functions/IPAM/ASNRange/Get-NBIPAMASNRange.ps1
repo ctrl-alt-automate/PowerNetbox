@@ -31,12 +31,12 @@ function Get-NBIPAMASNRange {
         Return the raw API response
 
     .EXAMPLE
-        Get-NBIIPAM ASNRange
+        Get-NBIPAMASNRange
 
         Returns all ASN ranges
 
     .EXAMPLE
-        Get-NBIIPAM ASNRange -Name "Private"
+        Get-NBIPAMASNRange -Name "Private"
 
         Returns ASN ranges matching the name "Private"
 #>
@@ -76,7 +76,7 @@ function Get-NBIPAMASNRange {
     )
 
     process {
-        Write-Verbose "Retrieving IPAM ASN Ra ng e"
+        Write-Verbose "Retrieving I PA MA SN Ra ng e"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
                 foreach ($RangeId in $Id) {

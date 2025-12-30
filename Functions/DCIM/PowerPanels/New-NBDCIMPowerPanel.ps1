@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Creates a new DCIM Power Panel in Netbox DCIM module.
+    Creates a new CIMPowerPanel in Netbox D module.
 
 .DESCRIPTION
-    Creates a new DCIM Power Panel in Netbox DCIM module.
+    Creates a new CIMPowerPanel in Netbox D module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBDDCIM Power Panel
+    New-NBDCIMPowerPanel
 
-    Returns all DCIM Power Panel objects.
+    Returns all CIMPowerPanel objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -31,7 +31,7 @@ function New-NBDCIMPowerPanel {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating DCIM Power Panel"
+        Write-Verbose "Creating D CI MP ow er Pa ne l"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','power-panels'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create power panel')) {

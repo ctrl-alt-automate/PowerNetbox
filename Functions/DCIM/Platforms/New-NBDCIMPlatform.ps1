@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Creates a new DCIM Platform in Netbox DCIM module.
+    Creates a new CIMPlatform in Netbox D module.
 
 .DESCRIPTION
-    Creates a new DCIM Platform in Netbox DCIM module.
+    Creates a new CIMPlatform in Netbox D module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBDDCIM Platform
+    New-NBDCIMPlatform
 
-    Returns all DCIM Platform objects.
+    Returns all CIMPlatform objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -31,7 +31,7 @@ function New-NBDCIMPlatform {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating DCIM Platform"
+        Write-Verbose "Creating D CI MP la tf or m"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','platforms'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create platform')) {

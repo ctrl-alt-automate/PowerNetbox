@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Updates an existing Virtual MachineInterface in Netbox VPN module.
+    Updates an existing irtualMachineInterface in Netbox V module.
 
 .DESCRIPTION
-    Updates an existing Virtual MachineInterface in Netbox VPN module.
+    Updates an existing irtualMachineInterface in Netbox V module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBVVirtual MachineInterface
+    Set-NBVirtualMachineInterface
 
-    Returns all Virtual MachineInterface objects.
+    Returns all irtualMachineInterface objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -50,7 +50,7 @@ function Set-NBVirtualMachineInterface {
     process {
         foreach ($VMI_ID in $Id) {
             Write-Verbose "Obtaining VM Interface..."
-            $CurrentVMI = Get-NBVVirtual MachineInterface -Id $VMI_ID -ErrorAction Stop
+            $CurrentVMI = Get-NBVirtualMachineInterface -Id $VMI_ID -ErrorAction Stop
             Write-Verbose "Finished obtaining VM Interface"
 
             $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'interfaces', $CurrentVMI.Id))

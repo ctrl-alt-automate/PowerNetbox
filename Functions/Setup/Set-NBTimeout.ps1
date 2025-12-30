@@ -19,7 +19,6 @@
 #>
 
 function Set-NBTimeout {
-    Write-Verbose "Updating Timeout"
     [CmdletBinding(ConfirmImpact = 'Low',
                    SupportsShouldProcess = $true)]
     [OutputType([uint16])]

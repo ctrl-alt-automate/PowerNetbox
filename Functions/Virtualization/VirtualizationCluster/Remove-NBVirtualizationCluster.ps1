@@ -4,7 +4,7 @@
 
 .DESCRIPTION
     Removes a virtualization cluster from the Netbox virtualization module.
-    Supports pipeline input from Get-NBVVirtualization Cluster.
+    Supports pipeline input from Get-NBVirtualizationCluster.
     Warning: This will also remove all VMs associated with the cluster.
 
 .PARAMETER Id
@@ -17,17 +17,17 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBVVirtualization Cluster -Id 1
+    Remove-NBVirtualizationCluster -Id 1
 
     Removes cluster ID 1 (with confirmation prompt).
 
 .EXAMPLE
-    Remove-NBVVirtualization Cluster -Id 1, 2, 3 -Force
+    Remove-NBVirtualizationCluster -Id 1, 2, 3 -Force
 
     Removes multiple clusters without confirmation.
 
 .EXAMPLE
-    Get-NBVVirtualization Cluster -Name "test-*" | Remove-NBVVirtualization Cluster
+    Get-NBVirtualizationCluster -Name "test-*" | Remove-NBVirtualizationCluster
 
     Removes all clusters matching the name pattern via pipeline.
 
@@ -50,7 +50,7 @@ function Remove-NBVirtualizationCluster {
     process {
         Write-Verbose "Removing Virtualization Cluster"
         foreach ($ClusterId in $Id) {
-            $CurrentCluster = Get-NBVVirtualization Cluster -Id $ClusterId -ErrorAction Stop
+            $CurrentCluster = Get-NBVirtualizationCluster -Id $ClusterId -ErrorAction Stop
 
             $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'clusters', $CurrentCluster.Id))
 

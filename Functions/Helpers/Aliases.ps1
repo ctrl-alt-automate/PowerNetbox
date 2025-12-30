@@ -1,11 +1,11 @@
 # Backwards compatibility aliases for renamed functions
 # These aliases maintain compatibility with scripts using the old Add-* naming convention
 
-Set-Alias -Name Add-NBDDCIM Interface -Value New-NBDDCIM Interface
-Set-Alias -Name Add-NBDDCIM InterfaceConnection -Value New-NBDDCIM InterfaceConnection
-Set-Alias -Name Add-NBDDCIM Front Port -Value New-NBDDCIM Front Port
-Set-Alias -Name Add-NBDDCIM Rear Port -Value New-NBDDCIM Rear Port
-Set-Alias -Name Add-NBVVirtual MachineInterface -Value New-NBVVirtual MachineInterface
+Set-Alias -Name Add-NBDCIMInterface -Value New-NBDCIMInterface
+Set-Alias -Name Add-NBDCIMInterfaceConnection -Value New-NBDCIMInterfaceConnection
+Set-Alias -Name Add-NBDCIMFrontPort -Value New-NBDCIMFrontPort
+Set-Alias -Name Add-NBDCIMRearPort -Value New-NBDCIMRearPort
+Set-Alias -Name Add-NBVirtualMachineInterface -Value New-NBVirtualMachineInterface
 
 # Export aliases
-Export-ModuleMember -Alias Add-NBDDCIM Interface, Add-NBDDCIM InterfaceConnection, Add-NBDDCIM Front Port, Add-NBDDCIM Rear Port, Add-NBVVirtual MachineInterface
+Export-ModuleMember -Alias Add-NBDCIMInterface, Add-NBDCIMInterfaceConnection, Add-NBDCIMFrontPort, Add-NBDCIMRearPort, Add-NBVirtualMachineInterface

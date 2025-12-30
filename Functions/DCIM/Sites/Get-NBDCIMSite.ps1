@@ -9,7 +9,7 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBDDCIM Site
+    Get-NBDCIMSite
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -58,13 +58,13 @@ function Get-NBDCIMSite {
         [string]$Contact_Email,
 
         [Parameter(ParameterSetName = 'Query')]
-        [uint64]$Tenant_Group_Id,
+        [uint64]$Tenant_Group_ID,
 
         [Parameter(ParameterSetName = 'Query')]
         [string]$Tenant_Group,
 
         [Parameter(ParameterSetName = 'Query')]
-        [uint64]$Tenant_Id,
+        [uint64]$Tenant_ID,
 
         [Parameter(ParameterSetName = 'Query')]
         [string]$Tenant,
@@ -73,7 +73,7 @@ function Get-NBDCIMSite {
         [string]$Status,
 
         [Parameter(ParameterSetName = 'Query')]
-        [uint64]$Region_Id,
+        [uint64]$Region_ID,
 
         [Parameter(ParameterSetName = 'Query')]
         [string]$Region,
@@ -88,10 +88,10 @@ function Get-NBDCIMSite {
     )
 
     process {
-        Write-Verbose "Retrieving DCIM Site"
+        Write-Verbose "Retrieving D CI MS it e"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {
-                foreach ($Site_Id in $ID) {
+                foreach ($Site_ID in $ID) {
                     $Segments = [System.Collections.ArrayList]::new(@('dcim', 'sites', $Site_Id))
 
                     $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName "Id"

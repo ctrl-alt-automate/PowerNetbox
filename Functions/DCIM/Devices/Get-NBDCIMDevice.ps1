@@ -18,15 +18,15 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBDDCIM Device
+    Get-NBDCIMDevice
     Returns the first page of devices (default limit).
 
 .EXAMPLE
-    Get-NBDDCIM Device -All
+    Get-NBDCIMDevice -All
     Returns all devices with automatic pagination.
 
 .EXAMPLE
-    Get-NBDDCIM Device -All -PageSize 200 -Verbose
+    Get-NBDCIMDevice -All -PageSize 200 -Verbose
     Returns all devices with 200 items per request, showing progress.
 
 .LINK
@@ -114,7 +114,7 @@ function Get-NBDCIMDevice {
     #endregion Parameters
 
     process {
-        Write-Verbose "Retrieving DCIM Device"
+        Write-Verbose "Retrieving D CI MD ev ic e"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'devices'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'

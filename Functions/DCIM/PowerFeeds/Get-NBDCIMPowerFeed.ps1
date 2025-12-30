@@ -9,7 +9,7 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBDDCIM Power Feed
+    Get-NBDCIMPowerFeed
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -37,7 +37,7 @@ function Get-NBDCIMPowerFeed {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Retrieving DCIM Power Feed"
+        Write-Verbose "Retrieving D CI MP ow er Fe ed"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','power-feeds',$i)) -Raw:$Raw } }
             default {

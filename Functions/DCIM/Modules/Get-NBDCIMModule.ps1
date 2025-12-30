@@ -9,7 +9,7 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBDDCIM Module
+    Get-NBDCIMModule
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -38,7 +38,7 @@ function Get-NBDCIMModule {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Retrieving DCIM Module"
+        Write-Verbose "Retrieving D CI MM od ul e"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','modules',$i)) -Raw:$Raw } }
             default {

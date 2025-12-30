@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Removes a DCIM Device Role from Netbox DCIM module.
+    Removes a CIMDeviceRole from Netbox D module.
 
 .DESCRIPTION
-    Removes a DCIM Device Role from Netbox DCIM module.
+    Removes a CIMDeviceRole from Netbox D module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBDDCIM Device Role
+    Remove-NBDCIMDeviceRole
 
-    Returns all DCIM Device Role objects.
+    Returns all CIMDeviceRole objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -25,7 +25,7 @@ function Remove-NBDCIMDeviceRole {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing DCIM DeviceR ol e"
+        Write-Verbose "Removing D CI MD ev ic eR ol e"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete device role')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','device-roles',$Id)) -Method DELETE -Raw:$Raw
         }

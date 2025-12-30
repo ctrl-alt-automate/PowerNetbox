@@ -13,7 +13,7 @@ function Remove-NBIPAMService {
         Return the raw API response
 
     .EXAMPLE
-        Remove-NBIIPAM Service -Id 1
+        Remove-NBIPAMService -Id 1
 
         Deletes service with ID 1
 #>
@@ -29,7 +29,7 @@ function Remove-NBIPAMService {
     )
 
     process {
-        Write-Verbose "Removing IPAM Service"
+        Write-Verbose "Removing I PA MS er vi ce"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'services', $Id))
 
         $URI = BuildNewURI -Segments $Segments

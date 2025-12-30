@@ -37,7 +37,7 @@ function Set-NBIPAMASNRange {
         Return the raw API response
 
     .EXAMPLE
-        Set-NBIIPAM ASNRange -Id 1 -Description "Updated description"
+        Set-NBIPAMASNRange -Id 1 -Description "Updated description"
 
         Updates the description of ASN range 1
 #>
@@ -71,7 +71,7 @@ function Set-NBIPAMASNRange {
     )
 
     process {
-        Write-Verbose "Updating IPAM ASN Ra ng e"
+        Write-Verbose "Updating I PA MA SN Ra ng e"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'asn-ranges', $Id))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'

@@ -29,12 +29,12 @@ function New-NBDCIMRegion {
         Return the raw API response
 
     .EXAMPLE
-        New-NBDDCIM Region -Name "Europe" -Slug "europe"
+        New-NBDCIMRegion -Name "Europe" -Slug "europe"
 
         Creates a new region named "Europe"
 
     .EXAMPLE
-        New-NBDDCIM Region -Name "Netherlands" -Slug "netherlands" -Parent 1
+        New-NBDCIMRegion -Name "Netherlands" -Slug "netherlands" -Parent 1
 
         Creates a new region as a child of region 1
 #>
@@ -63,7 +63,7 @@ function New-NBDCIMRegion {
     )
 
     process {
-        Write-Verbose "Creating DCIM Region"
+        Write-Verbose "Creating D CI MR eg io n"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'regions'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'

@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Creates a new DCIM Inventory ItemTemplate in Netbox DCIM module.
+    Creates a new CIMInventoryItemTemplate in Netbox D module.
 
 .DESCRIPTION
-    Creates a new DCIM Inventory ItemTemplate in Netbox DCIM module.
+    Creates a new CIMInventoryItemTemplate in Netbox D module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBDDCIM Inventory ItemTemplate
+    New-NBDCIMInventoryItemTemplate
 
-    Returns all DCIM Inventory ItemTemplate objects.
+    Returns all CIMInventoryItemTemplate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -34,7 +34,7 @@ function New-NBDCIMInventoryItemTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating DCIM Inventory Item Te mp la te"
+        Write-Verbose "Creating D CI MI nv en to ry It em Te mp la te"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','inventory-item-templates'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create inventory item template')) {

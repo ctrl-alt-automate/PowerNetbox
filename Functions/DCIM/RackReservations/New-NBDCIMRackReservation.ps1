@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Creates a new DCIM RackReservation in Netbox DCIM module.
+    Creates a new CIMRackReservation in Netbox D module.
 
 .DESCRIPTION
-    Creates a new DCIM RackReservation in Netbox DCIM module.
+    Creates a new CIMRackReservation in Netbox D module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBDDCIM RackReservation
+    New-NBDCIMRackReservation
 
-    Returns all DCIM RackReservation objects.
+    Returns all CIMRackReservation objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -32,7 +32,7 @@ function New-NBDCIMRackReservation {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating DCIM RackR es er va ti on"
+        Write-Verbose "Creating D CI MR ac kR es er va ti on"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','rack-reservations'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess("Rack $Rack", 'Create rack reservation')) {

@@ -38,12 +38,12 @@ function New-NBIPAMService {
         Return the raw API response
 
     .EXAMPLE
-        New-NBIIPAM Service -Name "HTTPS" -Ports @(443) -Protocol tcp -Device 1
+        New-NBIPAMService -Name "HTTPS" -Ports @(443) -Protocol tcp -Device 1
 
         Creates an HTTPS service on device 1
 
     .EXAMPLE
-        New-NBIIPAM Service -Name "DNS" -Ports @(53) -Protocol udp -Virtual_Machine 1
+        New-NBIPAMService -Name "DNS" -Ports @(53) -Protocol udp -Virtual_Machine 1
 
         Creates a DNS service on VM 1
 #>
@@ -78,7 +78,7 @@ function New-NBIPAMService {
     )
 
     process {
-        Write-Verbose "Creating IPAM Service"
+        Write-Verbose "Creating I PA MS er vi ce"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'services'))
 
         # Build body manually to handle parent object type

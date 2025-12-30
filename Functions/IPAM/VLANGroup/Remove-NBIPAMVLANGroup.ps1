@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Removes a IPAM VLANGroup from Netbox IPAM module.
+    Removes a PAMVLANGroup from Netbox I module.
 
 .DESCRIPTION
-    Removes a IPAM VLANGroup from Netbox IPAM module.
+    Removes a PAMVLANGroup from Netbox I module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBIIPAM VLANGroup
+    Remove-NBIPAMVLANGroup
 
-    Returns all IPAM VLANGroup objects.
+    Returns all PAMVLANGroup objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -25,7 +25,7 @@ function Remove-NBIPAMVLANGroup {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing IPAM VLANG ro up"
+        Write-Verbose "Removing I PA MV LA NG ro up"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete VLAN group')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('ipam','vlan-groups',$Id)) -Method DELETE -Raw:$Raw
         }

@@ -59,14 +59,14 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBIIPAM Address -Id 123 -Status "active"
+    Set-NBIPAMAddress -Id 123 -Status "active"
 
     Updates IP address 123 to active status.
 
 .EXAMPLE
-    Get-NBIIPAM Address -Status "deprecated" | ForEach-Object {
+    Get-NBIPAMAddress -Status "deprecated" | ForEach-Object {
         [PSCustomObject]@{Id = $_.id; Status = "reserved"}
-    } | Set-NBIIPAM Address -Force
+    } | Set-NBIPAMAddress -Force
 
     Bulk update all deprecated IP addresses to reserved status.
 
@@ -75,7 +75,7 @@
         [PSCustomObject]@{Id = 100; Description = "Updated"; Dns_name = "server1.local"}
         [PSCustomObject]@{Id = 101; Description = "Updated"; Dns_name = "server2.local"}
     )
-    $updates | Set-NBIIPAM Address -BatchSize 50 -Force
+    $updates | Set-NBIPAMAddress -BatchSize 50 -Force
 
     Bulk update multiple IP addresses with different values.
 
@@ -157,11 +157,13 @@ function Set-NBIPAMAddress {
     process {
         if ($PSCmdlet.ParameterSetName -eq 'Single') {
             foreach ($IPId in $Id) {
-                if ($PSBoundParameters.ContainsKey('Assigned_Object_Type') -and -not $PSBoundParameters.ContainsKey('Assigned_Object_Id')) {
-                    throw "Assigned_Object_Id is required when specifying Assigned_Object_Type"
-                }
-                elseif ($PSBoundParameters.ContainsKey('Assigned_Object_Id') -and -not $PSBoundParameters.ContainsKey('Assigned_Object_Type')) {
-                    throw "Assigned_Object_Type is required when specifying Assigned_Object_Id"
+                if ($PSBoundParameters.ContainsKey('Assigned_Object_Type') -or $PSBoundParameters.ContainsKey('Assigned_Object_Id')) {
+                    if ((-not [string]::IsNullOrWhiteSpace($Assigned_Object_Id)) -and [string]::IsNullOrWhiteSpace($Assigned_Object_Type)) {
+                        throw "Assigned_Object_Type is required when specifying Assigned_Object_Id"
+                    }
+                    elseif ((-not [string]::IsNullOrWhiteSpace($Assigned_Object_Type)) -and [string]::IsNullOrWhiteSpace($Assigned_Object_Id)) {
+                        throw "Assigned_Object_Id is required when specifying Assigned_Object_Type"
+                    }
                 }
 
                 $IPSegments = [System.Collections.ArrayList]::new(@('ipam', 'ip-addresses', $IPId))

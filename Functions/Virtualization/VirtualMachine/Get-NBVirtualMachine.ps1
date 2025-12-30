@@ -28,13 +28,13 @@ function Get-NBVirtualMachine {
     .PARAMETER Tenant
         String value of tenant
 
-    .PARAMETER Tenant_Id
+    .PARAMETER Tenant_ID
         Database ID of the tenant.
 
     .PARAMETER Platform
         String value of the platform
 
-    .PARAMETER Platform_Id
+    .PARAMETER Platform_ID
         Database ID of the platform
 
     .PARAMETER Cluster_Group
@@ -77,7 +77,7 @@ function Get-NBVirtualMachine {
         Database IDs of VMs
 
     .EXAMPLE
-        PS C:\> Get-NBVVirtual Machine
+        PS C:\> Get-NBVirtualMachine
 #>
 
     [CmdletBinding()]
@@ -100,11 +100,11 @@ function Get-NBVirtualMachine {
 
         [string]$Tenant,
 
-        [uint64]$Tenant_Id,
+        [uint64]$Tenant_ID,
 
         [string]$Platform,
 
-        [uint64]$Platform_Id,
+        [uint64]$Platform_ID,
 
         [string]$Cluster_Group,
 

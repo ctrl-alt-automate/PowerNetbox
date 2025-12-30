@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Updates an existing Wireless LANGroup in Netbox Wireless module.
+    Updates an existing irelessLANGroup in Netbox W module.
 
 .DESCRIPTION
-    Updates an existing Wireless LANGroup in Netbox Wireless module.
+    Updates an existing irelessLANGroup in Netbox W module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBWWireless LANGroup
+    Set-NBWirelessLANGroup
 
-    Returns all Wireless LANGroup objects.
+    Returns all irelessLANGroup objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

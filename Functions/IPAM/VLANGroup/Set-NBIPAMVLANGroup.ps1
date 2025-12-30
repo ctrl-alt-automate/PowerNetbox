@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Updates an existing IPAM VLANGroup in Netbox IPAM module.
+    Updates an existing PAMVLANGroup in Netbox I module.
 
 .DESCRIPTION
-    Updates an existing IPAM VLANGroup in Netbox IPAM module.
+    Updates an existing PAMVLANGroup in Netbox I module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBIIPAM VLANGroup
+    Set-NBIPAMVLANGroup
 
-    Returns all IPAM VLANGroup objects.
+    Returns all PAMVLANGroup objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -34,7 +34,7 @@ function Set-NBIPAMVLANGroup {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating IPAM VLANG ro up"
+        Write-Verbose "Updating I PA MV LA NG ro up"
         $Segments = [System.Collections.ArrayList]::new(@('ipam','vlan-groups',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update VLAN group')) {

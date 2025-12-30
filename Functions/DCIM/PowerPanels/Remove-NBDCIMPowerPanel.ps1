@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Removes a DCIM Power Panel from Netbox DCIM module.
+    Removes a CIMPowerPanel from Netbox D module.
 
 .DESCRIPTION
-    Removes a DCIM Power Panel from Netbox DCIM module.
+    Removes a CIMPowerPanel from Netbox D module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBDDCIM Power Panel
+    Remove-NBDCIMPowerPanel
 
-    Returns all DCIM Power Panel objects.
+    Returns all CIMPowerPanel objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -25,7 +25,7 @@ function Remove-NBDCIMPowerPanel {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing DCIM Power Panel"
+        Write-Verbose "Removing D CI MP ow er Pa ne l"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete power panel')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','power-panels',$Id)) -Method DELETE -Raw:$Raw
         }

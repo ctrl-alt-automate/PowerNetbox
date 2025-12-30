@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Updates an existing DCIM Virtual Device Context in Netbox DCIM module.
+    Updates an existing CIMVirtualDeviceContext in Netbox D module.
 
 .DESCRIPTION
-    Updates an existing DCIM Virtual Device Context in Netbox DCIM module.
+    Updates an existing CIMVirtualDeviceContext in Netbox D module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBDDCIM Virtual Device Context
+    Set-NBDCIMVirtualDeviceContext
 
-    Returns all DCIM Virtual Device Context objects.
+    Returns all CIMVirtualDeviceContext objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -36,7 +36,7 @@ function Set-NBDCIMVirtualDeviceContext {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating DCIM Virtual Device Context"
+        Write-Verbose "Updating D CI MV ir tu al De vi ce Co nt ex t"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','virtual-device-contexts',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update virtual device context')) {

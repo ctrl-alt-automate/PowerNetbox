@@ -31,7 +31,7 @@ function Set-NBIPAMASN {
         Return the raw API response
 
     .EXAMPLE
-        Set-NBIIPAM ASN -Id 1 -Description "Updated description"
+        Set-NBIPAMASN -Id 1 -Description "Updated description"
 
         Updates the description of ASN 1
 #>
@@ -60,7 +60,7 @@ function Set-NBIPAMASN {
     )
 
     process {
-        Write-Verbose "Updating IPAM ASN"
+        Write-Verbose "Updating I PA MA SN"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'asns', $Id))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'

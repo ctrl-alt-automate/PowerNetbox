@@ -9,7 +9,7 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBDDCIM Cable
+    Get-NBDCIMCable
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -38,11 +38,11 @@ function Get-NBDCIMCable {
 
         [string]$Termination_A_Type,
 
-        [uint64]$Termination_A_Id,
+        [uint64]$Termination_A_ID,
 
         [string]$Termination_B_Type,
 
-        [uint64]$Termination_B_Id,
+        [uint64]$Termination_B_ID,
 
         [string]$Type,
 
@@ -50,7 +50,7 @@ function Get-NBDCIMCable {
 
         [string]$Color,
 
-        [uint64]$Device_Id,
+        [uint64]$Device_ID,
 
         [string]$Device,
 
@@ -58,7 +58,7 @@ function Get-NBDCIMCable {
 
         [string]$Rack,
 
-        [uint64]$Location_Id,
+        [uint64]$Location_ID,
 
         [string]$Location,
 
@@ -68,7 +68,7 @@ function Get-NBDCIMCable {
     #endregion Parameters
 
     process {
-        Write-Verbose "Retrieving DCIM Cable"
+        Write-Verbose "Retrieving D CI MC ab le"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'cables'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'

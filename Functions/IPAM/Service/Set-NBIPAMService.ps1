@@ -34,7 +34,7 @@ function Set-NBIPAMService {
         Return the raw API response
 
     .EXAMPLE
-        Set-NBIIPAM Service -Id 1 -Ports @(443, 8443)
+        Set-NBIPAMService -Id 1 -Ports @(443, 8443)
 
         Updates service 1 to listen on ports 443 and 8443
 #>
@@ -65,7 +65,7 @@ function Set-NBIPAMService {
     )
 
     process {
-        Write-Verbose "Updating IPAM Service"
+        Write-Verbose "Updating I PA MS er vi ce"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'services', $Id))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'

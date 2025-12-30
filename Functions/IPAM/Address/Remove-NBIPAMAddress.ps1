@@ -23,12 +23,12 @@
     Skip confirmation prompts.
 
 .EXAMPLE
-    Remove-NBIIPAM Address -Id 123 -Force
+    Remove-NBIPAMAddress -Id 123 -Force
 
     Deletes IP address with ID 123 without confirmation.
 
 .EXAMPLE
-    Get-NBIIPAM Address -Status "deprecated" | Remove-NBIIPAM Address -Force
+    Get-NBIPAMAddress -Status "deprecated" | Remove-NBIPAMAddress -Force
 
     Bulk delete all deprecated IP addresses.
 
@@ -38,7 +38,7 @@
         [PSCustomObject]@{Id = 101}
         [PSCustomObject]@{Id = 102}
     )
-    $ipsToDelete | Remove-NBIIPAM Address -BatchSize 50 -Force
+    $ipsToDelete | Remove-NBIPAMAddress -BatchSize 50 -Force
 
     Bulk delete multiple IP addresses.
 
@@ -82,7 +82,7 @@ function Remove-NBIPAMAddress {
     process {
         if ($PSCmdlet.ParameterSetName -eq 'Single') {
             foreach ($IPId in $Id) {
-                $CurrentIP = Get-NBIIPAM Address -Id $IPId -ErrorAction Stop
+                $CurrentIP = Get-NBIPAMAddress -Id $IPId -ErrorAction Stop
 
                 if ($Force -or $PSCmdlet.ShouldProcess($CurrentIP.Address, "Delete")) {
                     $IPSegments = [System.Collections.ArrayList]::new(@('ipam', 'ip-addresses', $IPId))

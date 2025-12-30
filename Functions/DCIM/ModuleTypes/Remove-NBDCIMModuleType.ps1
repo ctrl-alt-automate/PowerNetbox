@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Removes a DCIM Module Type from Netbox DCIM module.
+    Removes a CIMModuleType from Netbox D module.
 
 .DESCRIPTION
-    Removes a DCIM Module Type from Netbox DCIM module.
+    Removes a CIMModuleType from Netbox D module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBDDCIM Module Type
+    Remove-NBDCIMModuleType
 
-    Returns all DCIM Module Type objects.
+    Returns all CIMModuleType objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -25,7 +25,7 @@ function Remove-NBDCIMModuleType {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing DCIM ModuleT yp e"
+        Write-Verbose "Removing D CI MM od ul eT yp e"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete module type')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','module-types',$Id)) -Method DELETE -Raw:$Raw
         }

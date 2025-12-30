@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Updates an existing DCIM Device Role in Netbox DCIM module.
+    Updates an existing CIMDeviceRole in Netbox D module.
 
 .DESCRIPTION
-    Updates an existing DCIM Device Role in Netbox DCIM module.
+    Updates an existing CIMDeviceRole in Netbox D module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBDDCIM Device Role
+    Set-NBDCIMDeviceRole
 
-    Returns all DCIM Device Role objects.
+    Returns all CIMDeviceRole objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -33,7 +33,7 @@ function Set-NBDCIMDeviceRole {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating DCIM DeviceR ol e"
+        Write-Verbose "Updating D CI MD ev ic eR ol e"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','device-roles',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update device role')) {

@@ -31,12 +31,12 @@ function Set-NBDCIMSiteGroup {
         Return the raw API response
 
     .EXAMPLE
-        Set-NBDDCIM SiteGroup -Id 1 -Name "Production Sites"
+        Set-NBDCIMSiteGroup -Id 1 -Name "Production Sites"
 
         Updates the name of site group 1
 
     .EXAMPLE
-        Set-NBDDCIM SiteGroup -Id 1 -Description "All production sites"
+        Set-NBDCIMSiteGroup -Id 1 -Description "All production sites"
 
         Updates the description of site group 1
 #>
@@ -64,7 +64,7 @@ function Set-NBDCIMSiteGroup {
     )
 
     process {
-        Write-Verbose "Updating DCIM SiteG ro up"
+        Write-Verbose "Updating D CI MS it eG ro up"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'site-groups', $Id))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'

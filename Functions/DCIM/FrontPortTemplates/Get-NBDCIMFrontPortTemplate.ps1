@@ -9,7 +9,7 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBDDCIM Front PortTemplate
+    Get-NBDCIMFrontPortTemplate
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -36,7 +36,7 @@ function Get-NBDCIMFrontPortTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Retrieving DCIM Front Port Te mp la te"
+        Write-Verbose "Retrieving D CI MF ro nt Po rt Te mp la te"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','front-port-templates',$i)) -Raw:$Raw } }
             default {

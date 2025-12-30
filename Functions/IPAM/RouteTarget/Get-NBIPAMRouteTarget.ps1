@@ -38,12 +38,12 @@ function Get-NBIPAMRouteTarget {
         Return the raw API response
 
     .EXAMPLE
-        Get-NBIIPAM Route Target
+        Get-NBIPAMRouteTarget
 
         Returns all route targets
 
     .EXAMPLE
-        Get-NBIIPAM Route Target -Name "65001:100"
+        Get-NBIPAMRouteTarget -Name "65001:100"
 
         Returns route targets matching the specified value
 #>
@@ -89,7 +89,7 @@ function Get-NBIPAMRouteTarget {
     )
 
     process {
-        Write-Verbose "Retrieving IPAM Route Target"
+        Write-Verbose "Retrieving I PA MR ou te Ta rg et"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
                 foreach ($RTId in $Id) {

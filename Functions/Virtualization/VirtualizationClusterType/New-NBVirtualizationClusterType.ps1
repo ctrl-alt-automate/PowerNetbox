@@ -25,12 +25,12 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBVVirtualization ClusterType -Name "VMware vSphere" -Slug "vmware-vsphere"
+    New-NBVirtualizationClusterType -Name "VMware vSphere" -Slug "vmware-vsphere"
 
     Creates a new cluster type for VMware vSphere.
 
 .EXAMPLE
-    New-NBVVirtualization ClusterType -Name "Proxmox VE" -Description "Open source virtualization platform"
+    New-NBVirtualizationClusterType -Name "Proxmox VE" -Description "Open source virtualization platform"
 
     Creates a new cluster type with auto-generated slug.
 

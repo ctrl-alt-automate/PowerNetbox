@@ -9,7 +9,7 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBDDCIM RackReservation
+    Get-NBDCIMRackReservation
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -36,7 +36,7 @@ function Get-NBDCIMRackReservation {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Retrieving DCIM RackR es er va ti on"
+        Write-Verbose "Retrieving D CI MR ac kR es er va ti on"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','rack-reservations',$i)) -Raw:$Raw } }
             default {

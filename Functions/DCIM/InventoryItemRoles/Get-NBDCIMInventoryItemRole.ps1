@@ -9,7 +9,7 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBDDCIM Inventory ItemRole
+    Get-NBDCIMInventoryItemRole
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -34,7 +34,7 @@ function Get-NBDCIMInventoryItemRole {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Retrieving DCIM Inventory Item Ro le"
+        Write-Verbose "Retrieving D CI MI nv en to ry It em Ro le"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','inventory-item-roles',$i)) -Raw:$Raw } }
             default {

@@ -31,17 +31,17 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBVVirtualization ClusterType
+    Get-NBVirtualizationClusterType
 
     Returns all cluster types.
 
 .EXAMPLE
-    Get-NBVVirtualization ClusterType -Name "VMware*"
+    Get-NBVirtualizationClusterType -Name "VMware*"
 
     Returns cluster types matching the name pattern.
 
 .EXAMPLE
-    Get-NBVVirtualization ClusterType -Id 1
+    Get-NBVirtualizationClusterType -Id 1
 
     Returns the cluster type with ID 1.
 

@@ -9,7 +9,7 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBDDCIM Inventory ItemTemplate
+    Get-NBDCIMInventoryItemTemplate
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -35,7 +35,7 @@ function Get-NBDCIMInventoryItemTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Retrieving DCIM Inventory Item Te mp la te"
+        Write-Verbose "Retrieving D CI MI nv en to ry It em Te mp la te"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','inventory-item-templates',$i)) -Raw:$Raw } }
             default {

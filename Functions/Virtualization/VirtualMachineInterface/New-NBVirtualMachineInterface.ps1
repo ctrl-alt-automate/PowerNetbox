@@ -62,12 +62,12 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBVVirtual MachineInterface -Name "eth0" -Virtual_Machine 42
+    New-NBVirtualMachineInterface -Name "eth0" -Virtual_Machine 42
 
     Creates a new enabled interface named 'eth0' on VM ID 42.
 
 .EXAMPLE
-    $vms = Get-NBVVirtual Machine -Cluster 1
+    $vms = Get-NBVirtualMachine -Cluster 1
     $interfaces = $vms | ForEach-Object {
         [PSCustomObject]@{
             Virtual_Machine = $_.id
@@ -76,7 +76,7 @@
             Description = "Primary interface"
         }
     }
-    $interfaces | New-NBVVirtual MachineInterface -BatchSize 50 -Force
+    $interfaces | New-NBVirtualMachineInterface -BatchSize 50 -Force
 
     Creates primary interfaces for all VMs in a cluster in bulk.
 
@@ -88,7 +88,7 @@
         [PSCustomObject]@{Virtual_Machine=$vmId; Name="eth1"; Description="Production"}
         [PSCustomObject]@{Virtual_Machine=$vmId; Name="eth2"; Description="Backup"}
     )
-    $interfaces | New-NBVVirtual MachineInterface -Force
+    $interfaces | New-NBVirtualMachineInterface -Force
 
     Creates multiple interfaces on a single VM.
 
