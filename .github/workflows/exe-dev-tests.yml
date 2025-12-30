@@ -132,7 +132,12 @@ jobs:
         shell: pwsh
         env:
           NETBOX_SCHEME: "https"
+          # Workaround for PowerShell Core SSL issues on Linux
+          DOTNET_SYSTEM_NET_HTTP_USESOCKETSHTTPHANDLER: "0"
         run: |
+          # Force TLS 1.2 for compatibility
+          [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
+
           $config = New-PesterConfiguration
           $config.Run.Path = './Tests/Integration.Tests.ps1'
           $config.Run.Exit = $true
@@ -244,7 +249,12 @@ jobs:
         shell: pwsh
         env:
           NETBOX_SCHEME: "https"
+          # Workaround for PowerShell Core SSL issues on Linux
+          DOTNET_SYSTEM_NET_HTTP_USESOCKETSHTTPHANDLER: "0"
         run: |
+          # Force TLS 1.2 for compatibility
+          [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
+
           $config = New-PesterConfiguration
           $config.Run.Path = './Tests/Integration.Tests.ps1'
           $config.Run.Exit = $true
@@ -401,7 +411,12 @@ jobs:
         shell: pwsh
         env:
           NETBOX_SCHEME: "https"
+          # Workaround for PowerShell Core SSL issues on Linux
+          DOTNET_SYSTEM_NET_HTTP_USESOCKETSHTTPHANDLER: "0"
         run: |
+          # Force TLS 1.2 for compatibility
+          [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
+
           $config = New-PesterConfiguration
           $config.Run.Path = './Tests/Integration.Tests.ps1'
           $config.Run.Exit = $true
