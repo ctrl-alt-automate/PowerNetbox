@@ -8,6 +8,10 @@
 # - Requires repository secrets for API tokens
 # - Manual trigger only (no Docker needed)
 #
+# LIMITATION: Full integration tests (POST/PATCH/DELETE) fail on Linux
+# due to PowerShell Core bug with SkipCertificateCheck + POST requests.
+# Use "quick" scope for exe.dev, "full" tests run on Docker CI (HTTP).
+#
 # Required Secrets:
 # - EXEDEV_TOKEN_437: API token for Netbox 4.3.7 (badger-victor)
 # - EXEDEV_TOKEN_449: API token for Netbox 4.4.9 (plasma-paint)
@@ -29,7 +33,7 @@ on:
           - minimum (4.3.7)
           - beta (4.5.0)
       test_scope:
-        description: 'Test scope'
+        description: 'Test scope (full requires valid SSL certs)'
         required: true
         default: 'quick'
         type: choice
