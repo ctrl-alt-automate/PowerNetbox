@@ -25,7 +25,7 @@ function Get-NBDCIMModuleBayTemplate {
 
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,
-        [Parameter(ParameterSetName = 'Query')][uint64]$DeviceType_Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Device_Type_Id,
         [Parameter(ParameterSetName = 'Query')][string]$Query,
         [ValidateRange(1, 1000)]
         [uint16]$Limit,
