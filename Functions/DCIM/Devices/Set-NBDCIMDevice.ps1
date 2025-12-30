@@ -103,7 +103,7 @@ function Set-NBDCIMDevice {
     [OutputType([PSCustomObject])]
     param(
         # Single mode parameters
-        [Parameter(ParameterSetName = 'Single', Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(ParameterSetName = 'Single', Mandatory = $true)]
         [uint64[]]$Id,
 
         [Parameter(ParameterSetName = 'Single')]

@@ -59,7 +59,7 @@ function Remove-NBDCIMDevice {
     [OutputType([void])]
     param(
         # Single mode parameters
-        [Parameter(ParameterSetName = 'Single', Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(ParameterSetName = 'Single', Mandatory = $true)]
         [uint64[]]$Id,
 
         # Bulk mode parameters
