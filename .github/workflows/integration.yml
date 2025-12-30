@@ -55,7 +55,14 @@ jobs:
       matrix:
         include:
           # ----------------------------------------------------------
-          # Stable version - MUST pass
+          # Minimum supported version
+          # ----------------------------------------------------------
+          - netbox: "v4.3.7-3.3.0"
+            netbox_short: "4.3.7"
+            experimental: false
+
+          # ----------------------------------------------------------
+          # Stable version - MUST pass (production target)
           # ----------------------------------------------------------
           - netbox: "v4.4.9-3.4.2"
             netbox_short: "4.4.9"
@@ -63,11 +70,10 @@ jobs:
 
           # ----------------------------------------------------------
           # Beta/Next version - Allowed to fail
-          # Uncomment when 4.5 docker image is available:
           # ----------------------------------------------------------
-          # - netbox: "v4.5.0-3.2.0"
-          #   netbox_short: "4.5.0-beta"
-          #   experimental: true
+          - netbox: "v4.5.0-beta1-3.4.2"
+            netbox_short: "4.5.0-beta1"
+            experimental: true
 
     env:
       NETBOX_VERSION: ${{ github.event.inputs.netbox_version || matrix.netbox }}
@@ -184,6 +190,76 @@ jobs:
 
           $cmdCount = (Get-Command -Module PowerNetbox).Count
           Write-Host "Module loaded with $cmdCount commands" -ForegroundColor Green
+
+      # ----------------------------------------------------------
+      # v2 Token Tests (Netbox 4.5+)
+      # ----------------------------------------------------------
+      - name: Test v2 token format support
+        if: startsWith(matrix.netbox_short, '4.5')
+        shell: pwsh
+        env:
+          NETBOX_HOST: ${{ env.NETBOX_HOST }}
+          NETBOX_TOKEN: ${{ env.NETBOX_TOKEN }}
+        run: |
+          Write-Host "============================================" -ForegroundColor Cyan
+          Write-Host " Testing v2 Token Support (Netbox 4.5+)" -ForegroundColor Cyan
+          Write-Host "============================================" -ForegroundColor Cyan
+          Write-Host ""
+
+          Import-Module ./PowerNetbox/PowerNetbox.psd1 -Force
+
+          # Test 1: Bearer header should work on 4.5+
+          Write-Host "Test 1: Testing Bearer header authentication..." -ForegroundColor Yellow
+          $headers = @{
+            'Authorization' = "Bearer $env:NETBOX_TOKEN"
+            'Accept' = 'application/json'
+          }
+          try {
+            $response = Invoke-RestMethod -Uri "http://$env:NETBOX_HOST/api/status/" -Headers $headers
+            Write-Host "  PASS: Bearer header works on Netbox 4.5+" -ForegroundColor Green
+            Write-Host "  Version: $($response.'netbox-version')" -ForegroundColor Gray
+          } catch {
+            Write-Host "  FAIL: Bearer header failed: $($_.Exception.Message)" -ForegroundColor Red
+            exit 1
+          }
+
+          # Test 2: Token header should also work (backwards compat)
+          Write-Host "Test 2: Testing Token header (backwards compat)..." -ForegroundColor Yellow
+          $headers = @{
+            'Authorization' = "Token $env:NETBOX_TOKEN"
+            'Accept' = 'application/json'
+          }
+          try {
+            $response = Invoke-RestMethod -Uri "http://$env:NETBOX_HOST/api/status/" -Headers $headers
+            Write-Host "  PASS: Token header works on Netbox 4.5+" -ForegroundColor Green
+          } catch {
+            Write-Host "  FAIL: Token header failed: $($_.Exception.Message)" -ForegroundColor Red
+            exit 1
+          }
+
+          # Test 3: v2 token format detection
+          Write-Host "Test 3: Testing v2 token format detection..." -ForegroundColor Yellow
+          $v2Token = "nbt_kVJSfSxl3xvO.b4KIab8fc0sKntsws0KK7j6VwWNYnztZ9BOC7NAq"
+          $v1Token = "0123456789abcdef0123456789abcdef01234567"
+
+          # v2 token format: nbt_<KEY>.<SECRET>
+          $v2Pattern = '^nbt_[A-Za-z0-9]+\.[A-Za-z0-9]+$'
+          if ($v2Token -match $v2Pattern) {
+            Write-Host "  PASS: v2 token format correctly identified" -ForegroundColor Green
+          } else {
+            Write-Host "  FAIL: v2 token format not recognized" -ForegroundColor Red
+            exit 1
+          }
+
+          if ($v1Token -notmatch $v2Pattern) {
+            Write-Host "  PASS: v1 token correctly not matched as v2" -ForegroundColor Green
+          } else {
+            Write-Host "  FAIL: v1 token incorrectly matched as v2" -ForegroundColor Red
+            exit 1
+          }
+
+          Write-Host ""
+          Write-Host "All v2 token tests passed!" -ForegroundColor Green
 
       # ----------------------------------------------------------
       # Run Integration Tests
