@@ -88,8 +88,10 @@ Describe "PowerNetbox Cross-Platform Compatibility" -Tag 'CrossPlatform' {
                 [System.Net.ServicePointManager]::SecurityProtocol | Should -Match 'Tls12'
             }
             else {
-                # PowerShell Core uses modern TLS by default
-                $true | Should -BeTrue
+                # PowerShell Core uses modern TLS by default and HttpClient handles it internally
+                # Verify that Invoke-RestMethod supports SkipCertificateCheck which indicates modern TLS support
+                $cmdlet = Get-Command Invoke-RestMethod
+                $cmdlet.Parameters.ContainsKey('SkipCertificateCheck') | Should -BeTrue -Because "PowerShell Core should support modern TLS via HttpClient"
             }
         }
     }
@@ -111,9 +113,13 @@ Describe "PowerNetbox Cross-Platform Compatibility" -Tag 'CrossPlatform' {
     Context "Encoding" {
 
         It "Should use UTF-8 encoding for API requests" {
-            # The ContentType should be application/json (UTF-8 is default for JSON)
-            # This is verified by the InvokeNetboxRequest implementation
-            $true | Should -BeTrue
+            # Verify InvokeNetboxRequest uses application/json ContentType
+            # The function should set ContentType to 'application/json' which defaults to UTF-8
+            InModuleScope -ModuleName 'PowerNetbox' -ScriptBlock {
+                $functionContent = Get-Content ./Functions/Helpers/InvokeNetboxRequest.ps1 -Raw
+                # InvokeNetboxRequest should specify application/json content type
+                $functionContent | Should -Match 'application/json'
+            }
         }
 
         It "Should handle Unicode characters in PowerShell strings" -Skip:($PSVersionTable.PSEdition -eq 'Desktop') {
@@ -184,9 +190,10 @@ Describe "PowerNetbox OS-Specific Behavior" -Tag 'CrossPlatform', 'OS' {
 
     Context "Windows-Specific" -Skip:(-not $IsWindows -and $PSVersionTable.PSEdition -eq 'Core') {
 
-        It "Should work with Windows credential store" {
-            # Windows-specific credential handling
-            $true | Should -BeTrue
+        It "Should support ServicePointManager TLS configuration on Windows Desktop" -Skip:($PSVersionTable.PSEdition -ne 'Desktop') {
+            # Windows Desktop uses ServicePointManager for TLS configuration
+            # Verify TLS 1.2 is in the SecurityProtocol flags
+            [System.Net.ServicePointManager]::SecurityProtocol.HasFlag([System.Net.SecurityProtocolType]::Tls12) | Should -BeTrue
         }
     }
 
@@ -201,8 +208,11 @@ Describe "PowerNetbox OS-Specific Behavior" -Tag 'CrossPlatform', 'OS' {
 
     Context "macOS-Specific" -Skip:(-not $IsMacOS) {
 
-        It "Should work on macOS" {
-            $true | Should -BeTrue
+        It "Should load module successfully on macOS" {
+            # Verify the module loaded correctly on this platform
+            $module = Get-Module PowerNetbox
+            $module | Should -Not -BeNullOrEmpty
+            $module.Name | Should -Be 'PowerNetbox'
         }
     }
 }

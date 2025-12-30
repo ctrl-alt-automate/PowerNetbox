@@ -726,4 +726,49 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' {
             }
         }
     }
+
+    Context "Parameter Set Validation" {
+        # Test that parameter sets are properly mutually exclusive
+        # Functions with ById and Query parameter sets should not allow both simultaneously
+
+        It "Get-NBIPAMAddress should not allow both Id and Query parameters" {
+            # When a function has ById and Query parameter sets,
+            # using both should cause PowerShell to error due to ambiguous parameter set
+            { Get-NBIPAMAddress -Id 10 -Query 'test' } | Should -Throw -Because "Id (ByID set) and Query (Query set) are mutually exclusive"
+        }
+
+        It "Get-NBIPAMAddress should not allow both Id and Address parameters" {
+            # Id is in ByID parameter set, Address is in Query parameter set
+            { Get-NBIPAMAddress -Id 10 -Address '192.168.1.1' } | Should -Throw -Because "Id (ByID set) and Address (Query set) are mutually exclusive"
+        }
+
+        It "Get-NBIPAMAddress should allow Id parameter alone" {
+            # Should not throw - Id alone is valid (ByID parameter set)
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $command = Get-Command Get-NBIPAMAddress
+                $parameterSets = $command.ParameterSets
+                $byIdSet = $parameterSets | Where-Object { $_.Name -eq 'ByID' }
+                $byIdSet | Should -Not -BeNullOrEmpty -Because "ByID parameter set should exist"
+                $byIdSet.Parameters.Name | Should -Contain 'Id'
+            }
+        }
+
+        It "Get-NBIPAMAddress should allow Query parameter alone" {
+            # Should not throw - Query alone is valid (Query parameter set)
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $command = Get-Command Get-NBIPAMAddress
+                $parameterSets = $command.ParameterSets
+                $querySet = $parameterSets | Where-Object { $_.Name -eq 'Query' }
+                $querySet | Should -Not -BeNullOrEmpty -Because "Query parameter set should exist"
+                $querySet.Parameters.Name | Should -Contain 'Query'
+            }
+        }
+
+        It "Get-NBIPAMAddress should have correct default parameter set" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $command = Get-Command Get-NBIPAMAddress
+                $command.DefaultParameterSet | Should -Be 'Query'
+            }
+        }
+    }
 }
