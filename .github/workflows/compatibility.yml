@@ -63,6 +63,11 @@ jobs:
             netbox_short: "4.4.9"
             expected_failures: []
 
+          # Netbox 4.5.x - Beta (experimental)
+          - netbox: "v4.5.0-beta1-3.4.2"
+            netbox_short: "4.5.0-beta1"
+            expected_failures: []
+
     env:
       NETBOX_VERSION: ${{ matrix.netbox }}
       NETBOX_HOST: "localhost:8000"
