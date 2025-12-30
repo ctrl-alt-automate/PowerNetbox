@@ -13,12 +13,12 @@ function Remove-NBDCIMRegion {
         Return the raw API response
 
     .EXAMPLE
-        Remove-NBDDCIM Region -Id 1
+        Remove-NBDCIMRegion -Id 1
 
         Deletes region with ID 1
 
     .EXAMPLE
-        Get-NBDDCIM Region -Name "Old Region" | Remove-NBDDCIM Region
+        Get-NBDCIMRegion -Name "Old Region" | Remove-NBDCIMRegion
 
         Deletes regions matching the name "Old Region"
 #>
@@ -34,7 +34,7 @@ function Remove-NBDCIMRegion {
     )
 
     process {
-        Write-Verbose "Removing DCIM Region"
+        Write-Verbose "Removing D CI MR eg io n"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'regions', $Id))
 
         $URI = BuildNewURI -Segments $Segments

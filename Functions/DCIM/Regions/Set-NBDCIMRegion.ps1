@@ -31,12 +31,12 @@ function Set-NBDCIMRegion {
         Return the raw API response
 
     .EXAMPLE
-        Set-NBDDCIM Region -Id 1 -Name "Western Europe"
+        Set-NBDCIMRegion -Id 1 -Name "Western Europe"
 
         Updates the name of region 1
 
     .EXAMPLE
-        Set-NBDDCIM Region -Id 1 -Description "Western European countries"
+        Set-NBDCIMRegion -Id 1 -Description "Western European countries"
 
         Updates the description of region 1
 #>
@@ -64,7 +64,7 @@ function Set-NBDCIMRegion {
     )
 
     process {
-        Write-Verbose "Updating DCIM Region"
+        Write-Verbose "Updating D CI MR eg io n"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'regions', $Id))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'

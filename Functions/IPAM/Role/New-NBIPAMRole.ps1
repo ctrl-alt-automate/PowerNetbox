@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Creates a new IPAM Role in Netbox IPAM module.
+    Creates a new PAMRole in Netbox I module.
 
 .DESCRIPTION
-    Creates a new IPAM Role in Netbox IPAM module.
+    Creates a new PAMRole in Netbox I module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBIIPAM Role
+    New-NBIPAMRole
 
-    Returns all IPAM Role objects.
+    Returns all PAMRole objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -30,7 +30,7 @@ function New-NBIPAMRole {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating IPAM Role"
+        Write-Verbose "Creating I PA MR ol e"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'roles'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         $URI = BuildNewURI -Segments $URIComponents.Segments

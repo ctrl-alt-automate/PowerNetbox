@@ -44,17 +44,17 @@ function Get-NBDCIMLocation {
         Return the raw API response
 
     .EXAMPLE
-        Get-NBDDCIM Location
+        Get-NBDCIMLocation
 
         Returns all locations
 
     .EXAMPLE
-        Get-NBDDCIM Location -Site_Id 1
+        Get-NBDCIMLocation -Site_Id 1
 
         Returns all locations at site with ID 1
 
     .EXAMPLE
-        Get-NBDDCIM Location -Name "Server Room"
+        Get-NBDCIMLocation -Name "Server Room"
 
         Returns locations matching the name "Server Room"
 #>
@@ -107,7 +107,7 @@ function Get-NBDCIMLocation {
     )
 
     process {
-        Write-Verbose "Retrieving DCIM Location"
+        Write-Verbose "Retrieving D CI ML oc at io n"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
                 foreach ($LocationId in $Id) {

@@ -9,7 +9,7 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBWWireless LAN
+    Get-NBWirelessLAN
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

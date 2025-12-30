@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Updates an existing DCIM Front PortTemplate in Netbox DCIM module.
+    Updates an existing CIMFrontPortTemplate in Netbox D module.
 
 .DESCRIPTION
-    Updates an existing DCIM Front PortTemplate in Netbox DCIM module.
+    Updates an existing CIMFrontPortTemplate in Netbox D module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBDDCIM Front PortTemplate
+    Set-NBDCIMFrontPortTemplate
 
-    Returns all DCIM Front PortTemplate objects.
+    Returns all CIMFrontPortTemplate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -34,7 +34,7 @@ function Set-NBDCIMFrontPortTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating DCIM Front Port Te mp la te"
+        Write-Verbose "Updating D CI MF ro nt Po rt Te mp la te"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','front-port-templates',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update front port template')) {

@@ -40,13 +40,13 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBVVirtualization Cluster -Name "Production vSphere" -Type 1
+    New-NBVirtualizationCluster -Name "Production vSphere" -Type 1
 
     Creates a new cluster with the specified name and type.
 
 .EXAMPLE
-    $type = Get-NBVVirtualization ClusterType -Name "VMware vSphere"
-    New-NBVVirtualization Cluster -Name "DC1-Cluster" -Type $type.Id -Site 1 -Status "active"
+    $type = Get-NBVirtualizationClusterType -Name "VMware vSphere"
+    New-NBVirtualizationCluster -Name "DC1-Cluster" -Type $type.Id -Site 1 -Status "active"
 
     Creates a new active cluster associated with a site.
 

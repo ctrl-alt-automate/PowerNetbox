@@ -9,7 +9,7 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBDDCIM Virtual Chassis
+    Get-NBDCIMVirtualChassis
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -38,7 +38,7 @@ function Get-NBDCIMVirtualChassis {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Retrieving DCIM Virtual Chassis"
+        Write-Verbose "Retrieving D CI MV ir tu al Ch as si s"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','virtual-chassis',$i)) -Raw:$Raw } }
             default {

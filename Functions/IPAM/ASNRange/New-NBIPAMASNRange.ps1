@@ -34,7 +34,7 @@ function New-NBIPAMASNRange {
         Return the raw API response
 
     .EXAMPLE
-        New-NBIIPAM ASNRange -Name "Private" -Slug "private" -RIR 1 -Start 64512 -End 65534
+        New-NBIPAMASNRange -Name "Private" -Slug "private" -RIR 1 -Start 64512 -End 65534
 
         Creates a private ASN range
 #>
@@ -72,7 +72,7 @@ function New-NBIPAMASNRange {
     )
 
     process {
-        Write-Verbose "Creating IPAM ASN Ra ng e"
+        Write-Verbose "Creating I PA MA SN Ra ng e"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'asn-ranges'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'

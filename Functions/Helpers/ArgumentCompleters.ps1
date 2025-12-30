@@ -430,7 +430,15 @@ function Register-NBArgumentCompleters {
     .SYNOPSIS
         Registers all argument completers for PowerNetbox functions.
     .DESCRIPTION
-        Call this function ArgumentCompleters { $_.CommandType -eq 'Function' }
+        Call this function to enable tab completion for common parameter values
+        across all PowerNetbox functions.
+    #>
+    [CmdletBinding()]
+    param()
+
+    # Get all PowerNetbox commands
+    $moduleCommands = Get-Command -Module PowerNetbox -ErrorAction SilentlyContinue |
+        Where-Object { $_.CommandType -eq 'Function' }
 
     if (-not $moduleCommands) {
         Write-Verbose "PowerNetbox module not loaded, skipping completer registration"
@@ -438,7 +446,7 @@ function Register-NBArgumentCompleters {
     }
 
     # Status completers - context-specific
-    $deviceCommands = $moduleCommands | Where-Object { $_.Name -match 'Device|VM|VVirtual Machine' }
+    $deviceCommands = $moduleCommands | Where-Object { $_.Name -match 'Device|VM|VirtualMachine' }
     $ipamCommands = $moduleCommands | Where-Object { $_.Name -match 'IPAM|Prefix|Address|VLAN' }
     $cableCommands = $moduleCommands | Where-Object { $_.Name -match 'Cable' }
     $circuitCommands = $moduleCommands | Where-Object { $_.Name -match 'Circuit' }

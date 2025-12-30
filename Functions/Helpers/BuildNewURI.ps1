@@ -1,11 +1,53 @@
-
+﻿
 function BuildNewURI {
 <#
     .SYNOPSIS
         Create a new URI for Netbox
 
     .DESCRIPTION
-        Internal function BuildNewURI {
+        Internal function used to build a URIBuilder object.
+
+    .PARAMETER Hostname
+        Hostname of the Netbox API
+
+    .PARAMETER Segments
+        Array of strings for each segment in the URL path
+
+    .PARAMETER Parameters
+        Hashtable of query parameters to include
+
+    .PARAMETER HTTPS
+        Whether to use HTTPS or HTTP
+
+    .PARAMETER Port
+        A description of the Port parameter.
+
+    .PARAMETER APIInfo
+        A description of the APIInfo parameter.
+
+    .EXAMPLE
+        PS C:\> BuildNewURI
+
+    .NOTES
+        Additional information about the function.
+#>
+
+    [CmdletBinding()]
+    [OutputType([System.UriBuilder])]
+    param
+    (
+        [Parameter(Mandatory = $false)]
+        [string[]]$Segments,
+
+        [Parameter(Mandatory = $false)]
+        [hashtable]$Parameters,
+
+        [switch]$SkipConnectedCheck
+    )
+
+    Write-Verbose "Building URI"
+
+    if (-not $SkipConnectedCheck) {
         # There is no point in continuing if we have not successfully connected to an API
         $null = CheckNetboxIsConnected
     }
@@ -21,18 +63,15 @@ function BuildNewURI {
     Write-Verbose " URIPath: $($uriBuilder.Path)"
 
     if ($parameters) {
-        # Build query string without System.Web dependency (cross-platform)
-        $QueryParts = [System.Collections.Generic.List[string]]::new()
+        # Loop through the parameters and use the HttpUtility to create a Query string
+        [System.Collections.Specialized.NameValueCollection]$URIParams = [System.Web.HttpUtility]::ParseQueryString([String]::Empty)
 
         foreach ($param in $Parameters.GetEnumerator()) {
             Write-Verbose " Adding URI parameter $($param.Key):$($param.Value)"
-            # URL encode key and value using .NET Uri class (available everywhere)
-            $EncodedKey = [System.Uri]::EscapeDataString($param.Key)
-            $EncodedValue = [System.Uri]::EscapeDataString([string]$param.Value)
-            $QueryParts.Add("$EncodedKey=$EncodedValue")
+            $URIParams[$param.Key] = $param.Value
         }
 
-        $uriBuilder.Query = $QueryParts -join '&'
+        $uriBuilder.Query = $URIParams.ToString()
     }
 
     Write-Verbose " Completed building URIBuilder"

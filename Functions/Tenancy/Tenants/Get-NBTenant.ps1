@@ -87,8 +87,8 @@ function Get-NBTenant {
         Write-Verbose "Retrieving Tenant"
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {
-            foreach ($Tenant_Id in $Id) {
-                $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'tenants', $Tenant_Id))
+            foreach ($Tenant_ID in $Id) {
+                $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'tenants', $Tenant_ID))
 
                 $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id'
 

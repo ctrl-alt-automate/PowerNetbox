@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Updates an existing IPAM RIR in Netbox IPAM module.
+    Updates an existing PAMRIR in Netbox I module.
 
 .DESCRIPTION
-    Updates an existing IPAM RIR in Netbox IPAM module.
+    Updates an existing PAMRIR in Netbox I module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBIIPAM RIR
+    Set-NBIPAMRIR
 
-    Returns all IPAM RIR objects.
+    Returns all PAMRIR objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -31,7 +31,7 @@ function Set-NBIPAMRIR {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating IPAM RIR"
+        Write-Verbose "Updating I PA MR IR"
         $Segments = [System.Collections.ArrayList]::new(@('ipam','rirs',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update RIR')) {

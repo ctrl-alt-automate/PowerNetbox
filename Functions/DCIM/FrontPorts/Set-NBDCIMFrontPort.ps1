@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Updates an existing DCIM Front Port in Netbox DCIM module.
+    Updates an existing CIMFrontPort in Netbox D module.
 
 .DESCRIPTION
-    Updates an existing DCIM Front Port in Netbox DCIM module.
+    Updates an existing CIMFrontPort in Netbox D module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBDDCIM Front Port
+    Set-NBDCIMFrontPort
 
-    Returns all DCIM Front Port objects.
+    Returns all CIMFrontPort objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -58,9 +58,9 @@ function Set-NBDCIMFrontPort {
     }
 
     process {
-        Write-Verbose "Updating DCIM Front Port"
+        Write-Verbose "Updating D CI MF ro nt Po rt"
         foreach ($FrontPortID in $Id) {
-            $CurrentPort = Get-NBDDCIM Front Port -Id $FrontPortID -ErrorAction Stop
+            $CurrentPort = Get-NBDCIMFrontPort -Id $FrontPortID -ErrorAction Stop
 
             $Segments = [System.Collections.ArrayList]::new(@('dcim', 'front-ports', $CurrentPort.Id))
 

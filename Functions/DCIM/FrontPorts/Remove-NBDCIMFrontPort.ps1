@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Removes a DCIM Front Port from Netbox DCIM module.
+    Removes a CIMFrontPort from Netbox D module.
 
 .DESCRIPTION
-    Removes a DCIM Front Port from Netbox DCIM module.
+    Removes a CIMFrontPort from Netbox D module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBDDCIM Front Port
+    Remove-NBDCIMFrontPort
 
-    Returns all DCIM Front Port objects.
+    Returns all CIMFrontPort objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -36,9 +36,9 @@ function Remove-NBDCIMFrontPort {
     }
 
     process {
-        Write-Verbose "Removing DCIM Front Port"
+        Write-Verbose "Removing D CI MF ro nt Po rt"
         foreach ($FrontPortID in $Id) {
-            $CurrentPort = Get-NBDDCIM Front Port -Id $FrontPortID -ErrorAction Stop
+            $CurrentPort = Get-NBDCIMFrontPort -Id $FrontPortID -ErrorAction Stop
 
             if ($Force -or $pscmdlet.ShouldProcess("Name: $($CurrentPort.Name) | ID: $($CurrentPort.Id)", "Remove")) {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'front-ports', $CurrentPort.Id))

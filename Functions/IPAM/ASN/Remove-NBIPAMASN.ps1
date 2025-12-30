@@ -13,7 +13,7 @@ function Remove-NBIPAMASN {
         Return the raw API response
 
     .EXAMPLE
-        Remove-NBIIPAM ASN -Id 1
+        Remove-NBIPAMASN -Id 1
 
         Deletes ASN with ID 1
 #>
@@ -29,7 +29,7 @@ function Remove-NBIPAMASN {
     )
 
     process {
-        Write-Verbose "Removing IPAM ASN"
+        Write-Verbose "Removing I PA MA SN"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'asns', $Id))
 
         $URI = BuildNewURI -Segments $Segments

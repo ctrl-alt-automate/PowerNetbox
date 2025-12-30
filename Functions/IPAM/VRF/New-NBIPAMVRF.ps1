@@ -37,12 +37,12 @@ function New-NBIPAMVRF {
         Return the raw API response
 
     .EXAMPLE
-        New-NBIIPAM VRF -Name "Production"
+        New-NBIPAMVRF -Name "Production"
 
         Creates a new VRF named "Production"
 
     .EXAMPLE
-        New-NBIIPAM VRF -Name "Customer-A" -RD "65001:100" -Enforce_Unique $true
+        New-NBIPAMVRF -Name "Customer-A" -RD "65001:100" -Enforce_Unique $true
 
         Creates a new VRF with route distinguisher and unique enforcement
 #>
@@ -75,7 +75,7 @@ function New-NBIPAMVRF {
     )
 
     process {
-        Write-Verbose "Creating IPAM VRF"
+        Write-Verbose "Creating I PA MV RF"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'vrfs'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'

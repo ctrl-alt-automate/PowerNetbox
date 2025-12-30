@@ -19,7 +19,6 @@
 #>
 
 function Test-NBAPIConnected {
-    Write-Verbose "Testing API Connected"
     [CmdletBinding()]
     [OutputType([PSCustomObject])]
     param ()

@@ -4,7 +4,7 @@
 
 .DESCRIPTION
     Removes a cluster group from the Netbox virtualization module.
-    Supports pipeline input from Get-NBVVirtualization ClusterGroup.
+    Supports pipeline input from Get-NBVirtualizationClusterGroup.
 
 .PARAMETER Id
     The database ID(s) of the cluster group(s) to remove. Accepts pipeline input.
@@ -16,12 +16,12 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBVVirtualization ClusterGroup -Id 1
+    Remove-NBVirtualizationClusterGroup -Id 1
 
     Removes cluster group ID 1 (with confirmation prompt).
 
 .EXAMPLE
-    Get-NBVVirtualization ClusterGroup | Where-Object { $_.cluster_count -eq 0 } | Remove-NBVVirtualization ClusterGroup -Force
+    Get-NBVirtualizationClusterGroup | Where-Object { $_.cluster_count -eq 0 } | Remove-NBVirtualizationClusterGroup -Force
 
     Removes all empty cluster groups without confirmation.
 
@@ -44,7 +44,7 @@ function Remove-NBVirtualizationClusterGroup {
     process {
         Write-Verbose "Removing Virtualization Cluster Group"
         foreach ($GroupId in $Id) {
-            $CurrentGroup = Get-NBVVirtualization ClusterGroup -Id $GroupId -ErrorAction Stop
+            $CurrentGroup = Get-NBVirtualizationClusterGroup -Id $GroupId -ErrorAction Stop
 
             $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'cluster-groups', $CurrentGroup.Id))
 

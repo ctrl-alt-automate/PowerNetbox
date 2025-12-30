@@ -13,12 +13,12 @@ function Remove-NBDCIMLocation {
         Return the raw API response
 
     .EXAMPLE
-        Remove-NBDDCIM Location -Id 1
+        Remove-NBDCIMLocation -Id 1
 
         Deletes location with ID 1
 
     .EXAMPLE
-        Get-NBDDCIM Location -Name "Old Room" | Remove-NBDDCIM Location
+        Get-NBDCIMLocation -Name "Old Room" | Remove-NBDCIMLocation
 
         Deletes locations matching the name "Old Room"
 #>
@@ -34,7 +34,7 @@ function Remove-NBDCIMLocation {
     )
 
     process {
-        Write-Verbose "Removing DCIM Location"
+        Write-Verbose "Removing D CI ML oc at io n"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'locations', $Id))
 
         $URI = BuildNewURI -Segments $Segments

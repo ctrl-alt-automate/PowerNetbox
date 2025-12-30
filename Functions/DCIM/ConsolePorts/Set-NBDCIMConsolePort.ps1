@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Updates an existing DCIM Console Port in Netbox DCIM module.
+    Updates an existing CIMConsolePort in Netbox D module.
 
 .DESCRIPTION
-    Updates an existing DCIM Console Port in Netbox DCIM module.
+    Updates an existing CIMConsolePort in Netbox D module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBDDCIM Console Port
+    Set-NBDCIMConsolePort
 
-    Returns all DCIM Console Port objects.
+    Returns all CIMConsolePort objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -35,7 +35,7 @@ function Set-NBDCIMConsolePort {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating DCIM Console Port"
+        Write-Verbose "Updating D CI MC on so le Po rt"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','console-ports',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update console port')) {

@@ -22,12 +22,12 @@ function New-NBDCIMManufacturer {
         Return the raw API response
 
     .EXAMPLE
-        New-NBDDCIM Manufacturer -Name "Cisco" -Slug "cisco"
+        New-NBDCIMManufacturer -Name "Cisco" -Slug "cisco"
 
         Creates a new manufacturer named "Cisco"
 
     .EXAMPLE
-        New-NBDDCIM Manufacturer -Name "Dell Technologies" -Slug "dell" -Description "Server and storage manufacturer"
+        New-NBDCIMManufacturer -Name "Dell Technologies" -Slug "dell" -Description "Server and storage manufacturer"
 
         Creates a new manufacturer with description
 #>
@@ -52,7 +52,7 @@ function New-NBDCIMManufacturer {
     )
 
     process {
-        Write-Verbose "Creating DCIM Manufacturer"
+        Write-Verbose "Creating D CI MM an uf ac tu re r"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'manufacturers'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'

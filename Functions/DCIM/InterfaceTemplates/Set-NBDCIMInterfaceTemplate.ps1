@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Updates an existing DCIM Interface Template in Netbox DCIM module.
+    Updates an existing CIMInterfaceTemplate in Netbox D module.
 
 .DESCRIPTION
-    Updates an existing DCIM Interface Template in Netbox DCIM module.
+    Updates an existing CIMInterfaceTemplate in Netbox D module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBDDCIM Interface Template
+    Set-NBDCIMInterfaceTemplate
 
-    Returns all DCIM Interface Template objects.
+    Returns all CIMInterfaceTemplate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -36,7 +36,7 @@ function Set-NBDCIMInterfaceTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating DCIM Interface Te mp la te"
+        Write-Verbose "Updating D CI MI nt er fa ce Te mp la te"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','interface-templates',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update interface template')) {

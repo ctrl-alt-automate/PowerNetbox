@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Creates a new Wireless LAN in Netbox Wireless module.
+    Creates a new irelessLAN in Netbox W module.
 
 .DESCRIPTION
-    Creates a new Wireless LAN in Netbox Wireless module.
+    Creates a new irelessLAN in Netbox W module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBWWireless LAN
+    New-NBWirelessLAN
 
-    Returns all Wireless LAN objects.
+    Returns all irelessLAN objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

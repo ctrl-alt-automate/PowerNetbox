@@ -33,7 +33,6 @@
     Connect-NBAPI
 #>
 function Get-ModelDefinition {
-    Write-Verbose "Retrieving Model Definition"
     [CmdletBinding(DefaultParameterSetName = 'ByName')]
     [OutputType([PSCustomObject])]
     param

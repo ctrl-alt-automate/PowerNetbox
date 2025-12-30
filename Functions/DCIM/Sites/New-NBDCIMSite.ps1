@@ -5,7 +5,7 @@
      Created on:    2020-10-02 15:52
      Created by:    Claussen
      Organization:  NEOnet
-     Filename:      New-NBDDCIM Site.ps1
+     Filename:      New-NBDCIMSite.ps1
     ===========================================================================
     .DESCRIPTION
         A description of the file.
@@ -22,7 +22,7 @@ function New-NBDCIMSite {
         Create a new Site to Netbox
 
     .EXAMPLE
-        New-NBDDCIM Site -name MySite
+        New-NBDCIMSite -name MySite
 
         Add new Site MySite on Netbox
 
@@ -69,7 +69,7 @@ function New-NBDCIMSite {
     )
 
     process {
-        Write-Verbose "Creating DCIM Site"
+        Write-Verbose "Creating D CI MS it e"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'sites'))
         $Method = 'POST'
 

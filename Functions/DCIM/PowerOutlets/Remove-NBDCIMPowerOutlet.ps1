@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Removes a DCIM Power Outlet from Netbox DCIM module.
+    Removes a CIMPowerOutlet from Netbox D module.
 
 .DESCRIPTION
-    Removes a DCIM Power Outlet from Netbox DCIM module.
+    Removes a CIMPowerOutlet from Netbox D module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBDDCIM Power Outlet
+    Remove-NBDCIMPowerOutlet
 
-    Returns all DCIM Power Outlet objects.
+    Returns all CIMPowerOutlet objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -25,7 +25,7 @@ function Remove-NBDCIMPowerOutlet {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing DCIM Power Outlet"
+        Write-Verbose "Removing D CI MP ow er Ou tl et"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete power outlet')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','power-outlets',$Id)) -Method DELETE -Raw:$Raw
         }

@@ -9,7 +9,7 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBDDCIM Console Port
+    Get-NBDCIMConsolePort
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -36,7 +36,7 @@ function Get-NBDCIMConsolePort {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Retrieving DCIM Console Port"
+        Write-Verbose "Retrieving D CI MC on so le Po rt"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','console-ports',$i)) -Raw:$Raw } }
             default {

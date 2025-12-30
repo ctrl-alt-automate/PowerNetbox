@@ -55,7 +55,7 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBIIPAM Prefix -Prefix "10.0.0.0/24" -Status "active" -Site 1
+    New-NBIPAMPrefix -Prefix "10.0.0.0/24" -Status "active" -Site 1
 
     Creates a single prefix.
 
@@ -63,12 +63,12 @@
     $prefixes = 1..50 | ForEach-Object {
         [PSCustomObject]@{Prefix="10.$_.0.0/24"; Status="active"; Site=1}
     }
-    $prefixes | New-NBIIPAM Prefix -BatchSize 50 -Force
+    $prefixes | New-NBIPAMPrefix -BatchSize 50 -Force
 
     Creates 50 prefixes in bulk using a single API call.
 
 .EXAMPLE
-    Import-Csv subnets.csv | New-NBIIPAM Prefix -BatchSize 100 -Force
+    Import-Csv subnets.csv | New-NBIPAMPrefix -BatchSize 100 -Force
 
     Bulk import prefixes from a CSV file.
 

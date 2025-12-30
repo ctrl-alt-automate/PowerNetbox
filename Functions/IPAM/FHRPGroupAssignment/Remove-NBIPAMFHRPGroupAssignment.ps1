@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Removes a IPAM FHRP GroupAssignment from Netbox IPAM module.
+    Removes a PAMFHRPGroupAssignment from Netbox I module.
 
 .DESCRIPTION
-    Removes a IPAM FHRP GroupAssignment from Netbox IPAM module.
+    Removes a PAMFHRPGroupAssignment from Netbox I module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBIIPAM FHRP GroupAssignment
+    Remove-NBIPAMFHRPGroupAssignment
 
-    Returns all IPAM FHRP GroupAssignment objects.
+    Returns all PAMFHRPGroupAssignment objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -25,7 +25,7 @@ function Remove-NBIPAMFHRPGroupAssignment {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing IPAM FHRP Group As si gn me nt"
+        Write-Verbose "Removing I PA MF HR PG ro up As si gn me nt"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete FHRP group assignment')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('ipam','fhrp-group-assignments',$Id)) -Method DELETE -Raw:$Raw
         }

@@ -8,19 +8,16 @@ function Set-NBCipherSSL {
         This is required for PowerShell Desktop (5.1) which defaults to older protocols.
         PowerShell Core (7+) already uses modern TLS by default.
 
-    .EXAMPLE
-        Set-NBCipherSSL
-
-        Enables TLS 1.2 (and TLS 1.3 if available) for the current PowerShell session.
-
-    .EXAMPLE
-        Set-NBCipherSSL
-        Connect-NBAPI -Hostname "netbox.example.com" -Credential $cred
-
-        Configures TLS before connecting to a Netbox instance that requires modern protocols.
-
     .NOTES
-        This function Set-NBCipherSSL {
+        This function should only be called on PowerShell Desktop edition.
+        SSL3 and TLS 1.0/1.1 are intentionally excluded as they are deprecated.
+    #>
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessForStateChangingFunctions", "")]
+    [CmdletBinding()]
+    param()
+
+    # Only apply to Desktop edition (PS 5.1)
+    if ($PSVersionTable.PSEdition -ne 'Desktop') {
         Write-Verbose "Skipping TLS configuration - PowerShell Core uses modern TLS by default"
         return
     }

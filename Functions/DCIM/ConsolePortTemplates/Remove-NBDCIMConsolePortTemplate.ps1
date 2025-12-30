@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Removes a DCIM Console PortTemplate from Netbox DCIM module.
+    Removes a CIMConsolePortTemplate from Netbox D module.
 
 .DESCRIPTION
-    Removes a DCIM Console PortTemplate from Netbox DCIM module.
+    Removes a CIMConsolePortTemplate from Netbox D module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBDDCIM Console PortTemplate
+    Remove-NBDCIMConsolePortTemplate
 
-    Returns all DCIM Console PortTemplate objects.
+    Returns all CIMConsolePortTemplate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -25,7 +25,7 @@ function Remove-NBDCIMConsolePortTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing DCIM Console Port Te mp la te"
+        Write-Verbose "Removing D CI MC on so le Po rt Te mp la te"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete console port template')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','console-port-templates',$Id)) -Method DELETE -Raw:$Raw
         }

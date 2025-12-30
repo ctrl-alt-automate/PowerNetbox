@@ -72,14 +72,14 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBDDCIM Device -Id 123 -Status "active"
+    Set-NBDCIMDevice -Id 123 -Status "active"
 
     Updates device 123 to active status.
 
 .EXAMPLE
-    Get-NBDDCIM Device -Status "planned" | ForEach-Object {
+    Get-NBDCIMDevice -Status "planned" | ForEach-Object {
         [PSCustomObject]@{Id = $_.id; Status = "active"}
-    } | Set-NBDDCIM Device -Force
+    } | Set-NBDCIMDevice -Force
 
     Bulk update all planned devices to active status.
 
@@ -88,7 +88,7 @@
         [PSCustomObject]@{Id = 100; Status = "active"; Comments = "Deployed"}
         [PSCustomObject]@{Id = 101; Status = "active"; Comments = "Deployed"}
     )
-    $updates | Set-NBDDCIM Device -BatchSize 50 -Force
+    $updates | Set-NBDCIMDevice -BatchSize 50 -Force
 
     Bulk update multiple devices with different values.
 
@@ -195,7 +195,7 @@ function Set-NBDCIMDevice {
     process {
         if ($PSCmdlet.ParameterSetName -eq 'Single') {
             foreach ($DeviceID in $Id) {
-                $CurrentDevice = Get-NBDDCIM Device -Id $DeviceID -ErrorAction Stop
+                $CurrentDevice = Get-NBDCIMDevice -Id $DeviceID -ErrorAction Stop
 
                 if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentDevice.Name)", "Update device")) {
                     $DeviceSegments = [System.Collections.ArrayList]::new(@('dcim', 'devices', $CurrentDevice.Id))

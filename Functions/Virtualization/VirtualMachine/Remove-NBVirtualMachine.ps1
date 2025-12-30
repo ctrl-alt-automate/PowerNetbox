@@ -23,12 +23,12 @@
     Skip confirmation prompts.
 
 .EXAMPLE
-    Remove-NBVVirtual Machine -Id 123 -Force
+    Remove-NBVirtualMachine -Id 123 -Force
 
     Deletes VM with ID 123 without confirmation.
 
 .EXAMPLE
-    Get-NBVVirtual Machine -Status "decommissioning" | Remove-NBVVirtual Machine -Force
+    Get-NBVirtualMachine -Status "decommissioning" | Remove-NBVirtualMachine -Force
 
     Bulk delete all VMs with decommissioning status.
 
@@ -38,7 +38,7 @@
         [PSCustomObject]@{Id = 101}
         [PSCustomObject]@{Id = 102}
     )
-    $vmsToDelete | Remove-NBVVirtual Machine -BatchSize 50 -Force
+    $vmsToDelete | Remove-NBVirtualMachine -BatchSize 50 -Force
 
     Bulk delete multiple VMs.
 
@@ -82,7 +82,7 @@ function Remove-NBVirtualMachine {
     process {
         if ($PSCmdlet.ParameterSetName -eq 'Single') {
             foreach ($VMId in $Id) {
-                $CurrentVM = Get-NBVVirtual Machine -Id $VMId -ErrorAction Stop
+                $CurrentVM = Get-NBVirtualMachine -Id $VMId -ErrorAction Stop
 
                 if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentVM.Name)/$($CurrentVM.Id)", "Remove")) {
                     $VMSegments = [System.Collections.ArrayList]::new(@('virtualization', 'virtual-machines', $CurrentVM.Id))

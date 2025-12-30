@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Removes a DCIM Virtual Chassis from Netbox DCIM module.
+    Removes a CIMVirtualChassis from Netbox D module.
 
 .DESCRIPTION
-    Removes a DCIM Virtual Chassis from Netbox DCIM module.
+    Removes a CIMVirtualChassis from Netbox D module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBDDCIM Virtual Chassis
+    Remove-NBDCIMVirtualChassis
 
-    Returns all DCIM Virtual Chassis objects.
+    Returns all CIMVirtualChassis objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -25,7 +25,7 @@ function Remove-NBDCIMVirtualChassis {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing DCIM Virtual Chassis"
+        Write-Verbose "Removing D CI MV ir tu al Ch as si s"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete virtual chassis')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','virtual-chassis',$Id)) -Method DELETE -Raw:$Raw
         }

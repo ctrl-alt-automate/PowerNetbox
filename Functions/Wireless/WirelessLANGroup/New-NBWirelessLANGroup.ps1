@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Creates a new Wireless LANGroup in Netbox Wireless module.
+    Creates a new irelessLANGroup in Netbox W module.
 
 .DESCRIPTION
-    Creates a new Wireless LANGroup in Netbox Wireless module.
+    Creates a new irelessLANGroup in Netbox W module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBWWireless LANGroup
+    New-NBWirelessLANGroup
 
-    Returns all Wireless LANGroup objects.
+    Returns all irelessLANGroup objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

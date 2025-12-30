@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Updates an existing DCIM Rear Port in Netbox DCIM module.
+    Updates an existing CIMRearPort in Netbox D module.
 
 .DESCRIPTION
-    Updates an existing DCIM Rear Port in Netbox DCIM module.
+    Updates an existing CIMRearPort in Netbox D module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBDDCIM Rear Port
+    Set-NBDCIMRearPort
 
-    Returns all DCIM Rear Port objects.
+    Returns all CIMRearPort objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -57,9 +57,9 @@ function Set-NBDCIMRearPort {
     }
 
     process {
-        Write-Verbose "Updating DCIM Rear Port"
+        Write-Verbose "Updating D CI MR ea rP or t"
         foreach ($RearPortID in $Id) {
-            $CurrentPort = Get-NBDDCIM Rear Port -Id $RearPortID -ErrorAction Stop
+            $CurrentPort = Get-NBDCIMRearPort -Id $RearPortID -ErrorAction Stop
 
             $Segments = [System.Collections.ArrayList]::new(@('dcim', 'rear-ports', $CurrentPort.Id))
 

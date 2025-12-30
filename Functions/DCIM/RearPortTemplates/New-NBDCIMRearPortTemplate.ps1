@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Creates a new DCIM Rear PortTemplate in Netbox DCIM module.
+    Creates a new CIMRearPortTemplate in Netbox D module.
 
 .DESCRIPTION
-    Creates a new DCIM Rear PortTemplate in Netbox DCIM module.
+    Creates a new CIMRearPortTemplate in Netbox D module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBDDCIM Rear PortTemplate
+    New-NBDCIMRearPortTemplate
 
-    Returns all DCIM Rear PortTemplate objects.
+    Returns all CIMRearPortTemplate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -32,7 +32,7 @@ function New-NBDCIMRearPortTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating DCIM Rear PortT em pl at e"
+        Write-Verbose "Creating D CI MR ea rP or tT em pl at e"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','rear-port-templates'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create rear port template')) {

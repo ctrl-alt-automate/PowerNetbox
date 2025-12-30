@@ -8,7 +8,7 @@ function Get-NBIPAMAvailableIP {
         By default, the number of IPs returned will be equivalent to PAGINATE_COUNT. An arbitrary limit
         (up to MAX_PAGE_SIZE, if set) may be passed, however results will not be paginated
 
-    .PARAMETER Prefix_Id
+    .PARAMETER Prefix_ID
         Database ID of the prefix to get available IPs from.
 
     .PARAMETER Limit
@@ -21,7 +21,7 @@ function Get-NBIPAMAvailableIP {
         Number of available IPs to return (alias for Limit).
 
     .EXAMPLE
-        Get-NBIPAMAvailableIP -Prefix_ID (Get-NBIIPAM Prefix -Prefix 192.0.2.0/24).id
+        Get-NBIPAMAvailableIP -Prefix_ID (Get-NBIPAMPrefix -Prefix 192.0.2.0/24).id
 
         Get (Next) Available IP on the Prefix 192.0.2.0/24
 
@@ -44,7 +44,7 @@ function Get-NBIPAMAvailableIP {
         [Parameter(Mandatory = $true,
             ValueFromPipelineByPropertyName = $true)]
         [Alias('Id')]
-        [uint64]$Prefix_Id,
+        [uint64]$Prefix_ID,
 
         [Alias('NumberOfIPs')]
         [uint64]$Limit,
@@ -54,7 +54,7 @@ function Get-NBIPAMAvailableIP {
 
     process {
         Write-Verbose "Retrieving I PA MA va il ab le IP"
-        $Segments = [System.Collections.ArrayList]::new(@('ipam', 'prefixes', $Prefix_Id, 'available-ips'))
+        $Segments = [System.Collections.ArrayList]::new(@('ipam', 'prefixes', $Prefix_ID, 'available-ips'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'prefix_id'
 

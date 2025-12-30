@@ -43,12 +43,12 @@ function Set-NBDCIMLocation {
         Return the raw API response
 
     .EXAMPLE
-        Set-NBDDCIM Location -Id 1 -Name "Server Room A"
+        Set-NBDCIMLocation -Id 1 -Name "Server Room A"
 
         Updates the name of location 1
 
     .EXAMPLE
-        Set-NBDDCIM Location -Id 1 -Status retired
+        Set-NBDCIMLocation -Id 1 -Status retired
 
         Marks location 1 as retired
 #>
@@ -85,7 +85,7 @@ function Set-NBDCIMLocation {
     )
 
     process {
-        Write-Verbose "Updating DCIM Location"
+        Write-Verbose "Updating D CI ML oc at io n"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'locations', $Id))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'

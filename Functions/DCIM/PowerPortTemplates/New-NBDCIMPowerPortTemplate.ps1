@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Creates a new DCIM Power PortTemplate in Netbox DCIM module.
+    Creates a new CIMPowerPortTemplate in Netbox D module.
 
 .DESCRIPTION
-    Creates a new DCIM Power PortTemplate in Netbox DCIM module.
+    Creates a new CIMPowerPortTemplate in Netbox D module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBDDCIM Power PortTemplate
+    New-NBDCIMPowerPortTemplate
 
-    Returns all DCIM Power PortTemplate objects.
+    Returns all CIMPowerPortTemplate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -32,7 +32,7 @@ function New-NBDCIMPowerPortTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating DCIM Power Port Te mp la te"
+        Write-Verbose "Creating D CI MP ow er Po rt Te mp la te"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','power-port-templates'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create power port template')) {

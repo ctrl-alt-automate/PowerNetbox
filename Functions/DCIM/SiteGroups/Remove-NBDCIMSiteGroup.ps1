@@ -13,12 +13,12 @@ function Remove-NBDCIMSiteGroup {
         Return the raw API response
 
     .EXAMPLE
-        Remove-NBDDCIM SiteGroup -Id 1
+        Remove-NBDCIMSiteGroup -Id 1
 
         Deletes site group with ID 1
 
     .EXAMPLE
-        Get-NBDDCIM SiteGroup -Name "Old Group" | Remove-NBDDCIM SiteGroup
+        Get-NBDCIMSiteGroup -Name "Old Group" | Remove-NBDCIMSiteGroup
 
         Deletes site groups matching the name "Old Group"
 #>
@@ -34,7 +34,7 @@ function Remove-NBDCIMSiteGroup {
     )
 
     process {
-        Write-Verbose "Removing DCIM SiteG ro up"
+        Write-Verbose "Removing D CI MS it eG ro up"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'site-groups', $Id))
 
         $URI = BuildNewURI -Segments $Segments

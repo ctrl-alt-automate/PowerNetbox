@@ -9,7 +9,7 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBDDCIM Rear Port
+    Get-NBDCIMRearPort
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -45,7 +45,7 @@ function Get-NBDCIMRearPort {
     )
 
     process {
-        Write-Verbose "Retrieving DCIM Rear Port"
+        Write-Verbose "Retrieving D CI MR ea rP or t"
 
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'rear-ports'))
 

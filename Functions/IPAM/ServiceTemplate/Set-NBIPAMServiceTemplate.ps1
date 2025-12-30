@@ -31,7 +31,7 @@ function Set-NBIPAMServiceTemplate {
         Return the raw API response
 
     .EXAMPLE
-        Set-NBIIPAM ServiceTemplate -Id 1 -Ports @(80, 443, 8080)
+        Set-NBIPAMServiceTemplate -Id 1 -Ports @(80, 443, 8080)
 
         Updates service template 1 with new ports
 #>
@@ -60,7 +60,7 @@ function Set-NBIPAMServiceTemplate {
     )
 
     process {
-        Write-Verbose "Updating IPAM Service Te mp la te"
+        Write-Verbose "Updating I PA MS er vi ce Te mp la te"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'service-templates', $Id))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'

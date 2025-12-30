@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Creates a new DCIM Virtual Chassis in Netbox DCIM module.
+    Creates a new CIMVirtualChassis in Netbox D module.
 
 .DESCRIPTION
-    Creates a new DCIM Virtual Chassis in Netbox DCIM module.
+    Creates a new CIMVirtualChassis in Netbox D module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBDDCIM Virtual Chassis
+    New-NBDCIMVirtualChassis
 
-    Returns all DCIM Virtual Chassis objects.
+    Returns all CIMVirtualChassis objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -31,7 +31,7 @@ function New-NBDCIMVirtualChassis {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating DCIM Virtual Chassis"
+        Write-Verbose "Creating D CI MV ir tu al Ch as si s"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','virtual-chassis'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create virtual chassis')) {

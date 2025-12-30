@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Removes a VPN Tunnel from Netbox VPN module.
+    Removes a PNTunnel from Netbox V module.
 
 .DESCRIPTION
-    Removes a VPN Tunnel from Netbox VPN module.
+    Removes a PNTunnel from Netbox V module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBVVPN Tunnel
+    Remove-NBVPNTunnel
 
-    Returns all VPN Tunnel objects.
+    Returns all PNTunnel objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -26,7 +26,7 @@ function Remove-NBVPNTunnel {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing VPN Tunnel"
+        Write-Verbose "Removing V PN Tu nn el"
         $Segments = [System.Collections.ArrayList]::new(@('vpn', 'tunnels', $Id))
         $URI = BuildNewURI -Segments $Segments
         if ($PSCmdlet.ShouldProcess($Id, 'Delete VPN tunnel')) {

@@ -34,12 +34,12 @@ function Get-NBIPAMASN {
         Return the raw API response
 
     .EXAMPLE
-        Get-NBIIPAM ASN
+        Get-NBIPAMASN
 
         Returns all ASNs
 
     .EXAMPLE
-        Get-NBIIPAM ASN -ASN 65001
+        Get-NBIPAMASN -ASN 65001
 
         Returns ASN 65001
 #>
@@ -82,7 +82,7 @@ function Get-NBIPAMASN {
     )
 
     process {
-        Write-Verbose "Retrieving IPAM ASN"
+        Write-Verbose "Retrieving I PA MA SN"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
                 foreach ($ASNId in $Id) {

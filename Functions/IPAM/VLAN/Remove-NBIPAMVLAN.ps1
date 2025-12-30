@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Removes a IPAM VLAN from Netbox IPAM module.
+    Removes a PAMVLAN from Netbox I module.
 
 .DESCRIPTION
-    Removes a IPAM VLAN from Netbox IPAM module.
+    Removes a PAMVLAN from Netbox I module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBIIPAM VLAN
+    Remove-NBIPAMVLAN
 
-    Returns all IPAM VLAN objects.
+    Returns all PAMVLAN objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -25,7 +25,7 @@ function Remove-NBIPAMVLAN {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing IPAM VLAN"
+        Write-Verbose "Removing I PA MV LA N"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete VLAN')) {
             $Segments = [System.Collections.ArrayList]::new(@('ipam', 'vlans', $Id))
             $URI = BuildNewURI -Segments $Segments

@@ -13,7 +13,7 @@ function Remove-NBIPAMServiceTemplate {
         Return the raw API response
 
     .EXAMPLE
-        Remove-NBIIPAM ServiceTemplate -Id 1
+        Remove-NBIPAMServiceTemplate -Id 1
 
         Deletes service template with ID 1
 #>
@@ -29,7 +29,7 @@ function Remove-NBIPAMServiceTemplate {
     )
 
     process {
-        Write-Verbose "Removing IPAM Service Te mp la te"
+        Write-Verbose "Removing I PA MS er vi ce Te mp la te"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'service-templates', $Id))
 
         $URI = BuildNewURI -Segments $Segments

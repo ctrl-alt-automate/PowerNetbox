@@ -18,7 +18,6 @@
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 function Set-NBHostScheme {
-    Write-Verbose "Updating Host Scheme"
     [CmdletBinding(ConfirmImpact = 'Low',
                    SupportsShouldProcess = $true)]
     [OutputType([string])]

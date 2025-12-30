@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Removes a IPAM VLANTranslationRule from Netbox IPAM module.
+    Removes a PAMVLANTranslationRule from Netbox I module.
 
 .DESCRIPTION
-    Removes a IPAM VLANTranslationRule from Netbox IPAM module.
+    Removes a PAMVLANTranslationRule from Netbox I module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBIIPAM VLANTranslationRule
+    Remove-NBIPAMVLANTranslationRule
 
-    Returns all IPAM VLANTranslationRule objects.
+    Returns all PAMVLANTranslationRule objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -25,7 +25,7 @@ function Remove-NBIPAMVLANTranslationRule {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing IPAM VLANT ra ns la ti on Ru le"
+        Write-Verbose "Removing I PA MV LA NT ra ns la ti on Ru le"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete VLAN translation rule')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('ipam','vlan-translation-rules',$Id)) -Method DELETE -Raw:$Raw
         }

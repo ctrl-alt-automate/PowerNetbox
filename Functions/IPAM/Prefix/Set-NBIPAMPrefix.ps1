@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Updates an existing IPAM Prefix in Netbox IPAM module.
+    Updates an existing PAMPrefix in Netbox I module.
 
 .DESCRIPTION
-    Updates an existing IPAM Prefix in Netbox IPAM module.
+    Updates an existing PAMPrefix in Netbox I module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBIIPAM Prefix
+    Set-NBIPAMPrefix
 
-    Returns all IPAM Prefix objects.
+    Returns all PAMPrefix objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -77,7 +77,7 @@ function Set-NBIPAMPrefix {
             $Segments = [System.Collections.ArrayList]::new(@('ipam', 'prefixes', $PrefixId))
 
             Write-Verbose "Obtaining Prefix from ID $PrefixId"
-            $CurrentPrefix = Get-NBIIPAM Prefix -Id $PrefixId -ErrorAction Stop
+            $CurrentPrefix = Get-NBIPAMPrefix -Id $PrefixId -ErrorAction Stop
 
             if ($Force -or $PSCmdlet.ShouldProcess($CurrentPrefix.Prefix, 'Set')) {
                 $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force'

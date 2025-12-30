@@ -32,12 +32,12 @@ function Get-NBIPAMServiceTemplate {
         Return the raw API response
 
     .EXAMPLE
-        Get-NBIIPAM ServiceTemplate
+        Get-NBIPAMServiceTemplate
 
         Returns all service templates
 
     .EXAMPLE
-        Get-NBIIPAM ServiceTemplate -Name "HTTP"
+        Get-NBIPAMServiceTemplate -Name "HTTP"
 
         Returns service templates matching the name "HTTP"
 #>
@@ -78,7 +78,7 @@ function Get-NBIPAMServiceTemplate {
     )
 
     process {
-        Write-Verbose "Retrieving IPAM Service Te mp la te"
+        Write-Verbose "Retrieving I PA MS er vi ce Te mp la te"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
                 foreach ($TemplateId in $Id) {

@@ -75,7 +75,7 @@ function Get-NBIPAMPrefix {
         Return the raw API response instead of extracting the results array.
 
     .EXAMPLE
-        PS C:\> Get-NBIIPAM Prefix
+        PS C:\> Get-NBIPAMPrefix
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]
@@ -160,7 +160,7 @@ function Get-NBIPAMPrefix {
     )
 
     process {
-        Write-Verbose "Retrieving IPAM Prefix"
+        Write-Verbose "Retrieving I PA MP re fi x"
         #    if ($null -ne $Family) {
         #        $PSBoundParameters.Family = ValidateIPAMChoice -ProvidedValue $Family -PrefixFamily
         #    }
@@ -171,8 +171,8 @@ function Get-NBIPAMPrefix {
 
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {
-            foreach ($Prefix_Id in $Id) {
-                $Segments = [System.Collections.ArrayList]::new(@('ipam', 'prefixes', $Prefix_Id))
+            foreach ($Prefix_ID in $Id) {
+                $Segments = [System.Collections.ArrayList]::new(@('ipam', 'prefixes', $Prefix_ID))
 
                 $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id'
 

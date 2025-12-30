@@ -15,7 +15,6 @@
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 function Get-NBVersion {
-    Write-Verbose "Retrieving Version"
     [CmdletBinding()]
     [OutputType([PSCustomObject])]
     param ()

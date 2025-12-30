@@ -9,7 +9,7 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBDDCIM Virtual Device Context
+    Get-NBDCIMVirtualDeviceContext
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -38,7 +38,7 @@ function Get-NBDCIMVirtualDeviceContext {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Retrieving DCIM Virtual Device Context"
+        Write-Verbose "Retrieving D CI MV ir tu al De vi ce Co nt ex t"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','virtual-device-contexts',$i)) -Raw:$Raw } }
             default {

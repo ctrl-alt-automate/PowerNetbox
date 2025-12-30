@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Updates an existing DCIM Power Feed in Netbox DCIM module.
+    Updates an existing CIMPowerFeed in Netbox D module.
 
 .DESCRIPTION
-    Updates an existing DCIM Power Feed in Netbox DCIM module.
+    Updates an existing CIMPowerFeed in Netbox D module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBDDCIM Power Feed
+    Set-NBDCIMPowerFeed
 
-    Returns all DCIM Power Feed objects.
+    Returns all CIMPowerFeed objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -40,7 +40,7 @@ function Set-NBDCIMPowerFeed {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating DCIM Power Feed"
+        Write-Verbose "Updating D CI MP ow er Fe ed"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','power-feeds',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update power feed')) {

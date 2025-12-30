@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Updates an existing VPN L2VPNTermination in Netbox VPN module.
+    Updates an existing PNL2VPNTermination in Netbox V module.
 
 .DESCRIPTION
-    Updates an existing VPN L2VPNTermination in Netbox VPN module.
+    Updates an existing PNL2VPNTermination in Netbox V module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBVVPN L2VPNTermination
+    Set-NBVPNL2VPNTermination
 
-    Returns all VPN L2VPNTermination objects.
+    Returns all PNL2VPNTermination objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

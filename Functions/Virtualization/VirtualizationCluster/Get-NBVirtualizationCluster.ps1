@@ -44,7 +44,7 @@ function Get-NBVirtualizationCluster {
         Return the raw API response instead of extracting the results array.
 
     .EXAMPLE
-        PS C:\> Get-NBVVirtualization Cluster
+        PS C:\> Get-NBVirtualizationCluster
 #>
 
     [CmdletBinding()]

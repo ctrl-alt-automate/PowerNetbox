@@ -13,12 +13,12 @@ function Remove-NBIPAMRouteTarget {
         Return the raw API response
 
     .EXAMPLE
-        Remove-NBIIPAM Route Target -Id 1
+        Remove-NBIPAMRouteTarget -Id 1
 
         Deletes route target with ID 1
 
     .EXAMPLE
-        Get-NBIIPAM Route Target -Name "65001:999" | Remove-NBIIPAM Route Target
+        Get-NBIPAMRouteTarget -Name "65001:999" | Remove-NBIPAMRouteTarget
 
         Deletes route targets matching the specified value
 #>
@@ -34,7 +34,7 @@ function Remove-NBIPAMRouteTarget {
     )
 
     process {
-        Write-Verbose "Removing IPAM Route Target"
+        Write-Verbose "Removing I PA MR ou te Ta rg et"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'route-targets', $Id))
 
         $URI = BuildNewURI -Segments $Segments

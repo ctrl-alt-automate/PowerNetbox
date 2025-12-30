@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Updates an existing DCIM RackReservation in Netbox DCIM module.
+    Updates an existing CIMRackReservation in Netbox D module.
 
 .DESCRIPTION
-    Updates an existing DCIM RackReservation in Netbox DCIM module.
+    Updates an existing CIMRackReservation in Netbox D module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBDDCIM RackReservation
+    Set-NBDCIMRackReservation
 
-    Returns all DCIM RackReservation objects.
+    Returns all CIMRackReservation objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -33,7 +33,7 @@ function Set-NBDCIMRackReservation {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating DCIM RackR es er va ti on"
+        Write-Verbose "Updating D CI MR ac kR es er va ti on"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','rack-reservations',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update rack reservation')) {

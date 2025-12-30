@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Updates an existing DCIM RackType in Netbox DCIM module.
+    Updates an existing CIMRackType in Netbox D module.
 
 .DESCRIPTION
-    Updates an existing DCIM RackType in Netbox DCIM module.
+    Updates an existing CIMRackType in Netbox D module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBDDCIM RackType
+    Set-NBDCIMRackType
 
-    Returns all DCIM RackType objects.
+    Returns all CIMRackType objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -43,7 +43,7 @@ function Set-NBDCIMRackType {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating DCIM RackT yp e"
+        Write-Verbose "Updating D CI MR ac kT yp e"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','rack-types',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update rack type')) {

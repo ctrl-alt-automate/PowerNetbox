@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Updates an existing DCIM Device BayTemplate in Netbox DCIM module.
+    Updates an existing CIMDeviceBayTemplate in Netbox D module.
 
 .DESCRIPTION
-    Updates an existing DCIM Device BayTemplate in Netbox DCIM module.
+    Updates an existing CIMDeviceBayTemplate in Netbox D module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBDDCIM Device BayTemplate
+    Set-NBDCIMDeviceBayTemplate
 
-    Returns all DCIM Device BayTemplate objects.
+    Returns all CIMDeviceBayTemplate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -29,7 +29,7 @@ function Set-NBDCIMDeviceBayTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating DCIM DeviceB ay Te mp la te"
+        Write-Verbose "Updating D CI MD ev ic eB ay Te mp la te"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','device-bay-templates',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update device bay template')) {

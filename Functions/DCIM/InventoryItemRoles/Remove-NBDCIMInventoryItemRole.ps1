@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Removes a DCIM Inventory ItemRole from Netbox DCIM module.
+    Removes a CIMInventoryItemRole from Netbox D module.
 
 .DESCRIPTION
-    Removes a DCIM Inventory ItemRole from Netbox DCIM module.
+    Removes a CIMInventoryItemRole from Netbox D module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBDDCIM Inventory ItemRole
+    Remove-NBDCIMInventoryItemRole
 
-    Returns all DCIM Inventory ItemRole objects.
+    Returns all CIMInventoryItemRole objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -25,7 +25,7 @@ function Remove-NBDCIMInventoryItemRole {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing DCIM Inventory Item Ro le"
+        Write-Verbose "Removing D CI MI nv en to ry It em Ro le"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete inventory item role')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','inventory-item-roles',$Id)) -Method DELETE -Raw:$Raw
         }

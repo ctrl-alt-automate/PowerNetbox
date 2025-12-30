@@ -52,17 +52,17 @@ function Get-NBDCIMRack {
         Return the raw API response
 
     .EXAMPLE
-        Get-NBDDCIM Rack
+        Get-NBDCIMRack
 
         Returns all racks
 
     .EXAMPLE
-        Get-NBDDCIM Rack -Site_Id 1
+        Get-NBDCIMRack -Site_Id 1
 
         Returns all racks at site with ID 1
 
     .EXAMPLE
-        Get-NBDDCIM Rack -Name "Rack-01"
+        Get-NBDCIMRack -Name "Rack-01"
 
         Returns racks matching the name "Rack-01"
 #>
@@ -124,7 +124,7 @@ function Get-NBDCIMRack {
     )
 
     process {
-        Write-Verbose "Retrieving DCIM Rack"
+        Write-Verbose "Retrieving D CI MR ac k"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
                 foreach ($RackId in $Id) {

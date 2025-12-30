@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Updates an existing VPN IKE Policy in Netbox VPN module.
+    Updates an existing PNIKEPolicy in Netbox V module.
 
 .DESCRIPTION
-    Updates an existing VPN IKE Policy in Netbox VPN module.
+    Updates an existing PNIKEPolicy in Netbox V module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBVVPN IKE Policy
+    Set-NBVPNIKEPolicy
 
-    Returns all VPN IKE Policy objects.
+    Returns all PNIKEPolicy objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -23,7 +23,7 @@ function Set-NBVPNIKEPolicy {
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [string]$Name,[uint16]$Version,[string]$Mode,[uint64[]]$Proposals,[string]$Preshared_Key,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
     process {
-        Write-Verbose "Updating VPN IKE Policy"
+        Write-Verbose "Updating V PN IK EP ol ic y"
         $s = [System.Collections.ArrayList]::new(@('vpn','ike-policies',$Id)); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update IKE policy')) { InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments) -Method PATCH -Body $u.Parameters -Raw:$Raw }
     }

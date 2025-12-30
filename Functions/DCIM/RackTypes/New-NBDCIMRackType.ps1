@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Creates a new DCIM RackType in Netbox DCIM module.
+    Creates a new CIMRackType in Netbox D module.
 
 .DESCRIPTION
-    Creates a new DCIM RackType in Netbox DCIM module.
+    Creates a new CIMRackType in Netbox D module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBDDCIM RackType
+    New-NBDCIMRackType
 
-    Returns all DCIM RackType objects.
+    Returns all CIMRackType objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -42,7 +42,7 @@ function New-NBDCIMRackType {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating DCIM RackT yp e"
+        Write-Verbose "Creating D CI MR ac kT yp e"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','rack-types'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Model, 'Create rack type')) {

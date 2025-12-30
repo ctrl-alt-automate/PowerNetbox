@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Removes a DCIM Device Type from Netbox DCIM module.
+    Removes a CIMDeviceType from Netbox D module.
 
 .DESCRIPTION
-    Removes a DCIM Device Type from Netbox DCIM module.
+    Removes a CIMDeviceType from Netbox D module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBDDCIM Device Type
+    Remove-NBDCIMDeviceType
 
-    Returns all DCIM Device Type objects.
+    Returns all CIMDeviceType objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -25,7 +25,7 @@ function Remove-NBDCIMDeviceType {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing DCIM DeviceT yp e"
+        Write-Verbose "Removing D CI MD ev ic eT yp e"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete device type')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','device-types',$Id)) -Method DELETE -Raw:$Raw
         }

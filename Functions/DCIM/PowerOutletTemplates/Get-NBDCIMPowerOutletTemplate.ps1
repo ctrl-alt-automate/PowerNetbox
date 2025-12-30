@@ -9,7 +9,7 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBDDCIM Power OutletTemplate
+    Get-NBDCIMPowerOutletTemplate
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -36,7 +36,7 @@ function Get-NBDCIMPowerOutletTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Retrieving DCIM Power Outlet Te mp la te"
+        Write-Verbose "Retrieving D CI MP ow er Ou tl et Te mp la te"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','power-outlet-templates',$i)) -Raw:$Raw } }
             default {

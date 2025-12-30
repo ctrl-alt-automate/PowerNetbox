@@ -47,18 +47,18 @@
     Array of tag IDs to assign to this front port.
 
 .EXAMPLE
-    New-NBDDCIM Front Port -Device 42 -Name "Port 1" -Type "8p8c" -Rear_Port 100
+    New-NBDCIMFrontPort -Device 42 -Name "Port 1" -Type "8p8c" -Rear_Port 100
 
     Creates a new RJ-45 front port named 'Port 1' on device 42, mapped to rear port 100.
 
 .EXAMPLE
-    New-NBDDCIM Front Port -Device 42 -Name "Fiber-01" -Type "lc" -Rear_Port 100 -Color "00ff00"
+    New-NBDCIMFrontPort -Device 42 -Name "Fiber-01" -Type "lc" -Rear_Port 100 -Color "00ff00"
 
     Creates a new LC fiber front port with a green color indicator.
 
 .EXAMPLE
     1..24 | ForEach-Object {
-        New-NBDDCIM Front Port -Device 42 -Name "Port $_" -Type "8p8c" -Rear_Port (100 + $_)
+        New-NBDCIMFrontPort -Device 42 -Name "Port $_" -Type "8p8c" -Rear_Port (100 + $_)
     }
 
     Creates 24 front ports on a patch panel, each mapped to a corresponding rear port.
@@ -108,7 +108,7 @@ function New-NBDCIMFrontPort {
     )
 
     process {
-        Write-Verbose "Creating DCIM Front Port"
+        Write-Verbose "Creating D CI MF ro nt Po rt"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'front-ports'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters

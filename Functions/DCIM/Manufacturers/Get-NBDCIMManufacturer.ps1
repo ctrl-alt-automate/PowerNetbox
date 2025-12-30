@@ -28,12 +28,12 @@ function Get-NBDCIMManufacturer {
         Return the raw API response
 
     .EXAMPLE
-        Get-NBDDCIM Manufacturer
+        Get-NBDCIMManufacturer
 
         Returns all manufacturers
 
     .EXAMPLE
-        Get-NBDDCIM Manufacturer -Name "Cisco"
+        Get-NBDCIMManufacturer -Name "Cisco"
 
         Returns manufacturers matching the name "Cisco"
 #>
@@ -70,7 +70,7 @@ function Get-NBDCIMManufacturer {
     )
 
     process {
-        Write-Verbose "Retrieving DCIM Manufacturer"
+        Write-Verbose "Retrieving D CI MM an uf ac tu re r"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
                 foreach ($ManufacturerId in $Id) {

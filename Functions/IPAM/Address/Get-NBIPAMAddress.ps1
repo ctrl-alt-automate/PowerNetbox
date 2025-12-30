@@ -9,7 +9,7 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBIIPAM Address
+    Get-NBIPAMAddress
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -59,7 +59,7 @@ function Get-NBIPAMAddress {
         [string]$Device,
 
         [Parameter(ParameterSetName = 'Query')]
-        [uint64]$Device_Id,
+        [uint64]$Device_ID,
 
         [Parameter(ParameterSetName = 'Query')]
         [string]$Virtual_Machine,
@@ -86,7 +86,7 @@ function Get-NBIPAMAddress {
     )
 
     process {
-        Write-Verbose "Retrieving IPAM Address"
+        Write-Verbose "Retrieving I PA MA dd re ss"
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($IP_ID in $Id) {

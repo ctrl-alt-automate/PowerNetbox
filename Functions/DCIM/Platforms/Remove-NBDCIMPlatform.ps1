@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Removes a DCIM Platform from Netbox DCIM module.
+    Removes a CIMPlatform from Netbox D module.
 
 .DESCRIPTION
-    Removes a DCIM Platform from Netbox DCIM module.
+    Removes a CIMPlatform from Netbox D module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBDDCIM Platform
+    Remove-NBDCIMPlatform
 
-    Returns all DCIM Platform objects.
+    Returns all CIMPlatform objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -25,7 +25,7 @@ function Remove-NBDCIMPlatform {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing DCIM Platform"
+        Write-Verbose "Removing D CI MP la tf or m"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete platform')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','platforms',$Id)) -Method DELETE -Raw:$Raw
         }

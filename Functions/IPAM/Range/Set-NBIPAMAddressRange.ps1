@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Updates an existing IPAM AddressRange in Netbox IPAM module.
+    Updates an existing PAMAddressRange in Netbox I module.
 
 .DESCRIPTION
-    Updates an existing IPAM AddressRange in Netbox IPAM module.
+    Updates an existing PAMAddressRange in Netbox I module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBIIPAM AddressRange
+    Set-NBIPAMAddressRange
 
-    Returns all IPAM AddressRange objects.
+    Returns all PAMAddressRange objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -64,7 +64,7 @@ function Set-NBIPAMAddressRange {
             $Segments = [System.Collections.ArrayList]::new(@('ipam', 'ip-ranges', $RangeID))
 
             Write-Verbose "Obtaining IP range from ID $RangeID"
-            $CurrentRange = Get-NBIIPAM AddressRange -Id $RangeID -ErrorAction Stop
+            $CurrentRange = Get-NBIPAMAddressRange -Id $RangeID -ErrorAction Stop
 
             if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentRange.Start_Address) - $($CurrentRange.End_Address)", 'Set')) {
                 $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force'

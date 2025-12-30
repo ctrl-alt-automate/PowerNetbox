@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Creates a new IPAM RIR in Netbox IPAM module.
+    Creates a new PAMRIR in Netbox I module.
 
 .DESCRIPTION
-    Creates a new IPAM RIR in Netbox IPAM module.
+    Creates a new PAMRIR in Netbox I module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBIIPAM RIR
+    New-NBIPAMRIR
 
-    Returns all IPAM RIR objects.
+    Returns all PAMRIR objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -30,7 +30,7 @@ function New-NBIPAMRIR {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating IPAM RIR"
+        Write-Verbose "Creating I PA MR IR"
         $Segments = [System.Collections.ArrayList]::new(@('ipam','rirs'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create RIR')) {

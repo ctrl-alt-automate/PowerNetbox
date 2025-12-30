@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Creates a new IPAM VLANGroup in Netbox IPAM module.
+    Creates a new PAMVLANGroup in Netbox I module.
 
 .DESCRIPTION
-    Creates a new IPAM VLANGroup in Netbox IPAM module.
+    Creates a new PAMVLANGroup in Netbox I module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBIIPAM VLANGroup
+    New-NBIPAMVLANGroup
 
-    Returns all IPAM VLANGroup objects.
+    Returns all PAMVLANGroup objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -33,7 +33,7 @@ function New-NBIPAMVLANGroup {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating IPAM VLANG ro up"
+        Write-Verbose "Creating I PA MV LA NG ro up"
         $Segments = [System.Collections.ArrayList]::new(@('ipam','vlan-groups'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create VLAN group')) {

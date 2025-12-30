@@ -25,12 +25,12 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBVVirtualization ClusterGroup -Name "Production Clusters" -Slug "production-clusters"
+    New-NBVirtualizationClusterGroup -Name "Production Clusters" -Slug "production-clusters"
 
     Creates a new cluster group with the specified name and slug.
 
 .EXAMPLE
-    New-NBVVirtualization ClusterGroup -Name "DR Sites" -Description "Disaster recovery clusters"
+    New-NBVirtualizationClusterGroup -Name "DR Sites" -Description "Disaster recovery clusters"
 
     Creates a new cluster group with auto-generated slug.
 
