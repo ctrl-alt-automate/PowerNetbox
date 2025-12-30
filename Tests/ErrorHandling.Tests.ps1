@@ -800,55 +800,10 @@ Describe "GetNetboxAPIErrorBody Helper" -Tag 'ErrorHandling', 'Helper' {
         }
     }
 
-    Context "HttpWebResponse Handling (PowerShell Desktop)" {
-        It "Should extract error body from HttpWebResponse" {
-            InModuleScope -ModuleName 'PowerNetbox' {
-                # Create a mock HttpWebResponse-like object
-                $responseBody = '{"detail": "Invalid field value"}'
-                $bytes = [System.Text.Encoding]::UTF8.GetBytes($responseBody)
-                $stream = [System.IO.MemoryStream]::new($bytes)
-
-                $mockResponse = New-Object PSObject
-                $mockResponse | Add-Member -MemberType ScriptMethod -Name 'GetResponseStream' -Value {
-                    $stream
-                }.GetNewClosure()
-                # Mark it as HttpWebResponse type
-                $mockResponse.PSTypeNames.Insert(0, 'System.Net.HttpWebResponse')
-
-                # Call the function
-                $result = GetNetboxAPIErrorBody -Response $mockResponse
-
-                $result | Should -Be $responseBody
-            }
-        }
-
-        It "Should return empty string when stream is null" {
-            InModuleScope -ModuleName 'PowerNetbox' {
-                $mockResponse = New-Object PSObject
-                $mockResponse | Add-Member -MemberType ScriptMethod -Name 'GetResponseStream' -Value { $null }
-                $mockResponse.PSTypeNames.Insert(0, 'System.Net.HttpWebResponse')
-
-                $result = GetNetboxAPIErrorBody -Response $mockResponse
-
-                $result | Should -BeNullOrEmpty
-            }
-        }
-    }
-
-    Context "Error Resilience" {
-        It "Should return empty string when response reading fails" {
-            InModuleScope -ModuleName 'PowerNetbox' {
-                $mockResponse = New-Object PSObject
-                $mockResponse | Add-Member -MemberType ScriptMethod -Name 'GetResponseStream' -Value {
-                    throw "Stream error"
-                }
-                $mockResponse.PSTypeNames.Insert(0, 'System.Net.HttpWebResponse')
-
-                $result = GetNetboxAPIErrorBody -Response $mockResponse
-
-                $result | Should -BeNullOrEmpty
-            }
-        }
+    Context "HttpWebResponse Handling" {
+        # Note: These tests require actual HttpWebResponse objects which cannot be easily mocked
+        # The -is operator does real type checking, not type name matching
+        # HttpWebResponse handling is tested through integration tests
 
         It "Should return empty string for unknown response type" {
             InModuleScope -ModuleName 'PowerNetbox' {
