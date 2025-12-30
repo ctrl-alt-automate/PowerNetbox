@@ -82,6 +82,7 @@ function Get-NBDCIMRegion {
     )
 
     process {
+        Write-Verbose "Retrieving D CI MR eg io n"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
                 foreach ($RegionId in $Id) {

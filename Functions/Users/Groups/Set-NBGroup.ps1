@@ -43,6 +43,7 @@ function Set-NBGroup {
     )
 
     process {
+        Write-Verbose "Updating Group"
         $Segments = [System.Collections.ArrayList]::new(@('users', 'groups', $Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
         $URI = BuildNewURI -Segments $URIComponents.Segments

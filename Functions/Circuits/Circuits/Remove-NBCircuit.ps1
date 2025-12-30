@@ -31,6 +31,7 @@ function Remove-NBCircuit {
     )
 
     process {
+        Write-Verbose "Removing Circuit"
         $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuits', $Id))
 
         $URI = BuildNewURI -Segments $Segments

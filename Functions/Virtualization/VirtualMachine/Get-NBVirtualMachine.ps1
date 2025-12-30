@@ -134,6 +134,7 @@ function Get-NBVirtualMachine {
     )
 
     process {
+        Write-Verbose "Retrieving Virtual Machine"
         $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'virtual-machines'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters

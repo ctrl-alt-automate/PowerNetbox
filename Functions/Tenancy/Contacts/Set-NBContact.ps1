@@ -1,4 +1,4 @@
-﻿
+
 function Set-NBContact {
 <#
     .SYNOPSIS
@@ -97,6 +97,7 @@ function Set-NBContact {
     }
 
     process {
+        Write-Verbose "Updating Contact"
         foreach ($ContactId in $Id) {
             $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'contacts', $ContactId))
 

@@ -33,6 +33,7 @@ function Get-NBIPAMVLANTranslationPolicy {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Retrieving I PA MV LA NT ra ns la ti on Po li cy"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('ipam','vlan-translation-policies',$i)) -Raw:$Raw } }
             default {

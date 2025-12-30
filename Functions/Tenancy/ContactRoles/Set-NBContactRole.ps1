@@ -1,4 +1,4 @@
-﻿
+
 function Set-NBContactRole {
 <#
     .SYNOPSIS
@@ -56,6 +56,7 @@ function Set-NBContactRole {
     }
 
     process {
+        Write-Verbose "Updating Contact Role"
         foreach ($ContactRoleId in $Id) {
             $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'contacts', $ContactRoleId))
 

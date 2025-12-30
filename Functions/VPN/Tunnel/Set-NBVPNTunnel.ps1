@@ -35,6 +35,7 @@ function Set-NBVPNTunnel {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Updating V PN Tu nn el"
         $Segments = [System.Collections.ArrayList]::new(@('vpn', 'tunnels', $Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
         $URI = BuildNewURI -Segments $URIComponents.Segments

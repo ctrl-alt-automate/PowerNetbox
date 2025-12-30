@@ -28,6 +28,7 @@ function Remove-NBUser {
     )
 
     process {
+        Write-Verbose "Removing User"
         $Segments = [System.Collections.ArrayList]::new(@('users', 'users', $Id))
         $URI = BuildNewURI -Segments $Segments
 

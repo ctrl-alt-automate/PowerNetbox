@@ -36,6 +36,7 @@ function Set-NBDCIMCable {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Updating D CI MC ab le"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','cables',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update cable')) {

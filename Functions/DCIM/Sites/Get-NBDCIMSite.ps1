@@ -88,6 +88,7 @@ function Get-NBDCIMSite {
     )
 
     process {
+        Write-Verbose "Retrieving D CI MS it e"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {
                 foreach ($Site_ID in $ID) {

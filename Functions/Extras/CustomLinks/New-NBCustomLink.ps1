@@ -75,6 +75,7 @@ function New-NBCustomLink {
     )
 
     process {
+        Write-Verbose "Creating Custom Link"
         $Segments = [System.Collections.ArrayList]::new(@('extras', 'custom-links'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         $URI = BuildNewURI -Segments $URIComponents.Segments

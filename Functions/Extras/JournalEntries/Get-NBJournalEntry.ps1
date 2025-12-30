@@ -76,6 +76,7 @@ function Get-NBJournalEntry {
     )
 
     process {
+        Write-Verbose "Retrieving Journal Entry"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {
                 foreach ($i in $Id) {

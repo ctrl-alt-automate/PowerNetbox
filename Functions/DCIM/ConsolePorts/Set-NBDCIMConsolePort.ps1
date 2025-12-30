@@ -35,6 +35,7 @@ function Set-NBDCIMConsolePort {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Updating D CI MC on so le Po rt"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','console-ports',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update console port')) {

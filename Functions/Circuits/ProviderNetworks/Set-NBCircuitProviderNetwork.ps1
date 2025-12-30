@@ -58,6 +58,7 @@ function Set-NBCircuitProviderNetwork {
     )
 
     process {
+        Write-Verbose "Updating Circuit Provider Network"
         $Segments = [System.Collections.ArrayList]::new(@('circuits', 'provider-networks', $Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
         $URI = BuildNewURI -Segments $URIComponents.Segments

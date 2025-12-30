@@ -33,6 +33,7 @@ function Set-NBDCIMDeviceRole {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Updating D CI MD ev ic eR ol e"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','device-roles',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update device role')) {

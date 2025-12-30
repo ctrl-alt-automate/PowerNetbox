@@ -48,6 +48,7 @@ function Merge-NBBranch {
     )
 
     process {
+        Write-Verbose "Processing Merge-NBBranch"
         CheckNetboxIsConnected
 
         # Check for conflicts unless Force is specified

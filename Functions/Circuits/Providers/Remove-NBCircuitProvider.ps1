@@ -28,6 +28,7 @@ function Remove-NBCircuitProvider {
     )
 
     process {
+        Write-Verbose "Removing Circuit Provider"
         $Segments = [System.Collections.ArrayList]::new(@('circuits', 'providers', $Id))
 
         $URI = BuildNewURI -Segments $Segments

@@ -76,6 +76,7 @@ function Get-NBIPAMASNRange {
     )
 
     process {
+        Write-Verbose "Retrieving I PA MA SN Ra ng e"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
                 foreach ($RangeId in $Id) {

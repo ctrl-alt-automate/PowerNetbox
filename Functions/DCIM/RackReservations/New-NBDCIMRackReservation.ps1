@@ -32,6 +32,7 @@ function New-NBDCIMRackReservation {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Creating D CI MR ac kR es er va ti on"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','rack-reservations'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess("Rack $Rack", 'Create rack reservation')) {

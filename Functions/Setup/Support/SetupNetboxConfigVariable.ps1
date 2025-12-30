@@ -1,4 +1,4 @@
-﻿function SetupNetboxConfigVariable {
+function SetupNetboxConfigVariable {
     [CmdletBinding()]
     param
     (
@@ -7,7 +7,7 @@
 
     Write-Verbose "Checking for NetboxConfig hashtable"
     if ((-not ($script:NetboxConfig)) -or $Overwrite) {
-        Write-Verbose "Creating NetboxConfig hashtable"
+        Write-Verbose "Creating Netbox Confighashtable"
         $script:NetboxConfig = @{
             'Connected'     = $false
             'Choices'       = @{

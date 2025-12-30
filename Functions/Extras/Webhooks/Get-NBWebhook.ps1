@@ -63,6 +63,7 @@ function Get-NBWebhook {
     )
 
     process {
+        Write-Verbose "Retrieving Webhook"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {
                 foreach ($i in $Id) {

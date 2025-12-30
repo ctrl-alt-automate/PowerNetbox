@@ -124,6 +124,7 @@ function Get-NBDCIMRack {
     )
 
     process {
+        Write-Verbose "Retrieving D CI MR ac k"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
                 foreach ($RackId in $Id) {

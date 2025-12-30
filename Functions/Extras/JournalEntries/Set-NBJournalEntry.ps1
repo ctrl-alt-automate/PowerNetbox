@@ -54,6 +54,7 @@ function Set-NBJournalEntry {
     )
 
     process {
+        Write-Verbose "Updating Journal Entry"
         $Segments = [System.Collections.ArrayList]::new(@('extras', 'journal-entries', $Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
         $URI = BuildNewURI -Segments $URIComponents.Segments

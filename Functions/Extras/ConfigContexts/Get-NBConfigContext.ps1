@@ -63,6 +63,7 @@ function Get-NBConfigContext {
     )
 
     process {
+        Write-Verbose "Retrieving Config Context"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {
                 foreach ($i in $Id) {

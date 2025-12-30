@@ -31,6 +31,7 @@ function New-NBDCIMVirtualChassis {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Creating D CI MV ir tu al Ch as si s"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','virtual-chassis'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create virtual chassis')) {

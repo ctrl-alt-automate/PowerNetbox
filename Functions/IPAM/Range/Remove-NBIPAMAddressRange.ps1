@@ -31,6 +31,7 @@ function Remove-NBIPAMAddressRange {
     )
 
     process {
+        Write-Verbose "Removing I PA MA dd re ss Ra ng e"
         foreach ($Range_Id in $Id) {
             $CurrentRange = Get-NBIPAMAddressRange -Id $Range_Id -ErrorAction Stop
 

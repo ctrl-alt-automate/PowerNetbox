@@ -82,6 +82,7 @@ function Get-NBDCIMSiteGroup {
     )
 
     process {
+        Write-Verbose "Retrieving D CI MS it eG ro up"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
                 foreach ($SiteGroupId in $Id) {

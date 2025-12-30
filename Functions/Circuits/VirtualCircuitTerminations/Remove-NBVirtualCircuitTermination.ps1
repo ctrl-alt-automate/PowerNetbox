@@ -28,6 +28,7 @@ function Remove-NBVirtualCircuitTermination {
     )
 
     process {
+        Write-Verbose "Removing Virtual Circuit Termination"
         $Segments = [System.Collections.ArrayList]::new(@('circuits', 'virtual-circuit-terminations', $Id))
         $URI = BuildNewURI -Segments $Segments
 

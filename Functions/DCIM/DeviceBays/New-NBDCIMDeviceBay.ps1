@@ -31,6 +31,7 @@ function New-NBDCIMDeviceBay {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Creating D CI MD ev ic eB ay"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','device-bays'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create device bay')) {

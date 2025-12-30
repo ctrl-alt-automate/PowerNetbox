@@ -59,6 +59,7 @@ function Get-NBCircuitTermination {
     )
 
     process {
+        Write-Verbose "Retrieving Circuit Termination"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {
                 foreach ($i in $ID) {

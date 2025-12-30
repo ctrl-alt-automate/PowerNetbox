@@ -40,6 +40,7 @@ function Set-NBDCIMPowerFeed {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Updating D CI MP ow er Fe ed"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','power-feeds',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update power feed')) {

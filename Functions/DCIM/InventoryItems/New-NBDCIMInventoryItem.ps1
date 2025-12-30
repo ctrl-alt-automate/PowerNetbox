@@ -39,6 +39,7 @@ function New-NBDCIMInventoryItem {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Creating D CI MI nv en to ry It em"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','inventory-items'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create inventory item')) {

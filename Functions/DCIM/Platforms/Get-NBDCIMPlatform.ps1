@@ -45,6 +45,7 @@ function Get-NBDCIMPlatform {
     )
 
     process {
+        Write-Verbose "Retrieving D CI MP la tf or m"
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($PlatformID in $Id) {

@@ -25,6 +25,7 @@ function Remove-NBDCIMInventoryItemRole {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Removing D CI MI nv en to ry It em Ro le"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete inventory item role')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','inventory-item-roles',$Id)) -Method DELETE -Raw:$Raw
         }

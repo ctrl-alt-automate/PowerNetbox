@@ -84,6 +84,7 @@ function Get-NBIPAMVLAN {
     )
 
     process {
+        Write-Verbose "Retrieving I PA MV LA N"
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($VLAN_ID in $Id) {

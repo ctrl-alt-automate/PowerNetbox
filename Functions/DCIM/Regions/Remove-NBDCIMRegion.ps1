@@ -34,6 +34,7 @@ function Remove-NBDCIMRegion {
     )
 
     process {
+        Write-Verbose "Removing D CI MR eg io n"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'regions', $Id))
 
         $URI = BuildNewURI -Segments $Segments

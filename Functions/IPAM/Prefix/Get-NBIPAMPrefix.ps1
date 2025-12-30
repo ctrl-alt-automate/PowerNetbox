@@ -160,6 +160,7 @@ function Get-NBIPAMPrefix {
     )
 
     process {
+        Write-Verbose "Retrieving I PA MP re fi x"
         #    if ($null -ne $Family) {
         #        $PSBoundParameters.Family = ValidateIPAMChoice -ProvidedValue $Family -PrefixFamily
         #    }

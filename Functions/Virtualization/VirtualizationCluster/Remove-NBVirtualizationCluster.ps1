@@ -48,6 +48,7 @@ function Remove-NBVirtualizationCluster {
     )
 
     process {
+        Write-Verbose "Removing Virtualization Cluster"
         foreach ($ClusterId in $Id) {
             $CurrentCluster = Get-NBVirtualizationCluster -Id $ClusterId -ErrorAction Stop
 

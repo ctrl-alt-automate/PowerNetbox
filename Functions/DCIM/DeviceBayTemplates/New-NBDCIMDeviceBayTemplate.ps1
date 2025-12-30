@@ -28,6 +28,7 @@ function New-NBDCIMDeviceBayTemplate {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Creating D CI MD ev ic eB ay Te mp la te"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','device-bay-templates'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create device bay template')) {

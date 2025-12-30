@@ -81,6 +81,7 @@ function Get-NBEventRule {
     )
 
     process {
+        Write-Verbose "Retrieving Event Rule"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {
                 foreach ($i in $Id) {

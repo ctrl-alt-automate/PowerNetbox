@@ -61,6 +61,7 @@ function New-NBCircuit {
     )
 
     process {
+        Write-Verbose "Creating Circuit"
         $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuits'))
         $Method = 'POST'
 

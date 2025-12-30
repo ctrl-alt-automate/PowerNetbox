@@ -84,6 +84,7 @@ function Set-NBCircuit {
     )
 
     process {
+        Write-Verbose "Updating Circuit"
         $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuits', $Id))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'

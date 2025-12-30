@@ -25,6 +25,7 @@ function Remove-NBIPAMFHRPGroup {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Removing I PA MF HR PG ro up"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete FHRP group')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('ipam','fhrp-groups',$Id)) -Method DELETE -Raw:$Raw
         }

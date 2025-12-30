@@ -1,4 +1,4 @@
-﻿
+
 function New-NBContactAssignment {
 <#
     .SYNOPSIS
@@ -62,6 +62,7 @@ function New-NBContactAssignment {
     }
 
     process {
+        Write-Verbose "Creating Contact Assignment"
         $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'contact-assignments'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters

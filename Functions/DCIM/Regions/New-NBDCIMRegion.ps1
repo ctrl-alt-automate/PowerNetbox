@@ -63,6 +63,7 @@ function New-NBDCIMRegion {
     )
 
     process {
+        Write-Verbose "Creating D CI MR eg io n"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'regions'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'

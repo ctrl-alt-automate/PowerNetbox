@@ -82,6 +82,7 @@ function Get-NBIPAMASN {
     )
 
     process {
+        Write-Verbose "Retrieving I PA MA SN"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
                 foreach ($ASNId in $Id) {

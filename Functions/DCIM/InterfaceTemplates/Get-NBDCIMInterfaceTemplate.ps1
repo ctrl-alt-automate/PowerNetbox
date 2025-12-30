@@ -36,6 +36,7 @@ function Get-NBDCIMInterfaceTemplate {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Retrieving D CI MI nt er fa ce Te mp la te"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','interface-templates',$i)) -Raw:$Raw } }
             default {

@@ -42,6 +42,7 @@ function Remove-NBTenantGroup {
     )
 
     process {
+        Write-Verbose "Removing Tenant Group"
         foreach ($GroupId in $Id) {
             $CurrentGroup = Get-NBTenantGroup -Id $GroupId -ErrorAction Stop
 

@@ -69,6 +69,7 @@ function Set-NBDataSource {
     )
 
     process {
+        Write-Verbose "Updating Data Source"
         $Segments = [System.Collections.ArrayList]::new(@('core', 'data-sources', $Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
         $URI = BuildNewURI -Segments $URIComponents.Segments

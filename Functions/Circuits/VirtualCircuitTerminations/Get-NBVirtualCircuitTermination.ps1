@@ -70,6 +70,7 @@ function Get-NBVirtualCircuitTermination {
     )
 
     process {
+        Write-Verbose "Retrieving Virtual Circuit Termination"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {
                 foreach ($i in $Id) {

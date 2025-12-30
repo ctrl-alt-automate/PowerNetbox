@@ -34,6 +34,7 @@ function New-NBDCIMConsoleServerPort {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Creating D CI MC on so le Se rv er Po rt"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','console-server-ports'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create console server port')) {

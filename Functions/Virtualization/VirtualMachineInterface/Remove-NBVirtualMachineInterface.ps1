@@ -53,6 +53,7 @@ function Remove-NBVirtualMachineInterface {
     )
 
     process {
+        Write-Verbose "Removing Virtual Machine Interface"
         foreach ($InterfaceId in $Id) {
             $CurrentInterface = Get-NBVirtualMachineInterface -Id $InterfaceId -ErrorAction Stop
 

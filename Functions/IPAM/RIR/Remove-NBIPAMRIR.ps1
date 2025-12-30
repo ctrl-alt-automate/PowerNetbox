@@ -25,6 +25,7 @@ function Remove-NBIPAMRIR {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Removing I PA MR IR"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete RIR')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('ipam','rirs',$Id)) -Method DELETE -Raw:$Raw
         }
