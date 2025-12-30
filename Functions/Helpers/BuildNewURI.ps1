@@ -19,17 +19,8 @@ function BuildNewURI {
     .PARAMETER HTTPS
         Whether to use HTTPS or HTTP
 
-    .PARAMETER Port
-        A description of the Port parameter.
-
-    .PARAMETER APIInfo
-        A description of the APIInfo parameter.
-
     .EXAMPLE
-        PS C:\> BuildNewURI
-
-    .NOTES
-        Additional information about the function.
+        PS C:\> BuildNewURI -Segments @('dcim', 'devices')
 #>
 
     [CmdletBinding()]
@@ -63,15 +54,18 @@ function BuildNewURI {
     Write-Verbose " URIPath: $($uriBuilder.Path)"
 
     if ($parameters) {
-        # Loop through the parameters and use the HttpUtility to create a Query string
-        [System.Collections.Specialized.NameValueCollection]$URIParams = [System.Web.HttpUtility]::ParseQueryString([String]::Empty)
+        # Build query string without System.Web dependency (cross-platform)
+        $QueryParts = [System.Collections.Generic.List[string]]::new()
 
         foreach ($param in $Parameters.GetEnumerator()) {
             Write-Verbose " Adding URI parameter $($param.Key):$($param.Value)"
-            $URIParams[$param.Key] = $param.Value
+            # URL encode key and value using .NET Uri class (available everywhere)
+            $EncodedKey = [System.Uri]::EscapeDataString($param.Key)
+            $EncodedValue = [System.Uri]::EscapeDataString([string]$param.Value)
+            $QueryParts.Add("$EncodedKey=$EncodedValue")
         }
 
-        $uriBuilder.Query = $URIParams.ToString()
+        $uriBuilder.Query = $QueryParts -join '&'
     }
 
     Write-Verbose " Completed building URIBuilder"

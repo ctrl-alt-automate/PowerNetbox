@@ -157,13 +157,12 @@ function Set-NBIPAMAddress {
     process {
         if ($PSCmdlet.ParameterSetName -eq 'Single') {
             foreach ($IPId in $Id) {
-                if ($PSBoundParameters.ContainsKey('Assigned_Object_Type') -or $PSBoundParameters.ContainsKey('Assigned_Object_Id')) {
-                    if ((-not [string]::IsNullOrWhiteSpace($Assigned_Object_Id)) -and [string]::IsNullOrWhiteSpace($Assigned_Object_Type)) {
-                        throw "Assigned_Object_Type is required when specifying Assigned_Object_Id"
-                    }
-                    elseif ((-not [string]::IsNullOrWhiteSpace($Assigned_Object_Type)) -and [string]::IsNullOrWhiteSpace($Assigned_Object_Id)) {
-                        throw "Assigned_Object_Id is required when specifying Assigned_Object_Type"
-                    }
+                # Validate that Assigned_Object_Type and Assigned_Object_Id are used together
+                if ($PSBoundParameters.ContainsKey('Assigned_Object_Type') -and -not $PSBoundParameters.ContainsKey('Assigned_Object_Id')) {
+                    throw "Assigned_Object_Id is required when specifying Assigned_Object_Type"
+                }
+                if ($PSBoundParameters.ContainsKey('Assigned_Object_Id') -and -not $PSBoundParameters.ContainsKey('Assigned_Object_Type')) {
+                    throw "Assigned_Object_Type is required when specifying Assigned_Object_Id"
                 }
 
                 $IPSegments = [System.Collections.ArrayList]::new(@('ipam', 'ip-addresses', $IPId))
