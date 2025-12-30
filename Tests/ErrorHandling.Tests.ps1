@@ -792,14 +792,188 @@ Describe "PowerNetbox Error Handling" -Tag 'ErrorHandling' {
 
 Describe "GetNetboxAPIErrorBody Helper" -Tag 'ErrorHandling', 'Helper' {
 
-    It "Should return empty string for null response stream" {
-        # This tests the helper function's null handling
-        $mockResponse = [PSCustomObject]@{
-            GetResponseStream = { return $null }
+    BeforeAll {
+        InModuleScope -ModuleName 'PowerNetbox' -ScriptBlock {
+            $script:NetboxConfig.Hostname = 'netbox.test.com'
+            $script:NetboxConfig.HostScheme = 'https'
+            $script:NetboxConfig.HostPort = 443
+        }
+    }
+
+    Context "HttpWebResponse Handling (PowerShell Desktop)" {
+        It "Should extract error body from HttpWebResponse" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                # Create a mock HttpWebResponse-like object
+                $responseBody = '{"detail": "Invalid field value"}'
+                $bytes = [System.Text.Encoding]::UTF8.GetBytes($responseBody)
+                $stream = [System.IO.MemoryStream]::new($bytes)
+
+                $mockResponse = New-Object PSObject
+                $mockResponse | Add-Member -MemberType ScriptMethod -Name 'GetResponseStream' -Value {
+                    $stream
+                }.GetNewClosure()
+                # Mark it as HttpWebResponse type
+                $mockResponse.PSTypeNames.Insert(0, 'System.Net.HttpWebResponse')
+
+                # Call the function
+                $result = GetNetboxAPIErrorBody -Response $mockResponse
+
+                $result | Should -Be $responseBody
+            }
         }
 
-        # The function should handle null gracefully
-        # Note: This is a unit test concept - actual implementation may vary
+        It "Should return empty string when stream is null" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $mockResponse = New-Object PSObject
+                $mockResponse | Add-Member -MemberType ScriptMethod -Name 'GetResponseStream' -Value { $null }
+                $mockResponse.PSTypeNames.Insert(0, 'System.Net.HttpWebResponse')
+
+                $result = GetNetboxAPIErrorBody -Response $mockResponse
+
+                $result | Should -BeNullOrEmpty
+            }
+        }
+    }
+
+    Context "Error Resilience" {
+        It "Should return empty string when response reading fails" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $mockResponse = New-Object PSObject
+                $mockResponse | Add-Member -MemberType ScriptMethod -Name 'GetResponseStream' -Value {
+                    throw "Stream error"
+                }
+                $mockResponse.PSTypeNames.Insert(0, 'System.Net.HttpWebResponse')
+
+                $result = GetNetboxAPIErrorBody -Response $mockResponse
+
+                $result | Should -BeNullOrEmpty
+            }
+        }
+
+        It "Should return empty string for unknown response type" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $mockResponse = [PSCustomObject]@{ SomeProperty = "value" }
+
+                $result = GetNetboxAPIErrorBody -Response $mockResponse
+
+                $result | Should -BeNullOrEmpty
+            }
+        }
+    }
+}
+
+Describe "BuildDetailedErrorMessage Helper" -Tag 'ErrorHandling', 'Helper' {
+
+    BeforeAll {
+        InModuleScope -ModuleName 'PowerNetbox' -ScriptBlock {
+            $script:NetboxConfig.Hostname = 'netbox.test.com'
+            $script:NetboxConfig.HostScheme = 'https'
+            $script:NetboxConfig.HostPort = 443
+        }
+    }
+
+    Context "Status Code Specific Troubleshooting" {
+        It "Should provide 401 Unauthorized troubleshooting hints" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $result = BuildDetailedErrorMessage -StatusCode 401 -StatusName "Unauthorized" `
+                    -Method "GET" -Endpoint "/api/dcim/devices/" -ErrorMessage "Authentication failed"
+
+                $result | Should -Match "401 Unauthorized"
+                $result | Should -Match "GET /api/dcim/devices/"
+                $result | Should -Match "API token is correct"
+                $result | Should -Match "Admin > API Tokens"
+            }
+        }
+
+        It "Should provide 403 Forbidden troubleshooting hints" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $result = BuildDetailedErrorMessage -StatusCode 403 -StatusName "Forbidden" `
+                    -Method "DELETE" -Endpoint "/api/dcim/devices/123/" -ErrorMessage "Permission denied"
+
+                $result | Should -Match "403 Forbidden"
+                $result | Should -Match "DELETE /api/dcim/devices/123/"
+                $result | Should -Match "token has permission"
+                $result | Should -Match "object-level permissions"
+            }
+        }
+
+        It "Should provide 404 Not Found troubleshooting hints" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $result = BuildDetailedErrorMessage -StatusCode 404 -StatusName "Not Found" `
+                    -Method "GET" -Endpoint "/api/dcim/devices/99999/" -ErrorMessage "Not found"
+
+                $result | Should -Match "404 Not Found"
+                $result | Should -Match "resource ID exists"
+                $result | Should -Match "resource was deleted"
+            }
+        }
+
+        It "Should provide 429 Rate Limit troubleshooting hints" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $result = BuildDetailedErrorMessage -StatusCode 429 -StatusName "Too Many Requests" `
+                    -Method "GET" -Endpoint "/api/dcim/devices/" -ErrorMessage "Rate limited"
+
+                $result | Should -Match "429 Too Many Requests"
+                $result | Should -Match "rate limited"
+                $result | Should -Match "Wait a moment"
+            }
+        }
+
+        It "Should provide 500+ Server Error troubleshooting hints" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $result = BuildDetailedErrorMessage -StatusCode 500 -StatusName "Internal Server Error" `
+                    -Method "POST" -Endpoint "/api/dcim/devices/" -ErrorMessage "Server error"
+
+                $result | Should -Match "500 Internal Server Error"
+                $result | Should -Match "server-side error"
+                $result | Should -Match "Netbox server logs"
+            }
+        }
+
+        It "Should provide 503 Service Unavailable troubleshooting hints" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $result = BuildDetailedErrorMessage -StatusCode 503 -StatusName "Service Unavailable" `
+                    -Method "GET" -Endpoint "/api/" -ErrorMessage "Service down"
+
+                $result | Should -Match "503 Service Unavailable"
+                $result | Should -Match "server-side error"
+                $result | Should -Match "Netbox service is running"
+            }
+        }
+
+        It "Should provide generic troubleshooting for unknown status codes" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $result = BuildDetailedErrorMessage -StatusCode 418 -StatusName "I'm a teapot" `
+                    -Method "GET" -Endpoint "/api/teapot/" -ErrorMessage "Cannot brew coffee"
+
+                $result | Should -Match "418 I'm a teapot"
+                $result | Should -Match "Check your request parameters"
+            }
+        }
+    }
+
+    Context "Error Message Format" {
+        It "Should include all provided information in the message" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $result = BuildDetailedErrorMessage -StatusCode 400 -StatusName "Bad Request" `
+                    -Method "POST" -Endpoint "/api/ipam/ip-addresses/" -ErrorMessage "Invalid IP format"
+
+                $result | Should -Match "400 Bad Request"
+                $result | Should -Match "POST /api/ipam/ip-addresses/"
+                $result | Should -Match "Invalid IP format"
+                $result | Should -Match "Troubleshooting:"
+            }
+        }
+
+        It "Should handle empty error message gracefully" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $result = BuildDetailedErrorMessage -StatusCode 400 -StatusName "Bad Request" `
+                    -Method "GET" -Endpoint "/api/test/" -ErrorMessage ""
+
+                $result | Should -Match "400 Bad Request"
+                $result | Should -Match "GET /api/test/"
+            }
+        }
     }
 }
 

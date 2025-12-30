@@ -5,7 +5,11 @@ BeforeAll {
     Import-Module Pester
     Remove-Module PowerNetbox -Force -ErrorAction SilentlyContinue
 
+    # Try built module first, fall back to source
     $ModulePath = Join-Path (Join-Path $PSScriptRoot "..") "PowerNetbox/PowerNetbox.psd1"
+    if (-not (Test-Path $ModulePath)) {
+        $ModulePath = Join-Path (Join-Path $PSScriptRoot "..") "PowerNetbox.psd1"
+    }
     if (Test-Path $ModulePath) {
         Import-Module $ModulePath -ErrorAction Stop
     }
@@ -857,6 +861,34 @@ Describe "Set-NBDCIMDevice Bulk Mode" -Tag 'Bulk', 'DCIM' {
         }
     }
 
+    Context "Single Mode Operations" {
+        It "Should update a single device by Id" {
+            $result = Set-NBDCIMDevice -Id 100 -Status "active" -Force
+
+            $result | Should -Not -BeNullOrEmpty
+            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -ModuleName 'PowerNetbox'
+        }
+
+        It "Should update multiple devices when Id array is provided" {
+            $result = Set-NBDCIMDevice -Id 100, 101, 102 -Status "staged" -Force
+
+            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 3 -ModuleName 'PowerNetbox'
+        }
+
+        It "Should update device name" {
+            $result = Set-NBDCIMDevice -Id 100 -Name "renamed-device" -Force
+
+            $result | Should -Not -BeNullOrEmpty
+            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -ModuleName 'PowerNetbox'
+        }
+
+        It "Should call Get-NBDCIMDevice for each Id in single mode" {
+            Set-NBDCIMDevice -Id 100 -Status "active" -Force
+
+            Should -Invoke -CommandName 'Get-NBDCIMDevice' -Times 1 -ModuleName 'PowerNetbox' -ParameterFilter { $Id -eq 100 }
+        }
+    }
+
     Context "Parameter Sets" {
         It "Should have Single and Bulk parameter sets" {
             $cmd = Get-Command Set-NBDCIMDevice
@@ -921,6 +953,26 @@ Describe "Remove-NBDCIMDevice Bulk Mode" -Tag 'Bulk', 'DCIM' {
         }
     }
 
+    Context "Single Mode Operations" {
+        It "Should delete a single device by Id" {
+            { Remove-NBDCIMDevice -Id 100 -Force } | Should -Not -Throw
+
+            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -ModuleName 'PowerNetbox'
+        }
+
+        It "Should delete multiple devices when Id array is provided" {
+            { Remove-NBDCIMDevice -Id 100, 101, 102 -Force } | Should -Not -Throw
+
+            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 3 -ModuleName 'PowerNetbox'
+        }
+
+        It "Should call Get-NBDCIMDevice for each Id in single mode" {
+            Remove-NBDCIMDevice -Id 100 -Force
+
+            Should -Invoke -CommandName 'Get-NBDCIMDevice' -Times 1 -ModuleName 'PowerNetbox' -ParameterFilter { $Id -eq 100 }
+        }
+    }
+
     Context "Parameter Sets" {
         It "Should have Single and Bulk parameter sets" {
             $cmd = Get-Command Remove-NBDCIMDevice
@@ -964,7 +1016,7 @@ Describe "Remove-NBDCIMDevice Bulk Mode" -Tag 'Bulk', 'DCIM' {
     }
 }
 
-Describe "Set-NBIPAMAddress Bulk Mode" -Tag 'Bulk', 'IPAM' {
+Describe "Set-NBIPAMAddress" -Tag 'Bulk', 'IPAM' {
     BeforeAll {
         Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
         Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
@@ -1008,6 +1060,35 @@ Describe "Set-NBIPAMAddress Bulk Mode" -Tag 'Bulk', 'IPAM' {
                 Id = $Id
                 Address = "192.168.1.$Id/24"
             }
+        }
+    }
+
+    Context "Single Mode Operations" {
+        It "Should update a single IP address by Id" {
+            $result = Set-NBIPAMAddress -Id 100 -Status "active" -Force
+
+            $result | Should -Not -BeNullOrEmpty
+            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -ModuleName 'PowerNetbox'
+        }
+
+        It "Should update multiple IPs when Id array is provided" {
+            $result = Set-NBIPAMAddress -Id 100, 101, 102 -Status "reserved" -Force
+
+            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 3 -ModuleName 'PowerNetbox'
+        }
+
+        It "Should validate Assigned_Object_Type requires Assigned_Object_Id" {
+            { Set-NBIPAMAddress -Id 100 -Assigned_Object_Type "dcim.interface" -Force -ErrorAction Stop } | Should -Throw
+        }
+
+        It "Should validate Assigned_Object_Id requires Assigned_Object_Type" {
+            { Set-NBIPAMAddress -Id 100 -Assigned_Object_Id 50 -Force -ErrorAction Stop } | Should -Throw
+        }
+
+        It "Should accept both Assigned_Object_Type and Assigned_Object_Id together" {
+            $result = Set-NBIPAMAddress -Id 100 -Assigned_Object_Type "dcim.interface" -Assigned_Object_Id 50 -Force
+
+            $result | Should -Not -BeNullOrEmpty
         }
     }
 
@@ -1100,6 +1181,26 @@ Describe "Remove-NBIPAMAddress Bulk Mode" -Tag 'Bulk', 'IPAM' {
                 Id = $Id
                 Address = "192.168.1.$Id/24"
             }
+        }
+    }
+
+    Context "Single Mode Operations" {
+        It "Should delete a single IP address by Id" {
+            { Remove-NBIPAMAddress -Id 100 -Force } | Should -Not -Throw
+
+            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -ModuleName 'PowerNetbox'
+        }
+
+        It "Should delete multiple IPs when Id array is provided" {
+            { Remove-NBIPAMAddress -Id 100, 101, 102 -Force } | Should -Not -Throw
+
+            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 3 -ModuleName 'PowerNetbox'
+        }
+
+        It "Should call Get-NBIPAMAddress for each Id in single mode" {
+            Remove-NBIPAMAddress -Id 100 -Force
+
+            Should -Invoke -CommandName 'Get-NBIPAMAddress' -Times 1 -ModuleName 'PowerNetbox' -ParameterFilter { $Id -eq 100 }
         }
     }
 
@@ -1210,6 +1311,36 @@ Describe "Set-NBVirtualMachine Bulk Mode" -Tag 'Bulk', 'Virtualization' {
         }
     }
 
+    Context "Single Mode Operations" {
+        It "Should update a single VM by Id" {
+            $result = Set-NBVirtualMachine -Id 100 -Status "active" -Force
+
+            $result | Should -Not -BeNullOrEmpty
+            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -ModuleName 'PowerNetbox'
+        }
+
+        It "Should update VM name" {
+            $result = Set-NBVirtualMachine -Id 100 -Name "renamed-vm" -Force
+
+            $result | Should -Not -BeNullOrEmpty
+            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -ModuleName 'PowerNetbox'
+        }
+
+        It "Should update VM with multiple parameters" {
+            $result = Set-NBVirtualMachine -Id 100 -Status "active" -VCPUs 4 -Memory 8192 -Force
+
+            $result | Should -Not -BeNullOrEmpty
+            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -ModuleName 'PowerNetbox'
+        }
+
+        It "Should support pipeline input by Id property" {
+            $vm = [PSCustomObject]@{ Id = 100 }
+            $result = $vm | Set-NBVirtualMachine -Status "offline" -Force
+
+            $result | Should -Not -BeNullOrEmpty
+        }
+    }
+
     Context "Parameter Sets" {
         It "Should have Single and Bulk parameter sets" {
             $cmd = Get-Command Set-NBVirtualMachine
@@ -1299,6 +1430,33 @@ Describe "Remove-NBVirtualMachine Bulk Mode" -Tag 'Bulk', 'Virtualization' {
                 Id = $Id
                 Name = "vm-$Id"
             }
+        }
+    }
+
+    Context "Single Mode Operations" {
+        It "Should delete a single VM by Id" {
+            { Remove-NBVirtualMachine -Id 100 -Force } | Should -Not -Throw
+
+            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -ModuleName 'PowerNetbox'
+        }
+
+        It "Should delete multiple VMs when Id array is provided" {
+            { Remove-NBVirtualMachine -Id 100, 101, 102 -Force } | Should -Not -Throw
+
+            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 3 -ModuleName 'PowerNetbox'
+        }
+
+        It "Should call Get-NBVirtualMachine for each Id in single mode" {
+            Remove-NBVirtualMachine -Id 100 -Force
+
+            Should -Invoke -CommandName 'Get-NBVirtualMachine' -Times 1 -ModuleName 'PowerNetbox' -ParameterFilter { $Id -eq 100 }
+        }
+
+        It "Should support pipeline input by Id property" {
+            $vm = [PSCustomObject]@{ Id = 100 }
+            { $vm | Remove-NBVirtualMachine -Force } | Should -Not -Throw
+
+            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -ModuleName 'PowerNetbox'
         }
     }
 
