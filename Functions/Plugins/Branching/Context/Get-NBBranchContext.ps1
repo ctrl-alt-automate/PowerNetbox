@@ -31,7 +31,7 @@
 #>
 function Get-NBBranchContext {
     [CmdletBinding()]
-    [OutputType([string])]
+    [OutputType([string], [string[]])]
     param(
         [switch]$Stack
     )
