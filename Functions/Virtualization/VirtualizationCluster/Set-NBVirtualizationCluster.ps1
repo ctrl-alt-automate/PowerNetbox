@@ -4,7 +4,7 @@
 
 .DESCRIPTION
     Updates an existing virtualization cluster in the Netbox virtualization module.
-    Supports pipeline input from Get-NBVirtualizationCluster.
+    Supports pipeline input from Get-NBVVirtualization Cluster.
 
 .PARAMETER Id
     The database ID of the cluster to update. Accepts pipeline input.
@@ -46,19 +46,19 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBVirtualizationCluster -Id 1 -Description "Updated description"
+    Set-NBVVirtualization Cluster -Id 1 -Description "Updated description"
 
     Updates the description of cluster ID 1.
 
 .EXAMPLE
-    Get-NBVirtualizationCluster -Name "prod-cluster" | Set-NBVirtualizationCluster -Status "active"
+    Get-NBVVirtualization Cluster -Name "prod-cluster" | Set-NBVVirtualization Cluster -Status "active"
 
     Updates a cluster found by name via pipeline.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/models/virtualization/cluster/
 #>
-function Set-NBVirtualizationCluster {
+function Set-NBVVirtualization Cluster {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
     [OutputType([PSCustomObject])]
     param
@@ -95,7 +95,7 @@ function Set-NBVirtualizationCluster {
     process {
         Write-Verbose "Updating Virtualization Cluster"
         foreach ($ClusterId in $Id) {
-            $CurrentCluster = Get-NBVirtualizationCluster -Id $ClusterId -ErrorAction Stop
+            $CurrentCluster = Get-NBVVirtualization Cluster -Id $ClusterId -ErrorAction Stop
 
             $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'clusters', $CurrentCluster.Id))
 

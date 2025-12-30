@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Creates a new CIMConsoleServerPort in Netbox D module.
+    Creates a new DCIM Console Server Port in Netbox DCIM module.
 
 .DESCRIPTION
-    Creates a new CIMConsoleServerPort in Netbox D module.
+    Creates a new DCIM Console Server Port in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBDCIMConsoleServerPort
+    New-NBDDCIM Console Server Port
 
-    Returns all CIMConsoleServerPort objects.
+    Returns all DCIM Console Server Port objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function New-NBDCIMConsoleServerPort {
+function New-NBDDCIM Console Server Port {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param(
@@ -34,7 +34,7 @@ function New-NBDCIMConsoleServerPort {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating D CI MC on so le Se rv er Po rt"
+        Write-Verbose "Creating DCIM Console Server Port"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','console-server-ports'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create console server port')) {

@@ -9,12 +9,12 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBIPAMAggregate
+    Get-NBIIPAM Aggregate
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Get-NBIPAMAggregate {
+function Get-NBIIPAM Aggregate {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([PSCustomObject])]
     param
@@ -55,7 +55,7 @@ function Get-NBIPAMAggregate {
     )
 
 process {
-        Write-Verbose "Retrieving I PA MA gg re ga te"
+        Write-Verbose "Retrieving IPAM Aggregate"
         #    if ($null -ne $Family) {
         #        $PSBoundParameters.Family = ValidateIPAMChoice -ProvidedValue $Family -AggregateFamily
         #    }

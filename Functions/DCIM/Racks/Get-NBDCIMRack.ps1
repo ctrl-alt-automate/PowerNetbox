@@ -1,4 +1,4 @@
-function Get-NBDCIMRack {
+function Get-NBDDCIM Rack {
 <#
     .SYNOPSIS
         Get racks from Netbox
@@ -52,17 +52,17 @@ function Get-NBDCIMRack {
         Return the raw API response
 
     .EXAMPLE
-        Get-NBDCIMRack
+        Get-NBDDCIM Rack
 
         Returns all racks
 
     .EXAMPLE
-        Get-NBDCIMRack -Site_Id 1
+        Get-NBDDCIM Rack -Site_Id 1
 
         Returns all racks at site with ID 1
 
     .EXAMPLE
-        Get-NBDCIMRack -Name "Rack-01"
+        Get-NBDDCIM Rack -Name "Rack-01"
 
         Returns racks matching the name "Rack-01"
 #>
@@ -124,7 +124,7 @@ function Get-NBDCIMRack {
     )
 
     process {
-        Write-Verbose "Retrieving D CI MR ac k"
+        Write-Verbose "Retrieving DCIM Rack"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
                 foreach ($RackId in $Id) {

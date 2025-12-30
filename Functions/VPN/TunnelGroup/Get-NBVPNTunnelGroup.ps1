@@ -9,12 +9,12 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBVPNTunnelGroup
+    Get-NBVVPN TunnelGroup
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Get-NBVPNTunnelGroup {
+function Get-NBVVPN TunnelGroup {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([PSCustomObject])]
     param([Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
@@ -23,7 +23,7 @@ function Get-NBVPNTunnelGroup {
         [uint16]$Limit,[ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,[switch]$Raw)
     process {
-        Write-Verbose "Retrieving V PN Tu nn el Gr ou p"
+        Write-Verbose "Retrieving VPN Tunnel Gr ou p"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','tunnel-groups',$i)) -Raw:$Raw } }
             default { $s = [System.Collections.ArrayList]::new(@('vpn','tunnel-groups')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'; InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments -Parameters $u.Parameters) -Raw:$Raw }

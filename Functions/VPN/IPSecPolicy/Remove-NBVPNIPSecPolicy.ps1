@@ -1,25 +1,26 @@
 <#
 .SYNOPSIS
-    Removes a PNIPSecPolicy from Netbox V module.
+    Removes a VPN IPSec Policy from Netbox VPN module.
 
 .DESCRIPTION
-    Removes a PNIPSecPolicy from Netbox V module.
+    Removes a VPN IPSec Policy from Netbox VPN module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBVPNIPSecPolicy
+    Remove-NBVVPN IPSec Policy
 
-    Returns all PNIPSecPolicy objects.
+    Returns all VPN IPSec Policy objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Remove-NBVPNIPSecPolicy {
+function Remove-NBVVPN IPSec Policy {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[switch]$Raw)
-    process { if ($PSCmdlet.ShouldProcess($Id, 'Delete IPSec policy')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','ipsec-policies',$Id)) -Method DELETE -Raw:$Raw } }
+    process {
+        Write-Verbose "Removing VPN IPSec Policy" if ($PSCmdlet.ShouldProcess($Id, 'Delete IPSec policy')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','ipsec-policies',$Id)) -Method DELETE -Raw:$Raw } }
 }

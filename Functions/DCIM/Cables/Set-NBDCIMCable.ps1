@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Updates an existing CIMCable in Netbox D module.
+    Updates an existing DCIM Cable in Netbox DCIM module.
 
 .DESCRIPTION
-    Updates an existing CIMCable in Netbox D module.
+    Updates an existing DCIM Cable in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBDCIMCable
+    Set-NBDDCIM Cable
 
-    Returns all CIMCable objects.
+    Returns all DCIM Cable objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Set-NBDCIMCable {
+function Set-NBDDCIM Cable {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     [OutputType([PSCustomObject])]
     param(
@@ -36,7 +36,7 @@ function Set-NBDCIMCable {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating D CI MC ab le"
+        Write-Verbose "Updating DCIM Cable"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','cables',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update cable')) {

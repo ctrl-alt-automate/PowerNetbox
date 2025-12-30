@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Removes a PAMFHRPGroup from Netbox I module.
+    Removes a IPAM FHRP Group from Netbox IPAM module.
 
 .DESCRIPTION
-    Removes a PAMFHRPGroup from Netbox I module.
+    Removes a IPAM FHRP Group from Netbox IPAM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBIPAMFHRPGroup
+    Remove-NBIIPAM FHRP Group
 
-    Returns all PAMFHRPGroup objects.
+    Returns all IPAM FHRP Group objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Remove-NBIPAMFHRPGroup {
+function Remove-NBIIPAM FHRP Group {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     [OutputType([PSCustomObject])]
     param(
@@ -25,7 +25,7 @@ function Remove-NBIPAMFHRPGroup {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing I PA MF HR PG ro up"
+        Write-Verbose "Removing IPAM FHRP Group"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete FHRP group')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('ipam','fhrp-groups',$Id)) -Method DELETE -Raw:$Raw
         }

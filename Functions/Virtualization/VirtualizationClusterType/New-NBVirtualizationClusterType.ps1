@@ -25,19 +25,19 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBVirtualizationClusterType -Name "VMware vSphere" -Slug "vmware-vsphere"
+    New-NBVVirtualization ClusterType -Name "VMware vSphere" -Slug "vmware-vsphere"
 
     Creates a new cluster type for VMware vSphere.
 
 .EXAMPLE
-    New-NBVirtualizationClusterType -Name "Proxmox VE" -Description "Open source virtualization platform"
+    New-NBVVirtualization ClusterType -Name "Proxmox VE" -Description "Open source virtualization platform"
 
     Creates a new cluster type with auto-generated slug.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/models/virtualization/clustertype/
 #>
-function New-NBVirtualizationClusterType {
+function New-NBVVirtualization ClusterType {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param

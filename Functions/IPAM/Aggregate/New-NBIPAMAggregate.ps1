@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Creates a new PAMAggregate in Netbox I module.
+    Creates a new IPAM Aggregate in Netbox IPAM module.
 
 .DESCRIPTION
-    Creates a new PAMAggregate in Netbox I module.
+    Creates a new IPAM Aggregate in Netbox IPAM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBIPAMAggregate
+    New-NBIIPAM Aggregate
 
-    Returns all PAMAggregate objects.
+    Returns all IPAM Aggregate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function New-NBIPAMAggregate {
+function New-NBIIPAM Aggregate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param(
@@ -32,7 +32,7 @@ function New-NBIPAMAggregate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating I PA MA gg re ga te"
+        Write-Verbose "Creating IPAM Aggregate"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'aggregates'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         $URI = BuildNewURI -Segments $URIComponents.Segments

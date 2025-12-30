@@ -1,4 +1,4 @@
-function New-NBIPAMASN {
+function New-NBIIPAM ASN {
 <#
     .SYNOPSIS
         Create a new ASN in Netbox
@@ -28,12 +28,12 @@ function New-NBIPAMASN {
         Return the raw API response
 
     .EXAMPLE
-        New-NBIPAMASN -ASN 65001
+        New-NBIIPAM ASN -ASN 65001
 
         Creates ASN 65001
 
     .EXAMPLE
-        New-NBIPAMASN -ASN 65001 -RIR 1 -Description "Primary ASN"
+        New-NBIIPAM ASN -ASN 65001 -RIR 1 -Description "Primary ASN"
 
         Creates ASN 65001 with RIR and description
 #>
@@ -60,7 +60,7 @@ function New-NBIPAMASN {
     )
 
     process {
-        Write-Verbose "Creating I PA MA SN"
+        Write-Verbose "Creating IPAM ASN"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'asns'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'

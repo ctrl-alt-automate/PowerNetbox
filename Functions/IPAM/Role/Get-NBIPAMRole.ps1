@@ -1,5 +1,5 @@
 
-function Get-NBIPAMRole {
+function Get-NBIIPAM Role {
 <#
     .SYNOPSIS
         Get IPAM Prefix/VLAN roles
@@ -32,7 +32,7 @@ function Get-NBIPAMRole {
         Return the raw API response instead of extracting the results array.
 
     .EXAMPLE
-        PS C:\> Get-NBIPAMRole
+        PS C:\> Get-NBIIPAM Role
 
 #>
 
@@ -77,7 +77,7 @@ function Get-NBIPAMRole {
     )
 
     process {
-        Write-Verbose "Retrieving I PA MR ol e"
+        Write-Verbose "Retrieving IPAM Role"
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($Role_ID in $Id) {

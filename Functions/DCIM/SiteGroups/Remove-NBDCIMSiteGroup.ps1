@@ -1,4 +1,4 @@
-function Remove-NBDCIMSiteGroup {
+function Remove-NBDDCIM SiteGroup {
 <#
     .SYNOPSIS
         Remove a site group from Netbox
@@ -13,12 +13,12 @@ function Remove-NBDCIMSiteGroup {
         Return the raw API response
 
     .EXAMPLE
-        Remove-NBDCIMSiteGroup -Id 1
+        Remove-NBDDCIM SiteGroup -Id 1
 
         Deletes site group with ID 1
 
     .EXAMPLE
-        Get-NBDCIMSiteGroup -Name "Old Group" | Remove-NBDCIMSiteGroup
+        Get-NBDDCIM SiteGroup -Name "Old Group" | Remove-NBDDCIM SiteGroup
 
         Deletes site groups matching the name "Old Group"
 #>
@@ -34,7 +34,7 @@ function Remove-NBDCIMSiteGroup {
     )
 
     process {
-        Write-Verbose "Removing D CI MS it eG ro up"
+        Write-Verbose "Removing DCIM SiteG ro up"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'site-groups', $Id))
 
         $URI = BuildNewURI -Segments $Segments

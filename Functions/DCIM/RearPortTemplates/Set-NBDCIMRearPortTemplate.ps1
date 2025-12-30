@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Updates an existing CIMRearPortTemplate in Netbox D module.
+    Updates an existing DCIM Rear PortTemplate in Netbox DCIM module.
 
 .DESCRIPTION
-    Updates an existing CIMRearPortTemplate in Netbox D module.
+    Updates an existing DCIM Rear PortTemplate in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBDCIMRearPortTemplate
+    Set-NBDDCIM Rear PortTemplate
 
-    Returns all CIMRearPortTemplate objects.
+    Returns all DCIM Rear PortTemplate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Set-NBDCIMRearPortTemplate {
+function Set-NBDDCIM Rear PortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     [OutputType([PSCustomObject])]
     param(
@@ -33,7 +33,7 @@ function Set-NBDCIMRearPortTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating D CI MR ea rP or tT em pl at e"
+        Write-Verbose "Updating DCIM Rear PortT em pl at e"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','rear-port-templates',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update rear port template')) {

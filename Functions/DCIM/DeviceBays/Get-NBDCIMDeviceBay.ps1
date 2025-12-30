@@ -9,12 +9,12 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBDCIMDeviceBay
+    Get-NBDDCIM Device Bay
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Get-NBDCIMDeviceBay {
+function Get-NBDDCIM Device Bay {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([PSCustomObject])]
     param(
@@ -34,7 +34,7 @@ function Get-NBDCIMDeviceBay {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Retrieving D CI MD ev ic eB ay"
+        Write-Verbose "Retrieving DCIM DeviceB ay"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','device-bays',$i)) -Raw:$Raw } }
             default {

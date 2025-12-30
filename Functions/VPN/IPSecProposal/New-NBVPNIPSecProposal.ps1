@@ -33,12 +33,12 @@
     Return the raw API response
 
 .EXAMPLE
-    New-NBVPNIPSecProposal -Name "IPSec-Proposal-1" -Encryption_Algorithm "aes-256-cbc" -Authentication_Algorithm "hmac-sha256"
+    New-NBVVPN IPSec Proposal -Name "IPSec-Proposal-1" -Encryption_Algorithm "aes-256-cbc" -Authentication_Algorithm "hmac-sha256"
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function New-NBVPNIPSecProposal {
+function New-NBVVPN IPSec Proposal {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param(
@@ -67,7 +67,7 @@ function New-NBVPNIPSecProposal {
     )
 
     process {
-        Write-Verbose "Creating V PN IP Se cP ro po sa l"
+        Write-Verbose "Creating VPN IPSec Proposal"
         $Segments = [System.Collections.ArrayList]::new(@('vpn', 'ipsec-proposals'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'

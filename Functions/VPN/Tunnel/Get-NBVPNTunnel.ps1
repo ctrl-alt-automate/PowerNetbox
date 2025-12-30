@@ -9,12 +9,12 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBVPNTunnel
+    Get-NBVVPN Tunnel
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Get-NBVPNTunnel {
+function Get-NBVVPN Tunnel {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([PSCustomObject])]
     param
@@ -38,7 +38,7 @@ function Get-NBVPNTunnel {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Retrieving V PN Tu nn el"
+        Write-Verbose "Retrieving VPN Tunnel"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
                 foreach ($TunnelId in $Id) {

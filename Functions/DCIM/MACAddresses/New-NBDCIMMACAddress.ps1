@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Creates a new CIMMACAddress in Netbox D module.
+    Creates a new DCIM MAC Address in Netbox DCIM module.
 
 .DESCRIPTION
-    Creates a new CIMMACAddress in Netbox D module.
+    Creates a new DCIM MAC Address in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBDCIMMACAddress
+    New-NBDDCIM MAC Address
 
-    Returns all CIMMACAddress objects.
+    Returns all DCIM MAC Address objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function New-NBDCIMMACAddress {
+function New-NBDDCIM MAC Address {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param(
@@ -31,7 +31,7 @@ function New-NBDCIMMACAddress {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating D CI MM AC Ad dr es s"
+        Write-Verbose "Creating DCIM MAC Address"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','mac-addresses'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Mac_Address, 'Create MAC address')) {

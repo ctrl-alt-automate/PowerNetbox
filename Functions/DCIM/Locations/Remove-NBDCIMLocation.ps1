@@ -1,4 +1,4 @@
-function Remove-NBDCIMLocation {
+function Remove-NBDDCIM Location {
 <#
     .SYNOPSIS
         Remove a location from Netbox
@@ -13,12 +13,12 @@ function Remove-NBDCIMLocation {
         Return the raw API response
 
     .EXAMPLE
-        Remove-NBDCIMLocation -Id 1
+        Remove-NBDDCIM Location -Id 1
 
         Deletes location with ID 1
 
     .EXAMPLE
-        Get-NBDCIMLocation -Name "Old Room" | Remove-NBDCIMLocation
+        Get-NBDDCIM Location -Name "Old Room" | Remove-NBDDCIM Location
 
         Deletes locations matching the name "Old Room"
 #>
@@ -34,7 +34,7 @@ function Remove-NBDCIMLocation {
     )
 
     process {
-        Write-Verbose "Removing D CI ML oc at io n"
+        Write-Verbose "Removing DCIM Location"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'locations', $Id))
 
         $URI = BuildNewURI -Segments $Segments

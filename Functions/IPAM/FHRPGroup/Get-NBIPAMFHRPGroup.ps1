@@ -9,12 +9,12 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBIPAMFHRPGroup
+    Get-NBIIPAM FHRP Group
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Get-NBIPAMFHRPGroup {
+function Get-NBIIPAM FHRP Group {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([PSCustomObject])]
     param(
@@ -35,7 +35,7 @@ function Get-NBIPAMFHRPGroup {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Retrieving I PA MF HR PG ro up"
+        Write-Verbose "Retrieving IPAM FHRP Group"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('ipam','fhrp-groups',$i)) -Raw:$Raw } }
             default {

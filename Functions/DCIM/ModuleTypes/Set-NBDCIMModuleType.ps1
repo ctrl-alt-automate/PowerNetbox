@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Updates an existing CIMModuleType in Netbox D module.
+    Updates an existing DCIM Module Type in Netbox DCIM module.
 
 .DESCRIPTION
-    Updates an existing CIMModuleType in Netbox D module.
+    Updates an existing DCIM Module Type in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBDCIMModuleType
+    Set-NBDDCIM Module Type
 
-    Returns all CIMModuleType objects.
+    Returns all DCIM Module Type objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Set-NBDCIMModuleType {
+function Set-NBDDCIM Module Type {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     [OutputType([PSCustomObject])]
     param(
@@ -34,7 +34,7 @@ function Set-NBDCIMModuleType {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating D CI MM od ul eT yp e"
+        Write-Verbose "Updating DCIM ModuleT yp e"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','module-types',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update module type')) {

@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Updates an existing CIMInventoryItemRole in Netbox D module.
+    Updates an existing DCIM Inventory ItemRole in Netbox DCIM module.
 
 .DESCRIPTION
-    Updates an existing CIMInventoryItemRole in Netbox D module.
+    Updates an existing DCIM Inventory ItemRole in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBDCIMInventoryItemRole
+    Set-NBDDCIM Inventory ItemRole
 
-    Returns all CIMInventoryItemRole objects.
+    Returns all DCIM Inventory ItemRole objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Set-NBDCIMInventoryItemRole {
+function Set-NBDDCIM Inventory ItemRole {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     [OutputType([PSCustomObject])]
     param(
@@ -31,7 +31,7 @@ function Set-NBDCIMInventoryItemRole {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating D CI MI nv en to ry It em Ro le"
+        Write-Verbose "Updating DCIM Inventory Item Ro le"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','inventory-item-roles',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update inventory item role')) {

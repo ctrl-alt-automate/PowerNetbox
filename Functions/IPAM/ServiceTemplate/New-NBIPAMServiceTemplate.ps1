@@ -1,4 +1,4 @@
-function New-NBIPAMServiceTemplate {
+function New-NBIIPAM ServiceTemplate {
 <#
     .SYNOPSIS
         Create a new service template in Netbox
@@ -29,12 +29,12 @@ function New-NBIPAMServiceTemplate {
         Return the raw API response
 
     .EXAMPLE
-        New-NBIPAMServiceTemplate -Name "HTTPS" -Ports @(443) -Protocol tcp
+        New-NBIIPAM ServiceTemplate -Name "HTTPS" -Ports @(443) -Protocol tcp
 
         Creates an HTTPS service template
 
     .EXAMPLE
-        New-NBIPAMServiceTemplate -Name "Web Server" -Ports @(80, 443) -Protocol tcp
+        New-NBIIPAM ServiceTemplate -Name "Web Server" -Ports @(80, 443) -Protocol tcp
 
         Creates a web server template with HTTP and HTTPS ports
 #>
@@ -63,7 +63,7 @@ function New-NBIPAMServiceTemplate {
     )
 
     process {
-        Write-Verbose "Creating I PA MS er vi ce Te mp la te"
+        Write-Verbose "Creating IPAM Service Te mp la te"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'service-templates'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'

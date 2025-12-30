@@ -1,5 +1,5 @@
 
-function Set-NBDCIMInterfaceConnection {
+function Set-NBDDCIM InterfaceConnection {
 <#
     .SYNOPSIS
         Update an interface connection
@@ -23,7 +23,7 @@ function Set-NBDCIMInterfaceConnection {
         Skip confirmation prompts.
 
     .EXAMPLE
-        PS C:\> Set-NBDCIMInterfaceConnection -Id 1 -Connection_Status 'connected'
+        PS C:\> Set-NBDDCIM InterfaceConnection -Id 1 -Connection_Status 'connected'
 #>
 
     [CmdletBinding(ConfirmImpact = 'Medium',
@@ -51,9 +51,9 @@ function Set-NBDCIMInterfaceConnection {
     }
 
     process {
-        Write-Verbose "Updating D CI MI nt er fa ce Co nn ec ti on"
+        Write-Verbose "Updating DCIM Interface Co nn ec ti on"
         foreach ($ConnectionID in $Id) {
-            $CurrentConnection = Get-NBDCIMInterfaceConnection -Id $ConnectionID -ErrorAction Stop
+            $CurrentConnection = Get-NBDDCIM InterfaceConnection -Id $ConnectionID -ErrorAction Stop
 
             $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interface-connections', $CurrentConnection.Id))
 

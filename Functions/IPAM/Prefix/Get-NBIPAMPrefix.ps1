@@ -1,5 +1,5 @@
 
-function Get-NBIPAMPrefix {
+function Get-NBIIPAM Prefix {
 <#
     .SYNOPSIS
         Retrieves IP prefixes from Netbox IPAM module.
@@ -75,7 +75,7 @@ function Get-NBIPAMPrefix {
         Return the raw API response instead of extracting the results array.
 
     .EXAMPLE
-        PS C:\> Get-NBIPAMPrefix
+        PS C:\> Get-NBIIPAM Prefix
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]
@@ -160,7 +160,7 @@ function Get-NBIPAMPrefix {
     )
 
     process {
-        Write-Verbose "Retrieving I PA MP re fi x"
+        Write-Verbose "Retrieving IPAM Prefix"
         #    if ($null -ne $Family) {
         #        $PSBoundParameters.Family = ValidateIPAMChoice -ProvidedValue $Family -PrefixFamily
         #    }
@@ -171,8 +171,8 @@ function Get-NBIPAMPrefix {
 
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {
-            foreach ($Prefix_ID in $Id) {
-                $Segments = [System.Collections.ArrayList]::new(@('ipam', 'prefixes', $Prefix_ID))
+            foreach ($Prefix_Id in $Id) {
+                $Segments = [System.Collections.ArrayList]::new(@('ipam', 'prefixes', $Prefix_Id))
 
                 $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id'
 

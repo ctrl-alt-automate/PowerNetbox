@@ -1,4 +1,4 @@
-function Get-NBIPAMServiceTemplate {
+function Get-NBIIPAM ServiceTemplate {
 <#
     .SYNOPSIS
         Get service templates from Netbox
@@ -32,12 +32,12 @@ function Get-NBIPAMServiceTemplate {
         Return the raw API response
 
     .EXAMPLE
-        Get-NBIPAMServiceTemplate
+        Get-NBIIPAM ServiceTemplate
 
         Returns all service templates
 
     .EXAMPLE
-        Get-NBIPAMServiceTemplate -Name "HTTP"
+        Get-NBIIPAM ServiceTemplate -Name "HTTP"
 
         Returns service templates matching the name "HTTP"
 #>
@@ -78,7 +78,7 @@ function Get-NBIPAMServiceTemplate {
     )
 
     process {
-        Write-Verbose "Retrieving I PA MS er vi ce Te mp la te"
+        Write-Verbose "Retrieving IPAM Service Te mp la te"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
                 foreach ($TemplateId in $Id) {

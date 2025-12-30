@@ -1,4 +1,4 @@
-function Remove-NBIPAMVRF {
+function Remove-NBIIPAM VRF {
 <#
     .SYNOPSIS
         Remove a VRF from Netbox
@@ -13,12 +13,12 @@ function Remove-NBIPAMVRF {
         Return the raw API response
 
     .EXAMPLE
-        Remove-NBIPAMVRF -Id 1
+        Remove-NBIIPAM VRF -Id 1
 
         Deletes VRF with ID 1
 
     .EXAMPLE
-        Get-NBIPAMVRF -Name "Test-VRF" | Remove-NBIPAMVRF
+        Get-NBIIPAM VRF -Name "Test-VRF" | Remove-NBIIPAM VRF
 
         Deletes VRFs matching the name "Test-VRF"
 #>
@@ -34,7 +34,7 @@ function Remove-NBIPAMVRF {
     )
 
     process {
-        Write-Verbose "Removing I PA MV RF"
+        Write-Verbose "Removing IPAM VRF"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'vrfs', $Id))
 
         $URI = BuildNewURI -Segments $Segments

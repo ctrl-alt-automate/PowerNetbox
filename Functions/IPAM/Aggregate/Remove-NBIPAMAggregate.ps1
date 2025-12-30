@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Removes a PAMAggregate from Netbox I module.
+    Removes a IPAM Aggregate from Netbox IPAM module.
 
 .DESCRIPTION
-    Removes a PAMAggregate from Netbox I module.
+    Removes a IPAM Aggregate from Netbox IPAM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBIPAMAggregate
+    Remove-NBIIPAM Aggregate
 
-    Returns all PAMAggregate objects.
+    Returns all IPAM Aggregate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Remove-NBIPAMAggregate {
+function Remove-NBIIPAM Aggregate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     [OutputType([PSCustomObject])]
     param(
@@ -25,7 +25,7 @@ function Remove-NBIPAMAggregate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing I PA MA gg re ga te"
+        Write-Verbose "Removing IPAM Aggregate"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete aggregate')) {
             $Segments = [System.Collections.ArrayList]::new(@('ipam', 'aggregates', $Id))
             $URI = BuildNewURI -Segments $Segments

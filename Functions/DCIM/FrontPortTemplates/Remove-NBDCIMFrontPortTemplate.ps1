@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Removes a CIMFrontPortTemplate from Netbox D module.
+    Removes a DCIM Front PortTemplate from Netbox DCIM module.
 
 .DESCRIPTION
-    Removes a CIMFrontPortTemplate from Netbox D module.
+    Removes a DCIM Front PortTemplate from Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBDCIMFrontPortTemplate
+    Remove-NBDDCIM Front PortTemplate
 
-    Returns all CIMFrontPortTemplate objects.
+    Returns all DCIM Front PortTemplate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Remove-NBDCIMFrontPortTemplate {
+function Remove-NBDDCIM Front PortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     [OutputType([PSCustomObject])]
     param(
@@ -25,7 +25,7 @@ function Remove-NBDCIMFrontPortTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing D CI MF ro nt Po rt Te mp la te"
+        Write-Verbose "Removing DCIM Front Port Te mp la te"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete front port template')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','front-port-templates',$Id)) -Method DELETE -Raw:$Raw
         }

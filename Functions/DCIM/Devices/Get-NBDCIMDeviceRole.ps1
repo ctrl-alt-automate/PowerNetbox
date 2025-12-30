@@ -9,12 +9,12 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBDCIMDeviceRole
+    Get-NBDDCIM Device Role
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Get-NBDCIMDeviceRole {
+function Get-NBDDCIM Device Role {
     [CmdletBinding()]
     [OutputType([PSCustomObject])]
     param
@@ -45,7 +45,7 @@ function Get-NBDCIMDeviceRole {
     )
 
     process {
-        Write-Verbose "Retrieving D CI MD ev ic eR ol e"
+        Write-Verbose "Retrieving DCIM DeviceR ol e"
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($DRId in $Id) {

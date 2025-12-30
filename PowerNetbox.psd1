@@ -69,13 +69,13 @@ ClrVersion = '2.0.50727'
 NestedModules = @()
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-FunctionsToExport = 'Aliases', 'BuildNewURI', 'BuildURIComponents', 'BulkOperationResult',
-               'CheckNetboxIsConnected', 'Clear-NBCredential', 'Connect-NBAPI',
-               'ConvertTo-NetboxVersion', 'CreateEnum', 'Enter-NBBranch',
-               'Exit-NBBranch', 'Get-ModelDefinition', 'Get-NBAPIDefinition',
-               'Get-NBBookmark', 'Get-NBBranch', 'Get-NBBranchContext',
-               'Get-NBBranchEvent', 'Get-NBChangeDiff', 'Get-NBCircuit',
-               'Get-NBCircuitGroup', 'Get-NBCircuitGroupAssignment',
+FunctionsToExport = 'Aliases', 'ArgumentCompleters', 'BuildNewURI', 'BuildURIComponents',
+               'BulkOperationResult', 'CheckNetboxIsConnected', 'Clear-NBCredential',
+               'Connect-NBAPI', 'ConvertTo-NetboxVersion', 'CreateEnum',
+               'Enter-NBBranch', 'Exit-NBBranch', 'Get-ModelDefinition',
+               'Get-NBAPIDefinition', 'Get-NBBookmark', 'Get-NBBranch',
+               'Get-NBBranchContext', 'Get-NBBranchEvent', 'Get-NBChangeDiff',
+               'Get-NBCircuit', 'Get-NBCircuitGroup', 'Get-NBCircuitGroupAssignment',
                'Get-NBCircuitProvider', 'Get-NBCircuitProviderAccount',
                'Get-NBCircuitProviderNetwork', 'Get-NBCircuitTermination',
                'Get-NBCircuitType', 'Get-NBConfigContext', 'Get-NBContact',
@@ -174,7 +174,6 @@ FunctionsToExport = 'Aliases', 'BuildNewURI', 'BuildURIComponents', 'BulkOperati
                'New-NBVPNL2VPNTermination', 'New-NBVPNTunnel',
                'New-NBVPNTunnelGroup', 'New-NBVPNTunnelTermination', 'New-NBWebhook',
                'New-NBWirelessLAN', 'New-NBWirelessLANGroup', 'New-NBWirelessLink',
-               'Register-NBArgumentCompleters',
                'Remove-NBBookmark', 'Remove-NBBranch', 'Remove-NBCircuit',
                'Remove-NBCircuitGroup', 'Remove-NBCircuitGroupAssignment',
                'Remove-NBCircuitProvider', 'Remove-NBCircuitProviderAccount',
@@ -279,8 +278,8 @@ FunctionsToExport = 'Aliases', 'BuildNewURI', 'BuildURIComponents', 'BulkOperati
                'Set-NBVPNTunnelGroup', 'Set-NBVPNTunnelTermination', 'Set-NBWebhook',
                'Set-NBWirelessLAN', 'Set-NBWirelessLANGroup', 'Set-NBWirelessLink',
                'SetupNetboxConfigVariable', 'Sync-NBBranch', 'Test-NBAPIConnected',
-               'Test-NBBranchingAvailable',
-               'Undo-NBBranchMerge', 'VerifyAPIConnectivity'
+               'Test-NBBranchingAvailable', 'Undo-NBBranchMerge',
+               'VerifyAPIConnectivity'
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = @()

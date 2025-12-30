@@ -23,12 +23,12 @@
     Skip confirmation prompts.
 
 .EXAMPLE
-    Remove-NBVirtualMachine -Id 123 -Force
+    Remove-NBVVirtual Machine -Id 123 -Force
 
     Deletes VM with ID 123 without confirmation.
 
 .EXAMPLE
-    Get-NBVirtualMachine -Status "decommissioning" | Remove-NBVirtualMachine -Force
+    Get-NBVVirtual Machine -Status "decommissioning" | Remove-NBVVirtual Machine -Force
 
     Bulk delete all VMs with decommissioning status.
 
@@ -38,7 +38,7 @@
         [PSCustomObject]@{Id = 101}
         [PSCustomObject]@{Id = 102}
     )
-    $vmsToDelete | Remove-NBVirtualMachine -BatchSize 50 -Force
+    $vmsToDelete | Remove-NBVVirtual Machine -BatchSize 50 -Force
 
     Bulk delete multiple VMs.
 
@@ -46,7 +46,7 @@
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 
-function Remove-NBVirtualMachine {
+function Remove-NBVVirtual Machine {
     [CmdletBinding(SupportsShouldProcess = $true,
         ConfirmImpact = 'High',
         DefaultParameterSetName = 'Single')]
@@ -82,7 +82,7 @@ function Remove-NBVirtualMachine {
     process {
         if ($PSCmdlet.ParameterSetName -eq 'Single') {
             foreach ($VMId in $Id) {
-                $CurrentVM = Get-NBVirtualMachine -Id $VMId -ErrorAction Stop
+                $CurrentVM = Get-NBVVirtual Machine -Id $VMId -ErrorAction Stop
 
                 if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentVM.Name)/$($CurrentVM.Id)", "Remove")) {
                     $VMSegments = [System.Collections.ArrayList]::new(@('virtualization', 'virtual-machines', $CurrentVM.Id))

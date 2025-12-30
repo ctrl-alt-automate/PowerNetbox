@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Removes a CIMPowerFeed from Netbox D module.
+    Removes a DCIM Power Feed from Netbox DCIM module.
 
 .DESCRIPTION
-    Removes a CIMPowerFeed from Netbox D module.
+    Removes a DCIM Power Feed from Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBDCIMPowerFeed
+    Remove-NBDDCIM Power Feed
 
-    Returns all CIMPowerFeed objects.
+    Returns all DCIM Power Feed objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Remove-NBDCIMPowerFeed {
+function Remove-NBDDCIM Power Feed {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     [OutputType([PSCustomObject])]
     param(
@@ -25,7 +25,7 @@ function Remove-NBDCIMPowerFeed {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing D CI MP ow er Fe ed"
+        Write-Verbose "Removing DCIM Power Feed"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete power feed')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','power-feeds',$Id)) -Method DELETE -Raw:$Raw
         }

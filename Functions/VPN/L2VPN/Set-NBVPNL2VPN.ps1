@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Updates an existing PNL2VPN in Netbox V module.
+    Updates an existing VPN L2VPN in Netbox VPN module.
 
 .DESCRIPTION
-    Updates an existing PNL2VPN in Netbox V module.
+    Updates an existing VPN L2VPN in Netbox VPN module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBVPNL2VPN
+    Set-NBVVPN L2VPN
 
-    Returns all PNL2VPN objects.
+    Returns all VPN L2VPN objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Set-NBVPNL2VPN {
+function Set-NBVVPN L2VPN {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,

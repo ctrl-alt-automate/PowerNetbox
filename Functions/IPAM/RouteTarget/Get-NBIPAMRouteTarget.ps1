@@ -1,4 +1,4 @@
-function Get-NBIPAMRouteTarget {
+function Get-NBIIPAM Route Target {
 <#
     .SYNOPSIS
         Get route targets from Netbox
@@ -38,12 +38,12 @@ function Get-NBIPAMRouteTarget {
         Return the raw API response
 
     .EXAMPLE
-        Get-NBIPAMRouteTarget
+        Get-NBIIPAM Route Target
 
         Returns all route targets
 
     .EXAMPLE
-        Get-NBIPAMRouteTarget -Name "65001:100"
+        Get-NBIIPAM Route Target -Name "65001:100"
 
         Returns route targets matching the specified value
 #>
@@ -89,7 +89,7 @@ function Get-NBIPAMRouteTarget {
     )
 
     process {
-        Write-Verbose "Retrieving I PA MR ou te Ta rg et"
+        Write-Verbose "Retrieving IPAM Route Target"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
                 foreach ($RTId in $Id) {

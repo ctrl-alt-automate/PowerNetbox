@@ -4,7 +4,7 @@
 
 .DESCRIPTION
     Updates an existing cluster group in the Netbox virtualization module.
-    Supports pipeline input from Get-NBVirtualizationClusterGroup.
+    Supports pipeline input from Get-NBVVirtualization ClusterGroup.
 
 .PARAMETER Id
     The database ID of the cluster group to update. Accepts pipeline input.
@@ -31,19 +31,19 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBVirtualizationClusterGroup -Id 1 -Description "Updated description"
+    Set-NBVVirtualization ClusterGroup -Id 1 -Description "Updated description"
 
     Updates the description of cluster group ID 1.
 
 .EXAMPLE
-    Get-NBVirtualizationClusterGroup -Name "prod" | Set-NBVirtualizationClusterGroup -Name "Production"
+    Get-NBVVirtualization ClusterGroup -Name "prod" | Set-NBVVirtualization ClusterGroup -Name "Production"
 
     Updates a cluster group found by name via pipeline.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/models/virtualization/clustergroup/
 #>
-function Set-NBVirtualizationClusterGroup {
+function Set-NBVVirtualization ClusterGroup {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
     [OutputType([PSCustomObject])]
     param
@@ -69,7 +69,7 @@ function Set-NBVirtualizationClusterGroup {
     process {
         Write-Verbose "Updating Virtualization Cluster Group"
         foreach ($GroupId in $Id) {
-            $CurrentGroup = Get-NBVirtualizationClusterGroup -Id $GroupId -ErrorAction Stop
+            $CurrentGroup = Get-NBVVirtualization ClusterGroup -Id $GroupId -ErrorAction Stop
 
             $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'cluster-groups', $CurrentGroup.Id))
 

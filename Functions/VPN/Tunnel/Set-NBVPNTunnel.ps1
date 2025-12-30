@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Updates an existing PNTunnel in Netbox V module.
+    Updates an existing VPN Tunnel in Netbox VPN module.
 
 .DESCRIPTION
-    Updates an existing PNTunnel in Netbox V module.
+    Updates an existing VPN Tunnel in Netbox VPN module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBVPNTunnel
+    Set-NBVVPN Tunnel
 
-    Returns all PNTunnel objects.
+    Returns all VPN Tunnel objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Set-NBVPNTunnel {
+function Set-NBVVPN Tunnel {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     [OutputType([PSCustomObject])]
     param
@@ -35,7 +35,7 @@ function Set-NBVPNTunnel {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating V PN Tu nn el"
+        Write-Verbose "Updating VPN Tunnel"
         $Segments = [System.Collections.ArrayList]::new(@('vpn', 'tunnels', $Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
         $URI = BuildNewURI -Segments $URIComponents.Segments

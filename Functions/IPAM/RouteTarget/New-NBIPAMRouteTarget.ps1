@@ -1,4 +1,4 @@
-function New-NBIPAMRouteTarget {
+function New-NBIIPAM Route Target {
 <#
     .SYNOPSIS
         Create a new route target in Netbox
@@ -26,12 +26,12 @@ function New-NBIPAMRouteTarget {
         Return the raw API response
 
     .EXAMPLE
-        New-NBIPAMRouteTarget -Name "65001:100"
+        New-NBIIPAM Route Target -Name "65001:100"
 
         Creates a new route target with value "65001:100"
 
     .EXAMPLE
-        New-NBIPAMRouteTarget -Name "65001:200" -Description "Customer A import"
+        New-NBIIPAM Route Target -Name "65001:200" -Description "Customer A import"
 
         Creates a new route target with description
 #>
@@ -56,7 +56,7 @@ function New-NBIPAMRouteTarget {
     )
 
     process {
-        Write-Verbose "Creating I PA MR ou te Ta rg et"
+        Write-Verbose "Creating IPAM Route Target"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'route-targets'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'

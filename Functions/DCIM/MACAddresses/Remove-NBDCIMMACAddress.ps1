@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Removes a CIMMACAddress from Netbox D module.
+    Removes a DCIM MAC Address from Netbox DCIM module.
 
 .DESCRIPTION
-    Removes a CIMMACAddress from Netbox D module.
+    Removes a DCIM MAC Address from Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBDCIMMACAddress
+    Remove-NBDDCIM MAC Address
 
-    Returns all CIMMACAddress objects.
+    Returns all DCIM MAC Address objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Remove-NBDCIMMACAddress {
+function Remove-NBDDCIM MAC Address {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     [OutputType([PSCustomObject])]
     param(
@@ -25,7 +25,7 @@ function Remove-NBDCIMMACAddress {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing D CI MM AC Ad dr es s"
+        Write-Verbose "Removing DCIM MAC Address"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete MAC address')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','mac-addresses',$Id)) -Method DELETE -Raw:$Raw
         }

@@ -18,6 +18,7 @@
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 function Set-NBHostPort {
+    Write-Verbose "Updating Host Port"
     [CmdletBinding(ConfirmImpact = 'Low',
                    SupportsShouldProcess = $true)]
     [OutputType([string])]

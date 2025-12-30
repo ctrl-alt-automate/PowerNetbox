@@ -24,6 +24,7 @@
     https://github.com/netboxlabs/netbox-branching
 #>
 function Test-NBBranchingAvailable {
+    Write-Verbose "Testing Branching Available"
     [CmdletBinding()]
     [OutputType([bool])]
     param(

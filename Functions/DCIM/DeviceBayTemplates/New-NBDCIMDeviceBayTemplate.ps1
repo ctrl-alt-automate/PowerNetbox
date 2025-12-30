@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Creates a new CIMDeviceBayTemplate in Netbox D module.
+    Creates a new DCIM Device BayTemplate in Netbox DCIM module.
 
 .DESCRIPTION
-    Creates a new CIMDeviceBayTemplate in Netbox D module.
+    Creates a new DCIM Device BayTemplate in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBDCIMDeviceBayTemplate
+    New-NBDDCIM Device BayTemplate
 
-    Returns all CIMDeviceBayTemplate objects.
+    Returns all DCIM Device BayTemplate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function New-NBDCIMDeviceBayTemplate {
+function New-NBDDCIM Device BayTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param(
@@ -28,7 +28,7 @@ function New-NBDCIMDeviceBayTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating D CI MD ev ic eB ay Te mp la te"
+        Write-Verbose "Creating DCIM DeviceB ay Te mp la te"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','device-bay-templates'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create device bay template')) {

@@ -61,12 +61,12 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBIPAMAddress -Address "192.168.1.1/24"
+    New-NBIIPAM Address -Address "192.168.1.1/24"
 
     Creates a single IP address with status active.
 
 .EXAMPLE
-    New-NBIPAMAddress -Address "10.0.0.1/24" -Status active -Description "Gateway"
+    New-NBIIPAM Address -Address "10.0.0.1/24" -Status active -Description "Gateway"
 
     Creates an IP address with description.
 
@@ -77,12 +77,12 @@
             Status = "active"
             Description = "Host $_"
         }
-    } | New-NBIPAMAddress -BatchSize 100 -Force
+    } | New-NBIIPAM Address -BatchSize 100 -Force
 
     Bulk create 254 IP addresses in a subnet.
 
 .EXAMPLE
-    Import-Csv ips.csv | New-NBIPAMAddress -BatchSize 50 -Force
+    Import-Csv ips.csv | New-NBIIPAM Address -BatchSize 50 -Force
 
     Bulk import IP addresses from a CSV file.
 
@@ -90,7 +90,7 @@
     https://netbox.readthedocs.io/en/stable/models/ipam/ipaddress/
 #>
 
-function New-NBIPAMAddress {
+function New-NBIIPAM Address {
     [CmdletBinding(SupportsShouldProcess = $true,
         ConfirmImpact = 'Low',
         DefaultParameterSetName = 'Single')]

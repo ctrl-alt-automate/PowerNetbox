@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Creates a new PAMFHRPGroupAssignment in Netbox I module.
+    Creates a new IPAM FHRP GroupAssignment in Netbox IPAM module.
 
 .DESCRIPTION
-    Creates a new PAMFHRPGroupAssignment in Netbox I module.
+    Creates a new IPAM FHRP GroupAssignment in Netbox IPAM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBIPAMFHRPGroupAssignment
+    New-NBIIPAM FHRP GroupAssignment
 
-    Returns all PAMFHRPGroupAssignment objects.
+    Returns all IPAM FHRP GroupAssignment objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function New-NBIPAMFHRPGroupAssignment {
+function New-NBIIPAM FHRP GroupAssignment {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param(
@@ -28,7 +28,7 @@ function New-NBIPAMFHRPGroupAssignment {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating I PA MF HR PG ro up As si gn me nt"
+        Write-Verbose "Creating IPAM FHRP Group As si gn me nt"
         $Segments = [System.Collections.ArrayList]::new(@('ipam','fhrp-group-assignments'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess("Group $Group Interface $Interface_Id", 'Create FHRP group assignment')) {

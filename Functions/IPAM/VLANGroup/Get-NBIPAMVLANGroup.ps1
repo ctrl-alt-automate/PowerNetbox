@@ -9,12 +9,12 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBIPAMVLANGroup
+    Get-NBIIPAM VLANGroup
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Get-NBIPAMVLANGroup {
+function Get-NBIIPAM VLANGroup {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([PSCustomObject])]
     param(
@@ -38,7 +38,7 @@ function Get-NBIPAMVLANGroup {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Retrieving I PA MV LA NG ro up"
+        Write-Verbose "Retrieving IPAM VLANG ro up"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('ipam','vlan-groups',$i)) -Raw:$Raw } }
             default {

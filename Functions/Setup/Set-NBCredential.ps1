@@ -18,6 +18,7 @@
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 function Set-NBCredential {
+    Write-Verbose "Updating Credential"
     [CmdletBinding(DefaultParameterSetName = 'CredsObject',
         ConfirmImpact = 'Low',
         SupportsShouldProcess = $true)]

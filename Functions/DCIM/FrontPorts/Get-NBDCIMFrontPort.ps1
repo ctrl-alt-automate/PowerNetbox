@@ -9,12 +9,12 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBDCIMFrontPort
+    Get-NBDDCIM Front Port
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Get-NBDCIMFrontPort {
+function Get-NBDDCIM Front Port {
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param
@@ -45,7 +45,7 @@ function Get-NBDCIMFrontPort {
     )
 
     process {
-        Write-Verbose "Retrieving D CI MF ro nt Po rt"
+        Write-Verbose "Retrieving DCIM Front Port"
 
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'front-ports'))
 

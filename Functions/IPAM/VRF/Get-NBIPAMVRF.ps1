@@ -1,4 +1,4 @@
-function Get-NBIPAMVRF {
+function Get-NBIIPAM VRF {
 <#
     .SYNOPSIS
         Get VRFs from Netbox
@@ -37,17 +37,17 @@ function Get-NBIPAMVRF {
         Return the raw API response
 
     .EXAMPLE
-        Get-NBIPAMVRF
+        Get-NBIIPAM VRF
 
         Returns all VRFs
 
     .EXAMPLE
-        Get-NBIPAMVRF -Name "Production"
+        Get-NBIIPAM VRF -Name "Production"
 
         Returns VRFs matching the name "Production"
 
     .EXAMPLE
-        Get-NBIPAMVRF -RD "65001:100"
+        Get-NBIIPAM VRF -RD "65001:100"
 
         Returns VRFs with the specified route distinguisher
 #>
@@ -93,7 +93,7 @@ function Get-NBIPAMVRF {
     )
 
     process {
-        Write-Verbose "Retrieving I PA MV RF"
+        Write-Verbose "Retrieving IPAM VRF"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
                 foreach ($VRFId in $Id) {

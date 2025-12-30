@@ -1,4 +1,4 @@
-function Remove-NBDCIMInterface {
+function Remove-NBDDCIM Interface {
     <#
     .SYNOPSIS
         Removes an interface
@@ -13,7 +13,7 @@ function Remove-NBDCIMInterface {
         Skip confirmation prompts.
 
     .EXAMPLE
-        PS C:\> Remove-NBDCIMInterface -Id 123
+        PS C:\> Remove-NBDDCIM Interface -Id 123
 #>
 
     [CmdletBinding(ConfirmImpact = 'High',
@@ -33,9 +33,9 @@ function Remove-NBDCIMInterface {
     }
 
     process {
-        Write-Verbose "Removing D CI MI nt er fa ce"
+        Write-Verbose "Removing DCIM Interface"
         foreach ($InterfaceId in $Id) {
-            $CurrentInterface = Get-NBDCIMInterface -Id $InterfaceId -ErrorAction Stop
+            $CurrentInterface = Get-NBDDCIM Interface -Id $InterfaceId -ErrorAction Stop
 
             if ($Force -or $pscmdlet.ShouldProcess("Name: $($CurrentInterface.Name) | ID: $($CurrentInterface.Id)", "Remove")) {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interfaces', $CurrentInterface.Id))

@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Removes a CIMDeviceBay from Netbox D module.
+    Removes a DCIM Device Bay from Netbox DCIM module.
 
 .DESCRIPTION
-    Removes a CIMDeviceBay from Netbox D module.
+    Removes a DCIM Device Bay from Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBDCIMDeviceBay
+    Remove-NBDDCIM Device Bay
 
-    Returns all CIMDeviceBay objects.
+    Returns all DCIM Device Bay objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Remove-NBDCIMDeviceBay {
+function Remove-NBDDCIM Device Bay {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     [OutputType([PSCustomObject])]
     param(
@@ -25,7 +25,7 @@ function Remove-NBDCIMDeviceBay {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing D CI MD ev ic eB ay"
+        Write-Verbose "Removing DCIM DeviceB ay"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete device bay')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','device-bays',$Id)) -Method DELETE -Raw:$Raw
         }

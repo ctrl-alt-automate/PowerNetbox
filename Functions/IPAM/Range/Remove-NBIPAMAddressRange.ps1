@@ -1,5 +1,5 @@
 
-function Remove-NBIPAMAddressRange {
+function Remove-NBIIPAM AddressRange {
     <#
     .SYNOPSIS
         Remove an IP address range from Netbox
@@ -14,7 +14,7 @@ function Remove-NBIPAMAddressRange {
         Do not confirm.
 
     .EXAMPLE
-        PS C:\> Remove-NBIPAMAddressRange -Id 1234
+        PS C:\> Remove-NBIIPAM AddressRange -Id 1234
 
 #>
 
@@ -31,9 +31,9 @@ function Remove-NBIPAMAddressRange {
     )
 
     process {
-        Write-Verbose "Removing I PA MA dd re ss Ra ng e"
+        Write-Verbose "Removing IPAM Address Ra ng e"
         foreach ($Range_Id in $Id) {
-            $CurrentRange = Get-NBIPAMAddressRange -Id $Range_Id -ErrorAction Stop
+            $CurrentRange = Get-NBIIPAM AddressRange -Id $Range_Id -ErrorAction Stop
 
             $Segments = [System.Collections.ArrayList]::new(@('ipam', 'ip-ranges', $Range_Id))
 

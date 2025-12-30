@@ -1,4 +1,4 @@
-function Remove-NBDCIMManufacturer {
+function Remove-NBDDCIM Manufacturer {
 <#
     .SYNOPSIS
         Delete a manufacturer from Netbox
@@ -16,17 +16,17 @@ function Remove-NBDCIMManufacturer {
         Return the raw API response
 
     .EXAMPLE
-        Remove-NBDCIMManufacturer -Id 1
+        Remove-NBDDCIM Manufacturer -Id 1
 
         Deletes manufacturer with ID 1 (with confirmation)
 
     .EXAMPLE
-        Remove-NBDCIMManufacturer -Id 1 -Confirm:$false
+        Remove-NBDDCIM Manufacturer -Id 1 -Confirm:$false
 
         Deletes manufacturer with ID 1 without confirmation
 
     .EXAMPLE
-        Get-NBDCIMManufacturer -Name "OldVendor" | Remove-NBDCIMManufacturer
+        Get-NBDDCIM Manufacturer -Name "OldVendor" | Remove-NBDDCIM Manufacturer
 
         Deletes manufacturer named "OldVendor"
 #>
@@ -45,9 +45,9 @@ function Remove-NBDCIMManufacturer {
     )
 
     process {
-        Write-Verbose "Removing D CI MM an uf ac tu re r"
+        Write-Verbose "Removing DCIM Manufacturer"
         foreach ($ManufacturerId in $Id) {
-            $CurrentManufacturer = Get-NBDCIMManufacturer -Id $ManufacturerId -ErrorAction Stop
+            $CurrentManufacturer = Get-NBDDCIM Manufacturer -Id $ManufacturerId -ErrorAction Stop
 
             if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentManufacturer.Name)", "Delete manufacturer")) {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'manufacturers', $CurrentManufacturer.Id))

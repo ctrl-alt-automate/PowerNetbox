@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Creates a new CIMModule in Netbox D module.
+    Creates a new DCIM Module in Netbox DCIM module.
 
 .DESCRIPTION
-    Creates a new CIMModule in Netbox D module.
+    Creates a new DCIM Module in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBDCIMModule
+    New-NBDDCIM Module
 
-    Returns all CIMModule objects.
+    Returns all DCIM Module objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function New-NBDCIMModule {
+function New-NBDDCIM Module {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param(
@@ -36,7 +36,7 @@ function New-NBDCIMModule {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating D CI MM od ul e"
+        Write-Verbose "Creating DCIM Module"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','modules'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess("Device $Device", 'Create module')) {

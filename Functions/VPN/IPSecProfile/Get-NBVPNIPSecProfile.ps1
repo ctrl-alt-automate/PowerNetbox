@@ -9,12 +9,12 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBVPNIPSecProfile
+    Get-NBVVPN IPSec Profile
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Get-NBVPNIPSecProfile {
+function Get-NBVVPN IPSec Profile {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([PSCustomObject])]
     param([Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
@@ -22,7 +22,7 @@ function Get-NBVPNIPSecProfile {
         [uint16]$Limit,[ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,[switch]$Raw)
     process {
-        Write-Verbose "Retrieving V PN IP Se cP ro fi le"
+        Write-Verbose "Retrieving VPN IPSec Profile"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','ipsec-profiles',$i)) -Raw:$Raw } }
             default { $s = [System.Collections.ArrayList]::new(@('vpn','ipsec-profiles')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'; InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments -Parameters $u.Parameters) -Raw:$Raw }

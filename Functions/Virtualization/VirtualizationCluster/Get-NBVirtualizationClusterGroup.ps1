@@ -9,12 +9,12 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBVirtualizationClusterGroup
+    Get-NBVVirtualization ClusterGroup
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Get-NBVirtualizationClusterGroup {
+function Get-NBVVirtualization ClusterGroup {
     [CmdletBinding()]
     [OutputType([PSCustomObject])]
     param

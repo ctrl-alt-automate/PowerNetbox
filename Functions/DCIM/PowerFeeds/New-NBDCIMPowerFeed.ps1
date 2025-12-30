@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Creates a new CIMPowerFeed in Netbox D module.
+    Creates a new DCIM Power Feed in Netbox DCIM module.
 
 .DESCRIPTION
-    Creates a new CIMPowerFeed in Netbox D module.
+    Creates a new DCIM Power Feed in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBDCIMPowerFeed
+    New-NBDDCIM Power Feed
 
-    Returns all CIMPowerFeed objects.
+    Returns all DCIM Power Feed objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function New-NBDCIMPowerFeed {
+function New-NBDDCIM Power Feed {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param(
@@ -39,7 +39,7 @@ function New-NBDCIMPowerFeed {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating D CI MP ow er Fe ed"
+        Write-Verbose "Creating DCIM Power Feed"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','power-feeds'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create power feed')) {

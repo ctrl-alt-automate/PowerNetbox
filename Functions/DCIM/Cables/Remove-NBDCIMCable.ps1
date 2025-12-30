@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Removes a CIMCable from Netbox D module.
+    Removes a DCIM Cable from Netbox DCIM module.
 
 .DESCRIPTION
-    Removes a CIMCable from Netbox D module.
+    Removes a DCIM Cable from Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBDCIMCable
+    Remove-NBDDCIM Cable
 
-    Returns all CIMCable objects.
+    Returns all DCIM Cable objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Remove-NBDCIMCable {
+function Remove-NBDDCIM Cable {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     [OutputType([PSCustomObject])]
     param(
@@ -25,7 +25,7 @@ function Remove-NBDCIMCable {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing D CI MC ab le"
+        Write-Verbose "Removing DCIM Cable"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete cable')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','cables',$Id)) -Method DELETE -Raw:$Raw
         }

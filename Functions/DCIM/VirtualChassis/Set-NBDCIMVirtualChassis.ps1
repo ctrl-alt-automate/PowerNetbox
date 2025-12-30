@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Updates an existing CIMVirtualChassis in Netbox D module.
+    Updates an existing DCIM Virtual Chassis in Netbox DCIM module.
 
 .DESCRIPTION
-    Updates an existing CIMVirtualChassis in Netbox D module.
+    Updates an existing DCIM Virtual Chassis in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBDCIMVirtualChassis
+    Set-NBDDCIM Virtual Chassis
 
-    Returns all CIMVirtualChassis objects.
+    Returns all DCIM Virtual Chassis objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Set-NBDCIMVirtualChassis {
+function Set-NBDDCIM Virtual Chassis {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     [OutputType([PSCustomObject])]
     param(
@@ -32,7 +32,7 @@ function Set-NBDCIMVirtualChassis {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating D CI MV ir tu al Ch as si s"
+        Write-Verbose "Updating DCIM Virtual Chassis"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','virtual-chassis',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update virtual chassis')) {

@@ -9,12 +9,12 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBDCIMCableTermination
+    Get-NBDDCIM CableTermination
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Get-NBDCIMCableTermination {
+function Get-NBDDCIM CableTermination {
     [CmdletBinding()]
     [OutputType([PSCustomObject])]
     #region Parameters
@@ -40,7 +40,7 @@ function Get-NBDCIMCableTermination {
 
         [string]$Termination_Type,
 
-        [uint64]$Termination_ID,
+        [uint64]$Termination_Id,
 
         [switch]$Raw
     )
@@ -48,7 +48,7 @@ function Get-NBDCIMCableTermination {
     #endregion Parameters
 
     process {
-        Write-Verbose "Retrieving D CI MC ab le Te rm in at io n"
+        Write-Verbose "Retrieving DCIM Cable Te rm in at io n"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'cable-terminations'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'

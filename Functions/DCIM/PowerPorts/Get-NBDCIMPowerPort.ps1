@@ -9,12 +9,12 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBDCIMPowerPort
+    Get-NBDDCIM Power Port
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Get-NBDCIMPowerPort {
+function Get-NBDDCIM Power Port {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([PSCustomObject])]
     param(
@@ -36,7 +36,7 @@ function Get-NBDCIMPowerPort {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Retrieving D CI MP ow er Po rt"
+        Write-Verbose "Retrieving DCIM Power Port"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','power-ports',$i)) -Raw:$Raw } }
             default {

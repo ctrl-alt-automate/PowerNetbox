@@ -28,6 +28,7 @@
     Connect-NBAPI
 #>
 Function Set-NBUntrustedSSL {
+    Write-Verbose "Processing disables"
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessforStateChangingFunctions", "")]
     [CmdletBinding()]
     [OutputType([void])]

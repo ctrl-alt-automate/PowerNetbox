@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing nvokeParams in Netbox I module.
+    Updates an existing nvokeParams in Netbox IPAM module.
 
 .DESCRIPTION
-    Updates an existing nvokeParams in Netbox I module.
+    Updates an existing nvokeParams in Netbox IPAM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -18,6 +18,7 @@
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 function Set-NBInvokeParams {
+    Write-Verbose "Updating Invoke Params"
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', '', Justification = 'Params refers to a collection of invoke parameters')]
     [CmdletBinding(ConfirmImpact = 'Low',
         SupportsShouldProcess = $true)]

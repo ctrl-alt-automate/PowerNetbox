@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Creates a new CIMModuleType in Netbox D module.
+    Creates a new DCIM Module Type in Netbox DCIM module.
 
 .DESCRIPTION
-    Creates a new CIMModuleType in Netbox D module.
+    Creates a new DCIM Module Type in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBDCIMModuleType
+    New-NBDDCIM Module Type
 
-    Returns all CIMModuleType objects.
+    Returns all DCIM Module Type objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function New-NBDCIMModuleType {
+function New-NBDDCIM Module Type {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param(
@@ -33,7 +33,7 @@ function New-NBDCIMModuleType {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating D CI MM od ul eT yp e"
+        Write-Verbose "Creating DCIM ModuleT yp e"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','module-types'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Model, 'Create module type')) {

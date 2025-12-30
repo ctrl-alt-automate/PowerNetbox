@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Creates a new PAMFHRPGroup in Netbox I module.
+    Creates a new IPAM FHRP Group in Netbox IPAM module.
 
 .DESCRIPTION
-    Creates a new PAMFHRPGroup in Netbox I module.
+    Creates a new IPAM FHRP Group in Netbox IPAM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBIPAMFHRPGroup
+    New-NBIIPAM FHRP Group
 
-    Returns all PAMFHRPGroup objects.
+    Returns all IPAM FHRP Group objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function New-NBIPAMFHRPGroup {
+function New-NBIIPAM FHRP Group {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param(
@@ -33,7 +33,7 @@ function New-NBIPAMFHRPGroup {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating I PA MF HR PG ro up"
+        Write-Verbose "Creating IPAM FHRP Group"
         $Segments = [System.Collections.ArrayList]::new(@('ipam','fhrp-groups'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess("$Protocol Group $Group_Id", 'Create FHRP group')) {

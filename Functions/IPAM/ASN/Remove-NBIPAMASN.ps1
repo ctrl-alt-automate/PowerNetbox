@@ -1,4 +1,4 @@
-function Remove-NBIPAMASN {
+function Remove-NBIIPAM ASN {
 <#
     .SYNOPSIS
         Remove an ASN from Netbox
@@ -13,7 +13,7 @@ function Remove-NBIPAMASN {
         Return the raw API response
 
     .EXAMPLE
-        Remove-NBIPAMASN -Id 1
+        Remove-NBIIPAM ASN -Id 1
 
         Deletes ASN with ID 1
 #>
@@ -29,7 +29,7 @@ function Remove-NBIPAMASN {
     )
 
     process {
-        Write-Verbose "Removing I PA MA SN"
+        Write-Verbose "Removing IPAM ASN"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'asns', $Id))
 
         $URI = BuildNewURI -Segments $Segments

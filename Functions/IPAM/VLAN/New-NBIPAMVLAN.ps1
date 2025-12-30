@@ -52,7 +52,7 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBIPAMVLAN -VID 100 -Name "Production" -Site 1
+    New-NBIIPAM VLAN -VID 100 -Name "Production" -Site 1
 
     Creates a single VLAN.
 
@@ -60,12 +60,12 @@
     $vlans = 100..199 | ForEach-Object {
         [PSCustomObject]@{VID=$_; Name="VLAN$_"; Status="active"; Site=1}
     }
-    $vlans | New-NBIPAMVLAN -BatchSize 50 -Force
+    $vlans | New-NBIIPAM VLAN -BatchSize 50 -Force
 
     Creates 100 VLANs in bulk using 2 API calls.
 
 .EXAMPLE
-    Import-Csv vlans.csv | New-NBIPAMVLAN -BatchSize 100 -Force
+    Import-Csv vlans.csv | New-NBIIPAM VLAN -BatchSize 100 -Force
 
     Bulk import VLANs from a CSV file.
 
@@ -73,7 +73,7 @@
     https://netbox.readthedocs.io/en/stable/models/ipam/vlan/
 #>
 
-function New-NBIPAMVLAN {
+function New-NBIIPAM VLAN {
     [CmdletBinding(SupportsShouldProcess = $true,
         ConfirmImpact = 'Low',
         DefaultParameterSetName = 'Single')]

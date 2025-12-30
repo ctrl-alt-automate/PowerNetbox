@@ -9,12 +9,12 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBDCIMMACAddress
+    Get-NBDDCIM MAC Address
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Get-NBDCIMMACAddress {
+function Get-NBDDCIM MAC Address {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([PSCustomObject])]
     param(
@@ -37,7 +37,7 @@ function Get-NBDCIMMACAddress {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Retrieving D CI MM AC Ad dr es s"
+        Write-Verbose "Retrieving DCIM MAC Address"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','mac-addresses',$i)) -Raw:$Raw } }
             default {

@@ -1,4 +1,4 @@
-function Get-NBIPAMASNRange {
+function Get-NBIIPAM ASNRange {
 <#
     .SYNOPSIS
         Get ASN ranges from Netbox
@@ -31,12 +31,12 @@ function Get-NBIPAMASNRange {
         Return the raw API response
 
     .EXAMPLE
-        Get-NBIPAMASNRange
+        Get-NBIIPAM ASNRange
 
         Returns all ASN ranges
 
     .EXAMPLE
-        Get-NBIPAMASNRange -Name "Private"
+        Get-NBIIPAM ASNRange -Name "Private"
 
         Returns ASN ranges matching the name "Private"
 #>
@@ -76,7 +76,7 @@ function Get-NBIPAMASNRange {
     )
 
     process {
-        Write-Verbose "Retrieving I PA MA SN Ra ng e"
+        Write-Verbose "Retrieving IPAM ASN Ra ng e"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
                 foreach ($RangeId in $Id) {

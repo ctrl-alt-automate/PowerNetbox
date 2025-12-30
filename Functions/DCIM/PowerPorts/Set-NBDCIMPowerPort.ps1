@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Updates an existing CIMPowerPort in Netbox D module.
+    Updates an existing DCIM Power Port in Netbox DCIM module.
 
 .DESCRIPTION
-    Updates an existing CIMPowerPort in Netbox D module.
+    Updates an existing DCIM Power Port in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBDCIMPowerPort
+    Set-NBDDCIM Power Port
 
-    Returns all CIMPowerPort objects.
+    Returns all DCIM Power Port objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Set-NBDCIMPowerPort {
+function Set-NBDDCIM Power Port {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     [OutputType([PSCustomObject])]
     param(
@@ -36,7 +36,7 @@ function Set-NBDCIMPowerPort {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating D CI MP ow er Po rt"
+        Write-Verbose "Updating DCIM Power Port"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','power-ports',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update power port')) {

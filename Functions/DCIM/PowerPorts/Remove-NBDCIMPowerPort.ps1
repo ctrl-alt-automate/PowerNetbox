@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Removes a CIMPowerPort from Netbox D module.
+    Removes a DCIM Power Port from Netbox DCIM module.
 
 .DESCRIPTION
-    Removes a CIMPowerPort from Netbox D module.
+    Removes a DCIM Power Port from Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBDCIMPowerPort
+    Remove-NBDDCIM Power Port
 
-    Returns all CIMPowerPort objects.
+    Returns all DCIM Power Port objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Remove-NBDCIMPowerPort {
+function Remove-NBDDCIM Power Port {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     [OutputType([PSCustomObject])]
     param(
@@ -25,7 +25,7 @@ function Remove-NBDCIMPowerPort {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing D CI MP ow er Po rt"
+        Write-Verbose "Removing DCIM Power Port"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete power port')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','power-ports',$Id)) -Method DELETE -Raw:$Raw
         }

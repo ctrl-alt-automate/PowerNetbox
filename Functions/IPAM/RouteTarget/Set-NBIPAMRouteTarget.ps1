@@ -1,4 +1,4 @@
-function Set-NBIPAMRouteTarget {
+function Set-NBIIPAM Route Target {
 <#
     .SYNOPSIS
         Update a route target in Netbox
@@ -28,12 +28,12 @@ function Set-NBIPAMRouteTarget {
         Return the raw API response
 
     .EXAMPLE
-        Set-NBIPAMRouteTarget -Id 1 -Description "Updated description"
+        Set-NBIIPAM Route Target -Id 1 -Description "Updated description"
 
         Updates the description of route target 1
 
     .EXAMPLE
-        Set-NBIPAMRouteTarget -Id 1 -Tenant 5
+        Set-NBIIPAM Route Target -Id 1 -Tenant 5
 
         Assigns route target 1 to tenant 5
 #>
@@ -59,7 +59,7 @@ function Set-NBIPAMRouteTarget {
     )
 
     process {
-        Write-Verbose "Updating I PA MR ou te Ta rg et"
+        Write-Verbose "Updating IPAM Route Target"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'route-targets', $Id))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'

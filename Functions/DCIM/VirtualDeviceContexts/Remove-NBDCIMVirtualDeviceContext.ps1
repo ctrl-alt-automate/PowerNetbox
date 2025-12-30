@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Removes a CIMVirtualDeviceContext from Netbox D module.
+    Removes a DCIM Virtual Device Context from Netbox DCIM module.
 
 .DESCRIPTION
-    Removes a CIMVirtualDeviceContext from Netbox D module.
+    Removes a DCIM Virtual Device Context from Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBDCIMVirtualDeviceContext
+    Remove-NBDDCIM Virtual Device Context
 
-    Returns all CIMVirtualDeviceContext objects.
+    Returns all DCIM Virtual Device Context objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Remove-NBDCIMVirtualDeviceContext {
+function Remove-NBDDCIM Virtual Device Context {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     [OutputType([PSCustomObject])]
     param(
@@ -25,7 +25,7 @@ function Remove-NBDCIMVirtualDeviceContext {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing D CI MV ir tu al De vi ce Co nt ex t"
+        Write-Verbose "Removing DCIM Virtual Device Context"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete virtual device context')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','virtual-device-contexts',$Id)) -Method DELETE -Raw:$Raw
         }
