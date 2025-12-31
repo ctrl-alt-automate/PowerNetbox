@@ -89,6 +89,7 @@ function Get-NBIPAMRouteTarget {
     )
 
     process {
+        Write-Verbose "Retrieving IPAM Route Target"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
                 foreach ($RTId in $Id) {

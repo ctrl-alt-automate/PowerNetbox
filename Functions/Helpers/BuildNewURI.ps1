@@ -19,17 +19,8 @@ function BuildNewURI {
     .PARAMETER HTTPS
         Whether to use HTTPS or HTTP
 
-    .PARAMETER Port
-        A description of the Port parameter.
-
-    .PARAMETER APIInfo
-        A description of the APIInfo parameter.
-
     .EXAMPLE
-        PS C:\> BuildNewURI
-
-    .NOTES
-        Additional information about the function.
+        PS C:\> BuildNewURI -Segments @('dcim', 'devices')
 #>
 
     [CmdletBinding()]

@@ -5,7 +5,8 @@ function Get-NBCircuit {
         Gets one or more circuits
 
     .DESCRIPTION
-        A detailed description of the Get-NBCircuit function.
+        Retrieves circuit objects from Netbox. Circuits represent physical or virtual
+        connections between sites, typically provided by external carriers or ISPs.
 
     .PARAMETER Id
         Database ID of circuit. This will query for exactly the IDs provided
@@ -59,8 +60,6 @@ function Get-NBCircuit {
     .EXAMPLE
         PS C:\> Get-NBCircuit
 
-    .NOTES
-        Additional information about the function.
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]
@@ -112,6 +111,7 @@ function Get-NBCircuit {
     )
 
     process {
+        Write-Verbose "Retrieving Circuit"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {
                 foreach ($i in $ID) {

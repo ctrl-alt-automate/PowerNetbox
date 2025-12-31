@@ -28,6 +28,7 @@ function Remove-NBCircuitGroup {
     )
 
     process {
+        Write-Verbose "Removing Circuit Group"
         $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuit-groups', $Id))
         $URI = BuildNewURI -Segments $Segments
 

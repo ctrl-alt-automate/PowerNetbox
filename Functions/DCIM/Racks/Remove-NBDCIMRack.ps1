@@ -45,6 +45,7 @@ function Remove-NBDCIMRack {
     )
 
     process {
+        Write-Verbose "Removing D CI MR ac k"
         foreach ($RackId in $Id) {
             $CurrentRack = Get-NBDCIMRack -Id $RackId -ErrorAction Stop
 

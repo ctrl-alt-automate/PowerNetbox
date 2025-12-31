@@ -35,6 +35,7 @@ function Get-NBDCIMModuleType {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Retrieving DCIM Module Type"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','module-types',$i)) -Raw:$Raw } }
             default {

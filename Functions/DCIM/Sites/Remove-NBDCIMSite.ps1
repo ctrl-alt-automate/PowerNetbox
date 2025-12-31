@@ -48,6 +48,7 @@ function Remove-NBDCIMSite {
     }
 
     process {
+        Write-Verbose "Removing D CI MS it e"
         $CurrentSite = Get-NBDCIMSite -Id $Id -ErrorAction Stop
 
         if ($pscmdlet.ShouldProcess("$($CurrentSite.Name)/$($CurrentSite.Id)", "Remove Site")) {

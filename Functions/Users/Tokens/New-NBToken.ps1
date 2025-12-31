@@ -53,6 +53,7 @@ function New-NBToken {
     )
 
     process {
+        Write-Verbose "Creating Token"
         $Segments = [System.Collections.ArrayList]::new(@('users', 'tokens'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         $URI = BuildNewURI -Segments $URIComponents.Segments

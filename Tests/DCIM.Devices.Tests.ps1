@@ -313,11 +313,9 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             $bodyObj.site | Should -Be 15
         }
 
-        It "Should set multiple devices from the pipeline" {
-            $Result = @(
-                [pscustomobject]@{ 'id' = 4432 },
-                [pscustomobject]@{ 'id' = 3241 }
-            ) | Set-NBDCIMDevice -Cluster 10 -Platform 20 -Site 15 -Force
+        It "Should set multiple devices by ID array" {
+            # Single mode with multiple IDs (not pipeline) - bulk mode via pipeline uses InputObject
+            $Result = Set-NBDCIMDevice -Id 4432, 3241 -Cluster 10 -Platform 20 -Site 15 -Force
 
             $Result.Method | Should -Be 'PATCH', 'PATCH'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/devices/4432/', 'https://netbox.domain.com/api/dcim/devices/3241/'
@@ -348,11 +346,23 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/devices/10/', 'https://netbox.domain.com/api/dcim/devices/12/'
         }
 
-        It "Should remove a device from the pipeline" {
-            $Result = [pscustomobject]@{ 'Id' = 30 } | Remove-NBDCIMDevice -Force
+        It "Should remove devices via bulk mode pipeline" {
+            # Pipeline triggers bulk mode - Send-NBBulkRequest handles the DELETE
+            # Mock InvokeNetboxRequest to return null (DELETE returns no body)
+            Mock -CommandName "InvokeNetboxRequest" -ModuleName PowerNetbox -MockWith {
+                return $null
+            }
 
-            $Result.Method | Should -Be 'DELETE'
-            $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/devices/30/'
+            $items = @(
+                [pscustomobject]@{ 'Id' = 30 },
+                [pscustomobject]@{ 'Id' = 31 }
+            )
+            $items | Remove-NBDCIMDevice -Force
+
+            # Verify InvokeNetboxRequest was called with DELETE and the bulk endpoint
+            Should -Invoke -CommandName "InvokeNetboxRequest" -ModuleName PowerNetbox -ParameterFilter {
+                $Method -eq 'DELETE' -and $URI.ToString() -like '*dcim/devices/*' -and $null -ne $Body
+            }
         }
     }
 }

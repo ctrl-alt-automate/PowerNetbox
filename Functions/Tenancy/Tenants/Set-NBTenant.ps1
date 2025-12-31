@@ -77,6 +77,7 @@ function Set-NBTenant {
     )
 
     process {
+        Write-Verbose "Updating Tenant"
         foreach ($TenantId in $Id) {
             $CurrentTenant = Get-NBTenant -Id $TenantId -ErrorAction Stop
 

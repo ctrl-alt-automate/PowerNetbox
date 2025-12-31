@@ -28,6 +28,7 @@ function Remove-NBCustomLink {
     )
 
     process {
+        Write-Verbose "Removing Custom Link"
         $Segments = [System.Collections.ArrayList]::new(@('extras', 'custom-links', $Id))
         $URI = BuildNewURI -Segments $Segments
 

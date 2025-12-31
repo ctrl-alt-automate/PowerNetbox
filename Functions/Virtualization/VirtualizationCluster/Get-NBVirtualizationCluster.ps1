@@ -41,13 +41,10 @@ function Get-NBVirtualizationCluster {
         Database ID of the site.
 
     .PARAMETER Raw
-        A description of the Raw parameter.
+        Return the raw API response instead of extracting the results array.
 
     .EXAMPLE
         PS C:\> Get-NBVirtualizationCluster
-
-    .NOTES
-        Additional information about the function.
 #>
 
     [CmdletBinding()]
@@ -89,6 +86,7 @@ function Get-NBVirtualizationCluster {
     )
 
     process {
+        Write-Verbose "Retrieving Virtualization Cluster"
         $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'clusters'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters

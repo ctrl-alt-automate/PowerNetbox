@@ -29,6 +29,7 @@ function Remove-NBIPAMService {
     )
 
     process {
+        Write-Verbose "Removing IPA MS er vi ce"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'services', $Id))
 
         $URI = BuildNewURI -Segments $Segments

@@ -36,8 +36,6 @@ function Connect-NBAPI {
 
         This will prompt for Credential, then proceed to attempt a connection to Netbox
 
-    .NOTES
-        Additional information about the function.
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Manual')]

@@ -46,8 +46,6 @@ function Get-NBContact {
     .EXAMPLE
         PS C:\> Get-NBContact
 
-    .NOTES
-        Additional information about the function.
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]
@@ -97,6 +95,7 @@ function Get-NBContact {
     )
 
     process {
+        Write-Verbose "Retrieving Contact"
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($Contact_ID in $Id) {

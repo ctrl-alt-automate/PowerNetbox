@@ -78,6 +78,7 @@ function New-NBIPAMService {
     )
 
     process {
+        Write-Verbose "Creating IPA MS er vi ce"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'services'))
 
         # Build body manually to handle parent object type

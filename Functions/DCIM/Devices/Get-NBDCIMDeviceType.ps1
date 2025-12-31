@@ -62,6 +62,7 @@ function Get-NBDCIMDeviceType {
     )
 
     process {
+        Write-Verbose "Retrieving DCIM Device Type"
         #endregion Parameters
 
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'device-types'))

@@ -37,6 +37,7 @@ function Get-NBDCIMMACAddress {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Retrieving DCIM MAC Address"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','mac-addresses',$i)) -Raw:$Raw } }
             default {

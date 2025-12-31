@@ -108,6 +108,7 @@ function New-NBDCIMFrontPort {
     )
 
     process {
+        Write-Verbose "Creating D CI MF ro nt Po rt"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'front-ports'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters

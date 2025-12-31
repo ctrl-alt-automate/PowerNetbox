@@ -33,6 +33,7 @@ function New-NBDCIMModuleType {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Creating D CI MM od ul eT yp e"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','module-types'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Model, 'Create module type')) {

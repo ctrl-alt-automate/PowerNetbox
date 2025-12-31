@@ -107,6 +107,7 @@ function Get-NBDCIMLocation {
     )
 
     process {
+        Write-Verbose "Retrieving DCIM Location"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
                 foreach ($LocationId in $Id) {

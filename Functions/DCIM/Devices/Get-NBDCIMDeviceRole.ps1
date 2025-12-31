@@ -45,6 +45,7 @@ function Get-NBDCIMDeviceRole {
     )
 
     process {
+        Write-Verbose "Retrieving DCIM Device Role"
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($DRId in $Id) {

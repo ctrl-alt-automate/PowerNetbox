@@ -48,6 +48,7 @@ function Remove-NBContactAssignment {
     )
 
     process {
+        Write-Verbose "Removing Contact Assignment"
         foreach ($AssignmentId in $Id) {
             $CurrentAssignment = Get-NBContactAssignment -Id $AssignmentId -ErrorAction Stop
 

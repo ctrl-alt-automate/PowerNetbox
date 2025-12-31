@@ -57,6 +57,7 @@ function Get-NBCustomFieldChoiceSet {
     )
 
     process {
+        Write-Verbose "Retrieving Custom Field Choice Set"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {
                 foreach ($i in $Id) {

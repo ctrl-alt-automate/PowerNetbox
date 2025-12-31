@@ -1,4 +1,4 @@
-﻿
+
 function Set-NBContact {
 <#
     .SYNOPSIS
@@ -8,7 +8,7 @@ function Set-NBContact {
         Updates a contact object in Netbox which can be linked to other objects
 
     .PARAMETER Id
-        A description of the Id parameter.
+        Database ID of the contact to update.
 
     .PARAMETER Name
         The contacts full name, e.g "Leroy Jenkins"
@@ -38,19 +38,17 @@ function Set-NBContact {
         URI related to the contact
 
     .PARAMETER Custom_Fields
-        A description of the Custom_Fields parameter.
+        Hashtable of custom field values.
 
     .PARAMETER Force
-        A description of the Force parameter.
+        Skip confirmation prompts.
 
     .PARAMETER Raw
-        A description of the Raw parameter.
+        Return the raw API response instead of the updated object.
 
     .EXAMPLE
         PS C:\> Set-NBContact -Id 10 -Name 'Leroy Jenkins' -Email 'leroy.jenkins@example.com'
 
-    .NOTES
-        Additional information about the function.
 #>
 
     [CmdletBinding(ConfirmImpact = 'Low',
@@ -99,6 +97,7 @@ function Set-NBContact {
     }
 
     process {
+        Write-Verbose "Updating Contact"
         foreach ($ContactId in $Id) {
             $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'contacts', $ContactId))
 

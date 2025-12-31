@@ -34,6 +34,7 @@ function Set-NBIPAMFHRPGroup {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Updating IPA MF HR PG ro up"
         $Segments = [System.Collections.ArrayList]::new(@('ipam','fhrp-groups',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update FHRP group')) {

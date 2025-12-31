@@ -36,6 +36,7 @@ function Get-NBDCIMRackReservation {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Retrieving DCIM Rack Reservation"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','rack-reservations',$i)) -Raw:$Raw } }
             default {

@@ -45,6 +45,7 @@ function Get-NBDCIMPlatform {
     )
 
     process {
+        Write-Verbose "Retrieving DCIM Platform"
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($PlatformID in $Id) {

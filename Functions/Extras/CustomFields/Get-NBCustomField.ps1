@@ -69,6 +69,7 @@ function Get-NBCustomField {
     )
 
     process {
+        Write-Verbose "Retrieving Custom Field"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {
                 foreach ($i in $Id) {

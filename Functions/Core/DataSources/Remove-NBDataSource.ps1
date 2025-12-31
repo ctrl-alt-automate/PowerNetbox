@@ -28,6 +28,7 @@ function Remove-NBDataSource {
     )
 
     process {
+        Write-Verbose "Removing Data Source"
         $Segments = [System.Collections.ArrayList]::new(@('core', 'data-sources', $Id))
         $URI = BuildNewURI -Segments $Segments
 

@@ -57,6 +57,7 @@ function Get-NBGroup {
     )
 
     process {
+        Write-Verbose "Retrieving Group"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {
                 foreach ($i in $Id) {

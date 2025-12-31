@@ -67,6 +67,7 @@ function Set-NBVirtualizationClusterGroup {
     )
 
     process {
+        Write-Verbose "Updating Virtualization Cluster Group"
         foreach ($GroupId in $Id) {
             $CurrentGroup = Get-NBVirtualizationClusterGroup -Id $GroupId -ErrorAction Stop
 

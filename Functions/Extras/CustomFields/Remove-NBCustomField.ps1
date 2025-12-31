@@ -28,6 +28,7 @@ function Remove-NBCustomField {
     )
 
     process {
+        Write-Verbose "Removing Custom Field"
         $Segments = [System.Collections.ArrayList]::new(@('extras', 'custom-fields', $Id))
         $URI = BuildNewURI -Segments $Segments
 

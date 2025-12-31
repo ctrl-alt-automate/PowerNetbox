@@ -68,6 +68,7 @@ function New-NBSavedFilter {
     )
 
     process {
+        Write-Verbose "Creating Saved Filter"
         $Segments = [System.Collections.ArrayList]::new(@('extras', 'saved-filters'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         $URI = BuildNewURI -Segments $URIComponents.Segments

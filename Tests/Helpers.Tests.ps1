@@ -285,6 +285,368 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' {
     # NOTE: ValidateChoice tests removed - function no longer exists in the module
     # The module now passes values directly to the API without client-side validation
 
+    Context "BuildNewURI Edge Cases" {
+        BeforeAll {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.Hostname = 'netbox.domain.com'
+                $script:NetboxConfig.HostScheme = 'https'
+                $script:NetboxConfig.HostPort = 443
+            }
+        }
+
+        It "Should handle empty segments array" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $URIBuilder = BuildNewURI -Segments @() -SkipConnectedCheck
+                $URIBuilder.Path | Should -BeExactly 'api//'
+            }
+        }
+
+        It "Should handle null parameters" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $URIBuilder = BuildNewURI -Segments @('dcim', 'devices') -Parameters $null -SkipConnectedCheck
+                $URIBuilder.Path | Should -BeExactly 'api/dcim/devices/'
+                $URIBuilder.Query | Should -BeNullOrEmpty
+            }
+        }
+
+        It "Should URL-encode special characters in parameter values" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $URIBuilder = BuildNewURI -Segments @('dcim', 'devices') -Parameters @{name='test&value'} -SkipConnectedCheck
+                $URIBuilder.Query | Should -Match 'name=test%26value'
+            }
+        }
+
+        It "Should URL-encode spaces in parameter values" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $URIBuilder = BuildNewURI -Segments @('dcim', 'devices') -Parameters @{name='my device'} -SkipConnectedCheck
+                $URIBuilder.Query | Should -Match 'name=my%20device'
+            }
+        }
+
+        It "Should handle multiple query parameters" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $URIBuilder = BuildNewURI -Segments @('dcim', 'devices') -Parameters @{limit=10; offset=20} -SkipConnectedCheck
+                $URIBuilder.Query | Should -Match 'limit=10'
+                $URIBuilder.Query | Should -Match 'offset=20'
+            }
+        }
+
+        It "Should handle segments with leading/trailing slashes" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $URIBuilder = BuildNewURI -Segments @('/dcim/', '/devices/') -SkipConnectedCheck
+                $URIBuilder.Path | Should -BeExactly 'api/dcim/devices/'
+            }
+        }
+
+        It "Should handle numeric segments (IDs)" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $URIBuilder = BuildNewURI -Segments @('dcim', 'devices', 123) -SkipConnectedCheck
+                $URIBuilder.Path | Should -BeExactly 'api/dcim/devices/123/'
+            }
+        }
+
+        It "Should preserve case in segments" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $URIBuilder = BuildNewURI -Segments @('DCIM', 'Devices') -SkipConnectedCheck
+                $URIBuilder.Path | Should -BeExactly 'api/DCIM/Devices/'
+            }
+        }
+    }
+
+    Context "BuildURIComponents Edge Cases" {
+        It "Should handle minimal URISegments" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $URIComponents = BuildURIComponents -URISegments ([System.Collections.ArrayList]@('api')) -ParametersDictionary @{name='test'}
+                $URIComponents.Segments.Count | Should -Be 1
+                $URIComponents.Parameters['name'] | Should -Be 'test'
+            }
+        }
+
+        It "Should handle empty ParametersDictionary" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $URIComponents = BuildURIComponents -URISegments ([System.Collections.ArrayList]@('dcim', 'devices')) -ParametersDictionary @{}
+                $URIComponents.Segments | Should -Be @('dcim', 'devices')
+                $URIComponents.Parameters.Count | Should -Be 0
+            }
+        }
+
+        It "Should handle scalar ID (add to segments)" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                # This mimics actual PowerShell parameter binding: -Id 123 binds as scalar
+                $URIComponents = BuildURIComponents -URISegments ([System.Collections.ArrayList]@('dcim', 'devices')) -ParametersDictionary @{id=123}
+                $URIComponents.Segments | Should -Contain 123
+                $URIComponents.Parameters.ContainsKey('id__in') | Should -BeFalse
+            }
+        }
+
+        It "Should handle three or more IDs" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $URIComponents = BuildURIComponents -URISegments ([System.Collections.ArrayList]@('dcim', 'devices')) -ParametersDictionary @{id=@(1,2,3)}
+                $URIComponents.Parameters['id__in'] | Should -Be '1,2,3'
+            }
+        }
+
+        It "Should lowercase parameter keys but preserve values" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $URIComponents = BuildURIComponents -URISegments ([System.Collections.ArrayList]@('dcim')) -ParametersDictionary @{DeviceType='Server'}
+                $URIComponents.Parameters.ContainsKey('devicetype') | Should -BeTrue
+                $URIComponents.Parameters['devicetype'] | Should -Be 'Server'
+            }
+        }
+
+        It "Should handle CustomFields with various key casings" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $URIComponents = BuildURIComponents -URISegments ([System.Collections.ArrayList]@('dcim')) -ParametersDictionary @{
+                    CustomFields = @{
+                        'PRTG_ID' = 123
+                        'customer_Name' = 'Acme'
+                    }
+                }
+                $URIComponents.Parameters['cf_prtg_id'] | Should -Be '123'
+                $URIComponents.Parameters['cf_customer_name'] | Should -Be 'Acme'
+            }
+        }
+
+        It "Should skip multiple parameters by name" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $URIComponents = BuildURIComponents -URISegments ([System.Collections.ArrayList]@('dcim')) `
+                    -ParametersDictionary @{param1=1; param2=2; param3=3} `
+                    -SkipParameterByName @('param1', 'param3')
+                $URIComponents.Parameters.Count | Should -Be 1
+                $URIComponents.Parameters['param2'] | Should -Be 2
+            }
+        }
+
+        It "Should handle mixed numeric and string IDs" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $URIComponents = BuildURIComponents -URISegments ([System.Collections.ArrayList]@('dcim', 'devices')) -ParametersDictionary @{id=@(1, '2', 3)}
+                $URIComponents.Parameters['id__in'] | Should -Be '1,2,3'
+            }
+        }
+    }
+
+    Context "InvokeNetboxRequest Pagination" {
+        BeforeAll {
+            Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
+            Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 5 }
+            Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
+            Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
+                return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
+            }
+
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.Hostname = 'netbox.domain.com'
+                $script:NetboxConfig.HostScheme = 'https'
+                $script:NetboxConfig.HostPort = 443
+                $script:NetboxConfig.BranchStack = $null
+            }
+        }
+
+        It "Should fetch all pages when using -All" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:pageCount = 0
+                Mock -CommandName 'Invoke-RestMethod' -MockWith {
+                    $script:pageCount++
+                    if ($script:pageCount -eq 1) {
+                        return @{
+                            count = 3
+                            next = 'https://netbox.domain.com/api/dcim/devices/?limit=1&offset=1'
+                            previous = $null
+                            results = @(@{id=1; name='device1'})
+                        }
+                    } elseif ($script:pageCount -eq 2) {
+                        return @{
+                            count = 3
+                            next = 'https://netbox.domain.com/api/dcim/devices/?limit=1&offset=2'
+                            previous = 'https://netbox.domain.com/api/dcim/devices/?limit=1'
+                            results = @(@{id=2; name='device2'})
+                        }
+                    } else {
+                        return @{
+                            count = 3
+                            next = $null
+                            previous = 'https://netbox.domain.com/api/dcim/devices/?limit=1&offset=1'
+                            results = @(@{id=3; name='device3'})
+                        }
+                    }
+                }
+
+                $URI = BuildNewURI -Segments 'dcim', 'devices' -SkipConnectedCheck
+                $results = InvokeNetboxRequest -URI $URI -All -PageSize 1
+
+                $results.Count | Should -Be 3
+                $results[0].name | Should -Be 'device1'
+                $results[1].name | Should -Be 'device2'
+                $results[2].name | Should -Be 'device3'
+            }
+        }
+
+        It "Should return empty array when no results" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                Mock -CommandName 'Invoke-RestMethod' -MockWith {
+                    return @{
+                        count = 0
+                        next = $null
+                        previous = $null
+                        results = @()
+                    }
+                }
+
+                $URI = BuildNewURI -Segments 'dcim', 'devices' -SkipConnectedCheck
+                $results = InvokeNetboxRequest -URI $URI
+
+                $results | Should -BeNullOrEmpty
+            }
+        }
+
+        It "Should return Raw response with -All -Raw" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                Mock -CommandName 'Invoke-RestMethod' -MockWith {
+                    return @{
+                        count = 1
+                        next = $null
+                        previous = $null
+                        results = @(@{id=1; name='device1'})
+                    }
+                }
+
+                $URI = BuildNewURI -Segments 'dcim', 'devices' -SkipConnectedCheck
+                $result = InvokeNetboxRequest -URI $URI -All -Raw
+
+                $result.count | Should -Be 1
+                $result.next | Should -BeNullOrEmpty
+                $result.results | Should -Not -BeNullOrEmpty
+            }
+        }
+    }
+
+    Context "InvokeNetboxRequest Error Handling" {
+        BeforeAll {
+            Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
+            Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 5 }
+            Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
+            Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
+                return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
+            }
+
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.Hostname = 'netbox.domain.com'
+                $script:NetboxConfig.HostScheme = 'https'
+                $script:NetboxConfig.HostPort = 443
+            }
+        }
+
+        It "Should include Authorization header with Token" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                Mock -CommandName 'Invoke-RestMethod' -MockWith {
+                    return @{ results = @() }
+                } -Verifiable
+
+                $URI = BuildNewURI -Segments 'dcim', 'devices' -SkipConnectedCheck
+                InvokeNetboxRequest -URI $URI
+
+                Should -Invoke Invoke-RestMethod -ModuleName 'PowerNetbox' -ParameterFilter {
+                    $Headers.Authorization -eq 'Token faketoken'
+                }
+            }
+        }
+
+        It "Should serialize body with correct depth" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                Mock -CommandName 'Invoke-RestMethod' -MockWith {
+                    return @{ id = 1 }
+                }
+
+                $nestedBody = @{
+                    level1 = @{
+                        level2 = @{
+                            level3 = @{
+                                value = 'deep'
+                            }
+                        }
+                    }
+                }
+
+                $URI = BuildNewURI -Segments 'dcim', 'devices' -SkipConnectedCheck
+                $result = InvokeNetboxRequest -URI $URI -Method POST -Body $nestedBody
+
+                Should -Invoke Invoke-RestMethod -ModuleName 'PowerNetbox' -ParameterFilter {
+                    $Body -match 'deep'
+                }
+            }
+        }
+    }
+
+    Context "InvokeNetboxRequest Branch Context" {
+        BeforeAll {
+            Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
+            Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 5 }
+            Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
+            Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
+                return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
+            }
+
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.Hostname = 'netbox.domain.com'
+                $script:NetboxConfig.HostScheme = 'https'
+                $script:NetboxConfig.HostPort = 443
+            }
+        }
+
+        It "Should add X-NetBox-Branch header when Branch is specified" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.BranchStack = $null
+                Mock -CommandName 'Invoke-RestMethod' -MockWith {
+                    return @{ results = @() }
+                }
+
+                $URI = BuildNewURI -Segments 'dcim', 'devices' -SkipConnectedCheck
+                InvokeNetboxRequest -URI $URI -Branch 'my-branch'
+
+                Should -Invoke Invoke-RestMethod -ModuleName 'PowerNetbox' -ParameterFilter {
+                    $Headers['X-NetBox-Branch'] -eq 'my-branch'
+                }
+            }
+        }
+
+        It "Should use BranchStack when no explicit Branch" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.BranchStack = [System.Collections.Generic.Stack[string]]::new()
+                $script:NetboxConfig.BranchStack.Push('stack-branch')
+
+                Mock -CommandName 'Invoke-RestMethod' -MockWith {
+                    return @{ results = @() }
+                }
+
+                $URI = BuildNewURI -Segments 'dcim', 'devices' -SkipConnectedCheck
+                InvokeNetboxRequest -URI $URI
+
+                Should -Invoke Invoke-RestMethod -ModuleName 'PowerNetbox' -ParameterFilter {
+                    $Headers['X-NetBox-Branch'] -eq 'stack-branch'
+                }
+
+                # Cleanup
+                $script:NetboxConfig.BranchStack = $null
+            }
+        }
+
+        It "Should not add X-NetBox-Branch when no branch context" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.BranchStack = $null
+                Mock -CommandName 'Invoke-RestMethod' -MockWith {
+                    return @{ results = @() }
+                }
+
+                $URI = BuildNewURI -Segments 'dcim', 'devices' -SkipConnectedCheck
+                InvokeNetboxRequest -URI $URI
+
+                Should -Invoke Invoke-RestMethod -ModuleName 'PowerNetbox' -ParameterFilter {
+                    -not $Headers.ContainsKey('X-NetBox-Branch')
+                }
+            }
+        }
+    }
+
     Context "ConvertTo-NetboxVersion" {
         It "Should parse standard three-part version" {
             InModuleScope -ModuleName 'PowerNetbox' {
@@ -361,6 +723,51 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' {
             InModuleScope -ModuleName 'PowerNetbox' {
                 $result = ConvertTo-NetboxVersion -VersionString "4.4.9+build.123"
                 $result | Should -Be ([version]"4.4.9")
+            }
+        }
+    }
+
+    Context "Parameter Set Validation" {
+        # Test that parameter sets are properly mutually exclusive
+        # Functions with ById and Query parameter sets should not allow both simultaneously
+
+        It "Get-NBIPAMAddress should not allow both Id and Query parameters" {
+            # When a function has ById and Query parameter sets,
+            # using both should cause PowerShell to error due to ambiguous parameter set
+            { Get-NBIPAMAddress -Id 10 -Query 'test' } | Should -Throw -Because "Id (ByID set) and Query (Query set) are mutually exclusive"
+        }
+
+        It "Get-NBIPAMAddress should not allow both Id and Address parameters" {
+            # Id is in ByID parameter set, Address is in Query parameter set
+            { Get-NBIPAMAddress -Id 10 -Address '192.168.1.1' } | Should -Throw -Because "Id (ByID set) and Address (Query set) are mutually exclusive"
+        }
+
+        It "Get-NBIPAMAddress should allow Id parameter alone" {
+            # Should not throw - Id alone is valid (ByID parameter set)
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $command = Get-Command Get-NBIPAMAddress
+                $parameterSets = $command.ParameterSets
+                $byIdSet = $parameterSets | Where-Object { $_.Name -eq 'ByID' }
+                $byIdSet | Should -Not -BeNullOrEmpty -Because "ByID parameter set should exist"
+                $byIdSet.Parameters.Name | Should -Contain 'Id'
+            }
+        }
+
+        It "Get-NBIPAMAddress should allow Query parameter alone" {
+            # Should not throw - Query alone is valid (Query parameter set)
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $command = Get-Command Get-NBIPAMAddress
+                $parameterSets = $command.ParameterSets
+                $querySet = $parameterSets | Where-Object { $_.Name -eq 'Query' }
+                $querySet | Should -Not -BeNullOrEmpty -Because "Query parameter set should exist"
+                $querySet.Parameters.Name | Should -Contain 'Query'
+            }
+        }
+
+        It "Get-NBIPAMAddress should have correct default parameter set" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $command = Get-Command Get-NBIPAMAddress
+                $command.DefaultParameterSet | Should -Be 'Query'
             }
         }
     }

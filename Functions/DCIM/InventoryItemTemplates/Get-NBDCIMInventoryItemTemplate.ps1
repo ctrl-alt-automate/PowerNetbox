@@ -25,7 +25,7 @@ function Get-NBDCIMInventoryItemTemplate {
 
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,
-        [Parameter(ParameterSetName = 'Query')][uint64]$DeviceType_Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Device_Type_Id,
         [Parameter(ParameterSetName = 'Query')][uint64]$Parent_Id,
         [Parameter(ParameterSetName = 'Query')][string]$Query,
         [ValidateRange(1, 1000)]
@@ -35,6 +35,7 @@ function Get-NBDCIMInventoryItemTemplate {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Retrieving DCIM Inventory Item Template"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','inventory-item-templates',$i)) -Raw:$Raw } }
             default {

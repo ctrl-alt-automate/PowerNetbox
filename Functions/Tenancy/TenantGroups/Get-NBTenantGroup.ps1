@@ -85,6 +85,7 @@ function Get-NBTenantGroup {
     )
 
     process {
+        Write-Verbose "Retrieving Tenant Group"
         $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'tenant-groups'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'

@@ -124,6 +124,7 @@ function Get-NBDCIMRack {
     )
 
     process {
+        Write-Verbose "Retrieving DCIM Rack"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
                 foreach ($RackId in $Id) {

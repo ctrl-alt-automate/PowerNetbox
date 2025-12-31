@@ -85,6 +85,7 @@ function Get-NBJob {
     )
 
     process {
+        Write-Verbose "Retrieving Job"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {
                 foreach ($i in $Id) {

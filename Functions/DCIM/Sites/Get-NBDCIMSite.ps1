@@ -88,6 +88,7 @@ function Get-NBDCIMSite {
     )
 
     process {
+        Write-Verbose "Retrieving DCIM Site"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {
                 foreach ($Site_ID in $ID) {

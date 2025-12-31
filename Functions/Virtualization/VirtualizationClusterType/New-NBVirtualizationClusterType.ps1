@@ -58,6 +58,7 @@ function New-NBVirtualizationClusterType {
     )
 
     process {
+        Write-Verbose "Creating Virtualization Cluster Type"
         # Auto-generate slug from name if not provided
         if (-not $PSBoundParameters.ContainsKey('Slug')) {
             $PSBoundParameters['Slug'] = ($Name -replace '\s+', '-').ToLower()

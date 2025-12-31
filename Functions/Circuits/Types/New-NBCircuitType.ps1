@@ -50,6 +50,7 @@ function New-NBCircuitType {
     )
 
     process {
+        Write-Verbose "Creating Circuit Type"
         $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuit-types'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'

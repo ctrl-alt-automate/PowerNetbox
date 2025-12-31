@@ -86,6 +86,7 @@ function Set-NBDCIMInterface {
     }
 
     process {
+        Write-Verbose "Updating D CI MI nt er fa ce"
         foreach ($InterfaceId in $Id) {
             $CurrentInterface = Get-NBDCIMInterface -Id $InterfaceId -ErrorAction Stop
 

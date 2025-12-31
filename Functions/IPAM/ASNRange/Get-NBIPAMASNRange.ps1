@@ -76,6 +76,7 @@ function Get-NBIPAMASNRange {
     )
 
     process {
+        Write-Verbose "Retrieving IPAM ASN Range"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
                 foreach ($RangeId in $Id) {

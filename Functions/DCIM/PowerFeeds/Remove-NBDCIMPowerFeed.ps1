@@ -25,6 +25,7 @@ function Remove-NBDCIMPowerFeed {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Removing D CI MP ow er Fe ed"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete power feed')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','power-feeds',$Id)) -Method DELETE -Raw:$Raw
         }

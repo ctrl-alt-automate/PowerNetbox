@@ -1,4 +1,4 @@
-﻿
+
 function New-NBContact {
 <#
     .SYNOPSIS
@@ -32,16 +32,13 @@ function New-NBContact {
         URI related to the contact
 
     .PARAMETER Custom_Fields
-        A description of the Custom_Fields parameter.
+        Hashtable of custom field values.
 
     .PARAMETER Raw
-        A description of the Raw parameter.
+        Return the raw API response instead of the created object.
 
     .EXAMPLE
         PS C:\> New-NBContact -Name 'Leroy Jenkins' -Email 'leroy.jenkins@example.com'
-
-    .NOTES
-        Additional information about the function.
 #>
 
     [CmdletBinding(ConfirmImpact = 'Low',
@@ -80,6 +77,7 @@ function New-NBContact {
     )
 
     process {
+        Write-Verbose "Creating Contact"
         $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'contacts'))
         $Method = 'POST'
 
