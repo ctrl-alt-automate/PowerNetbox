@@ -101,6 +101,7 @@ function New-NBDCIMRearPort {
     )
 
     process {
+        Write-Verbose "Creating D CI MR ea rP or t"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'rear-ports'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters

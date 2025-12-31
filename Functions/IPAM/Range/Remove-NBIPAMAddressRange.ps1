@@ -16,8 +16,6 @@ function Remove-NBIPAMAddressRange {
     .EXAMPLE
         PS C:\> Remove-NBIPAMAddressRange -Id 1234
 
-    .NOTES
-        Additional information about the function.
 #>
 
     [CmdletBinding(ConfirmImpact = 'High',
@@ -33,6 +31,7 @@ function Remove-NBIPAMAddressRange {
     )
 
     process {
+        Write-Verbose "Removing IPA MA dd re ss Ra ng e"
         foreach ($Range_Id in $Id) {
             $CurrentRange = Get-NBIPAMAddressRange -Id $Range_Id -ErrorAction Stop
 

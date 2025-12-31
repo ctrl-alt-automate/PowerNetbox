@@ -2,10 +2,11 @@
 function Get-NBTenant {
 <#
     .SYNOPSIS
-        Get a tenent from Netbox
+        Get a tenant from Netbox
 
     .DESCRIPTION
-        A detailed description of the Get-NBTenant function.
+        Retrieves tenant objects from Netbox. Tenants represent organizations or
+        customers that own or use resources tracked in Netbox.
 
     .PARAMETER Name
         The specific name of the tenant. Must match exactly as is defined in Netbox
@@ -25,7 +26,7 @@ function Get-NBTenant {
     .PARAMETER GroupID
         The database ID of the group in Netbox
 
-    .PARAMETER CustomFields
+    .PARAMETER Custom_Fields
         Hashtable in the format @{"field_name" = "value"} to search
 
     .PARAMETER Limit
@@ -40,8 +41,6 @@ function Get-NBTenant {
     .EXAMPLE
         PS C:\> Get-NBTenant
 
-    .NOTES
-        Additional information about the function.
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]
@@ -73,7 +72,7 @@ function Get-NBTenant {
         [uint64]$GroupID,
 
         [Parameter(ParameterSetName = 'Query')]
-        [hashtable]$CustomFields,
+        [hashtable]$Custom_Fields,
 
         [ValidateRange(1, 1000)]
         [uint16]$Limit,
@@ -85,6 +84,7 @@ function Get-NBTenant {
     )
 
     process {
+        Write-Verbose "Retrieving Tenant"
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($Tenant_ID in $Id) {

@@ -63,6 +63,7 @@ function Get-NBDataFile {
     )
 
     process {
+        Write-Verbose "Retrieving Data File"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {
                 foreach ($i in $Id) {

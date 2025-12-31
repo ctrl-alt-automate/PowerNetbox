@@ -84,6 +84,7 @@ function Get-NBChangeDiff {
     )
 
     process {
+        Write-Verbose "Retrieving Change Diff"
         CheckNetboxIsConnected
 
         switch ($PSCmdlet.ParameterSetName) {

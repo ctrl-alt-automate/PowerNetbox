@@ -67,6 +67,7 @@ function Set-NBVirtualizationClusterType {
     )
 
     process {
+        Write-Verbose "Updating Virtualization Cluster Type"
         foreach ($TypeId in $Id) {
             $CurrentType = Get-NBVirtualizationClusterType -Id $TypeId -ErrorAction Stop
 

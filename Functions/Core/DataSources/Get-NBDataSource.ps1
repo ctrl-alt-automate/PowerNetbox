@@ -70,6 +70,7 @@ function Get-NBDataSource {
     )
 
     process {
+        Write-Verbose "Retrieving Data Source"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {
                 foreach ($i in $Id) {

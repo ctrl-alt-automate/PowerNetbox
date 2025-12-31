@@ -73,6 +73,7 @@ function Set-NBUser {
     )
 
     process {
+        Write-Verbose "Updating User"
         $Segments = [System.Collections.ArrayList]::new(@('users', 'users', $Id))
 
         # Build params manually to handle SecureString conversion

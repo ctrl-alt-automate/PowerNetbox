@@ -69,6 +69,7 @@ function Get-NBToken {
     )
 
     process {
+        Write-Verbose "Retrieving Token"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {
                 foreach ($i in $Id) {

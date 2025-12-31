@@ -38,6 +38,7 @@ function Get-NBVPNTunnel {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Retrieving V PN Tu nn el"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
                 foreach ($TunnelId in $Id) {

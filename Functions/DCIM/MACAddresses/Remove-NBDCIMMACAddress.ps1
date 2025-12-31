@@ -25,6 +25,7 @@ function Remove-NBDCIMMACAddress {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Removing D CI MM AC Ad dr es s"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete MAC address')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','mac-addresses',$Id)) -Method DELETE -Raw:$Raw
         }

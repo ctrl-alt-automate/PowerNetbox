@@ -66,6 +66,7 @@ function Get-NBCircuitGroup {
     )
 
     process {
+        Write-Verbose "Retrieving Circuit Group"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {
                 foreach ($i in $Id) {

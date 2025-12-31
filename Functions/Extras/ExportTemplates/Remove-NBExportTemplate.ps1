@@ -28,6 +28,7 @@ function Remove-NBExportTemplate {
     )
 
     process {
+        Write-Verbose "Removing Export Template"
         $Segments = [System.Collections.ArrayList]::new(@('extras', 'export-templates', $Id))
         $URI = BuildNewURI -Segments $Segments
 

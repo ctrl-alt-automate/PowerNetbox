@@ -41,6 +41,7 @@ function Get-NBTag {
     )
 
     process {
+        Write-Verbose "Retrieving Tag"
 
         $Segments = [System.Collections.ArrayList]::new(@('extras', 'tags'))
 

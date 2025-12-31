@@ -26,6 +26,7 @@ function Remove-NBVPNTunnel {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Removing V PN Tu nn el"
         $Segments = [System.Collections.ArrayList]::new(@('vpn', 'tunnels', $Id))
         $URI = BuildNewURI -Segments $Segments
         if ($PSCmdlet.ShouldProcess($Id, 'Delete VPN tunnel')) {

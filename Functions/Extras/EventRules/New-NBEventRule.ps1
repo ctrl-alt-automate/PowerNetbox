@@ -97,6 +97,7 @@ function New-NBEventRule {
     )
 
     process {
+        Write-Verbose "Creating Event Rule"
         $Segments = [System.Collections.ArrayList]::new(@('extras', 'event-rules'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         $URI = BuildNewURI -Segments $URIComponents.Segments

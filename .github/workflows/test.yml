@@ -71,7 +71,11 @@ jobs:
           $config.TestResult.OutputPath = 'TestResults.xml'
           $config.TestResult.OutputFormat = 'NUnitXml'
           $config.Output.Verbosity = 'Detailed'
-          $config.CodeCoverage.Enabled = $false
+          # Code coverage configuration
+          $config.CodeCoverage.Enabled = $true
+          $config.CodeCoverage.Path = @('./Functions/')
+          $config.CodeCoverage.OutputPath = 'coverage.xml'
+          $config.CodeCoverage.OutputFormat = 'JaCoCo'
           Invoke-Pester -Configuration $config
 
       - name: Run Pester tests (powershell)
@@ -86,7 +90,11 @@ jobs:
           $config.TestResult.OutputPath = 'TestResults.xml'
           $config.TestResult.OutputFormat = 'NUnitXml'
           $config.Output.Verbosity = 'Detailed'
-          $config.CodeCoverage.Enabled = $false
+          # Code coverage configuration
+          $config.CodeCoverage.Enabled = $true
+          $config.CodeCoverage.Path = @('./Functions/')
+          $config.CodeCoverage.OutputPath = 'coverage.xml'
+          $config.CodeCoverage.OutputFormat = 'JaCoCo'
           Invoke-Pester -Configuration $config
 
       - name: Upload test results
@@ -95,6 +103,14 @@ jobs:
         with:
           name: test-results-${{ matrix.os }}-${{ matrix.pwsh && 'pwsh' || 'ps51' }}
           path: TestResults.xml
+          retention-days: 30
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-${{ matrix.os }}-${{ matrix.pwsh && 'pwsh' || 'ps51' }}
+          path: coverage.xml
           retention-days: 30
 
       - name: Create issue on failure

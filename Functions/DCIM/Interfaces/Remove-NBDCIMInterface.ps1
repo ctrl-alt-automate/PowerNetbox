@@ -7,16 +7,13 @@ function Remove-NBDCIMInterface {
         Removes an interface by ID from a device
 
     .PARAMETER Id
-        A description of the Id parameter.
+        Database ID of the interface to delete.
 
     .PARAMETER Force
-        A description of the Force parameter.
+        Skip confirmation prompts.
 
     .EXAMPLE
-        		PS C:\> Remove-NBDCIMInterface -Id $value1
-
-    .NOTES
-        Additional information about the function.
+        PS C:\> Remove-NBDCIMInterface -Id 123
 #>
 
     [CmdletBinding(ConfirmImpact = 'High',
@@ -36,6 +33,7 @@ function Remove-NBDCIMInterface {
     }
 
     process {
+        Write-Verbose "Removing D CI MI nt er fa ce"
         foreach ($InterfaceId in $Id) {
             $CurrentInterface = Get-NBDCIMInterface -Id $InterfaceId -ErrorAction Stop
 

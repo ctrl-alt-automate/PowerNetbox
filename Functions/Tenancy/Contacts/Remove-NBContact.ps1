@@ -47,6 +47,7 @@ function Remove-NBContact {
     )
 
     process {
+        Write-Verbose "Removing Contact"
         foreach ($ContactId in $Id) {
             $CurrentContact = Get-NBContact -Id $ContactId -ErrorAction Stop
 

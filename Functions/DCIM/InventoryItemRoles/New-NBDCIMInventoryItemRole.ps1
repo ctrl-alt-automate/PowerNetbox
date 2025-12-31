@@ -30,6 +30,7 @@ function New-NBDCIMInventoryItemRole {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Creating D CI MI nv en to ry It em Ro le"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','inventory-item-roles'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create inventory item role')) {

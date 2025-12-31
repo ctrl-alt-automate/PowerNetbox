@@ -69,6 +69,7 @@ function Get-NBCircuitProviderAccount {
     )
 
     process {
+        Write-Verbose "Retrieving Circuit Provider Account"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {
                 foreach ($i in $Id) {

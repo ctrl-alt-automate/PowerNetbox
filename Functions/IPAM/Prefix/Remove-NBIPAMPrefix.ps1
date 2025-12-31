@@ -25,6 +25,7 @@ function Remove-NBIPAMPrefix {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Removing IPA MP re fi x"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete prefix')) {
             $Segments = [System.Collections.ArrayList]::new(@('ipam', 'prefixes', $Id))
             $URI = BuildNewURI -Segments $Segments

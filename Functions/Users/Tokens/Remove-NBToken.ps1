@@ -28,6 +28,7 @@ function Remove-NBToken {
     )
 
     process {
+        Write-Verbose "Removing Token"
         $Segments = [System.Collections.ArrayList]::new(@('users', 'tokens', $Id))
         $URI = BuildNewURI -Segments $Segments
 

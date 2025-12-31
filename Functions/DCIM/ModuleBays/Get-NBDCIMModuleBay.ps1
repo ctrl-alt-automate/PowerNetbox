@@ -34,6 +34,7 @@ function Get-NBDCIMModuleBay {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Retrieving DCIM Module Bay"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','module-bays',$i)) -Raw:$Raw } }
             default {

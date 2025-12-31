@@ -36,6 +36,7 @@ function Get-NBDCIMPowerPort {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Retrieving DCIM Power Port"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','power-ports',$i)) -Raw:$Raw } }
             default {

@@ -110,6 +110,7 @@ function New-NBDCIMCable {
     )
 
     process {
+        Write-Verbose "Creating D CI MC ab le"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'cables'))
 
         # Build the body manually since terminations need special handling

@@ -72,6 +72,7 @@ function New-NBVirtualCircuit {
     )
 
     process {
+        Write-Verbose "Creating Virtual Circuit"
         $Segments = [System.Collections.ArrayList]::new(@('circuits', 'virtual-circuits'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         $URI = BuildNewURI -Segments $URIComponents.Segments

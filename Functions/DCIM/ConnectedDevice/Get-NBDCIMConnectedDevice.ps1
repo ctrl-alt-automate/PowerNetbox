@@ -28,6 +28,7 @@ function Get-NBDCIMConnectedDevice {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Retrieving DCIM Connected Device"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','connected-device'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'
         InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw

@@ -107,6 +107,7 @@ function Set-NBDCIMSite {
     )
 
     process {
+        Write-Verbose "Updating D CI MS it e"
         foreach ($SiteID in $Id) {
             $CurrentSite = Get-NBDCIMSite -Id $SiteID -ErrorAction Stop
 

@@ -28,6 +28,7 @@ function Remove-NBBookmark {
     )
 
     process {
+        Write-Verbose "Removing Bookmark"
         $Segments = [System.Collections.ArrayList]::new(@('extras', 'bookmarks', $Id))
         $URI = BuildNewURI -Segments $Segments
 

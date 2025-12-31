@@ -48,6 +48,7 @@ function Get-NBDCIMCableTermination {
     #endregion Parameters
 
     process {
+        Write-Verbose "Retrieving DCIM Cable Termination"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'cable-terminations'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'

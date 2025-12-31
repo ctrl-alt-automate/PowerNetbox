@@ -123,6 +123,7 @@ function Set-NBCustomField {
     )
 
     process {
+        Write-Verbose "Updating Custom Field"
         $Segments = [System.Collections.ArrayList]::new(@('extras', 'custom-fields', $Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
         $URI = BuildNewURI -Segments $URIComponents.Segments

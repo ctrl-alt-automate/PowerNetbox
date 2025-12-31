@@ -38,6 +38,7 @@ function Sync-NBBranch {
     )
 
     process {
+        Write-Verbose "Processing Sync-NBBranch"
         CheckNetboxIsConnected
 
         $Segments = [System.Collections.ArrayList]::new(@('plugins', 'netbox-branching', 'branches', $Id, 'sync'))

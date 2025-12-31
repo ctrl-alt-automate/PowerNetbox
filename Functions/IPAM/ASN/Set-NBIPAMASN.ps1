@@ -60,6 +60,7 @@ function Set-NBIPAMASN {
     )
 
     process {
+        Write-Verbose "Updating IPA MA SN"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'asns', $Id))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'

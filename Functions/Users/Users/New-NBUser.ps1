@@ -71,6 +71,7 @@ function New-NBUser {
     )
 
     process {
+        Write-Verbose "Creating User"
         $Segments = [System.Collections.ArrayList]::new(@('users', 'users'))
 
         # Convert SecureString to plain text for API (required by Netbox)

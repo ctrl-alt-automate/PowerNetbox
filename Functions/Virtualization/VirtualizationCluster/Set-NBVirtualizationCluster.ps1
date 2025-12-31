@@ -93,6 +93,7 @@ function Set-NBVirtualizationCluster {
     )
 
     process {
+        Write-Verbose "Updating Virtualization Cluster"
         foreach ($ClusterId in $Id) {
             $CurrentCluster = Get-NBVirtualizationCluster -Id $ClusterId -ErrorAction Stop
 

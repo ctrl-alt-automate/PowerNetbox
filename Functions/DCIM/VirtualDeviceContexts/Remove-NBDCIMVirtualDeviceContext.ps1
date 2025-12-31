@@ -25,6 +25,7 @@ function Remove-NBDCIMVirtualDeviceContext {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Removing D CI MV ir tu al De vi ce Co nt ex t"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete virtual device context')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','virtual-device-contexts',$Id)) -Method DELETE -Raw:$Raw
         }

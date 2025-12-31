@@ -42,6 +42,7 @@ function Remove-NBContactRole {
     )
 
     process {
+        Write-Verbose "Removing Contact Role"
         foreach ($RoleId in $Id) {
             $CurrentRole = Get-NBContactRole -Id $RoleId -ErrorAction Stop
 

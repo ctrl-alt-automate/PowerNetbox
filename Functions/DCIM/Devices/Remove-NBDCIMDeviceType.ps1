@@ -25,6 +25,7 @@ function Remove-NBDCIMDeviceType {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Removing D CI MD ev ic eT yp e"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete device type')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','device-types',$Id)) -Method DELETE -Raw:$Raw
         }

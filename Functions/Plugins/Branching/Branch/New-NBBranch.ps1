@@ -55,6 +55,7 @@ function New-NBBranch {
     )
 
     process {
+        Write-Verbose "Creating Branch"
         CheckNetboxIsConnected
 
         $Segments = [System.Collections.ArrayList]::new(@('plugins', 'netbox-branching', 'branches'))

@@ -25,7 +25,7 @@ function Get-NBDCIMModuleBayTemplate {
 
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,
-        [Parameter(ParameterSetName = 'Query')][uint64]$DeviceType_Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Device_Type_Id,
         [Parameter(ParameterSetName = 'Query')][string]$Query,
         [ValidateRange(1, 1000)]
         [uint16]$Limit,
@@ -34,6 +34,7 @@ function Get-NBDCIMModuleBayTemplate {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Retrieving DCIM Module Bay Template"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','module-bay-templates',$i)) -Raw:$Raw } }
             default {

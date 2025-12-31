@@ -50,6 +50,7 @@ function New-NBVirtualCircuitTermination {
     )
 
     process {
+        Write-Verbose "Creating Virtual Circuit Termination"
         $Segments = [System.Collections.ArrayList]::new(@('circuits', 'virtual-circuit-terminations'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         $URI = BuildNewURI -Segments $URIComponents.Segments

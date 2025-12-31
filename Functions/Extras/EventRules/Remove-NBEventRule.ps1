@@ -28,6 +28,7 @@ function Remove-NBEventRule {
     )
 
     process {
+        Write-Verbose "Removing Event Rule"
         $Segments = [System.Collections.ArrayList]::new(@('extras', 'event-rules', $Id))
         $URI = BuildNewURI -Segments $Segments
 

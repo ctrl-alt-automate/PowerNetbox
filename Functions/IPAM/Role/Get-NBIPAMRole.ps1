@@ -29,13 +29,11 @@ function Get-NBIPAMRole {
         Result offset
 
     .PARAMETER Raw
-        A description of the Raw parameter.
+        Return the raw API response instead of extracting the results array.
 
     .EXAMPLE
         PS C:\> Get-NBIPAMRole
 
-    .NOTES
-        Additional information about the function.
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]
@@ -79,6 +77,7 @@ function Get-NBIPAMRole {
     )
 
     process {
+        Write-Verbose "Retrieving IPAM Role"
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($Role_ID in $Id) {

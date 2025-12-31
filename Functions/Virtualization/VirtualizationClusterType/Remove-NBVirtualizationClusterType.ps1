@@ -42,6 +42,7 @@ function Remove-NBVirtualizationClusterType {
     )
 
     process {
+        Write-Verbose "Removing Virtualization Cluster Type"
         foreach ($TypeId in $Id) {
             $CurrentType = Get-NBVirtualizationClusterType -Id $TypeId -ErrorAction Stop
 

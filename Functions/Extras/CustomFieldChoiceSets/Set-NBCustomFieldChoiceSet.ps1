@@ -53,6 +53,7 @@ function Set-NBCustomFieldChoiceSet {
     )
 
     process {
+        Write-Verbose "Updating Custom Field Choice Set"
         $Segments = [System.Collections.ArrayList]::new(@('extras', 'custom-field-choice-sets', $Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
         $URI = BuildNewURI -Segments $URIComponents.Segments

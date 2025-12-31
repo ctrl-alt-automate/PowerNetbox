@@ -67,6 +67,7 @@ function New-NBVPNIPSecProposal {
     )
 
     process {
+        Write-Verbose "Creating V PN IP Se cP ro po sa l"
         $Segments = [System.Collections.ArrayList]::new(@('vpn', 'ipsec-proposals'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'

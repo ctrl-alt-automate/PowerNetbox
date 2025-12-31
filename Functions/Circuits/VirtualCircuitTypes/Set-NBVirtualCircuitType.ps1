@@ -54,6 +54,7 @@ function Set-NBVirtualCircuitType {
     )
 
     process {
+        Write-Verbose "Updating Virtual Circuit Type"
         $Segments = [System.Collections.ArrayList]::new(@('circuits', 'virtual-circuit-types', $Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
         $URI = BuildNewURI -Segments $URIComponents.Segments

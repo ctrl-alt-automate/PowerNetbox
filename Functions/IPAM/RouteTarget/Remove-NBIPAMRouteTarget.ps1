@@ -34,6 +34,7 @@ function Remove-NBIPAMRouteTarget {
     )
 
     process {
+        Write-Verbose "Removing IPA MR ou te Ta rg et"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'route-targets', $Id))
 
         $URI = BuildNewURI -Segments $Segments

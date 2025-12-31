@@ -34,6 +34,7 @@ function New-NBGroup {
     )
 
     process {
+        Write-Verbose "Creating Group"
         $Segments = [System.Collections.ArrayList]::new(@('users', 'groups'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         $URI = BuildNewURI -Segments $URIComponents.Segments

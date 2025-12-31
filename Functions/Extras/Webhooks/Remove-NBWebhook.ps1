@@ -28,6 +28,7 @@ function Remove-NBWebhook {
     )
 
     process {
+        Write-Verbose "Removing Webhook"
         $Segments = [System.Collections.ArrayList]::new(@('extras', 'webhooks', $Id))
         $URI = BuildNewURI -Segments $Segments
 
