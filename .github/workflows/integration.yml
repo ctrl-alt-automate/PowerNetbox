@@ -208,22 +208,31 @@ jobs:
 
           Import-Module ./PowerNetbox/PowerNetbox.psd1 -Force
 
-          # Test 1: Bearer header should work on 4.5+
-          Write-Host "Test 1: Testing Bearer header authentication..." -ForegroundColor Yellow
-          $headers = @{
-            'Authorization' = "Bearer $env:NETBOX_TOKEN"
-            'Accept' = 'application/json'
-          }
-          try {
-            $response = Invoke-RestMethod -Uri "http://$env:NETBOX_HOST/api/status/" -Headers $headers
-            Write-Host "  PASS: Bearer header works on Netbox 4.5+" -ForegroundColor Green
-            Write-Host "  Version: $($response.'netbox-version')" -ForegroundColor Gray
-          } catch {
-            Write-Host "  FAIL: Bearer header failed: $($_.Exception.Message)" -ForegroundColor Red
-            exit 1
+          # v2 token format: nbt_<KEY>.<SECRET>
+          $v2Pattern = '^nbt_[A-Za-z0-9]+\.[A-Za-z0-9]+$'
+          $isV2Token = $env:NETBOX_TOKEN -match $v2Pattern
+
+          # Test 1: Bearer header (only works with v2 tokens)
+          if ($isV2Token) {
+            Write-Host "Test 1: Testing Bearer header with v2 token..." -ForegroundColor Yellow
+            $headers = @{
+              'Authorization' = "Bearer $env:NETBOX_TOKEN"
+              'Accept' = 'application/json'
+            }
+            try {
+              $response = Invoke-RestMethod -Uri "http://$env:NETBOX_HOST/api/status/" -Headers $headers
+              Write-Host "  PASS: Bearer header works with v2 token" -ForegroundColor Green
+              Write-Host "  Version: $($response.'netbox-version')" -ForegroundColor Gray
+            } catch {
+              Write-Host "  FAIL: Bearer header failed: $($_.Exception.Message)" -ForegroundColor Red
+              exit 1
+            }
+          } else {
+            Write-Host "Test 1: SKIPPED - Bearer auth requires v2 token (nbt_xxx.yyy format)" -ForegroundColor Yellow
+            Write-Host "  Current token is v1 format (40-char hex)" -ForegroundColor Gray
           }
 
-          # Test 2: Token header should also work (backwards compat)
+          # Test 2: Token header should work with both v1 and v2 tokens (backwards compat)
           Write-Host "Test 2: Testing Token header (backwards compat)..." -ForegroundColor Yellow
           $headers = @{
             'Authorization' = "Token $env:NETBOX_TOKEN"
@@ -232,18 +241,17 @@ jobs:
           try {
             $response = Invoke-RestMethod -Uri "http://$env:NETBOX_HOST/api/status/" -Headers $headers
             Write-Host "  PASS: Token header works on Netbox 4.5+" -ForegroundColor Green
+            Write-Host "  Version: $($response.'netbox-version')" -ForegroundColor Gray
           } catch {
             Write-Host "  FAIL: Token header failed: $($_.Exception.Message)" -ForegroundColor Red
             exit 1
           }
 
-          # Test 3: v2 token format detection
+          # Test 3: v2 token format detection (regex pattern matching)
           Write-Host "Test 3: Testing v2 token format detection..." -ForegroundColor Yellow
           $v2Token = "***REMOVED***"
           $v1Token = "0123456789abcdef0123456789abcdef01234567"
 
-          # v2 token format: nbt_<KEY>.<SECRET>
-          $v2Pattern = '^nbt_[A-Za-z0-9]+\.[A-Za-z0-9]+$'
           if ($v2Token -match $v2Pattern) {
             Write-Host "  PASS: v2 token format correctly identified" -ForegroundColor Green
           } else {
