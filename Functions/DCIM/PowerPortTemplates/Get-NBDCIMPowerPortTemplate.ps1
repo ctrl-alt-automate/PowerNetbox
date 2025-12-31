@@ -36,7 +36,7 @@ function Get-NBDCIMPowerPortTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Retrieving D CI MP ow er Po rt Te mp la te"
+        Write-Verbose "Retrieving DCIM Power Port Template"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','power-port-templates',$i)) -Raw:$Raw } }
             default {

@@ -78,7 +78,7 @@ function Get-NBIPAMServiceTemplate {
     )
 
     process {
-        Write-Verbose "Retrieving I PA MS er vi ce Te mp la te"
+        Write-Verbose "Retrieving IPAM Service Template"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
                 foreach ($TemplateId in $Id) {

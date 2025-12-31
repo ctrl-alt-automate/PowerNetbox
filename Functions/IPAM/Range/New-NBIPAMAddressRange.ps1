@@ -89,7 +89,7 @@ function New-NBIPAMAddressRange {
     )
 
     process {
-        Write-Verbose "Creating I PA MA dd re ss Ra ng e"
+        Write-Verbose "Creating IPA MA dd re ss Ra ng e"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'ip-ranges'))
         $Method = 'POST'
 

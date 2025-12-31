@@ -156,15 +156,15 @@ function Set-NBIPAMAddress {
 
     process {
         if ($PSCmdlet.ParameterSetName -eq 'Single') {
-            foreach ($IPId in $Id) {
-                # Validate that Assigned_Object_Type and Assigned_Object_Id are used together
-                if ($PSBoundParameters.ContainsKey('Assigned_Object_Type') -and -not $PSBoundParameters.ContainsKey('Assigned_Object_Id')) {
-                    throw "Assigned_Object_Id is required when specifying Assigned_Object_Type"
-                }
-                if ($PSBoundParameters.ContainsKey('Assigned_Object_Id') -and -not $PSBoundParameters.ContainsKey('Assigned_Object_Type')) {
-                    throw "Assigned_Object_Type is required when specifying Assigned_Object_Id"
-                }
+            # Validate that Assigned_Object_Type and Assigned_Object_Id are used together
+            if ($PSBoundParameters.ContainsKey('Assigned_Object_Type') -and -not $PSBoundParameters.ContainsKey('Assigned_Object_Id')) {
+                throw "Assigned_Object_Id is required when specifying Assigned_Object_Type"
+            }
+            if ($PSBoundParameters.ContainsKey('Assigned_Object_Id') -and -not $PSBoundParameters.ContainsKey('Assigned_Object_Type')) {
+                throw "Assigned_Object_Type is required when specifying Assigned_Object_Id"
+            }
 
+            foreach ($IPId in $Id) {
                 $IPSegments = [System.Collections.ArrayList]::new(@('ipam', 'ip-addresses', $IPId))
 
                 if ($Force -or $PSCmdlet.ShouldProcess($IPId, 'Update IP address')) {

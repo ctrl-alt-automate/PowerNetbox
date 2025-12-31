@@ -29,7 +29,7 @@ function Set-NBIPAMFHRPGroupAssignment {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating I PA MF HR PG ro up As si gn me nt"
+        Write-Verbose "Updating IPA MF HR PG ro up As si gn me nt"
         $Segments = [System.Collections.ArrayList]::new(@('ipam','fhrp-group-assignments',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update FHRP group assignment')) {

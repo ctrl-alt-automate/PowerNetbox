@@ -34,7 +34,7 @@ function Get-NBDCIMModuleBayTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Retrieving D CI MM od ul eB ay Te mp la te"
+        Write-Verbose "Retrieving DCIM Module Bay Template"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','module-bay-templates',$i)) -Raw:$Raw } }
             default {

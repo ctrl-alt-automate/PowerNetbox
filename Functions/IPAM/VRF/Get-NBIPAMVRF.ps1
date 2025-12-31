@@ -93,7 +93,7 @@ function Get-NBIPAMVRF {
     )
 
     process {
-        Write-Verbose "Retrieving I PA MV RF"
+        Write-Verbose "Retrieving IPAM VRF"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
                 foreach ($VRFId in $Id) {

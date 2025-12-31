@@ -35,7 +35,7 @@ function Get-NBIPAMFHRPGroup {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Retrieving I PA MF HR PG ro up"
+        Write-Verbose "Retrieving IPAM FHRP Group"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('ipam','fhrp-groups',$i)) -Raw:$Raw } }
             default {

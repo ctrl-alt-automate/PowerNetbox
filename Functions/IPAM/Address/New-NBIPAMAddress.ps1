@@ -84,7 +84,7 @@
 .EXAMPLE
     Import-Csv ips.csv | New-NBIPAMAddress -BatchSize 50 -Force
 
-    Bulk import IP addresses from a CSV file.
+    Bulk import IP addresses froMACSV file.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/models/ipam/ipaddress/

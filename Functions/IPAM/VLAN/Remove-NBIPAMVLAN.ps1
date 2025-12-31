@@ -25,7 +25,7 @@ function Remove-NBIPAMVLAN {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing I PA MV LA N"
+        Write-Verbose "Removing IPA MV LA N"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete VLAN')) {
             $Segments = [System.Collections.ArrayList]::new(@('ipam', 'vlans', $Id))
             $URI = BuildNewURI -Segments $Segments

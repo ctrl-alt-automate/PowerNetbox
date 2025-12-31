@@ -45,7 +45,7 @@ function Get-NBDCIMRearPort {
     )
 
     process {
-        Write-Verbose "Retrieving D CI MR ea rP or t"
+        Write-Verbose "Retrieving DCIM Rear Port"
 
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'rear-ports'))
 

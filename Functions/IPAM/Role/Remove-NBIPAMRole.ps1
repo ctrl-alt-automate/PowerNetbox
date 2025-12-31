@@ -25,7 +25,7 @@ function Remove-NBIPAMRole {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing I PA MR ol e"
+        Write-Verbose "Removing IPA MR ol e"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete IPAM role')) {
             $Segments = [System.Collections.ArrayList]::new(@('ipam', 'roles', $Id))
             $URI = BuildNewURI -Segments $Segments

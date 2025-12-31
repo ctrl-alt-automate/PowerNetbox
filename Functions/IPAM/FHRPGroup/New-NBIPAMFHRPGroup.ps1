@@ -33,7 +33,7 @@ function New-NBIPAMFHRPGroup {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating I PA MF HR PG ro up"
+        Write-Verbose "Creating IPA MF HR PG ro up"
         $Segments = [System.Collections.ArrayList]::new(@('ipam','fhrp-groups'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess("$Protocol Group $Group_Id", 'Create FHRP group')) {

@@ -35,7 +35,7 @@ function Get-NBDCIMPowerPanel {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Retrieving D CI MP ow er Pa ne l"
+        Write-Verbose "Retrieving DCIM Power Panel"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','power-panels',$i)) -Raw:$Raw } }
             default {

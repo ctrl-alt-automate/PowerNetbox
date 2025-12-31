@@ -38,7 +38,7 @@ function Get-NBDCIMInventoryItem {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Retrieving D CI MI nv en to ry It em"
+        Write-Verbose "Retrieving DCIM Inventory Item"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','inventory-items',$i)) -Raw:$Raw } }
             default {

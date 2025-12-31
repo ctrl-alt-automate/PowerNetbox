@@ -35,7 +35,7 @@ function Get-NBDCIMInventoryItemTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Retrieving D CI MI nv en to ry It em Te mp la te"
+        Write-Verbose "Retrieving DCIM Inventory Item Template"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','inventory-item-templates',$i)) -Raw:$Raw } }
             default {

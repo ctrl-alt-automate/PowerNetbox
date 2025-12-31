@@ -25,7 +25,7 @@ function Remove-NBIPAMAggregate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing I PA MA gg re ga te"
+        Write-Verbose "Removing IPA MA gg re ga te"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete aggregate')) {
             $Segments = [System.Collections.ArrayList]::new(@('ipam', 'aggregates', $Id))
             $URI = BuildNewURI -Segments $Segments
