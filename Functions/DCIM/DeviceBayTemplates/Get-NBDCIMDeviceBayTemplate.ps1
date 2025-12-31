@@ -34,7 +34,7 @@ function Get-NBDCIMDeviceBayTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Retrieving D CI MD ev ic eB ay Te mp la te"
+        Write-Verbose "Retrieving DCIM Device Bay Template"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','device-bay-templates',$i)) -Raw:$Raw } }
             default {

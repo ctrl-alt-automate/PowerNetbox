@@ -36,7 +36,7 @@ function Get-NBDCIMFrontPortTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Retrieving D CI MF ro nt Po rt Te mp la te"
+        Write-Verbose "Retrieving DCIM Front Port Template"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','front-port-templates',$i)) -Raw:$Raw } }
             default {

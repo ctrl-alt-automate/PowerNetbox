@@ -68,7 +68,7 @@ function Get-NBDCIMCable {
     #endregion Parameters
 
     process {
-        Write-Verbose "Retrieving D CI MC ab le"
+        Write-Verbose "Retrieving DCIM Cable"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'cables'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'

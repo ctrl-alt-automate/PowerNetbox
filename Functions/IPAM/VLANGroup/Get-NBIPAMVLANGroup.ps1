@@ -38,7 +38,7 @@ function Get-NBIPAMVLANGroup {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Retrieving I PA MV LA NG ro up"
+        Write-Verbose "Retrieving IPAM VLAN Group"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('ipam','vlan-groups',$i)) -Raw:$Raw } }
             default {

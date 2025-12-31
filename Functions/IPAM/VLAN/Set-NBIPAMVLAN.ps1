@@ -36,7 +36,7 @@ function Set-NBIPAMVLAN {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating I PA MV LA N"
+        Write-Verbose "Updating IPA MV LA N"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'vlans', $Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
         $URI = BuildNewURI -Segments $URIComponents.Segments

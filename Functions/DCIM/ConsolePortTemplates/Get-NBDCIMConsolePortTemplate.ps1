@@ -36,7 +36,7 @@ function Get-NBDCIMConsolePortTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Retrieving D CI MC on so le Po rt Te mp la te"
+        Write-Verbose "Retrieving DCIM Console Port Template"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','console-port-templates',$i)) -Raw:$Raw } }
             default {

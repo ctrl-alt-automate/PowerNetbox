@@ -35,7 +35,7 @@ function Get-NBDCIMRackType {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Retrieving D CI MR ac kT yp e"
+        Write-Verbose "Retrieving DCIM Rack Type"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','rack-types',$i)) -Raw:$Raw } }
             default {

@@ -45,7 +45,7 @@ function Get-NBDCIMFrontPort {
     )
 
     process {
-        Write-Verbose "Retrieving D CI MF ro nt Po rt"
+        Write-Verbose "Retrieving DCIM Front Port"
 
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'front-ports'))
 

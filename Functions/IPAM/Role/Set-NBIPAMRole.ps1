@@ -31,7 +31,7 @@ function Set-NBIPAMRole {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating I PA MR ol e"
+        Write-Verbose "Updating IPA MR ol e"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'roles', $Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
         $URI = BuildNewURI -Segments $URIComponents.Segments

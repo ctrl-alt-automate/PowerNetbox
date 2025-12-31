@@ -53,7 +53,7 @@ function Get-NBIPAMAvailableIP {
     )
 
     process {
-        Write-Verbose "Retrieving I PA MA va il ab le IP"
+        Write-Verbose "Retrieving IPAM Available IP"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'prefixes', $Prefix_ID, 'available-ips'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'prefix_id'

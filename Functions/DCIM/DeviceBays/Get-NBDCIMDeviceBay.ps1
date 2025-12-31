@@ -34,7 +34,7 @@ function Get-NBDCIMDeviceBay {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Retrieving D CI MD ev ic eB ay"
+        Write-Verbose "Retrieving DCIM Device Bay"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','device-bays',$i)) -Raw:$Raw } }
             default {

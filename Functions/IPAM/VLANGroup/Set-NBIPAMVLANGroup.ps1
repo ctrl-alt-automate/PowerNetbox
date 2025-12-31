@@ -34,7 +34,7 @@ function Set-NBIPAMVLANGroup {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating I PA MV LA NG ro up"
+        Write-Verbose "Updating IPA MV LA NG ro up"
         $Segments = [System.Collections.ArrayList]::new(@('ipam','vlan-groups',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update VLAN group')) {

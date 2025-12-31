@@ -77,7 +77,7 @@ function Get-NBIPAMRole {
     )
 
     process {
-        Write-Verbose "Retrieving I PA MR ol e"
+        Write-Verbose "Retrieving IPAM Role"
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($Role_ID in $Id) {

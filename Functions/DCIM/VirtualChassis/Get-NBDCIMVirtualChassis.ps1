@@ -38,7 +38,7 @@ function Get-NBDCIMVirtualChassis {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Retrieving D CI MV ir tu al Ch as si s"
+        Write-Verbose "Retrieving DCIM Virtual Chassis"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','virtual-chassis',$i)) -Raw:$Raw } }
             default {

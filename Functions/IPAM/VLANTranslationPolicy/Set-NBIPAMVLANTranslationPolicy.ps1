@@ -30,7 +30,7 @@ function Set-NBIPAMVLANTranslationPolicy {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating I PA MV LA NT ra ns la ti on Po li cy"
+        Write-Verbose "Updating IPA MV LA NT ra ns la ti on Po li cy"
         $Segments = [System.Collections.ArrayList]::new(@('ipam','vlan-translation-policies',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update VLAN translation policy')) {
