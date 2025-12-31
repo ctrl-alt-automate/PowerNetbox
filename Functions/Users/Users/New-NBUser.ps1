@@ -72,6 +72,7 @@ function New-NBUser {
     )
 
     process {
+        Write-Verbose "Creating User"
         $Segments = [System.Collections.ArrayList]::new(@('users', 'users'))
 
         # Check for deprecated parameters

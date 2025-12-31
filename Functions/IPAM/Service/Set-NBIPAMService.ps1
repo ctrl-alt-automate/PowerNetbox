@@ -65,6 +65,7 @@ function Set-NBIPAMService {
     )
 
     process {
+        Write-Verbose "Updating IPA MS er vi ce"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'services', $Id))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'

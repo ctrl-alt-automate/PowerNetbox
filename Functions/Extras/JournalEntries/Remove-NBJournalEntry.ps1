@@ -28,6 +28,7 @@ function Remove-NBJournalEntry {
     )
 
     process {
+        Write-Verbose "Removing Journal Entry"
         $Segments = [System.Collections.ArrayList]::new(@('extras', 'journal-entries', $Id))
         $URI = BuildNewURI -Segments $Segments
 

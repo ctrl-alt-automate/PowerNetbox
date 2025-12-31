@@ -30,10 +30,12 @@ We extend our sincere thanks to Ben and all original contributors for building t
 
 - **100% API Coverage** - Full support for all Netbox 4.x API endpoints
 - **Cross-Platform** - Works on Windows, Linux, and macOS
-- **504+ Functions** - Complete CRUD operations for all resources
+- **498 Functions** - Complete CRUD operations for all resources
 - **Pipeline Support** - Full PowerShell pipeline integration
 - **Secure** - Token-based authentication with TLS 1.2/1.3
-- **Well Tested** - 946 unit tests for quality assurance
+- **Well Tested** - 946 unit tests + 79 integration tests
+- **Tab Completion** - Argument completers for common parameters
+- **Verbose Logging** - Write-Verbose in all functions for debugging
 
 ### Supported Modules
 
@@ -279,6 +281,15 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 Original copyright (c) 2018 Ben Claussen. Fork maintained by ctrl-alt-automate.
 
 ## Changelog
+
+### v4.4.9.2
+
+- **Argument completers** - Tab completion for common parameters (#115, #117)
+- **Verbose logging** - Write-Verbose added to all 448 functions (#121)
+- **Documentation cleanup** - Removed placeholder documentation (#116)
+- **Test suite improvements** - Comprehensive integration tests for Circuits, VPN, Wireless, Extras (#128)
+- **Bug fixes** - Bulk mode parameter binding, parameter naming standardization (#118, #120)
+- **Code quality** - PSScriptAnalyzer compliance, quality audit fixes (#126)
 
 ### v4.4.9.1
 

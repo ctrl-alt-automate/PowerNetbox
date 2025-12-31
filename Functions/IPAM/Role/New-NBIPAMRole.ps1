@@ -30,6 +30,7 @@ function New-NBIPAMRole {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Creating IPA MR ol e"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'roles'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         $URI = BuildNewURI -Segments $URIComponents.Segments

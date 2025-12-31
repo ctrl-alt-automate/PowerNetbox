@@ -28,6 +28,7 @@ function Remove-NBConfigContext {
     )
 
     process {
+        Write-Verbose "Removing Config Context"
         $Segments = [System.Collections.ArrayList]::new(@('extras', 'config-contexts', $Id))
         $URI = BuildNewURI -Segments $Segments
 

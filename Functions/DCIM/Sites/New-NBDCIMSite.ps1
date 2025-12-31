@@ -71,6 +71,7 @@ function New-NBDCIMSite {
     )
 
     process {
+        Write-Verbose "Creating D CI MS it e"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'sites'))
         $Method = 'POST'
 

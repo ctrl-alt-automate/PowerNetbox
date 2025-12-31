@@ -128,6 +128,7 @@ function New-NBDCIMFrontPort {
     )
 
     process {
+
         # Detect Netbox version for port mapping format
         $netboxVersion = $null
         $is45OrHigher = $false
@@ -142,6 +143,8 @@ function New-NBDCIMFrontPort {
             Write-Verbose "Could not detect Netbox version, assuming 4.4 format"
         }
 
+
+        Write-Verbose "Creating DCIM Front Port"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'front-ports'))
 
         # Use BuildURIComponents but skip port mapping params (handled separately)

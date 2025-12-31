@@ -125,6 +125,7 @@ function New-NBDCIMCable {
     )
 
     process {
+        Write-Verbose "Creating D CI MC ab le"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'cables'))
 
         # Check for version-specific parameters

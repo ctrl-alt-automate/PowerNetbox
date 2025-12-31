@@ -84,6 +84,7 @@ function Set-NBWebhook {
     )
 
     process {
+        Write-Verbose "Updating Webhook"
         $Segments = [System.Collections.ArrayList]::new(@('extras', 'webhooks', $Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
         $URI = BuildNewURI -Segments $URIComponents.Segments

@@ -75,6 +75,7 @@ function New-NBIPAMVRF {
     )
 
     process {
+        Write-Verbose "Creating IPA MV RF"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'vrfs'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'

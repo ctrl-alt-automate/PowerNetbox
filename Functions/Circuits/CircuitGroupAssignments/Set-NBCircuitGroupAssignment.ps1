@@ -49,6 +49,7 @@ function Set-NBCircuitGroupAssignment {
     )
 
     process {
+        Write-Verbose "Updating Circuit Group Assignment"
         $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuit-group-assignments', $Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
         $URI = BuildNewURI -Segments $URIComponents.Segments

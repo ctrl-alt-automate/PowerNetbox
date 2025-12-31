@@ -25,6 +25,7 @@ function Remove-NBDCIMVirtualChassis {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Removing D CI MV ir tu al Ch as si s"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete virtual chassis')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','virtual-chassis',$Id)) -Method DELETE -Raw:$Raw
         }

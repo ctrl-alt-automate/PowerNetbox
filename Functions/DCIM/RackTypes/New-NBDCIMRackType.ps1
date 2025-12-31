@@ -42,6 +42,7 @@ function New-NBDCIMRackType {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Creating D CI MR ac kT yp e"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','rack-types'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Model, 'Create rack type')) {

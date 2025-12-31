@@ -1158,4 +1158,69 @@ Describe "Live Integration Tests" -Tag 'Integration', 'Live' -Skip:(-not $script
             $fp2.rear_ports | Should -Not -BeNullOrEmpty
         }
     }
+
+    Context "Extras Tags CRUD" {
+        BeforeAll {
+            $script:TestTagName = "$($script:TestPrefix)-Tag"
+            $script:TestTagSlug = $script:TestTagName.ToLower() -replace '[^a-z0-9-]', '-'
+        }
+
+        It "Should create a tag" {
+            $tag = New-NBTag -Name $script:TestTagName -Slug $script:TestTagSlug -Color 'ff0000'
+
+            $tag | Should -Not -BeNullOrEmpty
+            $tag.name | Should -Be $script:TestTagName
+
+            $script:TestTagId = $tag.id
+            [void]$script:CreatedResources.Tags.Add($tag.id)
+
+            Write-Host "  Created tag: $($tag.name) (ID: $($tag.id))" -ForegroundColor Green
+        }
+
+        It "Should get tag by ID" {
+            $tag = Get-NBTag -Id $script:TestTagId
+
+            $tag | Should -Not -BeNullOrEmpty
+            $tag.id | Should -Be $script:TestTagId
+            $tag.name | Should -Be $script:TestTagName
+        }
+
+        It "Should update tag" {
+            $tag = Set-NBTag -Id $script:TestTagId -Description "$script:TestPrefix - Updated Tag"
+
+            $tag.description | Should -BeLike "*Updated*"
+        }
+
+        It "Should delete tag" {
+            { Remove-NBTag -Id $script:TestTagId -Confirm:$false } | Should -Not -Throw
+
+            $script:CreatedResources.Tags.Remove($script:TestTagId)
+        }
+    }
+
+    Context "Extras Operations (Netbox 4.x)" {
+        It "Should query tags without error" {
+            { Get-NBTag -Limit 1 } | Should -Not -Throw
+        }
+
+        It "Should query custom fields without error" {
+            { Get-NBCustomField -Limit 1 } | Should -Not -Throw
+        }
+
+        It "Should query config contexts without error" {
+            { Get-NBConfigContext -Limit 1 } | Should -Not -Throw
+        }
+
+        It "Should query webhooks without error" {
+            { Get-NBWebhook -Limit 1 } | Should -Not -Throw
+        }
+
+        It "Should query export templates without error" {
+            { Get-NBExportTemplate -Limit 1 } | Should -Not -Throw
+        }
+
+        It "Should query custom links without error" {
+            { Get-NBCustomLink -Limit 1 } | Should -Not -Throw
+        }
+    }
 }

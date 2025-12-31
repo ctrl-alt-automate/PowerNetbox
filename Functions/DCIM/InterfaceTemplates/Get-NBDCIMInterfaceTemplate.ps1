@@ -25,8 +25,8 @@ function Get-NBDCIMInterfaceTemplate {
 
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,
-        [Parameter(ParameterSetName = 'Query')][uint64]$DeviceType_Id,
-        [Parameter(ParameterSetName = 'Query')][uint64]$ModuleType_Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Device_Type_Id,
+        [Parameter(ParameterSetName = 'Query')][uint64]$Module_Type_Id,
         [Parameter(ParameterSetName = 'Query')][string]$Type,
         [Parameter(ParameterSetName = 'Query')][string]$Query,
         [ValidateRange(1, 1000)]
@@ -36,6 +36,7 @@ function Get-NBDCIMInterfaceTemplate {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Retrieving DCIM Interface Template"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','interface-templates',$i)) -Raw:$Raw } }
             default {

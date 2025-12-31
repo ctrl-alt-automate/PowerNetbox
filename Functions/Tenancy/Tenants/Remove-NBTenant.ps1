@@ -47,6 +47,7 @@ function Remove-NBTenant {
     )
 
     process {
+        Write-Verbose "Removing Tenant"
         foreach ($TenantId in $Id) {
             $CurrentTenant = Get-NBTenant -Id $TenantId -ErrorAction Stop
 

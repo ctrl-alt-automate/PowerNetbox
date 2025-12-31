@@ -129,6 +129,7 @@ function Get-NBDCIMCable {
     #endregion Parameters
 
     process {
+        Write-Verbose "Retrieving DCIM Cable"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'cables'))
 
         # Check for version-specific parameters

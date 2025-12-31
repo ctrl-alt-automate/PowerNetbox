@@ -28,6 +28,7 @@ function Remove-NBVirtualCircuitType {
     )
 
     process {
+        Write-Verbose "Removing Virtual Circuit Type"
         $Segments = [System.Collections.ArrayList]::new(@('circuits', 'virtual-circuit-types', $Id))
         $URI = BuildNewURI -Segments $Segments
 

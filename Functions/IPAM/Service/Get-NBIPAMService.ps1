@@ -90,6 +90,7 @@ function Get-NBIPAMService {
     )
 
     process {
+        Write-Verbose "Retrieving IPAM Service"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
                 foreach ($ServiceId in $Id) {

@@ -90,7 +90,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should update a cable" {
             $Result = Set-NBDCIMCable -Id 1 -Label 'Updated' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
-            $Result.URI | Should -Match '/api/dcim/cables/1/'
+            $Result.Uri | Should -Match '/api/dcim/cables/1/'
         }
     }
 
@@ -104,7 +104,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should remove a cable" {
             $Result = Remove-NBDCIMCable -Id 3 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
-            $Result.URI | Should -Match '/api/dcim/cables/3/'
+            $Result.Uri | Should -Match '/api/dcim/cables/3/'
         }
     }
 
@@ -208,7 +208,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should update a location" {
             $Result = Set-NBDCIMLocation -Id 1 -Name 'Updated' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
-            $Result.URI | Should -Match '/api/dcim/locations/1/'
+            $Result.Uri | Should -Match '/api/dcim/locations/1/'
         }
     }
 
@@ -222,7 +222,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should remove a location" {
             $Result = Remove-NBDCIMLocation -Id 2 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
-            $Result.URI | Should -Match '/api/dcim/locations/2/'
+            $Result.Uri | Should -Match '/api/dcim/locations/2/'
         }
     }
     #endregion
@@ -262,7 +262,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should update a region" {
             $Result = Set-NBDCIMRegion -Id 1 -Description 'Updated' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
-            $Result.URI | Should -Match '/api/dcim/regions/1/'
+            $Result.Uri | Should -Match '/api/dcim/regions/1/'
         }
     }
 
@@ -276,7 +276,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should remove a region" {
             $Result = Remove-NBDCIMRegion -Id 2 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
-            $Result.URI | Should -Match '/api/dcim/regions/2/'
+            $Result.Uri | Should -Match '/api/dcim/regions/2/'
         }
     }
     #endregion
@@ -315,7 +315,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should update a site group" {
             $Result = Set-NBDCIMSiteGroup -Id 1 -Description 'Updated' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
-            $Result.URI | Should -Match '/api/dcim/site-groups/1/'
+            $Result.Uri | Should -Match '/api/dcim/site-groups/1/'
         }
     }
 
@@ -329,7 +329,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should remove a site group" {
             $Result = Remove-NBDCIMSiteGroup -Id 2 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
-            $Result.URI | Should -Match '/api/dcim/site-groups/2/'
+            $Result.Uri | Should -Match '/api/dcim/site-groups/2/'
         }
     }
     #endregion
@@ -374,7 +374,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should update a manufacturer" {
             $Result = Set-NBDCIMManufacturer -Id 1 -Description 'Updated' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
-            $Result.URI | Should -Match '/api/dcim/manufacturers/1/'
+            $Result.Uri | Should -Match '/api/dcim/manufacturers/1/'
         }
     }
 
@@ -388,7 +388,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should remove a manufacturer" {
             $Result = Remove-NBDCIMManufacturer -Id 2 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
-            $Result.URI | Should -Match '/api/dcim/manufacturers/2/'
+            $Result.Uri | Should -Match '/api/dcim/manufacturers/2/'
         }
     }
     #endregion
@@ -425,7 +425,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should update a rack type" {
             $Result = Set-NBDCIMRackType -Id 1 -Description 'Updated' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
-            $Result.URI | Should -Match '/api/dcim/rack-types/1/'
+            $Result.Uri | Should -Match '/api/dcim/rack-types/1/'
         }
     }
 
@@ -439,7 +439,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should remove a rack type" {
             $Result = Remove-NBDCIMRackType -Id 2 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
-            $Result.URI | Should -Match '/api/dcim/rack-types/2/'
+            $Result.Uri | Should -Match '/api/dcim/rack-types/2/'
         }
     }
     #endregion
@@ -476,7 +476,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should update a rack role" {
             $Result = Set-NBDCIMRackRole -Id 1 -Description 'Updated' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
-            $Result.URI | Should -Match '/api/dcim/rack-roles/1/'
+            $Result.Uri | Should -Match '/api/dcim/rack-roles/1/'
         }
     }
 
@@ -490,7 +490,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should remove a rack role" {
             $Result = Remove-NBDCIMRackRole -Id 2 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
-            $Result.URI | Should -Match '/api/dcim/rack-roles/2/'
+            $Result.Uri | Should -Match '/api/dcim/rack-roles/2/'
         }
     }
     #endregion
@@ -527,7 +527,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should update a rack reservation" {
             $Result = Set-NBDCIMRackReservation -Id 1 -Description 'Updated' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
-            $Result.URI | Should -Match '/api/dcim/rack-reservations/1/'
+            $Result.Uri | Should -Match '/api/dcim/rack-reservations/1/'
         }
     }
 
@@ -541,7 +541,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should remove a rack reservation" {
             $Result = Remove-NBDCIMRackReservation -Id 2 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
-            $Result.URI | Should -Match '/api/dcim/rack-reservations/2/'
+            $Result.Uri | Should -Match '/api/dcim/rack-reservations/2/'
         }
     }
     #endregion
@@ -581,7 +581,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should update a console port" {
             $Result = Set-NBDCIMConsolePort -Id 1 -Description 'Updated' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
-            $Result.URI | Should -Match '/api/dcim/console-ports/1/'
+            $Result.Uri | Should -Match '/api/dcim/console-ports/1/'
         }
     }
 
@@ -595,7 +595,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should remove a console port" {
             $Result = Remove-NBDCIMConsolePort -Id 2 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
-            $Result.URI | Should -Match '/api/dcim/console-ports/2/'
+            $Result.Uri | Should -Match '/api/dcim/console-ports/2/'
         }
     }
     #endregion
@@ -632,7 +632,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should update a console server port" {
             $Result = Set-NBDCIMConsoleServerPort -Id 1 -Description 'Updated' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
-            $Result.URI | Should -Match '/api/dcim/console-server-ports/1/'
+            $Result.Uri | Should -Match '/api/dcim/console-server-ports/1/'
         }
     }
 
@@ -646,7 +646,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should remove a console server port" {
             $Result = Remove-NBDCIMConsoleServerPort -Id 2 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
-            $Result.URI | Should -Match '/api/dcim/console-server-ports/2/'
+            $Result.Uri | Should -Match '/api/dcim/console-server-ports/2/'
         }
     }
     #endregion
@@ -683,7 +683,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should update a power port" {
             $Result = Set-NBDCIMPowerPort -Id 1 -Description 'Updated' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
-            $Result.URI | Should -Match '/api/dcim/power-ports/1/'
+            $Result.Uri | Should -Match '/api/dcim/power-ports/1/'
         }
     }
 
@@ -697,7 +697,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should remove a power port" {
             $Result = Remove-NBDCIMPowerPort -Id 2 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
-            $Result.URI | Should -Match '/api/dcim/power-ports/2/'
+            $Result.Uri | Should -Match '/api/dcim/power-ports/2/'
         }
     }
     #endregion
@@ -734,7 +734,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should update a power outlet" {
             $Result = Set-NBDCIMPowerOutlet -Id 1 -Description 'Updated' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
-            $Result.URI | Should -Match '/api/dcim/power-outlets/1/'
+            $Result.Uri | Should -Match '/api/dcim/power-outlets/1/'
         }
     }
 
@@ -748,7 +748,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should remove a power outlet" {
             $Result = Remove-NBDCIMPowerOutlet -Id 2 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
-            $Result.URI | Should -Match '/api/dcim/power-outlets/2/'
+            $Result.Uri | Should -Match '/api/dcim/power-outlets/2/'
         }
     }
     #endregion
@@ -785,7 +785,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should update a power panel" {
             $Result = Set-NBDCIMPowerPanel -Id 1 -Description 'Updated' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
-            $Result.URI | Should -Match '/api/dcim/power-panels/1/'
+            $Result.Uri | Should -Match '/api/dcim/power-panels/1/'
         }
     }
 
@@ -799,7 +799,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should remove a power panel" {
             $Result = Remove-NBDCIMPowerPanel -Id 2 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
-            $Result.URI | Should -Match '/api/dcim/power-panels/2/'
+            $Result.Uri | Should -Match '/api/dcim/power-panels/2/'
         }
     }
     #endregion
@@ -836,7 +836,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should update a power feed" {
             $Result = Set-NBDCIMPowerFeed -Id 1 -Description 'Updated' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
-            $Result.URI | Should -Match '/api/dcim/power-feeds/1/'
+            $Result.Uri | Should -Match '/api/dcim/power-feeds/1/'
         }
     }
 
@@ -850,7 +850,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should remove a power feed" {
             $Result = Remove-NBDCIMPowerFeed -Id 2 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
-            $Result.URI | Should -Match '/api/dcim/power-feeds/2/'
+            $Result.Uri | Should -Match '/api/dcim/power-feeds/2/'
         }
     }
     #endregion
@@ -887,7 +887,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should update a device bay" {
             $Result = Set-NBDCIMDeviceBay -Id 1 -Description 'Updated' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
-            $Result.URI | Should -Match '/api/dcim/device-bays/1/'
+            $Result.Uri | Should -Match '/api/dcim/device-bays/1/'
         }
     }
 
@@ -901,7 +901,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should remove a device bay" {
             $Result = Remove-NBDCIMDeviceBay -Id 2 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
-            $Result.URI | Should -Match '/api/dcim/device-bays/2/'
+            $Result.Uri | Should -Match '/api/dcim/device-bays/2/'
         }
     }
     #endregion
@@ -938,7 +938,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should update a module" {
             $Result = Set-NBDCIMModule -Id 1 -Description 'Updated' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
-            $Result.URI | Should -Match '/api/dcim/modules/1/'
+            $Result.Uri | Should -Match '/api/dcim/modules/1/'
         }
     }
 
@@ -952,7 +952,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should remove a module" {
             $Result = Remove-NBDCIMModule -Id 2 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
-            $Result.URI | Should -Match '/api/dcim/modules/2/'
+            $Result.Uri | Should -Match '/api/dcim/modules/2/'
         }
     }
     #endregion
@@ -989,7 +989,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should update a module type" {
             $Result = Set-NBDCIMModuleType -Id 1 -Description 'Updated' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
-            $Result.URI | Should -Match '/api/dcim/module-types/1/'
+            $Result.Uri | Should -Match '/api/dcim/module-types/1/'
         }
     }
 
@@ -1003,7 +1003,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should remove a module type" {
             $Result = Remove-NBDCIMModuleType -Id 2 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
-            $Result.URI | Should -Match '/api/dcim/module-types/2/'
+            $Result.Uri | Should -Match '/api/dcim/module-types/2/'
         }
     }
     #endregion
@@ -1040,7 +1040,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should update a module bay" {
             $Result = Set-NBDCIMModuleBay -Id 1 -Description 'Updated' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
-            $Result.URI | Should -Match '/api/dcim/module-bays/1/'
+            $Result.Uri | Should -Match '/api/dcim/module-bays/1/'
         }
     }
 
@@ -1054,7 +1054,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should remove a module bay" {
             $Result = Remove-NBDCIMModuleBay -Id 2 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
-            $Result.URI | Should -Match '/api/dcim/module-bays/2/'
+            $Result.Uri | Should -Match '/api/dcim/module-bays/2/'
         }
     }
     #endregion
@@ -1091,7 +1091,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should update a module type profile" {
             $Result = Set-NBDCIMModuleTypeProfile -Id 1 -Description 'Updated' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
-            $Result.URI | Should -Match '/api/dcim/module-type-profiles/1/'
+            $Result.Uri | Should -Match '/api/dcim/module-type-profiles/1/'
         }
     }
 
@@ -1105,7 +1105,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should remove a module type profile" {
             $Result = Remove-NBDCIMModuleTypeProfile -Id 2 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
-            $Result.URI | Should -Match '/api/dcim/module-type-profiles/2/'
+            $Result.Uri | Should -Match '/api/dcim/module-type-profiles/2/'
         }
     }
     #endregion
@@ -1142,7 +1142,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should update an inventory item" {
             $Result = Set-NBDCIMInventoryItem -Id 1 -Description 'Updated' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
-            $Result.URI | Should -Match '/api/dcim/inventory-items/1/'
+            $Result.Uri | Should -Match '/api/dcim/inventory-items/1/'
         }
     }
 
@@ -1156,7 +1156,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should remove an inventory item" {
             $Result = Remove-NBDCIMInventoryItem -Id 2 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
-            $Result.URI | Should -Match '/api/dcim/inventory-items/2/'
+            $Result.Uri | Should -Match '/api/dcim/inventory-items/2/'
         }
     }
     #endregion
@@ -1193,7 +1193,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should update an inventory item role" {
             $Result = Set-NBDCIMInventoryItemRole -Id 1 -Description 'Updated' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
-            $Result.URI | Should -Match '/api/dcim/inventory-item-roles/1/'
+            $Result.Uri | Should -Match '/api/dcim/inventory-item-roles/1/'
         }
     }
 
@@ -1207,7 +1207,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should remove an inventory item role" {
             $Result = Remove-NBDCIMInventoryItemRole -Id 2 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
-            $Result.URI | Should -Match '/api/dcim/inventory-item-roles/2/'
+            $Result.Uri | Should -Match '/api/dcim/inventory-item-roles/2/'
         }
     }
     #endregion
@@ -1259,7 +1259,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should update a front port" {
             $Result = Set-NBDCIMFrontPort -Id 1 -Description 'Updated' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
-            $Result.URI | Should -Match '/api/dcim/front-ports/1/'
+            $Result.Uri | Should -Match '/api/dcim/front-ports/1/'
         }
 
         It "Should update a front port with Rear_Ports array (4.5+ format)" {
@@ -1287,7 +1287,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should remove a front port" {
             $Result = Remove-NBDCIMFrontPort -Id 2 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
-            $Result.URI | Should -Match '/api/dcim/front-ports/2/'
+            $Result.Uri | Should -Match '/api/dcim/front-ports/2/'
         }
     }
     #endregion
@@ -1338,7 +1338,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should update a rear port" {
             $Result = Set-NBDCIMRearPort -Id 1 -Description 'Updated' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
-            $Result.URI | Should -Match '/api/dcim/rear-ports/1/'
+            $Result.Uri | Should -Match '/api/dcim/rear-ports/1/'
         }
 
         It "Should update a rear port with Front_Ports array (4.5+ bidirectional)" {
@@ -1366,7 +1366,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should remove a rear port" {
             $Result = Remove-NBDCIMRearPort -Id 2 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
-            $Result.URI | Should -Match '/api/dcim/rear-ports/2/'
+            $Result.Uri | Should -Match '/api/dcim/rear-ports/2/'
         }
     }
     #endregion
@@ -1403,7 +1403,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should update a MAC address" {
             $Result = Set-NBDCIMMACAddress -Id 1 -Description 'Updated' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
-            $Result.URI | Should -Match '/api/dcim/mac-addresses/1/'
+            $Result.Uri | Should -Match '/api/dcim/mac-addresses/1/'
         }
     }
 
@@ -1417,7 +1417,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should remove a MAC address" {
             $Result = Remove-NBDCIMMACAddress -Id 2 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
-            $Result.URI | Should -Match '/api/dcim/mac-addresses/2/'
+            $Result.Uri | Should -Match '/api/dcim/mac-addresses/2/'
         }
     }
     #endregion
@@ -1454,7 +1454,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should update a virtual chassis" {
             $Result = Set-NBDCIMVirtualChassis -Id 1 -Description 'Updated' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
-            $Result.URI | Should -Match '/api/dcim/virtual-chassis/1/'
+            $Result.Uri | Should -Match '/api/dcim/virtual-chassis/1/'
         }
     }
 
@@ -1468,7 +1468,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should remove a virtual chassis" {
             $Result = Remove-NBDCIMVirtualChassis -Id 2 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
-            $Result.URI | Should -Match '/api/dcim/virtual-chassis/2/'
+            $Result.Uri | Should -Match '/api/dcim/virtual-chassis/2/'
         }
     }
     #endregion
@@ -1505,7 +1505,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should update a virtual device context" {
             $Result = Set-NBDCIMVirtualDeviceContext -Id 1 -Description 'Updated' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
-            $Result.URI | Should -Match '/api/dcim/virtual-device-contexts/1/'
+            $Result.Uri | Should -Match '/api/dcim/virtual-device-contexts/1/'
         }
     }
 
@@ -1519,7 +1519,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         It "Should remove a virtual device context" {
             $Result = Remove-NBDCIMVirtualDeviceContext -Id 2 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
-            $Result.URI | Should -Match '/api/dcim/virtual-device-contexts/2/'
+            $Result.Uri | Should -Match '/api/dcim/virtual-device-contexts/2/'
         }
     }
     #endregion

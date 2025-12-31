@@ -58,6 +58,7 @@ function Set-NBToken {
     )
 
     process {
+        Write-Verbose "Updating Token"
         $Segments = [System.Collections.ArrayList]::new(@('users', 'tokens', $Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
         $URI = BuildNewURI -Segments $URIComponents.Segments

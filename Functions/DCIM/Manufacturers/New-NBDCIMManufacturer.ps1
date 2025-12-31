@@ -52,6 +52,7 @@ function New-NBDCIMManufacturer {
     )
 
     process {
+        Write-Verbose "Creating D CI MM an uf ac tu re r"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'manufacturers'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'

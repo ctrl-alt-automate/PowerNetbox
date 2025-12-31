@@ -36,6 +36,7 @@ function Set-NBDCIMPowerOutlet {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Updating D CI MP ow er Ou tl et"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','power-outlets',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update power outlet')) {

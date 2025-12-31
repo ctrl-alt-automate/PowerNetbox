@@ -70,7 +70,7 @@
 .EXAMPLE
     Import-Csv vlans.csv | New-NBIPAMVLAN -BatchSize 100 -Force
 
-    Bulk import VLANs from a CSV file.
+    Bulk import VLANs froMACSV file.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/models/ipam/vlan/
@@ -121,7 +121,7 @@ function New-NBIPAMVLAN {
 
         [Parameter(ParameterSetName = 'Bulk')]
         [ValidateRange(1, 1000)]
-        [int]$BatchSize = 50,
+        [int]$BatchSize = 100,
 
         [Parameter(ParameterSetName = 'Bulk')]
         [switch]$Force,

@@ -33,6 +33,7 @@ function Set-NBIPAMAggregate {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Updating IPA MA gg re ga te"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'aggregates', $Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
         $URI = BuildNewURI -Segments $URIComponents.Segments

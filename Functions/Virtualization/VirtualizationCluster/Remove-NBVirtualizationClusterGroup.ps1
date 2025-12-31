@@ -42,6 +42,7 @@ function Remove-NBVirtualizationClusterGroup {
     )
 
     process {
+        Write-Verbose "Removing Virtualization Cluster Group"
         foreach ($GroupId in $Id) {
             $CurrentGroup = Get-NBVirtualizationClusterGroup -Id $GroupId -ErrorAction Stop
 

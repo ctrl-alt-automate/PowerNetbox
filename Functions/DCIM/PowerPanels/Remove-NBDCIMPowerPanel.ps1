@@ -25,6 +25,7 @@ function Remove-NBDCIMPowerPanel {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Removing D CI MP ow er Pa ne l"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete power panel')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','power-panels',$Id)) -Method DELETE -Raw:$Raw
         }

@@ -63,6 +63,7 @@ function Get-NBExportTemplate {
     )
 
     process {
+        Write-Verbose "Retrieving Export Template"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {
                 foreach ($i in $Id) {

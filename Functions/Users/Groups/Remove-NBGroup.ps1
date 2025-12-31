@@ -28,6 +28,7 @@ function Remove-NBGroup {
     )
 
     process {
+        Write-Verbose "Removing Group"
         $Segments = [System.Collections.ArrayList]::new(@('users', 'groups', $Id))
         $URI = BuildNewURI -Segments $Segments
 

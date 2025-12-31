@@ -46,6 +46,7 @@ function Get-NBCircuitType {
     )
 
     process {
+        Write-Verbose "Retrieving Circuit Type"
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($i in $ID) {

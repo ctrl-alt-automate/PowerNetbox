@@ -35,6 +35,7 @@ function New-NBBookmark {
     )
 
     process {
+        Write-Verbose "Creating Bookmark"
         $Segments = [System.Collections.ArrayList]::new(@('extras', 'bookmarks'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         $URI = BuildNewURI -Segments $URIComponents.Segments

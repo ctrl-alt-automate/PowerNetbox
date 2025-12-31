@@ -35,6 +35,7 @@ function New-NBDCIMInterfaceTemplate {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Creating D CI MI nt er fa ce Te mp la te"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','interface-templates'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create interface template')) {

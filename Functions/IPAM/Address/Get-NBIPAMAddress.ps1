@@ -86,6 +86,7 @@ function Get-NBIPAMAddress {
     )
 
     process {
+        Write-Verbose "Retrieving IPAM Address"
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($IP_ID in $Id) {

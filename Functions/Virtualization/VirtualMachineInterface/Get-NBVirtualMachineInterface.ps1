@@ -35,13 +35,10 @@ function Get-NBVirtualMachineInterface {
         MAC address assigned to the interface
 
     .PARAMETER Raw
-        A description of the Raw parameter.
+        Return the raw API response instead of extracting the results array.
 
     .EXAMPLE
         PS C:\> Get-NBVirtualMachineInterface
-
-    .NOTES
-        Additional information about the function.
 #>
 
     [CmdletBinding()]
@@ -80,6 +77,7 @@ function Get-NBVirtualMachineInterface {
     )
 
     process {
+        Write-Verbose "Retrieving Virtual Machine Interface"
         $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'interfaces'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters

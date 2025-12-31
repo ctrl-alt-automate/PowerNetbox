@@ -96,6 +96,7 @@ function Set-NBDCIMCable {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Updating DCIM Cable"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'cables', $Id))
 
         # Check for version-specific parameters

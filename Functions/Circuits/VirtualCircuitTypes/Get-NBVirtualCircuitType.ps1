@@ -63,6 +63,7 @@ function Get-NBVirtualCircuitType {
     )
 
     process {
+        Write-Verbose "Retrieving Virtual Circuit Type"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {
                 foreach ($i in $Id) {

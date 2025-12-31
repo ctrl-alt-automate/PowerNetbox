@@ -32,6 +32,7 @@ function Set-NBDCIMMACAddress {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Updating D CI MM AC Ad dr es s"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','mac-addresses',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update MAC address')) {

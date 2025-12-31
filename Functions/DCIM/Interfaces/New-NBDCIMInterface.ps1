@@ -82,7 +82,7 @@
 .EXAMPLE
     Import-Csv interfaces.csv | New-NBDCIMInterface -BatchSize 100 -Force
 
-    Bulk import interfaces from a CSV file.
+    Bulk import interfaces froMACSV file.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/models/dcim/interface/
@@ -146,7 +146,7 @@ function New-NBDCIMInterface {
 
         [Parameter(ParameterSetName = 'Bulk')]
         [ValidateRange(1, 1000)]
-        [int]$BatchSize = 50,
+        [int]$BatchSize = 100,
 
         [Parameter(ParameterSetName = 'Bulk')]
         [switch]$Force,

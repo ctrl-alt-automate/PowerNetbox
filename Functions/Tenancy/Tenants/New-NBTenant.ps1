@@ -1,4 +1,4 @@
-﻿
+
 function New-NBTenant {
 <#
     .SYNOPSIS
@@ -25,8 +25,6 @@ function New-NBTenant {
     .EXAMPLE
         PS C:\> New-NBTenant -Name 'Contoso Inc' -Slug 'contoso-inc'
 
-    .NOTES
-        Additional information about the function.
 #>
 
     [CmdletBinding(ConfirmImpact = 'Low',
@@ -53,6 +51,7 @@ function New-NBTenant {
     )
 
     process {
+        Write-Verbose "Creating Tenant"
         $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'tenants'))
         $Method = 'POST'
 

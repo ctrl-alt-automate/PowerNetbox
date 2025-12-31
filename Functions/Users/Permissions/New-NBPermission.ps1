@@ -67,6 +67,7 @@ function New-NBPermission {
     )
 
     process {
+        Write-Verbose "Creating Permission"
         $Segments = [System.Collections.ArrayList]::new(@('users', 'permissions'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         $URI = BuildNewURI -Segments $URIComponents.Segments

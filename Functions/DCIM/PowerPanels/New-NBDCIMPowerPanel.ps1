@@ -31,6 +31,7 @@ function New-NBDCIMPowerPanel {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Creating D CI MP ow er Pa ne l"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','power-panels'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create power panel')) {

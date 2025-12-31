@@ -32,6 +32,7 @@ function Set-NBDCIMModuleBay {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Updating D CI MM od ul eB ay"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','module-bays',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update module bay')) {

@@ -35,6 +35,7 @@ function Get-NBIPAMRIR {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Retrieving IPAM RIR"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('ipam','rirs',$i)) -Raw:$Raw } }
             default {

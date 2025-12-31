@@ -34,6 +34,7 @@ function Get-NBDCIMRackRole {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Retrieving DCIM Rack Role"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','rack-roles',$i)) -Raw:$Raw } }
             default {

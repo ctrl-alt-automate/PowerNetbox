@@ -28,6 +28,7 @@ function Remove-NBVirtualCircuit {
     )
 
     process {
+        Write-Verbose "Removing Virtual Circuit"
         $Segments = [System.Collections.ArrayList]::new(@('circuits', 'virtual-circuits', $Id))
         $URI = BuildNewURI -Segments $Segments
 

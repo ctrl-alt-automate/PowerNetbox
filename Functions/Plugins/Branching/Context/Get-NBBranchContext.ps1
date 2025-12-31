@@ -31,20 +31,20 @@
 #>
 function Get-NBBranchContext {
     [CmdletBinding()]
-    [OutputType([string])]
+    [OutputType([string], [string[]])]
     param(
         [switch]$Stack
     )
 
     if (-not $script:NetboxConfig.BranchStack) {
         if ($Stack) {
-            return @()
+            return [string[]]@()
         }
         return $null
     }
 
     if ($Stack) {
-        return $script:NetboxConfig.BranchStack.ToArray()
+        return [string[]]$script:NetboxConfig.BranchStack.ToArray()
     }
 
     if ($script:NetboxConfig.BranchStack.Count -eq 0) {

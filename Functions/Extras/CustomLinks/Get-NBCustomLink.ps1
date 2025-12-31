@@ -63,6 +63,7 @@ function Get-NBCustomLink {
     )
 
     process {
+        Write-Verbose "Retrieving Custom Link"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {
                 foreach ($i in $Id) {

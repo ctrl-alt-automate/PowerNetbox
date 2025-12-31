@@ -87,6 +87,7 @@ function Get-NBSavedFilter {
     )
 
     process {
+        Write-Verbose "Retrieving Saved Filter"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {
                 foreach ($i in $Id) {
