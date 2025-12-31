@@ -298,18 +298,10 @@ jobs:
         env:
           NETBOX_HOST: ${{ env.NETBOX_HOST }}
           NETBOX_TOKEN: ${{ env.NETBOX_TOKEN }}
-          NETBOX_RUNNING_VERSION: ${{ env.NETBOX_RUNNING_VERSION }}
         run: |
           Write-Host "Verifying API authentication..." -ForegroundColor Cyan
 
-          # If version is null, API is likely broken
-          if ($env:NETBOX_RUNNING_VERSION -eq 'null' -or [string]::IsNullOrEmpty($env:NETBOX_RUNNING_VERSION)) {
-            Write-Host "WARNING: Netbox version is null - API may not be functional" -ForegroundColor Yellow
-            echo "api_working=false" >> $env:GITHUB_OUTPUT
-            exit 0
-          }
-
-          # Try Token auth
+          # Try Token auth directly - most reliable test
           $headers = @{
             'Authorization' = "Token $env:NETBOX_TOKEN"
             'Accept' = 'application/json'
