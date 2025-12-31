@@ -406,6 +406,7 @@ Describe "Live Integration Tests" -Tag 'Integration', 'Live' -Skip:(-not $script
             ClusterTypes    = [System.Collections.ArrayList]::new()
             Sites           = [System.Collections.ArrayList]::new()
             Tenants         = [System.Collections.ArrayList]::new()
+            Tags            = [System.Collections.ArrayList]::new()
         }
 
         Write-Host "Test Run ID: $script:TestRunId" -ForegroundColor Cyan
@@ -473,6 +474,9 @@ Describe "Live Integration Tests" -Tag 'Integration', 'Live' -Skip:(-not $script
         }
         foreach ($id in $script:CreatedResources.Tenants) {
             Remove-TestResource -ResourceType 'Tenant' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBTenant -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
+        }
+        foreach ($id in $script:CreatedResources.Tags) {
+            Remove-TestResource -ResourceType 'Tag' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBTag -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
         }
 
         # Report any cleanup errors
