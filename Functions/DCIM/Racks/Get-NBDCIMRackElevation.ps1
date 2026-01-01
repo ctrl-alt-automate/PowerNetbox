@@ -25,6 +25,9 @@ function Get-NBDCIMRackElevation {
     .PARAMETER Offset
         Offset for pagination
 
+    .PARAMETER All
+        Automatically paginate through all results. Cannot be used with Limit or Offset.
+
     .PARAMETER Raw
         Return the raw API response
 
@@ -53,6 +56,11 @@ function Get-NBDCIMRackElevation {
 
         Get only occupied rack units
 
+    .EXAMPLE
+        Get-NBDCIMRackElevation -Id 24 -All
+
+        Get all rack units without manual pagination
+
     .LINK
         https://netbox.readthedocs.io/en/stable/models/dcim/rack/
 #>
@@ -75,11 +83,19 @@ function Get-NBDCIMRackElevation {
         [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
-        [ValidateRange(0, [int]::MaxValue)]
-        [uint16]$Offset,
+        [ValidateRange(0, [uint32]::MaxValue)]
+        [uint32]$Offset,
+
+        [switch]$All,
 
         [switch]$Raw
     )
+
+    begin {
+        if ($All -and ($PSBoundParameters.ContainsKey('Limit') -or $PSBoundParameters.ContainsKey('Offset'))) {
+            throw "The -All parameter cannot be used with -Limit or -Offset"
+        }
+    }
 
     process {
         Write-Verbose "Retrieving DCIM Rack Elevation for rack ID $Id"
@@ -141,8 +157,43 @@ function Get-NBDCIMRackElevation {
             }
         }
         else {
-            # JSON mode - standard paginated response
-            InvokeNetboxRequest -URI $URI -Raw:$Raw
+            # JSON mode
+            if ($All) {
+                # Auto-paginate through all results
+                $allResults = [System.Collections.ArrayList]::new()
+                $currentOffset = 0
+                $pageSize = 1000
+
+                do {
+                    $Parameters['limit'] = $pageSize
+                    $Parameters['offset'] = $currentOffset
+                    $URI = BuildNewURI -Segments $Segments -Parameters $Parameters
+
+                    $response = InvokeNetboxRequest -URI $URI -Raw:$true
+                    if ($response.results) {
+                        [void]$allResults.AddRange($response.results)
+                    }
+
+                    $currentOffset += $pageSize
+                } while ($response.next)
+
+                if ($Raw) {
+                    # Return as paginated structure
+                    [PSCustomObject]@{
+                        count    = $allResults.Count
+                        next     = $null
+                        previous = $null
+                        results  = $allResults.ToArray()
+                    }
+                }
+                else {
+                    $allResults.ToArray()
+                }
+            }
+            else {
+                # Standard paginated response
+                InvokeNetboxRequest -URI $URI -Raw:$Raw
+            }
         }
     }
 }

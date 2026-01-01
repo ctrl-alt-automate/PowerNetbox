@@ -164,20 +164,15 @@ function Export-NBRackElevation {
                 }
             }
             else {
-                # Get elevation data
-                $elevation = Get-NBDCIMRackElevation -Id $Id -Face $currentFace -Limit 1000
+                # Get elevation data (use -All for automatic pagination)
+                $elevation = Get-NBDCIMRackElevation -Id $Id -Face $currentFace -All
 
+                # Filter to whole U positions only (remove half-U entries)
+                $elevation = $elevation | Where-Object { $_.id -eq [Math]::Floor($_.id) }
+
+                # Optionally filter to only occupied slots
                 if (-not $IncludeEmptySlots) {
-                    # Filter to only whole U positions with devices
-                    $elevation = $elevation | Where-Object {
-                        $_.device -and ($_.id -eq [Math]::Floor($_.id))
-                    }
-                }
-                else {
-                    # Filter to only whole U positions
-                    $elevation = $elevation | Where-Object {
-                        $_.id -eq [Math]::Floor($_.id)
-                    }
+                    $elevation = $elevation | Where-Object { $_.device }
                 }
 
                 # Sort by U position (descending - top to bottom)

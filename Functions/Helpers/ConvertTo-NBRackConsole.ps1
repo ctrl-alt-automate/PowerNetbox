@@ -141,7 +141,6 @@ function ConvertTo-NBRackConsole {
             }
 
             # Create a device bar
-            $barWidth = [Math]::Min($deviceName.Length + 4, $deviceWidth - 2)
             $bar = "$($colors.BgBlue)$($colors.White) $deviceName $($colors.Reset)"
             $padding = ' ' * ($deviceWidth - $deviceName.Length - 2)
 
