@@ -15,7 +15,7 @@ function Export-NBRackElevation {
         The ID of the rack to export (required, pipeline support)
 
     .PARAMETER Format
-        Output format: HTML (default), Markdown, or SVG
+        Output format: HTML (default), Markdown, SVG, or Console
 
     .PARAMETER Face
         Which face of the rack to show: Front (default), Rear, or Both
@@ -30,6 +30,12 @@ function Export-NBRackElevation {
 
     .PARAMETER IncludeEmptySlots
         Include all empty U positions in output. Default shows only occupied.
+
+    .PARAMETER Compact
+        For Console format: hide empty slots and show summary instead.
+
+    .PARAMETER NoColor
+        For Console format: disable ANSI color codes.
 
     .PARAMETER PassThru
         Return content as string instead of writing to file (even when -Path specified)
@@ -57,6 +63,16 @@ function Export-NBRackElevation {
 
         Saves native Netbox SVG rendering
 
+    .EXAMPLE
+        Export-NBRackElevation -Id 24 -Format Console
+
+        Displays ASCII-art rack elevation in the terminal
+
+    .EXAMPLE
+        Export-NBRackElevation -Id 24 -Format Console -Compact -NoColor
+
+        Compact console output without colors (for piping/logging)
+
     .LINK
         https://netbox.readthedocs.io/en/stable/models/dcim/rack/
 #>
@@ -68,7 +84,7 @@ function Export-NBRackElevation {
         [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
         [uint64]$Id,
 
-        [ValidateSet('HTML', 'Markdown', 'SVG')]
+        [ValidateSet('HTML', 'Markdown', 'SVG', 'Console')]
         [string]$Format = 'HTML',
 
         [ValidateSet('Front', 'Rear', 'Both')]
@@ -79,6 +95,10 @@ function Export-NBRackElevation {
         [switch]$UseNativeRenderer,
 
         [switch]$IncludeEmptySlots,
+
+        [switch]$Compact,
+
+        [switch]$NoColor,
 
         [switch]$PassThru,
 
@@ -92,9 +112,17 @@ function Export-NBRackElevation {
             $UseNativeRenderer = $true
         }
 
-        if ($UseNativeRenderer -and $Format -eq 'Markdown') {
-            Write-Warning "-UseNativeRenderer not applicable to Markdown format. Ignoring."
+        if ($UseNativeRenderer -and $Format -in @('Markdown', 'Console')) {
+            Write-Warning "-UseNativeRenderer not applicable to $Format format. Ignoring."
             $UseNativeRenderer = $false
+        }
+
+        if ($Compact -and $Format -ne 'Console') {
+            Write-Warning "-Compact only applies to Console format. Ignoring."
+        }
+
+        if ($NoColor -and $Format -ne 'Console') {
+            Write-Warning "-NoColor only applies to Console format. Ignoring."
         }
     }
 
@@ -164,16 +192,31 @@ function Export-NBRackElevation {
                         ConvertTo-NBRackMarkdown -RackName $rackName -SiteName $siteName -UHeight $rackHeight `
                             -Face $faceLabel -ElevationData $elevation
                     }
+                    'Console' {
+                        ConvertTo-NBRackConsole -RackName $rackName -SiteName $siteName -UHeight $rackHeight `
+                            -Face $faceLabel -ElevationData $elevation -Compact:$Compact -NoColor:$NoColor
+                    }
                 }
             }
         }
 
         # Combine output for 'Both' faces
         if ($Face -eq 'Both' -and $Format -ne 'SVG') {
-            $output = $output -join "`n`n"
+            if ($Format -eq 'Console') {
+                # Console output is array of lines, flatten
+                $output = $output | ForEach-Object { $_ }
+            }
+            else {
+                $output = $output -join "`n`n"
+            }
         }
-        elseif ($output -is [array]) {
+        elseif ($output -is [array] -and $Format -ne 'Console') {
             $output = $output[0]
+        }
+
+        # Console format: join lines with newlines if returning as string
+        if ($Format -eq 'Console' -and $output -is [array]) {
+            $output = $output -join "`n"
         }
 
         # Handle output
@@ -186,6 +229,7 @@ function Export-NBRackElevation {
                     'HTML' { '.html' }
                     'Markdown' { '.md' }
                     'SVG' { '.svg' }
+                    'Console' { '.txt' }
                 }
                 $safeName = $rackName -replace '[^\w\-]', '_'
                 $outputPath = Join-Path $Path "$safeName$extension"
