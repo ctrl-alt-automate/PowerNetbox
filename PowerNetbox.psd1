@@ -71,8 +71,9 @@ NestedModules = @()
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
 FunctionsToExport = 'Aliases', 'ArgumentCompleters', 'BuildNewURI', 'BuildURIComponents',
                'BulkOperationResult', 'CheckNetboxIsConnected', 'Clear-NBCredential',
-               'Connect-NBAPI', 'ConvertTo-NetboxVersion', 'CreateEnum',
-               'Enter-NBBranch', 'Exit-NBBranch', 'Get-ModelDefinition',
+               'Connect-NBAPI', 'ConvertTo-NBRackHTML', 'ConvertTo-NBRackMarkdown',
+               'ConvertTo-NetboxVersion', 'CreateEnum', 'Enter-NBBranch',
+               'Exit-NBBranch', 'Export-NBRackElevation', 'Get-ModelDefinition',
                'Get-NBAPIDefinition', 'Get-NBBookmark', 'Get-NBBranch',
                'Get-NBBranchContext', 'Get-NBBranchEvent', 'Get-NBChangeDiff',
                'Get-NBCircuit', 'Get-NBCircuitGroup', 'Get-NBCircuitGroupAssignment',
