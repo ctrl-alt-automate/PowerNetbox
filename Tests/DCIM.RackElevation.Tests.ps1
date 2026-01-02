@@ -308,10 +308,11 @@ Describe "Export-NBRackElevation Tests" -Tag 'DCIM', 'Racks', 'RackElevation', '
     Context "Export-NBRackElevation Console Output" {
         It "Should generate ASCII box drawing" {
             $Result = Export-NBRackElevation -Id 24 -Format Console
-            $Result | Should -Match '╔'
-            $Result | Should -Match '╗'
-            $Result | Should -Match '╚'
-            $Result | Should -Match '╝'
+            # Use [char] to avoid UTF-8 encoding issues on Windows PS 5.1
+            $Result | Should -Match ([char]0x2554)  # ╔
+            $Result | Should -Match ([char]0x2557)  # ╗
+            $Result | Should -Match ([char]0x255A)  # ╚
+            $Result | Should -Match ([char]0x255D)  # ╝
         }
 
         It "Should include rack name" {
