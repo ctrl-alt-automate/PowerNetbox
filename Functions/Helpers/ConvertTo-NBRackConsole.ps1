@@ -48,16 +48,18 @@ function ConvertTo-NBRackConsole {
     )
 
     # ANSI color codes (if colors enabled)
+    # Note: Use [char]27 instead of `e for PS 5.1 compatibility
+    $esc = [char]27
     $colors = @{
-        Reset   = if ($NoColor) { '' } else { "`e[0m" }
-        Bold    = if ($NoColor) { '' } else { "`e[1m" }
-        Dim     = if ($NoColor) { '' } else { "`e[2m" }
-        Blue    = if ($NoColor) { '' } else { "`e[34m" }
-        Cyan    = if ($NoColor) { '' } else { "`e[36m" }
-        Green   = if ($NoColor) { '' } else { "`e[32m" }
-        Yellow  = if ($NoColor) { '' } else { "`e[33m" }
-        BgBlue  = if ($NoColor) { '' } else { "`e[44m" }
-        White   = if ($NoColor) { '' } else { "`e[37m" }
+        Reset   = if ($NoColor) { '' } else { "$esc[0m" }
+        Bold    = if ($NoColor) { '' } else { "$esc[1m" }
+        Dim     = if ($NoColor) { '' } else { "$esc[2m" }
+        Blue    = if ($NoColor) { '' } else { "$esc[34m" }
+        Cyan    = if ($NoColor) { '' } else { "$esc[36m" }
+        Green   = if ($NoColor) { '' } else { "$esc[32m" }
+        Yellow  = if ($NoColor) { '' } else { "$esc[33m" }
+        BgBlue  = if ($NoColor) { '' } else { "$esc[44m" }
+        White   = if ($NoColor) { '' } else { "$esc[37m" }
     }
 
     # Box drawing characters (as strings for multiplication)
