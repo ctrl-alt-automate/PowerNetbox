@@ -35,6 +35,10 @@
     Return the complete GraphQL response including potential errors array.
     Without -Raw, only the data property is returned (or throws on errors).
 
+.PARAMETER Timeout
+    Request timeout in seconds. Defaults to the global timeout set via Set-NBTimeout or Connect-NBAPI.
+    Useful for complex queries that may take longer to execute.
+
 .OUTPUTS
     [PSCustomObject] The query results or extracted data based on ResultPath.
 
@@ -118,6 +122,11 @@
     Requires Netbox 3.0+ for GraphQL support.
     Advanced filtering syntax (OR/NOT operators, custom fields) requires Netbox 4.3+.
 
+    Pagination:
+    - Default limit is 100 items per query (Netbox server default)
+    - Use pagination: { limit: N, offset: M } to control results
+    - For large datasets, implement client-side pagination
+
     Filter Syntax for Netbox 4.3/4.4:
     - ID filters: { id: 1 }
     - Enum filters: { status: STATUS_ACTIVE }
@@ -152,7 +161,10 @@ function Invoke-NBGraphQL {
         [string]$ResultPath,
 
         [Parameter()]
-        [switch]$Raw
+        [switch]$Raw,
+
+        [Parameter()]
+        [uint16]$Timeout
     )
 
     begin {
@@ -195,7 +207,16 @@ function Invoke-NBGraphQL {
         Write-Verbose "Query: $($Query -replace '\s+', ' ' | ForEach-Object { if ($_.Length -gt 200) { $_.Substring(0, 200) + '...' } else { $_ } })"
 
         # Execute the request - always get raw response to check for GraphQL errors
-        $response = InvokeNetboxRequest -URI $uri -Method POST -Body $body -Raw
+        $invokeParams = @{
+            URI    = $uri
+            Method = 'POST'
+            Body   = $body
+            Raw    = $true
+        }
+        if ($Timeout) {
+            $invokeParams.Timeout = $Timeout
+        }
+        $response = InvokeNetboxRequest @invokeParams
 
         # Handle GraphQL-specific error responses
         # GraphQL returns errors in the response body, not via HTTP status codes

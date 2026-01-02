@@ -75,6 +75,33 @@ Describe "Invoke-NBGraphQL" -Tag 'GraphQL', 'Setup' {
         It "Should not accept empty ResultPath" {
             { Invoke-NBGraphQL -Query '{ test }' -ResultPath '' } | Should -Throw
         }
+
+        It "Should accept Timeout parameter" {
+            { Invoke-NBGraphQL -Query '{ test }' -Timeout 60 } | Should -Not -Throw
+        }
+    }
+
+    Context "Timeout Support" {
+
+        It "Should pass Timeout to InvokeNetboxRequest when specified" {
+            Mock -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -MockWith {
+                return @{ data = @{ test = 'value' } }
+            } -ParameterFilter { $Timeout -eq 120 }
+
+            Invoke-NBGraphQL -Query '{ test }' -Timeout 120
+
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -Times 1 -ParameterFilter { $Timeout -eq 120 }
+        }
+
+        It "Should not pass Timeout when not specified" {
+            Mock -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -MockWith {
+                return @{ data = @{ test = 'value' } }
+            } -ParameterFilter { -not $PSBoundParameters.ContainsKey('Timeout') }
+
+            Invoke-NBGraphQL -Query '{ test }'
+
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -Times 1
+        }
     }
 
     Context "Basic Query Execution" {
