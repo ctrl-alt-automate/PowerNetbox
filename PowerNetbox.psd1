@@ -12,7 +12,7 @@
 RootModule = 'PowerNetbox.psm1'
 
 # Version number of this module.
-ModuleVersion = '4.4.9.2'
+ModuleVersion = '4.4.9.3'
 
 # Supported PSEditions
 CompatiblePSEditions = 'Desktop', 'Core'
