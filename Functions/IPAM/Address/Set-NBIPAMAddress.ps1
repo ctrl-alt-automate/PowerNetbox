@@ -97,7 +97,7 @@ function Set-NBIPAMAddress {
         [Parameter(ParameterSetName = 'Single')]
         [string]$Address,
 
-        [Parameter(ParameterSetName = 'Single')]
+        [Parameter(ParameterSetName = 'Single', ValueFromPipelineByPropertyName = $true)]
         [string]$Status,
 
         [Parameter(ParameterSetName = 'Single')]
@@ -122,7 +122,7 @@ function Set-NBIPAMAddress {
         [Parameter(ParameterSetName = 'Single')]
         [uint64]$Assigned_Object_Id,
 
-        [Parameter(ParameterSetName = 'Single')]
+        [Parameter(ParameterSetName = 'Single', ValueFromPipelineByPropertyName = $true)]
         [string]$Description,
 
         [Parameter(ParameterSetName = 'Single')]
