@@ -6,6 +6,10 @@
     Helper function for bulk API operations. Handles batching, progress reporting,
     and partial failure handling for POST, PATCH, and DELETE operations.
 
+    If a batch fails with a 500 Internal Server Error (which can occur due to Redis
+    cache inconsistency when referencing newly created objects), the function
+    automatically falls back to sequential single-item requests for that batch.
+
 .PARAMETER URI
     The base URI for the API endpoint.
 
@@ -122,12 +126,67 @@ function Send-NBBulkRequest {
             }
         }
         catch {
-            # Entire batch failed - mark all items as failed
             $errorMessage = $_.Exception.Message
-            Write-Warning "Batch $currentBatch failed: $errorMessage"
 
-            foreach ($item in $batch) {
-                $result.AddFailure($item, $errorMessage)
+            # Check if this is a 500 Internal Server Error
+            # This can occur due to Redis cache inconsistency when referencing newly created objects
+            if ($errorMessage -like "*500 Internal Server Error*" -or $errorMessage -like "*500*") {
+                Write-Warning "Batch $currentBatch failed with 500 Server Error. Retrying $($batch.Count) items sequentially with exponential backoff..."
+
+                # Wait before retrying to allow Redis cache to sync (longer initial delay)
+                Start-Sleep -Seconds 3
+
+                # Retry each item individually with exponential backoff
+                $itemIndex = 0
+                foreach ($item in $batch) {
+                    $itemIndex++
+                    $maxRetries = 3
+                    $retryCount = 0
+                    $success = $false
+
+                    while (-not $success -and $retryCount -lt $maxRetries) {
+                        try {
+                            # Delay between items (exponential backoff on retry)
+                            if ($itemIndex -gt 1 -or $retryCount -gt 0) {
+                                $delay = [Math]::Pow(2, $retryCount) * 500  # 500ms, 1s, 2s
+                                Start-Sleep -Milliseconds $delay
+                            }
+
+                            # Send single item (not as array) for sequential processing
+                            $singleResponse = InvokeNetboxRequest -URI $URI -Method $Method -Body $item -Raw
+
+                            if ($singleResponse.id) {
+                                $result.AddSuccess($singleResponse)
+                                $success = $true
+                            }
+                            elseif ($null -eq $singleResponse -and $Method -eq 'DELETE') {
+                                $result.AddSuccess($item)
+                                $success = $true
+                            }
+                            else {
+                                $result.AddFailure($item, "Unexpected response in sequential fallback")
+                                $success = $true  # Don't retry on unexpected format
+                            }
+                        }
+                        catch {
+                            $retryCount++
+                            if ($retryCount -ge $maxRetries) {
+                                $result.AddFailure($item, $_.Exception.Message)
+                            }
+                            else {
+                                Write-Verbose "Sequential item $itemIndex failed (attempt $retryCount/$maxRetries), retrying..."
+                            }
+                        }
+                    }
+                }
+            }
+            else {
+                # Other errors (400, 403, etc.) - fail the batch as usual
+                Write-Warning "Batch $currentBatch failed: $errorMessage"
+
+                foreach ($item in $batch) {
+                    $result.AddFailure($item, $errorMessage)
+                }
             }
         }
     }

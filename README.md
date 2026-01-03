@@ -240,6 +240,7 @@ Import-Module PowerNetbox
 |------|-------------|
 | [Getting Started](https://github.com/ctrl-alt-automate/PowerNetbox/wiki/Getting-Started) | Installation and first steps |
 | [Common Workflows](https://github.com/ctrl-alt-automate/PowerNetbox/wiki/Common-Workflows) | Bulk import, VMware sync, reporting |
+| [Bulk Operations](https://github.com/ctrl-alt-automate/PowerNetbox/wiki/Bulk-Operations) | High-performance batch processing |
 | [DCIM Examples](https://github.com/ctrl-alt-automate/PowerNetbox/wiki/DCIM-Examples) | Sites, devices, racks, cables |
 | [IPAM Examples](https://github.com/ctrl-alt-automate/PowerNetbox/wiki/IPAM-Examples) | IP addresses, prefixes, VLANs |
 | [Branching](https://github.com/ctrl-alt-automate/PowerNetbox/wiki/Branching) | Stage changes with branching plugin |
@@ -281,6 +282,13 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 Original copyright (c) 2018 Ben Claussen. Fork maintained by ctrl-alt-automate.
 
 ## Changelog
+
+### v4.4.9.3
+
+- **Bulk operations resilience** - Automatic fallback to sequential requests on 500 errors
+- **PowerShell 7.4+ compatibility** - Fixed redirect handling in `Connect-NBAPI`
+- **Pipeline binding fix** - `Set-NBIPAMAddress` now accepts Status/Description from pipeline
+- **Scenario test suite** - Comprehensive tests for bulk operations, workflows, and filters
 
 ### v4.4.9.2
 

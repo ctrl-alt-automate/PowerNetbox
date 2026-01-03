@@ -23,8 +23,8 @@ function Get-NBTenant {
     .PARAMETER Group
         The specific group as defined in Netbox.
 
-    .PARAMETER GroupID
-        The database ID of the group in Netbox
+    .PARAMETER Group_Id
+        The database ID of the group in Netbox. Alias: GroupID
 
     .PARAMETER Custom_Fields
         Hashtable in the format @{"field_name" = "value"} to search
@@ -69,7 +69,8 @@ function Get-NBTenant {
         [string]$Group,
 
         [Parameter(ParameterSetName = 'Query')]
-        [uint64]$GroupID,
+        [Alias('GroupID')]
+        [uint64]$Group_Id,
 
         [Parameter(ParameterSetName = 'Query')]
         [hashtable]$Custom_Fields,
