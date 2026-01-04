@@ -94,6 +94,13 @@ function Connect-NBAPI {
         $invokeParams.remove("SkipCertificateCheck")
     }
 
+    # Add AllowInsecureRedirect for PS 7.4+ (handles http:// redirects when connecting via https://)
+    # Some Netbox instances return http:// URLs in Location headers even when accessed via https://
+    $psVersion = $PSVersionTable.PSVersion
+    if ($psVersion.Major -gt 7 -or ($psVersion.Major -eq 7 -and $psVersion.Minor -ge 4)) {
+        $invokeParams['AllowInsecureRedirect'] = $true
+    }
+
     # For PowerShell Desktop (5.1), configure TLS and certificate handling
     if ("Desktop" -eq $PSVersionTable.PsEdition) {
         # Enable modern TLS protocols
