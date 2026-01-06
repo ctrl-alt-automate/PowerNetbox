@@ -31,3 +31,15 @@ Connect-DevNetbox.ps1
 # Build output
 PowerNetbox/
 NetboxPSv4/
+
+# Test artifacts
+coverage.xml
+*.coverage.xml
+TestResults/
+*.trx
+
+# Dev-only files (exclude from main branch merges)
+# These files exist on dev but should NOT be merged to main:
+# - Test-ExeDevVMs.ps1
+# - scripts/setup-exe-dev-environment.sh
+# - .github/workflows/exe-dev-tests.yml
