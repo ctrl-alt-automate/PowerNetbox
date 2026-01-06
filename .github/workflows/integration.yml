@@ -269,7 +269,7 @@ jobs:
 
           # Test 3: v2 token format detection (regex pattern matching - no API needed)
           Write-Host "Test 3: Testing v2 token format detection..." -ForegroundColor Yellow
-          $v2Token = "nbt_kVJSfSxl3xvO.b4KIab8fc0sKntsws0KK7j6VwWNYnztZ9BOC7NAq"
+          $v2Token = "nbt_ExampleKey123.ExampleSecretValue456789"
           $v1Token = "0123456789abcdef0123456789abcdef01234567"
 
           if ($v2Token -match $v2Pattern) {
