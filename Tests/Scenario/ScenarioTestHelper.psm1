@@ -7,25 +7,32 @@
 
 # Module-scope variables
 $script:TestDataPath = Join-Path (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent) ".." | Join-Path -ChildPath "TestData"
+
+# Test environments loaded from environment variables for security
+# Required env vars per environment:
+#   NETBOX_449_HOST, NETBOX_449_TOKEN
+#   NETBOX_449_ZWQG_HOST, NETBOX_449_ZWQG_TOKEN
+#   NETBOX_437_HOST, NETBOX_437_TOKEN
+#   NETBOX_450_HOST, NETBOX_450_TOKEN
 $script:TestEnvironments = @{
     '4.4.9' = @{
-        Hostname = 'plasma-paint.exe.xyz'
-        Token    = '***REMOVED***'
+        Hostname = $env:NETBOX_449_HOST
+        Token    = $env:NETBOX_449_TOKEN
         Scheme   = 'https'
     }
     '4.4.9-zwqg' = @{
-        Hostname = 'zwqg2756.cloud.netboxapp.com'
-        Token    = '***REMOVED***'
+        Hostname = $env:NETBOX_449_ZWQG_HOST
+        Token    = $env:NETBOX_449_ZWQG_TOKEN
         Scheme   = 'https'
     }
     '4.3.7' = @{
-        Hostname = 'badger-victor.exe.xyz'
-        Token    = '***REMOVED***'
+        Hostname = $env:NETBOX_437_HOST
+        Token    = $env:NETBOX_437_TOKEN
         Scheme   = 'https'
     }
     '4.5.0' = @{
-        Hostname = 'zulu-how.exe.xyz'
-        Token    = '***REMOVED***'
+        Hostname = $env:NETBOX_450_HOST
+        Token    = $env:NETBOX_450_TOKEN
         Scheme   = 'https'
     }
 }
@@ -71,6 +78,17 @@ function Connect-ScenarioTest {
     $config = $script:TestEnvironments[$Environment]
     if (-not $config) {
         throw "Environment '$Environment' not found"
+    }
+
+    # Validate environment variables are set
+    if (-not $config.Hostname -or -not $config.Token) {
+        $envPrefix = switch ($Environment) {
+            '4.4.9'      { 'NETBOX_449' }
+            '4.4.9-zwqg' { 'NETBOX_449_ZWQG' }
+            '4.3.7'      { 'NETBOX_437' }
+            '4.5.0'      { 'NETBOX_450' }
+        }
+        throw "Environment variables not set for '$Environment'. Required: ${envPrefix}_HOST and ${envPrefix}_TOKEN"
     }
 
     $secureToken = ConvertTo-SecureString -String $config.Token -AsPlainText -Force
