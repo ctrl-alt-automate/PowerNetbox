@@ -310,7 +310,7 @@ jobs:
           else
             echo "V1 token failed (HTTP $RESPONSE) - creating v2 token for Netbox 4.5.0+"
 
-            # Create a v2 token using Netbox's generate() and update_digest() methods
+            # Create a v2 token using Netbox's Token model
             echo "Running Django shell to create token..."
             DJANGO_OUTPUT=$(docker exec powernetbox-netbox-1 /opt/netbox/venv/bin/python /opt/netbox/netbox/manage.py shell -c "
           import sys
@@ -338,18 +338,21 @@ jobs:
                   token.key = token.generate_key()
               print(f'DEBUG: Generated key: {token.key}', file=sys.stderr)
 
-              # Generate plaintext secret
+              # Generate plaintext secret and assign to token.plaintext
               plaintext = token.generate()
               print(f'DEBUG: generate() returned: {plaintext[:10] if plaintext else None}...', file=sys.stderr)
 
-              # Update the HMAC digest with the plaintext (this hashes the secret)
+              # Set plaintext on the token (this is used by update_digest)
+              token.plaintext = plaintext
+
+              # Update the HMAC digest (reads from token.plaintext)
               if hasattr(token, 'update_digest') and callable(token.update_digest):
-                  token.update_digest(plaintext)
+                  token.update_digest()
                   print(f'DEBUG: Called update_digest()', file=sys.stderr)
 
               # Save the token
               token.save()
-              print(f'DEBUG: Token saved, id={token.id}', file=sys.stderr)
+              print(f'DEBUG: Token saved, id={token.id}, hmac_digest={token.hmac_digest[:10] if token.hmac_digest else None}...', file=sys.stderr)
 
               # Output the full token
               if plaintext:
