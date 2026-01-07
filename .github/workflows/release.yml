@@ -33,7 +33,7 @@ jobs:
           $config.Run.Exit = $true
           $config.Output.Verbosity = 'Detailed'
           # Exclude Scenario and Integration tests (require live API credentials)
-          $config.Filter.ExcludePath = @('./Tests/Scenario', './Tests/Integration.Tests.ps1', './Tests/integration')
+          $config.Run.ExcludePath = @('./Tests/Scenario', './Tests/Integration.Tests.ps1', './Tests/integration')
 
           Invoke-Pester -Configuration $config
 
