@@ -47,7 +47,7 @@
 .PARAMETER Tags
     Array of tag names or IDs
 
-.PARAMETER Profile
+.PARAMETER Cable_Profile
     Cable profile for path tracing (Netbox 4.5+ only).
     Defines how connectors/lanes on one side map to those on the other side.
     Available profiles:
@@ -119,17 +119,18 @@ function New-NBDCIMCable {
                      '2c1p', '2c2p', '2c4p', '2c4p-shuffle', '2c6p', '2c8p', '2c12p',
                      '4c1p', '4c2p', '4c4p', '4c4p-shuffle', '4c6p', '4c8p', '8c4p',
                      '1c4p-4c1p', '1c6p-6c1p', '2c4p-8c1p-shuffle')]
-        [string]$Profile,
+        [Alias('Profile')]
+        [string]$Cable_Profile,
 
         [switch]$Raw
     )
 
     process {
-        Write-Verbose "Creating D CI MC ab le"
+        Write-Verbose "Creating DCIM Cable"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'cables'))
 
         # Check for version-specific parameters
-        $excludeProfile = Test-NBMinimumVersion -ParameterName 'Profile' -MinimumVersion '4.5.0' -BoundParameters $PSBoundParameters -FeatureName 'Cable Profiles'
+        $excludeProfile = Test-NBMinimumVersion -ParameterName 'Cable_Profile' -MinimumVersion '4.5.0' -BoundParameters $PSBoundParameters -FeatureName 'Cable Profiles'
 
         # Build the body manually since terminations need special handling
         $body = @{
@@ -148,7 +149,7 @@ function New-NBDCIMCable {
         if ($PSBoundParameters.ContainsKey('Comments')) { $body.comments = $Comments }
         if ($PSBoundParameters.ContainsKey('Tags')) { $body.tags = $Tags }
         if ($PSBoundParameters.ContainsKey('Custom_Fields')) { $body.custom_fields = $Custom_Fields }
-        if ($PSBoundParameters.ContainsKey('Profile') -and -not $excludeProfile) { $body.profile = $Profile }
+        if ($PSBoundParameters.ContainsKey('Cable_Profile') -and -not $excludeProfile) { $body.profile = $Cable_Profile }
 
         $URI = BuildNewURI -Segments $Segments
 

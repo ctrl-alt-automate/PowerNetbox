@@ -33,7 +33,7 @@
 .PARAMETER Color
     Filter by cable color.
 
-.PARAMETER Profile
+.PARAMETER Cable_Profile
     Filter by cable profile (Netbox 4.5+ only).
 
 .PARAMETER Device_ID
@@ -61,7 +61,7 @@
     Get-NBDCIMCable
 
 .EXAMPLE
-    Get-NBDCIMCable -Profile '1c4p-4c1p'
+    Get-NBDCIMCable -Cable_Profile '1c4p-4c1p'
 
 .EXAMPLE
     Get-NBDCIMCable -Status 'connected' -Device_ID 5
@@ -109,7 +109,8 @@ function Get-NBDCIMCable {
                      '2c1p', '2c2p', '2c4p', '2c4p-shuffle', '2c6p', '2c8p', '2c12p',
                      '4c1p', '4c2p', '4c4p', '4c4p-shuffle', '4c6p', '4c8p', '8c4p',
                      '1c4p-4c1p', '1c6p-6c1p', '2c4p-8c1p-shuffle')]
-        [string]$Profile,
+        [Alias('Profile')]
+        [string]$Cable_Profile,
 
         [uint64]$Device_ID,
 
@@ -133,13 +134,17 @@ function Get-NBDCIMCable {
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'cables'))
 
         # Check for version-specific parameters
-        $excludeProfile = Test-NBMinimumVersion -ParameterName 'Profile' -MinimumVersion '4.5.0' -BoundParameters $PSBoundParameters -FeatureName 'Cable Profiles'
+        $excludeProfile = Test-NBMinimumVersion -ParameterName 'Cable_Profile' -MinimumVersion '4.5.0' -BoundParameters $PSBoundParameters -FeatureName 'Cable Profiles'
 
-        # Build skip parameters list
-        $skipParams = @('Raw', 'All', 'PageSize')
-        if ($excludeProfile) { $skipParams += 'Profile' }
+        # Build skip parameters list (always skip Cable_Profile, we'll add it manually as 'profile')
+        $skipParams = @('Raw', 'All', 'PageSize', 'Cable_Profile')
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName $skipParams
+
+        # Add Cable_Profile as 'profile' in query params (API uses 'profile')
+        if ($PSBoundParameters.ContainsKey('Cable_Profile') -and -not $excludeProfile) {
+            $URIComponents.Parameters['profile'] = $Cable_Profile
+        }
 
         $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
