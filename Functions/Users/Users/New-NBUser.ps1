@@ -22,6 +22,7 @@
 
 .PARAMETER Is_Staff
     Whether user has staff access.
+    DEPRECATED: This parameter is removed in Netbox 4.5 and will be ignored.
 
 .PARAMETER Is_Active
     Whether user is active.
@@ -74,11 +75,18 @@ function New-NBUser {
         Write-Verbose "Creating User"
         $Segments = [System.Collections.ArrayList]::new(@('users', 'users'))
 
+        # Check for deprecated parameters
+        $excludeIsStaff = Test-NBDeprecatedParameter -ParameterName 'Is_Staff' -DeprecatedInVersion '4.5.0' -BoundParameters $PSBoundParameters
+
         # Convert SecureString to plain text for API (required by Netbox)
         $params = @{}
         foreach ($key in $PSBoundParameters.Keys) {
             if ($key -eq 'Password') {
                 $params['password'] = [System.Net.NetworkCredential]::new('', $Password).Password
+            }
+            elseif ($key -eq 'Is_Staff' -and $excludeIsStaff) {
+                # Skip deprecated parameter on Netbox 4.5+
+                continue
             }
             elseif ($key -notin 'Raw', 'WhatIf', 'Confirm', 'Verbose', 'Debug', 'ErrorAction', 'WarningAction', 'InformationAction', 'ErrorVariable', 'WarningVariable', 'InformationVariable', 'OutVariable', 'OutBuffer', 'PipelineVariable') {
                 $params[$key] = $PSBoundParameters[$key]

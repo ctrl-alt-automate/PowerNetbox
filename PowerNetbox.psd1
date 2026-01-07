@@ -12,7 +12,7 @@
 RootModule = 'PowerNetbox.psm1'
 
 # Version number of this module.
-ModuleVersion = '4.4.10.0'
+ModuleVersion = '4.5.0.0'
 
 # Supported PSEditions
 CompatiblePSEditions = 'Desktop', 'Core'
@@ -116,12 +116,12 @@ FunctionsToExport = 'Aliases', 'ArgumentCompleters', 'BuildNewURI', 'BuildURICom
                'Get-NBIPAMServiceTemplate', 'Get-NBIPAMVLAN', 'Get-NBIPAMVLANGroup',
                'Get-NBIPAMVLANTranslationPolicy', 'Get-NBIPAMVLANTranslationRule',
                'Get-NBIPAMVRF', 'Get-NBJob', 'Get-NBJournalEntry',
-               'Get-NBObjectChange', 'Get-NBObjectType', 'Get-NBPermission',
-               'Get-NBSavedFilter', 'Get-NBTag', 'Get-NBTenant', 'Get-NBTenantGroup',
-               'Get-NBTimeout', 'Get-NBToken', 'Get-NBUser', 'Get-NBVersion',
-               'Get-NBVirtualCircuit', 'Get-NBVirtualCircuitTermination',
-               'Get-NBVirtualCircuitType', 'Get-NBVirtualizationCluster',
-               'Get-NBVirtualizationClusterGroup',
+               'Get-NBObjectChange', 'Get-NBObjectType', 'Get-NBOwner',
+               'Get-NBOwnerGroup', 'Get-NBPermission', 'Get-NBSavedFilter',
+               'Get-NBTag', 'Get-NBTenant', 'Get-NBTenantGroup', 'Get-NBTimeout',
+               'Get-NBToken', 'Get-NBUser', 'Get-NBVersion', 'Get-NBVirtualCircuit',
+               'Get-NBVirtualCircuitTermination', 'Get-NBVirtualCircuitType',
+               'Get-NBVirtualizationCluster', 'Get-NBVirtualizationClusterGroup',
                'Get-NBVirtualizationClusterType', 'Get-NBVirtualMachine',
                'Get-NBVirtualMachineInterface', 'Get-NBVPNIKEPolicy',
                'Get-NBVPNIKEProposal', 'Get-NBVPNIPSecPolicy',
@@ -165,9 +165,10 @@ FunctionsToExport = 'Aliases', 'ArgumentCompleters', 'BuildNewURI', 'BuildURICom
                'New-NBIPAMRole', 'New-NBIPAMRouteTarget', 'New-NBIPAMService',
                'New-NBIPAMServiceTemplate', 'New-NBIPAMVLAN', 'New-NBIPAMVLANGroup',
                'New-NBIPAMVLANTranslationPolicy', 'New-NBIPAMVLANTranslationRule',
-               'New-NBIPAMVRF', 'New-NBJournalEntry', 'New-NBPermission',
-               'New-NBSavedFilter', 'New-NBTag', 'New-NBTenant', 'New-NBTenantGroup',
-               'New-NBToken', 'New-NBUser', 'New-NBVirtualCircuit',
+               'New-NBIPAMVRF', 'New-NBJournalEntry', 'New-NBOwner',
+               'New-NBOwnerGroup', 'New-NBPermission', 'New-NBSavedFilter',
+               'New-NBTag', 'New-NBTenant', 'New-NBTenantGroup', 'New-NBToken',
+               'New-NBUser', 'New-NBVirtualCircuit',
                'New-NBVirtualCircuitTermination', 'New-NBVirtualCircuitType',
                'New-NBVirtualizationCluster', 'New-NBVirtualizationClusterGroup',
                'New-NBVirtualizationClusterType', 'New-NBVirtualMachine',
@@ -217,11 +218,12 @@ FunctionsToExport = 'Aliases', 'ArgumentCompleters', 'BuildNewURI', 'BuildURICom
                'Remove-NBIPAMVLAN', 'Remove-NBIPAMVLANGroup',
                'Remove-NBIPAMVLANTranslationPolicy',
                'Remove-NBIPAMVLANTranslationRule', 'Remove-NBIPAMVRF',
-               'Remove-NBJournalEntry', 'Remove-NBPermission',
-               'Remove-NBSavedFilter', 'Remove-NBTag', 'Remove-NBTenant',
-               'Remove-NBTenantGroup', 'Remove-NBToken', 'Remove-NBUser',
-               'Remove-NBVirtualCircuit', 'Remove-NBVirtualCircuitTermination',
-               'Remove-NBVirtualCircuitType', 'Remove-NBVirtualizationCluster',
+               'Remove-NBJournalEntry', 'Remove-NBOwner', 'Remove-NBOwnerGroup',
+               'Remove-NBPermission', 'Remove-NBSavedFilter', 'Remove-NBTag',
+               'Remove-NBTenant', 'Remove-NBTenantGroup', 'Remove-NBToken',
+               'Remove-NBUser', 'Remove-NBVirtualCircuit',
+               'Remove-NBVirtualCircuitTermination', 'Remove-NBVirtualCircuitType',
+               'Remove-NBVirtualizationCluster',
                'Remove-NBVirtualizationClusterGroup',
                'Remove-NBVirtualizationClusterType', 'Remove-NBVirtualMachine',
                'Remove-NBVirtualMachineInterface', 'Remove-NBVPNIKEPolicy',
@@ -267,10 +269,11 @@ FunctionsToExport = 'Aliases', 'ArgumentCompleters', 'BuildNewURI', 'BuildURICom
                'Set-NBIPAMRole', 'Set-NBIPAMRouteTarget', 'Set-NBIPAMService',
                'Set-NBIPAMServiceTemplate', 'Set-NBIPAMVLAN', 'Set-NBIPAMVLANGroup',
                'Set-NBIPAMVLANTranslationPolicy', 'Set-NBIPAMVLANTranslationRule',
-               'Set-NBIPAMVRF', 'Set-NBJournalEntry', 'Set-NBPermission',
-               'Set-NBSavedFilter', 'Set-NBTag', 'Set-NBTenant', 'Set-NBTenantGroup',
-               'Set-NBTimeout', 'Set-NBToken', 'Set-NBUnstrustedSSL',
-               'Set-NBuntrustedSSL', 'Set-NBUser', 'Set-NBVirtualCircuit',
+               'Set-NBIPAMVRF', 'Set-NBJournalEntry', 'Set-NBOwner',
+               'Set-NBOwnerGroup', 'Set-NBPermission', 'Set-NBSavedFilter',
+               'Set-NBTag', 'Set-NBTenant', 'Set-NBTenantGroup', 'Set-NBTimeout',
+               'Set-NBToken', 'Set-NBUnstrustedSSL', 'Set-NBuntrustedSSL',
+               'Set-NBUser', 'Set-NBVirtualCircuit',
                'Set-NBVirtualCircuitTermination', 'Set-NBVirtualCircuitType',
                'Set-NBVirtualizationCluster', 'Set-NBVirtualizationClusterGroup',
                'Set-NBVirtualizationClusterType', 'Set-NBVirtualMachine',
@@ -281,8 +284,10 @@ FunctionsToExport = 'Aliases', 'ArgumentCompleters', 'BuildNewURI', 'BuildURICom
                'Set-NBVPNTunnelGroup', 'Set-NBVPNTunnelTermination', 'Set-NBWebhook',
                'Set-NBWirelessLAN', 'Set-NBWirelessLANGroup', 'Set-NBWirelessLink',
                'SetupNetboxConfigVariable', 'Sync-NBBranch', 'Test-NBAPIConnected',
-               'Test-NBBranchingAvailable', 'Undo-NBBranchMerge',
-               'VerifyAPIConnectivity'
+               'Test-NBAuthentication', 'Test-NBBranchingAvailable',
+               'Test-NBDeprecatedParameter', 'Test-NBMinimumVersion',
+               'Undo-NBBranchMerge', 'VerifyAPIConnectivity'
+
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = @()

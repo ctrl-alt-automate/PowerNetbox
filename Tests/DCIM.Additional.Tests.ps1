@@ -107,6 +107,64 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
             $Result.Uri | Should -Match '/api/dcim/cables/3/'
         }
     }
+
+    Context "Cable Profile Support (4.5+)" {
+        It "Should include Profile in New-NBDCIMCable body on Netbox 4.5+" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.ParsedVersion = [version]'4.5.0'
+            }
+            $aTerm = @(@{object_type="dcim.interface"; object_id=1})
+            $bTerm = @(@{object_type="dcim.interface"; object_id=2})
+            $Result = New-NBDCIMCable -A_Terminations $aTerm -B_Terminations $bTerm -Profile '1c4p-4c1p' -Confirm:$false
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.profile | Should -Be '1c4p-4c1p'
+        }
+
+        It "Should exclude Profile from New-NBDCIMCable body on Netbox 4.4.x" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.ParsedVersion = [version]'4.4.9'
+            }
+            $aTerm = @(@{object_type="dcim.interface"; object_id=1})
+            $bTerm = @(@{object_type="dcim.interface"; object_id=2})
+            $Result = New-NBDCIMCable -A_Terminations $aTerm -B_Terminations $bTerm -Profile '1c4p-4c1p' -Confirm:$false -WarningAction SilentlyContinue
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.PSObject.Properties.Name | Should -Not -Contain 'profile'
+        }
+
+        It "Should include Profile in Set-NBDCIMCable body on Netbox 4.5+" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.ParsedVersion = [version]'4.5.0'
+            }
+            $Result = Set-NBDCIMCable -Id 1 -Profile '2c4p' -Confirm:$false
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.profile | Should -Be '2c4p'
+        }
+
+        It "Should exclude Profile from Set-NBDCIMCable body on Netbox 4.4.x" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.ParsedVersion = [version]'4.4.9'
+            }
+            $Result = Set-NBDCIMCable -Id 1 -Profile '2c4p' -Confirm:$false -WarningAction SilentlyContinue
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.PSObject.Properties.Name | Should -Not -Contain 'profile'
+        }
+
+        It "Should include Profile filter in Get-NBDCIMCable on Netbox 4.5+" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.ParsedVersion = [version]'4.5.0'
+            }
+            $Result = Get-NBDCIMCable -Profile '1c4p-4c1p'
+            $Result.Uri | Should -Match 'profile=1c4p-4c1p'
+        }
+
+        It "Should exclude Profile filter from Get-NBDCIMCable on Netbox 4.4.x" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.ParsedVersion = [version]'4.4.9'
+            }
+            $Result = Get-NBDCIMCable -Profile '1c4p-4c1p' -WarningAction SilentlyContinue
+            $Result.Uri | Should -Not -Match 'profile='
+        }
+    }
     #endregion
 
     #region Locations
@@ -1169,10 +1227,25 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
     }
 
     Context "Add-NBDCIMFrontPort" {
-        It "Should create a front port" {
+        It "Should create a front port with legacy parameters" {
             $Result = Add-NBDCIMFrontPort -Device 1 -Name 'FP1' -Type '8p8c' -Rear_Port 1 -Rear_Port_Position 1
             $Result.Method | Should -Be 'POST'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/front-ports/'
+        }
+
+        It "Should create a front port with Rear_Ports array (4.5+ format)" {
+            # Mock version detection to return 4.5
+            Mock -CommandName "Get-NBVersion" -ModuleName PowerNetbox -MockWith {
+                return @{ 'netbox-version' = '4.5.0' }
+            }
+            $rearPorts = @(
+                @{ rear_port = 100; rear_port_position = 1; position = 1 }
+            )
+            $Result = Add-NBDCIMFrontPort -Device 1 -Name 'FP2' -Type 'lc' -Rear_Ports $rearPorts
+            $Result.Method | Should -Be 'POST'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.rear_ports | Should -Not -BeNullOrEmpty
+            $bodyObj.rear_ports[0].rear_port | Should -Be 100
         }
     }
 
@@ -1187,6 +1260,20 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
             $Result = Set-NBDCIMFrontPort -Id 1 -Description 'Updated' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
             $Result.Uri | Should -Match '/api/dcim/front-ports/1/'
+        }
+
+        It "Should update a front port with Rear_Ports array (4.5+ format)" {
+            Mock -CommandName "Get-NBVersion" -ModuleName PowerNetbox -MockWith {
+                return @{ 'netbox-version' = '4.5.0' }
+            }
+            $rearPorts = @(
+                @{ rear_port = 200; rear_port_position = 2; position = 1 }
+            )
+            $Result = Set-NBDCIMFrontPort -Id 1 -Rear_Ports $rearPorts -Confirm:$false
+            $Result.Method | Should -Be 'PATCH'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.rear_ports | Should -Not -BeNullOrEmpty
+            $bodyObj.rear_ports[0].rear_port | Should -Be 200
         }
     }
 
@@ -1225,6 +1312,20 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
             $Result.Method | Should -Be 'POST'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/rear-ports/'
         }
+
+        It "Should create a rear port with Front_Ports array (4.5+ bidirectional)" {
+            Mock -CommandName "Get-NBVersion" -ModuleName PowerNetbox -MockWith {
+                return @{ 'netbox-version' = '4.5.0' }
+            }
+            $frontPorts = @(
+                @{ front_port = 50; front_port_position = 1; position = 1 }
+            )
+            $Result = Add-NBDCIMRearPort -Device 1 -Name 'RP2' -Type 'lc' -Front_Ports $frontPorts
+            $Result.Method | Should -Be 'POST'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.front_ports | Should -Not -BeNullOrEmpty
+            $bodyObj.front_ports[0].front_port | Should -Be 50
+        }
     }
 
     Context "Set-NBDCIMRearPort" {
@@ -1238,6 +1339,20 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
             $Result = Set-NBDCIMRearPort -Id 1 -Description 'Updated' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
             $Result.Uri | Should -Match '/api/dcim/rear-ports/1/'
+        }
+
+        It "Should update a rear port with Front_Ports array (4.5+ bidirectional)" {
+            Mock -CommandName "Get-NBVersion" -ModuleName PowerNetbox -MockWith {
+                return @{ 'netbox-version' = '4.5.0' }
+            }
+            $frontPorts = @(
+                @{ front_port = 75; front_port_position = 2; position = 1 }
+            )
+            $Result = Set-NBDCIMRearPort -Id 1 -Front_Ports $frontPorts -Confirm:$false
+            $Result.Method | Should -Be 'PATCH'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.front_ports | Should -Not -BeNullOrEmpty
+            $bodyObj.front_ports[0].front_port | Should -Be 75
         }
     }
 
@@ -1405,6 +1520,39 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
             $Result = Remove-NBDCIMVirtualDeviceContext -Id 2 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
             $Result.Uri | Should -Match '/api/dcim/virtual-device-contexts/2/'
+        }
+    }
+    #endregion
+
+    #region PowerOutletTemplates (Color field - Netbox 4.5+)
+    Context "New-NBDCIMPowerOutletTemplate" {
+        It "Should create a power outlet template" {
+            $Result = New-NBDCIMPowerOutletTemplate -Device_Type 1 -Name 'Outlet1'
+            $Result.Method | Should -Be 'POST'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/power-outlet-templates/'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.device_type | Should -Be 1
+            $bodyObj.name | Should -Be 'Outlet1'
+        }
+
+        It "Should create a power outlet template with Color (Netbox 4.5+)" {
+            $Result = New-NBDCIMPowerOutletTemplate -Device_Type 1 -Name 'Outlet1' -Color 'aa1409'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.color | Should -Be 'aa1409'
+        }
+    }
+
+    Context "Set-NBDCIMPowerOutletTemplate" {
+        It "Should update a power outlet template" {
+            $Result = Set-NBDCIMPowerOutletTemplate -Id 1 -Description 'Updated' -Confirm:$false
+            $Result.Method | Should -Be 'PATCH'
+            $Result.URI | Should -Match '/api/dcim/power-outlet-templates/1/'
+        }
+
+        It "Should update a power outlet template with Color (Netbox 4.5+)" {
+            $Result = Set-NBDCIMPowerOutletTemplate -Id 1 -Color 'f44336' -Confirm:$false
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.color | Should -Be 'f44336'
         }
     }
     #endregion

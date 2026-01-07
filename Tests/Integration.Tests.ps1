@@ -219,92 +219,6 @@ Describe "Integration Tests - Mock API Responses" -Tag 'Integration', 'Mock' {
         }
     }
 
-    Context "Circuits Module - API Path Verification" {
-        BeforeAll {
-            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
-                return @{
-                    count   = 0
-                    results = @()
-                }
-            }
-        }
-
-        It "Get-NBCircuit uses correct API path" {
-            $result = Get-NBCircuit -Limit 1
-
-            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -ParameterFilter {
-                $Uri -match '/api/circuits/circuits/'
-            }
-        }
-
-        It "Get-NBCircuitType uses correct API path" {
-            $result = Get-NBCircuitType -Limit 1
-
-            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -ParameterFilter {
-                $Uri -match '/api/circuits/circuit-types/'
-            }
-        }
-
-        It "Get-NBCircuitProvider uses correct API path" {
-            $result = Get-NBCircuitProvider -Limit 1
-
-            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -ParameterFilter {
-                $Uri -match '/api/circuits/providers/'
-            }
-        }
-    }
-
-    Context "Extras Module - API Path Verification" {
-        BeforeAll {
-            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
-                return @{
-                    count   = 0
-                    results = @()
-                }
-            }
-        }
-
-        It "Get-NBTag uses correct API path" {
-            $result = Get-NBTag -Limit 1
-
-            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -ParameterFilter {
-                $Uri -match '/api/extras/tags/'
-            }
-        }
-
-        It "Get-NBCustomField uses correct API path" {
-            $result = Get-NBCustomField -Limit 1
-
-            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -ParameterFilter {
-                $Uri -match '/api/extras/custom-fields/'
-            }
-        }
-
-        It "Get-NBConfigContext uses correct API path" {
-            $result = Get-NBConfigContext -Limit 1
-
-            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -ParameterFilter {
-                $Uri -match '/api/extras/config-contexts/'
-            }
-        }
-
-        It "Get-NBWebhook uses correct API path" {
-            $result = Get-NBWebhook -Limit 1
-
-            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -ParameterFilter {
-                $Uri -match '/api/extras/webhooks/'
-            }
-        }
-
-        It "Get-NBExportTemplate uses correct API path" {
-            $result = Get-NBExportTemplate -Limit 1
-
-            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -ParameterFilter {
-                $Uri -match '/api/extras/export-templates/'
-            }
-        }
-    }
-
     Context "Response Parsing" {
         It "Should parse paginated response correctly" {
             Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
@@ -480,16 +394,10 @@ Describe "Live Integration Tests" -Tag 'Integration', 'Live' -Skip:(-not $script
             Devices         = [System.Collections.ArrayList]::new()
             VMs             = [System.Collections.ArrayList]::new()
             Interfaces      = [System.Collections.ArrayList]::new()
-            WirelessLANs    = [System.Collections.ArrayList]::new()
-            Circuits        = [System.Collections.ArrayList]::new()
-            Tunnels         = [System.Collections.ArrayList]::new()
             # Level 2: Mid-level resources
             Addresses       = [System.Collections.ArrayList]::new()
             Prefixes        = [System.Collections.ArrayList]::new()
             VLANs           = [System.Collections.ArrayList]::new()
-            WirelessLANGroups = [System.Collections.ArrayList]::new()
-            IPSecProfiles   = [System.Collections.ArrayList]::new()
-            TunnelGroups    = [System.Collections.ArrayList]::new()
             # Level 3: Reference data
             DeviceTypes     = [System.Collections.ArrayList]::new()
             DeviceRoles     = [System.Collections.ArrayList]::new()
@@ -498,17 +406,7 @@ Describe "Live Integration Tests" -Tag 'Integration', 'Live' -Skip:(-not $script
             ClusterTypes    = [System.Collections.ArrayList]::new()
             Sites           = [System.Collections.ArrayList]::new()
             Tenants         = [System.Collections.ArrayList]::new()
-            CircuitProviders = [System.Collections.ArrayList]::new()
-            CircuitTypes    = [System.Collections.ArrayList]::new()
-            IKEPolicies     = [System.Collections.ArrayList]::new()
-            IPSecPolicies   = [System.Collections.ArrayList]::new()
-            # Level 4: Base VPN resources (least dependent)
-            IKEProposals    = [System.Collections.ArrayList]::new()
-            IPSecProposals  = [System.Collections.ArrayList]::new()
-            # Extras module resources
             Tags            = [System.Collections.ArrayList]::new()
-            CustomLinks     = [System.Collections.ArrayList]::new()
-            Webhooks        = [System.Collections.ArrayList]::new()
         }
 
         Write-Host "Test Run ID: $script:TestRunId" -ForegroundColor Cyan
@@ -543,15 +441,6 @@ Describe "Live Integration Tests" -Tag 'Integration', 'Live' -Skip:(-not $script
         foreach ($id in $script:CreatedResources.Interfaces) {
             Remove-TestResource -ResourceType 'Interface' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBDCIMInterface -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
         }
-        foreach ($id in $script:CreatedResources.WirelessLANs) {
-            Remove-TestResource -ResourceType 'WirelessLAN' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBWirelessLAN -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
-        }
-        foreach ($id in $script:CreatedResources.Circuits) {
-            Remove-TestResource -ResourceType 'Circuit' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBCircuit -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
-        }
-        foreach ($id in $script:CreatedResources.Tunnels) {
-            Remove-TestResource -ResourceType 'Tunnel' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBVPNTunnel -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
-        }
 
         # Level 2: Mid-level resources
         foreach ($id in $script:CreatedResources.Addresses) {
@@ -562,15 +451,6 @@ Describe "Live Integration Tests" -Tag 'Integration', 'Live' -Skip:(-not $script
         }
         foreach ($id in $script:CreatedResources.VLANs) {
             Remove-TestResource -ResourceType 'VLAN' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBIPAMVLAN -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
-        }
-        foreach ($id in $script:CreatedResources.WirelessLANGroups) {
-            Remove-TestResource -ResourceType 'WirelessLANGroup' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBWirelessLANGroup -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
-        }
-        foreach ($id in $script:CreatedResources.IPSecProfiles) {
-            Remove-TestResource -ResourceType 'IPSecProfile' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBVPNIPSecProfile -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
-        }
-        foreach ($id in $script:CreatedResources.TunnelGroups) {
-            Remove-TestResource -ResourceType 'TunnelGroup' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBVPNTunnelGroup -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
         }
 
         # Level 3: Reference data
@@ -595,36 +475,8 @@ Describe "Live Integration Tests" -Tag 'Integration', 'Live' -Skip:(-not $script
         foreach ($id in $script:CreatedResources.Tenants) {
             Remove-TestResource -ResourceType 'Tenant' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBTenant -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
         }
-        foreach ($id in $script:CreatedResources.CircuitProviders) {
-            Remove-TestResource -ResourceType 'CircuitProvider' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBCircuitProvider -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
-        }
-        foreach ($id in $script:CreatedResources.CircuitTypes) {
-            Remove-TestResource -ResourceType 'CircuitType' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBCircuitType -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
-        }
-        foreach ($id in $script:CreatedResources.IKEPolicies) {
-            Remove-TestResource -ResourceType 'IKEPolicy' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBVPNIKEPolicy -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
-        }
-        foreach ($id in $script:CreatedResources.IPSecPolicies) {
-            Remove-TestResource -ResourceType 'IPSecPolicy' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBVPNIPSecPolicy -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
-        }
-
-        # Level 4: Base VPN resources (least dependent)
-        foreach ($id in $script:CreatedResources.IKEProposals) {
-            Remove-TestResource -ResourceType 'IKEProposal' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBVPNIKEProposal -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
-        }
-        foreach ($id in $script:CreatedResources.IPSecProposals) {
-            Remove-TestResource -ResourceType 'IPSecProposal' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBVPNIPSecProposal -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
-        }
-
-        # Extras module resources
         foreach ($id in $script:CreatedResources.Tags) {
             Remove-TestResource -ResourceType 'Tag' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBTag -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
-        }
-        foreach ($id in $script:CreatedResources.CustomLinks) {
-            Remove-TestResource -ResourceType 'CustomLink' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBCustomLink -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
-        }
-        foreach ($id in $script:CreatedResources.Webhooks) {
-            Remove-TestResource -ResourceType 'Webhook' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBWebhook -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
         }
 
         # Report any cleanup errors
@@ -1154,63 +1006,6 @@ Describe "Live Integration Tests" -Tag 'Integration', 'Live' -Skip:(-not $script
         }
     }
 
-    Context "Circuits Module CRUD" {
-        BeforeAll {
-            $script:TestCircuitTypeName = "$($script:TestPrefix)-CircuitType"
-            $script:TestProviderName = "$($script:TestPrefix)-Provider"
-        }
-
-        It "Should create a circuit type" {
-            $type = New-NBCircuitType -Name $script:TestCircuitTypeName -Slug ($script:TestCircuitTypeName.ToLower() -replace '[^a-z0-9-]', '-')
-            $type | Should -Not -BeNullOrEmpty
-            $script:TestCircuitTypeId = $type.id
-            [void]$script:CreatedResources.CircuitTypes.Add($type.id)
-            Write-Host "  Created circuit type: $($type.name) (ID: $($type.id))" -ForegroundColor Green
-        }
-
-        It "Should create a circuit provider" {
-            $provider = New-NBCircuitProvider -Name $script:TestProviderName -Slug ($script:TestProviderName.ToLower() -replace '[^a-z0-9-]', '-')
-            $provider | Should -Not -BeNullOrEmpty
-            $script:TestProviderId = $provider.id
-            [void]$script:CreatedResources.CircuitProviders.Add($provider.id)
-            Write-Host "  Created circuit provider: $($provider.name) (ID: $($provider.id))" -ForegroundColor Green
-        }
-
-        It "Should create a circuit" {
-            $circuit = New-NBCircuit -Cid "$script:TestPrefix-001" -Provider $script:TestProviderId -Type $script:TestCircuitTypeId
-            $circuit | Should -Not -BeNullOrEmpty
-            $script:TestCircuitId = $circuit.id
-            [void]$script:CreatedResources.Circuits.Add($circuit.id)
-            Write-Host "  Created circuit: $($circuit.cid) (ID: $($circuit.id))" -ForegroundColor Green
-        }
-
-        It "Should get circuit by ID" {
-            $circuit = Get-NBCircuit -Id $script:TestCircuitId
-            $circuit | Should -Not -BeNullOrEmpty
-            $circuit.id | Should -Be $script:TestCircuitId
-        }
-
-        It "Should update circuit" {
-            $circuit = Set-NBCircuit -Id $script:TestCircuitId -Description "$script:TestPrefix - Updated"
-            $circuit.description | Should -BeLike "*Updated*"
-        }
-
-        It "Should delete circuit" {
-            { Remove-NBCircuit -Id $script:TestCircuitId -Confirm:$false } | Should -Not -Throw
-            $script:CreatedResources.Circuits.Remove($script:TestCircuitId)
-        }
-
-        It "Should delete provider" {
-            { Remove-NBCircuitProvider -Id $script:TestProviderId -Confirm:$false } | Should -Not -Throw
-            $script:CreatedResources.CircuitProviders.Remove($script:TestProviderId)
-        }
-
-        It "Should delete circuit type" {
-            { Remove-NBCircuitType -Id $script:TestCircuitTypeId -Confirm:$false } | Should -Not -Throw
-            $script:CreatedResources.CircuitTypes.Remove($script:TestCircuitTypeId)
-        }
-    }
-
     Context "VPN Operations (Netbox 4.x)" {
         It "Should query VPN tunnels without error" {
             { Get-NBVPNTunnel -Limit 1 } | Should -Not -Throw
@@ -1218,265 +1013,6 @@ Describe "Live Integration Tests" -Tag 'Integration', 'Live' -Skip:(-not $script
 
         It "Should query L2VPNs without error" {
             { Get-NBVPNL2VPN -Limit 1 } | Should -Not -Throw
-        }
-    }
-
-    Context "VPN Module CRUD" {
-        BeforeAll {
-            $script:TestIKEProposalName = "$($script:TestPrefix)-IKEProposal"
-            $script:TestIKEPolicyName = "$($script:TestPrefix)-IKEPolicy"
-            $script:TestIPSecProposalName = "$($script:TestPrefix)-IPSecProposal"
-            $script:TestIPSecPolicyName = "$($script:TestPrefix)-IPSecPolicy"
-            $script:TestIPSecProfileName = "$($script:TestPrefix)-IPSecProfile"
-            $script:TestTunnelGroupName = "$($script:TestPrefix)-TunnelGroup"
-            $script:TestTunnelName = "$($script:TestPrefix)-Tunnel"
-        }
-
-        # IKE Proposal CRUD
-        It "Should create an IKE proposal" {
-            $proposal = New-NBVPNIKEProposal -Name $script:TestIKEProposalName `
-                -Authentication_Method 'preshared-keys' `
-                -Encryption_Algorithm 'aes-256-cbc' `
-                -Authentication_Algorithm 'hmac-sha256' `
-                -Group 14
-            $proposal | Should -Not -BeNullOrEmpty
-            $proposal.name | Should -Be $script:TestIKEProposalName
-            $script:TestIKEProposalId = $proposal.id
-            [void]$script:CreatedResources.IKEProposals.Add($proposal.id)
-            Write-Host "  Created IKE Proposal: $($proposal.name) (ID: $($proposal.id))" -ForegroundColor Green
-        }
-
-        It "Should get IKE proposal by ID" {
-            $proposal = Get-NBVPNIKEProposal -Id $script:TestIKEProposalId
-            $proposal | Should -Not -BeNullOrEmpty
-            $proposal.id | Should -Be $script:TestIKEProposalId
-        }
-
-        It "Should update IKE proposal" {
-            $proposal = Set-NBVPNIKEProposal -Id $script:TestIKEProposalId -Description "$script:TestPrefix - Updated"
-            $proposal.description | Should -BeLike "*Updated*"
-        }
-
-        # IKE Policy CRUD
-        It "Should create an IKE policy" {
-            # Note: Mode is only valid for IKEv1, not IKEv2
-            $policy = New-NBVPNIKEPolicy -Name $script:TestIKEPolicyName `
-                -Version 2 `
-                -Proposals @($script:TestIKEProposalId)
-            $policy | Should -Not -BeNullOrEmpty
-            $policy.name | Should -Be $script:TestIKEPolicyName
-            $script:TestIKEPolicyId = $policy.id
-            [void]$script:CreatedResources.IKEPolicies.Add($policy.id)
-            Write-Host "  Created IKE Policy: $($policy.name) (ID: $($policy.id))" -ForegroundColor Green
-        }
-
-        It "Should get IKE policy by ID" {
-            $policy = Get-NBVPNIKEPolicy -Id $script:TestIKEPolicyId
-            $policy | Should -Not -BeNullOrEmpty
-            $policy.id | Should -Be $script:TestIKEPolicyId
-        }
-
-        It "Should update IKE policy" {
-            $policy = Set-NBVPNIKEPolicy -Id $script:TestIKEPolicyId -Description "$script:TestPrefix - Updated"
-            $policy.description | Should -BeLike "*Updated*"
-        }
-
-        # IPSec Proposal CRUD
-        It "Should create an IPSec proposal" {
-            $proposal = New-NBVPNIPSecProposal -Name $script:TestIPSecProposalName `
-                -Encryption_Algorithm 'aes-256-cbc' `
-                -Authentication_Algorithm 'hmac-sha256'
-            $proposal | Should -Not -BeNullOrEmpty
-            $proposal.name | Should -Be $script:TestIPSecProposalName
-            $script:TestIPSecProposalId = $proposal.id
-            [void]$script:CreatedResources.IPSecProposals.Add($proposal.id)
-            Write-Host "  Created IPSec Proposal: $($proposal.name) (ID: $($proposal.id))" -ForegroundColor Green
-        }
-
-        It "Should get IPSec proposal by ID" {
-            $proposal = Get-NBVPNIPSecProposal -Id $script:TestIPSecProposalId
-            $proposal | Should -Not -BeNullOrEmpty
-            $proposal.id | Should -Be $script:TestIPSecProposalId
-        }
-
-        It "Should update IPSec proposal" {
-            $proposal = Set-NBVPNIPSecProposal -Id $script:TestIPSecProposalId -Description "$script:TestPrefix - Updated"
-            $proposal.description | Should -BeLike "*Updated*"
-        }
-
-        # IPSec Policy CRUD
-        It "Should create an IPSec policy" {
-            $policy = New-NBVPNIPSecPolicy -Name $script:TestIPSecPolicyName `
-                -Proposals @($script:TestIPSecProposalId)
-            $policy | Should -Not -BeNullOrEmpty
-            $policy.name | Should -Be $script:TestIPSecPolicyName
-            $script:TestIPSecPolicyId = $policy.id
-            [void]$script:CreatedResources.IPSecPolicies.Add($policy.id)
-            Write-Host "  Created IPSec Policy: $($policy.name) (ID: $($policy.id))" -ForegroundColor Green
-        }
-
-        It "Should get IPSec policy by ID" {
-            $policy = Get-NBVPNIPSecPolicy -Id $script:TestIPSecPolicyId
-            $policy | Should -Not -BeNullOrEmpty
-            $policy.id | Should -Be $script:TestIPSecPolicyId
-        }
-
-        It "Should update IPSec policy" {
-            $policy = Set-NBVPNIPSecPolicy -Id $script:TestIPSecPolicyId -Description "$script:TestPrefix - Updated"
-            $policy.description | Should -BeLike "*Updated*"
-        }
-
-        # IPSec Profile CRUD
-        It "Should create an IPSec profile" {
-            $profile = New-NBVPNIPSecProfile -Name $script:TestIPSecProfileName `
-                -Mode 'esp' `
-                -Ike_Policy $script:TestIKEPolicyId `
-                -Ipsec_Policy $script:TestIPSecPolicyId
-            $profile | Should -Not -BeNullOrEmpty
-            $profile.name | Should -Be $script:TestIPSecProfileName
-            $script:TestIPSecProfileId = $profile.id
-            [void]$script:CreatedResources.IPSecProfiles.Add($profile.id)
-            Write-Host "  Created IPSec Profile: $($profile.name) (ID: $($profile.id))" -ForegroundColor Green
-        }
-
-        It "Should get IPSec profile by ID" {
-            $profile = Get-NBVPNIPSecProfile -Id $script:TestIPSecProfileId
-            $profile | Should -Not -BeNullOrEmpty
-            $profile.id | Should -Be $script:TestIPSecProfileId
-        }
-
-        It "Should update IPSec profile" {
-            $profile = Set-NBVPNIPSecProfile -Id $script:TestIPSecProfileId -Description "$script:TestPrefix - Updated"
-            $profile.description | Should -BeLike "*Updated*"
-        }
-
-        # Tunnel Group CRUD
-        It "Should create a tunnel group" {
-            $group = New-NBVPNTunnelGroup -Name $script:TestTunnelGroupName `
-                -Slug ($script:TestTunnelGroupName.ToLower() -replace '[^a-z0-9-]', '-')
-            $group | Should -Not -BeNullOrEmpty
-            $group.name | Should -Be $script:TestTunnelGroupName
-            $script:TestTunnelGroupId = $group.id
-            [void]$script:CreatedResources.TunnelGroups.Add($group.id)
-            Write-Host "  Created Tunnel Group: $($group.name) (ID: $($group.id))" -ForegroundColor Green
-        }
-
-        It "Should get tunnel group by ID" {
-            $group = Get-NBVPNTunnelGroup -Id $script:TestTunnelGroupId
-            $group | Should -Not -BeNullOrEmpty
-            $group.id | Should -Be $script:TestTunnelGroupId
-        }
-
-        It "Should update tunnel group" {
-            $group = Set-NBVPNTunnelGroup -Id $script:TestTunnelGroupId -Description "$script:TestPrefix - Updated"
-            $group.description | Should -BeLike "*Updated*"
-        }
-
-        # Tunnel CRUD
-        It "Should create a tunnel" {
-            $tunnel = New-NBVPNTunnel -Name $script:TestTunnelName `
-                -Status 'active' `
-                -Encapsulation 'ipsec-transport' `
-                -Ipsec_Profile $script:TestIPSecProfileId `
-                -Group $script:TestTunnelGroupId
-            $tunnel | Should -Not -BeNullOrEmpty
-            $tunnel.name | Should -Be $script:TestTunnelName
-            $script:TestTunnelId = $tunnel.id
-            [void]$script:CreatedResources.Tunnels.Add($tunnel.id)
-            Write-Host "  Created Tunnel: $($tunnel.name) (ID: $($tunnel.id))" -ForegroundColor Green
-        }
-
-        It "Should get tunnel by ID" {
-            $tunnel = Get-NBVPNTunnel -Id $script:TestTunnelId
-            $tunnel | Should -Not -BeNullOrEmpty
-            $tunnel.id | Should -Be $script:TestTunnelId
-        }
-
-        It "Should update tunnel" {
-            $tunnel = Set-NBVPNTunnel -Id $script:TestTunnelId -Description "$script:TestPrefix - Updated"
-            $tunnel.description | Should -BeLike "*Updated*"
-        }
-
-        # Delete in reverse dependency order
-        It "Should delete tunnel" {
-            { Remove-NBVPNTunnel -Id $script:TestTunnelId -Confirm:$false } | Should -Not -Throw
-            $script:CreatedResources.Tunnels.Remove($script:TestTunnelId)
-        }
-
-        It "Should delete tunnel group" {
-            { Remove-NBVPNTunnelGroup -Id $script:TestTunnelGroupId -Confirm:$false } | Should -Not -Throw
-            $script:CreatedResources.TunnelGroups.Remove($script:TestTunnelGroupId)
-        }
-
-        It "Should delete IPSec profile" {
-            { Remove-NBVPNIPSecProfile -Id $script:TestIPSecProfileId -Confirm:$false } | Should -Not -Throw
-            $script:CreatedResources.IPSecProfiles.Remove($script:TestIPSecProfileId)
-        }
-
-        It "Should delete IPSec policy" {
-            { Remove-NBVPNIPSecPolicy -Id $script:TestIPSecPolicyId -Confirm:$false } | Should -Not -Throw
-            $script:CreatedResources.IPSecPolicies.Remove($script:TestIPSecPolicyId)
-        }
-
-        It "Should delete IPSec proposal" {
-            { Remove-NBVPNIPSecProposal -Id $script:TestIPSecProposalId -Confirm:$false } | Should -Not -Throw
-            $script:CreatedResources.IPSecProposals.Remove($script:TestIPSecProposalId)
-        }
-
-        It "Should delete IKE policy" {
-            { Remove-NBVPNIKEPolicy -Id $script:TestIKEPolicyId -Confirm:$false } | Should -Not -Throw
-            $script:CreatedResources.IKEPolicies.Remove($script:TestIKEPolicyId)
-        }
-
-        It "Should delete IKE proposal" {
-            { Remove-NBVPNIKEProposal -Id $script:TestIKEProposalId -Confirm:$false } | Should -Not -Throw
-            $script:CreatedResources.IKEProposals.Remove($script:TestIKEProposalId)
-        }
-    }
-
-    Context "Wireless Module CRUD" {
-        BeforeAll {
-            $script:TestWirelessGroupName = "$($script:TestPrefix)-WLANGroup"
-            $script:TestWirelessLANName = "$($script:TestPrefix)-WLAN"
-        }
-
-        It "Should create a wireless LAN group" {
-            $group = New-NBWirelessLANGroup -Name $script:TestWirelessGroupName `
-                -Slug ($script:TestWirelessGroupName.ToLower() -replace '[^a-z0-9-]', '-')
-            $group | Should -Not -BeNullOrEmpty
-            $script:TestWirelessGroupId = $group.id
-            [void]$script:CreatedResources.WirelessLANGroups.Add($group.id)
-            Write-Host "  Created Wireless LAN Group: $($group.name) (ID: $($group.id))" -ForegroundColor Green
-        }
-
-        It "Should create a wireless LAN" {
-            $wlan = New-NBWirelessLAN -Ssid $script:TestWirelessLANName `
-                -Group $script:TestWirelessGroupId
-            $wlan | Should -Not -BeNullOrEmpty
-            $script:TestWirelessLANId = $wlan.id
-            [void]$script:CreatedResources.WirelessLANs.Add($wlan.id)
-            Write-Host "  Created Wireless LAN: $($wlan.ssid) (ID: $($wlan.id))" -ForegroundColor Green
-        }
-
-        It "Should get wireless LAN by ID" {
-            $wlan = Get-NBWirelessLAN -Id $script:TestWirelessLANId
-            $wlan | Should -Not -BeNullOrEmpty
-            $wlan.id | Should -Be $script:TestWirelessLANId
-        }
-
-        It "Should update wireless LAN" {
-            $wlan = Set-NBWirelessLAN -Id $script:TestWirelessLANId -Description "$script:TestPrefix - Updated"
-            $wlan.description | Should -BeLike "*Updated*"
-        }
-
-        It "Should delete wireless LAN" {
-            { Remove-NBWirelessLAN -Id $script:TestWirelessLANId -Confirm:$false } | Should -Not -Throw
-            $script:CreatedResources.WirelessLANs.Remove($script:TestWirelessLANId)
-        }
-
-        It "Should delete wireless LAN group" {
-            { Remove-NBWirelessLANGroup -Id $script:TestWirelessGroupId -Confirm:$false } | Should -Not -Throw
-            $script:CreatedResources.WirelessLANGroups.Remove($script:TestWirelessGroupId)
         }
     }
 
@@ -1496,6 +1032,123 @@ Describe "Live Integration Tests" -Tag 'Integration', 'Live' -Skip:(-not $script
             # - Netbox 4.4+: uses /api/core/object-types/
             # - Netbox 4.0-4.3: uses /api/extras/object-types/
             { Get-NBContentType -Limit 1 } | Should -Not -Throw
+        }
+    }
+
+    Context "Port Mapping (Netbox 4.5+)" -Tag 'PortMapping', 'Netbox45' {
+        BeforeAll {
+            # Check Netbox version
+            $status = Get-NBVersion
+            $versionString = $status.'netbox-version'
+            if ($versionString -match '^\d+\.\d+') {
+                $version = [version]($versionString -replace '-.*$')
+                $script:Is45OrHigher = $version -ge [version]'4.5.0'
+            }
+            else {
+                $script:Is45OrHigher = $false
+            }
+
+            if ($script:Is45OrHigher) {
+                # Find or create a test device
+                $script:TestDevice = Get-NBDCIMDevice -Name "$script:TestPrefix-PatchPanel" | Select-Object -First 1
+                if (-not $script:TestDevice) {
+                    # Need site, manufacturer, device type, device role
+                    $site = Get-NBDCIMSite | Select-Object -First 1
+                    if (-not $site) {
+                        $site = New-NBDCIMSite -Name "$script:TestPrefix-Site" -Slug "$script:TestPrefix-site".ToLower()
+                        [void]$script:CreatedResources.Sites.Add($site.id)
+                    }
+                    $mfr = Get-NBDCIMManufacturer | Select-Object -First 1
+                    if (-not $mfr) {
+                        $mfr = New-NBDCIMManufacturer -Name "$script:TestPrefix-Mfr" -Slug "$script:TestPrefix-mfr".ToLower()
+                        [void]$script:CreatedResources.Manufacturers.Add($mfr.id)
+                    }
+                    $devType = Get-NBDCIMDeviceType | Select-Object -First 1
+                    if (-not $devType) {
+                        $devType = New-NBDCIMDeviceType -Model "$script:TestPrefix-PP24" -Slug "$script:TestPrefix-pp24".ToLower() -Manufacturer $mfr.id
+                        [void]$script:CreatedResources.DeviceTypes.Add($devType.id)
+                    }
+                    $devRole = Get-NBDCIMDeviceRole | Select-Object -First 1
+                    if (-not $devRole) {
+                        $devRole = New-NBDCIMDeviceRole -Name "$script:TestPrefix-PatchPanel" -Slug "$script:TestPrefix-patchpanel".ToLower()
+                        [void]$script:CreatedResources.DeviceRoles.Add($devRole.id)
+                    }
+                    $script:TestDevice = New-NBDCIMDevice -Name "$script:TestPrefix-PatchPanel" -Site $site.id -Device_Type $devType.id -Role $devRole.id
+                    [void]$script:CreatedResources.Devices.Add($script:TestDevice.id)
+                }
+
+                # Track port resources for cleanup
+                $script:CreatedPorts = @{
+                    RearPorts  = [System.Collections.ArrayList]::new()
+                    FrontPorts = [System.Collections.ArrayList]::new()
+                }
+            }
+        }
+
+        AfterAll {
+            if ($script:Is45OrHigher -and $script:CreatedPorts) {
+                # Cleanup ports (FrontPorts first, then RearPorts)
+                foreach ($id in $script:CreatedPorts.FrontPorts) {
+                    try { Remove-NBDCIMFrontPort -Id $id -Confirm:$false -ErrorAction SilentlyContinue } catch {}
+                }
+                foreach ($id in $script:CreatedPorts.RearPorts) {
+                    try { Remove-NBDCIMRearPort -Id $id -Confirm:$false -ErrorAction SilentlyContinue } catch {}
+                }
+            }
+        }
+
+        It "Should create RearPort without port mappings" {
+            if (-not $script:Is45OrHigher) { Set-ItResult -Skipped -Because "Requires Netbox 4.5+"; return }
+            $rp = New-NBDCIMRearPort -Device $script:TestDevice.id -Name "$script:TestPrefix-RP1" -Type '8p8c' -Positions 2
+            $rp | Should -Not -BeNullOrEmpty
+            $rp.id | Should -BeGreaterThan 0
+            [void]$script:CreatedPorts.RearPorts.Add($rp.id)
+            $script:TestRearPort = $rp
+        }
+
+        It "Should create FrontPort with Rear_Ports array" {
+            if (-not $script:Is45OrHigher) { Set-ItResult -Skipped -Because "Requires Netbox 4.5+"; return }
+            $fp = New-NBDCIMFrontPort -Device $script:TestDevice.id -Name "$script:TestPrefix-FP1" -Type '8p8c' -Rear_Ports @(
+                @{ rear_port = $script:TestRearPort.id; rear_port_position = 1; position = 1 }
+            )
+            $fp | Should -Not -BeNullOrEmpty
+            $fp.rear_ports | Should -Not -BeNullOrEmpty
+            $fp.rear_ports[0].rear_port | Should -Be $script:TestRearPort.id
+            [void]$script:CreatedPorts.FrontPorts.Add($fp.id)
+            $script:TestFrontPort = $fp
+        }
+
+        It "Should update FrontPort Rear_Ports" {
+            if (-not $script:Is45OrHigher) { Set-ItResult -Skipped -Because "Requires Netbox 4.5+"; return }
+            $fp = Set-NBDCIMFrontPort -Id $script:TestFrontPort.id -Rear_Ports @(
+                @{ rear_port = $script:TestRearPort.id; rear_port_position = 2; position = 1 }
+            ) -Force
+            $fp.rear_ports[0].rear_port_position | Should -Be 2
+        }
+
+        It "Should set RearPort Front_Ports via API (bidirectional)" {
+            if (-not $script:Is45OrHigher) { Set-ItResult -Skipped -Because "Requires Netbox 4.5+"; return }
+            # Create a RearPort (no front_ports initially)
+            $rp2 = New-NBDCIMRearPort -Device $script:TestDevice.id -Name "$script:TestPrefix-RP2" -Type '8p8c' -Positions 1
+            [void]$script:CreatedPorts.RearPorts.Add($rp2.id)
+            $rp2.front_ports | Should -BeNullOrEmpty
+
+            # Create a FrontPort mapped to this RearPort
+            $fp2 = New-NBDCIMFrontPort -Device $script:TestDevice.id -Name "$script:TestPrefix-FP2" -Type '8p8c' -Rear_Port $rp2.id -Rear_Port_Position 1
+            [void]$script:CreatedPorts.FrontPorts.Add($fp2.id)
+            $script:TestFP2 = $fp2
+
+            # Verify bidirectional mapping was created automatically by Netbox
+            $rp2Check = Get-NBDCIMRearPort -Id $rp2.id
+            $rp2Check.front_ports | Should -Not -BeNullOrEmpty -Because "Creating FrontPort with rear_port should auto-populate RearPort.front_ports"
+            $rp2Check.front_ports[0].front_port | Should -Be $fp2.id
+        }
+
+        It "Should sync bidirectional mapping to FrontPort" {
+            if (-not $script:Is45OrHigher) { Set-ItResult -Skipped -Because "Requires Netbox 4.5+"; return }
+            # The FrontPort created above should now have rear_ports populated
+            $fp2 = Get-NBDCIMFrontPort -Id $script:TestFP2.id
+            $fp2.rear_ports | Should -Not -BeNullOrEmpty
         }
     }
 

@@ -255,6 +255,18 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
             $bodyObj = $Result.Body | ConvertFrom-Json
             $bodyObj.status | Should -Be 1123
         }
+
+        It "Should create a VM with Start_On_Boot (Netbox 4.5+)" {
+            $Result = New-NBVirtualMachine -Name 'testvm' -Cluster 1 -Start_On_Boot 'on'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.start_on_boot | Should -Be 'on'
+        }
+
+        It "Should create a VM with Start_On_Boot set to laststate" {
+            $Result = New-NBVirtualMachine -Name 'testvm' -Cluster 1 -Start_On_Boot 'laststate'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.start_on_boot | Should -Be 'laststate'
+        }
     }
 
     Context "New-NBVirtualMachineInterface" {
@@ -312,6 +324,12 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
             $Result.Method | Should -Be 'PATCH'
             $bodyObj = $Result.Body | ConvertFrom-Json
             $bodyObj.status | Should -Be 'Fake'
+        }
+
+        It "Should update a VM with Start_On_Boot (Netbox 4.5+)" {
+            $Result = Set-NBVirtualMachine -Id 1234 -Start_On_Boot 'off' -Force
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.start_on_boot | Should -Be 'off'
         }
     }
 
