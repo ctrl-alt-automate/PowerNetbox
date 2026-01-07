@@ -310,7 +310,7 @@ jobs:
           else
             echo "V1 token failed (HTTP $RESPONSE) - creating v2 token for Netbox 4.5.0+"
 
-            # Create a v2 token using Netbox's generate() method
+            # Create a v2 token using Netbox's generate() and update_digest() methods
             echo "Running Django shell to create token..."
             DJANGO_OUTPUT=$(docker exec powernetbox-netbox-1 /opt/netbox/venv/bin/python /opt/netbox/netbox/manage.py shell -c "
           import sys
@@ -333,26 +333,29 @@ jobs:
               # Create token instance
               token = Token(user=user)
 
-              # Call generate() to get the plaintext secret before save()
-              if hasattr(token, 'generate') and callable(token.generate):
-                  plaintext = token.generate()
-                  print(f'DEBUG: generate() returned: {plaintext[:10] if plaintext else None}...', file=sys.stderr)
-                  token.save()
-                  if plaintext:
-                      full_token = f'nbt_{token.key}.{plaintext}'
-                      print(full_token)
-                      print(f'DEBUG: Created token via generate()', file=sys.stderr)
-              else:
-                  # Fallback: try save() and check token.token property
-                  result = token.save()
-                  print(f'DEBUG: save() returned: {result}', file=sys.stderr)
-                  if hasattr(token, 'token') and token.token:
-                      print(token.token)
-                      print(f'DEBUG: Got token from token property', file=sys.stderr)
-                  elif result and str(result).startswith('nbt_'):
-                      print(result)
-                  else:
-                      print(f'DEBUG: No plaintext available', file=sys.stderr)
+              # Generate the key first
+              if not token.key:
+                  token.key = token.generate_key()
+              print(f'DEBUG: Generated key: {token.key}', file=sys.stderr)
+
+              # Generate plaintext secret
+              plaintext = token.generate()
+              print(f'DEBUG: generate() returned: {plaintext[:10] if plaintext else None}...', file=sys.stderr)
+
+              # Update the HMAC digest with the plaintext (this hashes the secret)
+              if hasattr(token, 'update_digest') and callable(token.update_digest):
+                  token.update_digest(plaintext)
+                  print(f'DEBUG: Called update_digest()', file=sys.stderr)
+
+              # Save the token
+              token.save()
+              print(f'DEBUG: Token saved, id={token.id}', file=sys.stderr)
+
+              # Output the full token
+              if plaintext:
+                  full_token = f'nbt_{token.key}.{plaintext}'
+                  print(full_token)
+                  print(f'DEBUG: Created token successfully', file=sys.stderr)
 
           except Exception as e:
               print(f'ERROR: {type(e).__name__}: {e}', file=sys.stderr)
