@@ -333,32 +333,24 @@ jobs:
               # Create token instance
               token = Token(user=user)
 
-              # Generate the key first
-              if not token.key:
-                  token.key = token.generate_key()
-              print(f'DEBUG: Generated key: {token.key}', file=sys.stderr)
+              # Generate the plaintext secret
+              secret = Token.generate()  # Static method
+              print(f'DEBUG: Generated secret: {secret[:10]}...', file=sys.stderr)
 
-              # Generate plaintext secret and assign to token.plaintext
-              plaintext = token.generate()
-              print(f'DEBUG: generate() returned: {plaintext[:10] if plaintext else None}...', file=sys.stderr)
-
-              # Set plaintext on the token (this is used by update_digest)
-              token.plaintext = plaintext
-
-              # Update the HMAC digest (reads from token.plaintext)
-              if hasattr(token, 'update_digest') and callable(token.update_digest):
-                  token.update_digest()
-                  print(f'DEBUG: Called update_digest()', file=sys.stderr)
+              # Set via the 'token' property - this automatically:
+              # 1. Generates the key (token.key)
+              # 2. Calls update_digest() to compute HMAC
+              token.token = secret
+              print(f'DEBUG: Set token property, key={token.key}', file=sys.stderr)
 
               # Save the token
               token.save()
               print(f'DEBUG: Token saved, id={token.id}, hmac_digest={token.hmac_digest[:10] if token.hmac_digest else None}...', file=sys.stderr)
 
-              # Output the full token
-              if plaintext:
-                  full_token = f'nbt_{token.key}.{plaintext}'
-                  print(full_token)
-                  print(f'DEBUG: Created token successfully', file=sys.stderr)
+              # Output the full v2 token: nbt_{key}.{secret}
+              full_token = f'nbt_{token.key}.{secret}'
+              print(full_token)
+              print(f'DEBUG: Created v2 token successfully', file=sys.stderr)
 
           except Exception as e:
               print(f'ERROR: {type(e).__name__}: {e}', file=sys.stderr)
