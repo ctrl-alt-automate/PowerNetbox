@@ -310,7 +310,7 @@ jobs:
           else
             echo "V1 token failed (HTTP $RESPONSE) - creating v2 token for Netbox 4.5.0+"
 
-            # Create a v2 token - let Token model handle the hashing
+            # Create a v2 token using Netbox's generate() method
             echo "Running Django shell to create token..."
             DJANGO_OUTPUT=$(docker exec powernetbox-netbox-1 /opt/netbox/venv/bin/python /opt/netbox/netbox/manage.py shell -c "
           import sys
@@ -330,34 +330,29 @@ jobs:
               deleted = Token.objects.filter(user=user).delete()
               print(f'DEBUG: Deleted tokens: {deleted}', file=sys.stderr)
 
-              # Show Token model fields for debugging
-              fields = [f.name for f in Token._meta.get_fields()]
-              print(f'DEBUG: Token fields: {fields}', file=sys.stderr)
-
-              # Create token - let Netbox handle the key/secret generation
+              # Create token instance
               token = Token(user=user)
 
-              # Try different approaches to get the plaintext
-              # Approach 1: Check if save() returns the token
-              result = token.save()
-              print(f'DEBUG: save() returned: {result} (type={type(result).__name__})', file=sys.stderr)
-
-              if result and str(result).startswith('nbt_'):
-                  print(result)
-              else:
-                  # Approach 2: Check for _plaintext attribute (set during save)
-                  if hasattr(token, '_plaintext') and token._plaintext:
-                      full_token = f'nbt_{token.key}.{token._plaintext}'
+              # Call generate() to get the plaintext secret before save()
+              if hasattr(token, 'generate') and callable(token.generate):
+                  plaintext = token.generate()
+                  print(f'DEBUG: generate() returned: {plaintext[:10] if plaintext else None}...', file=sys.stderr)
+                  token.save()
+                  if plaintext:
+                      full_token = f'nbt_{token.key}.{plaintext}'
                       print(full_token)
-                      print(f'DEBUG: Got token from _plaintext attr', file=sys.stderr)
+                      print(f'DEBUG: Created token via generate()', file=sys.stderr)
+              else:
+                  # Fallback: try save() and check token.token property
+                  result = token.save()
+                  print(f'DEBUG: save() returned: {result}', file=sys.stderr)
+                  if hasattr(token, 'token') and token.token:
+                      print(token.token)
+                      print(f'DEBUG: Got token from token property', file=sys.stderr)
+                  elif result and str(result).startswith('nbt_'):
+                      print(result)
                   else:
-                      # Approach 3: Check for plaintext attribute
-                      if hasattr(token, 'plaintext') and token.plaintext:
-                          full_token = f'nbt_{token.key}.{token.plaintext}'
-                          print(full_token)
-                          print(f'DEBUG: Got token from plaintext attr', file=sys.stderr)
-                      else:
-                          print(f'DEBUG: No plaintext available. Token attrs: {[a for a in dir(token) if not a.startswith(\"_\")]}', file=sys.stderr)
+                      print(f'DEBUG: No plaintext available', file=sys.stderr)
 
           except Exception as e:
               print(f'ERROR: {type(e).__name__}: {e}', file=sys.stderr)
