@@ -5,10 +5,10 @@
 [![Tests](https://github.com/ctrl-alt-automate/PowerNetbox/actions/workflows/test.yml/badge.svg)](https://github.com/ctrl-alt-automate/PowerNetbox/actions/workflows/test.yml)
 [![Lint](https://github.com/ctrl-alt-automate/PowerNetbox/actions/workflows/pssa.yml/badge.svg)](https://github.com/ctrl-alt-automate/PowerNetbox/actions/workflows/pssa.yml)
 [![License](https://img.shields.io/github/license/ctrl-alt-automate/PowerNetbox)](LICENSE)
-[![Netbox Version](https://img.shields.io/badge/Netbox-4.4.9-blue?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyTDIgN2wxMCA1IDEwLTV6TTIgMTdsMTAgNSAxMC01TTIgMTJsMTAgNSAxMC01Ii8+PC9zdmc+)](https://github.com/netbox-community/netbox)
+[![Netbox Version](https://img.shields.io/badge/Netbox-4.4.10-blue?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyTDIgN2wxMCA1IDEwLTV6TTIgMTdsMTAgNSAxMC01TTIgMTJsMTAgNSAxMC01Ii8+PC9zdmc+)](https://github.com/netbox-community/netbox)
 [![Integration Tests](https://github.com/ctrl-alt-automate/PowerNetbox/actions/workflows/integration.yml/badge.svg)](https://github.com/ctrl-alt-automate/PowerNetbox/actions/workflows/integration.yml)
 
-**The** comprehensive PowerShell module for the [Netbox](https://github.com/netbox-community/netbox) REST API with **100% coverage**. Fully compatible with **Netbox 4.4.9**.
+**The** comprehensive PowerShell module for the [Netbox](https://github.com/netbox-community/netbox) REST API with **100% coverage**. Fully compatible with **Netbox 4.4.10**.
 
 ---
 
@@ -253,7 +253,7 @@ Import-Module PowerNetbox
 |----------|----------------|
 | PowerShell Desktop | 5.1 |
 | PowerShell Core | 7.0+ |
-| Netbox | 4.1+ (tested with 4.4.9) |
+| Netbox | 4.1+ (tested with 4.4.10) |
 
 > **Version Compatibility:** See the [Compatibility Guide](https://github.com/ctrl-alt-automate/PowerNetbox/wiki/Compatibility) for detailed information about supported Netbox versions and API differences.
 
@@ -282,6 +282,13 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 Original copyright (c) 2018 Ben Claussen. Fork maintained by ctrl-alt-automate.
 
 ## Changelog
+
+### v4.4.10.0
+
+- **Full Netbox 4.4.10 compatibility** - Tested with latest stable release
+- **New bridge_interfaces field** - Interface API now returns reverse bridge relationships (read-only)
+- **498 public functions** with 100% API coverage
+- **952 unit tests, 94 integration tests**
 
 ### v4.4.9.3
 

@@ -322,11 +322,11 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = 'v4.4.9 - PowerNetbox Release (matches Netbox 4.4.9)
-- Full Netbox 4.4.9 compatibility
-- Netbox 4.4.9 is a bugfix release with no breaking API changes
-- 494+ public functions with 100% API coverage
-- 946 unit tests, 79 integration tests
+        ReleaseNotes = 'v4.4.10 - PowerNetbox Release (matches Netbox 4.4.10)
+- Full Netbox 4.4.10 compatibility
+- New bridge_interfaces field on Interface API (read-only, automatic)
+- 498+ public functions with 100% API coverage
+- 952 unit tests, 94 integration tests
 - Cross-platform support (Windows, Linux, macOS)
 - Docker-based CI/CD integration testing'
 
