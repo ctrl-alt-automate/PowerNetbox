@@ -20,7 +20,7 @@ on:
       test_versions:
         description: 'Netbox versions to test (comma-separated)'
         required: false
-        default: '4.1.11,4.2.9,4.3.7,4.4.9,4.5.0-beta1'
+        default: '4.1.11,4.2.9,4.3.7,4.4.9,4.5.0'
         type: string
       include_beta:
         description: 'Include beta/pre-release versions'
@@ -69,17 +69,16 @@ jobs:
             netbox_short: "4.4.9"
             expected_failures: []
 
-          # Netbox 4.5.x - Beta (next major)
-          # Breaking changes in 4.5:
+          # Netbox 4.5.x - Latest stable
+          # Changes in 4.5:
           # - is_staff removed from User model (#101)
           # - Token v2 with Bearer auth (#102)
           # - New: cable-profiles, authentication-check (#103, #105)
           # - New fields: VM.interface_count, Token.allowed_ips (#106)
-          - netbox: "v4.5.0-beta1-3.4.2"
-            netbox_short: "4.5.0-beta1"
-            is_beta: true
-            expected_failures:
-              - "is_staff parameter deprecated"  # User model change
+          - netbox: "v4.5.0-3.4.2"
+            netbox_short: "4.5.0"
+            is_beta: false
+            expected_failures: []
 
     env:
       NETBOX_VERSION: ${{ matrix.netbox }}
@@ -459,11 +458,11 @@ jobs:
           echo "" >> compatibility-report.md
           echo "Generated: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> compatibility-report.md
           echo "" >> compatibility-report.md
-          echo "| Test | 4.1.11 | 4.2.9 | 4.3.7 | 4.4.9 | 4.5.0-beta1 |" >> compatibility-report.md
-          echo "|------|--------|-------|-------|-------|-------------|" >> compatibility-report.md
+          echo "| Test | 4.1.11 | 4.2.9 | 4.3.7 | 4.4.9 | 4.5.0 |" >> compatibility-report.md
+          echo "|------|--------|-------|-------|-------|-------|" >> compatibility-report.md
 
           # Parse results from each version
-          for version in 4.1.11 4.2.9 4.3.7 4.4.9 4.5.0-beta1; do
+          for version in 4.1.11 4.2.9 4.3.7 4.4.9 4.5.0; do
             if [ -f "results/compatibility-$version/compatibility-results-$version.json" ]; then
               echo "Found results for $version"
               cat "results/compatibility-$version/compatibility-results-$version.json"
