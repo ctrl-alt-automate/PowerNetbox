@@ -159,9 +159,9 @@ function Connect-NBAPI {
 
     if ($null -eq $script:NetboxConfig.ParsedVersion) {
         Write-Warning "Could not parse Netbox version '$versionString', assuming compatible"
-    } elseif ($script:NetboxConfig.ParsedVersion -lt [version]'4.1') {
+    } elseif ($script:NetboxConfig.ParsedVersion -lt [version]'4.3') {
         $Script:NetboxConfig.Connected = $false
-        throw "Netbox version is incompatible with this PS module. Requires >=4.1, found version $versionString"
+        throw "Netbox version is incompatible with this PS module. Requires >=4.3, found version $versionString"
     } else {
         Write-Verbose "Found compatible version [$versionString] (parsed: $($script:NetboxConfig.ParsedVersion))!"
     }

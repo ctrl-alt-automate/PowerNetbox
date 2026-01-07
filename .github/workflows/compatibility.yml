@@ -2,7 +2,7 @@
 # ===================
 # Test PowerNetbox against multiple Netbox versions to determine minimum version
 #
-# This workflow tests against Netbox 4.1 - 4.5 to identify:
+# This workflow tests against Netbox 4.3 - 4.5 to identify:
 # - Which functions work with which versions
 # - Breaking API changes between versions
 # - Minimum supported version
@@ -20,7 +20,7 @@ on:
       test_versions:
         description: 'Netbox versions to test (comma-separated)'
         required: false
-        default: '4.1.11,4.2.9,4.3.7,4.4.9,4.5.0'
+        default: '4.3.7,4.4.10,4.5.0'
         type: string
       include_beta:
         description: 'Include beta/pre-release versions'
@@ -45,31 +45,18 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # Netbox 4.1.x - Oldest 4.x we want to support
-          - netbox: "v4.1.11-3.0.2"
-            netbox_short: "4.1.11"
-            expected_failures:
-              - "Get-NBCoreObjectType"  # /api/core/object-types/ not available
-              - "Get-NBCoreObjectChange"  # Still in /api/extras/
-
-          # Netbox 4.2.x
-          - netbox: "v4.2.9-3.2.1"
-            netbox_short: "4.2.9"
-            expected_failures:
-              - "Get-NBCoreObjectType"
-
-          # Netbox 4.3.x - Last before 4.4 changes
+          # Netbox 4.3.x - Minimum supported version
           - netbox: "v4.3.7-3.3.0"
             netbox_short: "4.3.7"
             expected_failures:
-              - "Get-NBCoreObjectType"
+              - "Get-NBCoreObjectType"  # /api/core/object-types/ not available in 4.3
 
-          # Netbox 4.4.x - Current stable (reference)
-          - netbox: "v4.4.9-3.4.2"
-            netbox_short: "4.4.9"
+          # Netbox 4.4.x - Stable (reference)
+          - netbox: "v4.4.10-3.4.2"
+            netbox_short: "4.4.10"
             expected_failures: []
 
-          # Netbox 4.5.x - Latest stable
+          # Netbox 4.5.x - Latest stable (primary target)
           # Changes in 4.5:
           # - is_staff removed from User model (#101)
           # - Token v2 with Bearer auth (#102)
@@ -458,11 +445,11 @@ jobs:
           echo "" >> compatibility-report.md
           echo "Generated: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> compatibility-report.md
           echo "" >> compatibility-report.md
-          echo "| Test | 4.1.11 | 4.2.9 | 4.3.7 | 4.4.9 | 4.5.0 |" >> compatibility-report.md
-          echo "|------|--------|-------|-------|-------|-------|" >> compatibility-report.md
+          echo "| Test | 4.3.7 | 4.4.10 | 4.5.0 |" >> compatibility-report.md
+          echo "|------|-------|--------|-------|" >> compatibility-report.md
 
           # Parse results from each version
-          for version in 4.1.11 4.2.9 4.3.7 4.4.9 4.5.0; do
+          for version in 4.3.7 4.4.10 4.5.0; do
             if [ -f "results/compatibility-$version/compatibility-results-$version.json" ]; then
               echo "Found results for $version"
               cat "results/compatibility-$version/compatibility-results-$version.json"
