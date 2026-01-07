@@ -309,7 +309,7 @@ jobs:
             echo "V1 token failed (HTTP $RESPONSE) - creating v2 token for Netbox 4.5.0+"
 
             # Create a v2 token via Django management command
-            # In Netbox 4.5, save() returns the secret, and we need to construct nbt_<KEY>.<SECRET>
+            # In Netbox 4.5, save() returns the full token string (nbt_KEY.SECRET)
             TOKEN_OUTPUT=$(docker exec powernetbox-netbox-1 /opt/netbox/venv/bin/python /opt/netbox/netbox/manage.py shell -c "
           from users.models import Token
           from django.contrib.auth import get_user_model
@@ -317,12 +317,20 @@ jobs:
           user = User.objects.filter(username='admin').first()
           if not user:
               user = User.objects.create_superuser('admin', 'admin@example.com', 'admin')
-          # Delete existing tokens and create new v2 token
+          # Delete existing tokens
           Token.objects.filter(user=user).delete()
+          # Create new token - save() returns the full plaintext token in Netbox 4.5
           token = Token(user=user)
-          plaintext = token.save()
-          # Construct full v2 token: nbt_<KEY>.<SECRET>
-          print(f'nbt_{token.key}.{plaintext}')
+          full_token = token.save()
+          # Print the token - save() should return full 'nbt_KEY.SECRET' format
+          if full_token and full_token.startswith('nbt_'):
+              print(full_token)
+          else:
+              # Fallback: try to get plaintext from _plaintext attribute
+              if hasattr(token, '_plaintext'):
+                  print(f'nbt_{token.key}.{token._plaintext}')
+              else:
+                  print(f'ERROR: save() returned: {full_token}')
           " 2>&1 | grep -E '^nbt_')
 
             if [ -n "$TOKEN_OUTPUT" ]; then
@@ -332,7 +340,11 @@ jobs:
             else
               echo "ERROR: Failed to create v2 token."
               # Show debug info
-              docker exec powernetbox-netbox-1 /opt/netbox/venv/bin/python /opt/netbox/netbox/manage.py shell -c "from users.models import Token; print('Existing tokens:', Token.objects.count())"
+              docker exec powernetbox-netbox-1 /opt/netbox/venv/bin/python /opt/netbox/netbox/manage.py shell -c "
+          from users.models import Token
+          print('Token model methods:', [m for m in dir(Token) if not m.startswith('_')])
+          print('Existing tokens:', Token.objects.count())
+          "
               echo "token=$V1_TOKEN" >> $GITHUB_OUTPUT
               echo "token_type=v1-fallback" >> $GITHUB_OUTPUT
             fi
