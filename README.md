@@ -12,12 +12,12 @@
   <br>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/ctrl-alt-automate/PowerNetbox" alt="License"></a>
   <a href="https://github.com/ctrl-alt-automate/PowerNetbox/actions/workflows/pssa.yml"><img src="https://github.com/ctrl-alt-automate/PowerNetbox/actions/workflows/pssa.yml/badge.svg" alt="Lint"></a>
-  <a href="https://github.com/netbox-community/netbox"><img src="https://img.shields.io/badge/Netbox-4.4.10-blue?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyTDIgN2wxMCA1IDEwLTV6TTIgMTdsMTAgNSAxMC01TTIgMTJsMTAgNSAxMC01Ii8+PC9zdmc+" alt="Netbox Version"></a>
+  <a href="https://github.com/netbox-community/netbox"><img src="https://img.shields.io/badge/Netbox-4.5.0-blue?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyTDIgN2wxMCA1IDEwLTV6TTIgMTdsMTAgNSAxMC01TTIgMTJsMTAgNSAxMC01Ii8+PC9zdmc+" alt="Netbox Version"></a>
 </p>
 
 <p align="center">
   <b>The</b> comprehensive PowerShell module for the <a href="https://github.com/netbox-community/netbox">Netbox</a> REST API with <b>100% coverage</b>.<br>
-  Fully compatible with <b>Netbox 4.4.10</b>.
+  Fully compatible with <b>Netbox 4.5.0</b>.
 </p>
 
 ---
@@ -40,10 +40,10 @@ We extend our sincere thanks to Ben and all original contributors for building t
 
 - **100% API Coverage** - Full support for all Netbox 4.x API endpoints
 - **Cross-Platform** - Works on Windows, Linux, and macOS
-- **498 Functions** - Complete CRUD operations for all resources
+- **506 Functions** - Complete CRUD operations for all resources
 - **Pipeline Support** - Full PowerShell pipeline integration
 - **Secure** - Token-based authentication with TLS 1.2/1.3
-- **Well Tested** - 946 unit tests + 79 integration tests
+- **Well Tested** - 952 unit tests + 94 integration tests
 - **Tab Completion** - Argument completers for common parameters
 - **Verbose Logging** - Write-Verbose in all functions for debugging
 
@@ -60,7 +60,7 @@ We extend our sincere thanks to Ben and all original contributors for building t
 | Wireless | 3 | 12 | ✅ Full |
 | Extras | 12 | 45 | ✅ Full |
 | Core | 5 | 8 | ✅ Full |
-| Users | 4 | 16 | ✅ Full |
+| Users | 6 | 24 | ✅ Full |
 | Branching* | 3 | 16 | ✅ Full |
 
 \* Requires [netbox-branching](https://github.com/netboxlabs/netbox-branching) plugin
@@ -263,7 +263,7 @@ Import-Module PowerNetbox
 |----------|----------------|
 | PowerShell Desktop | 5.1 |
 | PowerShell Core | 7.0+ |
-| Netbox | 4.1+ (tested with 4.4.10) |
+| Netbox | 4.1+ (tested with 4.5.0) |
 
 > **Version Compatibility:** See the [Compatibility Guide](https://github.com/ctrl-alt-automate/PowerNetbox/wiki/Compatibility) for detailed information about supported Netbox versions and API differences.
 
@@ -293,12 +293,24 @@ Original copyright (c) 2018 Ben Claussen. Fork maintained by ctrl-alt-automate.
 
 ## Changelog
 
+### v4.5.0.0
+
+- **Full Netbox 4.5.0 compatibility** - Tested with official 4.5.0 release
+- **Token v2 Bearer authentication** - Support for new `nbt_<KEY>.<TOKEN>` format
+- **Cable Profiles** - `Cable_Profile` parameter on cable functions
+- **Object Ownership** - New `Get/New/Set/Remove-NBOwner` and `*-NBOwnerGroup` functions
+- **Test-NBAuthentication** - New function for auth verification
+- **Port Mappings** - Bidirectional `rear_ports`/`front_ports` support
+- **New fields** - `start_on_boot`, `enabled`, `color` on various endpoints
+- **Is_Staff deprecation** - Automatically handled for User functions
+- **506 public functions** with 100% API coverage
+- **952 unit tests, 94 integration tests**
+
 ### v4.4.10.0
 
 - **Full Netbox 4.4.10 compatibility** - Tested with latest stable release
 - **New bridge_interfaces field** - Interface API now returns reverse bridge relationships (read-only)
 - **498 public functions** with 100% API coverage
-- **952 unit tests, 94 integration tests**
 
 ### v4.4.9.3
 
