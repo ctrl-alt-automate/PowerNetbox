@@ -108,10 +108,10 @@ jobs:
 
       - name: Wait for Netbox to be ready
         run: |
-          echo "Waiting for Netbox to be ready (this may take 2-3 minutes for first-time setup)..."
+          echo "Waiting for Netbox to be ready (this may take 5-6 minutes for Netbox 4.5+ migrations)..."
           echo ""
 
-          MAX_WAIT=300  # 5 minutes max
+          MAX_WAIT=420  # 7 minutes max (4.5.0 has many migrations)
           ELAPSED=0
           INTERVAL=10
 
