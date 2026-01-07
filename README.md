@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/PowerNetbox-logo.png" alt="PowerNetbox Logo" width="200">
+  <img src="assets/PowerNetbox-logo.png" alt="PowerNetbox Logo" width="280">
 </p>
 
 <h1 align="center">PowerNetbox</h1>
