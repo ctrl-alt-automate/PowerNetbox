@@ -290,6 +290,51 @@ jobs:
           Write-Host "All v2 token tests passed!" -ForegroundColor Green
 
       # ----------------------------------------------------------
+      # Setup API Token (v1 or v2 depending on Netbox version)
+      # ----------------------------------------------------------
+      - name: Setup API Token
+        id: token
+        run: |
+          echo "Testing v1 token authentication..."
+          V1_TOKEN="0123456789abcdef0123456789abcdef01234567"
+
+          # Test if v1 token works
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Token $V1_TOKEN" http://localhost:8000/api/status/)
+
+          if [ "$RESPONSE" = "200" ]; then
+            echo "V1 token works - using legacy token"
+            echo "token=$V1_TOKEN" >> $GITHUB_OUTPUT
+            echo "token_type=v1" >> $GITHUB_OUTPUT
+          else
+            echo "V1 token failed (HTTP $RESPONSE) - creating v2 token for Netbox 4.5.0+"
+
+            # Create a v2 token via Django management command
+            TOKEN_OUTPUT=$(docker exec powernetbox-netbox-1 /opt/netbox/venv/bin/python /opt/netbox/netbox/manage.py shell -c "
+          from users.models import Token
+          from django.contrib.auth import get_user_model
+          User = get_user_model()
+          user = User.objects.filter(username='admin').first()
+          if not user:
+              user = User.objects.create_superuser('admin', 'admin@example.com', 'admin')
+          # Delete existing tokens and create new v2 token
+          Token.objects.filter(user=user).delete()
+          token = Token(user=user)
+          plaintext = token.save()
+          print(plaintext)
+          " 2>&1 | tail -1)
+
+            if [ -n "$TOKEN_OUTPUT" ] && [[ "$TOKEN_OUTPUT" == nbt_* ]]; then
+              echo "Created v2 token: ${TOKEN_OUTPUT:0:20}..."
+              echo "token=$TOKEN_OUTPUT" >> $GITHUB_OUTPUT
+              echo "token_type=v2" >> $GITHUB_OUTPUT
+            else
+              echo "ERROR: Failed to create v2 token. Output: $TOKEN_OUTPUT"
+              echo "token=$V1_TOKEN" >> $GITHUB_OUTPUT
+              echo "token_type=v1-fallback" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      # ----------------------------------------------------------
       # Verify API Auth Works
       # ----------------------------------------------------------
       - name: Verify API authentication
@@ -297,13 +342,21 @@ jobs:
         shell: pwsh
         env:
           NETBOX_HOST: ${{ env.NETBOX_HOST }}
-          NETBOX_TOKEN: ${{ env.NETBOX_TOKEN }}
+          NETBOX_TOKEN: ${{ steps.token.outputs.token }}
+          TOKEN_TYPE: ${{ steps.token.outputs.token_type }}
         run: |
           Write-Host "Verifying API authentication..." -ForegroundColor Cyan
+          Write-Host "Token type: $env:TOKEN_TYPE" -ForegroundColor Gray
 
-          # Try Token auth directly - most reliable test
+          # Determine auth header based on token type
+          $authHeader = if ($env:NETBOX_TOKEN -match '^nbt_') {
+            "Bearer $env:NETBOX_TOKEN"
+          } else {
+            "Token $env:NETBOX_TOKEN"
+          }
+
           $headers = @{
-            'Authorization' = "Token $env:NETBOX_TOKEN"
+            'Authorization' = $authHeader
             'Accept' = 'application/json'
           }
           try {
@@ -325,7 +378,7 @@ jobs:
         shell: pwsh
         env:
           NETBOX_HOST: ${{ env.NETBOX_HOST }}
-          NETBOX_TOKEN: ${{ env.NETBOX_TOKEN }}
+          NETBOX_TOKEN: ${{ steps.token.outputs.token }}
           NETBOX_VERSION: ${{ matrix.netbox_short }}
         run: |
           Write-Host "============================================" -ForegroundColor Cyan
