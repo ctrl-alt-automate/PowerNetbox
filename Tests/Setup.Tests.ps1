@@ -49,4 +49,225 @@ Describe "Setup tests" -Tag 'Core', 'Setup' {
             (Get-NBCredential).GetNetworkCredential().Password | Should -BeExactly 'faketoken'
         }
     }
+
+    Context "Token v2 Bearer Authentication" {
+        BeforeAll {
+            Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
+            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+                return [ordered]@{
+                    'Method'      = $Method
+                    'Uri'         = $Uri
+                    'Headers'     = $Headers
+                    'Timeout'     = $Timeout
+                    'ContentType' = $ContentType
+                    'Body'        = $Body
+                }
+            }
+            Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { return 'netbox.domain.com' }
+            Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
+            Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
+
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.Hostname = 'netbox.domain.com'
+                $script:NetboxConfig.HostScheme = 'https'
+                $script:NetboxConfig.HostPort = 443
+            }
+        }
+
+        It "Should use Token auth header for v1 legacy tokens" {
+            $v1Token = '0123456789abcdef0123456789abcdef01234567'
+            Set-NBCredential -Token (ConvertTo-SecureString -String $v1Token -AsPlainText -Force)
+
+            $Result = Get-NBDCIMSite
+            $Result.Headers.Authorization | Should -Be "Token $v1Token"
+        }
+
+        It "Should use Bearer auth header for v2 nbt_ tokens" {
+            $v2Token = 'nbt_abc123def456.ghijklmnopqrstuvwxyz1234567890'
+            Set-NBCredential -Token (ConvertTo-SecureString -String $v2Token -AsPlainText -Force)
+
+            $Result = Get-NBDCIMSite
+            $Result.Headers.Authorization | Should -Be "Bearer $v2Token"
+        }
+
+        It "Should use Token auth for tokens not starting with nbt_" {
+            $legacyToken = 'mylegacytoken12345'
+            Set-NBCredential -Token (ConvertTo-SecureString -String $legacyToken -AsPlainText -Force)
+
+            $Result = Get-NBDCIMSite
+            $Result.Headers.Authorization | Should -Be "Token $legacyToken"
+        }
+    }
+
+    Context "Test-NBAuthentication (Netbox 4.5+)" {
+        BeforeAll {
+            Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
+            Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { return 'netbox.domain.com' }
+            Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
+            Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
+            Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
+                return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
+            }
+
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.Hostname = 'netbox.domain.com'
+                $script:NetboxConfig.HostScheme = 'https'
+                $script:NetboxConfig.HostPort = 443
+                $script:NetboxConfig.ParsedVersion = [version]'4.5.0'
+                $script:NetboxConfig.NetboxVersion = @{ 'netbox-version' = '4.5.0' }
+            }
+        }
+
+        It "Should return true when authentication succeeds" {
+            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+                return @{
+                    id       = 1
+                    username = 'admin'
+                    email    = 'admin@example.com'
+                }
+            }
+
+            $Result = Test-NBAuthentication
+            $Result | Should -Be $true
+        }
+
+        It "Should call the authentication-check endpoint" {
+            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+                param($Uri)
+                return @{ Uri = $Uri; username = 'admin' }
+            }
+
+            $Result = Test-NBAuthentication -Detailed
+            $Result.User.Uri | Should -Match 'authentication-check'
+        }
+
+        It "Should return detailed user info when -Detailed is specified" {
+            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+                return @{
+                    id       = 1
+                    username = 'admin'
+                    email    = 'admin@example.com'
+                }
+            }
+
+            $Result = Test-NBAuthentication -Detailed
+            $Result.Authenticated | Should -Be $true
+            $Result.User.username | Should -Be 'admin'
+            $Result.Error | Should -BeNullOrEmpty
+        }
+
+        It "Should return false when authentication fails with 401" {
+            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+                $response = [System.Net.HttpWebResponse]::new()
+                $exception = [System.Net.WebException]::new("Unauthorized", $null, [System.Net.WebExceptionStatus]::ProtocolError, $response)
+                throw $exception
+            }
+
+            # Since we can't easily mock 401, test the fallback behavior
+            Mock -CommandName 'Get-NBVersion' -ModuleName 'PowerNetbox' -MockWith {
+                throw "Unauthorized"
+            }
+
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.ParsedVersion = [version]'4.4.9'
+            }
+
+            $Result = Test-NBAuthentication
+            $Result | Should -Be $false
+
+            # Reset version
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.ParsedVersion = [version]'4.5.0'
+            }
+        }
+
+        It "Should return error details when -Detailed and authentication fails" {
+            Mock -CommandName 'Get-NBVersion' -ModuleName 'PowerNetbox' -MockWith {
+                throw "Invalid token"
+            }
+
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.ParsedVersion = [version]'4.4.9'
+            }
+
+            $Result = Test-NBAuthentication -Detailed
+            $Result.Authenticated | Should -Be $false
+            $Result.Error | Should -Not -BeNullOrEmpty
+
+            # Reset version
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.ParsedVersion = [version]'4.5.0'
+            }
+        }
+    }
+
+    Context "Test-NBAuthentication Fallback (Netbox 4.4.x)" {
+        BeforeAll {
+            Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
+            Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { return 'netbox.domain.com' }
+            Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
+            Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
+            Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
+                return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
+            }
+
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.Hostname = 'netbox.domain.com'
+                $script:NetboxConfig.HostScheme = 'https'
+                $script:NetboxConfig.HostPort = 443
+                $script:NetboxConfig.ParsedVersion = [version]'4.4.9'
+                $script:NetboxConfig.NetboxVersion = @{ 'netbox-version' = '4.4.9' }
+            }
+        }
+
+        It "Should use fallback method on Netbox 4.4.x" {
+            Mock -CommandName 'Get-NBVersion' -ModuleName 'PowerNetbox' -MockWith {
+                return @{ 'netbox-version' = '4.4.9' }
+            }
+
+            $Result = Test-NBAuthentication
+            $Result | Should -Be $true
+        }
+
+        It "Should return true with note about limited info in detailed mode" {
+            Mock -CommandName 'Get-NBVersion' -ModuleName 'PowerNetbox' -MockWith {
+                return @{ 'netbox-version' = '4.4.9' }
+            }
+
+            $Result = Test-NBAuthentication -Detailed
+            $Result.Authenticated | Should -Be $true
+            $Result.User | Should -BeNullOrEmpty
+            $Result.Note | Should -Match 'prior to 4.5'
+        }
+
+        It "Should return false when fallback authentication fails" {
+            Mock -CommandName 'Get-NBVersion' -ModuleName 'PowerNetbox' -MockWith {
+                throw "Connection refused"
+            }
+
+            $Result = Test-NBAuthentication
+            $Result | Should -Be $false
+        }
+    }
+
+    Context "Test-NBAuthentication Not Connected" {
+        It "Should return false when not connected to Netbox" {
+            Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith {
+                throw "Not connected"
+            }
+
+            $Result = Test-NBAuthentication
+            $Result | Should -Be $false
+        }
+
+        It "Should return error details when not connected and -Detailed" {
+            Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith {
+                throw "Not connected"
+            }
+
+            $Result = Test-NBAuthentication -Detailed
+            $Result.Authenticated | Should -Be $false
+            $Result.Error | Should -Match 'Connect-NBAPI'
+        }
+    }
 }

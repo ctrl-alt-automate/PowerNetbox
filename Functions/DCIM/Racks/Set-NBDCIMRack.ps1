@@ -78,6 +78,9 @@ function Set-NBDCIMRack {
     .PARAMETER Custom_Fields
         A hashtable of custom fields
 
+    .PARAMETER Owner
+        The owner ID for object ownership (Netbox 4.5+ only).
+
     .PARAMETER Force
         Skip confirmation prompts
 
@@ -146,6 +149,8 @@ function Set-NBDCIMRack {
         [string]$Comments,
 
         [hashtable]$Custom_Fields,
+
+        [uint64]$Owner,
 
         [switch]$Force
     )

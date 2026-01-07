@@ -75,6 +75,9 @@ function New-NBDCIMRack {
     .PARAMETER Custom_Fields
         A hashtable of custom fields
 
+    .PARAMETER Owner
+        The owner ID for object ownership (Netbox 4.5+ only).
+
     .PARAMETER Raw
         Return the raw API response
 
@@ -146,6 +149,8 @@ function New-NBDCIMRack {
         [string]$Comments,
 
         [hashtable]$Custom_Fields,
+
+        [uint64]$Owner,
 
         [switch]$Raw
     )
