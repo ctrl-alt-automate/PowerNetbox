@@ -309,6 +309,7 @@ jobs:
             echo "V1 token failed (HTTP $RESPONSE) - creating v2 token for Netbox 4.5.0+"
 
             # Create a v2 token via Django management command
+            # In Netbox 4.5, save() returns the secret, and we need to construct nbt_<KEY>.<SECRET>
             TOKEN_OUTPUT=$(docker exec powernetbox-netbox-1 /opt/netbox/venv/bin/python /opt/netbox/netbox/manage.py shell -c "
           from users.models import Token
           from django.contrib.auth import get_user_model
@@ -320,15 +321,18 @@ jobs:
           Token.objects.filter(user=user).delete()
           token = Token(user=user)
           plaintext = token.save()
-          print(plaintext)
-          " 2>&1 | tail -1)
+          # Construct full v2 token: nbt_<KEY>.<SECRET>
+          print(f'nbt_{token.key}.{plaintext}')
+          " 2>&1 | grep -E '^nbt_')
 
-            if [ -n "$TOKEN_OUTPUT" ] && [[ "$TOKEN_OUTPUT" == nbt_* ]]; then
+            if [ -n "$TOKEN_OUTPUT" ]; then
               echo "Created v2 token: ${TOKEN_OUTPUT:0:20}..."
               echo "token=$TOKEN_OUTPUT" >> $GITHUB_OUTPUT
               echo "token_type=v2" >> $GITHUB_OUTPUT
             else
-              echo "ERROR: Failed to create v2 token. Output: $TOKEN_OUTPUT"
+              echo "ERROR: Failed to create v2 token."
+              # Show debug info
+              docker exec powernetbox-netbox-1 /opt/netbox/venv/bin/python /opt/netbox/netbox/manage.py shell -c "from users.models import Token; print('Existing tokens:', Token.objects.count())"
               echo "token=$V1_TOKEN" >> $GITHUB_OUTPUT
               echo "token_type=v1-fallback" >> $GITHUB_OUTPUT
             fi
