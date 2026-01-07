@@ -311,33 +311,54 @@ jobs:
             echo "V1 token failed (HTTP $RESPONSE) - creating v2 token for Netbox 4.5.0+"
 
             # Create a v2 token by generating it ourselves (don't rely on save() return value)
-            # This approach generates the key and plaintext manually, hashes it, and saves
-            TOKEN_OUTPUT=$(docker exec powernetbox-netbox-1 /opt/netbox/venv/bin/python /opt/netbox/netbox/manage.py shell -c "
+            echo "Running Django shell to create token..."
+            DJANGO_OUTPUT=$(docker exec powernetbox-netbox-1 /opt/netbox/venv/bin/python /opt/netbox/netbox/manage.py shell -c "
           import secrets
+          import sys
           from django.contrib.auth.hashers import make_password
           from users.models import Token
           from django.contrib.auth import get_user_model
 
-          User = get_user_model()
-          user = User.objects.filter(username='admin').first()
-          if not user:
-              user = User.objects.create_superuser('admin', 'admin@example.com', 'admin')
+          try:
+              User = get_user_model()
+              user = User.objects.filter(username='admin').first()
+              print(f'DEBUG: Found user: {user}', file=sys.stderr)
 
-          # Delete existing tokens
-          Token.objects.filter(user=user).delete()
+              if not user:
+                  user = User.objects.create_superuser('admin', 'admin@example.com', 'admin')
+                  print(f'DEBUG: Created superuser', file=sys.stderr)
 
-          # Generate token components ourselves (same logic as Netbox 4.5 Token model)
-          key = secrets.token_urlsafe(16)[:12]  # 12 char key
-          plaintext = secrets.token_urlsafe(48)[:40]  # 40 char secret
-          hashed = make_password(plaintext)
+              # Delete existing tokens
+              deleted = Token.objects.filter(user=user).delete()
+              print(f'DEBUG: Deleted tokens: {deleted}', file=sys.stderr)
 
-          # Create and save token with pre-generated values
-          token = Token(user=user, key=key, hashed=hashed)
-          token.save()
+              # Generate token components ourselves
+              key = secrets.token_urlsafe(16)[:12]
+              plaintext = secrets.token_urlsafe(48)[:40]
+              hashed = make_password(plaintext)
+              print(f'DEBUG: Generated key={key[:4]}..., plaintext={plaintext[:4]}...', file=sys.stderr)
 
-          # Output the full token
-          print(f'nbt_{key}.{plaintext}')
-          " 2>&1 | grep -E '^nbt_' || true)
+              # Create and save token
+              token = Token(user=user, key=key, hashed=hashed)
+              token.save()
+              print(f'DEBUG: Token saved with id={token.id}', file=sys.stderr)
+
+              # Output the full token (this is what we capture)
+              full_token = f'nbt_{key}.{plaintext}'
+              print(full_token)
+              print(f'DEBUG: Output token: {full_token[:20]}...', file=sys.stderr)
+
+          except Exception as e:
+              print(f'ERROR: {type(e).__name__}: {e}', file=sys.stderr)
+              import traceback
+              traceback.print_exc()
+          " 2>&1)
+
+            echo "Django output:"
+            echo "$DJANGO_OUTPUT"
+
+            # Extract the token line
+            TOKEN_OUTPUT=$(echo "$DJANGO_OUTPUT" | grep -E '^nbt_' || true)
 
             if [ -n "$TOKEN_OUTPUT" ] && [[ "$TOKEN_OUTPUT" == nbt_* ]]; then
               echo "Created v2 token: ${TOKEN_OUTPUT:0:20}..."
