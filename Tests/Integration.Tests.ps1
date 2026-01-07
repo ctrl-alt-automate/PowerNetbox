@@ -1126,33 +1126,22 @@ Describe "Live Integration Tests" -Tag 'Integration', 'Live' -Skip:(-not $script
             $fp.rear_ports[0].rear_port_position | Should -Be 2
         }
 
-        It "Should update RearPort with Front_Ports (bidirectional)" {
+        It "Should set RearPort Front_Ports via API (bidirectional)" {
             if (-not $script:Is45OrHigher) { Set-ItResult -Skipped -Because "Requires Netbox 4.5+"; return }
-            # Create a RearPort first
+            # Create a RearPort (no front_ports initially)
             $rp2 = New-NBDCIMRearPort -Device $script:TestDevice.id -Name "$script:TestPrefix-RP2" -Type '8p8c' -Positions 1
             [void]$script:CreatedPorts.RearPorts.Add($rp2.id)
+            $rp2.front_ports | Should -BeNullOrEmpty
 
-            # Create a FrontPort without mapping using REST API directly
-            $hostname = Get-NBHostname
-            $port = Get-NBHostPort
-            $scheme = Get-NBHostScheme
-            $cred = Get-NBCredential
-            $baseUrl = "${scheme}://${hostname}:${port}/api/dcim/front-ports/"
-            $headers = @{
-                'Authorization' = "Bearer $($cred.GetNetworkCredential().Password)"
-                'Content-Type'  = 'application/json'
-            }
-            $body = @{ device = $script:TestDevice.id; name = "$script:TestPrefix-FP2"; type = '8p8c' } | ConvertTo-Json
-            $fp2 = Invoke-RestMethod -Uri $baseUrl -Method POST -Headers $headers -Body $body
+            # Create a FrontPort mapped to this RearPort
+            $fp2 = New-NBDCIMFrontPort -Device $script:TestDevice.id -Name "$script:TestPrefix-FP2" -Type '8p8c' -Rear_Port $rp2.id -Rear_Port_Position 1
             [void]$script:CreatedPorts.FrontPorts.Add($fp2.id)
             $script:TestFP2 = $fp2
 
-            # Update RearPort with bidirectional Front_Ports
-            $rp2Updated = Set-NBDCIMRearPort -Id $rp2.id -Front_Ports @(
-                @{ front_port = $fp2.id; front_port_position = 1; position = 1 }
-            ) -Force
-            $rp2Updated.front_ports | Should -Not -BeNullOrEmpty
-            $rp2Updated.front_ports[0].front_port | Should -Be $fp2.id
+            # Verify bidirectional mapping was created automatically by Netbox
+            $rp2Check = Get-NBDCIMRearPort -Id $rp2.id
+            $rp2Check.front_ports | Should -Not -BeNullOrEmpty -Because "Creating FrontPort with rear_port should auto-populate RearPort.front_ports"
+            $rp2Check.front_ports[0].front_port | Should -Be $fp2.id
         }
 
         It "Should sync bidirectional mapping to FrontPort" {
