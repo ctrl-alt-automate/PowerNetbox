@@ -112,6 +112,8 @@ jobs:
       - name: Setup API Token
         id: token
         run: |
+          set +e  # Don't exit on error - we handle errors ourselves
+
           echo "Testing v1 token authentication..."
           V1_TOKEN="0123456789abcdef0123456789abcdef01234567"
 
@@ -140,29 +142,39 @@ jobs:
           token = Token(user=user)
           full_token = token.save()
           # Print the token - save() should return full 'nbt_KEY.SECRET' format
-          if full_token and full_token.startswith('nbt_'):
+          if full_token and str(full_token).startswith('nbt_'):
               print(full_token)
           else:
               # Fallback: try to get plaintext from _plaintext attribute
-              if hasattr(token, '_plaintext'):
+              if hasattr(token, '_plaintext') and token._plaintext:
                   print(f'nbt_{token.key}.{token._plaintext}')
               else:
-                  print(f'ERROR: save() returned: {full_token}')
-          " 2>&1 | grep -E '^nbt_')
+                  import sys
+                  print(f'ERROR: save() returned: {full_token}, key={token.key}', file=sys.stderr)
+          " 2>&1 | grep -E '^nbt_' || true)
 
-            if [ -n "$TOKEN_OUTPUT" ]; then
+            if [ -n "$TOKEN_OUTPUT" ] && [[ "$TOKEN_OUTPUT" == nbt_* ]]; then
               echo "Created v2 token: ${TOKEN_OUTPUT:0:20}..."
               echo "token=$TOKEN_OUTPUT" >> $GITHUB_OUTPUT
               echo "auth_header=Bearer $TOKEN_OUTPUT" >> $GITHUB_OUTPUT
             else
-              echo "ERROR: Failed to create v2 token."
-              # Show debug info
+              echo "WARNING: Failed to create v2 token. Using v1 fallback (tests may fail)."
+              echo "Django shell output:"
               docker exec powernetbox-netbox-1 /opt/netbox/venv/bin/python /opt/netbox/netbox/manage.py shell -c "
           from users.models import Token
-          print('Token model methods:', [m for m in dir(Token) if not m.startswith('_')])
-          print('Existing tokens:', Token.objects.count())
-          "
-              exit 1
+          from django.contrib.auth import get_user_model
+          User = get_user_model()
+          user = User.objects.filter(username='admin').first()
+          print(f'User: {user}')
+          Token.objects.filter(user=user).delete()
+          token = Token(user=user)
+          result = token.save()
+          print(f'save() returned: {result} (type: {type(result)})')
+          print(f'token.key: {token.key}')
+          print(f'has _plaintext: {hasattr(token, \"_plaintext\")}')
+          " 2>&1 || true
+              echo "token=$V1_TOKEN" >> $GITHUB_OUTPUT
+              echo "auth_header=Token $V1_TOKEN" >> $GITHUB_OUTPUT
             fi
           fi
 
