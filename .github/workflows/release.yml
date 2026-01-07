@@ -28,12 +28,15 @@ jobs:
       - name: Run Pester tests
         shell: pwsh
         run: |
+          # Get all unit test files (exclude Scenario, integration, and Integration.Tests.ps1)
+          $unitTests = Get-ChildItem -Path './Tests' -Filter '*.Tests.ps1' -File |
+            Where-Object { $_.Name -ne 'Integration.Tests.ps1' } |
+            Select-Object -ExpandProperty FullName
+
           $config = New-PesterConfiguration
-          $config.Run.Path = './Tests'
+          $config.Run.Path = $unitTests
           $config.Run.Exit = $true
           $config.Output.Verbosity = 'Detailed'
-          # Exclude Scenario and Integration tests (require live API credentials)
-          $config.Run.ExcludePath = @('./Tests/Scenario', './Tests/Integration.Tests.ps1', './Tests/integration')
 
           Invoke-Pester -Configuration $config
 
