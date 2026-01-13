@@ -173,19 +173,39 @@ function InvokeNetboxRequest {
     }
 
     # Determine effective branch context: explicit param > stack context > main
-    $effectiveBranch = if ($Branch) {
+    $effectiveBranchContext = if ($Branch) {
+        # Explicit -Branch parameter (schema_id string)
         $Branch
     }
     elseif ($script:NetboxConfig.BranchStack -and $script:NetboxConfig.BranchStack.Count -gt 0) {
+        # Get context from stack
         $script:NetboxConfig.BranchStack.Peek()
     }
     else {
         $null
     }
 
-    if ($effectiveBranch) {
-        $Headers['X-NetBox-Branch'] = $effectiveBranch
-        Write-Verbose "Using branch context: $effectiveBranch"
+    if ($effectiveBranchContext) {
+        # Extract schema_id - handle both object (new) and string (legacy/explicit) formats
+        $schemaId = if ($effectiveBranchContext -is [PSCustomObject]) {
+            if (-not $effectiveBranchContext.SchemaId) {
+                throw "Invalid branch context object: 'SchemaId' property is missing or empty."
+            }
+            $effectiveBranchContext.SchemaId
+        } else {
+            # Assume it's already a schema_id string (e.g., from -Branch parameter)
+            $effectiveBranchContext
+        }
+
+        $Headers['X-NetBox-Branch'] = $schemaId
+
+        # Log with branch name if available, otherwise just schema_id
+        $displayName = if ($effectiveBranchContext -is [PSCustomObject] -and $effectiveBranchContext.Name) {
+            "$($effectiveBranchContext.Name) ($schemaId)"
+        } else {
+            $schemaId
+        }
+        Write-Verbose "Using branch context: $displayName"
     }
 
     $splat = @{

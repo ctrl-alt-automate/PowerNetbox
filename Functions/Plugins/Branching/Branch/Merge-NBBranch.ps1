@@ -69,7 +69,7 @@ function Merge-NBBranch {
             }
         }
 
-        $Segments = [System.Collections.ArrayList]::new(@('plugins', 'netbox-branching', 'branches', $Id, 'merge'))
+        $Segments = [System.Collections.ArrayList]::new(@('plugins', 'branching', 'branches', $Id, 'merge'))
 
         $URI = BuildNewURI -Segments $Segments
 
