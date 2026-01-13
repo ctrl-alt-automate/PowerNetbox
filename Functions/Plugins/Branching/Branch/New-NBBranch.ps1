@@ -58,7 +58,7 @@ function New-NBBranch {
         Write-Verbose "Creating Branch"
         CheckNetboxIsConnected
 
-        $Segments = [System.Collections.ArrayList]::new(@('plugins', 'netbox-branching', 'branches'))
+        $Segments = [System.Collections.ArrayList]::new(@('plugins', 'branching', 'branches'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
 

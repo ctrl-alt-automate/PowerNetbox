@@ -76,7 +76,7 @@ function Get-NBBranchEvent {
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {
                 foreach ($EventId in $Id) {
-                    $Segments = [System.Collections.ArrayList]::new(@('plugins', 'netbox-branching', 'branch-events', $EventId))
+                    $Segments = [System.Collections.ArrayList]::new(@('plugins', 'branching', 'branch-events', $EventId))
 
                     $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'All', 'PageSize'
 
@@ -87,7 +87,7 @@ function Get-NBBranchEvent {
             }
 
             default {
-                $Segments = [System.Collections.ArrayList]::new(@('plugins', 'netbox-branching', 'branch-events'))
+                $Segments = [System.Collections.ArrayList]::new(@('plugins', 'branching', 'branch-events'))
 
                 $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'
 

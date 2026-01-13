@@ -44,7 +44,7 @@ Describe "Branching Module Tests" -Tag 'Branching' {
             $script:NetboxConfig.Hostname = 'netbox.domain.com'
             $script:NetboxConfig.HostScheme = 'https'
             $script:NetboxConfig.HostPort = 443
-            $script:NetboxConfig.BranchStack = [System.Collections.Generic.Stack[string]]::new()
+            $script:NetboxConfig.BranchStack = [System.Collections.Generic.Stack[PSCustomObject]]::new()
         }
     }
 
@@ -78,7 +78,11 @@ Describe "Branching Module Tests" -Tag 'Branching' {
 
         It "Should return exited branch name" {
             InModuleScope -ModuleName 'PowerNetbox' {
-                $script:NetboxConfig.BranchStack.Push("test-branch")
+                $script:NetboxConfig.BranchStack.Push([PSCustomObject]@{
+                    Name = "test-branch"
+                    SchemaId = "abc12345"
+                    Id = 1
+                })
             }
             $Result = Exit-NBBranch
             $Result | Should -Be "test-branch"
@@ -88,8 +92,8 @@ Describe "Branching Module Tests" -Tag 'Branching' {
     Context "Branch Stack Management" {
         It "Should support nested branch contexts" {
             InModuleScope -ModuleName 'PowerNetbox' {
-                $script:NetboxConfig.BranchStack.Push("outer")
-                $script:NetboxConfig.BranchStack.Push("inner")
+                $script:NetboxConfig.BranchStack.Push([PSCustomObject]@{ Name = "outer"; SchemaId = "out12345"; Id = 1 })
+                $script:NetboxConfig.BranchStack.Push([PSCustomObject]@{ Name = "inner"; SchemaId = "inn12345"; Id = 2 })
             }
 
             $current = Get-NBBranchContext
@@ -104,9 +108,9 @@ Describe "Branching Module Tests" -Tag 'Branching' {
 
         It "Should return entire stack with -Stack" {
             InModuleScope -ModuleName 'PowerNetbox' {
-                $script:NetboxConfig.BranchStack.Push("first")
-                $script:NetboxConfig.BranchStack.Push("second")
-                $script:NetboxConfig.BranchStack.Push("third")
+                $script:NetboxConfig.BranchStack.Push([PSCustomObject]@{ Name = "first"; SchemaId = "fir12345"; Id = 1 })
+                $script:NetboxConfig.BranchStack.Push([PSCustomObject]@{ Name = "second"; SchemaId = "sec12345"; Id = 2 })
+                $script:NetboxConfig.BranchStack.Push([PSCustomObject]@{ Name = "third"; SchemaId = "thi12345"; Id = 3 })
             }
 
             $stack = Get-NBBranchContext -Stack
@@ -114,6 +118,17 @@ Describe "Branching Module Tests" -Tag 'Branching' {
             $stack[0] | Should -Be "third"
             $stack[1] | Should -Be "second"
             $stack[2] | Should -Be "first"
+        }
+
+        It "Should return full context objects with -Full" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.BranchStack.Push([PSCustomObject]@{ Name = "test"; SchemaId = "tes12345"; Id = 99 })
+            }
+
+            $context = Get-NBBranchContext -Full
+            $context.Name | Should -Be "test"
+            $context.SchemaId | Should -Be "tes12345"
+            $context.Id | Should -Be 99
         }
     }
     #endregion
@@ -142,7 +157,7 @@ Describe "Branching Module Tests" -Tag 'Branching' {
         BeforeEach {
             Mock -CommandName 'Test-NBBranchingAvailable' -ModuleName 'PowerNetbox' -MockWith { return $true }
             Mock -CommandName 'Get-NBBranch' -ModuleName 'PowerNetbox' -MockWith {
-                return [PSCustomObject]@{ id = 1; name = $Name }
+                return [PSCustomObject]@{ id = 1; name = $Name; schema_id = "abc12345" }
             }
         }
 
@@ -150,6 +165,12 @@ Describe "Branching Module Tests" -Tag 'Branching' {
             $null = Enter-NBBranch -Name "test-branch"
             $context = Get-NBBranchContext
             $context | Should -Be "test-branch"
+        }
+
+        It "Should store schema_id in context" {
+            $null = Enter-NBBranch -Name "test-branch"
+            $context = Get-NBBranchContext -Full
+            $context.SchemaId | Should -Be "abc12345"
         }
 
         It "Should return branch with -PassThru" {
@@ -168,6 +189,14 @@ Describe "Branching Module Tests" -Tag 'Branching' {
 
             { Enter-NBBranch -Name "test" } | Should -Throw "*not installed*"
         }
+
+        It "Should throw when branch has no schema_id" {
+            Mock -CommandName 'Get-NBBranch' -ModuleName 'PowerNetbox' -MockWith {
+                return [PSCustomObject]@{ id = 1; name = $Name }  # No schema_id
+            }
+
+            { Enter-NBBranch -Name "test" } | Should -Throw "*schema_id*"
+        }
     }
     #endregion
 
@@ -176,7 +205,7 @@ Describe "Branching Module Tests" -Tag 'Branching' {
         BeforeEach {
             Mock -CommandName 'Test-NBBranchingAvailable' -ModuleName 'PowerNetbox' -MockWith { return $true }
             Mock -CommandName 'Get-NBBranch' -ModuleName 'PowerNetbox' -MockWith {
-                return [PSCustomObject]@{ id = 1; name = $Name }
+                return [PSCustomObject]@{ id = 1; name = $Name; schema_id = "inv12345" }
             }
         }
 
@@ -213,12 +242,12 @@ Describe "Branching Module Tests" -Tag 'Branching' {
         It "Should request branches" {
             $Result = Get-NBBranch
             $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/plugins/netbox-branching/branches/'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/plugins/branching/branches/'
         }
 
         It "Should request a branch by ID" {
             $Result = Get-NBBranch -Id 5
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/plugins/netbox-branching/branches/5/'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/plugins/branching/branches/5/'
         }
 
         It "Should request branches by name" {
@@ -244,7 +273,7 @@ Describe "Branching Module Tests" -Tag 'Branching' {
 
         It "Should accept pipeline input" {
             $Result = [PSCustomObject]@{ Id = 15 } | Get-NBBranch
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/plugins/netbox-branching/branches/15/'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/plugins/branching/branches/15/'
         }
     }
     #endregion
@@ -254,7 +283,7 @@ Describe "Branching Module Tests" -Tag 'Branching' {
         It "Should create a branch" {
             $Result = New-NBBranch -Name "feature/test" -Confirm:$false
             $Result.Method | Should -Be 'POST'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/plugins/netbox-branching/branches/'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/plugins/branching/branches/'
             $bodyObj = $Result.Body | ConvertFrom-Json
             $bodyObj.name | Should -Be 'feature/test'
         }
@@ -278,7 +307,7 @@ Describe "Branching Module Tests" -Tag 'Branching' {
         It "Should update a branch" {
             $Result = Set-NBBranch -Id 1 -Description 'Updated description' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/plugins/netbox-branching/branches/1/'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/plugins/branching/branches/1/'
             $bodyObj = $Result.Body | ConvertFrom-Json
             $bodyObj.description | Should -Be 'Updated description'
         }
@@ -291,7 +320,7 @@ Describe "Branching Module Tests" -Tag 'Branching' {
 
         It "Should accept pipeline input" {
             $Result = [PSCustomObject]@{ Id = 10 } | Set-NBBranch -Description 'Piped update' -Confirm:$false
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/plugins/netbox-branching/branches/10/'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/plugins/branching/branches/10/'
         }
 
         It "Should support -WhatIf" {
@@ -306,12 +335,12 @@ Describe "Branching Module Tests" -Tag 'Branching' {
         It "Should delete a branch" {
             $Result = Remove-NBBranch -Id 1 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/plugins/netbox-branching/branches/1/'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/plugins/branching/branches/1/'
         }
 
         It "Should accept pipeline input" {
             $Result = [PSCustomObject]@{ Id = 25 } | Remove-NBBranch -Confirm:$false
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/plugins/netbox-branching/branches/25/'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/plugins/branching/branches/25/'
         }
 
         It "Should support -WhatIf" {
@@ -326,12 +355,12 @@ Describe "Branching Module Tests" -Tag 'Branching' {
         It "Should sync a branch" {
             $Result = Sync-NBBranch -Id 1 -Confirm:$false
             $Result.Method | Should -Be 'POST'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/plugins/netbox-branching/branches/1/sync/'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/plugins/branching/branches/1/sync/'
         }
 
         It "Should accept pipeline input" {
             $Result = [PSCustomObject]@{ Id = 5 } | Sync-NBBranch -Confirm:$false
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/plugins/netbox-branching/branches/5/sync/'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/plugins/branching/branches/5/sync/'
         }
 
         It "Should support -WhatIf" {
@@ -352,12 +381,12 @@ Describe "Branching Module Tests" -Tag 'Branching' {
         It "Should merge a branch" {
             $Result = Merge-NBBranch -Id 1 -Confirm:$false
             $Result.Method | Should -Be 'POST'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/plugins/netbox-branching/branches/1/merge/'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/plugins/branching/branches/1/merge/'
         }
 
         It "Should accept pipeline input" {
             $Result = [PSCustomObject]@{ Id = 3 } | Merge-NBBranch -Confirm:$false
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/plugins/netbox-branching/branches/3/merge/'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/plugins/branching/branches/3/merge/'
         }
 
         It "Should throw when conflicts exist without -Force" {
@@ -392,12 +421,12 @@ Describe "Branching Module Tests" -Tag 'Branching' {
         It "Should revert a merged branch" {
             $Result = Undo-NBBranchMerge -Id 1 -Confirm:$false
             $Result.Method | Should -Be 'POST'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/plugins/netbox-branching/branches/1/revert/'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/plugins/branching/branches/1/revert/'
         }
 
         It "Should accept pipeline input" {
             $Result = [PSCustomObject]@{ Id = 7 } | Undo-NBBranchMerge -Confirm:$false
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/plugins/netbox-branching/branches/7/revert/'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/plugins/branching/branches/7/revert/'
         }
 
         It "Should support -WhatIf" {
@@ -412,12 +441,12 @@ Describe "Branching Module Tests" -Tag 'Branching' {
         It "Should request branch events" {
             $Result = Get-NBBranchEvent
             $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/plugins/netbox-branching/branch-events/'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/plugins/branching/branch-events/'
         }
 
         It "Should request a branch event by ID" {
             $Result = Get-NBBranchEvent -Id 5
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/plugins/netbox-branching/branch-events/5/'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/plugins/branching/branch-events/5/'
         }
 
         It "Should filter by branch ID" {
@@ -433,7 +462,7 @@ Describe "Branching Module Tests" -Tag 'Branching' {
 
         It "Should accept pipeline input" {
             $Result = [PSCustomObject]@{ Id = 15 } | Get-NBBranchEvent
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/plugins/netbox-branching/branch-events/15/'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/plugins/branching/branch-events/15/'
         }
     }
     #endregion
@@ -443,12 +472,12 @@ Describe "Branching Module Tests" -Tag 'Branching' {
         It "Should request change diffs" {
             $Result = Get-NBChangeDiff
             $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/plugins/netbox-branching/changes/'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/plugins/branching/changes/'
         }
 
         It "Should request a change diff by ID" {
             $Result = Get-NBChangeDiff -Id 5
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/plugins/netbox-branching/changes/5/'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/plugins/branching/changes/5/'
         }
 
         It "Should filter by branch ID" {
@@ -474,20 +503,24 @@ Describe "Branching Module Tests" -Tag 'Branching' {
 
         It "Should accept pipeline input" {
             $Result = [PSCustomObject]@{ Id = 25 } | Get-NBChangeDiff
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/plugins/netbox-branching/changes/25/'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/plugins/branching/changes/25/'
         }
     }
     #endregion
 
     #region Branch Header Injection Tests
     Context "Branch Header Injection in InvokeNetboxRequest" {
-        It "Should add X-NetBox-Branch header when in branch context" {
+        It "Should add X-NetBox-Branch header with schema_id when in branch context" {
             InModuleScope -ModuleName 'PowerNetbox' {
-                $script:NetboxConfig.BranchStack.Push("feature-branch")
+                $script:NetboxConfig.BranchStack.Push([PSCustomObject]@{
+                    Name = "feature-branch"
+                    SchemaId = "feat1234"
+                    Id = 1
+                })
             }
 
             $Result = Get-NBBranch -Limit 1
-            $Result.Headers['X-NetBox-Branch'] | Should -Be 'feature-branch'
+            $Result.Headers['X-NetBox-Branch'] | Should -Be 'feat1234'
         }
 
         It "Should not add header when not in branch context" {
@@ -495,14 +528,25 @@ Describe "Branching Module Tests" -Tag 'Branching' {
             $Result.Headers.ContainsKey('X-NetBox-Branch') | Should -BeFalse
         }
 
-        It "Should use nested branch context" {
+        It "Should use nested branch context schema_id" {
             InModuleScope -ModuleName 'PowerNetbox' {
-                $script:NetboxConfig.BranchStack.Push("outer")
-                $script:NetboxConfig.BranchStack.Push("inner")
+                $script:NetboxConfig.BranchStack.Push([PSCustomObject]@{ Name = "outer"; SchemaId = "out12345"; Id = 1 })
+                $script:NetboxConfig.BranchStack.Push([PSCustomObject]@{ Name = "inner"; SchemaId = "inn12345"; Id = 2 })
             }
 
             $Result = Get-NBBranch -Limit 1
-            $Result.Headers['X-NetBox-Branch'] | Should -Be 'inner'
+            $Result.Headers['X-NetBox-Branch'] | Should -Be 'inn12345'
+        }
+
+        It "Should handle legacy string format for backwards compatibility" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                # Simulate legacy string format (e.g., from explicit -Branch parameter)
+                $script:NetboxConfig.BranchStack = [System.Collections.Generic.Stack[object]]::new()
+                $script:NetboxConfig.BranchStack.Push("legacy_schema_id")
+            }
+
+            $Result = Get-NBBranch -Limit 1
+            $Result.Headers['X-NetBox-Branch'] | Should -Be 'legacy_schema_id'
         }
     }
     #endregion

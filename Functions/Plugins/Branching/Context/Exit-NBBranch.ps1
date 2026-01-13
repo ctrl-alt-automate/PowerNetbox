@@ -31,8 +31,16 @@ function Exit-NBBranch {
         return $null
     }
 
-    $exitedBranch = $script:NetboxConfig.BranchStack.Pop()
-    Write-Verbose "Exited branch '$exitedBranch' (stack depth: $($script:NetboxConfig.BranchStack.Count))"
+    $exitedContext = $script:NetboxConfig.BranchStack.Pop()
 
-    return $exitedBranch
+    # Handle both old string format and new object format
+    $branchName = if ($exitedContext -is [PSCustomObject] -and $exitedContext.Name) {
+        $exitedContext.Name
+    } else {
+        $exitedContext
+    }
+
+    Write-Verbose "Exited branch '$branchName' (stack depth: $($script:NetboxConfig.BranchStack.Count))"
+
+    return $branchName
 }

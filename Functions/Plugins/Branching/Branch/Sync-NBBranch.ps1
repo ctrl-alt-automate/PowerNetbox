@@ -41,7 +41,7 @@ function Sync-NBBranch {
         Write-Verbose "Processing Sync-NBBranch"
         CheckNetboxIsConnected
 
-        $Segments = [System.Collections.ArrayList]::new(@('plugins', 'netbox-branching', 'branches', $Id, 'sync'))
+        $Segments = [System.Collections.ArrayList]::new(@('plugins', 'branching', 'branches', $Id, 'sync'))
 
         $URI = BuildNewURI -Segments $Segments
 

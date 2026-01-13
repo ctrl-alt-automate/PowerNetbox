@@ -33,7 +33,7 @@ function Test-NBBranchingAvailable {
     CheckNetboxIsConnected
 
     try {
-        $Segments = [System.Collections.ArrayList]::new(@('plugins', 'netbox-branching', 'branches'))
+        $Segments = [System.Collections.ArrayList]::new(@('plugins', 'branching', 'branches'))
         $URI = BuildNewURI -Segments $Segments -Parameters @{ limit = 1 }
 
         $null = InvokeNetboxRequest -URI $URI -Method GET -Raw

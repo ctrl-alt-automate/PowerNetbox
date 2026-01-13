@@ -82,17 +82,26 @@ function Enter-NBBranch {
             }
         }
 
-        # Get the branch name for the stack
-        $branchName = if ($branch.name) { $branch.name } else { $Name }
+        # Validate branch has schema_id (required for API header)
+        if (-not $branch.schema_id) {
+            throw "Branch object missing 'schema_id' property. This may indicate an incompatible branching plugin version."
+        }
+
+        # Create branch context object with both name and schema_id
+        $branchContext = [PSCustomObject]@{
+            Name     = if ($branch.name) { $branch.name } else { $Name }
+            SchemaId = $branch.schema_id
+            Id       = $branch.id
+        }
 
         # Initialize stack if needed
         if (-not $script:NetboxConfig.BranchStack) {
-            $script:NetboxConfig.BranchStack = [System.Collections.Generic.Stack[string]]::new()
+            $script:NetboxConfig.BranchStack = [System.Collections.Generic.Stack[PSCustomObject]]::new()
         }
 
         # Push onto stack
-        $script:NetboxConfig.BranchStack.Push($branchName)
-        Write-Verbose "Entered branch '$branchName' (stack depth: $($script:NetboxConfig.BranchStack.Count))"
+        $script:NetboxConfig.BranchStack.Push($branchContext)
+        Write-Verbose "Entered branch '$($branchContext.Name)' (schema_id: $($branchContext.SchemaId), stack depth: $($script:NetboxConfig.BranchStack.Count))"
 
         if ($PassThru) {
             $branch

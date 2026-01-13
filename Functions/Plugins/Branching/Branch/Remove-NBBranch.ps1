@@ -41,7 +41,7 @@ function Remove-NBBranch {
         Write-Verbose "Removing Branch"
         CheckNetboxIsConnected
 
-        $Segments = [System.Collections.ArrayList]::new(@('plugins', 'netbox-branching', 'branches', $Id))
+        $Segments = [System.Collections.ArrayList]::new(@('plugins', 'branching', 'branches', $Id))
 
         $URI = BuildNewURI -Segments $Segments
 
