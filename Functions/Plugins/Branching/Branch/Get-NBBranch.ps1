@@ -101,7 +101,7 @@ function Get-NBBranch {
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {
                 foreach ($BranchId in $Id) {
-                    $Segments = [System.Collections.ArrayList]::new(@('plugins', 'netbox-branching', 'branches', $BranchId))
+                    $Segments = [System.Collections.ArrayList]::new(@('plugins', 'branching', 'branches', $BranchId))
 
                     $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'All', 'PageSize'
 
@@ -112,7 +112,7 @@ function Get-NBBranch {
             }
 
             default {
-                $Segments = [System.Collections.ArrayList]::new(@('plugins', 'netbox-branching', 'branches'))
+                $Segments = [System.Collections.ArrayList]::new(@('plugins', 'branching', 'branches'))
 
                 $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'
 

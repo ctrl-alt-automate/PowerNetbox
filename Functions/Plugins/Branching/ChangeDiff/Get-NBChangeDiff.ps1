@@ -90,7 +90,7 @@ function Get-NBChangeDiff {
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {
                 foreach ($ChangeId in $Id) {
-                    $Segments = [System.Collections.ArrayList]::new(@('plugins', 'netbox-branching', 'changes', $ChangeId))
+                    $Segments = [System.Collections.ArrayList]::new(@('plugins', 'branching', 'changes', $ChangeId))
 
                     $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'All', 'PageSize'
 
@@ -101,7 +101,7 @@ function Get-NBChangeDiff {
             }
 
             default {
-                $Segments = [System.Collections.ArrayList]::new(@('plugins', 'netbox-branching', 'changes'))
+                $Segments = [System.Collections.ArrayList]::new(@('plugins', 'branching', 'changes'))
 
                 $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'
 

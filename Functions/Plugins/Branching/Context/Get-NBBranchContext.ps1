@@ -9,9 +9,14 @@
 .PARAMETER Stack
     Return the entire branch stack instead of just the current branch.
 
+.PARAMETER Full
+    Return the full branch context object(s) including Name, SchemaId, and Id.
+
 .OUTPUTS
     [string] The current branch name, or $null if in main context.
-    [string[]] If -Stack is specified, returns all branches in the stack.
+    [string[]] If -Stack is specified, returns all branch names in the stack.
+    [PSCustomObject] If -Full is specified, returns the current branch context object.
+    [PSCustomObject[]] If -Stack and -Full are specified, returns all context objects.
 
 .EXAMPLE
     Get-NBBranchContext
@@ -23,7 +28,11 @@
 
 .EXAMPLE
     Get-NBBranchContext -Stack
-    Returns the entire branch stack.
+    Returns all branch names in the stack.
+
+.EXAMPLE
+    Get-NBBranchContext -Full
+    Returns the full context object with Name, SchemaId, and Id.
 
 .LINK
     Enter-NBBranch
@@ -31,25 +40,40 @@
 #>
 function Get-NBBranchContext {
     [CmdletBinding()]
-    [OutputType([string], [string[]])]
+    [OutputType([string], [string[]], [PSCustomObject], [PSCustomObject[]])]
     param(
-        [switch]$Stack
+        [switch]$Stack,
+        [switch]$Full
     )
 
-    if (-not $script:NetboxConfig.BranchStack) {
+    if (-not $script:NetboxConfig.BranchStack -or $script:NetboxConfig.BranchStack.Count -eq 0) {
         if ($Stack) {
+            if ($Full) {
+                return [PSCustomObject[]]@()
+            }
             return [string[]]@()
         }
         return $null
     }
 
     if ($Stack) {
-        return [string[]]$script:NetboxConfig.BranchStack.ToArray()
+        $items = $script:NetboxConfig.BranchStack.ToArray()
+        if ($Full) {
+            return [PSCustomObject[]]$items
+        }
+        # Return just the names for backwards compatibility
+        return [string[]]($items | ForEach-Object {
+            if ($_ -is [PSCustomObject] -and $_.Name) { $_.Name } else { $_ }
+        })
     }
 
-    if ($script:NetboxConfig.BranchStack.Count -eq 0) {
-        return $null
+    $current = $script:NetboxConfig.BranchStack.Peek()
+    if ($Full) {
+        return $current
     }
-
-    return $script:NetboxConfig.BranchStack.Peek()
+    # Return just the name for backwards compatibility
+    if ($current -is [PSCustomObject] -and $current.Name) {
+        return $current.Name
+    }
+    return $current
 }
