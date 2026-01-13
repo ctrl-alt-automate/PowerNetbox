@@ -44,7 +44,7 @@ Describe "Branching Module Tests" -Tag 'Branching' {
             $script:NetboxConfig.Hostname = 'netbox.domain.com'
             $script:NetboxConfig.HostScheme = 'https'
             $script:NetboxConfig.HostPort = 443
-            $script:NetboxConfig.BranchStack = [System.Collections.Generic.Stack[PSCustomObject]]::new()
+            $script:NetboxConfig.BranchStack = [System.Collections.Generic.Stack[object]]::new()
         }
     }
 

@@ -94,9 +94,10 @@ function Enter-NBBranch {
             Id       = $branch.id
         }
 
-        # Initialize stack if needed
-        if (-not $script:NetboxConfig.BranchStack) {
-            $script:NetboxConfig.BranchStack = [System.Collections.Generic.Stack[PSCustomObject]]::new()
+        # Initialize stack if needed, or reinitialize if wrong type (upgrade from string stack)
+        if (-not $script:NetboxConfig.BranchStack -or
+            $script:NetboxConfig.BranchStack.GetType().GenericTypeArguments[0] -ne [PSCustomObject]) {
+            $script:NetboxConfig.BranchStack = [System.Collections.Generic.Stack[object]]::new()
         }
 
         # Push onto stack
