@@ -187,7 +187,10 @@ function InvokeNetboxRequest {
 
     if ($effectiveBranchContext) {
         # Extract schema_id - handle both object (new) and string (legacy/explicit) formats
-        $schemaId = if ($effectiveBranchContext -is [PSCustomObject] -and $effectiveBranchContext.SchemaId) {
+        $schemaId = if ($effectiveBranchContext -is [PSCustomObject]) {
+            if (-not $effectiveBranchContext.SchemaId) {
+                throw "Invalid branch context object: 'SchemaId' property is missing or empty."
+            }
             $effectiveBranchContext.SchemaId
         } else {
             # Assume it's already a schema_id string (e.g., from -Branch parameter)
