@@ -313,13 +313,8 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             $bodyObj.site | Should -Be 15
         }
 
-        It "Should set multiple devices by ID array" {
-            # Single mode with multiple IDs (not pipeline) - bulk mode via pipeline uses InputObject
-            $Result = Set-NBDCIMDevice -Id 4432, 3241 -Cluster 10 -Platform 20 -Site 15 -Force
-
-            $Result.Method | Should -Be 'PATCH', 'PATCH'
-            $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/devices/4432/', 'https://netbox.domain.com/api/dcim/devices/3241/'
-        }
+        # Note: Array Id parameters are not supported for Set- functions
+        # For bulk operations via pipeline, see BulkOperations.Tests.ps1
     }
 
     Context "Remove-NBDCIMDevice" {
@@ -339,12 +334,8 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/devices/10/'
         }
 
-        It "Should remove multiple devices" {
-            $Result = Remove-NBDCIMDevice -Id 10, 12 -Force
-
-            $Result.Method | Should -Be 'DELETE', 'DELETE'
-            $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/devices/10/', 'https://netbox.domain.com/api/dcim/devices/12/'
-        }
+        # Note: Array Id parameters are not supported for Remove- functions
+        # For bulk operations via pipeline, see BulkOperations.Tests.ps1
 
         It "Should remove devices via bulk mode pipeline" {
             # Pipeline triggers bulk mode - Send-NBBulkRequest handles the DELETE
