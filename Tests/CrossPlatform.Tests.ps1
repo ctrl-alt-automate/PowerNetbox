@@ -268,12 +268,14 @@ Describe "GetNetboxAPIErrorBody Cross-Platform" -Tag 'CrossPlatform', 'Helper' {
         }
     }
 
-    It "Should return empty string for unknown response types" {
+    It "Should return object with empty body for unknown response types" {
         InModuleScope -ModuleName 'PowerNetbox' {
             # Pass an object that is neither HttpWebResponse nor HttpResponseMessage
             $unknownResponse = [PSCustomObject]@{ StatusCode = 403 }
             $result = GetNetboxAPIErrorBody -Response $unknownResponse
-            $result | Should -Be ''
+            $result | Should -Not -BeNullOrEmpty
+            $result.Body | Should -BeNullOrEmpty
+            $result.IsJson | Should -BeFalse
         }
     }
 }
