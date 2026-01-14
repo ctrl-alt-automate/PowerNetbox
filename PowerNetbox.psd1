@@ -272,7 +272,7 @@ FunctionsToExport = 'Aliases', 'ArgumentCompleters', 'BuildNewURI', 'BuildURICom
                'Set-NBIPAMVRF', 'Set-NBJournalEntry', 'Set-NBOwner',
                'Set-NBOwnerGroup', 'Set-NBPermission', 'Set-NBSavedFilter',
                'Set-NBTag', 'Set-NBTenant', 'Set-NBTenantGroup', 'Set-NBTimeout',
-               'Set-NBToken', 'Set-NBUnstrustedSSL', 'Set-NBuntrustedSSL',
+               'Set-NBToken', 'Set-NBuntrustedSSL',
                'Set-NBUser', 'Set-NBVirtualCircuit',
                'Set-NBVirtualCircuitTermination', 'Set-NBVirtualCircuitType',
                'Set-NBVirtualizationCluster', 'Set-NBVirtualizationClusterGroup',

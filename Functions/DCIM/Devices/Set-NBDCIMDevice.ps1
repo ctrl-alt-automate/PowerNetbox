@@ -107,7 +107,7 @@ function Set-NBDCIMDevice {
     param(
         # Single mode parameters
         [Parameter(ParameterSetName = 'Single', Mandatory = $true)]
-        [uint64[]]$Id,
+        [uint64]$Id,
 
         [Parameter(ParameterSetName = 'Single')]
         [string]$Name,

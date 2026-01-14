@@ -25,7 +25,7 @@ function Get-NBTag {
         [int]$PageSize = 100,
 
         [Parameter(ValueFromPipelineByPropertyName = $true)]
-        [uint64]$Id,
+        [uint64[]]$Id,
 
         [string]$Name,
 

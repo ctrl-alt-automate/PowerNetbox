@@ -869,11 +869,8 @@ Describe "Set-NBDCIMDevice Bulk Mode" -Tag 'Bulk', 'DCIM' {
             Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -ModuleName 'PowerNetbox'
         }
 
-        It "Should update multiple devices when Id array is provided" {
-            $result = Set-NBDCIMDevice -Id 100, 101, 102 -Status "staged" -Force
-
-            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 3 -ModuleName 'PowerNetbox'
-        }
+        # Note: Array Id parameters are not supported for Set- functions
+        # Use pipeline with InputObject for bulk operations (see "Bulk Operations" context below)
 
         It "Should update device name" {
             $result = Set-NBDCIMDevice -Id 100 -Name "renamed-device" -Force
@@ -960,11 +957,8 @@ Describe "Remove-NBDCIMDevice Bulk Mode" -Tag 'Bulk', 'DCIM' {
             Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -ModuleName 'PowerNetbox'
         }
 
-        It "Should delete multiple devices when Id array is provided" {
-            { Remove-NBDCIMDevice -Id 100, 101, 102 -Force } | Should -Not -Throw
-
-            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 3 -ModuleName 'PowerNetbox'
-        }
+        # Note: Array Id parameters are not supported for Remove- functions
+        # Use pipeline with InputObject for bulk operations (see "Bulk Operations" context below)
 
         It "Should call Get-NBDCIMDevice for each Id in single mode" {
             Remove-NBDCIMDevice -Id 100 -Force
@@ -1071,11 +1065,8 @@ Describe "Set-NBIPAMAddress" -Tag 'Bulk', 'IPAM' {
             Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -ModuleName 'PowerNetbox'
         }
 
-        It "Should update multiple IPs when Id array is provided" {
-            $result = Set-NBIPAMAddress -Id 100, 101, 102 -Status "reserved" -Force
-
-            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 3 -ModuleName 'PowerNetbox'
-        }
+        # Note: Array Id parameters are not supported for Set- functions
+        # Use pipeline with InputObject for bulk operations (see "Bulk Operations" context below)
 
         It "Should validate Assigned_Object_Type requires Assigned_Object_Id" {
             { Set-NBIPAMAddress -Id 100 -Assigned_Object_Type "dcim.interface" -Force -ErrorAction Stop } | Should -Throw
@@ -1191,11 +1182,8 @@ Describe "Remove-NBIPAMAddress Bulk Mode" -Tag 'Bulk', 'IPAM' {
             Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -ModuleName 'PowerNetbox'
         }
 
-        It "Should delete multiple IPs when Id array is provided" {
-            { Remove-NBIPAMAddress -Id 100, 101, 102 -Force } | Should -Not -Throw
-
-            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 3 -ModuleName 'PowerNetbox'
-        }
+        # Note: Array Id parameters are not supported for Remove- functions
+        # Use pipeline with InputObject for bulk operations (see "Bulk Operations" context below)
 
         It "Should call Get-NBIPAMAddress for each Id in single mode" {
             Remove-NBIPAMAddress -Id 100 -Force
@@ -1440,11 +1428,8 @@ Describe "Remove-NBVirtualMachine Bulk Mode" -Tag 'Bulk', 'Virtualization' {
             Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -ModuleName 'PowerNetbox'
         }
 
-        It "Should delete multiple VMs when Id array is provided" {
-            { Remove-NBVirtualMachine -Id 100, 101, 102 -Force } | Should -Not -Throw
-
-            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 3 -ModuleName 'PowerNetbox'
-        }
+        # Note: Array Id parameters are not supported for Remove- functions
+        # Use pipeline with InputObject for bulk operations (see "Bulk Operations" context below)
 
         It "Should call Get-NBVirtualMachine for each Id in single mode" {
             Remove-NBVirtualMachine -Id 100 -Force

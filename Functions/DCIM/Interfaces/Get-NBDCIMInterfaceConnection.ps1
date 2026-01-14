@@ -30,7 +30,7 @@ function Get-NBDCIMInterfaceConnection {
         [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
-        [uint64]$Id,
+        [uint64[]]$Id,
 
         [object]$Connection_Status,
 

@@ -25,7 +25,7 @@ function Get-NBDCIMSite {
         [int]$PageSize = 100,
 
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)]
-        [uint64]$Id,
+        [uint64[]]$Id,
 
         [Parameter(ParameterSetName = 'Query')]
         [string]$Name,
