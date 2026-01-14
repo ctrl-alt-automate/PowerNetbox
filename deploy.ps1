@@ -78,6 +78,43 @@ Write-Host "Removing whitespace from files" -ForegroundColor Green
 Invoke-ScriptAnalyzer -Path $FunctionPath -IncludeRule 'PSAvoidTrailingWhitespace' -Recurse -Fix
 
 
+# Pre-flight check: Detect duplicate function names (case-insensitive)
+Write-Host "Checking for duplicate function names" -ForegroundColor Green
+$FunctionNames = @{}
+$Duplicates = [System.Collections.ArrayList]::new()
+
+foreach ($File in $PS1FunctionFiles) {
+    $Content = Get-Content $File.FullName -Raw
+
+    # Extract function name using regex
+    if ($Content -match 'function\s+([\w-]+)\s*[\{\(]') {
+        $FuncName = $Matches[1]
+        $FuncNameLower = $FuncName.ToLower()
+
+        if ($FunctionNames.ContainsKey($FuncNameLower)) {
+            [void]$Duplicates.Add([PSCustomObject]@{
+                FunctionName = $FuncName
+                File1        = $FunctionNames[$FuncNameLower]
+                File2        = $File.Name
+            })
+        }
+        else {
+            $FunctionNames[$FuncNameLower] = $File.Name
+        }
+    }
+}
+
+if ($Duplicates.Count -gt 0) {
+    Write-Host "ERROR: Found duplicate function definitions:" -ForegroundColor Red
+    $Duplicates | ForEach-Object {
+        Write-Host ("  {0}: {1} <-> {2}" -f $_.FunctionName, $_.File1, $_.File2) -ForegroundColor Red
+    }
+    throw "Deployment aborted due to duplicate function names. Please resolve conflicts before continuing."
+}
+
+Write-Host " No duplicates found ($($FunctionNames.Count) unique functions)" -ForegroundColor Green
+
+
 Write-Host "Concatenating [$($PS1FunctionFiles.Count)] PS1 files from $FunctionPath"
 
 "" | Out-File -FilePath $ConcatenatedFilePath -Encoding $FileEncoding
