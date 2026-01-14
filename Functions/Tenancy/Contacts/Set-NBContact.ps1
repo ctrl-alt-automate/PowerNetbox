@@ -58,7 +58,7 @@ function Set-NBContact {
     (
         [Parameter(Mandatory = $true,
                    ValueFromPipelineByPropertyName = $true)]
-        [uint64[]]$Id,
+        [uint64]$Id,
 
         [ValidateLength(1, 100)]
         [string]$Name,

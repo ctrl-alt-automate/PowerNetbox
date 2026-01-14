@@ -33,7 +33,7 @@ function Set-NBContactRole {
     (
         [Parameter(Mandatory = $true,
                    ValueFromPipelineByPropertyName = $true)]
-        [uint64[]]$Id,
+        [uint64]$Id,
 
         [Parameter(ValueFromPipelineByPropertyName = $true)]
         [ValidateLength(1, 100)]

@@ -95,7 +95,7 @@ function Set-NBIPAMAddress {
     (
         # Single mode parameters
         [Parameter(ParameterSetName = 'Single', Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
-        [uint64[]]$Id,
+        [uint64]$Id,
 
         [Parameter(ParameterSetName = 'Single')]
         [string]$Address,

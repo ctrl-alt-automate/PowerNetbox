@@ -70,7 +70,7 @@ function Get-NBDCIMRackElevation {
     param
     (
         [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
-        [uint64]$Id,
+        [uint64[]]$Id,
 
         [ValidateSet('front', 'rear')]
         [string]$Face = 'front',

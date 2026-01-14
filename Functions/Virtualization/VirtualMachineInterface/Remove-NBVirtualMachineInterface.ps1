@@ -45,7 +45,7 @@ function Remove-NBVirtualMachineInterface {
     param
     (
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
-        [uint64[]]$Id,
+        [uint64]$Id,
 
         [switch]$Force,
 

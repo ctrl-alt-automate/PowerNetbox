@@ -26,7 +26,7 @@ function Set-NBIPAMAddressRange {
     (
         [Parameter(Mandatory = $true,
                    ValueFromPipelineByPropertyName = $true)]
-        [uint64[]]$Id,
+        [uint64]$Id,
 
         [string]$Start_Address,
 

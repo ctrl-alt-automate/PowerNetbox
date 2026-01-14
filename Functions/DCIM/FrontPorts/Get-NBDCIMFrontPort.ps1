@@ -31,7 +31,7 @@ function Get-NBDCIMFrontPort {
         [uint16]$Offset,
 
         [Parameter(ValueFromPipelineByPropertyName = $true)]
-        [uint64]$Id,
+        [uint64[]]$Id,
 
         [string]$Name,
 
