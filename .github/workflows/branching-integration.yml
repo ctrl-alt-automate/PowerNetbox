@@ -1,0 +1,298 @@
+# Branching Plugin Integration Tests
+# ===================================
+# Test PowerNetbox branching functions against Netbox with the
+# netbox-branching plugin installed.
+#
+# This workflow:
+# - Builds a custom Netbox Docker image with branching plugin
+# - Runs branching-specific integration tests
+# - Verifies branch CRUD operations, context management, etc.
+#
+# Triggers:
+# - Push to dev/main/beta branches
+# - Pull requests to dev/main
+# - Manual dispatch
+
+name: Branching Integration Tests
+
+on:
+  push:
+    branches: [dev, main, beta]
+    paths:
+      - 'Functions/Plugins/Branching/**'
+      - 'Tests/Branching*.ps1'
+      - '.github/workflows/branching-integration.yml'
+      - 'Dockerfile.branching'
+      - 'configuration/plugins.py'
+  pull_request:
+    branches: [dev, main]
+    paths:
+      - 'Functions/Plugins/Branching/**'
+      - 'Tests/Branching*.ps1'
+  workflow_dispatch:
+    inputs:
+      netbox_version:
+        description: 'Netbox Docker image tag (e.g., v4.5.0-3.4.2)'
+        required: false
+        default: 'v4.5.0-3.4.2'
+        type: string
+      branching_version:
+        description: 'Branching plugin version (e.g., 0.8.0)'
+        required: false
+        default: '0.8.0'
+        type: string
+
+env:
+  COMPOSE_PROJECT_NAME: "powernetbox-branching"
+
+jobs:
+  branching-integration:
+    name: Branching Tests (Netbox ${{ matrix.netbox_short }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Netbox 4.5.x with branching 0.8.0
+          - netbox: "v4.5.0-3.4.2"
+            netbox_short: "4.5.0"
+            branching: "0.8.0"
+
+    env:
+      NETBOX_VERSION: ${{ github.event.inputs.netbox_version || matrix.netbox }}
+      BRANCHING_VERSION: ${{ github.event.inputs.branching_version || matrix.branching }}
+      NETBOX_HOST: "localhost:8000"
+
+    steps:
+      # ----------------------------------------------------------
+      # Setup
+      # ----------------------------------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # ----------------------------------------------------------
+      # Build Custom Image with Branching Plugin
+      # ----------------------------------------------------------
+      - name: Build custom Netbox image with branching plugin
+        run: |
+          echo "Building netbox-branching image..."
+          echo "  Netbox version: ${{ env.NETBOX_VERSION }}"
+          echo "  Branching version: ${{ env.BRANCHING_VERSION }}"
+
+          docker build \
+            --build-arg NETBOX_VERSION=${{ env.NETBOX_VERSION }} \
+            --build-arg BRANCHING_VERSION=${{ env.BRANCHING_VERSION }} \
+            -f Dockerfile.branching \
+            -t netbox-branching:${{ env.NETBOX_VERSION }} \
+            .
+
+      # ----------------------------------------------------------
+      # Start Netbox Stack with Branching Plugin
+      # ----------------------------------------------------------
+      - name: Create docker-compose override
+        run: |
+          cat > docker-compose.branching.yml << 'EOF'
+          services:
+            netbox:
+              image: netbox-branching:${{ env.NETBOX_VERSION }}
+              volumes:
+                - ./configuration/plugins.py:/etc/netbox/config/plugins.py:ro
+              environment:
+                # Skip automatic superuser - we'll create it manually (4.5.0 token issues)
+                SKIP_SUPERUSER: "true"
+              healthcheck:
+                # Extended timeout for plugin migrations
+                start_period: 300s
+          EOF
+
+      - name: Start Netbox stack with branching plugin
+        run: |
+          echo "Starting Netbox stack with branching plugin..."
+          docker compose -f docker-compose.ci.yml -f docker-compose.branching.yml up -d
+
+          echo ""
+          echo "Container status:"
+          docker compose -f docker-compose.ci.yml -f docker-compose.branching.yml ps
+
+      - name: Wait for Netbox to be ready
+        run: |
+          echo "Waiting for Netbox with branching plugin to be ready..."
+          echo "(This may take 5-7 minutes for plugin migrations)"
+          echo ""
+
+          MAX_WAIT=480  # 8 minutes max
+          ELAPSED=0
+          INTERVAL=15
+
+          while [ $ELAPSED -lt $MAX_WAIT ]; do
+            STATUS=$(docker inspect --format='{{.State.Health.Status}}' powernetbox-branching-netbox-1 2>/dev/null || echo "starting")
+
+            echo "[${ELAPSED}s] Container status: $STATUS"
+
+            if [ "$STATUS" = "healthy" ]; then
+              echo ""
+              echo "Netbox is healthy!"
+
+              if curl -sf http://localhost:8000/login/ > /dev/null 2>&1; then
+                echo "Web server responding!"
+                exit 0
+              fi
+            fi
+
+            if [ "$STATUS" = "unhealthy" ]; then
+              echo ""
+              echo "ERROR: Container became unhealthy!"
+              docker compose -f docker-compose.ci.yml -f docker-compose.branching.yml logs netbox --tail 100
+              exit 1
+            fi
+
+            sleep $INTERVAL
+            ELAPSED=$((ELAPSED + INTERVAL))
+          done
+
+          echo ""
+          echo "ERROR: Timeout waiting for Netbox"
+          docker compose -f docker-compose.ci.yml -f docker-compose.branching.yml logs netbox --tail 100
+          exit 1
+
+      # ----------------------------------------------------------
+      # Create Superuser and Token
+      # ----------------------------------------------------------
+      - name: Create superuser and API token
+        id: token
+        run: |
+          echo "Creating superuser and v2 token..."
+
+          TOKEN_OUTPUT=$(docker exec powernetbox-branching-netbox-1 \
+            /opt/netbox/venv/bin/python /opt/netbox/netbox/manage.py shell -c "
+          from django.contrib.auth import get_user_model
+          from users.models import Token
+          import sys
+
+          User = get_user_model()
+
+          try:
+              user = User.objects.get(username='admin')
+          except User.DoesNotExist:
+              user = User.objects.create_superuser('admin', 'admin@example.com', 'admin')
+              print('Created superuser', file=sys.stderr)
+
+          # Create v2 token
+          token = Token(user=user)
+          secret = Token.generate()
+          token.token = secret
+          token.save()
+
+          print(f'nbt_{token.key}.{secret}')
+          " 2>&1)
+
+          # Extract token
+          TOKEN=$(echo "$TOKEN_OUTPUT" | grep -E '^nbt_' | head -1)
+
+          if [ -z "$TOKEN" ]; then
+            echo "ERROR: Failed to create token"
+            echo "$TOKEN_OUTPUT"
+            exit 1
+          fi
+
+          echo "Token created: ${TOKEN:0:20}..."
+          echo "token=$TOKEN" >> $GITHUB_OUTPUT
+
+      # ----------------------------------------------------------
+      # Verify Branching Plugin
+      # ----------------------------------------------------------
+      - name: Verify branching plugin is active
+        env:
+          NETBOX_TOKEN: ${{ steps.token.outputs.token }}
+        run: |
+          echo "Verifying branching plugin..."
+
+          RESPONSE=$(curl -s -H "Authorization: Token $NETBOX_TOKEN" \
+            http://localhost:8000/api/plugins/branching/branches/)
+
+          echo "Response: $RESPONSE"
+
+          if echo "$RESPONSE" | grep -q '"results"'; then
+            echo "Branching plugin is active!"
+          else
+            echo "ERROR: Branching plugin not responding correctly"
+            exit 1
+          fi
+
+      # ----------------------------------------------------------
+      # Install PowerShell & Run Tests
+      # ----------------------------------------------------------
+      - name: Install PowerShell dependencies
+        shell: pwsh
+        run: |
+          Write-Host "Installing Pester..." -ForegroundColor Cyan
+          Set-PSRepository PSGallery -InstallationPolicy Trusted
+          Install-Module Pester -Force -Scope CurrentUser -MinimumVersion 5.0.0
+
+      - name: Build PowerNetbox module
+        shell: pwsh
+        run: |
+          Write-Host "Building module..." -ForegroundColor Cyan
+          ./deploy.ps1 -Environment dev -SkipVersion
+
+          Write-Host "Importing module..." -ForegroundColor Cyan
+          Import-Module ./PowerNetbox/PowerNetbox.psd1 -Force
+
+      - name: Run Branching Integration tests
+        shell: pwsh
+        env:
+          NETBOX_HOST: ${{ env.NETBOX_HOST }}
+          NETBOX_TOKEN: ${{ steps.token.outputs.token }}
+        run: |
+          Write-Host "============================================" -ForegroundColor Cyan
+          Write-Host " Running Branching Integration Tests" -ForegroundColor Cyan
+          Write-Host "============================================" -ForegroundColor Cyan
+          Write-Host ""
+
+          $config = New-PesterConfiguration
+          $config.Run.Path = './Tests/Branching.Integration.Tests.ps1'
+          $config.Run.Exit = $true
+          $config.Filter.Tag = @('BranchingIntegration')
+          $config.TestResult.Enabled = $true
+          $config.TestResult.OutputPath = 'BranchingTestResults.xml'
+          $config.TestResult.OutputFormat = 'NUnitXml'
+          $config.Output.Verbosity = 'Detailed'
+
+          Invoke-Pester -Configuration $config
+
+      # ----------------------------------------------------------
+      # Cleanup
+      # ----------------------------------------------------------
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: branching-test-results-${{ matrix.netbox_short }}
+          path: BranchingTestResults.xml
+          retention-days: 30
+
+      - name: Collect debug logs on failure
+        if: failure()
+        run: |
+          echo "=== Debug Information ===" > branching-debug.txt
+          docker compose -f docker-compose.ci.yml -f docker-compose.branching.yml ps >> branching-debug.txt 2>&1
+          echo "" >> branching-debug.txt
+          docker compose -f docker-compose.ci.yml -f docker-compose.branching.yml logs netbox --tail 200 >> branching-debug.txt 2>&1
+
+      - name: Upload debug logs on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: branching-debug-${{ matrix.netbox_short }}
+          path: branching-debug.txt
+          retention-days: 7
+
+      - name: Cleanup Docker resources
+        if: always()
+        run: |
+          docker compose -f docker-compose.ci.yml -f docker-compose.branching.yml down -v --remove-orphans
+          docker system prune -f --volumes
