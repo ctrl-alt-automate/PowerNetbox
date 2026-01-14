@@ -65,7 +65,7 @@ Describe "Branching Plugin Integration Tests" -Tag 'BranchingIntegration' -Skip:
             try {
                 Remove-NBBranch -Id $branchId -Force -ErrorAction SilentlyContinue
             } catch {
-                Write-Warning "Failed to clean up branch $branchId: $_"
+                Write-Warning "Failed to clean up branch ${branchId}: ${_}"
             }
         }
     }
