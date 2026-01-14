@@ -253,36 +253,52 @@ function InvokeNetboxRequest {
         catch {
             $statusCode = $null
             $errorMessage = $_.Exception.Message
-            $responseBody = $null
 
             # Extract status code and response body
             if ($_.Exception.Response) {
                 $statusCode = [int]$_.Exception.Response.StatusCode
 
                 # Use helper function for safe response body extraction (proper disposal)
-                $responseBody = GetNetboxAPIErrorBody -Response $_.Exception.Response
+                # Returns PSCustomObject with Body, ContentType, and IsJson properties
+                $errorResponse = GetNetboxAPIErrorBody -Response $_.Exception.Response
 
-                if ($responseBody) {
-                    try {
-                        $errorData = $responseBody | ConvertFrom-Json -ErrorAction Stop
-                        if ($errorData.detail) {
-                            $errorMessage = $errorData.detail
+                if ($errorResponse.Body) {
+                    # Handle JSON responses (from Netbox API)
+                    if ($errorResponse.IsJson) {
+                        try {
+                            $errorData = $errorResponse.Body | ConvertFrom-Json -ErrorAction Stop
+                            if ($errorData.detail) {
+                                $errorMessage = $errorData.detail
+                            }
+                            elseif ($errorData.error) {
+                                $errorMessage = $errorData.error
+                            }
+                            elseif ($errorData) {
+                                # Try to format the error object nicely
+                                $errorMessage = ($errorData.PSObject.Properties | ForEach-Object {
+                                    "$($_.Name): $($_.Value -join ', ')"
+                                }) -join '; '
+                            }
                         }
-                        elseif ($errorData.error) {
-                            $errorMessage = $errorData.error
-                        }
-                        elseif ($errorData) {
-                            # Try to format the error object nicely
-                            $errorMessage = ($errorData.PSObject.Properties | ForEach-Object {
-                                "$($_.Name): $($_.Value -join ', ')"
-                            }) -join '; '
+                        catch {
+                            # JSON parsing failed despite IsJson flag - use raw body
+                            Write-Verbose "JSON parsing failed: $($_.Exception.Message)"
+                            if ($errorResponse.Body.Length -lt 500) {
+                                $errorMessage = $errorResponse.Body
+                            }
                         }
                     }
-                    catch {
-                        # Use raw response body if JSON parsing fails
-                        if ($responseBody.Length -lt 500) {
-                            $errorMessage = $responseBody
-                        }
+                    # Handle HTML responses (from proxies like nginx, HAProxy, Cloudflare)
+                    elseif ($errorResponse.ContentType -like '*html*') {
+                        $errorMessage = ExtractHtmlErrorMessage -Html $errorResponse.Body -StatusCode $statusCode
+                    }
+                    # Handle other non-JSON responses (plain text, etc.)
+                    elseif ($errorResponse.Body.Length -lt 500) {
+                        $errorMessage = $errorResponse.Body
+                    }
+                    else {
+                        # Large non-JSON response - provide generic message
+                        $errorMessage = "Server returned non-JSON response (Content-Type: $($errorResponse.ContentType))"
                     }
                 }
             }
@@ -430,4 +446,73 @@ Message: $ErrorMessage
 Troubleshooting:
 $troubleshooting
 "@
+}
+
+function ExtractHtmlErrorMessage {
+    <#
+    .SYNOPSIS
+        Extracts a meaningful error message from HTML error pages.
+
+    .DESCRIPTION
+        When a proxy (nginx, HAProxy, Cloudflare) returns an HTML error page,
+        this function extracts the title or heading to provide a more useful
+        error message than raw HTML.
+
+    .PARAMETER Html
+        The HTML content from the error response.
+
+    .PARAMETER StatusCode
+        The HTTP status code for context.
+
+    .OUTPUTS
+        [string] A human-readable error message.
+    #>
+    [CmdletBinding()]
+    [OutputType([string])]
+    param(
+        [string]$Html,
+        [int]$StatusCode
+    )
+
+    # Try to extract <title> content
+    if ($Html -match '<title>([^<]+)</title>') {
+        $title = $Matches[1].Trim()
+        if ($title -and $title -ne '') {
+            return "Proxy error: $title"
+        }
+    }
+
+    # Try to extract <h1> content
+    if ($Html -match '<h1[^>]*>([^<]+)</h1>') {
+        $heading = $Matches[1].Trim()
+        if ($heading -and $heading -ne '') {
+            return "Proxy error: $heading"
+        }
+    }
+
+    # Detect known proxy signatures and provide helpful messages
+    $htmlLower = $Html.ToLower()
+
+    if ($htmlLower -match 'cloudflare') {
+        return "Cloudflare proxy error (HTTP $StatusCode) - The backend server may be unreachable"
+    }
+
+    if ($htmlLower -match 'nginx') {
+        return "nginx proxy error (HTTP $StatusCode) - The backend server may be unavailable"
+    }
+
+    if ($htmlLower -match 'haproxy') {
+        return "HAProxy error (HTTP $StatusCode) - The backend server may be down"
+    }
+
+    if ($htmlLower -match 'apache') {
+        return "Apache proxy error (HTTP $StatusCode) - The backend server may not be responding"
+    }
+
+    if ($htmlLower -match 'varnish') {
+        return "Varnish cache error (HTTP $StatusCode) - The origin server may be unreachable"
+    }
+
+    # Generic fallback for unidentified HTML responses
+    return "Proxy returned HTML error page (HTTP $StatusCode) - Check network/proxy configuration"
 }
