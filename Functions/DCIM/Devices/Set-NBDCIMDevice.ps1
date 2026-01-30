@@ -200,18 +200,15 @@ function Set-NBDCIMDevice {
 
     process {
         if ($PSCmdlet.ParameterSetName -eq 'Single') {
-            foreach ($DeviceID in $Id) {
-                $CurrentDevice = Get-NBDCIMDevice -Id $DeviceID -ErrorAction Stop
+            # Use Id directly - no need to fetch device first (saves an API call per update)
+            if ($Force -or $PSCmdlet.ShouldProcess("Device ID $Id", "Update device")) {
+                $DeviceSegments = [System.Collections.ArrayList]::new(@('dcim', 'devices', $Id))
 
-                if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentDevice.Name)", "Update device")) {
-                    $DeviceSegments = [System.Collections.ArrayList]::new(@('dcim', 'devices', $CurrentDevice.Id))
+                $URIComponents = BuildURIComponents -URISegments $DeviceSegments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force', 'Raw'
 
-                    $URIComponents = BuildURIComponents -URISegments $DeviceSegments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force', 'Raw'
+                $DeviceURI = BuildNewURI -Segments $URIComponents.Segments
 
-                    $DeviceURI = BuildNewURI -Segments $URIComponents.Segments
-
-                    InvokeNetboxRequest -URI $DeviceURI -Body $URIComponents.Parameters -Method PATCH -Raw:$Raw
-                }
+                InvokeNetboxRequest -URI $DeviceURI -Body $URIComponents.Parameters -Method PATCH -Raw:$Raw
             }
         }
         else {
