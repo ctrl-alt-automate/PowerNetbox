@@ -340,8 +340,7 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
         It "Should set a device to a new name" {
             $Result = Set-NBDCIMDevice -Id 1234 -Name 'newtestname' -Force
 
-            Should -Invoke -CommandName 'Get-NBDCIMDevice' -Times 1 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
-
+            # Uses Id directly without fetching device first (performance optimization #177)
             $Result.Method | Should -Be 'PATCH'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/devices/1234/'
             $Result.Body | Should -Be '{"name":"newtestname"}'

@@ -1314,8 +1314,10 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         }
 
         It "Should create a rear port with Front_Ports array (4.5+ bidirectional)" {
-            Mock -CommandName "Get-NBVersion" -ModuleName PowerNetbox -MockWith {
-                return @{ 'netbox-version' = '4.5.0' }
+            # Set cached version to simulate Netbox 4.5+ (preserve other config values)
+            InModuleScope PowerNetbox {
+                if (-not $script:NetboxConfig) { $script:NetboxConfig = @{} }
+                $script:NetboxConfig['ParsedVersion'] = [version]'4.5.0'
             }
             $frontPorts = @(
                 @{ front_port = 50; front_port_position = 1; position = 1 }
@@ -1342,8 +1344,10 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         }
 
         It "Should update a rear port with Front_Ports array (4.5+ bidirectional)" {
-            Mock -CommandName "Get-NBVersion" -ModuleName PowerNetbox -MockWith {
-                return @{ 'netbox-version' = '4.5.0' }
+            # Set cached version to simulate Netbox 4.5+ (preserve other config values)
+            InModuleScope PowerNetbox {
+                if (-not $script:NetboxConfig) { $script:NetboxConfig = @{} }
+                $script:NetboxConfig['ParsedVersion'] = [version]'4.5.0'
             }
             $frontPorts = @(
                 @{ front_port = 75; front_port_position = 2; position = 1 }
