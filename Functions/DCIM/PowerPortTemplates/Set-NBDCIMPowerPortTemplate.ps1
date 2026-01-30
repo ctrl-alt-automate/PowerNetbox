@@ -33,7 +33,7 @@ function Set-NBDCIMPowerPortTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating DCIM Power Port Te mp la te"
+        Write-Verbose "Updating DCIM Power Port Template"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','power-port-templates',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update power port template')) {

@@ -33,7 +33,7 @@ function New-NBDCIMFrontPortTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating DCIM Front Port Te mp la te"
+        Write-Verbose "Creating DCIM Front Port Template"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','front-port-templates'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create front port template')) {

@@ -31,7 +31,7 @@ function New-NBDCIMModuleBay {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating DCIM ModuleB ay"
+        Write-Verbose "Creating DCIM Module Bay"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','module-bays'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create module bay')) {

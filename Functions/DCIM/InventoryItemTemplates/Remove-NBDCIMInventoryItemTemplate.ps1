@@ -25,7 +25,7 @@ function Remove-NBDCIMInventoryItemTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing DCIM Inventory Item Te mp la te"
+        Write-Verbose "Removing DCIM Inventory Item Template"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete inventory item template')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','inventory-item-templates',$Id)) -Method DELETE -Raw:$Raw
         }

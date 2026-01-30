@@ -29,7 +29,7 @@ function New-NBIPAMVLANTranslationPolicy {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating IPAM VLANT ra ns la ti on Po li cy"
+        Write-Verbose "Creating IPAM VLANT ra ns la ti on Policy"
         $Segments = [System.Collections.ArrayList]::new(@('ipam','vlan-translation-policies'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create VLAN translation policy')) {

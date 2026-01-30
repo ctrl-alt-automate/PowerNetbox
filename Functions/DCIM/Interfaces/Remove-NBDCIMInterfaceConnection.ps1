@@ -36,7 +36,7 @@ function Remove-NBDCIMInterfaceConnection {
     }
 
     process {
-        Write-Verbose "Removing DCIM Interface Co nn ec ti on"
+        Write-Verbose "Removing DCIM Interface Connection"
         foreach ($ConnectionID in $Id) {
             $CurrentConnection = Get-NBDCIMInterfaceConnection -Id $ConnectionID -ErrorAction Stop
 

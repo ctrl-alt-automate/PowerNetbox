@@ -25,7 +25,7 @@ function Remove-NBDCIMModuleBayTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing DCIM ModuleB ay Te mp la te"
+        Write-Verbose "Removing DCIM Module Bay Template"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete module bay template')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','module-bay-templates',$Id)) -Method DELETE -Raw:$Raw
         }

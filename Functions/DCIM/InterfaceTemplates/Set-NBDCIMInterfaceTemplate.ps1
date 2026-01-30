@@ -36,7 +36,7 @@ function Set-NBDCIMInterfaceTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating DCIM Interface Te mp la te"
+        Write-Verbose "Updating DCIM Interface Template"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','interface-templates',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update interface template')) {

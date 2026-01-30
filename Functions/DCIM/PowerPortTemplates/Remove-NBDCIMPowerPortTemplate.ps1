@@ -25,7 +25,7 @@ function Remove-NBDCIMPowerPortTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing DCIM Power Port Te mp la te"
+        Write-Verbose "Removing DCIM Power Port Template"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete power port template')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','power-port-templates',$Id)) -Method DELETE -Raw:$Raw
         }

@@ -30,7 +30,7 @@ function New-NBDCIMConsolePortTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating DCIM Console Port Te mp la te"
+        Write-Verbose "Creating DCIM Console Port Template"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','console-port-templates'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create console port template')) {

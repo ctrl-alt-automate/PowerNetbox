@@ -63,7 +63,7 @@ function New-NBIPAMServiceTemplate {
     )
 
     process {
-        Write-Verbose "Creating IPA MS er vi ce Te mp la te"
+        Write-Verbose "Creating IPAM Service Template"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'service-templates'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
