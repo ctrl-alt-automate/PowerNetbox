@@ -253,52 +253,58 @@ function InvokeNetboxRequest {
         catch {
             $statusCode = $null
             $errorMessage = $_.Exception.Message
+            $errorBody = $null
 
-            # Extract status code and response body
+            # Extract status code from response
             if ($_.Exception.Response) {
                 $statusCode = [int]$_.Exception.Response.StatusCode
+            }
 
-                # Use helper function for safe response body extraction (proper disposal)
-                # Returns PSCustomObject with Body, ContentType, and IsJson properties
+            # PowerShell Core 7.x: ErrorDetails.Message contains the response body
+            # (HttpResponseMessage is disposed before we can read it directly)
+            if ($_.ErrorDetails.Message) {
+                Write-Verbose "Using ErrorDetails.Message for error body (PowerShell Core)"
+                $errorBody = $_.ErrorDetails.Message
+            }
+            # Fallback: Try to read from Response object (Windows PowerShell 5.1)
+            elseif ($_.Exception.Response) {
+                # Use helper function for safe response body extraction
                 $errorResponse = GetNetboxAPIErrorBody -Response $_.Exception.Response
-
                 if ($errorResponse.Body) {
-                    # Handle JSON responses (from Netbox API)
-                    if ($errorResponse.IsJson) {
-                        try {
-                            $errorData = $errorResponse.Body | ConvertFrom-Json -ErrorAction Stop
-                            if ($errorData.detail) {
-                                $errorMessage = $errorData.detail
-                            }
-                            elseif ($errorData.error) {
-                                $errorMessage = $errorData.error
-                            }
-                            elseif ($errorData) {
-                                # Try to format the error object nicely
-                                $errorMessage = ($errorData.PSObject.Properties | ForEach-Object {
-                                    "$($_.Name): $($_.Value -join ', ')"
-                                }) -join '; '
-                            }
-                        }
-                        catch {
-                            # JSON parsing failed despite IsJson flag - use raw body
-                            Write-Verbose "JSON parsing failed: $($_.Exception.Message)"
-                            if ($errorResponse.Body.Length -lt 500) {
-                                $errorMessage = $errorResponse.Body
-                            }
-                        }
+                    $errorBody = $errorResponse.Body
+                }
+            }
+
+            # Parse error body if we have one
+            if ($errorBody) {
+                # Try to parse as JSON first (Netbox API returns JSON errors)
+                try {
+                    $errorData = $errorBody | ConvertFrom-Json -ErrorAction Stop
+                    if ($errorData.detail) {
+                        $errorMessage = $errorData.detail
                     }
-                    # Handle HTML responses (from proxies like nginx, HAProxy, Cloudflare)
-                    elseif ($errorResponse.ContentType -like '*html*') {
-                        $errorMessage = ExtractHtmlErrorMessage -Html $errorResponse.Body -StatusCode $statusCode
+                    elseif ($errorData.error) {
+                        $errorMessage = $errorData.error
                     }
-                    # Handle other non-JSON responses (plain text, etc.)
-                    elseif ($errorResponse.Body.Length -lt 500) {
-                        $errorMessage = $errorResponse.Body
+                    elseif ($errorData) {
+                        # Try to format the error object nicely
+                        $errorMessage = ($errorData.PSObject.Properties | ForEach-Object {
+                            "$($_.Name): $($_.Value -join ', ')"
+                        }) -join '; '
+                    }
+                }
+                catch {
+                    # Not valid JSON - check if it's HTML (from proxies)
+                    if ($errorBody -match '^\s*<' -or $errorBody -match '<!DOCTYPE') {
+                        $errorMessage = ExtractHtmlErrorMessage -Html $errorBody -StatusCode $statusCode
+                    }
+                    # Plain text or other format
+                    elseif ($errorBody.Length -lt 500) {
+                        $errorMessage = $errorBody
                     }
                     else {
-                        # Large non-JSON response - provide generic message
-                        $errorMessage = "Server returned non-JSON response (Content-Type: $($errorResponse.ContentType))"
+                        # Large non-JSON response - truncate
+                        $errorMessage = $errorBody.Substring(0, 500) + '...'
                     }
                 }
             }
