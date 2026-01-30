@@ -322,6 +322,13 @@ Original copyright (c) 2018 Ben Claussen. Fork maintained by ctrl-alt-automate.
 
 ## Changelog
 
+### v4.5.0.2
+
+- **Bug Fix: PowerShell Core 7.x Error Messages** - Fixed issue where API error messages were not displayed correctly in PowerShell Core 7.x (#164)
+  - Error details now correctly extracted from `ErrorDetails.Message`
+  - Fallback to `Exception.Response` for Windows PowerShell 5.1 compatibility
+  - Improved JSON/HTML error parsing logic
+
 ### v4.5.0.1
 
 - **Performance Optimization** - Implements [NetBox REST API best practices](https://github.com/netboxlabs/netbox-best-practices)
