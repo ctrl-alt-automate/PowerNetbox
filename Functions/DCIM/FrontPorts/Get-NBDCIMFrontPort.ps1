@@ -53,7 +53,7 @@ function Get-NBDCIMFrontPort {
 
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'front-ports'))
 
-        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'All', 'PageSize'
 
         $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 

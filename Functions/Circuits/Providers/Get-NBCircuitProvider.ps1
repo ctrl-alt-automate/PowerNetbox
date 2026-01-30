@@ -65,7 +65,7 @@ function Get-NBCircuitProvider {
             foreach ($i in $ID) {
                 $Segments = [System.Collections.ArrayList]::new(@('circuits', 'providers', $i))
 
-                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName "Id"
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'All', 'PageSize'
 
                 $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
@@ -76,7 +76,7 @@ function Get-NBCircuitProvider {
         default {
             $Segments = [System.Collections.ArrayList]::new(@('circuits', 'providers'))
 
-            $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters
+            $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'All', 'PageSize'
 
             $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 

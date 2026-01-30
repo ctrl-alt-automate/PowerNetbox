@@ -69,7 +69,7 @@ function Get-NBCircuitTermination {
                 foreach ($i in $ID) {
                     $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuit-terminations', $i))
 
-                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName "Id"
+                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'All', 'PageSize'
 
                     $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
@@ -80,7 +80,7 @@ function Get-NBCircuitTermination {
             default {
                 $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuit-terminations'))
 
-                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'All', 'PageSize'
 
                 $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 

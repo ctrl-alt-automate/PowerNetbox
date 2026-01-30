@@ -84,7 +84,7 @@ function Get-NBVirtualMachineInterface {
         Write-Verbose "Retrieving Virtual Machine Interface"
         $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'interfaces'))
 
-        $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters
+        $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'All', 'PageSize'
 
         $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
