@@ -24,6 +24,10 @@ function Get-NBDCIMFrontPort {
         [ValidateRange(1, 1000)]
         [int]$PageSize = 100,
 
+        [switch]$Brief,
+
+        [string[]]$Fields,
+
         [ValidateRange(1, 1000)]
         [uint16]$Limit,
 

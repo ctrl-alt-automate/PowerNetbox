@@ -23,6 +23,10 @@ function Get-NBDCIMMACAddress {
         [ValidateRange(1, 1000)]
         [int]$PageSize = 100,
 
+        [switch]$Brief,
+
+        [string[]]$Fields,
+
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Mac_Address,
         [Parameter(ParameterSetName = 'Query')][uint64]$Assigned_Object_Id,

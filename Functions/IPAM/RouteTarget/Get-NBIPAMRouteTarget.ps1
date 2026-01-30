@@ -57,6 +57,10 @@ function Get-NBIPAMRouteTarget {
         [ValidateRange(1, 1000)]
         [int]$PageSize = 100,
 
+        [switch]$Brief,
+
+        [string[]]$Fields,
+
         [Parameter(ParameterSetName = 'ByID',
                    ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,

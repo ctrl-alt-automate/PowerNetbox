@@ -25,6 +25,10 @@ function Get-NBDCIMDeviceType {
         [ValidateRange(1, 1000)]
         [int]$PageSize = 100,
 
+        [switch]$Brief,
+
+        [string[]]$Fields,
+
         [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 

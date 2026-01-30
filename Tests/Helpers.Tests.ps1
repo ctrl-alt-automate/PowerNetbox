@@ -423,6 +423,57 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' {
                 $URIComponents.Parameters['id__in'] | Should -Be '1,2,3'
             }
         }
+
+        It "Should add brief=True parameter when Brief switch is set" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $URIComponents = BuildURIComponents -URISegments ([System.Collections.ArrayList]@('dcim', 'devices')) -ParametersDictionary @{Brief=$true}
+                $URIComponents.Parameters['brief'] | Should -Be 'True'
+            }
+        }
+
+        It "Should not add brief parameter when Brief is false" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $URIComponents = BuildURIComponents -URISegments ([System.Collections.ArrayList]@('dcim', 'devices')) -ParametersDictionary @{Brief=$false}
+                $URIComponents.Parameters.ContainsKey('brief') | Should -BeFalse
+            }
+        }
+
+        It "Should add fields parameter as comma-separated list" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $URIComponents = BuildURIComponents -URISegments ([System.Collections.ArrayList]@('dcim', 'devices')) -ParametersDictionary @{Fields=@('id','name','status','site.name')}
+                $URIComponents.Parameters['fields'] | Should -Be 'id,name,status,site.name'
+            }
+        }
+
+        It "Should handle single field in Fields parameter" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $URIComponents = BuildURIComponents -URISegments ([System.Collections.ArrayList]@('dcim', 'devices')) -ParametersDictionary @{Fields=@('name')}
+                $URIComponents.Parameters['fields'] | Should -Be 'name'
+            }
+        }
+
+        It "Should add exclude parameter as comma-separated list" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $URIComponents = BuildURIComponents -URISegments ([System.Collections.ArrayList]@('dcim', 'devices')) -ParametersDictionary @{Exclude=@('config_context','comments')}
+                $URIComponents.Parameters['exclude'] | Should -Be 'config_context,comments'
+            }
+        }
+
+        It "Should handle single value in Exclude parameter" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $URIComponents = BuildURIComponents -URISegments ([System.Collections.ArrayList]@('dcim', 'devices')) -ParametersDictionary @{Exclude=@('config_context')}
+                $URIComponents.Parameters['exclude'] | Should -Be 'config_context'
+            }
+        }
+
+        It "Should emit warning when Query parameter is used" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $warnings = $null
+                $URIComponents = BuildURIComponents -URISegments ([System.Collections.ArrayList]@('dcim', 'devices')) -ParametersDictionary @{Query='test'} -WarningVariable warnings
+                $warnings | Should -Not -BeNullOrEmpty
+                $warnings | Should -Match 'slow on large datasets'
+            }
+        }
     }
 
     Context "InvokeNetboxRequest Pagination" {
