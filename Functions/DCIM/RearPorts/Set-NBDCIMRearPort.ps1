@@ -106,19 +106,11 @@ function Set-NBDCIMRearPort {
     )
 
     begin {
-        # Detect Netbox version for bidirectional port mapping support
+        # Check Netbox version for bidirectional port mapping support (cached by Connect-NBAPI)
         $is45OrHigher = $false
         if ($Front_Ports) {
-            try {
-                $status = Get-NBVersion -ErrorAction SilentlyContinue
-                if ($status.'netbox-version') {
-                    $netboxVersion = ConvertTo-NetboxVersion -VersionString $status.'netbox-version'
-                    $is45OrHigher = $netboxVersion -ge [version]'4.5.0'
-                }
-            }
-            catch {
-                Write-Verbose "Could not detect Netbox version"
-            }
+            $netboxVersion = $script:NetboxConfig.ParsedVersion
+            $is45OrHigher = $netboxVersion -and ($netboxVersion -ge [version]'4.5.0')
 
             if (-not $is45OrHigher) {
                 Write-Warning "Front_Ports parameter is only supported on Netbox 4.5+. This parameter will be ignored on older versions."
