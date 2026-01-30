@@ -37,7 +37,7 @@
     Return the raw API response.
 
 .EXAMPLE
-    $securePass = ConvertTo-SecureString "SecureP@ss123" -AsPlainText -Force
+    $securePass = ConvertTo-SecureString "<YOUR_SECURE_PASSWORD>" -AsPlainText -Force
     New-NBUser -Username "newuser" -Password $securePass
 
 .LINK

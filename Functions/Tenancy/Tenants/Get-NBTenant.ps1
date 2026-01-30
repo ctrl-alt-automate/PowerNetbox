@@ -95,7 +95,7 @@ function Get-NBTenant {
             foreach ($Tenant_ID in $Id) {
                 $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'tenants', $Tenant_ID))
 
-                $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id'
+                $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'All', 'PageSize'
 
                 $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
@@ -108,7 +108,7 @@ function Get-NBTenant {
         default {
             $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'tenants'))
 
-            $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters
+            $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'All', 'PageSize'
 
             $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 

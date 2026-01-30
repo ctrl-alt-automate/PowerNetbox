@@ -105,7 +105,7 @@ function Get-NBContact {
             foreach ($Contact_ID in $Id) {
                 $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'contacts', $Contact_ID))
 
-                $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id'
+                $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'All', 'PageSize'
 
                 $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
@@ -118,7 +118,7 @@ function Get-NBContact {
         default {
             $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'contacts'))
 
-            $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters
+            $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'All', 'PageSize'
 
             $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 

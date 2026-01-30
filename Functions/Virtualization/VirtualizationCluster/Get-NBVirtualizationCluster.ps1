@@ -93,7 +93,7 @@ function Get-NBVirtualizationCluster {
         Write-Verbose "Retrieving Virtualization Cluster"
         $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'clusters'))
 
-        $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters
+        $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'All', 'PageSize'
 
         $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 

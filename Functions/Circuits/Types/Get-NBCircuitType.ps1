@@ -56,7 +56,7 @@ function Get-NBCircuitType {
             foreach ($i in $ID) {
                 $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuit_types', $i))
 
-                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName "Id"
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'All', 'PageSize'
 
                 $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
@@ -67,7 +67,7 @@ function Get-NBCircuitType {
         default {
             $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuit-types'))
 
-            $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters
+            $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'All', 'PageSize'
 
             $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 

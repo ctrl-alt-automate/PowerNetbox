@@ -49,7 +49,7 @@ function Get-NBTag {
 
         $Segments = [System.Collections.ArrayList]::new(@('extras', 'tags'))
 
-        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'All', 'PageSize'
 
         $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 

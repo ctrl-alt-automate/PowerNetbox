@@ -98,7 +98,7 @@ function Get-NBDCIMSite {
                 foreach ($Site_ID in $ID) {
                     $Segments = [System.Collections.ArrayList]::new(@('dcim', 'sites', $Site_Id))
 
-                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName "Id"
+                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'All', 'PageSize'
 
                     $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
@@ -109,7 +109,7 @@ function Get-NBDCIMSite {
             default {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'sites'))
 
-                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'All', 'PageSize'
 
                 $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 

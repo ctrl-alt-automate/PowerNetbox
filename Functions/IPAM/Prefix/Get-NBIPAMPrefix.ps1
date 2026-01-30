@@ -178,7 +178,7 @@ function Get-NBIPAMPrefix {
             foreach ($Prefix_ID in $Id) {
                 $Segments = [System.Collections.ArrayList]::new(@('ipam', 'prefixes', $Prefix_ID))
 
-                $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id'
+                $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'All', 'PageSize'
 
                 $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
@@ -191,7 +191,7 @@ function Get-NBIPAMPrefix {
         default {
             $Segments = [System.Collections.ArrayList]::new(@('ipam', 'prefixes'))
 
-            $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters
+            $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'All', 'PageSize'
 
             $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
