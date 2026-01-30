@@ -113,19 +113,9 @@ function Set-NBDCIMFrontPort {
     )
 
     begin {
-        # Detect Netbox version for port mapping format
-        $netboxVersion = $null
-        $is45OrHigher = $false
-        try {
-            $status = Get-NBVersion -ErrorAction SilentlyContinue
-            if ($status.'netbox-version') {
-                $netboxVersion = ConvertTo-NetboxVersion -VersionString $status.'netbox-version'
-                $is45OrHigher = $netboxVersion -ge [version]'4.5.0'
-            }
-        }
-        catch {
-            Write-Verbose "Could not detect Netbox version, assuming 4.4 format"
-        }
+        # Check Netbox version for port mapping format (cached by Connect-NBAPI)
+        $netboxVersion = $script:NetboxConfig.ParsedVersion
+        $is45OrHigher = $netboxVersion -and ($netboxVersion -ge [version]'4.5.0')
     }
 
     process {
