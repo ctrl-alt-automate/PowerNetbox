@@ -37,6 +37,10 @@ function Get-ModelDefinition {
     [OutputType([PSCustomObject])]
     param
     (
+        [switch]$Brief,
+
+        [string[]]$Fields,
+
         [Parameter(ParameterSetName = 'ByName',
                    Mandatory = $true)]
         [ValidateNotNullOrEmpty()]

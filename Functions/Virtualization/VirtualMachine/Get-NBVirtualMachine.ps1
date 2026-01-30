@@ -7,6 +7,27 @@ function Get-NBVirtualMachine {
     .DESCRIPTION
         Obtains one or more virtual machines based on provided filters.
 
+        By default, config_context is excluded from the response for performance.
+        Use -IncludeConfigContext to include it when needed.
+
+    .PARAMETER All
+        Automatically fetch all pages of results.
+
+    .PARAMETER PageSize
+        Number of items per page when using -All. Default: 100.
+
+    .PARAMETER Brief
+        Return a minimal representation of objects (id, url, display, name only).
+        Reduces response size by ~90%. Ideal for dropdowns and reference lists.
+
+    .PARAMETER Fields
+        Specify which fields to include in the response.
+        Supports nested field selection (e.g., 'site.name', 'cluster.name').
+
+    .PARAMETER IncludeConfigContext
+        Include config_context in the response. By default, config_context is
+        excluded for performance (can be 10-100x faster without it).
+
     .PARAMETER Limit
         Number of results to return per page
 
@@ -67,17 +88,21 @@ function Get-NBVirtualMachine {
     .PARAMETER Raw
         Return the raw API response instead of extracting the results array.
 
-    .PARAMETER TenantID
-        Database ID of tenant
-
-    .PARAMETER PlatformID
-        Database ID of the platform
-
-    .PARAMETER id__in
-        Database IDs of VMs
+    .EXAMPLE
+        Get-NBVirtualMachine
+        Returns VMs with config_context excluded by default.
 
     .EXAMPLE
-        PS C:\> Get-NBVirtualMachine
+        Get-NBVirtualMachine -Brief
+        Returns minimal VM representations for dropdowns.
+
+    .EXAMPLE
+        Get-NBVirtualMachine -IncludeConfigContext
+        Returns VMs with config_context included.
+
+    .EXAMPLE
+        Get-NBVirtualMachine -Fields 'id','name','status','site.name'
+        Returns only the specified fields.
 #>
 
     [CmdletBinding()]
@@ -88,6 +113,12 @@ function Get-NBVirtualMachine {
 
         [ValidateRange(1, 1000)]
         [int]$PageSize = 100,
+
+        [switch]$Brief,
+
+        [string[]]$Fields,
+
+        [switch]$IncludeConfigContext,
 
         [Alias('q')]
         [string]$Query,
@@ -137,7 +168,16 @@ function Get-NBVirtualMachine {
         Write-Verbose "Retrieving Virtual Machine"
         $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'virtual-machines'))
 
-        $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters
+        # Build parameters to pass, excluding config_context by default
+        $paramsToPass = @{} + $PSBoundParameters
+
+        # Add exclude=config_context unless IncludeConfigContext is specified
+        if (-not $IncludeConfigContext) {
+            $paramsToPass['Exclude'] = @('config_context')
+        }
+        [void]$paramsToPass.Remove('IncludeConfigContext')
+
+        $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $paramsToPass -SkipParameterByName 'Raw', 'All', 'PageSize'
 
         $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 

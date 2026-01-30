@@ -40,6 +40,10 @@ function Get-NBContactRole {
         [ValidateRange(1, 1000)]
         [int]$PageSize = 100,
 
+        [switch]$Brief,
+
+        [string[]]$Fields,
+
         [Parameter(ParameterSetName = 'Query',
                    Position = 0)]
         [string]$Name,

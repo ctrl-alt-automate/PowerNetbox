@@ -24,6 +24,10 @@ function Get-NBAPIDefinition {
         [ValidateRange(1, 1000)]
         [int]$PageSize = 100,
 
+        [switch]$Brief,
+
+        [string[]]$Fields,
+
         [ValidateSet('json', 'yaml', IgnoreCase = $true)]
         [string]$Format = 'json'
     )

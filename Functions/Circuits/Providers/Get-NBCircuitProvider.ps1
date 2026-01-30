@@ -24,6 +24,10 @@ function Get-NBCircuitProvider {
         [ValidateRange(1, 1000)]
         [int]$PageSize = 100,
 
+        [switch]$Brief,
+
+        [string[]]$Fields,
+
         [Parameter(ParameterSetName = 'ById',
                    Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
