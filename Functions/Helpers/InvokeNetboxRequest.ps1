@@ -253,36 +253,58 @@ function InvokeNetboxRequest {
         catch {
             $statusCode = $null
             $errorMessage = $_.Exception.Message
-            $responseBody = $null
+            $errorBody = $null
 
-            # Extract status code and response body
+            # Extract status code from response
             if ($_.Exception.Response) {
                 $statusCode = [int]$_.Exception.Response.StatusCode
+            }
 
-                # Use helper function for safe response body extraction (proper disposal)
-                $responseBody = GetNetboxAPIErrorBody -Response $_.Exception.Response
+            # PowerShell Core 7.x: ErrorDetails.Message contains the response body
+            # (HttpResponseMessage is disposed before we can read it directly)
+            if ($_.ErrorDetails.Message) {
+                Write-Verbose "Using ErrorDetails.Message for error body (PowerShell Core)"
+                $errorBody = $_.ErrorDetails.Message
+            }
+            # Fallback: Try to read from Response object (Windows PowerShell 5.1)
+            elseif ($_.Exception.Response) {
+                # Use helper function for safe response body extraction
+                $errorResponse = GetNetboxAPIErrorBody -Response $_.Exception.Response
+                if ($errorResponse.Body) {
+                    $errorBody = $errorResponse.Body
+                }
+            }
 
-                if ($responseBody) {
-                    try {
-                        $errorData = $responseBody | ConvertFrom-Json -ErrorAction Stop
-                        if ($errorData.detail) {
-                            $errorMessage = $errorData.detail
-                        }
-                        elseif ($errorData.error) {
-                            $errorMessage = $errorData.error
-                        }
-                        elseif ($errorData) {
-                            # Try to format the error object nicely
-                            $errorMessage = ($errorData.PSObject.Properties | ForEach-Object {
-                                "$($_.Name): $($_.Value -join ', ')"
-                            }) -join '; '
-                        }
+            # Parse error body if we have one
+            if ($errorBody) {
+                # Try to parse as JSON first (Netbox API returns JSON errors)
+                try {
+                    $errorData = $errorBody | ConvertFrom-Json -ErrorAction Stop
+                    if ($errorData.detail) {
+                        $errorMessage = $errorData.detail
                     }
-                    catch {
-                        # Use raw response body if JSON parsing fails
-                        if ($responseBody.Length -lt 500) {
-                            $errorMessage = $responseBody
-                        }
+                    elseif ($errorData.error) {
+                        $errorMessage = $errorData.error
+                    }
+                    elseif ($errorData) {
+                        # Try to format the error object nicely
+                        $errorMessage = ($errorData.PSObject.Properties | ForEach-Object {
+                            "$($_.Name): $($_.Value -join ', ')"
+                        }) -join '; '
+                    }
+                }
+                catch {
+                    # Not valid JSON - check if it's HTML (from proxies)
+                    if ($errorBody -match '^\s*<' -or $errorBody -match '<!DOCTYPE') {
+                        $errorMessage = ExtractHtmlErrorMessage -Html $errorBody -StatusCode $statusCode
+                    }
+                    # Plain text or other format
+                    elseif ($errorBody.Length -lt 500) {
+                        $errorMessage = $errorBody
+                    }
+                    else {
+                        # Large non-JSON response - truncate
+                        $errorMessage = $errorBody.Substring(0, 500) + '...'
                     }
                 }
             }
@@ -430,4 +452,73 @@ Message: $ErrorMessage
 Troubleshooting:
 $troubleshooting
 "@
+}
+
+function ExtractHtmlErrorMessage {
+    <#
+    .SYNOPSIS
+        Extracts a meaningful error message from HTML error pages.
+
+    .DESCRIPTION
+        When a proxy (nginx, HAProxy, Cloudflare) returns an HTML error page,
+        this function extracts the title or heading to provide a more useful
+        error message than raw HTML.
+
+    .PARAMETER Html
+        The HTML content from the error response.
+
+    .PARAMETER StatusCode
+        The HTTP status code for context.
+
+    .OUTPUTS
+        [string] A human-readable error message.
+    #>
+    [CmdletBinding()]
+    [OutputType([string])]
+    param(
+        [string]$Html,
+        [int]$StatusCode
+    )
+
+    # Try to extract <title> content
+    if ($Html -match '<title>([^<]+)</title>') {
+        $title = $Matches[1].Trim()
+        if ($title -and $title -ne '') {
+            return "Proxy error: $title"
+        }
+    }
+
+    # Try to extract <h1> content
+    if ($Html -match '<h1[^>]*>([^<]+)</h1>') {
+        $heading = $Matches[1].Trim()
+        if ($heading -and $heading -ne '') {
+            return "Proxy error: $heading"
+        }
+    }
+
+    # Detect known proxy signatures and provide helpful messages
+    $htmlLower = $Html.ToLower()
+
+    if ($htmlLower -match 'cloudflare') {
+        return "Cloudflare proxy error (HTTP $StatusCode) - The backend server may be unreachable"
+    }
+
+    if ($htmlLower -match 'nginx') {
+        return "nginx proxy error (HTTP $StatusCode) - The backend server may be unavailable"
+    }
+
+    if ($htmlLower -match 'haproxy') {
+        return "HAProxy error (HTTP $StatusCode) - The backend server may be down"
+    }
+
+    if ($htmlLower -match 'apache') {
+        return "Apache proxy error (HTTP $StatusCode) - The backend server may not be responding"
+    }
+
+    if ($htmlLower -match 'varnish') {
+        return "Varnish cache error (HTTP $StatusCode) - The origin server may be unreachable"
+    }
+
+    # Generic fallback for unidentified HTML responses
+    return "Proxy returned HTML error page (HTTP $StatusCode) - Check network/proxy configuration"
 }

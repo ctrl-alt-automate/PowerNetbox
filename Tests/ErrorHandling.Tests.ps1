@@ -807,13 +807,15 @@ Describe "GetNetboxAPIErrorBody Helper" -Tag 'ErrorHandling', 'Helper' {
         # The -is operator does real type checking, not type name matching
         # HttpWebResponse handling is tested through integration tests
 
-        It "Should return empty string for unknown response type" {
+        It "Should return object with empty body for unknown response type" {
             InModuleScope -ModuleName 'PowerNetbox' {
                 $mockResponse = [PSCustomObject]@{ SomeProperty = "value" }
 
                 $result = GetNetboxAPIErrorBody -Response $mockResponse
 
-                $result | Should -BeNullOrEmpty
+                $result | Should -Not -BeNullOrEmpty
+                $result.Body | Should -BeNullOrEmpty
+                $result.IsJson | Should -BeFalse
             }
         }
     }
@@ -955,6 +957,161 @@ Describe "Error Message Quality" -Tag 'ErrorHandling', 'UX' {
 
             # Verify that errors are thrown with context
             { Get-NBDCIMDevice } | Should -Throw
+        }
+    }
+}
+
+Describe "HTML Error Extraction" -Tag 'ErrorHandling', 'Proxy' {
+    <#
+    .SYNOPSIS
+        Tests for ExtractHtmlErrorMessage helper function.
+
+    .DESCRIPTION
+        Verifies that HTML error pages from proxies (nginx, HAProxy, Cloudflare)
+        are correctly parsed to provide meaningful error messages.
+    #>
+
+    Context "Title Extraction" {
+
+        It "Should extract title from HTML error page" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $html = '<html><head><title>502 Bad Gateway</title></head><body><h1>Bad Gateway</h1></body></html>'
+                $result = ExtractHtmlErrorMessage -Html $html -StatusCode 502
+
+                $result | Should -Match "Proxy error: 502 Bad Gateway"
+            }
+        }
+
+        It "Should extract h1 when title is missing" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $html = '<html><body><h1>Service Unavailable</h1><p>Please try again later.</p></body></html>'
+                $result = ExtractHtmlErrorMessage -Html $html -StatusCode 503
+
+                $result | Should -Match "Proxy error: Service Unavailable"
+            }
+        }
+    }
+
+    Context "Proxy Detection" {
+
+        It "Should detect nginx proxy errors" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $html = '<html><body><center><h1>502 Bad Gateway</h1></center><hr><center>nginx/1.24.0</center></body></html>'
+                $result = ExtractHtmlErrorMessage -Html $html -StatusCode 502
+
+                # Should match title extraction first
+                $result | Should -Match "Proxy error: 502 Bad Gateway"
+            }
+        }
+
+        It "Should detect Cloudflare proxy errors" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $html = '<html><head><title></title></head><body>Sorry, you have been blocked. Cloudflare Ray ID: abc123</body></html>'
+                $result = ExtractHtmlErrorMessage -Html $html -StatusCode 403
+
+                $result | Should -Match "Cloudflare"
+            }
+        }
+
+        It "Should detect HAProxy errors" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $html = '<html><body>503 Service Unavailable - No server is available to handle this request. HAProxy</body></html>'
+                $result = ExtractHtmlErrorMessage -Html $html -StatusCode 503
+
+                $result | Should -Match "HAProxy"
+            }
+        }
+
+        It "Should provide generic message for unknown HTML" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $html = '<html><body>Unknown error occurred</body></html>'
+                $result = ExtractHtmlErrorMessage -Html $html -StatusCode 500
+
+                $result | Should -Match "Proxy returned HTML error page"
+                $result | Should -Match "HTTP 500"
+            }
+        }
+    }
+}
+
+Describe "Content-Type Detection" -Tag 'ErrorHandling', 'ContentType' {
+    <#
+    .SYNOPSIS
+        Tests for GetNetboxAPIErrorBody Content-Type handling.
+
+    .DESCRIPTION
+        Verifies that the enhanced GetNetboxAPIErrorBody correctly identifies
+        JSON vs HTML responses based on Content-Type header and content inspection.
+
+    .NOTES
+        These tests verify the return object structure. Full integration testing
+        with real HTTP responses is done in Integration.Tests.ps1.
+    #>
+
+    Context "Return Object Structure" {
+
+        It "Should return object with Body, ContentType, and IsJson properties" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                # Unknown response type should return empty result object
+                $mockResponse = [PSCustomObject]@{ SomeProperty = 'value' }
+
+                $result = GetNetboxAPIErrorBody -Response $mockResponse
+
+                $result | Should -Not -BeNullOrEmpty
+                $result.PSObject.Properties.Name | Should -Contain 'Body'
+                $result.PSObject.Properties.Name | Should -Contain 'ContentType'
+                $result.PSObject.Properties.Name | Should -Contain 'IsJson'
+            }
+        }
+
+        It "Should return empty body for unknown response types" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $mockResponse = [PSCustomObject]@{ Unknown = 'type' }
+
+                $result = GetNetboxAPIErrorBody -Response $mockResponse
+
+                $result.Body | Should -BeNullOrEmpty
+                $result.IsJson | Should -BeFalse
+            }
+        }
+    }
+
+    Context "IsJson Detection Logic" {
+
+        It "Should detect JSON content type in string" {
+            # Test the content-type matching logic
+            $contentType = 'application/json'
+            $isJsonByContentType = $contentType -like '*json*'
+            $isJsonByContentType | Should -BeTrue
+
+            $contentType = 'application/json; charset=utf-8'
+            $isJsonByContentType = $contentType -like '*json*'
+            $isJsonByContentType | Should -BeTrue
+        }
+
+        It "Should detect JSON by content inspection" {
+            # Test the content inspection logic
+            $jsonBody = '{"error": "test"}'
+            $isJsonByContent = $jsonBody.TrimStart() -match '^[\{\[]'
+            $isJsonByContent | Should -BeTrue
+
+            $arrayBody = '[1, 2, 3]'
+            $isJsonByContent = $arrayBody.TrimStart() -match '^[\{\[]'
+            $isJsonByContent | Should -BeTrue
+
+            $htmlBody = '<html><body>Error</body></html>'
+            $isJsonByContent = $htmlBody.TrimStart() -match '^[\{\[]'
+            $isJsonByContent | Should -BeFalse
+        }
+
+        It "Should not detect HTML as JSON" {
+            $contentType = 'text/html'
+            $isJsonByContentType = $contentType -like '*json*'
+            $isJsonByContentType | Should -BeFalse
+
+            $contentType = 'text/html; charset=utf-8'
+            $isJsonByContentType = $contentType -like '*json*'
+            $isJsonByContentType | Should -BeFalse
         }
     }
 }

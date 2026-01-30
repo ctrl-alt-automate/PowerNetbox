@@ -69,8 +69,12 @@ function Get-NBDCIMRackElevation {
     [OutputType([PSCustomObject], [string])]
     param
     (
+        [switch]$Brief,
+
+        [string[]]$Fields,
+
         [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
-        [uint64]$Id,
+        [uint64[]]$Id,
 
         [ValidateSet('front', 'rear')]
         [string]$Face = 'front',

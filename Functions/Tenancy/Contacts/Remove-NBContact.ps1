@@ -39,7 +39,7 @@ function Remove-NBContact {
     param
     (
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
-        [uint64[]]$Id,
+        [uint64]$Id,
 
         [switch]$Force,
 

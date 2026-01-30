@@ -40,10 +40,11 @@ We extend our sincere thanks to Ben and all original contributors for building t
 
 - **100% API Coverage** - Full support for all Netbox 4.x API endpoints
 - **Cross-Platform** - Works on Windows, Linux, and macOS
-- **506 Functions** - Complete CRUD operations for all resources
+- **524 Functions** - Complete CRUD operations for all resources
 - **Pipeline Support** - Full PowerShell pipeline integration
+- **Performance Optimized** - Brief mode, field selection, config_context exclusion
 - **Secure** - Token-based authentication with TLS 1.2/1.3
-- **Well Tested** - 952 unit tests + 94 integration tests
+- **Well Tested** - 1436 unit tests + 98 integration tests
 - **Tab Completion** - Argument completers for common parameters
 - **Verbose Logging** - Write-Verbose in all functions for debugging
 
@@ -147,7 +148,7 @@ Connect-NBAPI -Hostname 'netbox.local' -Credential $credential -SkipCertificateC
 ### Basic Examples
 
 ```powershell
-# Get all devices
+# Get all devices (config_context excluded by default for performance)
 Get-NBDCIMDevice
 
 # Get a specific device by name
@@ -165,6 +166,34 @@ Remove-NBDCIMDevice -Id 1
 # Pipeline support
 Get-NBDCIMDevice -Name 'server*' | Set-NBDCIMDevice -Status 'active'
 ```
+
+### Performance Optimization
+
+PowerNetbox implements [NetBox REST API best practices](https://github.com/netboxlabs/netbox-best-practices) for optimal performance:
+
+```powershell
+# Brief mode - minimal response (~90% smaller payload)
+# Returns only: id, url, display, name
+Get-NBDCIMDevice -Brief
+
+# Field selection - request only the fields you need
+Get-NBDCIMDevice -Fields 'id','name','status','site.name'
+
+# Config context is excluded by default (10-100x faster)
+# Include it explicitly when needed:
+Get-NBDCIMDevice -IncludeConfigContext
+
+# Combine with filters for best performance
+Get-NBDCIMDevice -Site_Id 1 -Status 'active' -Brief
+```
+
+| Parameter | Effect | Use Case |
+|-----------|--------|----------|
+| `-Brief` | ~90% smaller response | Dropdowns, reference lists |
+| `-Fields` | Custom field selection | Reports, specific data needs |
+| `-IncludeConfigContext` | Include config_context | When you need rendered config |
+
+> **Note:** The `-Query` parameter performs a broad search and can be slow on large datasets. Use specific filters like `-Name`, `-Site_Id`, etc. for better performance.
 
 ### Advanced Examples
 
@@ -292,6 +321,25 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 Original copyright (c) 2018 Ben Claussen. Fork maintained by ctrl-alt-automate.
 
 ## Changelog
+
+### v4.5.0.2
+
+- **Bug Fix: PowerShell Core 7.x Error Messages** - Fixed issue where API error messages were not displayed correctly in PowerShell Core 7.x (#164)
+  - Error details now correctly extracted from `ErrorDetails.Message`
+  - Fallback to `Exception.Response` for Windows PowerShell 5.1 compatibility
+  - Improved JSON/HTML error parsing logic
+
+### v4.5.0.1
+
+- **Performance Optimization** - Implements [NetBox REST API best practices](https://github.com/netboxlabs/netbox-best-practices)
+  - `-Brief` switch on all GET functions (~90% smaller responses)
+  - `-Fields` parameter for custom field selection
+  - `config_context` excluded by default (10-100x faster for device/VM queries)
+  - `-IncludeConfigContext` switch to opt-in when needed
+  - Warning when using `-Query` parameter (slow on large datasets)
+- **VPN Function Improvements** - Fixed verbose messages and code formatting
+- **524 public functions** with 100% API coverage
+- **1436 unit tests, 98 integration tests**
 
 ### v4.5.0.0
 

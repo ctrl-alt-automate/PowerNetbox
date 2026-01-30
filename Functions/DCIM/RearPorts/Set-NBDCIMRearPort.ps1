@@ -76,7 +76,7 @@ function Set-NBDCIMRearPort {
     (
         [Parameter(Mandatory = $true,
             ValueFromPipelineByPropertyName = $true)]
-        [uint64[]]$Id,
+        [uint64]$Id,
 
         [uint64]$Device,
 

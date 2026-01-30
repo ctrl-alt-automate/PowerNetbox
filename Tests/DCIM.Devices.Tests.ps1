@@ -62,7 +62,8 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             $Result = Get-NBDCIMDevice
 
             $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/devices/'
+            # By default, config_context is excluded for performance
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/devices/?exclude=config_context'
             $Result.Headers.Keys.Count | Should -BeExactly 1
         }
 
@@ -70,16 +71,18 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             $Result = Get-NBDCIMDevice -Limit 10 -Offset 100
 
             $Result.Method | Should -Be 'GET'
-            # Parameter order in hashtables is not guaranteed, so check both are present
+            # Parameter order in hashtables is not guaranteed, so check all are present
             $Result.Uri | Should -Match 'limit=10'
             $Result.Uri | Should -Match 'offset=100'
+            $Result.Uri | Should -Match 'exclude=config_context'
         }
 
         It "Should request with a query" {
             $Result = Get-NBDCIMDevice -Query 'testdevice'
 
             $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/devices/?q=testdevice'
+            $Result.Uri | Should -Match 'q=testdevice'
+            $Result.Uri | Should -Match 'exclude=config_context'
         }
 
         It "Should request with an escaped query" {
@@ -87,28 +90,32 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
 
             $Result.Method | Should -Be 'GET'
             # Module doesn't URL-encode spaces in query strings
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/devices/?q=test device'
+            $Result.Uri | Should -Match 'q=test device'
+            $Result.Uri | Should -Match 'exclude=config_context'
         }
 
         It "Should request with a name" {
             $Result = Get-NBDCIMDevice -Name 'testdevice'
 
             $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/devices/?name=testdevice'
+            $Result.Uri | Should -Match 'name=testdevice'
+            $Result.Uri | Should -Match 'exclude=config_context'
         }
 
         It "Should request with a single ID" {
             $Result = Get-NBDCIMDevice -Id 10
 
             $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/devices/10/'
+            $Result.Uri | Should -Match 'dcim/devices/10/'
+            $Result.Uri | Should -Match 'exclude=config_context'
         }
 
         It "Should request a device by ID from the pipeline" {
             $Result = [pscustomobject]@{ 'id' = 10 } | Get-NBDCIMDevice
 
             $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/devices/10/'
+            $Result.Uri | Should -Match 'dcim/devices/10/'
+            $Result.Uri | Should -Match 'exclude=config_context'
         }
 
         It "Should request with multiple IDs" {
@@ -117,6 +124,7 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             $Result.Method | Should -Be 'GET'
             # Commas may or may not be URL-encoded depending on PS version
             $Result.Uri | Should -Match 'id__in=10(%2C|,)12(%2C|,)15'
+            $Result.Uri | Should -Match 'exclude=config_context'
         }
 
         It "Should request a status" {
@@ -124,7 +132,8 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
 
             $Result.Method | Should -Be 'GET'
             # Status value is passed through to API as-is (no client-side validation)
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/devices/?status=Active'
+            $Result.Uri | Should -Match 'status=Active'
+            $Result.Uri | Should -Match 'exclude=config_context'
         }
 
         It "Should pass invalid status to API" {
@@ -132,14 +141,52 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             # The API will return an error, not the client
             $Result = Get-NBDCIMDevice -Status 'Fake'
             $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/devices/?status=Fake'
+            $Result.Uri | Should -Match 'status=Fake'
+            $Result.Uri | Should -Match 'exclude=config_context'
         }
 
         It "Should request devices that are a PDU" {
             $Result = Get-NBDCIMDevice -Is_PDU $True
 
             $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -BeExactly 'https://netbox.domain.com/api/dcim/devices/?is_pdu=True'
+            $Result.Uri | Should -Match 'is_pdu=True'
+            $Result.Uri | Should -Match 'exclude=config_context'
+        }
+
+        It "Should exclude config_context by default" {
+            $Result = Get-NBDCIMDevice
+
+            $Result.Method | Should -Be 'GET'
+            $Result.Uri | Should -Match 'exclude=config_context'
+        }
+
+        It "Should not exclude config_context when IncludeConfigContext is specified" {
+            $Result = Get-NBDCIMDevice -IncludeConfigContext
+
+            $Result.Method | Should -Be 'GET'
+            $Result.Uri | Should -Not -Match 'exclude=config_context'
+        }
+
+        It "Should request with Brief mode" {
+            $Result = Get-NBDCIMDevice -Brief
+
+            $Result.Method | Should -Be 'GET'
+            $Result.Uri | Should -Match 'brief=True'
+        }
+
+        It "Should request with specific fields" {
+            $Result = Get-NBDCIMDevice -Fields 'id','name','status','site.name'
+
+            $Result.Method | Should -Be 'GET'
+            $Result.Uri | Should -Match 'fields=id(%2C|,)name(%2C|,)status(%2C|,)site.name'
+        }
+
+        It "Should combine Brief with exclude config_context" {
+            $Result = Get-NBDCIMDevice -Brief
+
+            $Result.Method | Should -Be 'GET'
+            $Result.Uri | Should -Match 'brief=True'
+            $Result.Uri | Should -Match 'exclude=config_context'
         }
     }
 
@@ -313,13 +360,8 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             $bodyObj.site | Should -Be 15
         }
 
-        It "Should set multiple devices by ID array" {
-            # Single mode with multiple IDs (not pipeline) - bulk mode via pipeline uses InputObject
-            $Result = Set-NBDCIMDevice -Id 4432, 3241 -Cluster 10 -Platform 20 -Site 15 -Force
-
-            $Result.Method | Should -Be 'PATCH', 'PATCH'
-            $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/devices/4432/', 'https://netbox.domain.com/api/dcim/devices/3241/'
-        }
+        # Note: Array Id parameters are not supported for Set- functions
+        # For bulk operations via pipeline, see BulkOperations.Tests.ps1
     }
 
     Context "Remove-NBDCIMDevice" {
@@ -339,12 +381,8 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/devices/10/'
         }
 
-        It "Should remove multiple devices" {
-            $Result = Remove-NBDCIMDevice -Id 10, 12 -Force
-
-            $Result.Method | Should -Be 'DELETE', 'DELETE'
-            $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/devices/10/', 'https://netbox.domain.com/api/dcim/devices/12/'
-        }
+        # Note: Array Id parameters are not supported for Remove- functions
+        # For bulk operations via pipeline, see BulkOperations.Tests.ps1
 
         It "Should remove devices via bulk mode pipeline" {
             # Pipeline triggers bulk mode - Send-NBBulkRequest handles the DELETE

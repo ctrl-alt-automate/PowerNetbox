@@ -58,6 +58,10 @@ function Get-NBVirtualizationClusterType {
         [ValidateRange(1, 1000)]
         [int]$PageSize = 100,
 
+        [switch]$Brief,
+
+        [string[]]$Fields,
+
         [Parameter(ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 

@@ -423,6 +423,57 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' {
                 $URIComponents.Parameters['id__in'] | Should -Be '1,2,3'
             }
         }
+
+        It "Should add brief=True parameter when Brief switch is set" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $URIComponents = BuildURIComponents -URISegments ([System.Collections.ArrayList]@('dcim', 'devices')) -ParametersDictionary @{Brief=$true}
+                $URIComponents.Parameters['brief'] | Should -Be 'True'
+            }
+        }
+
+        It "Should not add brief parameter when Brief is false" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $URIComponents = BuildURIComponents -URISegments ([System.Collections.ArrayList]@('dcim', 'devices')) -ParametersDictionary @{Brief=$false}
+                $URIComponents.Parameters.ContainsKey('brief') | Should -BeFalse
+            }
+        }
+
+        It "Should add fields parameter as comma-separated list" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $URIComponents = BuildURIComponents -URISegments ([System.Collections.ArrayList]@('dcim', 'devices')) -ParametersDictionary @{Fields=@('id','name','status','site.name')}
+                $URIComponents.Parameters['fields'] | Should -Be 'id,name,status,site.name'
+            }
+        }
+
+        It "Should handle single field in Fields parameter" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $URIComponents = BuildURIComponents -URISegments ([System.Collections.ArrayList]@('dcim', 'devices')) -ParametersDictionary @{Fields=@('name')}
+                $URIComponents.Parameters['fields'] | Should -Be 'name'
+            }
+        }
+
+        It "Should add exclude parameter as comma-separated list" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $URIComponents = BuildURIComponents -URISegments ([System.Collections.ArrayList]@('dcim', 'devices')) -ParametersDictionary @{Exclude=@('config_context','comments')}
+                $URIComponents.Parameters['exclude'] | Should -Be 'config_context,comments'
+            }
+        }
+
+        It "Should handle single value in Exclude parameter" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $URIComponents = BuildURIComponents -URISegments ([System.Collections.ArrayList]@('dcim', 'devices')) -ParametersDictionary @{Exclude=@('config_context')}
+                $URIComponents.Parameters['exclude'] | Should -Be 'config_context'
+            }
+        }
+
+        It "Should emit warning when Query parameter is used" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $warnings = $null
+                $URIComponents = BuildURIComponents -URISegments ([System.Collections.ArrayList]@('dcim', 'devices')) -ParametersDictionary @{Query='test'} -WarningVariable warnings
+                $warnings | Should -Not -BeNullOrEmpty
+                $warnings | Should -Match 'slow on large datasets'
+            }
+        }
     }
 
     Context "InvokeNetboxRequest Pagination" {
@@ -573,6 +624,54 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' {
                 Should -Invoke Invoke-RestMethod -ModuleName 'PowerNetbox' -ParameterFilter {
                     $Body -match 'deep'
                 }
+            }
+        }
+
+        It "Should parse JSON error body from ErrorDetails.Message (PowerShell Core fix)" {
+            # Issue #164: In PowerShell Core 7.x, the response body is available in ErrorDetails.Message
+            # because HttpResponseMessage is disposed before we can read it from Exception.Response
+            InModuleScope -ModuleName 'PowerNetbox' {
+                # Create an error that simulates PowerShell Core behavior with ErrorDetails populated
+                Mock -CommandName 'Invoke-RestMethod' -MockWith {
+                    # PowerShell way to create error with ErrorDetails
+                    $errorMsg = '{"address": ["Duplicate IP address found in global table"]}'
+                    Write-Error -Message "Bad Request" -ErrorId "WebCmdletWebResponseException" -Category InvalidOperation -ErrorAction Stop -TargetObject $errorMsg
+                }
+
+                $URI = BuildNewURI -Segments 'ipam', 'ip-addresses' -SkipConnectedCheck
+                $body = @{ address = '10.0.0.1/24' }
+
+                $thrownError = $null
+                try {
+                    InvokeNetboxRequest -URI $URI -Method POST -Body $body
+                } catch {
+                    $thrownError = $_
+                }
+
+                # Verify an error was thrown
+                $thrownError | Should -Not -BeNullOrEmpty
+            }
+        }
+
+        It "Should parse JSON error with detail field" {
+            # Test that 'detail' field is correctly extracted from JSON errors
+            InModuleScope -ModuleName 'PowerNetbox' {
+                Mock -CommandName 'Invoke-RestMethod' -MockWith {
+                    throw [System.Exception]::new('{"detail": "Authentication credentials were not provided."}')
+                }
+
+                $URI = BuildNewURI -Segments 'dcim', 'devices' -SkipConnectedCheck
+
+                $thrownError = $null
+                try {
+                    InvokeNetboxRequest -URI $URI
+                } catch {
+                    $thrownError = $_
+                }
+
+                $thrownError | Should -Not -BeNullOrEmpty
+                # The message should contain the parsed detail
+                $thrownError.Exception.Message | Should -Match "Authentication credentials"
             }
         }
     }

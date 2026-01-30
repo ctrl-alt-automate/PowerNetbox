@@ -128,8 +128,12 @@ Describe "Tenancy Module Tests" -Tag 'Tenancy' {
             $Result.URI | Should -Be 'https://netbox.domain.com/api/tenancy/tenants/10/'
         }
 
-        It "Should remove multiple tenants" {
-            $Result = Remove-NBTenant -Id 10, 11 -Force
+        It "Should remove multiple tenants via pipeline" {
+            # Remove- functions only accept single Id; use pipeline for bulk operations
+            $Result = @(
+                [pscustomobject]@{ 'Id' = 10 },
+                [pscustomobject]@{ 'Id' = 11 }
+            ) | Remove-NBTenant -Force
             $Result.Method | Should -Be 'DELETE', 'DELETE'
         }
     }

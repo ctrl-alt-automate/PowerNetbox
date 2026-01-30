@@ -24,13 +24,17 @@ function Get-NBDCIMInterfaceConnection {
         [ValidateRange(1, 1000)]
         [int]$PageSize = 100,
 
+        [switch]$Brief,
+
+        [string[]]$Fields,
+
         [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
         [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
-        [uint64]$Id,
+        [uint64[]]$Id,
 
         [object]$Connection_Status,
 

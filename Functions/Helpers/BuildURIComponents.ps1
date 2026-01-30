@@ -45,8 +45,31 @@ function BuildURIComponents {
             }
 
             'Query' {
+                Write-Warning "The -Query parameter can be slow on large datasets. Consider using specific filters like -Name for better performance."
                 Write-Verbose " Adding query parameter"
                 $URIParameters['q'] = $ParametersDictionary[$CmdletParameterName]
+                break
+            }
+
+            'Brief' {
+                if ($ParametersDictionary[$CmdletParameterName]) {
+                    Write-Verbose " Adding brief=True parameter for minimal response"
+                    $URIParameters['brief'] = 'True'
+                }
+                break
+            }
+
+            'Fields' {
+                $fieldList = $ParametersDictionary[$CmdletParameterName] -join ','
+                Write-Verbose " Adding fields parameter: $fieldList"
+                $URIParameters['fields'] = $fieldList
+                break
+            }
+
+            'Exclude' {
+                $excludeList = $ParametersDictionary[$CmdletParameterName] -join ','
+                Write-Verbose " Adding exclude parameter: $excludeList"
+                $URIParameters['exclude'] = $excludeList
                 break
             }
 
