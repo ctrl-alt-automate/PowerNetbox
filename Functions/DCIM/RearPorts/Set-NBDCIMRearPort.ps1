@@ -127,7 +127,7 @@ function Set-NBDCIMRearPort {
     }
 
     process {
-        Write-Verbose "Updating D CI MR ea rP or t"
+        Write-Verbose "Updating DCIM Rear Port"
         foreach ($RearPortID in $Id) {
             $CurrentPort = Get-NBDCIMRearPort -Id $RearPortID -ErrorAction Stop
 

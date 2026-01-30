@@ -25,7 +25,7 @@ function Remove-NBDCIMPowerOutlet {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing D CI MP ow er Ou tl et"
+        Write-Verbose "Removing DCIM Power Outlet"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete power outlet')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','power-outlets',$Id)) -Method DELETE -Raw:$Raw
         }

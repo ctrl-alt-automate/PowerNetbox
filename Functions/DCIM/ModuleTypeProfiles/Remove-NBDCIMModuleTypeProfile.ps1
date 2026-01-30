@@ -25,7 +25,7 @@ function Remove-NBDCIMModuleTypeProfile {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing D CI MM od ul eT yp eP ro fi le"
+        Write-Verbose "Removing DCIM Module TypeP ro fi le"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete module type profile')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','module-type-profiles',$Id)) -Method DELETE -Raw:$Raw
         }

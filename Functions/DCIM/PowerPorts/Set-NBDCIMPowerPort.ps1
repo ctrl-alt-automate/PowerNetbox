@@ -36,7 +36,7 @@ function Set-NBDCIMPowerPort {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating D CI MP ow er Po rt"
+        Write-Verbose "Updating DCIM Power Port"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','power-ports',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update power port')) {

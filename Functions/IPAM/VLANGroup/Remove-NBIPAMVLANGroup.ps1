@@ -25,7 +25,7 @@ function Remove-NBIPAMVLANGroup {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing IPA MV LA NG ro up"
+        Write-Verbose "Removing IPAM VLANG ro up"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete VLAN group')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('ipam','vlan-groups',$Id)) -Method DELETE -Raw:$Raw
         }

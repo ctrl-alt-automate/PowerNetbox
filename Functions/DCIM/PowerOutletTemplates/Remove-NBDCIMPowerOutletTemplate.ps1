@@ -25,7 +25,7 @@ function Remove-NBDCIMPowerOutletTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing D CI MP ow er Ou tl et Te mp la te"
+        Write-Verbose "Removing DCIM Power Outlet Template"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete power outlet template')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','power-outlet-templates',$Id)) -Method DELETE -Raw:$Raw
         }

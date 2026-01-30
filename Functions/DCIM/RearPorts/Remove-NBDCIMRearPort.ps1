@@ -36,7 +36,7 @@ function Remove-NBDCIMRearPort {
     }
 
     process {
-        Write-Verbose "Removing D CI MR ea rP or t"
+        Write-Verbose "Removing DCIM Rear Port"
         foreach ($RearPortID in $Id) {
             $CurrentPort = Get-NBDCIMRearPort -Id $RearPortID -ErrorAction Stop
 

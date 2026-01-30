@@ -156,7 +156,7 @@ function New-NBDCIMRack {
     )
 
     process {
-        Write-Verbose "Creating D CI MR ac k"
+        Write-Verbose "Creating DCIM Rack"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'racks'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'

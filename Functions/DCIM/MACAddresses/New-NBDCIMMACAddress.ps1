@@ -31,7 +31,7 @@ function New-NBDCIMMACAddress {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating D CI MM AC Ad dr es s"
+        Write-Verbose "Creating DCIM MAC Address"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','mac-addresses'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Mac_Address, 'Create MAC address')) {

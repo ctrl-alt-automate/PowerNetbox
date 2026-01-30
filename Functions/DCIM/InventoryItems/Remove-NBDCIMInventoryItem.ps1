@@ -25,7 +25,7 @@ function Remove-NBDCIMInventoryItem {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing D CI MI nv en to ry It em"
+        Write-Verbose "Removing DCIM Inventory Item"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete inventory item')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','inventory-items',$Id)) -Method DELETE -Raw:$Raw
         }

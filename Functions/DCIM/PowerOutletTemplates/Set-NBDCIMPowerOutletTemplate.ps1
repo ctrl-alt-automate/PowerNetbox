@@ -34,7 +34,7 @@ function Set-NBDCIMPowerOutletTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating D CI MP ow er Ou tl et Te mp la te"
+        Write-Verbose "Updating DCIM Power Outlet Template"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','power-outlet-templates',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update power outlet template')) {

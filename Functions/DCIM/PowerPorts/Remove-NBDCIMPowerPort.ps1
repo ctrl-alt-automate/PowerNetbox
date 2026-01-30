@@ -25,7 +25,7 @@ function Remove-NBDCIMPowerPort {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing D CI MP ow er Po rt"
+        Write-Verbose "Removing DCIM Power Port"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete power port')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','power-ports',$Id)) -Method DELETE -Raw:$Raw
         }

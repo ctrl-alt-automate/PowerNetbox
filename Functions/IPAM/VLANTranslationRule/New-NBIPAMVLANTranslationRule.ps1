@@ -30,7 +30,7 @@ function New-NBIPAMVLANTranslationRule {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating IPA MV LA NT ra ns la ti on Ru le"
+        Write-Verbose "Creating IPAM VLANT ra ns la ti on Ru le"
         $Segments = [System.Collections.ArrayList]::new(@('ipam','vlan-translation-rules'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess("$Local_Vid -> $Remote_Vid", 'Create VLAN translation rule')) {

@@ -32,7 +32,7 @@ function Set-NBDCIMVirtualChassis {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating D CI MV ir tu al Ch as si s"
+        Write-Verbose "Updating DCIM Virtual Chassis"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','virtual-chassis',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update virtual chassis')) {

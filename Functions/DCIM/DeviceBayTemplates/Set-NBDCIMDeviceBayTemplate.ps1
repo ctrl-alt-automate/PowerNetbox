@@ -29,7 +29,7 @@ function Set-NBDCIMDeviceBayTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating D CI MD ev ic eB ay Te mp la te"
+        Write-Verbose "Updating DCIM DeviceB ay Te mp la te"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','device-bay-templates',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update device bay template')) {

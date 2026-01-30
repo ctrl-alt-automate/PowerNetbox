@@ -25,7 +25,7 @@ function Remove-NBDCIMConsoleServerPortTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing D CI MC on so le Se rv er Po rt Te mp la te"
+        Write-Verbose "Removing DCIM Console Server Port Template"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete console server port template')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','console-server-port-templates',$Id)) -Method DELETE -Raw:$Raw
         }

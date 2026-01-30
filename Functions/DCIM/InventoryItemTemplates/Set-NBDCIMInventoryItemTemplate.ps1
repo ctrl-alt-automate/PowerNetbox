@@ -35,7 +35,7 @@ function Set-NBDCIMInventoryItemTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating D CI MI nv en to ry It em Te mp la te"
+        Write-Verbose "Updating DCIM Inventory Item Te mp la te"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','inventory-item-templates',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update inventory item template')) {

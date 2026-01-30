@@ -85,7 +85,7 @@ function New-NBDCIMLocation {
     )
 
     process {
-        Write-Verbose "Creating D CI ML oc at io n"
+        Write-Verbose "Creating DCIM Location"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'locations'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
