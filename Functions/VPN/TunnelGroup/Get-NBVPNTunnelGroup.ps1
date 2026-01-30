@@ -5,6 +5,14 @@
 .DESCRIPTION
     Retrieves Tunnel Group objects from Netbox VPN module.
 
+.PARAMETER Brief
+    Return a minimal representation of objects (id, url, display, name only).
+    Reduces response size by ~90%. Ideal for dropdowns and reference lists.
+
+.PARAMETER Fields
+    Specify which fields to include in the response.
+    Supports nested field selection (e.g., 'site.name').
+
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
@@ -17,20 +25,43 @@
 function Get-NBVPNTunnelGroup {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([PSCustomObject])]
-    param([switch]$Brief,
+    param(
+        [switch]$Brief,
 
         [string[]]$Fields,
 
-        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
-        [Parameter(ParameterSetName = 'Query')][string]$Name,[Parameter(ParameterSetName = 'Query')][string]$Slug,
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)]
+        [uint64[]]$Id,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Name,
+
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Slug,
+
         [ValidateRange(1, 1000)]
-        [uint16]$Limit,[ValidateRange(0, [int]::MaxValue)]
-        [uint16]$Offset,[switch]$Raw)
+        [uint16]$Limit,
+
+        [ValidateRange(0, [int]::MaxValue)]
+        [uint16]$Offset,
+
+        [switch]$Raw
+    )
+
     process {
-        Write-Verbose "Retrieving V PN Tu nn el Gr ou p"
+        Write-Verbose "Retrieving VPN Tunnel Group"
+
         switch ($PSCmdlet.ParameterSetName) {
-            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn','tunnel-groups',$i)) -Raw:$Raw } }
-            default { $s = [System.Collections.ArrayList]::new(@('vpn','tunnel-groups')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'; InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments -Parameters $u.Parameters) -Raw:$Raw }
+            'ByID' {
+                foreach ($i in $Id) {
+                    InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn', 'tunnel-groups', $i)) -Raw:$Raw
+                }
+            }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('vpn', 'tunnel-groups'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+                InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw
+            }
         }
     }
 }

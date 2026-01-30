@@ -63,7 +63,7 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
 
             $Result.Method | Should -Be 'GET'
             # By default, config_context is excluded for performance
-            $Result.Uri | Should -Match 'exclude=config_context'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/devices/?exclude=config_context'
             $Result.Headers.Keys.Count | Should -BeExactly 1
         }
 

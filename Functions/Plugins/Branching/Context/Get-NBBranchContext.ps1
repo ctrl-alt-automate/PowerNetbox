@@ -42,10 +42,6 @@ function Get-NBBranchContext {
     [CmdletBinding()]
     [OutputType([string], [string[]], [PSCustomObject], [PSCustomObject[]])]
     param(
-        [switch]$Brief,
-
-        [string[]]$Fields,
-
         [switch]$Stack,
         [switch]$Full
     )

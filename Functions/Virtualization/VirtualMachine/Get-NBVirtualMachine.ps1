@@ -177,7 +177,7 @@ function Get-NBVirtualMachine {
         }
         [void]$paramsToPass.Remove('IncludeConfigContext')
 
-        $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $paramsToPass -SkipParameterByName 'Raw', 'All', 'PageSize'
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $paramsToPass -SkipParameterByName 'Raw', 'All', 'PageSize'
 
         $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
