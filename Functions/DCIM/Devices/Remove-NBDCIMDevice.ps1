@@ -89,16 +89,13 @@ function Remove-NBDCIMDevice {
 
     process {
         if ($PSCmdlet.ParameterSetName -eq 'Single') {
-            foreach ($DeviceID in $Id) {
-                $CurrentDevice = Get-NBDCIMDevice -Id $DeviceID -ErrorAction Stop
+            # Use Id directly - no need to fetch device first (saves an API call per delete)
+            if ($Force -or $PSCmdlet.ShouldProcess("Device ID $Id", "Delete device")) {
+                $DeviceSegments = [System.Collections.ArrayList]::new(@('dcim', 'devices', $Id))
 
-                if ($Force -or $PSCmdlet.ShouldProcess("Name: $($CurrentDevice.Name) | ID: $($CurrentDevice.Id)", "Delete device")) {
-                    $DeviceSegments = [System.Collections.ArrayList]::new(@('dcim', 'devices', $CurrentDevice.Id))
+                $DeviceURI = BuildNewURI -Segments $DeviceSegments
 
-                    $DeviceURI = BuildNewURI -Segments $DeviceSegments
-
-                    InvokeNetboxRequest -URI $DeviceURI -Method DELETE -Raw:$Raw
-                }
+                InvokeNetboxRequest -URI $DeviceURI -Method DELETE -Raw:$Raw
             }
         }
         else {

@@ -73,7 +73,7 @@
 .EXAMPLE
     Import-Csv subnets.csv | New-NBIPAMPrefix -BatchSize 100 -Force
 
-    Bulk import prefixes froMACSV file.
+    Bulk import prefixes from CSV file.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/models/ipam/prefix/

@@ -231,8 +231,8 @@ Copy-Item -Path $ConcatenatedFilePath -Destination $PSM1OutputPath -Force
 Write-Host "Deployment complete" -ForegroundColor Green
 if ($ResetCurrentEnvironment) {
     Write-Warning "Running commands to reset current environment"
-    if (Get-Module 'NetboxPS') {
-        Remove-Module NetboxPS -Force
+    if (Get-Module 'PowerNetbox') {
+        Remove-Module PowerNetbox -Force
     }
 
     Write-Host " Reimporting module"

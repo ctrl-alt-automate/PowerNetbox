@@ -144,14 +144,6 @@ function Connect-NBAPI {
         }
     }
 
-#    Write-Verbose "Caching API definition"
-#    $script:NetboxConfig.APIDefinition = Get-NBAPIDefinition
-#
-#    if ([version]$script:NetboxConfig.APIDefinition.info.version -lt 2.8) {
-#        $Script:NetboxConfig.Connected = $false
-#        throw "Netbox version is incompatible with this PS module. Requires >=2.8.*, found version $($script:NetboxConfig.APIDefinition.info.version)"
-    #    }
-
     Write-Verbose "Checking Netbox version compatibility"
     $script:NetboxConfig.NetboxVersion = Get-NBVersion
     $versionString = $script:NetboxConfig.NetboxVersion.'netbox-version'
