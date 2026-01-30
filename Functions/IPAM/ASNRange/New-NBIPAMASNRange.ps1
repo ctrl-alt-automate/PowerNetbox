@@ -72,7 +72,7 @@ function New-NBIPAMASNRange {
     )
 
     process {
-        Write-Verbose "Creating IPA MA SN Ra ng e"
+        Write-Verbose "Creating IPAM ASN Range"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'asn-ranges'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'

@@ -34,7 +34,7 @@ function Remove-NBIPAMVRF {
     )
 
     process {
-        Write-Verbose "Removing IPA MV RF"
+        Write-Verbose "Removing IPAM VRF"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'vrfs', $Id))
 
         $URI = BuildNewURI -Segments $Segments

@@ -30,7 +30,7 @@ function New-NBIPAMRIR {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating IPA MR IR"
+        Write-Verbose "Creating IPAM RIR"
         $Segments = [System.Collections.ArrayList]::new(@('ipam','rirs'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create RIR')) {

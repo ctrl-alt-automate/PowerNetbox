@@ -25,7 +25,7 @@ function Remove-NBDCIMDeviceBayTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing D CI MD ev ic eB ay Te mp la te"
+        Write-Verbose "Removing DCIM Device Bay Template"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete device bay template')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','device-bay-templates',$Id)) -Method DELETE -Raw:$Raw
         }

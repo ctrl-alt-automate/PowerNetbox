@@ -45,7 +45,7 @@ function Remove-NBDCIMManufacturer {
     )
 
     process {
-        Write-Verbose "Removing D CI MM an uf ac tu re r"
+        Write-Verbose "Removing DCIM Manufacturer"
         foreach ($ManufacturerId in $Id) {
             $CurrentManufacturer = Get-NBDCIMManufacturer -Id $ManufacturerId -ErrorAction Stop
 

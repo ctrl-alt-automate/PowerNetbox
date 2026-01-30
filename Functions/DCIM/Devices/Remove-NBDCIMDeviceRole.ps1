@@ -25,7 +25,7 @@ function Remove-NBDCIMDeviceRole {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing D CI MD ev ic eR ol e"
+        Write-Verbose "Removing DCIM Device Role"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete device role')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','device-roles',$Id)) -Method DELETE -Raw:$Raw
         }

@@ -31,7 +31,7 @@ function Set-NBDCIMConsoleServerPortTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating D CI MC on so le Se rv er Po rt Te mp la te"
+        Write-Verbose "Updating DCIM Console Server Port Template"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','console-server-port-templates',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update console server port template')) {

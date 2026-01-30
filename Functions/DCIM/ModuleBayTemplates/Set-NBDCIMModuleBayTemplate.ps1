@@ -30,7 +30,7 @@ function Set-NBDCIMModuleBayTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating D CI MM od ul eB ay Te mp la te"
+        Write-Verbose "Updating DCIM Module Bay Template"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','module-bay-templates',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update module bay template')) {

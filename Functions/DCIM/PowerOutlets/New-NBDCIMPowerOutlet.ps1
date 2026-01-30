@@ -35,7 +35,7 @@ function New-NBDCIMPowerOutlet {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating D CI MP ow er Ou tl et"
+        Write-Verbose "Creating DCIM Power Outlet"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','power-outlets'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create power outlet')) {

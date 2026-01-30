@@ -29,7 +29,7 @@ function Remove-NBIPAMServiceTemplate {
     )
 
     process {
-        Write-Verbose "Removing IPA MS er vi ce Te mp la te"
+        Write-Verbose "Removing IPAM Service Template"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'service-templates', $Id))
 
         $URI = BuildNewURI -Segments $Segments

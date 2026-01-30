@@ -34,7 +34,7 @@ function New-NBDCIMInventoryItemTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating D CI MI nv en to ry It em Te mp la te"
+        Write-Verbose "Creating DCIM Inventory Item Template"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','inventory-item-templates'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create inventory item template')) {

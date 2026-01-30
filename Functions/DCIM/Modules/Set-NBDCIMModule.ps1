@@ -35,7 +35,7 @@ function Set-NBDCIMModule {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating D CI MM od ul e"
+        Write-Verbose "Updating DCIM Module"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','modules',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update module')) {

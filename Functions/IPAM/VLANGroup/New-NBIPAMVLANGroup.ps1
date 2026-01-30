@@ -33,7 +33,7 @@ function New-NBIPAMVLANGroup {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating IPA MV LA NG ro up"
+        Write-Verbose "Creating IPAM VLANG ro up"
         $Segments = [System.Collections.ArrayList]::new(@('ipam','vlan-groups'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create VLAN group')) {

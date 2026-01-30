@@ -34,7 +34,7 @@ function Remove-NBDCIMLocation {
     )
 
     process {
-        Write-Verbose "Removing D CI ML oc at io n"
+        Write-Verbose "Removing DCIM Location"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'locations', $Id))
 
         $URI = BuildNewURI -Segments $Segments

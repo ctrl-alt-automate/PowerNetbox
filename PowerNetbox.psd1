@@ -326,13 +326,14 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = 'v4.4.10 - PowerNetbox Release (matches Netbox 4.4.10)
-- Full Netbox 4.4.10 compatibility
-- New bridge_interfaces field on Interface API (read-only, automatic)
-- 498+ public functions with 100% API coverage
-- 952 unit tests, 94 integration tests
+        ReleaseNotes = 'v4.5.0.2 - PowerNetbox Release (matches Netbox 4.5.0)
+- Full Netbox 4.5.0 compatibility with Token v2 Bearer authentication
+- Performance optimization: Brief mode, Fields selection, config_context exclusion
+- Bug fix: PowerShell Core 7.x error message extraction (#164)
+- 524 public functions with 100% API coverage
+- 1436 unit tests, 98 integration tests
 - Cross-platform support (Windows, Linux, macOS)
-- Docker-based CI/CD integration testing'
+- See https://github.com/ctrl-alt-automate/PowerNetbox/releases for full changelog'
 
         # Prerelease string of this module
         # Prerelease = ''

@@ -39,7 +39,7 @@ function New-NBDCIMPowerFeed {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating D CI MP ow er Fe ed"
+        Write-Verbose "Creating DCIM Power Feed"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','power-feeds'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create power feed')) {

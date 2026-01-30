@@ -32,7 +32,7 @@ function Set-NBDCIMPlatform {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating D CI MP la tf or m"
+        Write-Verbose "Updating DCIM Platform"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','platforms',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update platform')) {
