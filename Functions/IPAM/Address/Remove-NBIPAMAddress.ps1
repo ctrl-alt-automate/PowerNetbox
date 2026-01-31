@@ -67,7 +67,9 @@ function Remove-NBIPAMAddress {
 
         # Common parameters
         [Parameter()]
-        [switch]$Force
+        [switch]$Force,
+
+        [switch]$Raw
     )
 
     begin {
@@ -89,7 +91,7 @@ function Remove-NBIPAMAddress {
 
                     $IPURI = BuildNewURI -Segments $IPSegments
 
-                    InvokeNetboxRequest -URI $IPURI -Method DELETE
+                    InvokeNetboxRequest -URI $IPURI -Method DELETE -Raw:$Raw
                 }
             }
         }
