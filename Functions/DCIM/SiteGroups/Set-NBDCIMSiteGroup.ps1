@@ -64,7 +64,7 @@ function Set-NBDCIMSiteGroup {
     )
 
     process {
-        Write-Verbose "Updating DCIM SiteG ro up"
+        Write-Verbose "Updating DCIM Site Group"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'site-groups', $Id))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'

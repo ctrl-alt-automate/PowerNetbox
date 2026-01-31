@@ -31,7 +31,7 @@ function Set-NBDCIMRackRole {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating DCIM RackR ol e"
+        Write-Verbose "Updating DCIM Rack Role"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','rack-roles',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update rack role')) {

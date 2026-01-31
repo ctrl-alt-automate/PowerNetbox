@@ -34,7 +34,7 @@ function Remove-NBDCIMSiteGroup {
     )
 
     process {
-        Write-Verbose "Removing DCIM SiteG ro up"
+        Write-Verbose "Removing DCIM Site Group"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'site-groups', $Id))
 
         $URI = BuildNewURI -Segments $Segments

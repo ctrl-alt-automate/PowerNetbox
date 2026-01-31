@@ -25,7 +25,7 @@ function Remove-NBIPAMVLANTranslationRule {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing IPAM VLANT ra ns la ti on Ru le"
+        Write-Verbose "Removing IPAM VLAN Translation Rule"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete VLAN translation rule')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('ipam','vlan-translation-rules',$Id)) -Method DELETE -Raw:$Raw
         }
