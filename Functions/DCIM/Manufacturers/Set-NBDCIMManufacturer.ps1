@@ -53,10 +53,8 @@ function Set-NBDCIMManufacturer {
     process {
         Write-Verbose "Updating DCIM Manufacturer"
         foreach ($ManufacturerId in $Id) {
-            $CurrentManufacturer = Get-NBDCIMManufacturer -Id $ManufacturerId -ErrorAction Stop
-
-            if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentManufacturer.Name)", "Update manufacturer")) {
-                $Segments = [System.Collections.ArrayList]::new(@('dcim', 'manufacturers', $CurrentManufacturer.Id))
+            if ($Force -or $PSCmdlet.ShouldProcess("Manufacturer ID $ManufacturerId", "Update manufacturer")) {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim', 'manufacturers', $ManufacturerId))
 
                 $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force'
 

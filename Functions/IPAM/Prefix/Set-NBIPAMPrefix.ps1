@@ -78,10 +78,7 @@ function Set-NBIPAMPrefix {
         foreach ($PrefixId in $Id) {
             $Segments = [System.Collections.ArrayList]::new(@('ipam', 'prefixes', $PrefixId))
 
-            Write-Verbose "Obtaining Prefix from ID $PrefixId"
-            $CurrentPrefix = Get-NBIPAMPrefix -Id $PrefixId -ErrorAction Stop
-
-            if ($Force -or $PSCmdlet.ShouldProcess($CurrentPrefix.Prefix, 'Set')) {
+            if ($Force -or $PSCmdlet.ShouldProcess("Prefix ID $PrefixId", 'Set')) {
                 $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force'
 
                 $URI = BuildNewURI -Segments $URIComponents.Segments

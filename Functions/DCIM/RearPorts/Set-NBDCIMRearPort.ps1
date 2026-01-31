@@ -121,9 +121,7 @@ function Set-NBDCIMRearPort {
     process {
         Write-Verbose "Updating DCIM Rear Port"
         foreach ($RearPortID in $Id) {
-            $CurrentPort = Get-NBDCIMRearPort -Id $RearPortID -ErrorAction Stop
-
-            $Segments = [System.Collections.ArrayList]::new(@('dcim', 'rear-ports', $CurrentPort.Id))
+            $Segments = [System.Collections.ArrayList]::new(@('dcim', 'rear-ports', $RearPortID))
 
             $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force', 'Front_Ports'
 
@@ -134,7 +132,7 @@ function Set-NBDCIMRearPort {
                 $URIComponents.Parameters['front_ports'] = $Front_Ports
             }
 
-            if ($Force -or $pscmdlet.ShouldProcess("Rear Port ID $($CurrentPort.Id)", "Set")) {
+            if ($Force -or $pscmdlet.ShouldProcess("Rear Port ID $RearPortID", "Set")) {
                 InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method PATCH
             }
         }

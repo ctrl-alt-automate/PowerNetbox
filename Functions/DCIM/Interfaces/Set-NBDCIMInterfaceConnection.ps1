@@ -53,11 +53,9 @@ function Set-NBDCIMInterfaceConnection {
     process {
         Write-Verbose "Updating DCIM Interface Connection"
         foreach ($ConnectionID in $Id) {
-            $CurrentConnection = Get-NBDCIMInterfaceConnection -Id $ConnectionID -ErrorAction Stop
+            $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interface-connections', $ConnectionID))
 
-            $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interface-connections', $CurrentConnection.Id))
-
-            if ($Force -or $pscmdlet.ShouldProcess("Connection ID $($CurrentConnection.Id)", "Set")) {
+            if ($Force -or $pscmdlet.ShouldProcess("Interface Connection ID $ConnectionID", "Set")) {
 
                 $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force'
 

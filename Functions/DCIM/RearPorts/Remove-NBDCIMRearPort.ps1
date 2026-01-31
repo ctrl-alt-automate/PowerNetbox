@@ -38,10 +38,8 @@ function Remove-NBDCIMRearPort {
     process {
         Write-Verbose "Removing DCIM Rear Port"
         foreach ($RearPortID in $Id) {
-            $CurrentPort = Get-NBDCIMRearPort -Id $RearPortID -ErrorAction Stop
-
-            if ($Force -or $pscmdlet.ShouldProcess("Name: $($CurrentPort.Name) | ID: $($CurrentPort.Id)", "Remove")) {
-                $Segments = [System.Collections.ArrayList]::new(@('dcim', 'rear-ports', $CurrentPort.Id))
+            if ($Force -or $pscmdlet.ShouldProcess("Rear Port ID $RearPortID", "Remove")) {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim', 'rear-ports', $RearPortID))
 
                 $URI = BuildNewURI -Segments $Segments
 

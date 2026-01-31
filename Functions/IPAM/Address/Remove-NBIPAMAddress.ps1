@@ -82,9 +82,7 @@ function Remove-NBIPAMAddress {
     process {
         if ($PSCmdlet.ParameterSetName -eq 'Single') {
             foreach ($IPId in $Id) {
-                $CurrentIP = Get-NBIPAMAddress -Id $IPId -ErrorAction Stop
-
-                if ($Force -or $PSCmdlet.ShouldProcess($CurrentIP.Address, "Delete")) {
+                if ($Force -or $PSCmdlet.ShouldProcess("IP Address ID $IPId", "Delete")) {
                     $IPSegments = [System.Collections.ArrayList]::new(@('ipam', 'ip-addresses', $IPId))
 
                     $IPURI = BuildNewURI -Segments $IPSegments

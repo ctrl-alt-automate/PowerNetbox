@@ -95,15 +95,13 @@ function Set-NBVirtualizationCluster {
     process {
         Write-Verbose "Updating Virtualization Cluster"
         foreach ($ClusterId in $Id) {
-            $CurrentCluster = Get-NBVirtualizationCluster -Id $ClusterId -ErrorAction Stop
-
-            $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'clusters', $CurrentCluster.Id))
+            $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'clusters', $ClusterId))
 
             $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force', 'Raw'
 
             $URI = BuildNewURI -Segments $URIComponents.Segments
 
-            if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentCluster.Name)", 'Update cluster')) {
+            if ($Force -or $PSCmdlet.ShouldProcess("Cluster ID $ClusterId", 'Update cluster')) {
                 InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
             }
         }

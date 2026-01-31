@@ -31,13 +31,11 @@ function Remove-NBIPAMAddressRange {
     )
 
     process {
-        Write-Verbose "Removing IPA MA dd re ss Range"
+        Write-Verbose "Removing IPAM Address Range"
         foreach ($Range_Id in $Id) {
-            $CurrentRange = Get-NBIPAMAddressRange -Id $Range_Id -ErrorAction Stop
-
             $Segments = [System.Collections.ArrayList]::new(@('ipam', 'ip-ranges', $Range_Id))
 
-            if ($Force -or $pscmdlet.ShouldProcess($CurrentRange.start_address, "Delete")) {
+            if ($Force -or $pscmdlet.ShouldProcess("IP Range ID $Range_Id", "Delete")) {
                 $URI = BuildNewURI -Segments $Segments
 
                 InvokeNetboxRequest -URI $URI -Method DELETE

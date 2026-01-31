@@ -38,10 +38,8 @@ function Remove-NBDCIMInterfaceConnection {
     process {
         Write-Verbose "Removing DCIM Interface Connection"
         foreach ($ConnectionID in $Id) {
-            $CurrentConnection = Get-NBDCIMInterfaceConnection -Id $ConnectionID -ErrorAction Stop
-
-            if ($Force -or $pscmdlet.ShouldProcess("Connection ID $($ConnectionID.Id)", "REMOVE")) {
-                $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interface-connections', $CurrentConnection.Id))
+            if ($Force -or $pscmdlet.ShouldProcess("Interface Connection ID $ConnectionID", "REMOVE")) {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interface-connections', $ConnectionID))
 
                 $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force'
 

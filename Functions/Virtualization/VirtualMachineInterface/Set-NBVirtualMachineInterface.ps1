@@ -49,13 +49,11 @@ function Set-NBVirtualMachineInterface {
 
     process {
         foreach ($VMI_ID in $Id) {
-            Write-Verbose "Obtaining VM Interface..."
-            $CurrentVMI = Get-NBVirtualMachineInterface -Id $VMI_ID -ErrorAction Stop
-            Write-Verbose "Finished obtaining VM Interface"
+            Write-Verbose "Updating VM Interface ID $VMI_ID"
 
-            $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'interfaces', $CurrentVMI.Id))
+            $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'interfaces', $VMI_ID))
 
-            if ($Force -or $pscmdlet.ShouldProcess("Interface $($CurrentVMI.Id) on VM $($CurrentVMI.Virtual_Machine.Name)", "Set")) {
+            if ($Force -or $pscmdlet.ShouldProcess("VM Interface ID $VMI_ID", "Set")) {
                 $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force'
 
                 $URI = BuildNewURI -Segments $URIComponents.Segments

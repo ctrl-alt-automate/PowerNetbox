@@ -82,10 +82,8 @@ function Remove-NBVirtualMachine {
     process {
         if ($PSCmdlet.ParameterSetName -eq 'Single') {
             foreach ($VMId in $Id) {
-                $CurrentVM = Get-NBVirtualMachine -Id $VMId -ErrorAction Stop
-
-                if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentVM.Name)/$($CurrentVM.Id)", "Remove")) {
-                    $VMSegments = [System.Collections.ArrayList]::new(@('virtualization', 'virtual-machines', $CurrentVM.Id))
+                if ($Force -or $PSCmdlet.ShouldProcess("Virtual Machine ID $VMId", "Remove")) {
+                    $VMSegments = [System.Collections.ArrayList]::new(@('virtualization', 'virtual-machines', $VMId))
 
                     $VMURI = BuildNewURI -Segments $VMSegments
 

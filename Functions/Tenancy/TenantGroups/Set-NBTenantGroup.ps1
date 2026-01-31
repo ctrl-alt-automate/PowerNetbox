@@ -74,15 +74,13 @@ function Set-NBTenantGroup {
     process {
         Write-Verbose "Updating Tenant Group"
         foreach ($GroupId in $Id) {
-            $CurrentGroup = Get-NBTenantGroup -Id $GroupId -ErrorAction Stop
-
-            $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'tenant-groups', $CurrentGroup.Id))
+            $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'tenant-groups', $GroupId))
 
             $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force', 'Raw'
 
             $URI = BuildNewURI -Segments $URIComponents.Segments
 
-            if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentGroup.Name)", 'Update tenant group')) {
+            if ($Force -or $PSCmdlet.ShouldProcess("Tenant Group ID $GroupId", 'Update tenant group')) {
                 InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
             }
         }
