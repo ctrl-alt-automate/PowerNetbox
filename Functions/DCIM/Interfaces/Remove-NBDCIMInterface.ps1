@@ -25,7 +25,9 @@ function Remove-NBDCIMInterface {
             ValueFromPipelineByPropertyName = $true)]
         [uint64]$Id,
 
-        [switch]$Force
+        [switch]$Force,
+
+        [switch]$Raw
     )
 
     begin {
@@ -40,7 +42,7 @@ function Remove-NBDCIMInterface {
 
                 $URI = BuildNewURI -Segments $Segments
 
-                InvokeNetboxRequest -URI $URI -Method DELETE
+                InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
             }
         }
     }

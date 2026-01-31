@@ -67,7 +67,9 @@ function Remove-NBVirtualMachine {
 
         # Common parameters
         [Parameter()]
-        [switch]$Force
+        [switch]$Force,
+
+        [switch]$Raw
     )
 
     begin {
@@ -87,7 +89,7 @@ function Remove-NBVirtualMachine {
 
                     $VMURI = BuildNewURI -Segments $VMSegments
 
-                    InvokeNetboxRequest -URI $VMURI -Method DELETE
+                    InvokeNetboxRequest -URI $VMURI -Method DELETE -Raw:$Raw
                 }
             }
         }

@@ -47,7 +47,9 @@ function Set-NBDCIMManufacturer {
 
         [hashtable]$Custom_Fields,
 
-        [switch]$Force
+        [switch]$Force,
+
+        [switch]$Raw
     )
 
     process {
@@ -56,11 +58,11 @@ function Set-NBDCIMManufacturer {
             if ($Force -or $PSCmdlet.ShouldProcess("Manufacturer ID $ManufacturerId", "Update manufacturer")) {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'manufacturers', $ManufacturerId))
 
-                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force'
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force', 'Raw'
 
                 $URI = BuildNewURI -Segments $URIComponents.Segments
 
-                InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method PATCH
+                InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method PATCH -Raw:$Raw
             }
         }
     }

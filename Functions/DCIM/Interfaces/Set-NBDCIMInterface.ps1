@@ -57,7 +57,9 @@ function Set-NBDCIMInterface {
         [ValidateRange(1, 4094)]
         [uint16[]]$Tagged_VLANs,
 
-        [switch]$Force
+        [switch]$Force,
+
+        [switch]$Raw
     )
 
     begin {
@@ -90,12 +92,12 @@ function Set-NBDCIMInterface {
         foreach ($InterfaceId in $Id) {
             $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interfaces', $InterfaceId))
 
-            $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id'
+            $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force', 'Raw'
 
             $URI = BuildNewURI -Segments $Segments
 
             if ($Force -or $pscmdlet.ShouldProcess("Interface ID $InterfaceId", "Set")) {
-                InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method PATCH
+                InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method PATCH -Raw:$Raw
             }
         }
     }
