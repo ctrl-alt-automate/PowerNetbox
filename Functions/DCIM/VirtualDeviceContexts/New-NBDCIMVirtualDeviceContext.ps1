@@ -35,7 +35,7 @@ function New-NBDCIMVirtualDeviceContext {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating D CI MV ir tu al De vi ce Co nt ex t"
+        Write-Verbose "Creating DCIM Virtual Device Context"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','virtual-device-contexts'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create virtual device context')) {

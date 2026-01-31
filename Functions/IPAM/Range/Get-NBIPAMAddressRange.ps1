@@ -75,7 +75,7 @@ function Get-NBIPAMAddressRange {
             foreach ($Range_ID in $Id) {
                 $Segments = [System.Collections.ArrayList]::new(@('ipam', 'ip-ranges', $Range_ID))
 
-                $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id'
+                $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'All', 'PageSize'
 
                 $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
@@ -88,7 +88,7 @@ function Get-NBIPAMAddressRange {
         default {
             $Segments = [System.Collections.ArrayList]::new(@('ipam', 'ip-ranges'))
 
-            $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters
+            $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'All', 'PageSize'
 
             $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 

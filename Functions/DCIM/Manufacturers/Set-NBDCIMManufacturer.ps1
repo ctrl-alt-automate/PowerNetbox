@@ -51,7 +51,7 @@ function Set-NBDCIMManufacturer {
     )
 
     process {
-        Write-Verbose "Updating D CI MM an uf ac tu re r"
+        Write-Verbose "Updating DCIM Manufacturer"
         foreach ($ManufacturerId in $Id) {
             $CurrentManufacturer = Get-NBDCIMManufacturer -Id $ManufacturerId -ErrorAction Stop
 

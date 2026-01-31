@@ -32,7 +32,7 @@ function New-NBDCIMDeviceRole {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating D CI MD ev ic eR ol e"
+        Write-Verbose "Creating DCIM Device Role"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','device-roles'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create device role')) {

@@ -34,7 +34,7 @@ function Set-NBDCIMFrontPortTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating D CI MF ro nt Po rt Te mp la te"
+        Write-Verbose "Updating DCIM Front Port Template"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','front-port-templates',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update front port template')) {

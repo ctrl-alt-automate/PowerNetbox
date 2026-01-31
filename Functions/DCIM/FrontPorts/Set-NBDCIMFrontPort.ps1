@@ -113,67 +113,55 @@ function Set-NBDCIMFrontPort {
     )
 
     begin {
-        # Detect Netbox version for port mapping format
-        $netboxVersion = $null
-        $is45OrHigher = $false
-        try {
-            $status = Get-NBVersion -ErrorAction SilentlyContinue
-            if ($status.'netbox-version') {
-                $netboxVersion = ConvertTo-NetboxVersion -VersionString $status.'netbox-version'
-                $is45OrHigher = $netboxVersion -ge [version]'4.5.0'
-            }
-        }
-        catch {
-            Write-Verbose "Could not detect Netbox version, assuming 4.4 format"
-        }
+        # Check Netbox version for port mapping format (cached by Connect-NBAPI)
+        $netboxVersion = $script:NetboxConfig.ParsedVersion
+        $is45OrHigher = $netboxVersion -and ($netboxVersion -ge [version]'4.5.0')
     }
 
     process {
-        Write-Verbose "Updating D CI MF ro nt Po rt"
-        foreach ($FrontPortID in $Id) {
-            $CurrentPort = Get-NBDCIMFrontPort -Id $FrontPortID -ErrorAction Stop
+        Write-Verbose "Updating DCIM Front Port"
+        $CurrentPort = Get-NBDCIMFrontPort -Id $Id -ErrorAction Stop
 
-            $Segments = [System.Collections.ArrayList]::new(@('dcim', 'front-ports', $CurrentPort.Id))
+        $Segments = [System.Collections.ArrayList]::new(@('dcim', 'front-ports', $CurrentPort.Id))
 
-            # Use BuildURIComponents but skip port mapping params (handled separately)
-            $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force', 'Rear_Ports', 'Rear_Port', 'Rear_Port_Position'
+        # Use BuildURIComponents but skip port mapping params (handled separately)
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force', 'Rear_Ports', 'Rear_Port', 'Rear_Port_Position'
 
-            $URI = BuildNewURI -Segments $Segments
+        $URI = BuildNewURI -Segments $Segments
 
-            # Handle port mappings based on version and provided parameters
-            if ($Rear_Ports) {
-                # New format explicitly provided
-                if (-not $is45OrHigher) {
-                    Write-Warning "Rear_Ports parameter is only supported on Netbox 4.5+. Current version: $netboxVersion"
-                }
-                $URIComponents.Parameters['rear_ports'] = $Rear_Ports
+        # Handle port mappings based on version and provided parameters
+        if ($Rear_Ports) {
+            # New format explicitly provided
+            if (-not $is45OrHigher) {
+                Write-Warning "Rear_Ports parameter is only supported on Netbox 4.5+. Current version: $netboxVersion"
             }
-            elseif ($PSBoundParameters.ContainsKey('Rear_Port')) {
-                # Old format provided
-                if ($is45OrHigher) {
-                    Write-Warning "Rear_Port parameter is deprecated on Netbox 4.5+. Use Rear_Ports instead. Auto-converting to new format."
-                    # Convert to new format
-                    $mapping = @{
-                        rear_port = $Rear_Port
-                        position  = 1
-                    }
-                    if ($PSBoundParameters.ContainsKey('Rear_Port_Position')) {
-                        $mapping['rear_port_position'] = $Rear_Port_Position
-                    }
-                    $URIComponents.Parameters['rear_ports'] = @($mapping)
+            $URIComponents.Parameters['rear_ports'] = $Rear_Ports
+        }
+        elseif ($PSBoundParameters.ContainsKey('Rear_Port')) {
+            # Old format provided
+            if ($is45OrHigher) {
+                Write-Warning "Rear_Port parameter is deprecated on Netbox 4.5+. Use Rear_Ports instead. Auto-converting to new format."
+                # Convert to new format
+                $mapping = @{
+                    rear_port = $Rear_Port
+                    position  = 1
                 }
-                else {
-                    # Netbox 4.4 - use old format
-                    $URIComponents.Parameters['rear_port'] = $Rear_Port
-                    if ($PSBoundParameters.ContainsKey('Rear_Port_Position')) {
-                        $URIComponents.Parameters['rear_port_position'] = $Rear_Port_Position
-                    }
+                if ($PSBoundParameters.ContainsKey('Rear_Port_Position')) {
+                    $mapping['rear_port_position'] = $Rear_Port_Position
+                }
+                $URIComponents.Parameters['rear_ports'] = @($mapping)
+            }
+            else {
+                # Netbox 4.4 - use old format
+                $URIComponents.Parameters['rear_port'] = $Rear_Port
+                if ($PSBoundParameters.ContainsKey('Rear_Port_Position')) {
+                    $URIComponents.Parameters['rear_port_position'] = $Rear_Port_Position
                 }
             }
+        }
 
-            if ($Force -or $pscmdlet.ShouldProcess("Front Port ID $($CurrentPort.Id)", "Set")) {
-                InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method PATCH
-            }
+        if ($Force -or $pscmdlet.ShouldProcess("Front Port ID $($CurrentPort.Id)", "Set")) {
+            InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method PATCH
         }
     }
 

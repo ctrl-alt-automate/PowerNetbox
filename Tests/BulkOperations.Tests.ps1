@@ -879,10 +879,12 @@ Describe "Set-NBDCIMDevice Bulk Mode" -Tag 'Bulk', 'DCIM' {
             Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -ModuleName 'PowerNetbox'
         }
 
-        It "Should call Get-NBDCIMDevice for each Id in single mode" {
+        It "Should use Id directly without fetching device first (performance optimization)" {
             Set-NBDCIMDevice -Id 100 -Status "active" -Force
 
-            Should -Invoke -CommandName 'Get-NBDCIMDevice' -Times 1 -ModuleName 'PowerNetbox' -ParameterFilter { $Id -eq 100 }
+            # Should NOT call Get-NBDCIMDevice - uses Id directly for better performance (#177)
+            Should -Invoke -CommandName 'Get-NBDCIMDevice' -Times 0 -ModuleName 'PowerNetbox'
+            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -ModuleName 'PowerNetbox'
         }
     }
 
@@ -960,10 +962,12 @@ Describe "Remove-NBDCIMDevice Bulk Mode" -Tag 'Bulk', 'DCIM' {
         # Note: Array Id parameters are not supported for Remove- functions
         # Use pipeline with InputObject for bulk operations (see "Bulk Operations" context below)
 
-        It "Should call Get-NBDCIMDevice for each Id in single mode" {
+        It "Should use Id directly without fetching device first (performance optimization)" {
             Remove-NBDCIMDevice -Id 100 -Force
 
-            Should -Invoke -CommandName 'Get-NBDCIMDevice' -Times 1 -ModuleName 'PowerNetbox' -ParameterFilter { $Id -eq 100 }
+            # Should NOT call Get-NBDCIMDevice - uses Id directly for better performance (#182)
+            Should -Invoke -CommandName 'Get-NBDCIMDevice' -Times 0 -ModuleName 'PowerNetbox'
+            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -ModuleName 'PowerNetbox'
         }
     }
 

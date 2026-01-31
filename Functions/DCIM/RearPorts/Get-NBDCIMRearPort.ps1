@@ -53,7 +53,7 @@ function Get-NBDCIMRearPort {
 
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'rear-ports'))
 
-        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'All', 'PageSize'
 
         $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 

@@ -38,7 +38,7 @@ function New-NBDCIMDeviceType {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating D CI MD ev ic eT yp e"
+        Write-Verbose "Creating DCIM Device Type"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','device-types'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Model, 'Create device type')) {

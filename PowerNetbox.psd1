@@ -69,24 +69,23 @@ ClrVersion = '2.0.50727'
 NestedModules = @()
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-FunctionsToExport = 'Aliases', 'ArgumentCompleters', 'BuildNewURI', 'BuildURIComponents',
-               'BulkOperationResult', 'CheckNetboxIsConnected', 'Clear-NBCredential',
-               'Connect-NBAPI', 'ConvertTo-NBRackConsole', 'ConvertTo-NBRackHTML',
-               'ConvertTo-NBRackMarkdown', 'ConvertTo-NetboxVersion', 'CreateEnum',
-               'Enter-NBBranch', 'Exit-NBBranch', 'Export-NBRackElevation',
-               'Get-ModelDefinition', 'Get-NBAPIDefinition', 'Get-NBBookmark',
-               'Get-NBBranch', 'Get-NBBranchContext', 'Get-NBBranchEvent',
-               'Get-NBChangeDiff', 'Get-NBCircuit', 'Get-NBCircuitGroup',
-               'Get-NBCircuitGroupAssignment', 'Get-NBCircuitProvider',
-               'Get-NBCircuitProviderAccount', 'Get-NBCircuitProviderNetwork',
-               'Get-NBCircuitTermination', 'Get-NBCircuitType',
-               'Get-NBConfigContext', 'Get-NBContact', 'Get-NBContactAssignment',
-               'Get-NBContactRole', 'Get-NBContentType', 'Get-NBCredential',
-               'Get-NBCustomField', 'Get-NBCustomFieldChoiceSet', 'Get-NBCustomLink',
-               'Get-NBDataFile', 'Get-NBDataSource', 'Get-NBDCIMCable',
-               'Get-NBDCIMCableTermination', 'Get-NBDCIMConnectedDevice',
-               'Get-NBDCIMConsolePort', 'Get-NBDCIMConsolePortTemplate',
-               'Get-NBDCIMConsoleServerPort',
+FunctionsToExport = 'BuildNewURI', 'BuildURIComponents', 'CheckNetboxIsConnected',
+               'Clear-NBCredential', 'Connect-NBAPI', 'ConvertTo-NBRackConsole',
+               'ConvertTo-NBRackHTML', 'ConvertTo-NBRackMarkdown',
+               'ConvertTo-NetboxVersion', 'CreateEnum', 'Enter-NBBranch',
+               'Exit-NBBranch', 'Export-NBRackElevation', 'Get-ModelDefinition',
+               'Get-NBAPIDefinition', 'Get-NBBookmark', 'Get-NBBranch',
+               'Get-NBBranchContext', 'Get-NBBranchEvent', 'Get-NBChangeDiff',
+               'Get-NBCircuit', 'Get-NBCircuitGroup', 'Get-NBCircuitGroupAssignment',
+               'Get-NBCircuitProvider', 'Get-NBCircuitProviderAccount',
+               'Get-NBCircuitProviderNetwork', 'Get-NBCircuitTermination',
+               'Get-NBCircuitType', 'Get-NBConfigContext', 'Get-NBContact',
+               'Get-NBContactAssignment', 'Get-NBContactRole', 'Get-NBContentType',
+               'Get-NBCredential', 'Get-NBCustomField', 'Get-NBCustomFieldChoiceSet',
+               'Get-NBCustomLink', 'Get-NBDataFile', 'Get-NBDataSource',
+               'Get-NBDCIMCable', 'Get-NBDCIMCableTermination',
+               'Get-NBDCIMConnectedDevice', 'Get-NBDCIMConsolePort',
+               'Get-NBDCIMConsolePortTemplate', 'Get-NBDCIMConsoleServerPort',
                'Get-NBDCIMConsoleServerPortTemplate', 'Get-NBDCIMDevice',
                'Get-NBDCIMDeviceBay', 'Get-NBDCIMDeviceBayTemplate',
                'Get-NBDCIMDeviceRole', 'Get-NBDCIMDeviceType', 'Get-NBDCIMFrontPort',
@@ -326,13 +325,14 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = 'v4.4.10 - PowerNetbox Release (matches Netbox 4.4.10)
-- Full Netbox 4.4.10 compatibility
-- New bridge_interfaces field on Interface API (read-only, automatic)
-- 498+ public functions with 100% API coverage
-- 952 unit tests, 94 integration tests
+        ReleaseNotes = 'v4.5.0.2 - PowerNetbox Release (matches Netbox 4.5.0)
+- Full Netbox 4.5.0 compatibility with Token v2 Bearer authentication
+- Performance optimization: Brief mode, Fields selection, config_context exclusion
+- Bug fix: PowerShell Core 7.x error message extraction (#164)
+- 524 public functions with 100% API coverage
+- 1436 unit tests, 98 integration tests
 - Cross-platform support (Windows, Linux, macOS)
-- Docker-based CI/CD integration testing'
+- See https://github.com/ctrl-alt-automate/PowerNetbox/releases for full changelog'
 
         # Prerelease string of this module
         # Prerelease = ''

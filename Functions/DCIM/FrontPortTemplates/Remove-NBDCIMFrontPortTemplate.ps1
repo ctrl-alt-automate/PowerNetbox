@@ -25,7 +25,7 @@ function Remove-NBDCIMFrontPortTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing D CI MF ro nt Po rt Te mp la te"
+        Write-Verbose "Removing DCIM Front Port Template"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete front port template')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','front-port-templates',$Id)) -Method DELETE -Raw:$Raw
         }

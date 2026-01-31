@@ -39,7 +39,7 @@ function Set-NBDCIMDeviceType {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating D CI MD ev ic eT yp e"
+        Write-Verbose "Updating DCIM Device Type"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','device-types',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update device type')) {

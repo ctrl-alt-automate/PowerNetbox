@@ -42,7 +42,7 @@ function Get-NBVPNTunnel {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Retrieving V PN Tu nn el"
+        Write-Verbose "Retrieving VPN Tunnel"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
                 foreach ($TunnelId in $Id) {

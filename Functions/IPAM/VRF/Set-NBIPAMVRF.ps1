@@ -79,7 +79,7 @@ function Set-NBIPAMVRF {
     )
 
     process {
-        Write-Verbose "Updating IPA MV RF"
+        Write-Verbose "Updating IPAM VRF"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'vrfs', $Id))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'

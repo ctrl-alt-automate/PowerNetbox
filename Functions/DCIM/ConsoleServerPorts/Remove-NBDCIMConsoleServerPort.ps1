@@ -25,7 +25,7 @@ function Remove-NBDCIMConsoleServerPort {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing D CI MC on so le Se rv er Po rt"
+        Write-Verbose "Removing DCIM Console Server Port"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete console server port')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','console-server-ports',$Id)) -Method DELETE -Raw:$Raw
         }

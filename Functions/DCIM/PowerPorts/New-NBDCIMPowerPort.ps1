@@ -35,7 +35,7 @@ function New-NBDCIMPowerPort {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Creating D CI MP ow er Po rt"
+        Write-Verbose "Creating DCIM Power Port"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','power-ports'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         if ($PSCmdlet.ShouldProcess($Name, 'Create power port')) {

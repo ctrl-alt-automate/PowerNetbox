@@ -84,6 +84,11 @@ $FunctionNames = @{}
 $Duplicates = [System.Collections.ArrayList]::new()
 
 foreach ($File in $PS1FunctionFiles) {
+    # Skip underscore-prefixed files (aliases, classes, argument completers)
+    if ($File.BaseName -like '_*') {
+        continue
+    }
+
     $Content = Get-Content $File.FullName -Raw
 
     # Extract function name using regex
@@ -155,7 +160,9 @@ $UpdateModuleManifestSplat = @{
 
 if ($Environment -ilike 'dev*') {
     Write-Host "Exporting all functions for development (including internal helpers)"
-    $UpdateModuleManifestSplat['FunctionsToExport'] = $PS1FunctionFiles.BaseName
+    # Exclude underscore-prefixed files (aliases, classes, argument completers - not functions)
+    $DevFunctions = $PS1FunctionFiles.BaseName | Where-Object { $_ -notlike '_*' }
+    $UpdateModuleManifestSplat['FunctionsToExport'] = $DevFunctions
 } else {
     # Production: Only export public functions (those with '-' in the name)
     # Internal helpers like BuildNewURI, InvokeNetboxRequest are kept private
@@ -224,8 +231,8 @@ Copy-Item -Path $ConcatenatedFilePath -Destination $PSM1OutputPath -Force
 Write-Host "Deployment complete" -ForegroundColor Green
 if ($ResetCurrentEnvironment) {
     Write-Warning "Running commands to reset current environment"
-    if (Get-Module 'NetboxPS') {
-        Remove-Module NetboxPS -Force
+    if (Get-Module 'PowerNetbox') {
+        Remove-Module PowerNetbox -Force
     }
 
     Write-Host " Reimporting module"

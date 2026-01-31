@@ -51,7 +51,7 @@ function Set-NBDCIMInterfaceConnection {
     }
 
     process {
-        Write-Verbose "Updating D CI MI nt er fa ce Co nn ec ti on"
+        Write-Verbose "Updating DCIM Interface Connection"
         foreach ($ConnectionID in $Id) {
             $CurrentConnection = Get-NBDCIMInterfaceConnection -Id $ConnectionID -ErrorAction Stop
 

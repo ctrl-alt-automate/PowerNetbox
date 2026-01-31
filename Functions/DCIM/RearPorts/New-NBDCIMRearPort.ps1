@@ -121,7 +121,7 @@ function New-NBDCIMRearPort {
     )
 
     process {
-        Write-Verbose "Creating D CI MR ea rP or t"
+        Write-Verbose "Creating DCIM Rear Port"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'rear-ports'))
 
         # Use BuildURIComponents but skip Front_Ports (handled separately)
@@ -131,18 +131,9 @@ function New-NBDCIMRearPort {
 
         # Handle Front_Ports for Netbox 4.5+ bidirectional mapping
         if ($Front_Ports) {
-            # Check if Netbox version supports this
-            $is45OrHigher = $false
-            try {
-                $status = Get-NBVersion -ErrorAction SilentlyContinue
-                if ($status.'netbox-version') {
-                    $netboxVersion = ConvertTo-NetboxVersion -VersionString $status.'netbox-version'
-                    $is45OrHigher = $netboxVersion -ge [version]'4.5.0'
-                }
-            }
-            catch {
-                Write-Verbose "Could not detect Netbox version"
-            }
+            # Check Netbox version (cached by Connect-NBAPI)
+            $netboxVersion = $script:NetboxConfig.ParsedVersion
+            $is45OrHigher = $netboxVersion -and ($netboxVersion -ge [version]'4.5.0')
 
             if (-not $is45OrHigher) {
                 Write-Warning "Front_Ports parameter is only supported on Netbox 4.5+. This parameter will be ignored on older versions."

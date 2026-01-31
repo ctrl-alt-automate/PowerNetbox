@@ -63,7 +63,7 @@ function New-NBVPNIPSecProfile {
     )
 
     process {
-        Write-Verbose "Creating V PN IP Se cP ro fi le"
+        Write-Verbose "Creating VPN IPSec Profile"
         $Segments = [System.Collections.ArrayList]::new(@('vpn', 'ipsec-profiles'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'

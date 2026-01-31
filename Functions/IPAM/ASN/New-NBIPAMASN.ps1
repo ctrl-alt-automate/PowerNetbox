@@ -60,7 +60,7 @@ function New-NBIPAMASN {
     )
 
     process {
-        Write-Verbose "Creating IPA MA SN"
+        Write-Verbose "Creating IPAM ASN"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'asns'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'

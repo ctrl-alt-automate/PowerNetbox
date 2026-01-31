@@ -32,7 +32,7 @@ function Set-NBDCIMDeviceBay {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating D CI MD ev ic eB ay"
+        Write-Verbose "Updating DCIM Device Bay"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','device-bays',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update device bay')) {

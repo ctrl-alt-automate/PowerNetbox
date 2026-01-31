@@ -25,7 +25,7 @@ function Remove-NBDCIMPlatform {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing D CI MP la tf or m"
+        Write-Verbose "Removing DCIM Platform"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete platform')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','platforms',$Id)) -Method DELETE -Raw:$Raw
         }

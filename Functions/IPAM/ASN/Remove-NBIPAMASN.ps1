@@ -29,7 +29,7 @@ function Remove-NBIPAMASN {
     )
 
     process {
-        Write-Verbose "Removing IPA MA SN"
+        Write-Verbose "Removing IPAM ASN"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'asns', $Id))
 
         $URI = BuildNewURI -Segments $Segments

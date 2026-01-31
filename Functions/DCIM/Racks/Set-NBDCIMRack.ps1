@@ -156,7 +156,7 @@ function Set-NBDCIMRack {
     )
 
     process {
-        Write-Verbose "Updating D CI MR ac k"
+        Write-Verbose "Updating DCIM Rack"
         foreach ($RackId in $Id) {
             $CurrentRack = Get-NBDCIMRack -Id $RackId -ErrorAction Stop
 

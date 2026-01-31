@@ -25,7 +25,7 @@ function Remove-NBDCIMInterfaceTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing D CI MI nt er fa ce Te mp la te"
+        Write-Verbose "Removing DCIM Interface Template"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete interface template')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','interface-templates',$Id)) -Method DELETE -Raw:$Raw
         }

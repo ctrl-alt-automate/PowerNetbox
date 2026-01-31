@@ -31,7 +31,7 @@ function Set-NBIPAMRIR {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating IPA MR IR"
+        Write-Verbose "Updating IPAM RIR"
         $Segments = [System.Collections.ArrayList]::new(@('ipam','rirs',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update RIR')) {
