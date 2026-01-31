@@ -143,7 +143,7 @@ function Get-NBDCIMCable {
         # Build skip parameters list (always skip Cable_Profile, we'll add it manually as 'profile')
         $skipParams = @('Raw', 'All', 'PageSize', 'Cable_Profile')
 
-        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName ($skipParams + @('All', 'PageSize'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName $skipParams
 
         # Add Cable_Profile as 'profile' in query params (API uses 'profile')
         if ($PSBoundParameters.ContainsKey('Cable_Profile') -and -not $excludeProfile) {
