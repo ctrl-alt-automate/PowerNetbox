@@ -1189,10 +1189,11 @@ Describe "Remove-NBIPAMAddress Bulk Mode" -Tag 'Bulk', 'IPAM' {
         # Note: Array Id parameters are not supported for Remove- functions
         # Use pipeline with InputObject for bulk operations (see "Bulk Operations" context below)
 
-        It "Should call Get-NBIPAMAddress for each Id in single mode" {
+        It "Should use Id directly without fetching IP address first (performance optimization)" {
             Remove-NBIPAMAddress -Id 100 -Force
 
-            Should -Invoke -CommandName 'Get-NBIPAMAddress' -Times 1 -ModuleName 'PowerNetbox' -ParameterFilter { $Id -eq 100 }
+            # Performance optimization: no longer fetches the object before deleting
+            Should -Invoke -CommandName 'Get-NBIPAMAddress' -Times 0 -ModuleName 'PowerNetbox'
         }
     }
 
@@ -1435,10 +1436,11 @@ Describe "Remove-NBVirtualMachine Bulk Mode" -Tag 'Bulk', 'Virtualization' {
         # Note: Array Id parameters are not supported for Remove- functions
         # Use pipeline with InputObject for bulk operations (see "Bulk Operations" context below)
 
-        It "Should call Get-NBVirtualMachine for each Id in single mode" {
+        It "Should use Id directly without fetching VM first (performance optimization)" {
             Remove-NBVirtualMachine -Id 100 -Force
 
-            Should -Invoke -CommandName 'Get-NBVirtualMachine' -Times 1 -ModuleName 'PowerNetbox' -ParameterFilter { $Id -eq 100 }
+            # Performance optimization: no longer fetches the object before deleting
+            Should -Invoke -CommandName 'Get-NBVirtualMachine' -Times 0 -ModuleName 'PowerNetbox'
         }
 
         It "Should support pipeline input by Id property" {

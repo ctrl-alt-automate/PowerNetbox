@@ -71,7 +71,8 @@ Describe "DCIM Racks Tests" -Tag 'DCIM', 'Racks' {
 
         It "Should update a rack" {
             $Result = Set-NBDCIMRack -Id 1 -Name 'UpdatedRack' -Force
-            Should -Invoke -CommandName 'Get-NBDCIMRack' -Times 1 -Exactly -Scope 'It' -ModuleName 'PowerNetbox'
+            # Performance optimization: no longer fetches the object before updating
+            Should -Invoke -CommandName 'Get-NBDCIMRack' -Times 0 -Exactly -Scope 'It' -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'PATCH'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/racks/1/'
         }
@@ -86,7 +87,8 @@ Describe "DCIM Racks Tests" -Tag 'DCIM', 'Racks' {
 
         It "Should remove a rack" {
             $Result = Remove-NBDCIMRack -Id 10 -Force
-            Should -Invoke -CommandName 'Get-NBDCIMRack' -Times 1 -Exactly -Scope 'It' -ModuleName 'PowerNetbox'
+            # Performance optimization: no longer fetches the object before deleting
+            Should -Invoke -CommandName 'Get-NBDCIMRack' -Times 0 -Exactly -Scope 'It' -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/racks/10/'
         }

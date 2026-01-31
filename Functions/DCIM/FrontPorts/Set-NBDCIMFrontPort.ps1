@@ -122,9 +122,8 @@ function Set-NBDCIMFrontPort {
 
     process {
         Write-Verbose "Updating DCIM Front Port"
-        $CurrentPort = Get-NBDCIMFrontPort -Id $Id -ErrorAction Stop
 
-        $Segments = [System.Collections.ArrayList]::new(@('dcim', 'front-ports', $CurrentPort.Id))
+        $Segments = [System.Collections.ArrayList]::new(@('dcim', 'front-ports', $Id))
 
         # Use BuildURIComponents but skip port mapping params (handled separately)
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force', 'Raw', 'Rear_Ports', 'Rear_Port', 'Rear_Port_Position'
@@ -162,7 +161,7 @@ function Set-NBDCIMFrontPort {
             }
         }
 
-        if ($Force -or $pscmdlet.ShouldProcess("Front Port ID $($CurrentPort.Id)", "Set")) {
+        if ($Force -or $pscmdlet.ShouldProcess("Front Port ID $Id", "Set")) {
             InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method PATCH -Raw:$Raw
         }
     }

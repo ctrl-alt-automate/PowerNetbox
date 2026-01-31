@@ -79,15 +79,13 @@ function Set-NBTenant {
     process {
         Write-Verbose "Updating Tenant"
         foreach ($TenantId in $Id) {
-            $CurrentTenant = Get-NBTenant -Id $TenantId -ErrorAction Stop
-
-            $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'tenants', $CurrentTenant.Id))
+            $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'tenants', $TenantId))
 
             $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force', 'Raw'
 
             $URI = BuildNewURI -Segments $URIComponents.Segments
 
-            if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentTenant.Name)", 'Update tenant')) {
+            if ($Force -or $PSCmdlet.ShouldProcess("Tenant ID $TenantId", 'Update tenant')) {
                 InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
             }
         }

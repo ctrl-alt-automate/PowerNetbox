@@ -40,10 +40,8 @@ function Remove-NBDCIMFrontPort {
     process {
         Write-Verbose "Removing DCIM Front Port"
         foreach ($FrontPortID in $Id) {
-            $CurrentPort = Get-NBDCIMFrontPort -Id $FrontPortID -ErrorAction Stop
-
-            if ($Force -or $pscmdlet.ShouldProcess("Name: $($CurrentPort.Name) | ID: $($CurrentPort.Id)", "Remove")) {
-                $Segments = [System.Collections.ArrayList]::new(@('dcim', 'front-ports', $CurrentPort.Id))
+            if ($Force -or $pscmdlet.ShouldProcess("Front Port ID $FrontPortID", "Remove")) {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim', 'front-ports', $FrontPortID))
 
                 $URI = BuildNewURI -Segments $Segments
 

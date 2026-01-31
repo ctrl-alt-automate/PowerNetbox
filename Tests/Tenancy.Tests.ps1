@@ -313,12 +313,12 @@ Describe "Tenancy Module Tests" -Tag 'Tenancy' {
             }
         }
 
-        # Note: Set-NBContactRole has a bug - it PATCHes to /contacts/ instead of /contact-roles/
         It "Should update a contact role" {
             $Result = Set-NBContactRole -Id 1 -Name 'Updated Role' -Confirm:$false
+            # Performance optimization: no longer fetches the object before updating
+            Should -Invoke -CommandName 'Get-NBContactRole' -Times 0 -Exactly -Scope 'It' -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'PATCH'
-            # Bug: Currently patches to /contacts/ instead of /contact-roles/
-            $Result.URI | Should -Be 'https://netbox.domain.com/api/tenancy/contacts/1/'
+            $Result.URI | Should -Be 'https://netbox.domain.com/api/tenancy/contact-roles/1/'
         }
     }
 

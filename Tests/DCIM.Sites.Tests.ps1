@@ -76,7 +76,8 @@ Describe "DCIM Sites Tests" -Tag 'DCIM', 'Sites' {
 
         It "Should update a site" {
             $Result = Set-NBDCIMSite -Id 1 -Name 'UpdatedSite' -Force
-            Should -Invoke -CommandName 'Get-NBDCIMSite' -Times 1 -Exactly -Scope 'It' -ModuleName 'PowerNetbox'
+            # Performance optimization: no longer fetches the object before updating
+            Should -Invoke -CommandName 'Get-NBDCIMSite' -Times 0 -Exactly -Scope 'It' -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'PATCH'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/sites/1/'
             $Result.Body | Should -Match '"name":"UpdatedSite"'
@@ -93,7 +94,8 @@ Describe "DCIM Sites Tests" -Tag 'DCIM', 'Sites' {
         It "Should remove a site" {
             # Remove-NBDCIMSite uses SupportsShouldProcess, use -Confirm:$false instead of -Force
             $Result = Remove-NBDCIMSite -Id 10 -Confirm:$false
-            Should -Invoke -CommandName 'Get-NBDCIMSite' -Times 1 -Exactly -Scope 'It' -ModuleName 'PowerNetbox'
+            # Performance optimization: no longer fetches the object before deleting
+            Should -Invoke -CommandName 'Get-NBDCIMSite' -Times 0 -Exactly -Scope 'It' -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/sites/10/'
         }
