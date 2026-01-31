@@ -30,7 +30,7 @@ function Set-NBDCIMModuleTypeProfile {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Updating DCIM Module TypeP ro fi le"
+        Write-Verbose "Updating DCIM Module Type Profile"
         $Segments = [System.Collections.ArrayList]::new(@('dcim','module-type-profiles',$Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw'
         if ($PSCmdlet.ShouldProcess($Id, 'Update module type profile')) {

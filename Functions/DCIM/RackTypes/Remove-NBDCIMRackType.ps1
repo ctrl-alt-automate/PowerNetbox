@@ -25,7 +25,7 @@ function Remove-NBDCIMRackType {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing DCIM RackT yp e"
+        Write-Verbose "Removing DCIM Rack Type"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete rack type')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','rack-types',$Id)) -Method DELETE -Raw:$Raw
         }

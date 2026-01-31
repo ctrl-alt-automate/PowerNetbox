@@ -25,7 +25,7 @@ function Remove-NBDCIMRackReservation {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing DCIM RackR es er va ti on"
+        Write-Verbose "Removing DCIM Rack Reservation"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete rack reservation')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','rack-reservations',$Id)) -Method DELETE -Raw:$Raw
         }

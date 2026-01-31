@@ -63,7 +63,7 @@ function New-NBDCIMSiteGroup {
     )
 
     process {
-        Write-Verbose "Creating DCIM SiteG ro up"
+        Write-Verbose "Creating DCIM Site Group"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'site-groups'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'

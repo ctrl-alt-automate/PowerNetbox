@@ -25,7 +25,7 @@ function Remove-NBDCIMRackRole {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing DCIM RackR ol e"
+        Write-Verbose "Removing DCIM Rack Role"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete rack role')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','rack-roles',$Id)) -Method DELETE -Raw:$Raw
         }

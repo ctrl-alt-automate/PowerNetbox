@@ -25,7 +25,7 @@ function Remove-NBDCIMRearPortTemplate {
         [switch]$Raw
     )
     process {
-        Write-Verbose "Removing DCIM Rear PortT em pl at e"
+        Write-Verbose "Removing DCIM Rear Port Template"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete rear port template')) {
             InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','rear-port-templates',$Id)) -Method DELETE -Raw:$Raw
         }
