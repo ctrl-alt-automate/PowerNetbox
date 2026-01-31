@@ -56,7 +56,7 @@ function New-NBIPAMRouteTarget {
     )
 
     process {
-        Write-Verbose "Creating IPA MR ou te Target"
+        Write-Verbose "Creating IPAM Route Target"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'route-targets'))
 
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
