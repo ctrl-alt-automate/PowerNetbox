@@ -75,6 +75,7 @@ function Get-NBOwnerGroup {
     )
 
     process {
+        Write-Verbose "Retrieving Owner Group"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {
                 foreach ($i in $Id) {

@@ -61,6 +61,7 @@ function Set-NBOwner {
     )
 
     process {
+        Write-Verbose "Updating Owner"
         $Segments = [System.Collections.ArrayList]::new(@('users', 'owners', $Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
         $URI = BuildNewURI -Segments $URIComponents.Segments
