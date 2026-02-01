@@ -1,6 +1,7 @@
 ﻿
 function CreateEnum {
     [CmdletBinding()]
+    [OutputType([void])]
     param
     (
         [Parameter(Mandatory = $true)]

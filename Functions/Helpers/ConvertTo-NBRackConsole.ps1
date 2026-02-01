@@ -1,4 +1,4 @@
-function ConvertTo-NBRackConsole {
+﻿function ConvertTo-NBRackConsole {
 <#
     .SYNOPSIS
         Convert rack elevation data to ASCII-art console output
