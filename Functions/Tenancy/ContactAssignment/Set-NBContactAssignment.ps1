@@ -71,9 +71,7 @@ function Set-NBContactAssignment {
 
             $URI = BuildNewURI -Segments $URIComponents.Segments
 
-            $CurrentContactAssignment = Get-NBContactAssignment -Id $ContactAssignmentId -ErrorAction Stop
-
-            if ($PSCmdlet.ShouldProcess($CurrentContactAssignment.Id, 'Update contact assignment')) {
+            if ($PSCmdlet.ShouldProcess($ContactAssignmentId, 'Update contact assignment')) {
                 InvokeNetboxRequest -URI $URI -Method $Method -Body $URIComponents.Parameters -Raw:$Raw
             }
         }

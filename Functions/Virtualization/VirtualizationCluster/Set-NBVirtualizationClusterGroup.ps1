@@ -69,15 +69,14 @@ function Set-NBVirtualizationClusterGroup {
     process {
         Write-Verbose "Updating Virtualization Cluster Group"
         foreach ($GroupId in $Id) {
-            $CurrentGroup = Get-NBVirtualizationClusterGroup -Id $GroupId -ErrorAction Stop
 
-            $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'cluster-groups', $CurrentGroup.Id))
+            $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'cluster-groups', $GroupId))
 
             $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force', 'Raw'
 
             $URI = BuildNewURI -Segments $URIComponents.Segments
 
-            if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentGroup.Name)", 'Update cluster group')) {
+            if ($Force -or $PSCmdlet.ShouldProcess("$("ID $GroupId")", 'Update cluster group')) {
                 InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
             }
         }

@@ -50,14 +50,13 @@ function Remove-NBContactAssignment {
     process {
         Write-Verbose "Removing Contact Assignment"
         foreach ($AssignmentId in $Id) {
-            $CurrentAssignment = Get-NBContactAssignment -Id $AssignmentId -ErrorAction Stop
 
-            $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'contact-assignments', $CurrentAssignment.Id))
+            $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'contact-assignments', $AssignmentId))
 
             $URI = BuildNewURI -Segments $Segments
 
             # Build descriptive target for confirmation
-            $Target = "Assignment ID $($CurrentAssignment.Id)"
+            $Target = "Assignment ID $($AssignmentId)"
             if ($CurrentAssignment.Contact -and $CurrentAssignment.Object) {
                 $Target = "Contact '$($CurrentAssignment.Contact.Name)' -> '$($CurrentAssignment.Object.Name)'"
             }

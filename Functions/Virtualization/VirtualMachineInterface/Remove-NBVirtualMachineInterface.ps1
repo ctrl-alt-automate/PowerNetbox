@@ -55,16 +55,15 @@ function Remove-NBVirtualMachineInterface {
     process {
         Write-Verbose "Removing Virtual Machine Interface"
         foreach ($InterfaceId in $Id) {
-            $CurrentInterface = Get-NBVirtualMachineInterface -Id $InterfaceId -ErrorAction Stop
 
-            $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'interfaces', $CurrentInterface.Id))
+            $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'interfaces', $InterfaceId))
 
             $URI = BuildNewURI -Segments $Segments
 
             # Build descriptive target for confirmation
-            $Target = "$($CurrentInterface.Name)"
+            $Target = "$("ID $InterfaceId")"
             if ($CurrentInterface.Virtual_Machine) {
-                $Target = "Interface '$($CurrentInterface.Name)' on VM '$($CurrentInterface.Virtual_Machine.Name)'"
+                $Target = "Interface '$("ID $InterfaceId")' on VM '$($CurrentInterface.Virtual_Machine.Name)'"
             }
 
             if ($Force -or $PSCmdlet.ShouldProcess($Target, 'Delete interface')) {

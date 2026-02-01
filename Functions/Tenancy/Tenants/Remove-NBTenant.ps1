@@ -49,13 +49,12 @@ function Remove-NBTenant {
     process {
         Write-Verbose "Removing Tenant"
         foreach ($TenantId in $Id) {
-            $CurrentTenant = Get-NBTenant -Id $TenantId -ErrorAction Stop
 
-            $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'tenants', $CurrentTenant.Id))
+            $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'tenants', $TenantId))
 
             $URI = BuildNewURI -Segments $Segments
 
-            if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentTenant.Name)", 'Delete tenant')) {
+            if ($Force -or $PSCmdlet.ShouldProcess("$("ID $TenantId")", 'Delete tenant')) {
                 InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
             }
         }
