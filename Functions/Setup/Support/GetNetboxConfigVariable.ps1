@@ -1,4 +1,4 @@
-function GetNetboxConfigVariable {
+﻿function GetNetboxConfigVariable {
     [CmdletBinding()]
     [OutputType([hashtable])]
     param()
