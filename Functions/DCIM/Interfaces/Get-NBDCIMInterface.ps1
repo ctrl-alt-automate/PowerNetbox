@@ -9,12 +9,12 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBDDCIM Interface
+    Get-NBDCIMInterface
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Get-NBDDCIM Interface {
+function Get-NBDCIMInterface {
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param

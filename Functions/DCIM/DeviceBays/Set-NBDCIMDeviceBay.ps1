@@ -10,14 +10,14 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBDDCIM DeviceBay
+    Set-NBDCIMDeviceBay
 
     Returns all DCIM DeviceBay objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Set-NBDDCIM DeviceBay {
+function Set-NBDCIMDeviceBay {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     [OutputType([PSCustomObject])]
     param(

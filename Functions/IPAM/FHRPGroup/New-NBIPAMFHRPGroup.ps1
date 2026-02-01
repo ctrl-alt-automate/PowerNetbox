@@ -10,14 +10,14 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBIIPAM FHRP Group
+    New-NBIPAMFHRPGroup
 
     Returns all IPAM FHRP Group objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function New-NBIIPAM FHRP Group {
+function New-NBIPAMFHRPGroup {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param(

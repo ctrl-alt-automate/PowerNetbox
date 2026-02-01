@@ -10,14 +10,14 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBDDCIM PowerOutlet
+    Set-NBDCIMPowerOutlet
 
     Returns all DCIM PowerOutlet objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Set-NBDDCIM PowerOutlet {
+function Set-NBDCIMPowerOutlet {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     [OutputType([PSCustomObject])]
     param(

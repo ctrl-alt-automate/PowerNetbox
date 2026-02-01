@@ -1,4 +1,4 @@
-function Get-NBDDCIM Region {
+function Get-NBDCIMRegion {
 <#
     .SYNOPSIS
         Get regions from Netbox
@@ -32,17 +32,17 @@ function Get-NBDDCIM Region {
         Return the raw API response
 
     .EXAMPLE
-        Get-NBDDCIM Region
+        Get-NBDCIMRegion
 
         Returns all regions
 
     .EXAMPLE
-        Get-NBDDCIM Region -Name "Europe"
+        Get-NBDCIMRegion -Name "Europe"
 
         Returns regions matching the name "Europe"
 
     .EXAMPLE
-        Get-NBDDCIM Region -Parent_Id 1
+        Get-NBDCIMRegion -Parent_Id 1
 
         Returns all child regions of region 1
 #>

@@ -10,7 +10,7 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBDDCIM InterfaceConnection
+    Remove-NBDCIMInterfaceConnection
 
     Returns all DCIM InterfaceConnection objects.
 
@@ -18,7 +18,7 @@
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 
-function Remove-NBDDCIM InterfaceConnection {
+function Remove-NBDCIMInterfaceConnection {
     [CmdletBinding(ConfirmImpact = 'High',
                    SupportsShouldProcess = $true)]
     [OutputType([void])]
@@ -38,7 +38,7 @@ function Remove-NBDDCIM InterfaceConnection {
     process {
         Write-Verbose "Removing DCIM Interface Connection"
         foreach ($ConnectionID in $Id) {
-            $CurrentConnection = Get-NBDDCIM InterfaceConnection -Id $ConnectionID -ErrorAction Stop
+            $CurrentConnection = Get-NBDCIMInterfaceConnection -Id $ConnectionID -ErrorAction Stop
 
             if ($Force -or $pscmdlet.ShouldProcess("Connection ID $($ConnectionID.Id)", "REMOVE")) {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interface-connections', $CurrentConnection.Id))

@@ -10,14 +10,14 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBDDCIM ConsolePortTemplate
+    Set-NBDCIMConsolePortTemplate
 
     Returns all DCIM ConsolePortTemplate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Set-NBDDCIM ConsolePortTemplate {
+function Set-NBDCIMConsolePortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     [OutputType([PSCustomObject])]
     param(

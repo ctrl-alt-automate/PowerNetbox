@@ -10,14 +10,14 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBDDCIM DeviceType
+    New-NBDCIMDeviceType
 
     Returns all DCIM DeviceType objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function New-NBDDCIM DeviceType {
+function New-NBDCIMDeviceType {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param(

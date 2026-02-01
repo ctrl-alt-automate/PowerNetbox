@@ -1,4 +1,4 @@
-function New-NBDDCIM SiteGroup {
+function New-NBDCIMSiteGroup {
 <#
     .SYNOPSIS
         Create a new site group in Netbox
@@ -29,12 +29,12 @@ function New-NBDDCIM SiteGroup {
         Return the raw API response
 
     .EXAMPLE
-        New-NBDDCIM SiteGroup -Name "Production" -Slug "production"
+        New-NBDCIMSiteGroup -Name "Production" -Slug "production"
 
         Creates a new site group named "Production"
 
     .EXAMPLE
-        New-NBDDCIM SiteGroup -Name "DR Sites" -Slug "dr-sites" -Parent 1
+        New-NBDCIMSiteGroup -Name "DR Sites" -Slug "dr-sites" -Parent 1
 
         Creates a new site group as a child of site group 1
 #>

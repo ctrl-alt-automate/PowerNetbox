@@ -10,14 +10,14 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBDDCIM RearPort
+    Remove-NBDCIMRearPort
 
     Returns all DCIM RearPort objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Remove-NBDDCIM RearPort {
+function Remove-NBDCIMRearPort {
 
     [CmdletBinding(ConfirmImpact = 'High',
         SupportsShouldProcess = $true)]
@@ -38,7 +38,7 @@ function Remove-NBDDCIM RearPort {
     process {
         Write-Verbose "Removing DCIM Rear Port"
         foreach ($RearPortID in $Id) {
-            $CurrentPort = Get-NBDDCIM RearPort -Id $RearPortID -ErrorAction Stop
+            $CurrentPort = Get-NBDCIMRearPort -Id $RearPortID -ErrorAction Stop
 
             if ($Force -or $pscmdlet.ShouldProcess("Name: $($CurrentPort.Name) | ID: $($CurrentPort.Id)", "Remove")) {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'rear-ports', $CurrentPort.Id))

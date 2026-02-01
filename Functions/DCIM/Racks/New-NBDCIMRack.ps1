@@ -1,4 +1,4 @@
-function New-NBDDCIM Rack {
+function New-NBDCIMRack {
 <#
     .SYNOPSIS
         Create a new rack in Netbox
@@ -82,12 +82,12 @@ function New-NBDDCIM Rack {
         Return the raw API response
 
     .EXAMPLE
-        New-NBDDCIM Rack -Name "Rack-01" -Site 1
+        New-NBDCIMRack -Name "Rack-01" -Site 1
 
         Creates a new rack named "Rack-01" at site 1
 
     .EXAMPLE
-        New-NBDDCIM Rack -Name "Rack-02" -Site 1 -U_Height 48 -Status active
+        New-NBDCIMRack -Name "Rack-02" -Site 1 -U_Height 48 -Status active
 
         Creates a 48U active rack at site 1
 #>

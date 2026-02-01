@@ -10,14 +10,14 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBDDCIM VirtualDeviceContext
+    Set-NBDCIMVirtualDeviceContext
 
     Returns all DCIM VirtualDeviceContext objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Set-NBDDCIM VirtualDeviceContext {
+function Set-NBDCIMVirtualDeviceContext {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     [OutputType([PSCustomObject])]
     param(

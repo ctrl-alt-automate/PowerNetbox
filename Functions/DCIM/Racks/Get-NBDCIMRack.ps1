@@ -1,4 +1,4 @@
-function Get-NBDDCIM Rack {
+function Get-NBDCIMRack {
 <#
     .SYNOPSIS
         Get racks from Netbox
@@ -52,17 +52,17 @@ function Get-NBDDCIM Rack {
         Return the raw API response
 
     .EXAMPLE
-        Get-NBDDCIM Rack
+        Get-NBDCIMRack
 
         Returns all racks
 
     .EXAMPLE
-        Get-NBDDCIM Rack -Site_Id 1
+        Get-NBDCIMRack -Site_Id 1
 
         Returns all racks at site with ID 1
 
     .EXAMPLE
-        Get-NBDDCIM Rack -Name "Rack-01"
+        Get-NBDCIMRack -Name "Rack-01"
 
         Returns racks matching the name "Rack-01"
 #>

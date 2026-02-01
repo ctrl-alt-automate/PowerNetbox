@@ -10,14 +10,14 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBDDCIM ModuleBayTemplate
+    Remove-NBDCIMModuleBayTemplate
 
     Returns all DCIM ModuleBayTemplate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Remove-NBDDCIM ModuleBayTemplate {
+function Remove-NBDCIMModuleBayTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     [OutputType([PSCustomObject])]
     param(

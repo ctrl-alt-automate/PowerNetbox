@@ -59,12 +59,12 @@
     Skip confirmation prompt.
 
 .EXAMPLE
-    Set-NBDDCIM FrontPort -Id 1 -Name "Port 1 Updated"
+    Set-NBDCIMFrontPort -Id 1 -Name "Port 1 Updated"
 
     Updates the name of front port with ID 1.
 
 .EXAMPLE
-    Set-NBDDCIM FrontPort -Id 1 -Rear_Ports @(
+    Set-NBDCIMFrontPort -Id 1 -Rear_Ports @(
         @{ rear_port = 100; rear_port_position = 2; position = 1 }
     )
 
@@ -73,7 +73,7 @@
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Set-NBDDCIM FrontPort {
+function Set-NBDCIMFrontPort {
     [CmdletBinding(ConfirmImpact = 'Medium',
         SupportsShouldProcess = $true)]
     [OutputType([pscustomobject])]
@@ -120,7 +120,7 @@ function Set-NBDDCIM FrontPort {
 
     process {
         Write-Verbose "Updating DCIM Front Port"
-        $CurrentPort = Get-NBDDCIM FrontPort -Id $Id -ErrorAction Stop
+        $CurrentPort = Get-NBDCIMFrontPort -Id $Id -ErrorAction Stop
 
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'front-ports', $CurrentPort.Id))
 

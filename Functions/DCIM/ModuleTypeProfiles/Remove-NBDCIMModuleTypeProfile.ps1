@@ -10,14 +10,14 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBDDCIM ModuleTypeProfile
+    Remove-NBDCIMModuleTypeProfile
 
     Returns all DCIM ModuleTypeProfile objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Remove-NBDDCIM ModuleTypeProfile {
+function Remove-NBDCIMModuleTypeProfile {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     [OutputType([PSCustomObject])]
     param(

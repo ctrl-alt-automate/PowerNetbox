@@ -1,4 +1,4 @@
-function Set-NBDDCIM Manufacturer {
+function Set-NBDCIMManufacturer {
 <#
     .SYNOPSIS
         Update a manufacturer in Netbox
@@ -25,10 +25,10 @@ function Set-NBDDCIM Manufacturer {
         Skip confirmation prompts
 
     .EXAMPLE
-        Set-NBDDCIM Manufacturer -Id 1 -Description "Updated description"
+        Set-NBDCIMManufacturer -Id 1 -Description "Updated description"
 
     .EXAMPLE
-        Get-NBDDCIM Manufacturer -Name "Cisco" | Set-NBDDCIM Manufacturer -Description "Network equipment"
+        Get-NBDCIMManufacturer -Name "Cisco" | Set-NBDCIMManufacturer -Description "Network equipment"
 #>
 
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
@@ -53,7 +53,7 @@ function Set-NBDDCIM Manufacturer {
     process {
         Write-Verbose "Updating DCIM Manufacturer"
         foreach ($ManufacturerId in $Id) {
-            $CurrentManufacturer = Get-NBDDCIM Manufacturer -Id $ManufacturerId -ErrorAction Stop
+            $CurrentManufacturer = Get-NBDCIMManufacturer -Id $ManufacturerId -ErrorAction Stop
 
             if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentManufacturer.Name)", "Update manufacturer")) {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'manufacturers', $CurrentManufacturer.Id))

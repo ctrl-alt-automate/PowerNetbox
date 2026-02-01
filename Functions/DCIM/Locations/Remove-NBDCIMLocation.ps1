@@ -1,4 +1,4 @@
-function Remove-NBDDCIM Location {
+function Remove-NBDCIMLocation {
 <#
     .SYNOPSIS
         Remove a location from Netbox
@@ -13,12 +13,12 @@ function Remove-NBDDCIM Location {
         Return the raw API response
 
     .EXAMPLE
-        Remove-NBDDCIM Location -Id 1
+        Remove-NBDCIMLocation -Id 1
 
         Deletes location with ID 1
 
     .EXAMPLE
-        Get-NBDDCIM Location -Name "Old Room" | Remove-NBDDCIM Location
+        Get-NBDCIMLocation -Name "Old Room" | Remove-NBDCIMLocation
 
         Deletes locations matching the name "Old Room"
 #>

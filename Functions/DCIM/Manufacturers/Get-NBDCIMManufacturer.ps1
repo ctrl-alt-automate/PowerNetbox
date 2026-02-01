@@ -1,4 +1,4 @@
-function Get-NBDDCIM Manufacturer {
+function Get-NBDCIMManufacturer {
 <#
     .SYNOPSIS
         Get manufacturers from Netbox
@@ -28,12 +28,12 @@ function Get-NBDDCIM Manufacturer {
         Return the raw API response
 
     .EXAMPLE
-        Get-NBDDCIM Manufacturer
+        Get-NBDCIMManufacturer
 
         Returns all manufacturers
 
     .EXAMPLE
-        Get-NBDDCIM Manufacturer -Name "Cisco"
+        Get-NBDCIMManufacturer -Name "Cisco"
 
         Returns manufacturers matching the name "Cisco"
 #>

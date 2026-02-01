@@ -1,4 +1,4 @@
-function Remove-NBDDCIM Rack {
+function Remove-NBDCIMRack {
 <#
     .SYNOPSIS
         Delete a rack from Netbox
@@ -16,17 +16,17 @@ function Remove-NBDDCIM Rack {
         Return the raw API response
 
     .EXAMPLE
-        Remove-NBDDCIM Rack -Id 1
+        Remove-NBDCIMRack -Id 1
 
         Deletes rack with ID 1 (with confirmation)
 
     .EXAMPLE
-        Remove-NBDDCIM Rack -Id 1 -Confirm:$false
+        Remove-NBDCIMRack -Id 1 -Confirm:$false
 
         Deletes rack with ID 1 without confirmation
 
     .EXAMPLE
-        Get-NBDDCIM Rack -Name "Rack-01" | Remove-NBDDCIM Rack
+        Get-NBDCIMRack -Name "Rack-01" | Remove-NBDCIMRack
 
         Deletes rack named "Rack-01"
 #>
@@ -47,7 +47,7 @@ function Remove-NBDDCIM Rack {
     process {
         Write-Verbose "Removing DCIM Rack"
         foreach ($RackId in $Id) {
-            $CurrentRack = Get-NBDDCIM Rack -Id $RackId -ErrorAction Stop
+            $CurrentRack = Get-NBDCIMRack -Id $RackId -ErrorAction Stop
 
             if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentRack.Name)", "Delete rack")) {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'racks', $CurrentRack.Id))

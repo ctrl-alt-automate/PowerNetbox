@@ -58,18 +58,18 @@
     Return the raw API response.
 
 .EXAMPLE
-    Get-NBDDCIM Cable
+    Get-NBDCIMCable
 
 .EXAMPLE
-    Get-NBDDCIM Cable -Cable_Profile '1c4p-4c1p'
+    Get-NBDCIMCable -Cable_Profile '1c4p-4c1p'
 
 .EXAMPLE
-    Get-NBDDCIM Cable -Status 'connected' -Device_ID 5
+    Get-NBDCIMCable -Status 'connected' -Device_ID 5
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Get-NBDDCIM Cable {
+function Get-NBDCIMCable {
     [CmdletBinding()]
     [OutputType([PSCustomObject])]
     #region Parameters

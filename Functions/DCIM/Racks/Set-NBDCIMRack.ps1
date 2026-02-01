@@ -1,4 +1,4 @@
-function Set-NBDDCIM Rack {
+function Set-NBDCIMRack {
 <#
     .SYNOPSIS
         Update a rack in Netbox
@@ -85,10 +85,10 @@ function Set-NBDDCIM Rack {
         Skip confirmation prompts
 
     .EXAMPLE
-        Set-NBDDCIM Rack -Id 1 -Description "Updated description"
+        Set-NBDCIMRack -Id 1 -Description "Updated description"
 
     .EXAMPLE
-        Get-NBDDCIM Rack -Name "Rack-01" | Set-NBDDCIM Rack -Status deprecated
+        Get-NBDCIMRack -Name "Rack-01" | Set-NBDCIMRack -Status deprecated
 #>
 
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
@@ -158,7 +158,7 @@ function Set-NBDDCIM Rack {
     process {
         Write-Verbose "Updating DCIM Rack"
         foreach ($RackId in $Id) {
-            $CurrentRack = Get-NBDDCIM Rack -Id $RackId -ErrorAction Stop
+            $CurrentRack = Get-NBDCIMRack -Id $RackId -ErrorAction Stop
 
             if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentRack.Name)", "Update rack")) {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'racks', $CurrentRack.Id))

@@ -10,14 +10,14 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBDDCIM InventoryItemTemplate
+    Set-NBDCIMInventoryItemTemplate
 
     Returns all DCIM InventoryItemTemplate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Set-NBDDCIM InventoryItemTemplate {
+function Set-NBDCIMInventoryItemTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     [OutputType([PSCustomObject])]
     param(

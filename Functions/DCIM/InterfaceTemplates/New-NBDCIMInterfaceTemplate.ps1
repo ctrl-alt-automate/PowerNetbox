@@ -10,14 +10,14 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBDDCIM InterfaceTemplate
+    New-NBDCIMInterfaceTemplate
 
     Returns all DCIM InterfaceTemplate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function New-NBDDCIM InterfaceTemplate {
+function New-NBDCIMInterfaceTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param(

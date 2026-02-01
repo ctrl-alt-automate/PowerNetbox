@@ -10,14 +10,14 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBDDCIM InventoryItemRole
+    New-NBDCIMInventoryItemRole
 
     Returns all DCIM InventoryItemRole objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function New-NBDDCIM InventoryItemRole {
+function New-NBDCIMInventoryItemRole {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param(

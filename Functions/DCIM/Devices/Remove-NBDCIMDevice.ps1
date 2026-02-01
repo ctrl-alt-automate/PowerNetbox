@@ -29,22 +29,22 @@
     Return the raw API response.
 
 .EXAMPLE
-    Remove-NBDDCIM Device -Id 123 -Force
+    Remove-NBDCIMDevice -Id 123 -Force
 
     Deletes device 123 without confirmation.
 
 .EXAMPLE
-    Remove-NBDDCIM Device -Id 100, 101, 102 -Force
+    Remove-NBDCIMDevice -Id 100, 101, 102 -Force
 
     Deletes multiple devices by ID.
 
 .EXAMPLE
-    Get-NBDDCIM Device -Status "decommissioning" | Remove-NBDDCIM Device -Force
+    Get-NBDCIMDevice -Status "decommissioning" | Remove-NBDCIMDevice -Force
 
     Bulk delete all devices in decommissioning status.
 
 .EXAMPLE
-    Get-NBDDCIM Device -Query "temp-*" | Remove-NBDDCIM Device -BatchSize 50 -Force
+    Get-NBDCIMDevice -Query "temp-*" | Remove-NBDCIMDevice -BatchSize 50 -Force
 
     Bulk delete devices matching a pattern with batching.
 
@@ -52,7 +52,7 @@
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 
-function Remove-NBDDCIM Device {
+function Remove-NBDCIMDevice {
     [CmdletBinding(SupportsShouldProcess = $true,
         ConfirmImpact = 'High',
         DefaultParameterSetName = 'Single')]

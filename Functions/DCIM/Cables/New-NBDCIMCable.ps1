@@ -65,18 +65,18 @@
 .EXAMPLE
     $termA = @{ object_type = 'dcim.interface'; object_id = 1 }
     $termB = @{ object_type = 'dcim.interface'; object_id = 2 }
-    New-NBDDCIM Cable -A_Terminations @($termA) -B_Terminations @($termB)
+    New-NBDCIMCable -A_Terminations @($termA) -B_Terminations @($termB)
 
 .EXAMPLE
     # Connect two interfaces by ID using helper
-    New-NBDDCIM Cable -A_Terminations @(@{object_type='dcim.interface';object_id=10}) `
+    New-NBDCIMCable -A_Terminations @(@{object_type='dcim.interface';object_id=10}) `
                     -B_Terminations @(@{object_type='dcim.interface';object_id=20}) `
                     -Type 'cat6' -Status 'connected' -Label 'Patch-001'
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function New-NBDDCIM Cable {
+function New-NBDCIMCable {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param(

@@ -1,4 +1,4 @@
-function Get-NBDDCIM RackElevation {
+function Get-NBDCIMRackElevation {
 <#
     .SYNOPSIS
         Get rack elevation data from Netbox
@@ -32,32 +32,32 @@ function Get-NBDDCIM RackElevation {
         Return the raw API response
 
     .EXAMPLE
-        Get-NBDDCIM RackElevation -Id 24
+        Get-NBDCIMRackElevation -Id 24
 
         Returns elevation data for rack ID 24 (front face, JSON format)
 
     .EXAMPLE
-        Get-NBDDCIM RackElevation -Id 24 -Face rear
+        Get-NBDCIMRackElevation -Id 24 -Face rear
 
         Returns elevation data for the rear face of rack ID 24
 
     .EXAMPLE
-        Get-NBDDCIM RackElevation -Id 24 -Render svg
+        Get-NBDCIMRackElevation -Id 24 -Render svg
 
         Returns the native Netbox SVG rendering of the rack elevation
 
     .EXAMPLE
-        Get-NBDDCIM Rack -Name "Amsterdam-R01" | Get-NBDDCIM RackElevation
+        Get-NBDCIMRack -Name "Amsterdam-R01" | Get-NBDCIMRackElevation
 
         Pipeline support: get elevation for rack by name
 
     .EXAMPLE
-        Get-NBDDCIM RackElevation -Id 24 | Where-Object { $_.device }
+        Get-NBDCIMRackElevation -Id 24 | Where-Object { $_.device }
 
         Get only occupied rack units
 
     .EXAMPLE
-        Get-NBDDCIM RackElevation -Id 24 -All
+        Get-NBDCIMRackElevation -Id 24 -All
 
         Get all rack units without manual pagination
 

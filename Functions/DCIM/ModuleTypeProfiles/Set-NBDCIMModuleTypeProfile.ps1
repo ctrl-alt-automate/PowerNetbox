@@ -10,14 +10,14 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBDDCIM ModuleTypeProfile
+    Set-NBDCIMModuleTypeProfile
 
     Returns all DCIM ModuleTypeProfile objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Set-NBDDCIM ModuleTypeProfile {
+function Set-NBDCIMModuleTypeProfile {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     [OutputType([PSCustomObject])]
     param(

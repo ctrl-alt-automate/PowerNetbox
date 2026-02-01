@@ -10,14 +10,14 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBDDCIM ConsoleServerPortTemplate
+    Remove-NBDCIMConsoleServerPortTemplate
 
     Returns all DCIM ConsoleServerPortTemplate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Remove-NBDDCIM ConsoleServerPortTemplate {
+function Remove-NBDCIMConsoleServerPortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     [OutputType([PSCustomObject])]
     param(

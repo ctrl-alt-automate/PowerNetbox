@@ -1,4 +1,4 @@
-function New-NBDDCIM Region {
+function New-NBDCIMRegion {
 <#
     .SYNOPSIS
         Create a new region in Netbox
@@ -29,12 +29,12 @@ function New-NBDDCIM Region {
         Return the raw API response
 
     .EXAMPLE
-        New-NBDDCIM Region -Name "Europe" -Slug "europe"
+        New-NBDCIMRegion -Name "Europe" -Slug "europe"
 
         Creates a new region named "Europe"
 
     .EXAMPLE
-        New-NBDDCIM Region -Name "Netherlands" -Slug "netherlands" -Parent 1
+        New-NBDCIMRegion -Name "Netherlands" -Slug "netherlands" -Parent 1
 
         Creates a new region as a child of region 1
 #>

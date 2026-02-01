@@ -5,7 +5,7 @@
      Created on:    2020-10-02 15:52
      Created by:    Claussen
      Organization:  NEOnet
-     Filename:      New-NBDDCIM Site.ps1
+     Filename:      New-NBDCIMSite.ps1
     ===========================================================================
     .DESCRIPTION
         A description of the file.
@@ -13,7 +13,7 @@
 
 
 
-function New-NBDDCIM Site {
+function New-NBDCIMSite {
     <#
     .SYNOPSIS
         Create a new Site to Netbox
@@ -22,7 +22,7 @@ function New-NBDDCIM Site {
         Create a new Site to Netbox
 
     .EXAMPLE
-        New-NBDDCIM Site -name MySite
+        New-NBDCIMSite -name MySite
 
         Add new Site MySite on Netbox
 

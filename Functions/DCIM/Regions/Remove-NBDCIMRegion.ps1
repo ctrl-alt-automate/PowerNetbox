@@ -1,4 +1,4 @@
-function Remove-NBDDCIM Region {
+function Remove-NBDCIMRegion {
 <#
     .SYNOPSIS
         Remove a region from Netbox
@@ -13,12 +13,12 @@ function Remove-NBDDCIM Region {
         Return the raw API response
 
     .EXAMPLE
-        Remove-NBDDCIM Region -Id 1
+        Remove-NBDCIMRegion -Id 1
 
         Deletes region with ID 1
 
     .EXAMPLE
-        Get-NBDDCIM Region -Name "Old Region" | Remove-NBDDCIM Region
+        Get-NBDCIMRegion -Name "Old Region" | Remove-NBDCIMRegion
 
         Deletes regions matching the name "Old Region"
 #>

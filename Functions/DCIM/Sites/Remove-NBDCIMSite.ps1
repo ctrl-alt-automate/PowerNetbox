@@ -5,14 +5,14 @@
      Created on:    2020-10-02 15:52
      Created by:    Claussen
      Organization:  NEOnet
-     Filename:      New-NBDDCIM Site.ps1
+     Filename:      New-NBDCIMSite.ps1
     ===========================================================================
     .DESCRIPTION
         A description of the file.
 #>
 
 
-function Remove-NBDDCIM Site {
+function Remove-NBDCIMSite {
     <#
         .SYNOPSIS
             Remove a Site
@@ -21,12 +21,12 @@ function Remove-NBDDCIM Site {
             Remove a DCIM Site from Netbox
 
         .EXAMPLE
-            Remove-NBDDCIM Site -Id 1
+            Remove-NBDCIMSite -Id 1
 
             Remove DCM Site with id 1
 
         .EXAMPLE
-            Get-NBDDCIM Site -name My Site | Remove-NBDDCIM Site -confirm:$false
+            Get-NBDCIMSite -name My Site | Remove-NBDCIMSite -confirm:$false
 
             Remove DCM Site with name My Site without confirmation
 
@@ -49,7 +49,7 @@ function Remove-NBDDCIM Site {
 
     process {
         Write-Verbose "Removing DCIM Site"
-        $CurrentSite = Get-NBDDCIM Site -Id $Id -ErrorAction Stop
+        $CurrentSite = Get-NBDCIMSite -Id $Id -ErrorAction Stop
 
         if ($pscmdlet.ShouldProcess("$($CurrentSite.Name)/$($CurrentSite.Id)", "Remove Site")) {
             $Segments = [System.Collections.ArrayList]::new(@('dcim', 'sites', $CurrentSite.Id))

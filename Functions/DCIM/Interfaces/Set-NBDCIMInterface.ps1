@@ -10,14 +10,14 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBDDCIM Interface
+    Set-NBDCIMInterface
 
     Returns all DCIM Interface objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Set-NBDDCIM Interface {
+function Set-NBDCIMInterface {
     [CmdletBinding(ConfirmImpact = 'Medium',
         SupportsShouldProcess = $true)]
     [OutputType([pscustomobject])]
@@ -88,7 +88,7 @@ function Set-NBDDCIM Interface {
     process {
         Write-Verbose "Updating DCIM Interface"
         foreach ($InterfaceId in $Id) {
-            $CurrentInterface = Get-NBDDCIM Interface -Id $InterfaceId -ErrorAction Stop
+            $CurrentInterface = Get-NBDCIMInterface -Id $InterfaceId -ErrorAction Stop
 
             $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interfaces', $CurrentInterface.Id))
 

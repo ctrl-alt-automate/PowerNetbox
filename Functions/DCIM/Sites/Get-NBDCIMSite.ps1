@@ -9,12 +9,12 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBDDCIM Site
+    Get-NBDCIMSite
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Get-NBDDCIM Site {
+function Get-NBDCIMSite {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([pscustomobject])]
     param

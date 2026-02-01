@@ -60,20 +60,20 @@
     Array of tag IDs to assign to this front port.
 
 .EXAMPLE
-    New-NBDDCIM FrontPort -Device 42 -Name "Port 1" -Type "8p8c" -Rear_Port 100
+    New-NBDCIMFrontPort -Device 42 -Name "Port 1" -Type "8p8c" -Rear_Port 100
 
     Creates a new RJ-45 front port named 'Port 1' on device 42, mapped to rear port 100.
     Works on both Netbox 4.4 and 4.5+ (auto-converts on 4.5+).
 
 .EXAMPLE
-    New-NBDDCIM FrontPort -Device 42 -Name "Port 1" -Type "8p8c" -Rear_Ports @(
+    New-NBDCIMFrontPort -Device 42 -Name "Port 1" -Type "8p8c" -Rear_Ports @(
         @{ rear_port = 100; rear_port_position = 1 }
     )
 
     Creates a front port using the new Netbox 4.5+ port mapping format.
 
 .EXAMPLE
-    New-NBDDCIM FrontPort -Device 42 -Name "Fiber-01" -Type "lc" -Rear_Ports @(
+    New-NBDCIMFrontPort -Device 42 -Name "Fiber-01" -Type "lc" -Rear_Ports @(
         @{ rear_port = 100; rear_port_position = 1; position = 1 },
         @{ rear_port = 101; rear_port_position = 1; position = 2 }
     )
@@ -83,7 +83,7 @@
 .LINK
     https://netbox.readthedocs.io/en/stable/models/dcim/frontport/
 #>
-function New-NBDDCIM FrontPort {
+function New-NBDCIMFrontPort {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param

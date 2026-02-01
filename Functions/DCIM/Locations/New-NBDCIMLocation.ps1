@@ -1,4 +1,4 @@
-function New-NBDDCIM Location {
+function New-NBDCIMLocation {
 <#
     .SYNOPSIS
         Create a new location in Netbox
@@ -41,12 +41,12 @@ function New-NBDDCIM Location {
         Return the raw API response
 
     .EXAMPLE
-        New-NBDDCIM Location -Name "Server Room" -Slug "server-room" -Site 1
+        New-NBDCIMLocation -Name "Server Room" -Slug "server-room" -Site 1
 
         Creates a new location named "Server Room" at site 1
 
     .EXAMPLE
-        New-NBDDCIM Location -Name "Floor 2" -Slug "floor-2" -Site 1 -Status active
+        New-NBDCIMLocation -Name "Floor 2" -Slug "floor-2" -Site 1 -Status active
 
         Creates a new active location at site 1
 #>

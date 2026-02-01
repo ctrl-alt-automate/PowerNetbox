@@ -10,14 +10,14 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBDDCIM FrontPort
+    Remove-NBDCIMFrontPort
 
     Returns all DCIM FrontPort objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Remove-NBDDCIM FrontPort {
+function Remove-NBDCIMFrontPort {
 
     [CmdletBinding(ConfirmImpact = 'High',
         SupportsShouldProcess = $true)]
@@ -38,7 +38,7 @@ function Remove-NBDDCIM FrontPort {
     process {
         Write-Verbose "Removing DCIM Front Port"
         foreach ($FrontPortID in $Id) {
-            $CurrentPort = Get-NBDDCIM FrontPort -Id $FrontPortID -ErrorAction Stop
+            $CurrentPort = Get-NBDCIMFrontPort -Id $FrontPortID -ErrorAction Stop
 
             if ($Force -or $pscmdlet.ShouldProcess("Name: $($CurrentPort.Name) | ID: $($CurrentPort.Id)", "Remove")) {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'front-ports', $CurrentPort.Id))

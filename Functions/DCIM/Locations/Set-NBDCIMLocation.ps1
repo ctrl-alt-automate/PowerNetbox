@@ -1,4 +1,4 @@
-function Set-NBDDCIM Location {
+function Set-NBDCIMLocation {
 <#
     .SYNOPSIS
         Update a location in Netbox
@@ -43,12 +43,12 @@ function Set-NBDDCIM Location {
         Return the raw API response
 
     .EXAMPLE
-        Set-NBDDCIM Location -Id 1 -Name "Server Room A"
+        Set-NBDCIMLocation -Id 1 -Name "Server Room A"
 
         Updates the name of location 1
 
     .EXAMPLE
-        Set-NBDDCIM Location -Id 1 -Status retired
+        Set-NBDCIMLocation -Id 1 -Status retired
 
         Marks location 1 as retired
 #>
