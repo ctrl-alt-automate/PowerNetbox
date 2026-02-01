@@ -54,7 +54,7 @@ function New-NBContactRole {
         $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'contacts'))
         $Method = 'POST'
 
-        $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters
+        $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
 
         $URI = BuildNewURI -Segments $URIComponents.Segments
 

@@ -163,7 +163,7 @@ function Set-NBDCIMRack {
             if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentRack.Name)", "Update rack")) {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'racks', $CurrentRack.Id))
 
-                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force'
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'Force', 'Raw'
 
                 $URI = BuildNewURI -Segments $URIComponents.Segments
 

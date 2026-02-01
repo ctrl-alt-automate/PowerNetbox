@@ -70,7 +70,7 @@ function New-NBDCIMInterfaceConnection {
 
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interface-connections'))
 
-        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
 
         $URI = BuildNewURI -Segments $URIComponents.Segments
 

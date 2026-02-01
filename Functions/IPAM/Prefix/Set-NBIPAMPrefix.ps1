@@ -82,7 +82,7 @@ function Set-NBIPAMPrefix {
             $CurrentPrefix = Get-NBIPAMPrefix -Id $PrefixId -ErrorAction Stop
 
             if ($Force -or $PSCmdlet.ShouldProcess($CurrentPrefix.Prefix, 'Set')) {
-                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force'
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'Force', 'Raw'
 
                 $URI = BuildNewURI -Segments $URIComponents.Segments
 

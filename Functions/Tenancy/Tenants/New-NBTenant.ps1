@@ -55,7 +55,7 @@ function New-NBTenant {
         $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'tenants'))
         $Method = 'POST'
 
-        $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters
+        $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
 
         $URI = BuildNewURI -Segments $URIComponents.Segments
 

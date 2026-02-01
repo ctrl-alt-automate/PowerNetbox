@@ -65,7 +65,7 @@ function New-NBCircuit {
         $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuits'))
         $Method = 'POST'
 
-        $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters
+        $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
 
         $URI = BuildNewURI -Segments $URIComponents.Segments
 

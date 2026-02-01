@@ -119,7 +119,7 @@ function Set-NBDCIMSite {
             if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentSite.Name)", "Update site")) {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'sites', $CurrentSite.Id))
 
-                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force'
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'Force', 'Raw'
 
                 $URI = BuildNewURI -Segments $URIComponents.Segments
 

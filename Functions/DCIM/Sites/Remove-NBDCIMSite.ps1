@@ -56,7 +56,7 @@ function Remove-NBDCIMSite {
 
             $URI = BuildNewURI -Segments $Segments
 
-            InvokeNetboxRequest -URI $URI -Method DELETE
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
         }
     }
 

@@ -125,7 +125,7 @@ function Set-NBDCIMFrontPort {
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'front-ports', $CurrentPort.Id))
 
         # Use BuildURIComponents but skip port mapping params (handled separately)
-        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force', 'Rear_Ports', 'Rear_Port', 'Rear_Port_Position'
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'Force', 'Raw', 'Rear_Ports', 'Rear_Port', 'Rear_Port_Position'
 
         $URI = BuildNewURI -Segments $Segments
 

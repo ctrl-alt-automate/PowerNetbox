@@ -67,7 +67,9 @@ function Remove-NBIPAMAddress {
 
         # Common parameters
         [Parameter()]
-        [switch]$Force
+        [switch]$Force,
+
+        [switch]$Raw
     )
 
     begin {

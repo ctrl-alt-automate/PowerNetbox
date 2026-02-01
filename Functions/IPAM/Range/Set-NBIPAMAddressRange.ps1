@@ -67,7 +67,7 @@ function Set-NBIPAMAddressRange {
             $CurrentRange = Get-NBIPAMAddressRange -Id $RangeID -ErrorAction Stop
 
             if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentRange.Start_Address) - $($CurrentRange.End_Address)", 'Set')) {
-                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force'
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'Force', 'Raw'
 
                 $URI = BuildNewURI -Segments $URIComponents.Segments
 

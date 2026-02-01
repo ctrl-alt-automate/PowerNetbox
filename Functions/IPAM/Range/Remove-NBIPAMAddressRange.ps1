@@ -27,7 +27,9 @@ function Remove-NBIPAMAddressRange {
                    ValueFromPipelineByPropertyName = $true)]
         [uint64]$Id,
 
-        [switch]$Force
+        [switch]$Force,
+
+        [switch]$Raw
     )
 
     process {
@@ -40,7 +42,7 @@ function Remove-NBIPAMAddressRange {
             if ($Force -or $pscmdlet.ShouldProcess($CurrentRange.start_address, "Delete")) {
                 $URI = BuildNewURI -Segments $Segments
 
-                InvokeNetboxRequest -URI $URI -Method DELETE
+                InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
             }
         }
     }
