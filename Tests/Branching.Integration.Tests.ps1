@@ -73,7 +73,7 @@ Describe "Branching Plugin Integration Tests" -Tag 'Integration', 'Branching', '
         # Clean up any sites created during tests
         foreach ($siteId in $script:CreatedSites) {
             try {
-                Remove-NBDCIMSite -Id $siteId -Force -ErrorAction SilentlyContinue
+                Remove-NBDCIMSite -Id $siteId -Force -ErrorAction Stop
             } catch {
                 Write-Warning "Failed to clean up site ${siteId}: ${_}"
             }
@@ -234,9 +234,6 @@ Describe "Branching Plugin Integration Tests" -Tag 'Integration', 'Branching', '
             }
 
             # Sync should succeed (even if no changes in main)
-            $result = Sync-NBBranch -Id $script:SyncBranch.id -Confirm:$false
-
-            # Result should be the branch object or null (depending on API behavior)
             # The sync operation should not throw
             { Sync-NBBranch -Id $script:SyncBranch.id -Confirm:$false } | Should -Not -Throw
         }
@@ -353,13 +350,24 @@ Describe "Branching Plugin Integration Tests" -Tag 'Integration', 'Branching', '
         }
 
         It "Should support -WhatIf on Undo-NBBranchMerge" {
-            if (-not $script:MergeBranch) {
-                Set-ItResult -Skipped -Because "No merge branch created"
+            # Create a fresh branch and merge it for this test (self-contained)
+            $branchName = "ci-whatif-undo-$(Get-Date -Format 'yyyyMMddHHmmss')"
+            $branch = New-NBBranch -Name $branchName -Description "WhatIf undo test" -Force
+            $script:CreatedBranches += $branch.id
+            Merge-NBBranch -Id $branch.id -Confirm:$false
+
+            $mergedBranch = Get-NBBranch -Id $branch.id
+            if ($mergedBranch.status.value -ne 'merged') {
+                Set-ItResult -Skipped -Because "Branch for WhatIf undo test did not merge correctly."
                 return
             }
 
             # WhatIf should not actually revert
-            { Undo-NBBranchMerge -Id $script:MergeBranch.id -WhatIf } | Should -Not -Throw
+            { Undo-NBBranchMerge -Id $branch.id -WhatIf } | Should -Not -Throw
+
+            # Verify the branch is still merged
+            $branchAfter = Get-NBBranch -Id $branch.id
+            $branchAfter.status.value | Should -Be 'merged'
         }
     }
 
@@ -605,6 +613,7 @@ Describe "Branching Plugin Integration Tests" -Tag 'Integration', 'Branching', '
             # Create a branch specifically for deletion
             $deleteBranchName = "ci-pipe-delete-$(Get-Date -Format 'yyyyMMddHHmmss')"
             $deleteBranch = New-NBBranch -Name $deleteBranchName -Description "Pipeline delete test" -Force
+            $script:CreatedBranches += $deleteBranch.id
 
             # Delete via pipeline
             Get-NBBranch -Id $deleteBranch.id | Remove-NBBranch -Force
