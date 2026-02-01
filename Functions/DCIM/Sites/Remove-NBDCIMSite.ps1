@@ -50,9 +50,8 @@ function Remove-NBDCIMSite {
 
     process {
         Write-Verbose "Removing DCIM Site"
-        $CurrentSite = Get-NBDCIMSite -Id $Id -ErrorAction Stop
 
-        if ($pscmdlet.ShouldProcess("$("ID $Id")/$($Id)", "Remove Site")) {
+        if ($pscmdlet.ShouldProcess("ID $Id", "Remove Site")) {
             $Segments = [System.Collections.ArrayList]::new(@('dcim', 'sites', $Id))
 
             $URI = BuildNewURI -Segments $Segments
