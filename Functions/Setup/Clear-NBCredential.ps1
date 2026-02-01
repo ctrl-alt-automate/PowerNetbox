@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Manages redential in Netbox C module.
+    Clears the stored Netbox API credential.
 
 .DESCRIPTION
-    Manages redential in Netbox C module.
+    Clears the stored Netbox API credential.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw

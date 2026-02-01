@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Removes a CIMDeviceBay from Netbox D module.
+    Removes a DCIM DeviceBay from Netbox DCIM module.
 
 .DESCRIPTION
-    Removes a CIMDeviceBay from Netbox D module.
+    Removes a DCIM DeviceBay from Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBDCIMDeviceBay
 
-    Returns all CIMDeviceBay objects.
+    Returns all DCIM DeviceBay objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

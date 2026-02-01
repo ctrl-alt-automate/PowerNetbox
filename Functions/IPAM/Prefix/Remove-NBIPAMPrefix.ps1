@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Removes a PAMPrefix from Netbox I module.
+    Removes a IPAM Prefix from Netbox IPAM module.
 
 .DESCRIPTION
-    Removes a PAMPrefix from Netbox I module.
+    Removes a IPAM Prefix from Netbox IPAM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBIPAMPrefix
 
-    Returns all PAMPrefix objects.
+    Returns all IPAM Prefix objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

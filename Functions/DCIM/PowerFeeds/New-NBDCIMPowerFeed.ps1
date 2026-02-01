@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Creates a new CIMPowerFeed in Netbox D module.
+    Creates a new DCIM PowerFeed in Netbox DCIM module.
 
 .DESCRIPTION
-    Creates a new CIMPowerFeed in Netbox D module.
+    Creates a new DCIM PowerFeed in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBDCIMPowerFeed
 
-    Returns all CIMPowerFeed objects.
+    Returns all DCIM PowerFeed objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

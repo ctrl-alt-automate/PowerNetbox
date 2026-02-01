@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Creates a new ircuit in Netbox C module.
+    Creates a new Circuit in Netbox C module.
 
 .DESCRIPTION
-    Creates a new ircuit in Netbox C module.
+    Creates a new Circuit in Netbox C module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw

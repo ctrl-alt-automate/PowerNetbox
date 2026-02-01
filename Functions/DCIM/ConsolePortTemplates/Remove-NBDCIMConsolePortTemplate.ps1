@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Removes a CIMConsolePortTemplate from Netbox D module.
+    Removes a DCIM ConsolePortTemplate from Netbox DCIM module.
 
 .DESCRIPTION
-    Removes a CIMConsolePortTemplate from Netbox D module.
+    Removes a DCIM ConsolePortTemplate from Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBDCIMConsolePortTemplate
 
-    Returns all CIMConsolePortTemplate objects.
+    Returns all DCIM ConsolePortTemplate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

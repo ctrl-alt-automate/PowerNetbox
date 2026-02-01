@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Removes a PNIKEPolicy from Netbox V module.
+    Removes a VPN IKEPolicy from Netbox VPN module.
 
 .DESCRIPTION
-    Removes a PNIKEPolicy from Netbox V module.
+    Removes a VPN IKEPolicy from Netbox VPN module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBVPNIKEPolicy
 
-    Returns all PNIKEPolicy objects.
+    Returns all VPN IKEPolicy objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

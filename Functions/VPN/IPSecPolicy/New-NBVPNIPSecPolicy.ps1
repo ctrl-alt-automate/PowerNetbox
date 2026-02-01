@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Creates a new PNIPSecPolicy in Netbox V module.
+    Creates a new VPN IPSecPolicy in Netbox VPN module.
 
 .DESCRIPTION
-    Creates a new PNIPSecPolicy in Netbox V module.
+    Creates a new VPN IPSecPolicy in Netbox VPN module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBVPNIPSecPolicy
 
-    Returns all PNIPSecPolicy objects.
+    Returns all VPN IPSecPolicy objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

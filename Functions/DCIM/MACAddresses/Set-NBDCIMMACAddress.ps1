@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing CIMMACAddress in Netbox D module.
+    Updates an existing CIMMACAddress in Netbox DCIM module.
 
 .DESCRIPTION
-    Updates an existing CIMMACAddress in Netbox D module.
+    Updates an existing CIMMACAddress in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw

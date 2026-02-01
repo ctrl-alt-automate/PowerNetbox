@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Creates a new CIMConsoleServerPort in Netbox D module.
+    Creates a new DCIM ConsoleServerPort in Netbox DCIM module.
 
 .DESCRIPTION
-    Creates a new CIMConsoleServerPort in Netbox D module.
+    Creates a new DCIM ConsoleServerPort in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBDCIMConsoleServerPort
 
-    Returns all CIMConsoleServerPort objects.
+    Returns all DCIM ConsoleServerPort objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

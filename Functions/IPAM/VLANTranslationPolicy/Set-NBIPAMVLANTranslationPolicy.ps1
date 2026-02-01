@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing PAMVLANTranslationPolicy in Netbox I module.
+    Updates an existing IPAM VLANTranslationPolicy in Netbox IPAM module.
 
 .DESCRIPTION
-    Updates an existing PAMVLANTranslationPolicy in Netbox I module.
+    Updates an existing IPAM VLANTranslationPolicy in Netbox IPAM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBIPAMVLANTranslationPolicy
 
-    Returns all PAMVLANTranslationPolicy objects.
+    Returns all IPAM VLANTranslationPolicy objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

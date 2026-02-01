@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing CIMFrontPortTemplate in Netbox D module.
+    Updates an existing DCIM FrontPortTemplate in Netbox DCIM module.
 
 .DESCRIPTION
-    Updates an existing CIMFrontPortTemplate in Netbox D module.
+    Updates an existing DCIM FrontPortTemplate in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBDCIMFrontPortTemplate
 
-    Returns all CIMFrontPortTemplate objects.
+    Returns all DCIM FrontPortTemplate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

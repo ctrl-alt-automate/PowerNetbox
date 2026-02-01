@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing CIMInterfaceTemplate in Netbox D module.
+    Updates an existing DCIM InterfaceTemplate in Netbox DCIM module.
 
 .DESCRIPTION
-    Updates an existing CIMInterfaceTemplate in Netbox D module.
+    Updates an existing DCIM InterfaceTemplate in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBDCIMInterfaceTemplate
 
-    Returns all CIMInterfaceTemplate objects.
+    Returns all DCIM InterfaceTemplate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

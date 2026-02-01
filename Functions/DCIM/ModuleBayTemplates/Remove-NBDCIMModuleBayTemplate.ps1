@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Removes a CIMModuleBayTemplate from Netbox D module.
+    Removes a DCIM ModuleBayTemplate from Netbox DCIM module.
 
 .DESCRIPTION
-    Removes a CIMModuleBayTemplate from Netbox D module.
+    Removes a DCIM ModuleBayTemplate from Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBDCIMModuleBayTemplate
 
-    Returns all CIMModuleBayTemplate objects.
+    Returns all DCIM ModuleBayTemplate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

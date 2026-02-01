@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing PAMVLANGroup in Netbox I module.
+    Updates an existing IPAM VLANGroup in Netbox IPAM module.
 
 .DESCRIPTION
-    Updates an existing PAMVLANGroup in Netbox I module.
+    Updates an existing IPAM VLANGroup in Netbox IPAM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBIPAMVLANGroup
 
-    Returns all PAMVLANGroup objects.
+    Returns all IPAM VLANGroup objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

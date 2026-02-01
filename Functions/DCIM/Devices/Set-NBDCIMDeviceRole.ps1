@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing CIMDeviceRole in Netbox D module.
+    Updates an existing DCIM DeviceRole in Netbox DCIM module.
 
 .DESCRIPTION
-    Updates an existing CIMDeviceRole in Netbox D module.
+    Updates an existing DCIM DeviceRole in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBDCIMDeviceRole
 
-    Returns all CIMDeviceRole objects.
+    Returns all DCIM DeviceRole objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Removes a CIMFrontPortTemplate from Netbox D module.
+    Removes a DCIM FrontPortTemplate from Netbox DCIM module.
 
 .DESCRIPTION
-    Removes a CIMFrontPortTemplate from Netbox D module.
+    Removes a DCIM FrontPortTemplate from Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBDCIMFrontPortTemplate
 
-    Returns all CIMFrontPortTemplate objects.
+    Returns all DCIM FrontPortTemplate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

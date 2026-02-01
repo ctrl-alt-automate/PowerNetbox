@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Creates a new CIMVirtualDeviceContext in Netbox D module.
+    Creates a new DCIM VirtualDeviceContext in Netbox DCIM module.
 
 .DESCRIPTION
-    Creates a new CIMVirtualDeviceContext in Netbox D module.
+    Creates a new DCIM VirtualDeviceContext in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBDCIMVirtualDeviceContext
 
-    Returns all CIMVirtualDeviceContext objects.
+    Returns all DCIM VirtualDeviceContext objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

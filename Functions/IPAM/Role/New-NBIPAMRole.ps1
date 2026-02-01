@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Creates a new PAMRole in Netbox I module.
+    Creates a new IPAM Role in Netbox IPAM module.
 
 .DESCRIPTION
-    Creates a new PAMRole in Netbox I module.
+    Creates a new IPAM Role in Netbox IPAM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBIPAMRole
 
-    Returns all PAMRole objects.
+    Returns all IPAM Role objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

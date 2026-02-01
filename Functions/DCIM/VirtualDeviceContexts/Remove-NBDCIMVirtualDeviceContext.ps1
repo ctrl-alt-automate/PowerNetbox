@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Removes a CIMVirtualDeviceContext from Netbox D module.
+    Removes a DCIM VirtualDeviceContext from Netbox DCIM module.
 
 .DESCRIPTION
-    Removes a CIMVirtualDeviceContext from Netbox D module.
+    Removes a DCIM VirtualDeviceContext from Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBDCIMVirtualDeviceContext
 
-    Returns all CIMVirtualDeviceContext objects.
+    Returns all DCIM VirtualDeviceContext objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

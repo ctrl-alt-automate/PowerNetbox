@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing CIMPlatform in Netbox D module.
+    Updates an existing DCIM Platform in Netbox DCIM module.
 
 .DESCRIPTION
-    Updates an existing CIMPlatform in Netbox D module.
+    Updates an existing DCIM Platform in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBDCIMPlatform
 
-    Returns all CIMPlatform objects.
+    Returns all DCIM Platform objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

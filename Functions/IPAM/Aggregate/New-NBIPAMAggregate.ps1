@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Creates a new PAMAggregate in Netbox I module.
+    Creates a new IPAM Aggregate in Netbox IPAM module.
 
 .DESCRIPTION
-    Creates a new PAMAggregate in Netbox I module.
+    Creates a new IPAM Aggregate in Netbox IPAM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBIPAMAggregate
 
-    Returns all PAMAggregate objects.
+    Returns all IPAM Aggregate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

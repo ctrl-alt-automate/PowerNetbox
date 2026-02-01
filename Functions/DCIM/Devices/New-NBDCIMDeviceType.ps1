@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Creates a new CIMDeviceType in Netbox D module.
+    Creates a new DCIM DeviceType in Netbox DCIM module.
 
 .DESCRIPTION
-    Creates a new CIMDeviceType in Netbox D module.
+    Creates a new DCIM DeviceType in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBDCIMDeviceType
 
-    Returns all CIMDeviceType objects.
+    Returns all DCIM DeviceType objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

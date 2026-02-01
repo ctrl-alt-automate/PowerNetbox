@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Removes a CIMPowerPanel from Netbox D module.
+    Removes a DCIM PowerPanel from Netbox DCIM module.
 
 .DESCRIPTION
-    Removes a CIMPowerPanel from Netbox D module.
+    Removes a DCIM PowerPanel from Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBDCIMPowerPanel
 
-    Returns all CIMPowerPanel objects.
+    Returns all DCIM PowerPanel objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

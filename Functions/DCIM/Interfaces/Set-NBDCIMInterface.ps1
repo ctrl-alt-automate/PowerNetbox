@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing CIMInterface in Netbox D module.
+    Updates an existing DCIM Interface in Netbox DCIM module.
 
 .DESCRIPTION
-    Updates an existing CIMInterface in Netbox D module.
+    Updates an existing DCIM Interface in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBDCIMInterface
 
-    Returns all CIMInterface objects.
+    Returns all DCIM Interface objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

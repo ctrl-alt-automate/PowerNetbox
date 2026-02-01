@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Removes a PNIPSecProposal from Netbox V module.
+    Removes a VPN IPSecProposal from Netbox VPN module.
 
 .DESCRIPTION
-    Removes a PNIPSecProposal from Netbox V module.
+    Removes a VPN IPSecProposal from Netbox VPN module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBVPNIPSecProposal
 
-    Returns all PNIPSecProposal objects.
+    Returns all VPN IPSecProposal objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

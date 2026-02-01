@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing PNL2VPN in Netbox V module.
+    Updates an existing VPN L2VPN in Netbox VPN module.
 
 .DESCRIPTION
-    Updates an existing PNL2VPN in Netbox V module.
+    Updates an existing VPN L2VPN in Netbox VPN module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBVPNL2VPN
 
-    Returns all PNL2VPN objects.
+    Returns all VPN L2VPN objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

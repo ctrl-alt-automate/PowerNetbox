@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing PAMRole in Netbox I module.
+    Updates an existing IPAM Role in Netbox IPAM module.
 
 .DESCRIPTION
-    Updates an existing PAMRole in Netbox I module.
+    Updates an existing IPAM Role in Netbox IPAM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBIPAMRole
 
-    Returns all PAMRole objects.
+    Returns all IPAM Role objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Creates a new PNTunnel in Netbox V module.
+    Creates a new VPN Tunnel in Netbox VPN module.
 
 .DESCRIPTION
-    Creates a new PNTunnel in Netbox V module.
+    Creates a new VPN Tunnel in Netbox VPN module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBVPNTunnel
 
-    Returns all PNTunnel objects.
+    Returns all VPN Tunnel objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

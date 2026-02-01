@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Creates a new CIMPowerOutletTemplate in Netbox D module.
+    Creates a new DCIM PowerOutletTemplate in Netbox DCIM module.
 
 .DESCRIPTION
-    Creates a new CIMPowerOutletTemplate in Netbox D module.
+    Creates a new DCIM PowerOutletTemplate in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBDCIMPowerOutletTemplate
 
-    Returns all CIMPowerOutletTemplate objects.
+    Returns all DCIM PowerOutletTemplate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

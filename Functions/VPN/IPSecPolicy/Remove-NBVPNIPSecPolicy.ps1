@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Removes a PNIPSecPolicy from Netbox V module.
+    Removes a VPN IPSecPolicy from Netbox VPN module.
 
 .DESCRIPTION
-    Removes a PNIPSecPolicy from Netbox V module.
+    Removes a VPN IPSecPolicy from Netbox VPN module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBVPNIPSecPolicy
 
-    Returns all PNIPSecPolicy objects.
+    Returns all VPN IPSecPolicy objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

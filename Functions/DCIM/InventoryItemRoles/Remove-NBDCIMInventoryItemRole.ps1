@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Removes a CIMInventoryItemRole from Netbox D module.
+    Removes a DCIM InventoryItemRole from Netbox DCIM module.
 
 .DESCRIPTION
-    Removes a CIMInventoryItemRole from Netbox D module.
+    Removes a DCIM InventoryItemRole from Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBDCIMInventoryItemRole
 
-    Returns all CIMInventoryItemRole objects.
+    Returns all DCIM InventoryItemRole objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

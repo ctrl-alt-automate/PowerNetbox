@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Removes a CIMInterfaceConnection from Netbox D module.
+    Removes a DCIM InterfaceConnection from Netbox DCIM module.
 
 .DESCRIPTION
-    Removes a CIMInterfaceConnection from Netbox D module.
+    Removes a DCIM InterfaceConnection from Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBDCIMInterfaceConnection
 
-    Returns all CIMInterfaceConnection objects.
+    Returns all DCIM InterfaceConnection objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

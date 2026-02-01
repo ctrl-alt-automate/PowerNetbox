@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing nvokeParams in Netbox I module.
+    Sets additional parameters for Netbox API invocations.
 
 .DESCRIPTION
-    Updates an existing nvokeParams in Netbox I module.
+    Sets additional parameters for Netbox API invocations.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw

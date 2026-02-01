@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Removes a CIMDeviceType from Netbox D module.
+    Removes a DCIM DeviceType from Netbox DCIM module.
 
 .DESCRIPTION
-    Removes a CIMDeviceType from Netbox D module.
+    Removes a DCIM DeviceType from Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBDCIMDeviceType
 
-    Returns all CIMDeviceType objects.
+    Returns all DCIM DeviceType objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

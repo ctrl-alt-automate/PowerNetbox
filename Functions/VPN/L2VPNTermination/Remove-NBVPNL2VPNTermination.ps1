@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Removes a PNL2VPNTermination from Netbox V module.
+    Removes a VPN L2VPNTermination from Netbox VPN module.
 
 .DESCRIPTION
-    Removes a PNL2VPNTermination from Netbox V module.
+    Removes a VPN L2VPNTermination from Netbox VPN module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBVPNL2VPNTermination
 
-    Returns all PNL2VPNTermination objects.
+    Returns all VPN L2VPNTermination objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

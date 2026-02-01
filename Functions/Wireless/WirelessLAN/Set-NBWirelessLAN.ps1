@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing irelessLAN in Netbox W module.
+    Updates an existing WirelessLAN in Netbox W module.
 
 .DESCRIPTION
-    Updates an existing irelessLAN in Netbox W module.
+    Updates an existing WirelessLAN in Netbox W module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBWirelessLAN
 
-    Returns all irelessLAN objects.
+    Returns all WirelessLAN objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

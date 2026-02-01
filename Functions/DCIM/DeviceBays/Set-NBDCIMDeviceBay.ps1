@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing CIMDeviceBay in Netbox D module.
+    Updates an existing DCIM DeviceBay in Netbox DCIM module.
 
 .DESCRIPTION
-    Updates an existing CIMDeviceBay in Netbox D module.
+    Updates an existing DCIM DeviceBay in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBDCIMDeviceBay
 
-    Returns all CIMDeviceBay objects.
+    Returns all DCIM DeviceBay objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

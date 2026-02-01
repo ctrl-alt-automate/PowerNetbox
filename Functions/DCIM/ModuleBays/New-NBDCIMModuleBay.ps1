@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Creates a new CIMModuleBay in Netbox D module.
+    Creates a new DCIM ModuleBay in Netbox DCIM module.
 
 .DESCRIPTION
-    Creates a new CIMModuleBay in Netbox D module.
+    Creates a new DCIM ModuleBay in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBDCIMModuleBay
 
-    Returns all CIMModuleBay objects.
+    Returns all DCIM ModuleBay objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
