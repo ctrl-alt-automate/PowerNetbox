@@ -63,30 +63,16 @@ Describe "DCIM Racks Tests" -Tag 'DCIM', 'Racks' {
     }
 
     Context "Set-NBDCIMRack" {
-        BeforeAll {
-            Mock -CommandName "Get-NBDCIMRack" -ModuleName PowerNetbox -MockWith {
-                return [pscustomobject]@{ 'Id' = $Id; 'Name' = $Name }
-            }
-        }
-
         It "Should update a rack" {
             $Result = Set-NBDCIMRack -Id 1 -Name 'UpdatedRack' -Force
-            Should -Invoke -CommandName 'Get-NBDCIMRack' -Times 1 -Exactly -Scope 'It' -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'PATCH'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/racks/1/'
         }
     }
 
     Context "Remove-NBDCIMRack" {
-        BeforeAll {
-            Mock -CommandName "Get-NBDCIMRack" -ModuleName PowerNetbox -MockWith {
-                return [pscustomobject]@{ 'Id' = $Id; 'Name' = $Name }
-            }
-        }
-
         It "Should remove a rack" {
             $Result = Remove-NBDCIMRack -Id 10 -Force
-            Should -Invoke -CommandName 'Get-NBDCIMRack' -Times 1 -Exactly -Scope 'It' -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/racks/10/'
         }

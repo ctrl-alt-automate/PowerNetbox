@@ -90,15 +90,14 @@ function Set-NBDCIMInterface {
     process {
         Write-Verbose "Updating DCIM Interface"
         foreach ($InterfaceId in $Id) {
-            $CurrentInterface = Get-NBDCIMInterface -Id $InterfaceId -ErrorAction Stop
 
-            $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interfaces', $CurrentInterface.Id))
+            $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interfaces', $InterfaceId))
 
             $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
 
             $URI = BuildNewURI -Segments $Segments
 
-            if ($Force -or $pscmdlet.ShouldProcess("Interface ID $($CurrentInterface.Id)", "Set")) {
+            if ($Force -or $pscmdlet.ShouldProcess("Interface ID $InterfaceId", "Set")) {
                 InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method PATCH -Raw:$Raw
             }
         }

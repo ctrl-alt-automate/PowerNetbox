@@ -49,13 +49,12 @@ function Remove-NBContact {
     process {
         Write-Verbose "Removing Contact"
         foreach ($ContactId in $Id) {
-            $CurrentContact = Get-NBContact -Id $ContactId -ErrorAction Stop
 
-            $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'contacts', $CurrentContact.Id))
+            $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'contacts', $ContactId))
 
             $URI = BuildNewURI -Segments $Segments
 
-            if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentContact.Name)", 'Delete contact')) {
+            if ($Force -or $PSCmdlet.ShouldProcess("$("ID $ContactId")", 'Delete contact')) {
                 InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
             }
         }

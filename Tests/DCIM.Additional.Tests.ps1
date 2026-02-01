@@ -1250,12 +1250,6 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
     }
 
     Context "Set-NBDCIMFrontPort" {
-        BeforeAll {
-            Mock -CommandName "Get-NBDCIMFrontPort" -ModuleName PowerNetbox -MockWith {
-                return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'FP1' }
-            }
-        }
-
         It "Should update a front port" {
             $Result = Set-NBDCIMFrontPort -Id 1 -Description 'Updated' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'

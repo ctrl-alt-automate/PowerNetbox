@@ -64,9 +64,7 @@ function Set-NBContactRole {
 
             $URI = BuildNewURI -Segments $URIComponents.Segments
 
-            $CurrentContactRole = Get-NBContactRole -Id $ContactRoleId -ErrorAction Stop
-
-            if ($Force -or $PSCmdlet.ShouldProcess($CurrentContactRole.Name, 'Update contact role')) {
+            if ($Force -or $PSCmdlet.ShouldProcess("ID $ContactRoleId", 'Update contact role')) {
                 InvokeNetboxRequest -URI $URI -Method $Method -Body $URIComponents.Parameters -Raw:$Raw
             }
         }
