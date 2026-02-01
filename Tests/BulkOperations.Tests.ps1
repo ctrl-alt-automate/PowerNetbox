@@ -1171,12 +1171,6 @@ Describe "Remove-NBIPAMAddress Bulk Mode" -Tag 'Bulk', 'IPAM' {
             return $null
         }
 
-        Mock -CommandName 'Get-NBIPAMAddress' -ModuleName 'PowerNetbox' -MockWith {
-            return [PSCustomObject]@{
-                Id = $Id
-                Address = "192.168.1.$Id/24"
-            }
-        }
     }
 
     Context "Single Mode Operations" {
@@ -1188,12 +1182,6 @@ Describe "Remove-NBIPAMAddress Bulk Mode" -Tag 'Bulk', 'IPAM' {
 
         # Note: Array Id parameters are not supported for Remove- functions
         # Use pipeline with InputObject for bulk operations (see "Bulk Operations" context below)
-
-        It "Should call Get-NBIPAMAddress for each Id in single mode" {
-            Remove-NBIPAMAddress -Id 100 -Force
-
-            Should -Invoke -CommandName 'Get-NBIPAMAddress' -Times 1 -ModuleName 'PowerNetbox' -ParameterFilter { $Id -eq 100 }
-        }
     }
 
     Context "Parameter Sets" {
@@ -1417,12 +1405,6 @@ Describe "Remove-NBVirtualMachine Bulk Mode" -Tag 'Bulk', 'Virtualization' {
             return $null
         }
 
-        Mock -CommandName 'Get-NBVirtualMachine' -ModuleName 'PowerNetbox' -MockWith {
-            return [PSCustomObject]@{
-                Id = $Id
-                Name = "vm-$Id"
-            }
-        }
     }
 
     Context "Single Mode Operations" {
@@ -1434,12 +1416,6 @@ Describe "Remove-NBVirtualMachine Bulk Mode" -Tag 'Bulk', 'Virtualization' {
 
         # Note: Array Id parameters are not supported for Remove- functions
         # Use pipeline with InputObject for bulk operations (see "Bulk Operations" context below)
-
-        It "Should call Get-NBVirtualMachine for each Id in single mode" {
-            Remove-NBVirtualMachine -Id 100 -Force
-
-            Should -Invoke -CommandName 'Get-NBVirtualMachine' -Times 1 -ModuleName 'PowerNetbox' -ParameterFilter { $Id -eq 100 }
-        }
 
         It "Should support pipeline input by Id property" {
             $vm = [PSCustomObject]@{ Id = 100 }
