@@ -39,8 +39,9 @@ function Remove-NBDCIMSite {
     (
         [Parameter(Mandatory = $true,
             ValueFromPipelineByPropertyName = $true)]
-        [uint64]$Id
+        [uint64]$Id,
 
+        [switch]$Raw
     )
 
     begin {
@@ -56,7 +57,7 @@ function Remove-NBDCIMSite {
 
             $URI = BuildNewURI -Segments $Segments
 
-            InvokeNetboxRequest -URI $URI -Method DELETE
+            InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
         }
     }
 

@@ -40,7 +40,9 @@ function Set-NBVirtualMachineInterface {
 
         [uint64]$Virtual_Machine,
 
-        [switch]$Force
+        [switch]$Force,
+
+        [switch]$Raw
     )
 
     begin {
@@ -56,11 +58,11 @@ function Set-NBVirtualMachineInterface {
             $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'interfaces', $CurrentVMI.Id))
 
             if ($Force -or $pscmdlet.ShouldProcess("Interface $($CurrentVMI.Id) on VM $($CurrentVMI.Virtual_Machine.Name)", "Set")) {
-                $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force'
+                $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'Force'
 
                 $URI = BuildNewURI -Segments $URIComponents.Segments
 
-                InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method PATCH
+                InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method PATCH -Raw:$Raw
             }
         }
     }

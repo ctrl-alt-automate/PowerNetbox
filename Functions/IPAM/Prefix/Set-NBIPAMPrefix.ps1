@@ -50,7 +50,9 @@ function Set-NBIPAMPrefix {
 
         [uint64]$Owner,
 
-        [switch]$Force
+        [switch]$Force,
+
+        [switch]$Raw
     )
 
     begin {
@@ -82,11 +84,11 @@ function Set-NBIPAMPrefix {
             $CurrentPrefix = Get-NBIPAMPrefix -Id $PrefixId -ErrorAction Stop
 
             if ($Force -or $PSCmdlet.ShouldProcess($CurrentPrefix.Prefix, 'Set')) {
-                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force'
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'Force'
 
                 $URI = BuildNewURI -Segments $URIComponents.Segments
 
-                InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method $Method
+                InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method $Method -Raw:$Raw
             }
         }
     }

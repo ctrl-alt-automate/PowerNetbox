@@ -108,7 +108,9 @@ function Set-NBDCIMSite {
 
         [uint64]$Owner,
 
-        [switch]$Force
+        [switch]$Force,
+
+        [switch]$Raw
     )
 
     process {
@@ -119,11 +121,11 @@ function Set-NBDCIMSite {
             if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentSite.Name)", "Update site")) {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'sites', $CurrentSite.Id))
 
-                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force'
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'Force'
 
                 $URI = BuildNewURI -Segments $URIComponents.Segments
 
-                InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method PATCH
+                InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method PATCH -Raw:$Raw
             }
         }
     }
