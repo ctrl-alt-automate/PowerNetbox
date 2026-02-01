@@ -33,6 +33,7 @@ function Remove-NBOwnerGroup {
     )
 
     process {
+        Write-Verbose "Removing Owner Group"
         $Segments = [System.Collections.ArrayList]::new(@('users', 'owner-groups', $Id))
         $URI = BuildNewURI -Segments $Segments
 

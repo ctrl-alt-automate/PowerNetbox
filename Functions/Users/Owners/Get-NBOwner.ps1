@@ -90,6 +90,7 @@ function Get-NBOwner {
     )
 
     process {
+        Write-Verbose "Retrieving Owner"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {
                 foreach ($i in $Id) {

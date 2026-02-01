@@ -46,6 +46,7 @@ function Set-NBOwnerGroup {
     )
 
     process {
+        Write-Verbose "Updating Owner Group"
         $Segments = [System.Collections.ArrayList]::new(@('users', 'owner-groups', $Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
         $URI = BuildNewURI -Segments $URIComponents.Segments

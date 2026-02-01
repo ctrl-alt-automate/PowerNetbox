@@ -38,7 +38,7 @@ function Undo-NBBranchMerge {
     )
 
     process {
-        Write-Verbose "Processing Undo-NBBranch Merge"
+        Write-Verbose "Processing Undo-NBBranchMerge"
         CheckNetboxIsConnected
 
         $Segments = [System.Collections.ArrayList]::new(@('plugins', 'branching', 'branches', $Id, 'revert'))
