@@ -138,8 +138,31 @@ function Get-NBDCIMRackElevation {
             Write-Verbose "Requesting SVG rendering from Netbox"
 
             $creds = Get-NBCredential
+            $token = $creds.GetNetworkCredential().Password
+
+            # Detect token format: v2 tokens start with 'nbt_' and use Bearer auth
+            $authHeader = if ($token -match '^nbt_') {
+                "Bearer $token"
+            }
+            else {
+                "Token $token"
+            }
+
             $headers = @{
-                'Authorization' = "Token {0}" -f $creds.GetNetworkCredential().Password
+                'Authorization' = $authHeader
+            }
+
+            # Add branch context header if in a branch
+            if ($script:NetboxConfig.BranchStack -and $script:NetboxConfig.BranchStack.Count -gt 0) {
+                $branchContext = $script:NetboxConfig.BranchStack.Peek()
+                $schemaId = if ($branchContext -is [PSCustomObject]) {
+                    $branchContext.SchemaId
+                }
+                else {
+                    $branchContext
+                }
+                $headers['X-NetBox-Branch'] = $schemaId
+                Write-Verbose "Using branch context: $schemaId"
             }
 
             $invokeParams = Get-NBInvokeParams
