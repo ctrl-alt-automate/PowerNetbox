@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Creates a new CIMPowerPanel in Netbox D module.
+    Creates a new DCIM PowerPanel in Netbox DCIM module.
 
 .DESCRIPTION
-    Creates a new CIMPowerPanel in Netbox D module.
+    Creates a new DCIM PowerPanel in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBDCIMPowerPanel
+    New-NBDDCIM PowerPanel
 
-    Returns all CIMPowerPanel objects.
+    Returns all DCIM PowerPanel objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function New-NBDCIMPowerPanel {
+function New-NBDDCIM PowerPanel {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param(

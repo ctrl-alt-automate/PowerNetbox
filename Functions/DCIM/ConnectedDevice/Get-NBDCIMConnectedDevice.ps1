@@ -9,12 +9,12 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBDCIMConnectedDevice
+    Get-NBDDCIM ConnectedDevice
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Get-NBDCIMConnectedDevice {
+function Get-NBDDCIM ConnectedDevice {
     [CmdletBinding()]
     [OutputType([PSCustomObject])]
     param(

@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Creates a new CIMRearPortTemplate in Netbox D module.
+    Creates a new DCIM RearPortTemplate in Netbox DCIM module.
 
 .DESCRIPTION
-    Creates a new CIMRearPortTemplate in Netbox D module.
+    Creates a new DCIM RearPortTemplate in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBDCIMRearPortTemplate
+    New-NBDDCIM RearPortTemplate
 
-    Returns all CIMRearPortTemplate objects.
+    Returns all DCIM RearPortTemplate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function New-NBDCIMRearPortTemplate {
+function New-NBDDCIM RearPortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param(

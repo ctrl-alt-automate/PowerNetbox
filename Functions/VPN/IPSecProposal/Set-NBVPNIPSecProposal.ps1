@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing PNIPSecProposal in Netbox V module.
+    Updates an existing VPN IPSecProposal in Netbox VPN module.
 
 .DESCRIPTION
-    Updates an existing PNIPSecProposal in Netbox V module.
+    Updates an existing VPN IPSecProposal in Netbox VPN module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBVPNIPSecProposal
 
-    Returns all PNIPSecProposal objects.
+    Returns all VPN IPSecProposal objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

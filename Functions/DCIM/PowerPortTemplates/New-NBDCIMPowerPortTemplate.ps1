@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Creates a new CIMPowerPortTemplate in Netbox D module.
+    Creates a new DCIM PowerPortTemplate in Netbox DCIM module.
 
 .DESCRIPTION
-    Creates a new CIMPowerPortTemplate in Netbox D module.
+    Creates a new DCIM PowerPortTemplate in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBDCIMPowerPortTemplate
+    New-NBDDCIM PowerPortTemplate
 
-    Returns all CIMPowerPortTemplate objects.
+    Returns all DCIM PowerPortTemplate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function New-NBDCIMPowerPortTemplate {
+function New-NBDDCIM PowerPortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param(

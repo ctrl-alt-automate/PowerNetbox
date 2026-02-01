@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Removes a CIMRackRole from Netbox D module.
+    Removes a DCIM RackRole from Netbox DCIM module.
 
 .DESCRIPTION
-    Removes a CIMRackRole from Netbox D module.
+    Removes a DCIM RackRole from Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBDCIMRackRole
+    Remove-NBDDCIM RackRole
 
-    Returns all CIMRackRole objects.
+    Returns all DCIM RackRole objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Remove-NBDCIMRackRole {
+function Remove-NBDDCIM RackRole {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     [OutputType([PSCustomObject])]
     param(

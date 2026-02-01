@@ -62,12 +62,12 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBDCIMInterface -Device 42 -Name "eth0" -Type "1000base-t"
+    New-NBDDCIM Interface -Device 42 -Name "eth0" -Type "1000base-t"
 
     Creates a new 1GbE interface named 'eth0' on device ID 42.
 
 .EXAMPLE
-    New-NBDCIMInterface -Device 42 -Name "bond0" -Type "lag" -Description "Server uplink LAG"
+    New-NBDDCIM Interface -Device 42 -Name "bond0" -Type "lag" -Description "Server uplink LAG"
 
     Creates a new LAG interface for link aggregation.
 
@@ -75,19 +75,19 @@
     $interfaces = 0..47 | ForEach-Object {
         [PSCustomObject]@{Device=42; Name="eth$_"; Type="1000base-t"}
     }
-    $interfaces | New-NBDCIMInterface -BatchSize 50 -Force
+    $interfaces | New-NBDDCIM Interface -BatchSize 50 -Force
 
     Creates 48 interfaces in bulk using a single API call.
 
 .EXAMPLE
-    Import-Csv interfaces.csv | New-NBDCIMInterface -BatchSize 100 -Force
+    Import-Csv interfaces.csv | New-NBDDCIM Interface -BatchSize 100 -Force
 
     Bulk import interfaces from CSV file.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/models/dcim/interface/
 #>
-function New-NBDCIMInterface {
+function New-NBDDCIM Interface {
     [CmdletBinding(SupportsShouldProcess = $true,
         ConfirmImpact = 'Low',
         DefaultParameterSetName = 'Single')]

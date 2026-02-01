@@ -9,7 +9,7 @@ function Export-NBRackElevation {
         - Markdown: GitHub-flavored markdown table
         - SVG: Native Netbox SVG rendering (passthrough)
 
-        Supports pipeline input from Get-NBDCIMRack for batch exports.
+        Supports pipeline input from Get-NBDDCIM Rack for batch exports.
 
     .PARAMETER Id
         The ID of the rack to export (required, pipeline support)
@@ -54,7 +54,7 @@ function Export-NBRackElevation {
         Returns markdown table as string
 
     .EXAMPLE
-        Get-NBDCIMRack -Site "Amsterdam" | Export-NBRackElevation -Format HTML -Path "./racks/"
+        Get-NBDDCIM Rack -Site "Amsterdam" | Export-NBRackElevation -Format HTML -Path "./racks/"
 
         Exports all racks in Amsterdam site to HTML files
 
@@ -130,7 +130,7 @@ function Export-NBRackElevation {
         Write-Verbose "Exporting rack elevation for rack ID $Id as $Format"
 
         # Get rack info for title
-        $rack = Get-NBDCIMRack -Id $Id
+        $rack = Get-NBDDCIM Rack -Id $Id
         if (-not $rack) {
             Write-Error "Rack with ID $Id not found"
             return
@@ -152,7 +152,7 @@ function Export-NBRackElevation {
 
             if ($UseNativeRenderer -and $Format -in @('SVG', 'HTML')) {
                 # Get native SVG from Netbox
-                $svgContent = Get-NBDCIMRackElevation -Id $Id -Face $currentFace -Render svg
+                $svgContent = Get-NBDDCIM RackElevation -Id $Id -Face $currentFace -Render svg
 
                 if ($Format -eq 'SVG') {
                     $svgContent
@@ -165,7 +165,7 @@ function Export-NBRackElevation {
             }
             else {
                 # Get elevation data (use -All for automatic pagination)
-                $elevation = Get-NBDCIMRackElevation -Id $Id -Face $currentFace -All
+                $elevation = Get-NBDDCIM RackElevation -Id $Id -Face $currentFace -All
 
                 # Filter to whole U positions only (remove half-U entries)
                 $elevation = $elevation | Where-Object { $_.id -eq [Math]::Floor($_.id) }

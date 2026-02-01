@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing PAMAddressRange in Netbox I module.
+    Updates an existing IPAM AddressRange in Netbox IPAM module.
 
 .DESCRIPTION
-    Updates an existing PAMAddressRange in Netbox I module.
+    Updates an existing IPAM AddressRange in Netbox IPAM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBIPAMAddressRange
 
-    Returns all PAMAddressRange objects.
+    Returns all IPAM AddressRange objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

@@ -9,12 +9,12 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBDCIMFrontPort
+    Get-NBDDCIM FrontPort
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Get-NBDCIMFrontPort {
+function Get-NBDDCIM FrontPort {
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param

@@ -50,15 +50,15 @@
     Return the raw API response.
 
 .EXAMPLE
-    Set-NBDCIMCable -Id 1 -Label 'Patch-001'
+    Set-NBDDCIM Cable -Id 1 -Label 'Patch-001'
 
 .EXAMPLE
-    Set-NBDCIMCable -Id 1 -Cable_Profile '1c4p-4c1p' -Status 'connected'
+    Set-NBDDCIM Cable -Id 1 -Cable_Profile '1c4p-4c1p' -Status 'connected'
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Set-NBDCIMCable {
+function Set-NBDDCIM Cable {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     [OutputType([PSCustomObject])]
     param(

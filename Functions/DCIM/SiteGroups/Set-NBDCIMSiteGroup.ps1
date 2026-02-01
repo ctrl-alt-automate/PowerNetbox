@@ -1,4 +1,4 @@
-function Set-NBDCIMSiteGroup {
+function Set-NBDDCIM SiteGroup {
 <#
     .SYNOPSIS
         Update a site group in Netbox
@@ -31,12 +31,12 @@ function Set-NBDCIMSiteGroup {
         Return the raw API response
 
     .EXAMPLE
-        Set-NBDCIMSiteGroup -Id 1 -Name "Production Sites"
+        Set-NBDDCIM SiteGroup -Id 1 -Name "Production Sites"
 
         Updates the name of site group 1
 
     .EXAMPLE
-        Set-NBDCIMSiteGroup -Id 1 -Description "All production sites"
+        Set-NBDDCIM SiteGroup -Id 1 -Description "All production sites"
 
         Updates the description of site group 1
 #>

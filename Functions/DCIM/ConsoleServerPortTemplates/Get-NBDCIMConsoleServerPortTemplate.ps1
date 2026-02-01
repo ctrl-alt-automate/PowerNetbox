@@ -9,12 +9,12 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBDCIMConsoleServerPortTemplate
+    Get-NBDDCIM ConsoleServerPortTemplate
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Get-NBDCIMConsoleServerPortTemplate {
+function Get-NBDDCIM ConsoleServerPortTemplate {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([PSCustomObject])]
     param(

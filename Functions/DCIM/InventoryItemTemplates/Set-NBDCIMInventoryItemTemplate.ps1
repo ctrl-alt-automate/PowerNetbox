@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Updates an existing CIMInventoryItemTemplate in Netbox D module.
+    Updates an existing DCIM InventoryItemTemplate in Netbox DCIM module.
 
 .DESCRIPTION
-    Updates an existing CIMInventoryItemTemplate in Netbox D module.
+    Updates an existing DCIM InventoryItemTemplate in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBDCIMInventoryItemTemplate
+    Set-NBDDCIM InventoryItemTemplate
 
-    Returns all CIMInventoryItemTemplate objects.
+    Returns all DCIM InventoryItemTemplate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Set-NBDCIMInventoryItemTemplate {
+function Set-NBDDCIM InventoryItemTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     [OutputType([PSCustomObject])]
     param(

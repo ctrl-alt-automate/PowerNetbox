@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Creates a new CIMPowerOutlet in Netbox D module.
+    Creates a new DCIM PowerOutlet in Netbox DCIM module.
 
 .DESCRIPTION
-    Creates a new CIMPowerOutlet in Netbox D module.
+    Creates a new DCIM PowerOutlet in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBDCIMPowerOutlet
+    New-NBDDCIM PowerOutlet
 
-    Returns all CIMPowerOutlet objects.
+    Returns all DCIM PowerOutlet objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function New-NBDCIMPowerOutlet {
+function New-NBDDCIM PowerOutlet {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param(

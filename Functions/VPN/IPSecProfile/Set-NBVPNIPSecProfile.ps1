@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing PNIPSecProfile in Netbox V module.
+    Updates an existing VPN IPSecProfile in Netbox VPN module.
 
 .DESCRIPTION
-    Updates an existing PNIPSecProfile in Netbox V module.
+    Updates an existing VPN IPSecProfile in Netbox VPN module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBVPNIPSecProfile
 
-    Returns all PNIPSecProfile objects.
+    Returns all VPN IPSecProfile objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

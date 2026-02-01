@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing ostScheme in Netbox H module.
+    Sets the HTTP scheme (http/https) for Netbox API connections.
 
 .DESCRIPTION
-    Updates an existing ostScheme in Netbox H module.
+    Sets the HTTP scheme (http/https) for Netbox API connections.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw

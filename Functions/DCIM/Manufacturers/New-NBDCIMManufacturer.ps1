@@ -1,4 +1,4 @@
-function New-NBDCIMManufacturer {
+function New-NBDDCIM Manufacturer {
 <#
     .SYNOPSIS
         Create a new manufacturer in Netbox
@@ -22,12 +22,12 @@ function New-NBDCIMManufacturer {
         Return the raw API response
 
     .EXAMPLE
-        New-NBDCIMManufacturer -Name "Cisco" -Slug "cisco"
+        New-NBDDCIM Manufacturer -Name "Cisco" -Slug "cisco"
 
         Creates a new manufacturer named "Cisco"
 
     .EXAMPLE
-        New-NBDCIMManufacturer -Name "Dell Technologies" -Slug "dell" -Description "Server and storage manufacturer"
+        New-NBDDCIM Manufacturer -Name "Dell Technologies" -Slug "dell" -Description "Server and storage manufacturer"
 
         Creates a new manufacturer with description
 #>

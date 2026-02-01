@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Creates a new CIMVirtualDeviceContext in Netbox D module.
+    Creates a new DCIM VirtualDeviceContext in Netbox DCIM module.
 
 .DESCRIPTION
-    Creates a new CIMVirtualDeviceContext in Netbox D module.
+    Creates a new DCIM VirtualDeviceContext in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBDCIMVirtualDeviceContext
+    New-NBDDCIM VirtualDeviceContext
 
-    Returns all CIMVirtualDeviceContext objects.
+    Returns all DCIM VirtualDeviceContext objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function New-NBDCIMVirtualDeviceContext {
+function New-NBDDCIM VirtualDeviceContext {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param(

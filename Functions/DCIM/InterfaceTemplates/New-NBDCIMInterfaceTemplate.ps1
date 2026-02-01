@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Creates a new CIMInterfaceTemplate in Netbox D module.
+    Creates a new DCIM InterfaceTemplate in Netbox DCIM module.
 
 .DESCRIPTION
-    Creates a new CIMInterfaceTemplate in Netbox D module.
+    Creates a new DCIM InterfaceTemplate in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBDCIMInterfaceTemplate
+    New-NBDDCIM InterfaceTemplate
 
-    Returns all CIMInterfaceTemplate objects.
+    Returns all DCIM InterfaceTemplate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function New-NBDCIMInterfaceTemplate {
+function New-NBDDCIM InterfaceTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param(

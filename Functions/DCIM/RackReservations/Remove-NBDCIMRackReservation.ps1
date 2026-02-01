@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Removes a CIMRackReservation from Netbox D module.
+    Removes a DCIM RackReservation from Netbox DCIM module.
 
 .DESCRIPTION
-    Removes a CIMRackReservation from Netbox D module.
+    Removes a DCIM RackReservation from Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBDCIMRackReservation
+    Remove-NBDDCIM RackReservation
 
-    Returns all CIMRackReservation objects.
+    Returns all DCIM RackReservation objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Remove-NBDCIMRackReservation {
+function Remove-NBDDCIM RackReservation {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     [OutputType([PSCustomObject])]
     param(

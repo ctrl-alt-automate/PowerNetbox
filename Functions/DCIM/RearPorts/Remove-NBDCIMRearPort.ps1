@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Removes a CIMRearPort from Netbox D module.
+    Removes a DCIM RearPort from Netbox DCIM module.
 
 .DESCRIPTION
-    Removes a CIMRearPort from Netbox D module.
+    Removes a DCIM RearPort from Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBDCIMRearPort
+    Remove-NBDDCIM RearPort
 
-    Returns all CIMRearPort objects.
+    Returns all DCIM RearPort objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Remove-NBDCIMRearPort {
+function Remove-NBDDCIM RearPort {
 
     [CmdletBinding(ConfirmImpact = 'High',
         SupportsShouldProcess = $true)]
@@ -38,7 +38,7 @@ function Remove-NBDCIMRearPort {
     process {
         Write-Verbose "Removing DCIM Rear Port"
         foreach ($RearPortID in $Id) {
-            $CurrentPort = Get-NBDCIMRearPort -Id $RearPortID -ErrorAction Stop
+            $CurrentPort = Get-NBDDCIM RearPort -Id $RearPortID -ErrorAction Stop
 
             if ($Force -or $pscmdlet.ShouldProcess("Name: $($CurrentPort.Name) | ID: $($CurrentPort.Id)", "Remove")) {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'rear-ports', $CurrentPort.Id))

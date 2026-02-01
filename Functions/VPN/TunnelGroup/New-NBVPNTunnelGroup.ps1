@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Creates a new PNTunnelGroup in Netbox V module.
+    Creates a new VPN TunnelGroup in Netbox VPN module.
 
 .DESCRIPTION
-    Creates a new PNTunnelGroup in Netbox V module.
+    Creates a new VPN TunnelGroup in Netbox VPN module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBVPNTunnelGroup
 
-    Returns all PNTunnelGroup objects.
+    Returns all VPN TunnelGroup objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

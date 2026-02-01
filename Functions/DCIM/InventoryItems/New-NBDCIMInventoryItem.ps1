@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Creates a new CIMInventoryItem in Netbox D module.
+    Creates a new DCIM InventoryItem in Netbox DCIM module.
 
 .DESCRIPTION
-    Creates a new CIMInventoryItem in Netbox D module.
+    Creates a new DCIM InventoryItem in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBDCIMInventoryItem
+    New-NBDDCIM InventoryItem
 
-    Returns all CIMInventoryItem objects.
+    Returns all DCIM InventoryItem objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function New-NBDCIMInventoryItem {
+function New-NBDDCIM InventoryItem {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param(

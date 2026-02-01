@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Creates a new CIMPlatform in Netbox D module.
+    Creates a new DCIM Platform in Netbox DCIM module.
 
 .DESCRIPTION
-    Creates a new CIMPlatform in Netbox D module.
+    Creates a new DCIM Platform in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBDCIMPlatform
+    New-NBDDCIM Platform
 
-    Returns all CIMPlatform objects.
+    Returns all DCIM Platform objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function New-NBDCIMPlatform {
+function New-NBDDCIM Platform {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param(

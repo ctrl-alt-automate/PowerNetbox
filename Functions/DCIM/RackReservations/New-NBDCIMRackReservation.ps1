@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Creates a new CIMRackReservation in Netbox D module.
+    Creates a new DCIM RackReservation in Netbox DCIM module.
 
 .DESCRIPTION
-    Creates a new CIMRackReservation in Netbox D module.
+    Creates a new DCIM RackReservation in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBDCIMRackReservation
+    New-NBDDCIM RackReservation
 
-    Returns all CIMRackReservation objects.
+    Returns all DCIM RackReservation objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function New-NBDCIMRackReservation {
+function New-NBDDCIM RackReservation {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param(

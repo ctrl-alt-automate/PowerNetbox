@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing PAMRIR in Netbox I module.
+    Updates an existing IPAM RIR in Netbox IPAM module.
 
 .DESCRIPTION
-    Updates an existing PAMRIR in Netbox I module.
+    Updates an existing IPAM RIR in Netbox IPAM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBIPAMRIR
 
-    Returns all PAMRIR objects.
+    Returns all IPAM RIR objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

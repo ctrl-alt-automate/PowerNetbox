@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing ostPort in Netbox H module.
+    Sets the port for Netbox API connections.
 
 .DESCRIPTION
-    Updates an existing ostPort in Netbox H module.
+    Sets the port for Netbox API connections.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw

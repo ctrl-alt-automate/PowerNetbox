@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Updates an existing CIMModule in Netbox D module.
+    Updates an existing DCIM Module in Netbox DCIM module.
 
 .DESCRIPTION
-    Updates an existing CIMModule in Netbox D module.
+    Updates an existing DCIM Module in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBDCIMModule
+    Set-NBDDCIM Module
 
-    Returns all CIMModule objects.
+    Returns all DCIM Module objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Set-NBDCIMModule {
+function Set-NBDDCIM Module {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     [OutputType([PSCustomObject])]
     param(

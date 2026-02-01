@@ -1,4 +1,4 @@
-function Get-NBDCIMLocation {
+function Get-NBDDCIM Location {
 <#
     .SYNOPSIS
         Get locations from Netbox
@@ -44,17 +44,17 @@ function Get-NBDCIMLocation {
         Return the raw API response
 
     .EXAMPLE
-        Get-NBDCIMLocation
+        Get-NBDDCIM Location
 
         Returns all locations
 
     .EXAMPLE
-        Get-NBDCIMLocation -Site_Id 1
+        Get-NBDDCIM Location -Site_Id 1
 
         Returns all locations at site with ID 1
 
     .EXAMPLE
-        Get-NBDCIMLocation -Name "Server Room"
+        Get-NBDDCIM Location -Name "Server Room"
 
         Returns locations matching the name "Server Room"
 #>

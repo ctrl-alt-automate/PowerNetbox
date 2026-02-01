@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Removes a PAMRIR from Netbox I module.
+    Removes a IPAM RIR from Netbox IPAM module.
 
 .DESCRIPTION
-    Removes a PAMRIR from Netbox I module.
+    Removes a IPAM RIR from Netbox IPAM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBIPAMRIR
 
-    Returns all PAMRIR objects.
+    Returns all IPAM RIR objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

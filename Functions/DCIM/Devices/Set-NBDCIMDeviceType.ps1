@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Updates an existing CIMDeviceType in Netbox D module.
+    Updates an existing DCIM DeviceType in Netbox DCIM module.
 
 .DESCRIPTION
-    Updates an existing CIMDeviceType in Netbox D module.
+    Updates an existing DCIM DeviceType in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBDCIMDeviceType
+    Set-NBDDCIM DeviceType
 
-    Returns all CIMDeviceType objects.
+    Returns all DCIM DeviceType objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Set-NBDCIMDeviceType {
+function Set-NBDDCIM DeviceType {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     [OutputType([PSCustomObject])]
     param(

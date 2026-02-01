@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Removes a CIMConsoleServerPortTemplate from Netbox D module.
+    Removes a DCIM ConsoleServerPortTemplate from Netbox DCIM module.
 
 .DESCRIPTION
-    Removes a CIMConsoleServerPortTemplate from Netbox D module.
+    Removes a DCIM ConsoleServerPortTemplate from Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBDCIMConsoleServerPortTemplate
+    Remove-NBDDCIM ConsoleServerPortTemplate
 
-    Returns all CIMConsoleServerPortTemplate objects.
+    Returns all DCIM ConsoleServerPortTemplate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Remove-NBDCIMConsoleServerPortTemplate {
+function Remove-NBDDCIM ConsoleServerPortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     [OutputType([PSCustomObject])]
     param(

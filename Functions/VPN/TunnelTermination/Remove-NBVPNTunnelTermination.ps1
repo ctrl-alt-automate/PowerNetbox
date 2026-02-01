@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Removes a PNTunnelTermination from Netbox V module.
+    Removes a VPN TunnelTermination from Netbox VPN module.
 
 .DESCRIPTION
-    Removes a PNTunnelTermination from Netbox V module.
+    Removes a VPN TunnelTermination from Netbox VPN module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBVPNTunnelTermination
 
-    Returns all PNTunnelTermination objects.
+    Returns all VPN TunnelTermination objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

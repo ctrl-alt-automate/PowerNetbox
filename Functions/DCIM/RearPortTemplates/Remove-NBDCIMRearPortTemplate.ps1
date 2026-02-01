@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Removes a CIMRearPortTemplate from Netbox D module.
+    Removes a DCIM RearPortTemplate from Netbox DCIM module.
 
 .DESCRIPTION
-    Removes a CIMRearPortTemplate from Netbox D module.
+    Removes a DCIM RearPortTemplate from Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBDCIMRearPortTemplate
+    Remove-NBDDCIM RearPortTemplate
 
-    Returns all CIMRearPortTemplate objects.
+    Returns all DCIM RearPortTemplate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Remove-NBDCIMRearPortTemplate {
+function Remove-NBDDCIM RearPortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     [OutputType([PSCustomObject])]
     param(

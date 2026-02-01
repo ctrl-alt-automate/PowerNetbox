@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Creates a new CIMDeviceRole in Netbox D module.
+    Creates a new DCIM DeviceRole in Netbox DCIM module.
 
 .DESCRIPTION
-    Creates a new CIMDeviceRole in Netbox D module.
+    Creates a new DCIM DeviceRole in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBDCIMDeviceRole
+    New-NBDDCIM DeviceRole
 
-    Returns all CIMDeviceRole objects.
+    Returns all DCIM DeviceRole objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function New-NBDCIMDeviceRole {
+function New-NBDDCIM DeviceRole {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param(

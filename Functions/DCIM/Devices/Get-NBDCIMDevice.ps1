@@ -33,33 +33,33 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Get-NBDCIMDevice
+    Get-NBDDCIM Device
     Returns the first page of devices (config_context excluded by default).
 
 .EXAMPLE
-    Get-NBDCIMDevice -All
+    Get-NBDDCIM Device -All
     Returns all devices with automatic pagination.
 
 .EXAMPLE
-    Get-NBDCIMDevice -Brief
+    Get-NBDDCIM Device -Brief
     Returns minimal device representations for dropdowns.
 
 .EXAMPLE
-    Get-NBDCIMDevice -Fields 'id','name','status','site.name'
+    Get-NBDDCIM Device -Fields 'id','name','status','site.name'
     Returns only the specified fields.
 
 .EXAMPLE
-    Get-NBDCIMDevice -IncludeConfigContext
+    Get-NBDDCIM Device -IncludeConfigContext
     Returns devices with config_context included.
 
 .EXAMPLE
-    Get-NBDCIMDevice -All -PageSize 200 -Verbose
+    Get-NBDDCIM Device -All -PageSize 200 -Verbose
     Returns all devices with 200 items per request, showing progress.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Get-NBDCIMDevice {
+function Get-NBDDCIM Device {
     [CmdletBinding()]
     [OutputType([PSCustomObject])]
     #region Parameters

@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing PAMFHRPGroupAssignment in Netbox I module.
+    Updates an existing IPAM FHRPGroupAssignment in Netbox IPAM module.
 
 .DESCRIPTION
-    Updates an existing PAMFHRPGroupAssignment in Netbox I module.
+    Updates an existing IPAM FHRPGroupAssignment in Netbox IPAM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBIPAMFHRPGroupAssignment
 
-    Returns all PAMFHRPGroupAssignment objects.
+    Returns all IPAM FHRPGroupAssignment objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Removes a CIMMACAddress from Netbox D module.
+    Removes a CIMMACAddress from Netbox DCIM module.
 
 .DESCRIPTION
-    Removes a CIMMACAddress from Netbox D module.
+    Removes a CIMMACAddress from Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw

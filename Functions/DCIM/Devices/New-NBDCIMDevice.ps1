@@ -42,7 +42,7 @@
     The owner ID for object ownership (Netbox 4.5+ only).
 
 .EXAMPLE
-    New-NBDCIMDevice -Name "server01" -Role 1 -Device_Type 1 -Site 1
+    New-NBDDCIM Device -Name "server01" -Role 1 -Device_Type 1 -Site 1
 
     Creates a single device named "server01".
 
@@ -51,14 +51,14 @@
         [PSCustomObject]@{Name="srv01"; Role=1; Device_Type=1; Site=1}
         [PSCustomObject]@{Name="srv02"; Role=1; Device_Type=1; Site=1}
     )
-    $devices | New-NBDCIMDevice -BatchSize 50
+    $devices | New-NBDDCIM Device -BatchSize 50
 
     Creates multiple devices using bulk API operations.
 
 .EXAMPLE
     1..100 | ForEach-Object {
         [PSCustomObject]@{Name="srv$_"; Role=1; Device_Type=1; Site=1}
-    } | New-NBDCIMDevice -BatchSize 50 -Force
+    } | New-NBDDCIM Device -BatchSize 50 -Force
 
     Creates 100 devices in 2 bulk API calls, skipping confirmation.
 
@@ -70,7 +70,7 @@
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 
-function New-NBDCIMDevice {
+function New-NBDDCIM Device {
     [CmdletBinding(SupportsShouldProcess = $true,
         ConfirmImpact = 'Low',
         DefaultParameterSetName = 'Single')]

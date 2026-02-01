@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Updates an existing CIMFrontPortTemplate in Netbox D module.
+    Updates an existing DCIM FrontPortTemplate in Netbox DCIM module.
 
 .DESCRIPTION
-    Updates an existing CIMFrontPortTemplate in Netbox D module.
+    Updates an existing DCIM FrontPortTemplate in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBDCIMFrontPortTemplate
+    Set-NBDDCIM FrontPortTemplate
 
-    Returns all CIMFrontPortTemplate objects.
+    Returns all DCIM FrontPortTemplate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Set-NBDCIMFrontPortTemplate {
+function Set-NBDDCIM FrontPortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     [OutputType([PSCustomObject])]
     param(

@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Creates a new CIMModuleTypeProfile in Netbox D module.
+    Creates a new DCIM ModuleTypeProfile in Netbox DCIM module.
 
 .DESCRIPTION
-    Creates a new CIMModuleTypeProfile in Netbox D module.
+    Creates a new DCIM ModuleTypeProfile in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBDCIMModuleTypeProfile
+    New-NBDDCIM ModuleTypeProfile
 
-    Returns all CIMModuleTypeProfile objects.
+    Returns all DCIM ModuleTypeProfile objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function New-NBDCIMModuleTypeProfile {
+function New-NBDDCIM ModuleTypeProfile {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param(

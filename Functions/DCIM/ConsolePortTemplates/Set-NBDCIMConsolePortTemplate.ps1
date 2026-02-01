@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Updates an existing CIMConsolePortTemplate in Netbox D module.
+    Updates an existing DCIM ConsolePortTemplate in Netbox DCIM module.
 
 .DESCRIPTION
-    Updates an existing CIMConsolePortTemplate in Netbox D module.
+    Updates an existing DCIM ConsolePortTemplate in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBDCIMConsolePortTemplate
+    Set-NBDDCIM ConsolePortTemplate
 
-    Returns all CIMConsolePortTemplate objects.
+    Returns all DCIM ConsolePortTemplate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function Set-NBDCIMConsolePortTemplate {
+function Set-NBDDCIM ConsolePortTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     [OutputType([PSCustomObject])]
     param(

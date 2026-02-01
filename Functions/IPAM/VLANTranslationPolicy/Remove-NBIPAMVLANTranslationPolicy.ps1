@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Removes a PAMVLANTranslationPolicy from Netbox I module.
+    Removes a IPAM VLANTranslationPolicy from Netbox IPAM module.
 
 .DESCRIPTION
-    Removes a PAMVLANTranslationPolicy from Netbox I module.
+    Removes a IPAM VLANTranslationPolicy from Netbox IPAM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBIPAMVLANTranslationPolicy
 
-    Returns all PAMVLANTranslationPolicy objects.
+    Returns all IPAM VLANTranslationPolicy objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

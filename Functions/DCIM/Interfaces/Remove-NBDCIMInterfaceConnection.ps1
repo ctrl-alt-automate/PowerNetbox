@@ -1,24 +1,24 @@
 <#
 .SYNOPSIS
-    Removes a CIMInterfaceConnection from Netbox D module.
+    Removes a DCIM InterfaceConnection from Netbox DCIM module.
 
 .DESCRIPTION
-    Removes a CIMInterfaceConnection from Netbox D module.
+    Removes a DCIM InterfaceConnection from Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Remove-NBDCIMInterfaceConnection
+    Remove-NBDDCIM InterfaceConnection
 
-    Returns all CIMInterfaceConnection objects.
+    Returns all DCIM InterfaceConnection objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 
-function Remove-NBDCIMInterfaceConnection {
+function Remove-NBDDCIM InterfaceConnection {
     [CmdletBinding(ConfirmImpact = 'High',
                    SupportsShouldProcess = $true)]
     [OutputType([void])]
@@ -38,7 +38,7 @@ function Remove-NBDCIMInterfaceConnection {
     process {
         Write-Verbose "Removing DCIM Interface Connection"
         foreach ($ConnectionID in $Id) {
-            $CurrentConnection = Get-NBDCIMInterfaceConnection -Id $ConnectionID -ErrorAction Stop
+            $CurrentConnection = Get-NBDDCIM InterfaceConnection -Id $ConnectionID -ErrorAction Stop
 
             if ($Force -or $pscmdlet.ShouldProcess("Connection ID $($ConnectionID.Id)", "REMOVE")) {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interface-connections', $CurrentConnection.Id))

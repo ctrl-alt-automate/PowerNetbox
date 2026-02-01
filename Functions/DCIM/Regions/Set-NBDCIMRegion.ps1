@@ -1,4 +1,4 @@
-function Set-NBDCIMRegion {
+function Set-NBDDCIM Region {
 <#
     .SYNOPSIS
         Update a region in Netbox
@@ -31,12 +31,12 @@ function Set-NBDCIMRegion {
         Return the raw API response
 
     .EXAMPLE
-        Set-NBDCIMRegion -Id 1 -Name "Western Europe"
+        Set-NBDDCIM Region -Id 1 -Name "Western Europe"
 
         Updates the name of region 1
 
     .EXAMPLE
-        Set-NBDCIMRegion -Id 1 -Description "Western European countries"
+        Set-NBDDCIM Region -Id 1 -Description "Western European countries"
 
         Updates the description of region 1
 #>

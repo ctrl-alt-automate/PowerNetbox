@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Creates a new CIMDeviceBayTemplate in Netbox D module.
+    Creates a new DCIM DeviceBayTemplate in Netbox DCIM module.
 
 .DESCRIPTION
-    Creates a new CIMDeviceBayTemplate in Netbox D module.
+    Creates a new DCIM DeviceBayTemplate in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBDCIMDeviceBayTemplate
+    New-NBDDCIM DeviceBayTemplate
 
-    Returns all CIMDeviceBayTemplate objects.
+    Returns all DCIM DeviceBayTemplate objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function New-NBDCIMDeviceBayTemplate {
+function New-NBDDCIM DeviceBayTemplate {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param(

@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing PNTunnelGroup in Netbox V module.
+    Updates an existing VPN TunnelGroup in Netbox VPN module.
 
 .DESCRIPTION
-    Updates an existing PNTunnelGroup in Netbox V module.
+    Updates an existing VPN TunnelGroup in Netbox VPN module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBVPNTunnelGroup
 
-    Returns all PNTunnelGroup objects.
+    Returns all VPN TunnelGroup objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

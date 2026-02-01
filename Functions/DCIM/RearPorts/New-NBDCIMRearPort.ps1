@@ -53,17 +53,17 @@
     Array of tag IDs to assign to this rear port.
 
 .EXAMPLE
-    New-NBDCIMRearPort -Device 42 -Name "Rear 1" -Type "8p8c"
+    New-NBDDCIM RearPort -Device 42 -Name "Rear 1" -Type "8p8c"
 
     Creates a new RJ-45 rear port named 'Rear 1' on device 42.
 
 .EXAMPLE
-    New-NBDCIMRearPort -Device 42 -Name "Fiber-Rear-01" -Type "lc" -Positions 2
+    New-NBDDCIM RearPort -Device 42 -Name "Fiber-Rear-01" -Type "lc" -Positions 2
 
     Creates a new LC fiber rear port that supports 2 front port positions.
 
 .EXAMPLE
-    New-NBDCIMRearPort -Device 42 -Name "Rear 1" -Type "8p8c" -Front_Ports @(
+    New-NBDDCIM RearPort -Device 42 -Name "Rear 1" -Type "8p8c" -Front_Ports @(
         @{ front_port = 100; front_port_position = 1; position = 1 }
     )
 
@@ -71,7 +71,7 @@
 
 .EXAMPLE
     1..24 | ForEach-Object {
-        New-NBDCIMRearPort -Device 42 -Name "Rear $_" -Type "8p8c"
+        New-NBDDCIM RearPort -Device 42 -Name "Rear $_" -Type "8p8c"
     }
 
     Creates 24 rear ports on a patch panel.
@@ -79,7 +79,7 @@
 .LINK
     https://netbox.readthedocs.io/en/stable/models/dcim/rearport/
 #>
-function New-NBDCIMRearPort {
+function New-NBDDCIM RearPort {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param

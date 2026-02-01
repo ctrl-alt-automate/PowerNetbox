@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Creates a new CIMMACAddress in Netbox D module.
+    Creates a new CIMMACAddress in Netbox DCIM module.
 
 .DESCRIPTION
-    Creates a new CIMMACAddress in Netbox D module.
+    Creates a new CIMMACAddress in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw

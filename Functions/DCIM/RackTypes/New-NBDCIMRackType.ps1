@@ -1,23 +1,23 @@
 <#
 .SYNOPSIS
-    Creates a new CIMRackType in Netbox D module.
+    Creates a new DCIM RackType in Netbox DCIM module.
 
 .DESCRIPTION
-    Creates a new CIMRackType in Netbox D module.
+    Creates a new DCIM RackType in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBDCIMRackType
+    New-NBDDCIM RackType
 
-    Returns all CIMRackType objects.
+    Returns all DCIM RackType objects.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-function New-NBDCIMRackType {
+function New-NBDDCIM RackType {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param(
