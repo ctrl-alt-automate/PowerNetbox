@@ -57,7 +57,9 @@ function New-NBDCIMInterfaceConnection {
         [uint64]$Interface_B,
 
         [ValidateSet('connected', 'planned', IgnoreCase = $true)]
-        [string]$Connection_Status
+        [string]$Connection_Status,
+
+        [switch]$Raw
     )
 
     process {
@@ -75,7 +77,7 @@ function New-NBDCIMInterfaceConnection {
         $URI = BuildNewURI -Segments $URIComponents.Segments
 
         if ($PSCmdlet.ShouldProcess("Interface $Interface_A <-> Interface $Interface_B", 'Create connection')) {
-            InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method POST
+            InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method POST -Raw:$Raw
         }
     }
 }

@@ -91,7 +91,7 @@ function Remove-NBIPAMAddress {
 
                     $IPURI = BuildNewURI -Segments $IPSegments
 
-                    InvokeNetboxRequest -URI $IPURI -Method DELETE
+                    InvokeNetboxRequest -URI $IPURI -Method DELETE -Raw:$Raw
                 }
             }
         }

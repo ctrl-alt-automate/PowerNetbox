@@ -91,7 +91,7 @@ function Remove-NBVirtualMachine {
 
                     $VMURI = BuildNewURI -Segments $VMSegments
 
-                    InvokeNetboxRequest -URI $VMURI -Method DELETE
+                    InvokeNetboxRequest -URI $VMURI -Method DELETE -Raw:$Raw
                 }
             }
         }
