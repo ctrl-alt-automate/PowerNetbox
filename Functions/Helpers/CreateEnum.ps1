@@ -1,6 +1,7 @@
 ﻿
 function CreateEnum {
     [CmdletBinding()]
+    [OutputType([void])]
     param
     (
         [Parameter(Mandatory = $true)]
@@ -20,7 +21,6 @@ public enum $EnumName
 }
 "@
     if (-not ([System.Management.Automation.PSTypeName]"$EnumName").Type) {
-        #Write-Host $definition -ForegroundColor Green
         Add-Type -TypeDefinition $definition -PassThru:$PassThru
     } else {
         Write-Warning "EnumType $EnumName already exists."

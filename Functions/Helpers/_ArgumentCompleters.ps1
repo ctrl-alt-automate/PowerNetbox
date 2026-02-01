@@ -9,6 +9,8 @@ function Get-NBArgumentCompleter {
     .SYNOPSIS
         Creates a script block for argument completion with the given values.
     #>
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'ValidValues', Justification = 'Used in closure')]
+    [OutputType([scriptblock])]
     param(
         [string[]]$ValidValues
     )
@@ -433,7 +435,9 @@ function Register-NBArgumentCompleters {
         Call this function to enable tab completion for common parameter values
         across all PowerNetbox functions.
     #>
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', '', Justification = 'Registers multiple completers')]
     [CmdletBinding()]
+    [OutputType([void])]
     param()
 
     # Get all PowerNetbox commands
