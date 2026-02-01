@@ -294,12 +294,10 @@ Describe "Tenancy Module Tests" -Tag 'Tenancy' {
     }
 
     Context "New-NBContactRole" {
-        # Note: New-NBContactRole has a bug - it POSTs to /contacts/ instead of /contact-roles/
         It "Should create a contact role" {
             $Result = New-NBContactRole -Name 'Manager' -Slug 'manager'
             $Result.Method | Should -Be 'POST'
-            # Bug: Currently posts to /contacts/ instead of /contact-roles/
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/tenancy/contacts/'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/tenancy/contact-roles/'
             $bodyObj = $Result.Body | ConvertFrom-Json
             $bodyObj.name | Should -Be 'Manager'
             $bodyObj.slug | Should -Be 'manager'
