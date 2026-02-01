@@ -60,13 +60,7 @@ function Remove-NBVirtualMachineInterface {
 
             $URI = BuildNewURI -Segments $Segments
 
-            # Build descriptive target for confirmation
-            $Target = "$("ID $InterfaceId")"
-            if ($CurrentInterface.Virtual_Machine) {
-                $Target = "Interface '$("ID $InterfaceId")' on VM '$($CurrentInterface.Virtual_Machine.Name)'"
-            }
-
-            if ($Force -or $PSCmdlet.ShouldProcess($Target, 'Delete interface')) {
+            if ($Force -or $PSCmdlet.ShouldProcess("ID: $InterfaceId", 'Delete interface')) {
                 InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
             }
         }

@@ -82,7 +82,7 @@ function Set-NBIPAMPrefix {
 
             Write-Verbose "Obtaining Prefix from ID $PrefixId"
 
-            if ($Force -or $PSCmdlet.ShouldProcess($CurrentPrefix.Prefix, 'Set')) {
+            if ($Force -or $PSCmdlet.ShouldProcess("ID: $PrefixId", 'Set')) {
                 $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'Force'
 
                 $URI = BuildNewURI -Segments $URIComponents.Segments
