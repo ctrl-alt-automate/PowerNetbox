@@ -30,7 +30,8 @@
     Body template (Jinja2).
 
 .PARAMETER Secret
-    Secret for HMAC signature.
+    Secret for HMAC signature. Use SecureString for security.
+    Example: $secret = ConvertTo-SecureString "my-secret" -AsPlainText -Force
 
 .PARAMETER Ssl_Verification
     Whether to verify SSL certificates.
@@ -72,7 +73,7 @@ function Set-NBWebhook {
 
         [string]$Body_Template,
 
-        [string]$Secret,
+        [securestring]$Secret,
 
         [bool]$Ssl_Verification,
 
@@ -86,8 +87,13 @@ function Set-NBWebhook {
     process {
         Write-Verbose "Updating Webhook"
         $Segments = [System.Collections.ArrayList]::new(@('extras', 'webhooks', $Id))
-        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'Secret'
         $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        # Convert SecureString secret to plaintext for API
+        if ($PSBoundParameters.ContainsKey('Secret')) {
+            $URIComponents.Parameters['secret'] = [System.Net.NetworkCredential]::new('', $Secret).Password
+        }
 
         if ($PSCmdlet.ShouldProcess($Id, 'Update Webhook')) {
             InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw

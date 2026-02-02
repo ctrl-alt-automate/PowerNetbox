@@ -179,7 +179,15 @@ function InvokeNetboxRequest {
     $splat += Get-NBInvokeParams
 
     if ($Body) {
-        Write-Verbose "BODY: $($Body | ConvertTo-Json -Compress)"
+        # Sanitize sensitive fields before logging
+        $sensitiveFields = @('secret', 'password', 'key', 'token')
+        $sanitizedBody = $Body.Clone()
+        foreach ($field in $sensitiveFields) {
+            if ($sanitizedBody.ContainsKey($field) -and $sanitizedBody[$field]) {
+                $sanitizedBody[$field] = '***REDACTED***'
+            }
+        }
+        Write-Verbose "BODY: $($sanitizedBody | ConvertTo-Json -Compress)"
         $null = $splat.Add('Body', ($Body | ConvertTo-Json -Compress -Depth 10))
     }
 
