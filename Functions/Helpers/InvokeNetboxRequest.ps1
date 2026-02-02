@@ -179,7 +179,18 @@ function InvokeNetboxRequest {
     $splat += Get-NBInvokeParams
 
     if ($Body) {
-        Write-Verbose "BODY: $($Body | ConvertTo-Json -Compress)"
+        # Sanitize sensitive fields before logging (handles both hashtables and PSCustomObjects)
+        $sensitiveFields = @('secret', 'password', 'key', 'token')
+        $sanitizedBody = @{}
+        foreach ($prop in $Body.PSObject.Properties) {
+            if ($sensitiveFields -contains $prop.Name -and $prop.Value) {
+                $sanitizedBody[$prop.Name] = '***REDACTED***'
+            }
+            else {
+                $sanitizedBody[$prop.Name] = $prop.Value
+            }
+        }
+        Write-Verbose "BODY: $($sanitizedBody | ConvertTo-Json -Compress)"
         $null = $splat.Add('Body', ($Body | ConvertTo-Json -Compress -Depth 10))
     }
 
