@@ -137,10 +137,8 @@ function Get-NBDCIMRackElevation {
             # Use Invoke-WebRequest directly to get raw SVG string (Invoke-RestMethod parses as XML)
             Write-Verbose "Requesting SVG rendering from Netbox"
 
-            $creds = Get-NBCredential
-            $headers = @{
-                'Authorization' = "Token {0}" -f $creds.GetNetworkCredential().Password
-            }
+            # Get authorization and branch context headers using centralized helper
+            $headers = Get-NBRequestHeaders
 
             $invokeParams = Get-NBInvokeParams
             $splat = @{
