@@ -106,7 +106,7 @@ function Connect-NBAPI {
     # This handles http:// redirects when connecting via https://, which some misconfigured
     # Netbox instances return. Only enabled when user has already accepted reduced security.
     $psVersion = $PSVersionTable.PSVersion
-    if ($SkipCertificateCheck -and ($psVersion.Major -gt 7 -or ($psVersion.Major -eq 7 -and $psVersion.Minor -ge 4))) {
+    if ($SkipCertificateCheck -and $psVersion -ge [version]'7.4') {
         $invokeParams['AllowInsecureRedirect'] = $true
         Write-Verbose "AllowInsecureRedirect enabled (SkipCertificateCheck is set)"
     }
