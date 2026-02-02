@@ -269,22 +269,30 @@ Import-Module PowerNetbox
 
 ## Documentation
 
-- **[Wiki](https://github.com/ctrl-alt-automate/PowerNetbox/wiki)** - Getting started, examples, and troubleshooting
+- **[Documentation](docs/README.md)** - Getting started, examples, and troubleshooting
 - **[Netbox API Docs](https://netbox.readthedocs.io/en/stable/rest-api/overview/)** - Official Netbox API documentation
 - **[GitHub Issues](https://github.com/ctrl-alt-automate/PowerNetbox/issues)** - Report bugs or request features
 
-### Wiki Highlights
+### Guides
 
-| Page | Description |
-|------|-------------|
-| [Getting Started](https://github.com/ctrl-alt-automate/PowerNetbox/wiki/Getting-Started) | Installation and first steps |
-| [Common Workflows](https://github.com/ctrl-alt-automate/PowerNetbox/wiki/Common-Workflows) | Bulk import, VMware sync, reporting |
-| [Bulk Operations](https://github.com/ctrl-alt-automate/PowerNetbox/wiki/Bulk-Operations) | High-performance batch processing |
-| [DCIM Examples](https://github.com/ctrl-alt-automate/PowerNetbox/wiki/DCIM-Examples) | Sites, devices, racks, cables |
-| [IPAM Examples](https://github.com/ctrl-alt-automate/PowerNetbox/wiki/IPAM-Examples) | IP addresses, prefixes, VLANs |
-| [Branching](https://github.com/ctrl-alt-automate/PowerNetbox/wiki/Branching) | Stage changes with branching plugin |
-| [Compatibility](https://github.com/ctrl-alt-automate/PowerNetbox/wiki/Compatibility) | Netbox version support matrix |
-| [Troubleshooting](https://github.com/ctrl-alt-automate/PowerNetbox/wiki/Troubleshooting) | Common issues and solutions |
+| Guide | Description |
+|-------|-------------|
+| [Getting Started](docs/guides/Getting-Started.md) | Installation and first steps |
+| [Common Workflows](docs/guides/Common-Workflows.md) | Bulk import, VMware sync, reporting |
+| [Bulk Operations](docs/guides/Bulk-Operations.md) | High-performance batch processing |
+| [DCIM Examples](docs/guides/DCIM-Examples.md) | Sites, devices, racks, cables |
+| [IPAM Examples](docs/guides/IPAM-Examples.md) | IP addresses, prefixes, VLANs |
+| [Branching](docs/guides/Branching.md) | Stage changes with branching plugin |
+| [Compatibility](docs/guides/Compatibility.md) | Netbox version support matrix |
+| [Troubleshooting](docs/guides/Troubleshooting.md) | Common issues and solutions |
+
+### Architecture
+
+| Document | Description |
+|----------|-------------|
+| [Architecture Overview](docs/CODEMAPS/INDEX.md) | Module structure and design |
+| [Functions by Module](docs/CODEMAPS/Functions.md) | Complete function reference |
+| [Helper Functions](docs/CODEMAPS/Helpers.md) | Internal utilities |
 
 ## Requirements
 
@@ -294,7 +302,7 @@ Import-Module PowerNetbox
 | PowerShell Core | 7.0+ |
 | Netbox | 4.1+ (tested with 4.5.0) |
 
-> **Version Compatibility:** See the [Compatibility Guide](https://github.com/ctrl-alt-automate/PowerNetbox/wiki/Compatibility) for detailed information about supported Netbox versions and API differences.
+> **Version Compatibility:** See the [Compatibility Guide](docs/guides/Compatibility.md) for detailed information about supported Netbox versions and API differences.
 
 ### Platform Support
 
