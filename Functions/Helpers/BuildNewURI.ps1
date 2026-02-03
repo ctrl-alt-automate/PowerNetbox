@@ -48,9 +48,9 @@ function BuildNewURI {
 
     # Validate and sanitize segments (defense-in-depth)
     $sanitizedSegments = $Segments.ForEach({
-        $segment = $_.trim('/').trim()
-        # Warn if segment contains unexpected characters (not alphanumeric, hyphen, underscore, or digits)
-        if ($segment -and $segment -notmatch '^[\w\-]+$') {
+        $segment = ([string]$_).trim('/').trim()
+        # Warn if segment contains characters other than alphanumeric, underscore, or hyphen
+        if ($segment -and $segment -notmatch '^[a-zA-Z0-9_-]+$') {
             Write-Warning "URI segment contains unexpected characters: $segment"
         }
         $segment
