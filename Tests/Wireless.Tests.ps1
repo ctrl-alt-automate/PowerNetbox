@@ -314,4 +314,40 @@ Describe "Wireless Module Tests" -Tag 'Wireless' {
         }
     }
     #endregion
+
+    #region Pagination Parameter Tests
+    Context "Wireless Get- Functions Pagination Support" {
+        It "Get-NBWirelessLAN should have -All parameter" {
+            $cmd = Get-Command Get-NBWirelessLAN
+            $cmd.Parameters.Keys | Should -Contain 'All'
+            $cmd.Parameters['All'].ParameterType.Name | Should -Be 'SwitchParameter'
+        }
+
+        It "Get-NBWirelessLAN should have -PageSize parameter" {
+            $cmd = Get-Command Get-NBWirelessLAN
+            $cmd.Parameters.Keys | Should -Contain 'PageSize'
+            $cmd.Parameters['PageSize'].ParameterType.Name | Should -Be 'Int32'
+        }
+
+        It "Get-NBWirelessLANGroup should have -All parameter" {
+            $cmd = Get-Command Get-NBWirelessLANGroup
+            $cmd.Parameters.Keys | Should -Contain 'All'
+        }
+
+        It "Get-NBWirelessLANGroup should have -PageSize parameter" {
+            $cmd = Get-Command Get-NBWirelessLANGroup
+            $cmd.Parameters.Keys | Should -Contain 'PageSize'
+        }
+
+        It "Get-NBWirelessLink should have -All parameter" {
+            $cmd = Get-Command Get-NBWirelessLink
+            $cmd.Parameters.Keys | Should -Contain 'All'
+        }
+
+        It "Get-NBWirelessLink should have -PageSize parameter" {
+            $cmd = Get-Command Get-NBWirelessLink
+            $cmd.Parameters.Keys | Should -Contain 'PageSize'
+        }
+    }
+    #endregion
 }

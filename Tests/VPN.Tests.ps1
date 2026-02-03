@@ -465,4 +465,60 @@ Describe "VPN Module Tests" -Tag 'VPN' {
         }
     }
     #endregion
+
+    #region Pagination Parameter Tests
+    Context "VPN Get- Functions Pagination Support" {
+        It "Get-NBVPNIKEPolicy should have -All parameter" {
+            $cmd = Get-Command Get-NBVPNIKEPolicy
+            $cmd.Parameters.Keys | Should -Contain 'All'
+            $cmd.Parameters['All'].ParameterType.Name | Should -Be 'SwitchParameter'
+        }
+
+        It "Get-NBVPNIKEPolicy should have -PageSize parameter" {
+            $cmd = Get-Command Get-NBVPNIKEPolicy
+            $cmd.Parameters.Keys | Should -Contain 'PageSize'
+            $cmd.Parameters['PageSize'].ParameterType.Name | Should -Be 'Int32'
+        }
+
+        It "Get-NBVPNIKEProposal should have -All parameter" {
+            $cmd = Get-Command Get-NBVPNIKEProposal
+            $cmd.Parameters.Keys | Should -Contain 'All'
+        }
+
+        It "Get-NBVPNIPSecPolicy should have -All parameter" {
+            $cmd = Get-Command Get-NBVPNIPSecPolicy
+            $cmd.Parameters.Keys | Should -Contain 'All'
+        }
+
+        It "Get-NBVPNIPSecProfile should have -All parameter" {
+            $cmd = Get-Command Get-NBVPNIPSecProfile
+            $cmd.Parameters.Keys | Should -Contain 'All'
+        }
+
+        It "Get-NBVPNIPSecProposal should have -All parameter" {
+            $cmd = Get-Command Get-NBVPNIPSecProposal
+            $cmd.Parameters.Keys | Should -Contain 'All'
+        }
+
+        It "Get-NBVPNL2VPN should have -All parameter" {
+            $cmd = Get-Command Get-NBVPNL2VPN
+            $cmd.Parameters.Keys | Should -Contain 'All'
+        }
+
+        It "Get-NBVPNL2VPNTermination should have -All parameter" {
+            $cmd = Get-Command Get-NBVPNL2VPNTermination
+            $cmd.Parameters.Keys | Should -Contain 'All'
+        }
+
+        It "Get-NBVPNTunnelGroup should have -All parameter" {
+            $cmd = Get-Command Get-NBVPNTunnelGroup
+            $cmd.Parameters.Keys | Should -Contain 'All'
+        }
+
+        It "Get-NBVPNTunnelTermination should have -All parameter" {
+            $cmd = Get-Command Get-NBVPNTunnelTermination
+            $cmd.Parameters.Keys | Should -Contain 'All'
+        }
+    }
+    #endregion
 }
