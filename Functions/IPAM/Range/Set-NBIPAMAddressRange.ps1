@@ -32,13 +32,14 @@ function Set-NBIPAMAddressRange {
 
         [string]$End_Address,
 
-        [object]$Status,
+        [ValidateSet('active', 'reserved', 'deprecated', IgnoreCase = $true)]
+        [string]$Status,
 
         [uint64]$Tenant,
 
         [uint64]$VRF,
 
-        [object]$Role,
+        [uint64]$Role,
 
         [hashtable]$Custom_Fields,
 

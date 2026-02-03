@@ -105,7 +105,8 @@ function New-NBIPAMAddress {
         [string]$Address,
 
         [Parameter(ParameterSetName = 'Single')]
-        [object]$Status = 'Active',
+        [ValidateSet('active', 'reserved', 'deprecated', 'dhcp', 'slaac', IgnoreCase = $true)]
+        [string]$Status = 'active',
 
         [Parameter(ParameterSetName = 'Single')]
         [uint64]$Tenant,
@@ -114,7 +115,8 @@ function New-NBIPAMAddress {
         [uint64]$VRF,
 
         [Parameter(ParameterSetName = 'Single')]
-        [object]$Role,
+        [ValidateSet('loopback', 'secondary', 'anycast', 'vip', 'vrrp', 'hsrp', 'glbp', 'carp', IgnoreCase = $true)]
+        [string]$Role,
 
         [Parameter(ParameterSetName = 'Single')]
         [uint64]$NAT_Inside,

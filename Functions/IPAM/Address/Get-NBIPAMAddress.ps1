@@ -39,7 +39,8 @@ function Get-NBIPAMAddress {
         [string]$Query,
 
         [Parameter(ParameterSetName = 'Query')]
-        [object]$Family,
+        [ValidateSet(4, 6)]
+        [int]$Family,
 
         [Parameter(ParameterSetName = 'Query')]
         [string]$Parent,
@@ -75,10 +76,12 @@ function Get-NBIPAMAddress {
         [uint64]$Interface_Id,
 
         [Parameter(ParameterSetName = 'Query')]
-        [object]$Status,
+        [ValidateSet('active', 'reserved', 'deprecated', 'dhcp', 'slaac', IgnoreCase = $true)]
+        [string]$Status,
 
         [Parameter(ParameterSetName = 'Query')]
-        [object]$Role,
+        [ValidateSet('loopback', 'secondary', 'anycast', 'vip', 'vrrp', 'hsrp', 'glbp', 'carp', IgnoreCase = $true)]
+        [string]$Role,
 
         [ValidateRange(1, 1000)]
         [uint16]$Limit,

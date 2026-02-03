@@ -123,7 +123,8 @@ function Set-NBDCIMDevice {
         [uint64]$Site,
 
         [Parameter(ParameterSetName = 'Single')]
-        [object]$Status,
+        [ValidateSet('offline', 'active', 'planned', 'staged', 'failed', 'inventory', 'decommissioning', IgnoreCase = $true)]
+        [string]$Status,
 
         [Parameter(ParameterSetName = 'Single')]
         [uint64]$Platform,
@@ -141,7 +142,8 @@ function Set-NBDCIMDevice {
         [uint16]$Position,
 
         [Parameter(ParameterSetName = 'Single')]
-        [object]$Face,
+        [ValidateSet('front', 'rear', IgnoreCase = $true)]
+        [string]$Face,
 
         [Parameter(ParameterSetName = 'Single')]
         [string]$Serial,

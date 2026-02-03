@@ -121,7 +121,8 @@ function Get-NBDCIMDevice {
 
         [uint64]$Model,
 
-        [object]$Status,
+        [ValidateSet('offline', 'active', 'planned', 'staged', 'failed', 'inventory', 'decommissioning', IgnoreCase = $true)]
+        [string]$Status,
 
         [bool]$Is_Full_Depth,
 

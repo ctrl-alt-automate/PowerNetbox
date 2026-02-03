@@ -35,7 +35,8 @@ function Set-NBDCIMInterfaceConnection {
                    ValueFromPipelineByPropertyName = $true)]
         [uint64]$Id,
 
-        [object]$Connection_Status,
+        [ValidateSet('connected', 'planned', 'decommissioning', IgnoreCase = $true)]
+        [string]$Connection_Status,
 
         [uint64]$Interface_A,
 
