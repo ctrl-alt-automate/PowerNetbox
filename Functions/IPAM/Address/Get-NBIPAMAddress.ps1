@@ -5,11 +5,19 @@
 .DESCRIPTION
     Retrieves Address objects from Netbox IPAM module.
 
+.PARAMETER Omit
+    Specify which fields to exclude from the response.
+    Requires Netbox 4.5.0 or later.
+
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
     Get-NBIPAMAddress
+
+.EXAMPLE
+    Get-NBIPAMAddress -Omit 'comments','description'
+    Returns addresses without comments and description fields (Netbox 4.5+).
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -27,6 +35,8 @@ function Get-NBIPAMAddress {
         [switch]$Brief,
 
         [string[]]$Fields,
+
+        [string[]]$Omit,
 
         [Parameter(ParameterSetName = 'Query',
             Position = 0)]

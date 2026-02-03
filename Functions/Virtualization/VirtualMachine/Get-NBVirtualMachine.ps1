@@ -24,6 +24,10 @@ function Get-NBVirtualMachine {
         Specify which fields to include in the response.
         Supports nested field selection (e.g., 'site.name', 'cluster.name').
 
+    .PARAMETER Omit
+        Specify which fields to exclude from the response.
+        Requires Netbox 4.5.0 or later.
+
     .PARAMETER IncludeConfigContext
         Include config_context in the response. By default, config_context is
         excluded for performance (can be 10-100x faster without it).
@@ -103,6 +107,10 @@ function Get-NBVirtualMachine {
     .EXAMPLE
         Get-NBVirtualMachine -Fields 'id','name','status','site.name'
         Returns only the specified fields.
+
+    .EXAMPLE
+        Get-NBVirtualMachine -Omit 'comments','description'
+        Returns VMs without comments and description fields (Netbox 4.5+).
 #>
 
     [CmdletBinding()]
@@ -117,6 +125,8 @@ function Get-NBVirtualMachine {
         [switch]$Brief,
 
         [string[]]$Fields,
+
+        [string[]]$Omit,
 
         [switch]$IncludeConfigContext,
 
@@ -172,9 +182,16 @@ function Get-NBVirtualMachine {
         # Build parameters to pass, excluding config_context by default
         $paramsToPass = @{} + $PSBoundParameters
 
-        # Add exclude=config_context unless IncludeConfigContext is specified
+        # Build omit list: start with user-provided fields, add config_context unless explicitly included
+        $omitFields = @()
+        if ($PSBoundParameters.ContainsKey('Omit')) {
+            $omitFields += $Omit
+        }
         if (-not $IncludeConfigContext) {
-            $paramsToPass['Exclude'] = @('config_context')
+            $omitFields += 'config_context'
+        }
+        if ($omitFields.Count -gt 0) {
+            $paramsToPass['Omit'] = $omitFields | Select-Object -Unique
         }
         [void]$paramsToPass.Remove('IncludeConfigContext')
 
