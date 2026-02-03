@@ -47,7 +47,7 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
             $Result = Get-NBVirtualMachine
             $Result.Method | Should -Be 'GET'
             # By default, config_context is excluded for performance
-            $Result.Uri | Should -Match 'exclude=config_context'
+            $Result.Uri | Should -Match 'omit=config_context'
         }
 
         It "Should request with limit and offset" {
@@ -56,14 +56,14 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
             # Parameter order in hashtables is not guaranteed
             $Result.Uri | Should -Match 'limit=10'
             $Result.Uri | Should -Match 'offset=12'
-            $Result.Uri | Should -Match 'exclude=config_context'
+            $Result.Uri | Should -Match 'omit=config_context'
         }
 
         It "Should request with a query" {
             $Result = Get-NBVirtualMachine -Query 'testvm'
             $Result.Method | Should -Be 'GET'
             $Result.Uri | Should -Match 'q=testvm'
-            $Result.Uri | Should -Match 'exclude=config_context'
+            $Result.Uri | Should -Match 'omit=config_context'
         }
 
         It "Should request with an escaped query" {
@@ -71,21 +71,21 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
             $Result.Method | Should -Be 'GET'
             # Module doesn't URL-encode spaces in query strings
             $Result.Uri | Should -Match 'q=test vm'
-            $Result.Uri | Should -Match 'exclude=config_context'
+            $Result.Uri | Should -Match 'omit=config_context'
         }
 
         It "Should request with a name" {
             $Result = Get-NBVirtualMachine -Name 'testvm'
             $Result.Method | Should -Be 'GET'
             $Result.Uri | Should -Match 'name=testvm'
-            $Result.Uri | Should -Match 'exclude=config_context'
+            $Result.Uri | Should -Match 'omit=config_context'
         }
 
         It "Should request with a single ID" {
             $Result = Get-NBVirtualMachine -Id 10
             $Result.Method | Should -Be 'GET'
             $Result.Uri | Should -Match 'virtualization/virtual-machines/10/'
-            $Result.Uri | Should -Match 'exclude=config_context'
+            $Result.Uri | Should -Match 'omit=config_context'
         }
 
         It "Should request with multiple IDs" {
@@ -93,7 +93,7 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
             $Result.Method | Should -Be 'GET'
             # Commas may or may not be URL-encoded depending on PS version
             $Result.Uri | Should -Match 'id__in=10(%2C|,)12(%2C|,)15'
-            $Result.Uri | Should -Match 'exclude=config_context'
+            $Result.Uri | Should -Match 'omit=config_context'
         }
 
         It "Should request a status" {
@@ -101,7 +101,7 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
             $Result.Method | Should -Be 'GET'
             # Status value is passed through to API as-is (no client-side validation)
             $Result.Uri | Should -Match 'status=Active'
-            $Result.Uri | Should -Match 'exclude=config_context'
+            $Result.Uri | Should -Match 'omit=config_context'
         }
 
         It "Should have ValidateSet for Status parameter" {
@@ -116,13 +116,13 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
         It "Should exclude config_context by default" {
             $Result = Get-NBVirtualMachine
             $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Match 'exclude=config_context'
+            $Result.Uri | Should -Match 'omit=config_context'
         }
 
         It "Should not exclude config_context when IncludeConfigContext is specified" {
             $Result = Get-NBVirtualMachine -IncludeConfigContext
             $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Not -Match 'exclude=config_context'
+            $Result.Uri | Should -Not -Match 'omit=config_context'
         }
 
         It "Should request with Brief mode" {
