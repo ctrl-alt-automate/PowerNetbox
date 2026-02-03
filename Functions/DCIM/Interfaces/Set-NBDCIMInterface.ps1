@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBDCIMInterface
 
-    Returns all DCIM Interface objects.
+    Updates an existing DCIM Interface object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

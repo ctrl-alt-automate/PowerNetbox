@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBWirelessLAN
 
-    Returns all irelessLAN objects.
+    Deletes a Wireless LAN object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

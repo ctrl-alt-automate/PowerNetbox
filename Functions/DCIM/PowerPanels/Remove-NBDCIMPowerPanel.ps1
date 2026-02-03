@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBDCIMPowerPanel
 
-    Returns all DCIM PowerPanel objects.
+    Deletes a DCIM PowerPanel object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

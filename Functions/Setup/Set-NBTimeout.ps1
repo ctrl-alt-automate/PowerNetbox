@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBTimeout
 
-    Returns all imeout objects.
+    Sets the Netbox API request timeout.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBDCIMModuleBay
 
-    Returns all DCIM ModuleBay objects.
+    Creates a new DCIM ModuleBay object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

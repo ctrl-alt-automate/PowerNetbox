@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBVPNTunnelGroup
 
-    Returns all VPN TunnelGroup objects.
+    Deletes a VPN TunnelGroup object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

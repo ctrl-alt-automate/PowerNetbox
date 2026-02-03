@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBDCIMFrontPortTemplate
 
-    Returns all DCIM FrontPortTemplate objects.
+    Creates a new DCIM FrontPortTemplate object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

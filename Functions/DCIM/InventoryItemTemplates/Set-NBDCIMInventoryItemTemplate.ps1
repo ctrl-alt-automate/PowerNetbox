@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBDCIMInventoryItemTemplate
 
-    Returns all DCIM InventoryItemTemplate objects.
+    Updates an existing DCIM InventoryItemTemplate object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

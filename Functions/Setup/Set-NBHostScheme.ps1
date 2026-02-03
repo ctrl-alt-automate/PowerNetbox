@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBHostScheme
 
-    Returns all ostScheme objects.
+    Sets the Netbox API host scheme (http or https).
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

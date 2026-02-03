@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBDCIMPowerFeed
 
-    Returns all DCIM PowerFeed objects.
+    Updates an existing DCIM PowerFeed object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

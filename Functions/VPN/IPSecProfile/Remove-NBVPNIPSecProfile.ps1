@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBVPNIPSecProfile
 
-    Returns all VPN IPSecProfile objects.
+    Deletes a VPN IPSecProfile object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

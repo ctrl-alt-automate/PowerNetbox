@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBDCIMRackRole
 
-    Returns all DCIM RackRole objects.
+    Deletes a DCIM RackRole object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

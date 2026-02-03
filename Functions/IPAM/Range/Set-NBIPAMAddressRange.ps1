@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBIPAMAddressRange
 
-    Returns all IPAM AddressRange objects.
+    Updates an existing IPAM Address Range object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

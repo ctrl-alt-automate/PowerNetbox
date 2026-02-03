@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBVPNTunnel
 
-    Returns all VPN Tunnel objects.
+    Creates a new VPN Tunnel object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBIPAMVLANGroup
 
-    Returns all IPAM VLANGroup objects.
+    Deletes an IPAM VLAN Group object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

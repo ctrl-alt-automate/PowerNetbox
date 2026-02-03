@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBIPAMPrefix
 
-    Returns all IPAM Prefix objects.
+    Updates an existing IPAM Prefix object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBIPAMVLANTranslationRule
 
-    Returns all IPAM VLANTranslationRule objects.
+    Updates an existing IPAM VLAN Translation Rule object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

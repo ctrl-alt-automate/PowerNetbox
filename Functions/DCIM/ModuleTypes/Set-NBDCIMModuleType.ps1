@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBDCIMModuleType
 
-    Returns all DCIM ModuleType objects.
+    Updates an existing DCIM ModuleType object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

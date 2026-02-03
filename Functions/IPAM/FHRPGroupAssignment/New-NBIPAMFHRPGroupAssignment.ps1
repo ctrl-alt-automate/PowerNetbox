@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBIPAMFHRPGroupAssignment
 
-    Returns all IPAM FHRPGroupAssignment objects.
+    Creates a new IPAM FHRP Group Assignment object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

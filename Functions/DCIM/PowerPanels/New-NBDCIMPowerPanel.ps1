@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBDCIMPowerPanel
 
-    Returns all DCIM PowerPanel objects.
+    Creates a new DCIM PowerPanel object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBDCIMVirtualChassis
 
-    Returns all DCIM VirtualChassis objects.
+    Deletes a DCIM VirtualChassis object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

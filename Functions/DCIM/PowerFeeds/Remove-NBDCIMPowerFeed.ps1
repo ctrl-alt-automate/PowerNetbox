@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBDCIMPowerFeed
 
-    Returns all DCIM PowerFeed objects.
+    Deletes a DCIM PowerFeed object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBDCIMRackReservation
 
-    Returns all DCIM RackReservation objects.
+    Updates an existing DCIM RackReservation object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

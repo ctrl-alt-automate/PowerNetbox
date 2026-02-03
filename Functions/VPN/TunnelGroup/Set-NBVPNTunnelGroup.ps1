@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBVPNTunnelGroup
 
-    Returns all VPN TunnelGroup objects.
+    Updates an existing VPN TunnelGroup object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

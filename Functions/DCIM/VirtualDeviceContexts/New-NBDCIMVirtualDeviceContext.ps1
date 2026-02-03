@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBDCIMVirtualDeviceContext
 
-    Returns all DCIM VirtualDeviceContext objects.
+    Creates a new DCIM VirtualDeviceContext object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

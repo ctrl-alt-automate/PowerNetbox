@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBDCIMVirtualDeviceContext
 
-    Returns all DCIM VirtualDeviceContext objects.
+    Deletes a DCIM VirtualDeviceContext object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

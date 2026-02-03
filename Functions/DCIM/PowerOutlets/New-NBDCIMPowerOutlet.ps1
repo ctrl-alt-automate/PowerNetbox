@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBDCIMPowerOutlet
 
-    Returns all DCIM PowerOutlet objects.
+    Creates a new DCIM PowerOutlet object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

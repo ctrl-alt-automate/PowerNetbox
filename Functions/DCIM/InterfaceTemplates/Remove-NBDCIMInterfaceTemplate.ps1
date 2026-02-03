@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBDCIMInterfaceTemplate
 
-    Returns all DCIM InterfaceTemplate objects.
+    Deletes a DCIM InterfaceTemplate object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

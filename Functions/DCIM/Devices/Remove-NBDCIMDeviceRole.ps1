@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBDCIMDeviceRole
 
-    Returns all DCIM DeviceRole objects.
+    Deletes a DCIM DeviceRole object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

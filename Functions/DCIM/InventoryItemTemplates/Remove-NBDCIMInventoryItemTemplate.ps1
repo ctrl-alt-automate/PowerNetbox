@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBDCIMInventoryItemTemplate
 
-    Returns all DCIM InventoryItemTemplate objects.
+    Deletes a DCIM InventoryItemTemplate object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

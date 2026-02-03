@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBDCIMRackRole
 
-    Returns all DCIM RackRole objects.
+    Creates a new DCIM RackRole object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

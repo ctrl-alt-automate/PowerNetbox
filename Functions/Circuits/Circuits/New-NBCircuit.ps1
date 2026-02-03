@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBCircuit
 
-    Returns all ircuit objects.
+    Creates a new Circuit object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

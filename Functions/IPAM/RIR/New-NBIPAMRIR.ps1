@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBIPAMRIR
 
-    Returns all IPAM RIR objects.
+    Creates a new IPAM RIR object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

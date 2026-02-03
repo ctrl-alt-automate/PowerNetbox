@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBVPNTunnel
 
-    Returns all VPN Tunnel objects.
+    Updates an existing VPN Tunnel object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

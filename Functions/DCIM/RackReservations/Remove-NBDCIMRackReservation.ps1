@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBDCIMRackReservation
 
-    Returns all DCIM RackReservation objects.
+    Deletes a DCIM RackReservation object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

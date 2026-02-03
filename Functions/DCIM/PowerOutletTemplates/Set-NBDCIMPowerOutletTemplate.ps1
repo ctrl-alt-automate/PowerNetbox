@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBDCIMPowerOutletTemplate
 
-    Returns all DCIM PowerOutletTemplate objects.
+    Updates an existing DCIM PowerOutletTemplate object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBDCIMFrontPortTemplate
 
-    Returns all DCIM FrontPortTemplate objects.
+    Updates an existing DCIM FrontPortTemplate object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

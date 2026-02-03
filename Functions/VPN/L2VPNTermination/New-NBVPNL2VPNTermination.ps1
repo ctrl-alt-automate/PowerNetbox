@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBVPNL2VPNTermination
 
-    Returns all VPN L2VPNTermination objects.
+    Creates a new VPN L2VPNTermination object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

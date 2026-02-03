@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBIPAMAggregate
 
-    Returns all IPAM Aggregate objects.
+    Creates a new IPAM Aggregate object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

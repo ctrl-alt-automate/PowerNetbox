@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBIPAMRole
 
-    Returns all IPAM Role objects.
+    Updates an existing IPAM Role object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

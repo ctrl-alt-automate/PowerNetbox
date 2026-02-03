@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBIPAMFHRPGroup
 
-    Returns all IPAM FHRPGroup objects.
+    Deletes an IPAM FHRP Group object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

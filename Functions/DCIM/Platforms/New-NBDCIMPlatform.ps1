@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBDCIMPlatform
 
-    Returns all DCIM Platform objects.
+    Creates a new DCIM Platform object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

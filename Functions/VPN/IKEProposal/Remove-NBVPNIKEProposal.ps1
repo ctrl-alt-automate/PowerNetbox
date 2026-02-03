@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBVPNIKEProposal
 
-    Returns all VPN IKEProposal objects.
+    Deletes a VPN IKEProposal object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

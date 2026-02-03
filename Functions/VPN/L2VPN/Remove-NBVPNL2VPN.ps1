@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBVPNL2VPN
 
-    Returns all VPN L2VPN objects.
+    Deletes a VPN L2VPN object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

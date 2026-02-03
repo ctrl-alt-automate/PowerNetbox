@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBDCIMCable
 
-    Returns all DCIM Cable objects.
+    Deletes a DCIM Cable object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

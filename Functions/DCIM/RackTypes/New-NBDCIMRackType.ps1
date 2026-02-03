@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBDCIMRackType
 
-    Returns all DCIM RackType objects.
+    Creates a new DCIM RackType object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

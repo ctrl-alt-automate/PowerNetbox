@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBDCIMPlatform
 
-    Returns all DCIM Platform objects.
+    Deletes a DCIM Platform object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

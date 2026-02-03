@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBDCIMPowerPanel
 
-    Returns all DCIM PowerPanel objects.
+    Updates an existing DCIM PowerPanel object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

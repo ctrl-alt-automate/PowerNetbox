@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBDCIMFrontPort
 
-    Returns all DCIM FrontPort objects.
+    Deletes a DCIM FrontPort object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

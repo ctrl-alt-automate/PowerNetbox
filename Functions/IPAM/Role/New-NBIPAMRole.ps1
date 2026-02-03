@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBIPAMRole
 
-    Returns all IPAM Role objects.
+    Creates a new IPAM Role object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

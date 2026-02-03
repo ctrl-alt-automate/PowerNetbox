@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBVPNIPSecProposal
 
-    Returns all VPN IPSecProposal objects.
+    Deletes a VPN IPSecProposal object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

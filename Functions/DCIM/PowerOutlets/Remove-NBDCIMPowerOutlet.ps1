@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBDCIMPowerOutlet
 
-    Returns all DCIM PowerOutlet objects.
+    Deletes a DCIM PowerOutlet object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
