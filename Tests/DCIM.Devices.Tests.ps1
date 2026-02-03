@@ -136,13 +136,13 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             $Result.Uri | Should -Match 'exclude=config_context'
         }
 
-        It "Should pass invalid status to API" {
-            # Invalid status values are now passed through to the API
-            # The API will return an error, not the client
-            $Result = Get-NBDCIMDevice -Status 'Fake'
-            $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Match 'status=Fake'
-            $Result.Uri | Should -Match 'exclude=config_context'
+        It "Should have ValidateSet for Status parameter" {
+            # Status parameter now uses ValidateSet for type safety
+            $cmd = Get-Command Get-NBDCIMDevice
+            $statusParam = $cmd.Parameters['Status']
+            $validateSet = $statusParam.Attributes | Where-Object { $_ -is [System.Management.Automation.ValidateSetAttribute] }
+            $validateSet | Should -Not -BeNullOrEmpty
+            $validateSet.ValidValues | Should -Contain 'active'
         }
 
         It "Should request devices that are a PDU" {
@@ -269,7 +269,7 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
 
     Context "New-NBDCIMDevice" {
         It "Should create a new device" {
-            $Result = New-NBDCIMDevice -Name "newdevice" -Device_Role 4 -Device_Type 10 -Site 1 -Face 0
+            $Result = New-NBDCIMDevice -Name "newdevice" -Device_Role 4 -Device_Type 10 -Site 1 -Face 'front'
 
             Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
 
@@ -281,15 +281,16 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             $bodyObj.role | Should -Be 4
             $bodyObj.device_type | Should -Be 10
             $bodyObj.site | Should -Be 1
-            $bodyObj.face | Should -Be 0
+            $bodyObj.face | Should -Be 'front'
         }
 
-        It "Should pass invalid status to API" {
-            # Invalid status values are now passed through to the API
-            $Result = New-NBDCIMDevice -Name "newdevice" -Device_Role 4 -Device_Type 10 -Site 1 -Status 5555
-            $Result.Method | Should -Be 'POST'
-            $bodyObj = $Result.Body | ConvertFrom-Json
-            $bodyObj.status | Should -Be 5555
+        It "Should have ValidateSet for Status parameter" {
+            # Status parameter now uses ValidateSet for type safety
+            $cmd = Get-Command New-NBDCIMDevice
+            $statusParam = $cmd.Parameters['Status']
+            $validateSet = $statusParam.Attributes | Where-Object { $_ -is [System.Management.Automation.ValidateSetAttribute] }
+            $validateSet | Should -Not -BeNullOrEmpty
+            $validateSet.ValidValues | Should -Contain 'active'
         }
 
         It "Should have Single and Bulk parameter sets" {

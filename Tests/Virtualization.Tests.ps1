@@ -104,12 +104,13 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
             $Result.Uri | Should -Match 'exclude=config_context'
         }
 
-        It "Should pass invalid status to API" {
-            # Invalid status values are now passed through to the API
-            $Result = Get-NBVirtualMachine -Status 'Fake'
-            $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Match 'status=Fake'
-            $Result.Uri | Should -Match 'exclude=config_context'
+        It "Should have ValidateSet for Status parameter" {
+            # Status parameter now uses ValidateSet for type safety
+            $cmd = Get-Command Get-NBVirtualMachine
+            $statusParam = $cmd.Parameters['Status']
+            $validateSet = $statusParam.Attributes | Where-Object { $_ -is [System.Management.Automation.ValidateSetAttribute] }
+            $validateSet | Should -Not -BeNullOrEmpty
+            $validateSet.ValidValues | Should -Contain 'active'
         }
 
         It "Should exclude config_context by default" {
@@ -281,12 +282,13 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
             $bodyObj.comments | Should -Be "these are comments"
         }
 
-        It "Should pass invalid status to API" {
-            # Invalid status values are now passed through to the API
-            $Result = New-NBVirtualMachine -Name 'testvm' -Status 1123 -Cluster 1
-            $Result.Method | Should -Be 'POST'
-            $bodyObj = $Result.Body | ConvertFrom-Json
-            $bodyObj.status | Should -Be 1123
+        It "Should have ValidateSet for Status parameter" {
+            # Status parameter now uses ValidateSet for type safety
+            $cmd = Get-Command New-NBVirtualMachine
+            $statusParam = $cmd.Parameters['Status']
+            $validateSet = $statusParam.Attributes | Where-Object { $_ -is [System.Management.Automation.ValidateSetAttribute] }
+            $validateSet | Should -Not -BeNullOrEmpty
+            $validateSet.ValidValues | Should -Contain 'active'
         }
 
         It "Should create a VM with Start_On_Boot (Netbox 4.5+)" {
@@ -351,12 +353,13 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
             $bodyObj.status | Should -Be 'Offline'
         }
 
-        It "Should pass invalid status to API" {
-            # Invalid status values are now passed through to the API
-            $Result = Set-NBVirtualMachine -Id 1234 -Status 'Fake' -Force
-            $Result.Method | Should -Be 'PATCH'
-            $bodyObj = $Result.Body | ConvertFrom-Json
-            $bodyObj.status | Should -Be 'Fake'
+        It "Should have ValidateSet for Status parameter" {
+            # Status parameter now uses ValidateSet for type safety
+            $cmd = Get-Command Set-NBVirtualMachine
+            $statusParam = $cmd.Parameters['Status']
+            $validateSet = $statusParam.Attributes | Where-Object { $_ -is [System.Management.Automation.ValidateSetAttribute] }
+            $validateSet | Should -Not -BeNullOrEmpty
+            $validateSet.ValidValues | Should -Contain 'active'
         }
 
         It "Should update a VM with Start_On_Boot (Netbox 4.5+)" {

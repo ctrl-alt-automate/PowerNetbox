@@ -106,7 +106,7 @@ Describe "IPAM tests" -Tag 'Ipam' {
         }
 
         It "Should update an IP address" {
-            $Result = Set-NBIPAMAddress -Id 4109 -Status 2 -Force
+            $Result = Set-NBIPAMAddress -Id 4109 -Status 'reserved' -Force
             $Result.Method | Should -Be 'PATCH'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/4109/'
         }
@@ -184,10 +184,10 @@ Describe "IPAM tests" -Tag 'Ipam' {
         }
 
         It "Should create a prefix with status and role" {
-            $Result = New-NBIPAMPrefix -Prefix "10.0.0.0/24" -Status 'Active' -Role 'Active'
+            $Result = New-NBIPAMPrefix -Prefix "10.0.0.0/24" -Status 'active' -Role 1
             $bodyObj = $Result.Body | ConvertFrom-Json
-            $bodyObj.status | Should -Be 'Active'
-            $bodyObj.role | Should -Be 'Active'
+            $bodyObj.status | Should -Be 'active'
+            $bodyObj.role | Should -Be 1
         }
     }
 

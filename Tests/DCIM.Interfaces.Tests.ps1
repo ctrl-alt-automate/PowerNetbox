@@ -218,11 +218,13 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
             $Result.Uri | Should -BeExactly 'https://netbox.domain.com/api/dcim/interface-connections/?connection_status=Connected'
         }
 
-        It "Should pass invalid connection status to API" {
-            # Invalid values are now passed through to the API
-            $Result = Get-NBDCIMInterfaceConnection -Connection_Status 'Fake'
-            $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Match 'connection_status=Fake'
+        It "Should have ValidateSet for Connection_Status parameter" {
+            # Connection_Status parameter now uses ValidateSet for type safety
+            $cmd = Get-Command Get-NBDCIMInterfaceConnection
+            $param = $cmd.Parameters['Connection_Status']
+            $validateSet = $param.Attributes | Where-Object { $_ -is [System.Management.Automation.ValidateSetAttribute] }
+            $validateSet | Should -Not -BeNullOrEmpty
+            $validateSet.ValidValues | Should -Contain 'connected'
         }
     }
 
