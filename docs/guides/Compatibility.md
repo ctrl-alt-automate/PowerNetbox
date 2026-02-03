@@ -25,7 +25,7 @@ PowerNetbox uses automated compatibility testing via GitHub Actions. The workflo
 The compatibility workflow runs 94 integration tests against each version:
 
 ```
-Netbox 4.5.0:  94/94 tests passed ✅ (Primary target)
+Netbox 4.5.2:  94/94 tests passed ✅ (Primary target)
 Netbox 4.4.10: 94/94 tests passed ✅
 Netbox 4.3.7:  94/94 tests passed ✅ (Minimum supported)
 ```
@@ -44,6 +44,8 @@ PowerNetbox handles API changes between Netbox versions automatically:
 | Object Ownership | New `/api/users/owners/` endpoint | `Get/New/Set/Remove-NBOwner` functions |
 | Port Mappings | Bidirectional `front_ports`/`rear_ports` | Full support in port functions |
 | Form_Factor removed | Interface `form_factor` replaced by `type` | `-Form_Factor` parameter removed, use `-Type` |
+| `?omit=` parameter | Replaces `?exclude=` for field omission | `-Omit` parameter on all 123 Get functions |
+| Image Attachments | Upload images to any object | `New-NBImageAttachment` function |
 
 ### Content Types / Object Types
 
@@ -92,11 +94,11 @@ docker compose -f docker-compose.ci.yml down -v
 
 ### Available Docker Image Tags
 
-| Netbox Version | Docker Tag |
-|----------------|------------|
-| 4.5.0 | `v4.5.0-3.4.2` |
-| 4.4.10 | `v4.4.10-3.4.2` |
-| 4.3.7 | `v4.3.7-3.3.0` |
+| Netbox Version | Docker Tag | Notes |
+|----------------|------------|-------|
+| 4.5.2 | `v4.5.2-4.0.0` | netbox-docker 4.0.0 (Granian, PostgreSQL 18, Valkey 9) |
+| 4.4.10 | `v4.4.10-3.4.2` | netbox-docker 3.4.2 |
+| 4.3.7 | `v4.3.7-3.3.0` | netbox-docker 3.3.0 |
 
 ## Reporting Compatibility Issues
 

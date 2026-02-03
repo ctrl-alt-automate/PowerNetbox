@@ -8,6 +8,7 @@ PowerNetbox implements [NetBox REST API best practices](https://github.com/netbo
 |---------|-----------|--------|----------|
 | Brief Mode | `-Brief` | ~90% smaller payload | Dropdowns, lists |
 | Field Selection | `-Fields` | Custom fields only | Reports, specific needs |
+| Field Omission | `-Omit` | Exclude specific fields | Removing large/unused fields |
 | Exclude Config Context | Default behavior | 10-100x faster | Most device/VM queries |
 | Include Config Context | `-IncludeConfigContext` | Include config_context | When you need rendered config |
 
@@ -77,6 +78,33 @@ $devices | Select-Object id, name, serial,
     Export-Csv -Path 'devices.csv' -NoTypeInformation
 ```
 
+## Field Omission
+
+The `-Omit` parameter allows you to exclude specific fields from the response. This is the inverse of `-Fields` - you specify what to remove rather than what to include.
+
+**Requires Netbox 4.5.0 or later.**
+
+```powershell
+# Exclude comments and description fields
+Get-NBDCIMDevice -Omit 'comments','description'
+
+# Exclude large nested objects
+Get-NBDCIMSite -Omit 'asns','prefixes'
+```
+
+### When to Use Field Omission
+
+- **Remove large text fields** - `comments`, `description` can be verbose
+- **Exclude unused relationships** - Skip nested objects you don't need
+- **Combine with config_context exclusion** - `-Omit` adds to the default exclusion
+
+### Example: Lightweight Device List
+
+```powershell
+# Exclude verbose fields for a lightweight response
+Get-NBDCIMDevice -All -Omit 'comments','description','local_context_data'
+```
+
 ## Config Context Exclusion
 
 By default, PowerNetbox excludes `config_context` from device and VM responses. This can improve performance by **10-100x** because config_context requires server-side rendering of hierarchical configuration data.
@@ -87,8 +115,8 @@ By default, PowerNetbox excludes `config_context` from device and VM responses. 
 # config_context is automatically excluded
 Get-NBDCIMDevice
 
-# Equivalent to:
-# GET /api/dcim/devices/?exclude=config_context
+# Equivalent to (Netbox 4.5+):
+# GET /api/dcim/devices/?omit=config_context
 ```
 
 ### Include Config Context When Needed
@@ -158,10 +186,11 @@ Get-NBDCIMDevice -Status 'active' -Brief -Limit 100 -Offset 0
 1. **Always use specific filters** instead of `-Query`
 2. **Use `-Brief`** for dropdowns and reference lists
 3. **Use `-Fields`** for reports and custom data extraction
-4. **Let config_context be excluded** by default
-5. **Only use `-IncludeConfigContext`** when you need rendered configuration
-6. **Use pagination** (`-Limit`, `-Offset`) for large result sets
-7. **Use `-All` with `-PageSize`** for automatic pagination
+4. **Use `-Omit`** to exclude large or unused fields (Netbox 4.5+)
+5. **Let config_context be excluded** by default
+6. **Only use `-IncludeConfigContext`** when you need rendered configuration
+7. **Use pagination** (`-Limit`, `-Offset`) for large result sets
+8. **Use `-All` with `-PageSize`** for automatic pagination
 
 ## See Also
 
