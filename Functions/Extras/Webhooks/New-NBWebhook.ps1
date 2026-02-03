@@ -43,7 +43,9 @@
     Return the raw API response.
 
 .EXAMPLE
-    New-NBWebhook -Name "Slack Notification" -Payload_Url "https://hooks.slack.com/services/xxx"
+    # Create a webhook that sends notifications to a Slack channel
+    $secret = ConvertTo-SecureString "your-webhook-secret" -AsPlainText -Force
+    New-NBWebhook -Name "Slack Notification" -Payload_Url "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX" -Secret $secret
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

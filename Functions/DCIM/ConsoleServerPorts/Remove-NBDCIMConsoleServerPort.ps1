@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBDCIMConsoleServerPort
 
-    Returns all DCIM ConsoleServerPort objects.
+    Deletes a DCIM ConsoleServerPort object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

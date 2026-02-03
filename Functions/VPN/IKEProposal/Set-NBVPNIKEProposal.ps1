@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBVPNIKEProposal
 
-    Returns all VPN IKEProposal objects.
+    Updates an existing VPN IKEProposal object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

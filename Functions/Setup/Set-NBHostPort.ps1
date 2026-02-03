@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBHostPort
 
-    Returns all ostPort objects.
+    Sets the Netbox API host port.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

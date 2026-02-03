@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBDCIMRearPortTemplate
 
-    Returns all DCIM RearPortTemplate objects.
+    Updates an existing DCIM RearPortTemplate object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

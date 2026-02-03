@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBDCIMModuleTypeProfile
 
-    Returns all DCIM ModuleTypeProfile objects.
+    Deletes a DCIM ModuleTypeProfile object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBDCIMPowerPort
 
-    Returns all DCIM PowerPort objects.
+    Creates a new DCIM PowerPort object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBVPNIPSecProfile
 
-    Returns all VPN IPSecProfile objects.
+    Updates an existing VPN IPSecProfile object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

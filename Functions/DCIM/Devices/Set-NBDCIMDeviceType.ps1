@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBDCIMDeviceType
 
-    Returns all DCIM DeviceType objects.
+    Updates an existing DCIM DeviceType object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

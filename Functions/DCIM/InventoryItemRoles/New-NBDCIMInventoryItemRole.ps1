@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBDCIMInventoryItemRole
 
-    Returns all DCIM InventoryItemRole objects.
+    Creates a new DCIM InventoryItemRole object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

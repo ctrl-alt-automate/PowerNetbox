@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBDCIMRackType
 
-    Returns all DCIM RackType objects.
+    Updates an existing DCIM RackType object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

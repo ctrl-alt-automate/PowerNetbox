@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBIPAMAggregate
 
-    Returns all IPAM Aggregate objects.
+    Deletes an IPAM Aggregate object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

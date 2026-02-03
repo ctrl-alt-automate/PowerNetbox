@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBDCIMPowerPort
 
-    Returns all DCIM PowerPort objects.
+    Updates an existing DCIM PowerPort object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBHostName
 
-    Returns all ostName objects.
+    Sets the Netbox API hostname.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

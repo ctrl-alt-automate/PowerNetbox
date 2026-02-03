@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBDCIMMACAddress
 
-    Returns all CIMMACAddress objects.
+    Updates an existing DCIM MAC Address object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

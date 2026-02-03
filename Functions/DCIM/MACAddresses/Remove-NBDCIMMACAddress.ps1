@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBDCIMMACAddress
 
-    Returns all CIMMACAddress objects.
+    Deletes a DCIM MAC Address object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

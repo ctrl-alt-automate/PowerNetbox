@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBIPAMFHRPGroup
 
-    Returns all IPAM FHRP Group objects.
+    Creates a new IPAM FHRP Group object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

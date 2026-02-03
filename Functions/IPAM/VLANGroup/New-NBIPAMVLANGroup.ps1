@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBIPAMVLANGroup
 
-    Returns all IPAM VLANGroup objects.
+    Creates a new IPAM VLAN Group object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

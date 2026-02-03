@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBDCIMConsoleServerPort
 
-    Returns all DCIM ConsoleServerPort objects.
+    Updates an existing DCIM ConsoleServerPort object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

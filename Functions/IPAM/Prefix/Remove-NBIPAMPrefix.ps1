@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBIPAMPrefix
 
-    Returns all IPAM Prefix objects.
+    Deletes an IPAM Prefix object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBWirelessLAN
 
-    Returns all irelessLAN objects.
+    Creates a new Wireless LAN object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

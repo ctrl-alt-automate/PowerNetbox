@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBWirelessLANGroup
 
-    Returns all irelessLANGroup objects.
+    Creates a new Wireless LAN Group object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

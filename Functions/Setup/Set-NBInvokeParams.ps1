@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBInvokeParams
 
-    Returns all nvokeParams objects.
+    Sets additional parameters for Invoke-RestMethod calls.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBVPNL2VPNTermination
 
-    Returns all VPN L2VPNTermination objects.
+    Deletes a VPN L2VPNTermination object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

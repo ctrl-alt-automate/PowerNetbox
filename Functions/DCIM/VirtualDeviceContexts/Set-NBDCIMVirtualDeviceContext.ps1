@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBDCIMVirtualDeviceContext
 
-    Returns all DCIM VirtualDeviceContext objects.
+    Updates an existing DCIM VirtualDeviceContext object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBVPNTunnelTermination
 
-    Returns all VPN TunnelTermination objects.
+    Creates a new VPN TunnelTermination object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

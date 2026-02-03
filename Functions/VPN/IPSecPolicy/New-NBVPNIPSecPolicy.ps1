@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBVPNIPSecPolicy
 
-    Returns all VPN IPSecPolicy objects.
+    Creates a new VPN IPSecPolicy object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

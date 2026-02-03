@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBVPNIPSecPolicy
 
-    Returns all VPN IPSecPolicy objects.
+    Deletes a VPN IPSecPolicy object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

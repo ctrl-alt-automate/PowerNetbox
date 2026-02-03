@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBDCIMVirtualChassis
 
-    Returns all DCIM VirtualChassis objects.
+    Updates an existing DCIM VirtualChassis object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

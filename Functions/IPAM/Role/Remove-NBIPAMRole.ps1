@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBIPAMRole
 
-    Returns all IPAM Role objects.
+    Deletes an IPAM Role object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

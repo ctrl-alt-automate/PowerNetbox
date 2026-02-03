@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBDCIMInterfaceConnection
 
-    Returns all DCIM InterfaceConnection objects.
+    Deletes a DCIM InterfaceConnection object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

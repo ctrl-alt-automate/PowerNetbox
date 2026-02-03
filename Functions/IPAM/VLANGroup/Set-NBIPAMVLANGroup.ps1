@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBIPAMVLANGroup
 
-    Returns all IPAM VLANGroup objects.
+    Updates an existing IPAM VLAN Group object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

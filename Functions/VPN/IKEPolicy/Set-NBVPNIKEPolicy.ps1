@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBVPNIKEPolicy
 
-    Returns all VPN IKEPolicy objects.
+    Updates an existing VPN IKEPolicy object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

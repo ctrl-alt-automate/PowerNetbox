@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBDCIMInterfaceTemplate
 
-    Returns all DCIM InterfaceTemplate objects.
+    Creates a new DCIM InterfaceTemplate object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

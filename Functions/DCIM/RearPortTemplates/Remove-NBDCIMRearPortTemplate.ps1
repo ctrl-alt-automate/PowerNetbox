@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBDCIMRearPortTemplate
 
-    Returns all DCIM RearPortTemplate objects.
+    Deletes a DCIM RearPortTemplate object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

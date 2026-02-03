@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBDCIMDeviceBayTemplate
 
-    Returns all DCIM DeviceBayTemplate objects.
+    Creates a new DCIM DeviceBayTemplate object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

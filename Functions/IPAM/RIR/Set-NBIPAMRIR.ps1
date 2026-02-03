@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBIPAMRIR
 
-    Returns all IPAM RIR objects.
+    Updates an existing IPAM RIR object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBDCIMConsoleServerPortTemplate
 
-    Returns all DCIM ConsoleServerPortTemplate objects.
+    Creates a new DCIM ConsoleServerPortTemplate object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

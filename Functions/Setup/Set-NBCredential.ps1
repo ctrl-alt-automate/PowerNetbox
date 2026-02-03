@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBCredential
 
-    Returns all redential objects.
+    Sets the Netbox API credential.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

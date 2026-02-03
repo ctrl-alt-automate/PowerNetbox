@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBDCIMDeviceType
 
-    Returns all DCIM DeviceType objects.
+    Deletes a DCIM DeviceType object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

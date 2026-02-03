@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBWirelessLAN
 
-    Returns all WirelessLAN objects.
+    Updates an existing Wireless LAN object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

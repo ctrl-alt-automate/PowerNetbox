@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBDCIMModule
 
-    Returns all DCIM Module objects.
+    Creates a new DCIM Module object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBVPNIKEPolicy
 
-    Returns all VPN IKEPolicy objects.
+    Deletes a VPN IKEPolicy object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

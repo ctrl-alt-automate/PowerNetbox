@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBDCIMPowerPortTemplate
 
-    Returns all DCIM PowerPortTemplate objects.
+    Deletes a DCIM PowerPortTemplate object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

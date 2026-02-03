@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBDCIMRackReservation
 
-    Returns all DCIM RackReservation objects.
+    Creates a new DCIM RackReservation object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

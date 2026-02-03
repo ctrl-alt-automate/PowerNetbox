@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBDCIMRackType
 
-    Returns all DCIM RackType objects.
+    Deletes a DCIM RackType object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBDCIMDeviceType
 
-    Returns all DCIM DeviceType objects.
+    Creates a new DCIM DeviceType object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

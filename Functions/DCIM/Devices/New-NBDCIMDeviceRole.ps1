@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBDCIMDeviceRole
 
-    Returns all DCIM DeviceRole objects.
+    Creates a new DCIM DeviceRole object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBDCIMDeviceBayTemplate
 
-    Returns all DCIM DeviceBayTemplate objects.
+    Deletes a DCIM DeviceBayTemplate object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

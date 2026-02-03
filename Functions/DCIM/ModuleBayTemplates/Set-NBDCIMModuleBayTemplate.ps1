@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBDCIMModuleBayTemplate
 
-    Returns all DCIM ModuleBayTemplate objects.
+    Updates an existing DCIM ModuleBayTemplate object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

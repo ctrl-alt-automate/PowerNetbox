@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBDCIMPowerPortTemplate
 
-    Returns all DCIM PowerPortTemplate objects.
+    Creates a new DCIM PowerPortTemplate object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

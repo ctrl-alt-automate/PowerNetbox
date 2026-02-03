@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBIPAMVLAN
 
-    Returns all IPAM VLAN objects.
+    Deletes an IPAM VLAN object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

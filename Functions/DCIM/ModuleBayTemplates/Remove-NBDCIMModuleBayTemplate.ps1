@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBDCIMModuleBayTemplate
 
-    Returns all DCIM ModuleBayTemplate objects.
+    Deletes a DCIM ModuleBayTemplate object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBIPAMRIR
 
-    Returns all IPAM RIR objects.
+    Deletes an IPAM RIR object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

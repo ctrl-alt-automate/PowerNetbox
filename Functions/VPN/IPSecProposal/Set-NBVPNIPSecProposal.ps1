@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBVPNIPSecProposal
 
-    Returns all VPN IPSecProposal objects.
+    Updates an existing VPN IPSecProposal object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

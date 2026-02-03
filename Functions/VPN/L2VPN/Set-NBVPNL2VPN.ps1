@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBVPNL2VPN
 
-    Returns all VPN L2VPN objects.
+    Updates an existing VPN L2VPN object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

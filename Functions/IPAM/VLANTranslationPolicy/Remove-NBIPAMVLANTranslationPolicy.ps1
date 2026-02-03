@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBIPAMVLANTranslationPolicy
 
-    Returns all IPAM VLANTranslationPolicy objects.
+    Deletes an IPAM VLAN Translation Policy object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

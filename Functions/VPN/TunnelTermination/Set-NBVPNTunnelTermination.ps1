@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBVPNTunnelTermination
 
-    Returns all VPN TunnelTermination objects.
+    Updates an existing VPN TunnelTermination object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

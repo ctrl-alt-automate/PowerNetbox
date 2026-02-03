@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBDCIMDeviceBay
 
-    Returns all DCIM DeviceBay objects.
+    Creates a new DCIM DeviceBay object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

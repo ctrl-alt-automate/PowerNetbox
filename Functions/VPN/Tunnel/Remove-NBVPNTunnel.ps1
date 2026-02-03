@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBVPNTunnel
 
-    Returns all VPN Tunnel objects.
+    Deletes a VPN Tunnel object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

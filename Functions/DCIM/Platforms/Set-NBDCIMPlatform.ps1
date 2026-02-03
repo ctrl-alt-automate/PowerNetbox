@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBDCIMPlatform
 
-    Returns all DCIM Platform objects.
+    Updates an existing DCIM Platform object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

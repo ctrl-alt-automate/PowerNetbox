@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBVPNL2VPN
 
-    Returns all VPN L2VPN objects.
+    Creates a new VPN L2VPN object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

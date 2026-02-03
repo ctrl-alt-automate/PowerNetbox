@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBDCIMModuleTypeProfile
 
-    Returns all DCIM ModuleTypeProfile objects.
+    Creates a new DCIM ModuleTypeProfile object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

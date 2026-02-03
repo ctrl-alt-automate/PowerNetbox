@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBIPAMVLAN
 
-    Returns all IPAM VLAN objects.
+    Updates an existing IPAM VLAN object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
