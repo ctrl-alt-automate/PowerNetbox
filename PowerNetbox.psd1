@@ -12,7 +12,7 @@
 RootModule = 'PowerNetbox.psm1'
 
 # Version number of this module.
-ModuleVersion = '4.5.0.2'
+ModuleVersion = '4.5.2.0'
 
 # Supported PSEditions
 CompatiblePSEditions = 'Desktop', 'Core'
@@ -326,10 +326,12 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = 'v4.5.0.2 - PowerNetbox Release (matches Netbox 4.5.0)
-- Full Netbox 4.5.0 compatibility with Token v2 Bearer authentication
-- Performance optimization: Brief mode, Fields selection, config_context exclusion
-- Bug fix: PowerShell Core 7.x error message extraction (#164)
+        ReleaseNotes = 'v4.5.2.0 - PowerNetbox Release (matches Netbox 4.5.2)
+- Full Netbox 4.5.2 compatibility with netbox-docker 4.0.0
+- CI migrated to netbox-docker 4.0.0 (Granian, PostgreSQL 18, Valkey 9)
+- Security: Verbose logging redacts sensitive fields (#228)
+- Security: Webhook Secret uses SecureString (#230)
+- Security: AllowInsecureRedirect only with SkipCertificateCheck (#231)
 - 524 public functions with 100% API coverage
 - 1436 unit tests, 98 integration tests
 - Cross-platform support (Windows, Linux, macOS)
