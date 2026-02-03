@@ -57,6 +57,7 @@ function New-NBOwner {
     )
 
     process {
+        Write-Verbose "Creating Owner"
         $Segments = [System.Collections.ArrayList]::new(@('users', 'owners'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
         $URI = BuildNewURI -Segments $URIComponents.Segments

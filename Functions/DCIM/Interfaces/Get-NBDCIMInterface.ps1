@@ -5,11 +5,19 @@
 .DESCRIPTION
     Retrieves Interfaces objects from Netbox DCIM module.
 
+.PARAMETER Omit
+    Specify which fields to exclude from the response.
+    Requires Netbox 4.5.0 or later.
+
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
     Get-NBDCIMInterface
+
+.EXAMPLE
+    Get-NBDCIMInterface -Omit 'description'
+    Returns interfaces without the description field (Netbox 4.5+).
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -28,6 +36,8 @@ function Get-NBDCIMInterface {
 
         [string[]]$Fields,
 
+        [string[]]$Omit,
+
         [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
@@ -38,8 +48,6 @@ function Get-NBDCIMInterface {
         [uint64[]]$Id,
 
         [string]$Name,
-
-        [object]$Form_Factor,
 
         [bool]$Enabled,
 

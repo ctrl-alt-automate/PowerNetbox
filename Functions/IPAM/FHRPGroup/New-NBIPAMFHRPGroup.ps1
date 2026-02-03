@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Creates a new PAMFHRPGroup in Netbox I module.
+    Creates a new IPAM FHRP Group in Netbox IPAM module.
 
 .DESCRIPTION
-    Creates a new PAMFHRPGroup in Netbox I module.
+    Creates a new IPAM FHRP Group in Netbox IPAM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBIPAMFHRPGroup
 
-    Returns all PAMFHRPGroup objects.
+    Creates a new IPAM FHRP Group object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

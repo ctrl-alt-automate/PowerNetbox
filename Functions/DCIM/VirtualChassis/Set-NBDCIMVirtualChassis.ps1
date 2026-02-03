@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing CIMVirtualChassis in Netbox D module.
+    Updates an existing DCIM VirtualChassis in Netbox DCIM module.
 
 .DESCRIPTION
-    Updates an existing CIMVirtualChassis in Netbox D module.
+    Updates an existing DCIM VirtualChassis in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBDCIMVirtualChassis
 
-    Returns all CIMVirtualChassis objects.
+    Updates an existing DCIM VirtualChassis object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Creates a new PAMVLANGroup in Netbox I module.
+    Creates a new IPAM VLANGroup in Netbox IPAM module.
 
 .DESCRIPTION
-    Creates a new PAMVLANGroup in Netbox I module.
+    Creates a new IPAM VLANGroup in Netbox IPAM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBIPAMVLANGroup
 
-    Returns all PAMVLANGroup objects.
+    Creates a new IPAM VLAN Group object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

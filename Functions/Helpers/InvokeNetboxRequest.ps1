@@ -160,52 +160,10 @@ function InvokeNetboxRequest {
     # Retryable HTTP status codes
     $retryableStatusCodes = @(408, 429, 500, 502, 503, 504)
 
-    $creds = Get-NBCredential
-    $token = $creds.GetNetworkCredential().Password
-
-    # Detect token format: v2 tokens start with 'nbt_' and use Bearer auth
-    if ($token -match '^nbt_') {
-        $Headers.Authorization = "Bearer $token"
-    }
-    else {
-        # Legacy v1 token format
-        $Headers.Authorization = "Token $token"
-    }
-
-    # Determine effective branch context: explicit param > stack context > main
-    $effectiveBranchContext = if ($Branch) {
-        # Explicit -Branch parameter (schema_id string)
-        $Branch
-    }
-    elseif ($script:NetboxConfig.BranchStack -and $script:NetboxConfig.BranchStack.Count -gt 0) {
-        # Get context from stack
-        $script:NetboxConfig.BranchStack.Peek()
-    }
-    else {
-        $null
-    }
-
-    if ($effectiveBranchContext) {
-        # Extract schema_id - handle both object (new) and string (legacy/explicit) formats
-        $schemaId = if ($effectiveBranchContext -is [PSCustomObject]) {
-            if (-not $effectiveBranchContext.SchemaId) {
-                throw "Invalid branch context object: 'SchemaId' property is missing or empty."
-            }
-            $effectiveBranchContext.SchemaId
-        } else {
-            # Assume it's already a schema_id string (e.g., from -Branch parameter)
-            $effectiveBranchContext
-        }
-
-        $Headers['X-NetBox-Branch'] = $schemaId
-
-        # Log with branch name if available, otherwise just schema_id
-        $displayName = if ($effectiveBranchContext -is [PSCustomObject] -and $effectiveBranchContext.Name) {
-            "$($effectiveBranchContext.Name) ($schemaId)"
-        } else {
-            $schemaId
-        }
-        Write-Verbose "Using branch context: $displayName"
+    # Get authorization and branch context headers using centralized helper
+    $requestHeaders = Get-NBRequestHeaders -Branch $Branch
+    foreach ($key in $requestHeaders.Keys) {
+        $Headers[$key] = $requestHeaders[$key]
     }
 
     $splat = @{
@@ -221,7 +179,18 @@ function InvokeNetboxRequest {
     $splat += Get-NBInvokeParams
 
     if ($Body) {
-        Write-Verbose "BODY: $($Body | ConvertTo-Json -Compress)"
+        # Sanitize sensitive fields before logging (handles both hashtables and PSCustomObjects)
+        $sensitiveFields = @('secret', 'password', 'key', 'token')
+        $sanitizedBody = @{}
+        foreach ($prop in $Body.PSObject.Properties) {
+            if ($sensitiveFields -contains $prop.Name -and $prop.Value) {
+                $sanitizedBody[$prop.Name] = '***REDACTED***'
+            }
+            else {
+                $sanitizedBody[$prop.Name] = $prop.Value
+            }
+        }
+        Write-Verbose "BODY: $($sanitizedBody | ConvertTo-Json -Compress)"
         $null = $splat.Add('Body', ($Body | ConvertTo-Json -Compress -Depth 10))
     }
 

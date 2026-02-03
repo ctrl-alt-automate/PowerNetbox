@@ -28,6 +28,9 @@ function Get-NBDCIMInterfaceConnection {
 
         [string[]]$Fields,
 
+
+        [string[]]$Omit,
+
         [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
@@ -36,7 +39,8 @@ function Get-NBDCIMInterfaceConnection {
 
         [uint64[]]$Id,
 
-        [object]$Connection_Status,
+        [ValidateSet('connected', 'planned', 'decommissioning', IgnoreCase = $true)]
+        [string]$Connection_Status,
 
         [uint64]$Site,
 

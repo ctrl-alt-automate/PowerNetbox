@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Creates a new PAMFHRPGroupAssignment in Netbox I module.
+    Creates a new IPAM FHRPGroupAssignment in Netbox IPAM module.
 
 .DESCRIPTION
-    Creates a new PAMFHRPGroupAssignment in Netbox I module.
+    Creates a new IPAM FHRPGroupAssignment in Netbox IPAM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBIPAMFHRPGroupAssignment
 
-    Returns all PAMFHRPGroupAssignment objects.
+    Creates a new IPAM FHRP Group Assignment object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

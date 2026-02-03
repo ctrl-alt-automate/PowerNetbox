@@ -92,7 +92,8 @@ function New-NBIPAMVLAN {
         [string]$Name,
 
         [Parameter(ParameterSetName = 'Single')]
-        [object]$Status = 'Active',
+        [ValidateSet('active', 'reserved', 'deprecated', IgnoreCase = $true)]
+        [string]$Status = 'active',
 
         [Parameter(ParameterSetName = 'Single')]
         [uint64]$Tenant,
@@ -104,7 +105,7 @@ function New-NBIPAMVLAN {
         [uint64]$Group,
 
         [Parameter(ParameterSetName = 'Single')]
-        [object]$Role,
+        [uint64]$Role,
 
         [Parameter(ParameterSetName = 'Single')]
         [string]$Description,

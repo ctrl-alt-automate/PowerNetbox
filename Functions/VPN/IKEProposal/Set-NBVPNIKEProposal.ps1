@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing PNIKEProposal in Netbox V module.
+    Updates an existing VPN IKEProposal in Netbox VPN module.
 
 .DESCRIPTION
-    Updates an existing PNIKEProposal in Netbox V module.
+    Updates an existing VPN IKEProposal in Netbox VPN module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBVPNIKEProposal
 
-    Returns all PNIKEProposal objects.
+    Updates an existing VPN IKEProposal object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

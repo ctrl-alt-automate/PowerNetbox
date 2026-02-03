@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing PAMPrefix in Netbox I module.
+    Updates an existing IPAM Prefix in Netbox IPAM module.
 
 .DESCRIPTION
-    Updates an existing PAMPrefix in Netbox I module.
+    Updates an existing IPAM Prefix in Netbox IPAM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBIPAMPrefix
 
-    Returns all PAMPrefix objects.
+    Updates an existing IPAM Prefix object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -40,7 +40,7 @@ function Set-NBIPAMPrefix {
 
         [uint64]$VLAN,
 
-        [object]$Role,
+        [uint64]$Role,
 
         [hashtable]$Custom_Fields,
 
@@ -50,7 +50,9 @@ function Set-NBIPAMPrefix {
 
         [uint64]$Owner,
 
-        [switch]$Force
+        [switch]$Force,
+
+        [switch]$Raw
     )
 
     begin {
@@ -78,12 +80,14 @@ function Set-NBIPAMPrefix {
         foreach ($PrefixId in $Id) {
             $Segments = [System.Collections.ArrayList]::new(@('ipam', 'prefixes', $PrefixId))
 
-            if ($Force -or $PSCmdlet.ShouldProcess("Prefix ID $PrefixId", 'Set')) {
-                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force'
+            Write-Verbose "Obtaining Prefix from ID $PrefixId"
+
+            if ($Force -or $PSCmdlet.ShouldProcess("ID: $PrefixId", 'Set')) {
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'Force'
 
                 $URI = BuildNewURI -Segments $URIComponents.Segments
 
-                InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method $Method
+                InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method $Method -Raw:$Raw
             }
         }
     }

@@ -5,11 +5,19 @@
 .DESCRIPTION
     Retrieves Address objects from Netbox IPAM module.
 
+.PARAMETER Omit
+    Specify which fields to exclude from the response.
+    Requires Netbox 4.5.0 or later.
+
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
     Get-NBIPAMAddress
+
+.EXAMPLE
+    Get-NBIPAMAddress -Omit 'comments','description'
+    Returns addresses without comments and description fields (Netbox 4.5+).
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -28,6 +36,8 @@ function Get-NBIPAMAddress {
 
         [string[]]$Fields,
 
+        [string[]]$Omit,
+
         [Parameter(ParameterSetName = 'Query',
             Position = 0)]
         [string]$Address,
@@ -39,7 +49,8 @@ function Get-NBIPAMAddress {
         [string]$Query,
 
         [Parameter(ParameterSetName = 'Query')]
-        [object]$Family,
+        [ValidateSet(4, 6)]
+        [int]$Family,
 
         [Parameter(ParameterSetName = 'Query')]
         [string]$Parent,
@@ -75,10 +86,12 @@ function Get-NBIPAMAddress {
         [uint64]$Interface_Id,
 
         [Parameter(ParameterSetName = 'Query')]
-        [object]$Status,
+        [ValidateSet('active', 'reserved', 'deprecated', 'dhcp', 'slaac', IgnoreCase = $true)]
+        [string]$Status,
 
         [Parameter(ParameterSetName = 'Query')]
-        [object]$Role,
+        [ValidateSet('loopback', 'secondary', 'anycast', 'vip', 'vrrp', 'hsrp', 'glbp', 'carp', IgnoreCase = $true)]
+        [string]$Role,
 
         [ValidateRange(1, 1000)]
         [uint16]$Limit,

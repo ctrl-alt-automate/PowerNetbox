@@ -27,7 +27,8 @@
     Body template (Jinja2).
 
 .PARAMETER Secret
-    Secret for HMAC signature.
+    Secret for HMAC signature. Use SecureString for security.
+    Example: $secret = ConvertTo-SecureString "my-secret" -AsPlainText -Force
 
 .PARAMETER Ssl_Verification
     Whether to verify SSL certificates.
@@ -42,7 +43,9 @@
     Return the raw API response.
 
 .EXAMPLE
-    New-NBWebhook -Name "Slack Notification" -Payload_Url "https://hooks.slack.com/services/xxx"
+    # Create a webhook that sends notifications to a Slack channel
+    $secret = ConvertTo-SecureString "your-webhook-secret" -AsPlainText -Force
+    New-NBWebhook -Name "Slack Notification" -Payload_Url "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX" -Secret $secret
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -70,7 +73,7 @@ function New-NBWebhook {
 
         [string]$Body_Template,
 
-        [string]$Secret,
+        [securestring]$Secret,
 
         [bool]$Ssl_Verification,
 
@@ -84,8 +87,13 @@ function New-NBWebhook {
     process {
         Write-Verbose "Creating Webhook"
         $Segments = [System.Collections.ArrayList]::new(@('extras', 'webhooks'))
-        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'Secret'
         $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        # Convert SecureString secret to plaintext for API
+        if ($PSBoundParameters.ContainsKey('Secret')) {
+            $URIComponents.Parameters['secret'] = [System.Net.NetworkCredential]::new('', $Secret).Password
+        }
 
         if ($PSCmdlet.ShouldProcess($Name, 'Create Webhook')) {
             InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw

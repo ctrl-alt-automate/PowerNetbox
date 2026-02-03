@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing CIMModuleTypeProfile in Netbox D module.
+    Updates an existing DCIM ModuleTypeProfile in Netbox DCIM module.
 
 .DESCRIPTION
-    Updates an existing CIMModuleTypeProfile in Netbox D module.
+    Updates an existing DCIM ModuleTypeProfile in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBDCIMModuleTypeProfile
 
-    Returns all CIMModuleTypeProfile objects.
+    Updates an existing DCIM ModuleTypeProfile object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

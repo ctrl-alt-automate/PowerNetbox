@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing PNTunnelTermination in Netbox V module.
+    Updates an existing VPN TunnelTermination in Netbox VPN module.
 
 .DESCRIPTION
-    Updates an existing PNTunnelTermination in Netbox V module.
+    Updates an existing VPN TunnelTermination in Netbox VPN module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBVPNTunnelTermination
 
-    Returns all PNTunnelTermination objects.
+    Updates an existing VPN TunnelTermination object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

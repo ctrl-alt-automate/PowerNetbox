@@ -44,11 +44,12 @@ function Remove-NBVirtualizationClusterGroup {
     process {
         Write-Verbose "Removing Virtualization Cluster Group"
         foreach ($GroupId in $Id) {
+
             $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'cluster-groups', $GroupId))
 
             $URI = BuildNewURI -Segments $Segments
 
-            if ($Force -or $PSCmdlet.ShouldProcess("Cluster Group ID $GroupId", 'Delete cluster group')) {
+            if ($Force -or $PSCmdlet.ShouldProcess("$("ID $GroupId")", 'Delete cluster group')) {
                 InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
             }
         }

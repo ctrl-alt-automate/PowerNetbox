@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Removes a PAMRole from Netbox I module.
+    Removes a IPAM Role from Netbox IPAM module.
 
 .DESCRIPTION
-    Removes a PAMRole from Netbox I module.
+    Removes a IPAM Role from Netbox IPAM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBIPAMRole
 
-    Returns all PAMRole objects.
+    Deletes an IPAM Role object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

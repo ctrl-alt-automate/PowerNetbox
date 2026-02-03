@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Creates a new PNL2VPN in Netbox V module.
+    Creates a new VPN L2VPN in Netbox VPN module.
 
 .DESCRIPTION
-    Creates a new PNL2VPN in Netbox V module.
+    Creates a new VPN L2VPN in Netbox VPN module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBVPNL2VPN
 
-    Returns all PNL2VPN objects.
+    Creates a new VPN L2VPN object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

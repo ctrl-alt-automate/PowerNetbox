@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBVirtualMachineInterface
 
-    Returns all irtualMachineInterface objects.
+    Updates an existing Virtual Machine Interface object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -56,7 +56,7 @@ function Set-NBVirtualMachineInterface {
             $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'interfaces', $VMI_ID))
 
             if ($Force -or $pscmdlet.ShouldProcess("VM Interface ID $VMI_ID", "Set")) {
-                $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force', 'Raw'
+                $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'Force'
 
                 $URI = BuildNewURI -Segments $URIComponents.Segments
 

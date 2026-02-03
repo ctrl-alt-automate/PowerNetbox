@@ -113,7 +113,8 @@ function Set-NBVirtualMachine {
         [uint64]$Cluster,
 
         [Parameter(ParameterSetName = 'Single')]
-        [object]$Status,
+        [ValidateSet('offline', 'active', 'planned', 'staged', 'failed', 'decommissioning', IgnoreCase = $true)]
+        [string]$Status,
 
         [Parameter(ParameterSetName = 'Single')]
         [uint64]$Platform,

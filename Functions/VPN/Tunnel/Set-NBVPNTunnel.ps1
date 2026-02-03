@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing PNTunnel in Netbox V module.
+    Updates an existing VPN Tunnel in Netbox VPN module.
 
 .DESCRIPTION
-    Updates an existing PNTunnel in Netbox V module.
+    Updates an existing VPN Tunnel in Netbox VPN module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBVPNTunnel
 
-    Returns all PNTunnel objects.
+    Updates an existing VPN Tunnel object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

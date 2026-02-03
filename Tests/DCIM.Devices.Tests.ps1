@@ -63,7 +63,7 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
 
             $Result.Method | Should -Be 'GET'
             # By default, config_context is excluded for performance
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/devices/?exclude=config_context'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/devices/?omit=config_context'
             $Result.Headers.Keys.Count | Should -BeExactly 1
         }
 
@@ -74,7 +74,7 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             # Parameter order in hashtables is not guaranteed, so check all are present
             $Result.Uri | Should -Match 'limit=10'
             $Result.Uri | Should -Match 'offset=100'
-            $Result.Uri | Should -Match 'exclude=config_context'
+            $Result.Uri | Should -Match 'omit=config_context'
         }
 
         It "Should request with a query" {
@@ -82,7 +82,7 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
 
             $Result.Method | Should -Be 'GET'
             $Result.Uri | Should -Match 'q=testdevice'
-            $Result.Uri | Should -Match 'exclude=config_context'
+            $Result.Uri | Should -Match 'omit=config_context'
         }
 
         It "Should request with an escaped query" {
@@ -91,7 +91,7 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             $Result.Method | Should -Be 'GET'
             # Module doesn't URL-encode spaces in query strings
             $Result.Uri | Should -Match 'q=test device'
-            $Result.Uri | Should -Match 'exclude=config_context'
+            $Result.Uri | Should -Match 'omit=config_context'
         }
 
         It "Should request with a name" {
@@ -99,7 +99,7 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
 
             $Result.Method | Should -Be 'GET'
             $Result.Uri | Should -Match 'name=testdevice'
-            $Result.Uri | Should -Match 'exclude=config_context'
+            $Result.Uri | Should -Match 'omit=config_context'
         }
 
         It "Should request with a single ID" {
@@ -107,7 +107,7 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
 
             $Result.Method | Should -Be 'GET'
             $Result.Uri | Should -Match 'dcim/devices/10/'
-            $Result.Uri | Should -Match 'exclude=config_context'
+            $Result.Uri | Should -Match 'omit=config_context'
         }
 
         It "Should request a device by ID from the pipeline" {
@@ -115,7 +115,7 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
 
             $Result.Method | Should -Be 'GET'
             $Result.Uri | Should -Match 'dcim/devices/10/'
-            $Result.Uri | Should -Match 'exclude=config_context'
+            $Result.Uri | Should -Match 'omit=config_context'
         }
 
         It "Should request with multiple IDs" {
@@ -124,7 +124,7 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             $Result.Method | Should -Be 'GET'
             # Commas may or may not be URL-encoded depending on PS version
             $Result.Uri | Should -Match 'id__in=10(%2C|,)12(%2C|,)15'
-            $Result.Uri | Should -Match 'exclude=config_context'
+            $Result.Uri | Should -Match 'omit=config_context'
         }
 
         It "Should request a status" {
@@ -133,16 +133,16 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             $Result.Method | Should -Be 'GET'
             # Status value is passed through to API as-is (no client-side validation)
             $Result.Uri | Should -Match 'status=Active'
-            $Result.Uri | Should -Match 'exclude=config_context'
+            $Result.Uri | Should -Match 'omit=config_context'
         }
 
-        It "Should pass invalid status to API" {
-            # Invalid status values are now passed through to the API
-            # The API will return an error, not the client
-            $Result = Get-NBDCIMDevice -Status 'Fake'
-            $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Match 'status=Fake'
-            $Result.Uri | Should -Match 'exclude=config_context'
+        It "Should have ValidateSet for Status parameter" {
+            # Status parameter now uses ValidateSet for type safety
+            $cmd = Get-Command Get-NBDCIMDevice
+            $statusParam = $cmd.Parameters['Status']
+            $validateSet = $statusParam.Attributes | Where-Object { $_ -is [System.Management.Automation.ValidateSetAttribute] }
+            $validateSet | Should -Not -BeNullOrEmpty
+            $validateSet.ValidValues | Should -Contain 'active'
         }
 
         It "Should request devices that are a PDU" {
@@ -150,21 +150,21 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
 
             $Result.Method | Should -Be 'GET'
             $Result.Uri | Should -Match 'is_pdu=True'
-            $Result.Uri | Should -Match 'exclude=config_context'
+            $Result.Uri | Should -Match 'omit=config_context'
         }
 
         It "Should exclude config_context by default" {
             $Result = Get-NBDCIMDevice
 
             $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Match 'exclude=config_context'
+            $Result.Uri | Should -Match 'omit=config_context'
         }
 
         It "Should not exclude config_context when IncludeConfigContext is specified" {
             $Result = Get-NBDCIMDevice -IncludeConfigContext
 
             $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Not -Match 'exclude=config_context'
+            $Result.Uri | Should -Not -Match 'omit=config_context'
         }
 
         It "Should request with Brief mode" {
@@ -186,7 +186,7 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
 
             $Result.Method | Should -Be 'GET'
             $Result.Uri | Should -Match 'brief=True'
-            $Result.Uri | Should -Match 'exclude=config_context'
+            $Result.Uri | Should -Match 'omit=config_context'
         }
     }
 
@@ -269,7 +269,7 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
 
     Context "New-NBDCIMDevice" {
         It "Should create a new device" {
-            $Result = New-NBDCIMDevice -Name "newdevice" -Device_Role 4 -Device_Type 10 -Site 1 -Face 0
+            $Result = New-NBDCIMDevice -Name "newdevice" -Device_Role 4 -Device_Type 10 -Site 1 -Face 'front'
 
             Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
 
@@ -281,15 +281,16 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             $bodyObj.role | Should -Be 4
             $bodyObj.device_type | Should -Be 10
             $bodyObj.site | Should -Be 1
-            $bodyObj.face | Should -Be 0
+            $bodyObj.face | Should -Be 'front'
         }
 
-        It "Should pass invalid status to API" {
-            # Invalid status values are now passed through to the API
-            $Result = New-NBDCIMDevice -Name "newdevice" -Device_Role 4 -Device_Type 10 -Site 1 -Status 5555
-            $Result.Method | Should -Be 'POST'
-            $bodyObj = $Result.Body | ConvertFrom-Json
-            $bodyObj.status | Should -Be 5555
+        It "Should have ValidateSet for Status parameter" {
+            # Status parameter now uses ValidateSet for type safety
+            $cmd = Get-Command New-NBDCIMDevice
+            $statusParam = $cmd.Parameters['Status']
+            $validateSet = $statusParam.Attributes | Where-Object { $_ -is [System.Management.Automation.ValidateSetAttribute] }
+            $validateSet | Should -Not -BeNullOrEmpty
+            $validateSet.ValidValues | Should -Contain 'active'
         }
 
         It "Should have Single and Bulk parameter sets" {

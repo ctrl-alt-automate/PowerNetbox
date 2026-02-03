@@ -47,7 +47,8 @@ function Remove-NBDCIMRack {
     process {
         Write-Verbose "Removing DCIM Rack"
         foreach ($RackId in $Id) {
-            if ($Force -or $PSCmdlet.ShouldProcess("Rack ID $RackId", "Delete rack")) {
+
+            if ($Force -or $PSCmdlet.ShouldProcess("$("ID $RackId")", "Delete rack")) {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'racks', $RackId))
 
                 $URI = BuildNewURI -Segments $Segments

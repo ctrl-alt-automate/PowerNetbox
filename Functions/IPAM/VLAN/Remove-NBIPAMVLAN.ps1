@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Removes a PAMVLAN from Netbox I module.
+    Removes a IPAM VLAN from Netbox IPAM module.
 
 .DESCRIPTION
-    Removes a PAMVLAN from Netbox I module.
+    Removes a IPAM VLAN from Netbox IPAM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBIPAMVLAN
 
-    Returns all PAMVLAN objects.
+    Deletes an IPAM VLAN object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

@@ -79,7 +79,7 @@ function New-NBDCIMSite {
             $PSBoundParameters.Add('slug', $name)
         }
 
-        $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters
+        $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
 
         $URI = BuildNewURI -Segments $URIComponents.Segments
 

@@ -44,11 +44,12 @@ function Remove-NBVirtualizationClusterType {
     process {
         Write-Verbose "Removing Virtualization Cluster Type"
         foreach ($TypeId in $Id) {
+
             $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'cluster-types', $TypeId))
 
             $URI = BuildNewURI -Segments $Segments
 
-            if ($Force -or $PSCmdlet.ShouldProcess("Cluster Type ID $TypeId", 'Delete cluster type')) {
+            if ($Force -or $PSCmdlet.ShouldProcess("$("ID $TypeId")", 'Delete cluster type')) {
                 InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
             }
         }

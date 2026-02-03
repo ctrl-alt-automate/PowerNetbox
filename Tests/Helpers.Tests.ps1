@@ -452,17 +452,17 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' {
             }
         }
 
-        It "Should add exclude parameter as comma-separated list" {
+        It "Should add omit parameter as comma-separated list" {
             InModuleScope -ModuleName 'PowerNetbox' {
-                $URIComponents = BuildURIComponents -URISegments ([System.Collections.ArrayList]@('dcim', 'devices')) -ParametersDictionary @{Exclude=@('config_context','comments')}
-                $URIComponents.Parameters['exclude'] | Should -Be 'config_context,comments'
+                $URIComponents = BuildURIComponents -URISegments ([System.Collections.ArrayList]@('dcim', 'devices')) -ParametersDictionary @{Omit=@('config_context','comments')}
+                $URIComponents.Parameters['omit'] | Should -Be 'config_context,comments'
             }
         }
 
-        It "Should handle single value in Exclude parameter" {
+        It "Should handle single value in Omit parameter" {
             InModuleScope -ModuleName 'PowerNetbox' {
-                $URIComponents = BuildURIComponents -URISegments ([System.Collections.ArrayList]@('dcim', 'devices')) -ParametersDictionary @{Exclude=@('config_context')}
-                $URIComponents.Parameters['exclude'] | Should -Be 'config_context'
+                $URIComponents = BuildURIComponents -URISegments ([System.Collections.ArrayList]@('dcim', 'devices')) -ParametersDictionary @{Omit=@('config_context')}
+                $URIComponents.Parameters['omit'] | Should -Be 'config_context'
             }
         }
 

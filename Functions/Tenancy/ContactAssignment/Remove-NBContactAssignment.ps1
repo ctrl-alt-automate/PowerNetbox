@@ -50,11 +50,12 @@ function Remove-NBContactAssignment {
     process {
         Write-Verbose "Removing Contact Assignment"
         foreach ($AssignmentId in $Id) {
+
             $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'contact-assignments', $AssignmentId))
 
             $URI = BuildNewURI -Segments $Segments
 
-            if ($Force -or $PSCmdlet.ShouldProcess("Contact Assignment ID $AssignmentId", 'Delete contact assignment')) {
+            if ($Force -or $PSCmdlet.ShouldProcess("ID: $AssignmentId", 'Delete contact assignment')) {
                 InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
             }
         }

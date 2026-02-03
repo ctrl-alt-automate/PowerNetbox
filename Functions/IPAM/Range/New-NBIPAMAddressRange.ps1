@@ -67,13 +67,14 @@ function New-NBIPAMAddressRange {
         [ValidateNotNullOrEmpty()]
         [string]$End_Address,
 
-        [object]$Status = 'Active',
+        [ValidateSet('active', 'reserved', 'deprecated', IgnoreCase = $true)]
+        [string]$Status = 'active',
 
         [uint64]$Tenant,
 
         [uint64]$VRF,
 
-        [object]$Role,
+        [uint64]$Role,
 
         [hashtable]$Custom_Fields,
 
@@ -93,7 +94,7 @@ function New-NBIPAMAddressRange {
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'ip-ranges'))
         $Method = 'POST'
 
-        $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters
+        $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
 
         $URI = BuildNewURI -Segments $URIComponents.Segments
 

@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Creates a new CIMDeviceBay in Netbox D module.
+    Creates a new DCIM DeviceBay in Netbox DCIM module.
 
 .DESCRIPTION
-    Creates a new CIMDeviceBay in Netbox D module.
+    Creates a new DCIM DeviceBay in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBDCIMDeviceBay
 
-    Returns all CIMDeviceBay objects.
+    Creates a new DCIM DeviceBay object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

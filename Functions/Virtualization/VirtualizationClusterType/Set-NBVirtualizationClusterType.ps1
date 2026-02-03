@@ -69,13 +69,14 @@ function Set-NBVirtualizationClusterType {
     process {
         Write-Verbose "Updating Virtualization Cluster Type"
         foreach ($TypeId in $Id) {
+
             $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'cluster-types', $TypeId))
 
             $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force', 'Raw'
 
             $URI = BuildNewURI -Segments $URIComponents.Segments
 
-            if ($Force -or $PSCmdlet.ShouldProcess("Cluster Type ID $TypeId", 'Update cluster type')) {
+            if ($Force -or $PSCmdlet.ShouldProcess("$("ID $TypeId")", 'Update cluster type')) {
                 InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
             }
         }

@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing CIMPowerPort in Netbox D module.
+    Updates an existing DCIM PowerPort in Netbox DCIM module.
 
 .DESCRIPTION
-    Updates an existing CIMPowerPort in Netbox D module.
+    Updates an existing DCIM PowerPort in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBDCIMPowerPort
 
-    Returns all CIMPowerPort objects.
+    Updates an existing DCIM PowerPort object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

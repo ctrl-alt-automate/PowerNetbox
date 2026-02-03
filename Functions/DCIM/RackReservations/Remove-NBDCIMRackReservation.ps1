@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Removes a CIMRackReservation from Netbox D module.
+    Removes a DCIM RackReservation from Netbox DCIM module.
 
 .DESCRIPTION
-    Removes a CIMRackReservation from Netbox D module.
+    Removes a DCIM RackReservation from Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBDCIMRackReservation
 
-    Returns all CIMRackReservation objects.
+    Deletes a DCIM RackReservation object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

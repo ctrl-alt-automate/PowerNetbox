@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing CIMInventoryItemTemplate in Netbox D module.
+    Updates an existing DCIM InventoryItemTemplate in Netbox DCIM module.
 
 .DESCRIPTION
-    Updates an existing CIMInventoryItemTemplate in Netbox D module.
+    Updates an existing DCIM InventoryItemTemplate in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBDCIMInventoryItemTemplate
 
-    Returns all CIMInventoryItemTemplate objects.
+    Updates an existing DCIM InventoryItemTemplate object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

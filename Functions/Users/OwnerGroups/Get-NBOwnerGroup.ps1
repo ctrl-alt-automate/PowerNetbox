@@ -56,6 +56,9 @@ function Get-NBOwnerGroup {
 
         [string[]]$Fields,
 
+
+        [string[]]$Omit,
+
         [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
@@ -75,6 +78,7 @@ function Get-NBOwnerGroup {
     )
 
     process {
+        Write-Verbose "Retrieving Owner Group"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {
                 foreach ($i in $Id) {

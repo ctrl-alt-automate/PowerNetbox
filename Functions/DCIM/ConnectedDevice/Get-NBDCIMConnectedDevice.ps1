@@ -27,6 +27,9 @@ function Get-NBDCIMConnectedDevice {
 
         [string[]]$Fields,
 
+
+        [string[]]$Omit,
+
         [Parameter(Mandatory = $true)][string]$Peer_Device,
         [Parameter(Mandatory = $true)][string]$Peer_Interface,
         [switch]$Raw

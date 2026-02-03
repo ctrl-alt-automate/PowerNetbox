@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing CIMModuleBayTemplate in Netbox D module.
+    Updates an existing DCIM ModuleBayTemplate in Netbox DCIM module.
 
 .DESCRIPTION
-    Updates an existing CIMModuleBayTemplate in Netbox D module.
+    Updates an existing DCIM ModuleBayTemplate in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBDCIMModuleBayTemplate
 
-    Returns all CIMModuleBayTemplate objects.
+    Updates an existing DCIM ModuleBayTemplate object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Removes a PNIKEProposal from Netbox V module.
+    Removes a VPN IKEProposal from Netbox VPN module.
 
 .DESCRIPTION
-    Removes a PNIKEProposal from Netbox V module.
+    Removes a VPN IKEProposal from Netbox VPN module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBVPNIKEProposal
 
-    Returns all PNIKEProposal objects.
+    Deletes a VPN IKEProposal object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

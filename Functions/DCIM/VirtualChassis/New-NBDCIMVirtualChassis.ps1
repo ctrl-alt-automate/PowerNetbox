@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Creates a new CIMVirtualChassis in Netbox D module.
+    Creates a new DCIM VirtualChassis in Netbox DCIM module.
 
 .DESCRIPTION
-    Creates a new CIMVirtualChassis in Netbox D module.
+    Creates a new DCIM VirtualChassis in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBDCIMVirtualChassis
 
-    Returns all CIMVirtualChassis objects.
+    Creates a new DCIM VirtualChassis object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

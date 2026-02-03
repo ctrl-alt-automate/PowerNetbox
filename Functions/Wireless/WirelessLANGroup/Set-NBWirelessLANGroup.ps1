@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBWirelessLANGroup
 
-    Returns all irelessLANGroup objects.
+    Updates an existing Wireless LAN Group object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

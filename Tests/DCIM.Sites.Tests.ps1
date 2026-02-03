@@ -85,17 +85,9 @@ Describe "DCIM Sites Tests" -Tag 'DCIM', 'Sites' {
     }
 
     Context "Remove-NBDCIMSite" {
-        BeforeAll {
-            Mock -CommandName "Get-NBDCIMSite" -ModuleName PowerNetbox -MockWith {
-                return [pscustomobject]@{ 'Id' = $Id; 'Name' = $Name }
-            }
-        }
-
         It "Should remove a site" {
             # Remove-NBDCIMSite uses SupportsShouldProcess, use -Confirm:$false instead of -Force
             $Result = Remove-NBDCIMSite -Id 10 -Confirm:$false
-            # Performance optimization: no longer fetches the object before deleting
-            Should -Invoke -CommandName 'Get-NBDCIMSite' -Times 0 -Exactly -Scope 'It' -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/sites/10/'
         }

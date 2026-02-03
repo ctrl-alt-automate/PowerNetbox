@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing PAMAggregate in Netbox I module.
+    Updates an existing IPAM Aggregate in Netbox IPAM module.
 
 .DESCRIPTION
-    Updates an existing PAMAggregate in Netbox I module.
+    Updates an existing IPAM Aggregate in Netbox IPAM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBIPAMAggregate
 
-    Returns all PAMAggregate objects.
+    Updates an existing IPAM Aggregate object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

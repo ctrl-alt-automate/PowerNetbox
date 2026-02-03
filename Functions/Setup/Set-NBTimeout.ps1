@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing imeout in Netbox T module.
+    Sets the timeout for Netbox API requests.
 
 .DESCRIPTION
-    Updates an existing imeout in Netbox T module.
+    Sets the timeout for Netbox API requests.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBTimeout
 
-    Returns all imeout objects.
+    Sets the Netbox API request timeout.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

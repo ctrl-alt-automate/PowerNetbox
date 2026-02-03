@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Creates a new ircuit in Netbox C module.
+    Creates a new Circuit in Netbox C module.
 
 .DESCRIPTION
-    Creates a new ircuit in Netbox C module.
+    Creates a new Circuit in Netbox C module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBCircuit
 
-    Returns all ircuit objects.
+    Creates a new Circuit object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -65,7 +65,7 @@ function New-NBCircuit {
         $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuits'))
         $Method = 'POST'
 
-        $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters
+        $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
 
         $URI = BuildNewURI -Segments $URIComponents.Segments
 

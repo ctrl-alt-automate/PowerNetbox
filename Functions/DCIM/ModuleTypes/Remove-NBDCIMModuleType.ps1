@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Removes a CIMModuleType from Netbox D module.
+    Removes a DCIM ModuleType from Netbox DCIM module.
 
 .DESCRIPTION
-    Removes a CIMModuleType from Netbox D module.
+    Removes a DCIM ModuleType from Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBDCIMModuleType
 
-    Returns all CIMModuleType objects.
+    Deletes a DCIM ModuleType object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBWirelessLANGroup
 
-    Returns all irelessLANGroup objects.
+    Deletes a Wireless LAN Group object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

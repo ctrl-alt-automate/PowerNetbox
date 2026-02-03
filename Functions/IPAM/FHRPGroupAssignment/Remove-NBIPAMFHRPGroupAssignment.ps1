@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Removes a PAMFHRPGroupAssignment from Netbox I module.
+    Removes a IPAM FHRPGroupAssignment from Netbox IPAM module.
 
 .DESCRIPTION
-    Removes a PAMFHRPGroupAssignment from Netbox I module.
+    Removes a IPAM FHRPGroupAssignment from Netbox IPAM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBIPAMFHRPGroupAssignment
 
-    Returns all PAMFHRPGroupAssignment objects.
+    Deletes an IPAM FHRP Group Assignment object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

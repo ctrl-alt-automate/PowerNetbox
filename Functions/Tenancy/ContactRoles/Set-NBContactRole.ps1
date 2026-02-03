@@ -60,11 +60,11 @@ function Set-NBContactRole {
         foreach ($ContactRoleId in $Id) {
             $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'contact-roles', $ContactRoleId))
 
-            $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force'
+            $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'Force'
 
             $URI = BuildNewURI -Segments $URIComponents.Segments
 
-            if ($PSCmdlet.ShouldProcess("Contact Role ID $ContactRoleId", 'Update contact role')) {
+            if ($Force -or $PSCmdlet.ShouldProcess("ID $ContactRoleId", 'Update contact role')) {
                 InvokeNetboxRequest -URI $URI -Method $Method -Body $URIComponents.Parameters -Raw:$Raw
             }
         }

@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Removes a PNL2VPN from Netbox V module.
+    Removes a VPN L2VPN from Netbox VPN module.
 
 .DESCRIPTION
-    Removes a PNL2VPN from Netbox V module.
+    Removes a VPN L2VPN from Netbox VPN module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBVPNL2VPN
 
-    Returns all PNL2VPN objects.
+    Deletes a VPN L2VPN object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

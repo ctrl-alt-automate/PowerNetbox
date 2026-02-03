@@ -28,6 +28,9 @@ function Get-NBCircuitProvider {
 
         [string[]]$Fields,
 
+
+        [string[]]$Omit,
+
         [Parameter(ParameterSetName = 'ById',
                    Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,

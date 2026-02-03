@@ -44,11 +44,12 @@ function Remove-NBContactRole {
     process {
         Write-Verbose "Removing Contact Role"
         foreach ($RoleId in $Id) {
+
             $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'contact-roles', $RoleId))
 
             $URI = BuildNewURI -Segments $Segments
 
-            if ($Force -or $PSCmdlet.ShouldProcess("Contact Role ID $RoleId", 'Delete contact role')) {
+            if ($Force -or $PSCmdlet.ShouldProcess("$("ID $RoleId")", 'Delete contact role')) {
                 InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
             }
         }

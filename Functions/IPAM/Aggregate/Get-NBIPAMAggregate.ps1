@@ -28,6 +28,9 @@ function Get-NBIPAMAggregate {
 
         [string[]]$Fields,
 
+
+        [string[]]$Omit,
+
         [Parameter(ParameterSetName = 'Query')]
         [string]$Query,
 
@@ -38,7 +41,8 @@ function Get-NBIPAMAggregate {
         [string]$Prefix,
 
         [Parameter(ParameterSetName = 'Query')]
-        [object]$Family,
+        [ValidateSet(4, 6)]
+        [int]$Family,
 
         [Parameter(ParameterSetName = 'Query')]
         [uint64]$RIR_Id,

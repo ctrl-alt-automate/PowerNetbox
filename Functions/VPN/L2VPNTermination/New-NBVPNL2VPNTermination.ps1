@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Creates a new PNL2VPNTermination in Netbox V module.
+    Creates a new VPN L2VPNTermination in Netbox VPN module.
 
 .DESCRIPTION
-    Creates a new PNL2VPNTermination in Netbox V module.
+    Creates a new VPN L2VPNTermination in Netbox VPN module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBVPNL2VPNTermination
 
-    Returns all PNL2VPNTermination objects.
+    Creates a new VPN L2VPNTermination object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

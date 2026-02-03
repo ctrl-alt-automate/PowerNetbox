@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBWirelessLANGroup -Name "Office" -Slug "office"
 
-    Creates a new WirelessLANGroup object.
+    Creates a new Wireless LAN Group object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

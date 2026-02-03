@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing redential in Netbox C module.
+    Sets the credential for Netbox API authentication.
 
 .DESCRIPTION
-    Updates an existing redential in Netbox C module.
+    Sets the credential for Netbox API authentication.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBCredential
 
-    Returns all redential objects.
+    Sets the Netbox API credential.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Removes a CIMCable from Netbox D module.
+    Removes a DCIM Cable from Netbox DCIM module.
 
 .DESCRIPTION
-    Removes a CIMCable from Netbox D module.
+    Removes a DCIM Cable from Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBDCIMCable
 
-    Returns all CIMCable objects.
+    Deletes a DCIM Cable object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

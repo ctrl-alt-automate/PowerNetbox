@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Creates a new PNTunnelTermination in Netbox V module.
+    Creates a new VPN TunnelTermination in Netbox VPN module.
 
 .DESCRIPTION
-    Creates a new PNTunnelTermination in Netbox V module.
+    Creates a new VPN TunnelTermination in Netbox VPN module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBVPNTunnelTermination
 
-    Returns all PNTunnelTermination objects.
+    Creates a new VPN TunnelTermination object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

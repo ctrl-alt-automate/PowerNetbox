@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Creates a new CIMMACAddress in Netbox D module.
+    Creates a new CIMMACAddress in Netbox DCIM module.
 
 .DESCRIPTION
-    Creates a new CIMMACAddress in Netbox D module.
+    Creates a new CIMMACAddress in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBDCIMMACAddress
 
-    Returns all CIMMACAddress objects.
+    Creates a new DCIM MAC Address object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

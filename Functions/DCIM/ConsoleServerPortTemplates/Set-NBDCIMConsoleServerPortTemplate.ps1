@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing CIMConsoleServerPortTemplate in Netbox D module.
+    Updates an existing DCIM ConsoleServerPortTemplate in Netbox DCIM module.
 
 .DESCRIPTION
-    Updates an existing CIMConsoleServerPortTemplate in Netbox D module.
+    Updates an existing DCIM ConsoleServerPortTemplate in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBDCIMConsoleServerPortTemplate
 
-    Returns all CIMConsoleServerPortTemplate objects.
+    Updates an existing DCIM ConsoleServerPortTemplate object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

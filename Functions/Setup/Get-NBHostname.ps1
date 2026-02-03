@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Retrieves Get-NBHostname.ps1 objects from Netbox Setup module.
+    Retrieves the current hostname for Netbox API connections from Netbox Setup module.
 
 .DESCRIPTION
-    Retrieves Get-NBHostname.ps1 objects from Netbox Setup module.
+    Retrieves the current hostname for Netbox API connections from Netbox Setup module.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.

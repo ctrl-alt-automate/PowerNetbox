@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBWirelessLink
 
-    Returns all irelessLink objects.
+    Creates a new Wireless Link object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

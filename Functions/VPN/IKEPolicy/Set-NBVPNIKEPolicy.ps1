@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing PNIKEPolicy in Netbox V module.
+    Updates an existing VPN IKEPolicy in Netbox VPN module.
 
 .DESCRIPTION
-    Updates an existing PNIKEPolicy in Netbox V module.
+    Updates an existing VPN IKEPolicy in Netbox VPN module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBVPNIKEPolicy
 
-    Returns all PNIKEPolicy objects.
+    Updates an existing VPN IKEPolicy object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

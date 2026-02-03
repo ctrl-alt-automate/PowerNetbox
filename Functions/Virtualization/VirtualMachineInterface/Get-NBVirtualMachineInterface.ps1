@@ -54,6 +54,9 @@ function Get-NBVirtualMachineInterface {
 
         [string[]]$Fields,
 
+
+        [string[]]$Omit,
+
         [Parameter(ValueFromPipeline = $true)]
         [uint64[]]$Id,
 

@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Removes a PNIPSecProfile from Netbox V module.
+    Removes a VPN IPSecProfile from Netbox VPN module.
 
 .DESCRIPTION
-    Removes a PNIPSecProfile from Netbox V module.
+    Removes a VPN IPSecProfile from Netbox VPN module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBVPNIPSecProfile
 
-    Returns all PNIPSecProfile objects.
+    Deletes a VPN IPSecProfile object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

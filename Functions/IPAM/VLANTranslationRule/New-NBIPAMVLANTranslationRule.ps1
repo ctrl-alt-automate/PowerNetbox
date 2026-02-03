@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Creates a new PAMVLANTranslationRule in Netbox I module.
+    Creates a new IPAM VLANTranslationRule in Netbox IPAM module.
 
 .DESCRIPTION
-    Creates a new PAMVLANTranslationRule in Netbox I module.
+    Creates a new IPAM VLANTranslationRule in Netbox IPAM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBIPAMVLANTranslationRule
 
-    Returns all PAMVLANTranslationRule objects.
+    Creates a new IPAM VLAN Translation Rule object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

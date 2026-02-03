@@ -101,11 +101,11 @@ function Set-NBContact {
         foreach ($ContactId in $Id) {
             $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'contacts', $ContactId))
 
-            $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force'
+            $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'Force'
 
             $URI = BuildNewURI -Segments $URIComponents.Segments
 
-            if ($Force -or $PSCmdlet.ShouldProcess("Contact ID $ContactId", 'Update contact')) {
+            if ($Force -or $PSCmdlet.ShouldProcess("ID $ContactId", 'Update contact')) {
                 InvokeNetboxRequest -URI $URI -Method $Method -Body $URIComponents.Parameters -Raw:$Raw
             }
         }

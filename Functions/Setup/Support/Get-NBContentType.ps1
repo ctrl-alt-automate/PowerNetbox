@@ -55,6 +55,9 @@ function Get-NBContentType {
 
         [string[]]$Fields,
 
+
+        [string[]]$Omit,
+
         [Parameter(ParameterSetName = 'Query',
                    Position = 0)]
         [string]$Model,

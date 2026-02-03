@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing PAMFHRPGroup in Netbox I module.
+    Updates an existing IPAM FHRPGroup in Netbox IPAM module.
 
 .DESCRIPTION
-    Updates an existing PAMFHRPGroup in Netbox I module.
+    Updates an existing IPAM FHRPGroup in Netbox IPAM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBIPAMFHRPGroup
 
-    Returns all PAMFHRPGroup objects.
+    Updates an existing IPAM FHRP Group object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

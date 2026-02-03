@@ -55,11 +55,12 @@ function Remove-NBVirtualMachineInterface {
     process {
         Write-Verbose "Removing Virtual Machine Interface"
         foreach ($InterfaceId in $Id) {
+
             $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'interfaces', $InterfaceId))
 
             $URI = BuildNewURI -Segments $Segments
 
-            if ($Force -or $PSCmdlet.ShouldProcess("VM Interface ID $InterfaceId", 'Delete interface')) {
+            if ($Force -or $PSCmdlet.ShouldProcess("ID: $InterfaceId", 'Delete interface')) {
                 InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
             }
         }

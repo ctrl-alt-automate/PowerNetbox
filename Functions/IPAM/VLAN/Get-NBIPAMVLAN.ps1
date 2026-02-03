@@ -28,6 +28,9 @@ function Get-NBIPAMVLAN {
 
         [string[]]$Fields,
 
+
+        [string[]]$Omit,
+
         [Parameter(ParameterSetName = 'Query',
                    Position = 0)]
         [ValidateRange(1, 4096)]
@@ -55,7 +58,8 @@ function Get-NBIPAMVLAN {
         [uint64]$TenantGroup_Id,
 
         [Parameter(ParameterSetName = 'Query')]
-        [object]$Status,
+        [ValidateSet('active', 'reserved', 'deprecated', IgnoreCase = $true)]
+        [string]$Status,
 
         [Parameter(ParameterSetName = 'Query')]
         [string]$Region,

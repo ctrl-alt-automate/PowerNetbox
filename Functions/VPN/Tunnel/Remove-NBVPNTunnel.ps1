@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Removes a PNTunnel from Netbox V module.
+    Removes a VPN Tunnel from Netbox VPN module.
 
 .DESCRIPTION
-    Removes a PNTunnel from Netbox V module.
+    Removes a VPN Tunnel from Netbox VPN module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBVPNTunnel
 
-    Returns all PNTunnel objects.
+    Deletes a VPN Tunnel object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

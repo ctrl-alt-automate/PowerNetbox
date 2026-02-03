@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing CIMPowerPanel in Netbox D module.
+    Updates an existing DCIM PowerPanel in Netbox DCIM module.
 
 .DESCRIPTION
-    Updates an existing CIMPowerPanel in Netbox D module.
+    Updates an existing DCIM PowerPanel in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBDCIMPowerPanel
 
-    Returns all CIMPowerPanel objects.
+    Updates an existing DCIM PowerPanel object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing CIMModuleBay in Netbox D module.
+    Updates an existing DCIM ModuleBay in Netbox DCIM module.
 
 .DESCRIPTION
-    Updates an existing CIMModuleBay in Netbox D module.
+    Updates an existing DCIM ModuleBay in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBDCIMModuleBay
 
-    Returns all CIMModuleBay objects.
+    Updates an existing DCIM ModuleBay object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

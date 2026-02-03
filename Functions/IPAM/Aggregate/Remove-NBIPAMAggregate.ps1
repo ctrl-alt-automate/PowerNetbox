@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Removes a PAMAggregate from Netbox I module.
+    Removes a IPAM Aggregate from Netbox IPAM module.
 
 .DESCRIPTION
-    Removes a PAMAggregate from Netbox I module.
+    Removes a IPAM Aggregate from Netbox IPAM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBIPAMAggregate
 
-    Returns all PAMAggregate objects.
+    Deletes an IPAM Aggregate object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

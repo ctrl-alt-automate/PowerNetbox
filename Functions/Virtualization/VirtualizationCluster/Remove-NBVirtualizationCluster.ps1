@@ -50,11 +50,12 @@ function Remove-NBVirtualizationCluster {
     process {
         Write-Verbose "Removing Virtualization Cluster"
         foreach ($ClusterId in $Id) {
+
             $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'clusters', $ClusterId))
 
             $URI = BuildNewURI -Segments $Segments
 
-            if ($Force -or $PSCmdlet.ShouldProcess("Cluster ID $ClusterId", 'Delete cluster')) {
+            if ($Force -or $PSCmdlet.ShouldProcess("$("ID $ClusterId")", 'Delete cluster')) {
                 InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
             }
         }

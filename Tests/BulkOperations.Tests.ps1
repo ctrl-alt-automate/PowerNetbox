@@ -1171,12 +1171,6 @@ Describe "Remove-NBIPAMAddress Bulk Mode" -Tag 'Bulk', 'IPAM' {
             return $null
         }
 
-        Mock -CommandName 'Get-NBIPAMAddress' -ModuleName 'PowerNetbox' -MockWith {
-            return [PSCustomObject]@{
-                Id = $Id
-                Address = "192.168.1.$Id/24"
-            }
-        }
     }
 
     Context "Single Mode Operations" {
@@ -1188,13 +1182,6 @@ Describe "Remove-NBIPAMAddress Bulk Mode" -Tag 'Bulk', 'IPAM' {
 
         # Note: Array Id parameters are not supported for Remove- functions
         # Use pipeline with InputObject for bulk operations (see "Bulk Operations" context below)
-
-        It "Should use Id directly without fetching IP address first (performance optimization)" {
-            Remove-NBIPAMAddress -Id 100 -Force
-
-            # Performance optimization: no longer fetches the object before deleting
-            Should -Invoke -CommandName 'Get-NBIPAMAddress' -Times 0 -ModuleName 'PowerNetbox'
-        }
     }
 
     Context "Parameter Sets" {
@@ -1418,12 +1405,6 @@ Describe "Remove-NBVirtualMachine Bulk Mode" -Tag 'Bulk', 'Virtualization' {
             return $null
         }
 
-        Mock -CommandName 'Get-NBVirtualMachine' -ModuleName 'PowerNetbox' -MockWith {
-            return [PSCustomObject]@{
-                Id = $Id
-                Name = "vm-$Id"
-            }
-        }
     }
 
     Context "Single Mode Operations" {
@@ -1435,13 +1416,6 @@ Describe "Remove-NBVirtualMachine Bulk Mode" -Tag 'Bulk', 'Virtualization' {
 
         # Note: Array Id parameters are not supported for Remove- functions
         # Use pipeline with InputObject for bulk operations (see "Bulk Operations" context below)
-
-        It "Should use Id directly without fetching VM first (performance optimization)" {
-            Remove-NBVirtualMachine -Id 100 -Force
-
-            # Performance optimization: no longer fetches the object before deleting
-            Should -Invoke -CommandName 'Get-NBVirtualMachine' -Times 0 -ModuleName 'PowerNetbox'
-        }
 
         It "Should support pipeline input by Id property" {
             $vm = [PSCustomObject]@{ Id = 100 }

@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Creates a new CIMFrontPortTemplate in Netbox D module.
+    Creates a new DCIM FrontPortTemplate in Netbox DCIM module.
 
 .DESCRIPTION
-    Creates a new CIMFrontPortTemplate in Netbox D module.
+    Creates a new DCIM FrontPortTemplate in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBDCIMFrontPortTemplate
 
-    Returns all CIMFrontPortTemplate objects.
+    Creates a new DCIM FrontPortTemplate object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

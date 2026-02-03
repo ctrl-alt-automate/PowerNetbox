@@ -28,6 +28,9 @@ function Get-NBIPAMAddressRange {
 
         [string[]]$Fields,
 
+
+        [string[]]$Omit,
+
         [Parameter(ParameterSetName = 'Query',
                    Position = 0)]
         [string]$Range,
@@ -39,7 +42,8 @@ function Get-NBIPAMAddressRange {
         [string]$Query,
 
         [Parameter(ParameterSetName = 'Query')]
-        [object]$Family,
+        [ValidateSet(4, 6)]
+        [int]$Family,
 
         [Parameter(ParameterSetName = 'Query')]
         [string]$VRF,
@@ -54,10 +58,11 @@ function Get-NBIPAMAddressRange {
         [uint32]$Tenant_Id,
 
         [Parameter(ParameterSetName = 'Query')]
-        [object]$Status,
+        [ValidateSet('active', 'reserved', 'deprecated', IgnoreCase = $true)]
+        [string]$Status,
 
         [Parameter(ParameterSetName = 'Query')]
-        [object]$Role,
+        [string]$Role,
 
         [ValidateRange(1, 1000)]
         [uint16]$Limit,

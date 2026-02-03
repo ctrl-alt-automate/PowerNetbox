@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Removes a CIMConsoleServerPort from Netbox D module.
+    Removes a DCIM ConsoleServerPort from Netbox DCIM module.
 
 .DESCRIPTION
-    Removes a CIMConsoleServerPort from Netbox D module.
+    Removes a DCIM ConsoleServerPort from Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBDCIMConsoleServerPort
 
-    Returns all CIMConsoleServerPort objects.
+    Deletes a DCIM ConsoleServerPort object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

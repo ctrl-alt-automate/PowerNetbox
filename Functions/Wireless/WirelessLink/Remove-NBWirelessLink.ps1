@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBWirelessLink
 
-    Returns all irelessLink objects.
+    Deletes a Wireless Link object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Removes a CIMInventoryItemTemplate from Netbox D module.
+    Removes a DCIM InventoryItemTemplate from Netbox DCIM module.
 
 .DESCRIPTION
-    Removes a CIMInventoryItemTemplate from Netbox D module.
+    Removes a DCIM InventoryItemTemplate from Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBDCIMInventoryItemTemplate
 
-    Returns all CIMInventoryItemTemplate objects.
+    Deletes a DCIM InventoryItemTemplate object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

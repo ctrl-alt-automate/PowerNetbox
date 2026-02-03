@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Removes a CIMDeviceRole from Netbox D module.
+    Removes a DCIM DeviceRole from Netbox DCIM module.
 
 .DESCRIPTION
-    Removes a CIMDeviceRole from Netbox D module.
+    Removes a DCIM DeviceRole from Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBDCIMDeviceRole
 
-    Returns all CIMDeviceRole objects.
+    Deletes a DCIM DeviceRole object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

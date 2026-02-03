@@ -47,7 +47,8 @@ function Remove-NBDCIMManufacturer {
     process {
         Write-Verbose "Removing DCIM Manufacturer"
         foreach ($ManufacturerId in $Id) {
-            if ($Force -or $PSCmdlet.ShouldProcess("Manufacturer ID $ManufacturerId", "Delete manufacturer")) {
+
+            if ($Force -or $PSCmdlet.ShouldProcess("$("ID $ManufacturerId")", "Delete manufacturer")) {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'manufacturers', $ManufacturerId))
 
                 $URI = BuildNewURI -Segments $Segments

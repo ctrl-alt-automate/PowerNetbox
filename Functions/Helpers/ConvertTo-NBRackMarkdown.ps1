@@ -21,6 +21,21 @@ function ConvertTo-NBRackMarkdown {
 
     .PARAMETER ElevationData
         Array of elevation unit objects from Get-NBDCIMRackElevation
+
+    .EXAMPLE
+        $elevation = Get-NBDCIMRackElevation -Id 24
+        ConvertTo-NBRackMarkdown -RackName "DC1-R01" -SiteName "Amsterdam" -UHeight 42 -Face Front -ElevationData $elevation
+
+        Generates a GitHub-flavored markdown table showing rack elevation.
+
+    .EXAMPLE
+        $elevation = Get-NBDCIMRackElevation -Id 24 | Where-Object { $_.device }
+        ConvertTo-NBRackMarkdown -RackName "DC1-R01" -SiteName "Amsterdam" -UHeight 42 -Face Front -ElevationData $elevation | Out-File rack.md -Encoding utf8
+
+        Generates markdown for only occupied rack units and saves to file.
+
+    .NOTES
+        This is an internal helper function. Use Export-NBRackElevation -Format Markdown for the public interface.
 #>
     [CmdletBinding()]
     [OutputType([string])]

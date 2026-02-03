@@ -71,11 +71,19 @@ function Get-NBIPAMPrefix {
     .PARAMETER Role_Id
         Filter by IPAM role database ID.
 
+    .PARAMETER Omit
+        Specify which fields to exclude from the response.
+        Requires Netbox 4.5.0 or later.
+
     .PARAMETER Raw
         Return the raw API response instead of extracting the results array.
 
     .EXAMPLE
         PS C:\> Get-NBIPAMPrefix
+
+    .EXAMPLE
+        PS C:\> Get-NBIPAMPrefix -Omit 'description','comments'
+        Returns prefixes without description and comments fields (Netbox 4.5+).
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]
@@ -91,6 +99,8 @@ function Get-NBIPAMPrefix {
 
         [string[]]$Fields,
 
+        [string[]]$Omit,
+
         [Parameter(ParameterSetName = 'Query',
                    Position = 0)]
         [string]$Prefix,
@@ -103,7 +113,8 @@ function Get-NBIPAMPrefix {
         [uint64[]]$Id,
 
         [Parameter(ParameterSetName = 'Query')]
-        [object]$Family,
+        [ValidateSet(4, 6)]
+        [int]$Family,
 
         [Parameter(ParameterSetName = 'Query')]
         [boolean]$Is_Pool,
@@ -146,7 +157,8 @@ function Get-NBIPAMPrefix {
         [uint64]$Vlan_Id,
 
         [Parameter(ParameterSetName = 'Query')]
-        [object]$Status,
+        [ValidateSet('container', 'active', 'reserved', 'deprecated', IgnoreCase = $true)]
+        [string]$Status,
 
         [Parameter(ParameterSetName = 'Query')]
         [string]$Role,

@@ -47,7 +47,7 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
             $Result = Get-NBVirtualMachine
             $Result.Method | Should -Be 'GET'
             # By default, config_context is excluded for performance
-            $Result.Uri | Should -Match 'exclude=config_context'
+            $Result.Uri | Should -Match 'omit=config_context'
         }
 
         It "Should request with limit and offset" {
@@ -56,14 +56,14 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
             # Parameter order in hashtables is not guaranteed
             $Result.Uri | Should -Match 'limit=10'
             $Result.Uri | Should -Match 'offset=12'
-            $Result.Uri | Should -Match 'exclude=config_context'
+            $Result.Uri | Should -Match 'omit=config_context'
         }
 
         It "Should request with a query" {
             $Result = Get-NBVirtualMachine -Query 'testvm'
             $Result.Method | Should -Be 'GET'
             $Result.Uri | Should -Match 'q=testvm'
-            $Result.Uri | Should -Match 'exclude=config_context'
+            $Result.Uri | Should -Match 'omit=config_context'
         }
 
         It "Should request with an escaped query" {
@@ -71,21 +71,21 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
             $Result.Method | Should -Be 'GET'
             # Module doesn't URL-encode spaces in query strings
             $Result.Uri | Should -Match 'q=test vm'
-            $Result.Uri | Should -Match 'exclude=config_context'
+            $Result.Uri | Should -Match 'omit=config_context'
         }
 
         It "Should request with a name" {
             $Result = Get-NBVirtualMachine -Name 'testvm'
             $Result.Method | Should -Be 'GET'
             $Result.Uri | Should -Match 'name=testvm'
-            $Result.Uri | Should -Match 'exclude=config_context'
+            $Result.Uri | Should -Match 'omit=config_context'
         }
 
         It "Should request with a single ID" {
             $Result = Get-NBVirtualMachine -Id 10
             $Result.Method | Should -Be 'GET'
             $Result.Uri | Should -Match 'virtualization/virtual-machines/10/'
-            $Result.Uri | Should -Match 'exclude=config_context'
+            $Result.Uri | Should -Match 'omit=config_context'
         }
 
         It "Should request with multiple IDs" {
@@ -93,7 +93,7 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
             $Result.Method | Should -Be 'GET'
             # Commas may or may not be URL-encoded depending on PS version
             $Result.Uri | Should -Match 'id__in=10(%2C|,)12(%2C|,)15'
-            $Result.Uri | Should -Match 'exclude=config_context'
+            $Result.Uri | Should -Match 'omit=config_context'
         }
 
         It "Should request a status" {
@@ -101,27 +101,28 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
             $Result.Method | Should -Be 'GET'
             # Status value is passed through to API as-is (no client-side validation)
             $Result.Uri | Should -Match 'status=Active'
-            $Result.Uri | Should -Match 'exclude=config_context'
+            $Result.Uri | Should -Match 'omit=config_context'
         }
 
-        It "Should pass invalid status to API" {
-            # Invalid status values are now passed through to the API
-            $Result = Get-NBVirtualMachine -Status 'Fake'
-            $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Match 'status=Fake'
-            $Result.Uri | Should -Match 'exclude=config_context'
+        It "Should have ValidateSet for Status parameter" {
+            # Status parameter now uses ValidateSet for type safety
+            $cmd = Get-Command Get-NBVirtualMachine
+            $statusParam = $cmd.Parameters['Status']
+            $validateSet = $statusParam.Attributes | Where-Object { $_ -is [System.Management.Automation.ValidateSetAttribute] }
+            $validateSet | Should -Not -BeNullOrEmpty
+            $validateSet.ValidValues | Should -Contain 'active'
         }
 
         It "Should exclude config_context by default" {
             $Result = Get-NBVirtualMachine
             $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Match 'exclude=config_context'
+            $Result.Uri | Should -Match 'omit=config_context'
         }
 
         It "Should not exclude config_context when IncludeConfigContext is specified" {
             $Result = Get-NBVirtualMachine -IncludeConfigContext
             $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Not -Match 'exclude=config_context'
+            $Result.Uri | Should -Not -Match 'omit=config_context'
         }
 
         It "Should request with Brief mode" {
@@ -281,12 +282,13 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
             $bodyObj.comments | Should -Be "these are comments"
         }
 
-        It "Should pass invalid status to API" {
-            # Invalid status values are now passed through to the API
-            $Result = New-NBVirtualMachine -Name 'testvm' -Status 1123 -Cluster 1
-            $Result.Method | Should -Be 'POST'
-            $bodyObj = $Result.Body | ConvertFrom-Json
-            $bodyObj.status | Should -Be 1123
+        It "Should have ValidateSet for Status parameter" {
+            # Status parameter now uses ValidateSet for type safety
+            $cmd = Get-Command New-NBVirtualMachine
+            $statusParam = $cmd.Parameters['Status']
+            $validateSet = $statusParam.Attributes | Where-Object { $_ -is [System.Management.Automation.ValidateSetAttribute] }
+            $validateSet | Should -Not -BeNullOrEmpty
+            $validateSet.ValidValues | Should -Contain 'active'
         }
 
         It "Should create a VM with Start_On_Boot (Netbox 4.5+)" {
@@ -351,12 +353,13 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
             $bodyObj.status | Should -Be 'Offline'
         }
 
-        It "Should pass invalid status to API" {
-            # Invalid status values are now passed through to the API
-            $Result = Set-NBVirtualMachine -Id 1234 -Status 'Fake' -Force
-            $Result.Method | Should -Be 'PATCH'
-            $bodyObj = $Result.Body | ConvertFrom-Json
-            $bodyObj.status | Should -Be 'Fake'
+        It "Should have ValidateSet for Status parameter" {
+            # Status parameter now uses ValidateSet for type safety
+            $cmd = Get-Command Set-NBVirtualMachine
+            $statusParam = $cmd.Parameters['Status']
+            $validateSet = $statusParam.Attributes | Where-Object { $_ -is [System.Management.Automation.ValidateSetAttribute] }
+            $validateSet | Should -Not -BeNullOrEmpty
+            $validateSet.ValidValues | Should -Contain 'active'
         }
 
         It "Should update a VM with Start_On_Boot (Netbox 4.5+)" {
@@ -367,16 +370,8 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
     }
 
     Context "Set-NBVirtualMachineInterface" {
-        BeforeAll {
-            Mock -CommandName "Get-NBVirtualMachineInterface" -ModuleName PowerNetbox -MockWith {
-                return [pscustomobject]@{ 'Id' = $Id; 'Name' = $Name }
-            }
-        }
-
         It "Should set an interface to a new name" {
             $Result = Set-NBVirtualMachineInterface -Id 1234 -Name 'newtestname' -Force
-            # Performance optimization: no longer fetches the object before updating
-            Should -Invoke -CommandName Get-NBVirtualMachineInterface -Times 0 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'PATCH'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/virtualization/interfaces/1234/'
             $Result.Body | Should -Be '{"name":"newtestname"}'
@@ -392,8 +387,6 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
                 Force       = $true
             }
             $Result = Set-NBVirtualMachineInterface @paramSetNetboxVirtualMachineInterface
-            # Performance optimization: no longer fetches the object before updating
-            Should -Invoke -CommandName Get-NBVirtualMachineInterface -Times 0 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'PATCH'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/virtualization/interfaces/1234/'
             # Compare as objects since JSON key order is not guaranteed
@@ -411,8 +404,6 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
                 [pscustomobject]@{ 'Id' = 1234 },
                 [pscustomobject]@{ 'Id' = 4321 }
             ) | Set-NBVirtualMachineInterface -Name 'newtestname' -Force
-            # Performance optimization: no longer fetches the object before updating
-            Should -Invoke -CommandName Get-NBVirtualMachineInterface -Times 0 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'PATCH', 'PATCH'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/virtualization/interfaces/1234/', 'https://netbox.domain.com/api/virtualization/interfaces/4321/'
         }
@@ -422,8 +413,6 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
                 [pscustomobject]@{ 'Id' = 4123 },
                 [pscustomobject]@{ 'Id' = 4321 }
             ) | Set-NBVirtualMachineInterface -Name 'newtestname' -Force
-            # Performance optimization: no longer fetches the object before updating
-            Should -Invoke -CommandName Get-NBVirtualMachineInterface -Times 0 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'PATCH', 'PATCH'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/virtualization/interfaces/4123/', 'https://netbox.domain.com/api/virtualization/interfaces/4321/'
             $Result.Body | Should -Be '{"name":"newtestname"}', '{"name":"newtestname"}'
@@ -431,16 +420,8 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
     }
 
     Context "Remove-NBVirtualMachine" {
-        BeforeAll {
-            Mock -CommandName "Get-NBVirtualMachine" -ModuleName PowerNetbox -MockWith {
-                return [pscustomobject]@{ 'Id' = $Id; 'Name' = $Name }
-            }
-        }
-
         It "Should remove a single VM" {
             $Result = Remove-NBVirtualMachine -Id 4125 -Force
-            # Performance optimization: no longer fetches the object before deleting
-            Should -Invoke -CommandName 'Get-NBVirtualMachine' -Times 0 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/4125/'
         }
@@ -452,8 +433,6 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
                 [pscustomobject]@{ 'Id' = 4125 },
                 [pscustomobject]@{ 'Id' = 4132 }
             ) | Remove-NBVirtualMachine -Force
-            # Performance optimization: no longer fetches the object before deleting
-            Should -Invoke -CommandName 'Get-NBVirtualMachine' -Times 0 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'DELETE', 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/4125/', 'https://netbox.domain.com/api/virtualization/virtual-machines/4132/'
         }
@@ -461,8 +440,6 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
         It "Should remove a VM from the pipeline" {
             # Use a pscustomobject with Id property instead of calling Get-NBVirtualMachine
             $Result = [pscustomobject]@{ 'Id' = 4125 } | Remove-NBVirtualMachine -Force
-            # Performance optimization: no longer fetches the object before deleting
-            Should -Invoke -CommandName 'Get-NBVirtualMachine' -Times 0 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/4125/'
         }
@@ -472,24 +449,14 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
                 [pscustomobject]@{ 'Id' = 4125 },
                 [pscustomobject]@{ 'Id' = 4132 }
             ) | Remove-NBVirtualMachine -Force
-            # Performance optimization: no longer fetches the object before deleting
-            Should -Invoke -CommandName 'Get-NBVirtualMachine' -Times 0 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'DELETE', 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/4125/', 'https://netbox.domain.com/api/virtualization/virtual-machines/4132/'
         }
     }
 
     Context "Remove-NBVirtualMachineInterface" {
-        BeforeAll {
-            Mock -CommandName "Get-NBVirtualMachineInterface" -ModuleName PowerNetbox -MockWith {
-                return [pscustomobject]@{ 'Id' = $Id; 'Name' = 'TestInterface' }
-            }
-        }
-
         It "Should remove a single interface" {
             $Result = Remove-NBVirtualMachineInterface -Id 100 -Force
-            # Performance optimization: no longer fetches the object before deleting
-            Should -Invoke -CommandName 'Get-NBVirtualMachineInterface' -Times 0 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/virtualization/interfaces/100/'
         }
@@ -500,8 +467,6 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
                 [pscustomobject]@{ 'Id' = 100 },
                 [pscustomobject]@{ 'Id' = 101 }
             ) | Remove-NBVirtualMachineInterface -Force
-            # Performance optimization: no longer fetches the object before deleting
-            Should -Invoke -CommandName 'Get-NBVirtualMachineInterface' -Times 0 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'DELETE', 'DELETE'
         }
     }

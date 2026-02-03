@@ -44,11 +44,12 @@ function Remove-NBTenantGroup {
     process {
         Write-Verbose "Removing Tenant Group"
         foreach ($GroupId in $Id) {
+
             $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'tenant-groups', $GroupId))
 
             $URI = BuildNewURI -Segments $Segments
 
-            if ($Force -or $PSCmdlet.ShouldProcess("Tenant Group ID $GroupId", 'Delete tenant group')) {
+            if ($Force -or $PSCmdlet.ShouldProcess("$("ID $GroupId")", 'Delete tenant group')) {
                 InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
             }
         }

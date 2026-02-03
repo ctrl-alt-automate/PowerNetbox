@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing CIMDeviceType in Netbox D module.
+    Updates an existing DCIM DeviceType in Netbox DCIM module.
 
 .DESCRIPTION
-    Updates an existing CIMDeviceType in Netbox D module.
+    Updates an existing DCIM DeviceType in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBDCIMDeviceType
 
-    Returns all CIMDeviceType objects.
+    Updates an existing DCIM DeviceType object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

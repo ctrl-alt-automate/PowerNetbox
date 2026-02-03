@@ -66,10 +66,10 @@ function BuildURIComponents {
                 break
             }
 
-            'Exclude' {
-                $excludeList = $ParametersDictionary[$CmdletParameterName] -join ','
-                Write-Verbose " Adding exclude parameter: $excludeList"
-                $URIParameters['exclude'] = $excludeList
+            'Omit' {
+                $omitList = $ParametersDictionary[$CmdletParameterName] -join ','
+                Write-Verbose " Adding omit parameter: $omitList"
+                $URIParameters['omit'] = $omitList
                 break
             }
 

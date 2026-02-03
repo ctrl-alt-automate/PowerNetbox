@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Removes a CIMPlatform from Netbox D module.
+    Removes a DCIM Platform from Netbox DCIM module.
 
 .DESCRIPTION
-    Removes a CIMPlatform from Netbox D module.
+    Removes a DCIM Platform from Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Remove-NBDCIMPlatform
 
-    Returns all CIMPlatform objects.
+    Deletes a DCIM Platform object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

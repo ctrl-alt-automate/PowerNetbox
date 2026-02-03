@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing ostName in Netbox H module.
+    Sets the hostname for Netbox API connections.
 
 .DESCRIPTION
-    Updates an existing ostName in Netbox H module.
+    Sets the hostname for Netbox API connections.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBHostName
 
-    Returns all ostName objects.
+    Sets the Netbox API hostname.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

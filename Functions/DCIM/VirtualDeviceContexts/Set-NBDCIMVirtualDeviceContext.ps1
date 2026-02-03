@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing CIMVirtualDeviceContext in Netbox D module.
+    Updates an existing DCIM VirtualDeviceContext in Netbox DCIM module.
 
 .DESCRIPTION
-    Updates an existing CIMVirtualDeviceContext in Netbox D module.
+    Updates an existing DCIM VirtualDeviceContext in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBDCIMVirtualDeviceContext
 
-    Returns all CIMVirtualDeviceContext objects.
+    Updates an existing DCIM VirtualDeviceContext object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

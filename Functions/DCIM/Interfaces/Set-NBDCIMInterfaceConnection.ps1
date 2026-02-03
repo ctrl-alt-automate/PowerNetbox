@@ -35,7 +35,8 @@ function Set-NBDCIMInterfaceConnection {
                    ValueFromPipelineByPropertyName = $true)]
         [uint64]$Id,
 
-        [object]$Connection_Status,
+        [ValidateSet('connected', 'planned', 'decommissioning', IgnoreCase = $true)]
+        [string]$Connection_Status,
 
         [uint64]$Interface_A,
 
@@ -59,7 +60,9 @@ function Set-NBDCIMInterfaceConnection {
 
             if ($Force -or $pscmdlet.ShouldProcess("Interface Connection ID $ConnectionID", "Set")) {
 
-                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force', 'Raw'
+            if ($Force -or $pscmdlet.ShouldProcess("Connection ID $($CurrentConnection.Id)", "Set")) {
+
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'Force'
 
                 $URI = BuildNewURI -Segments $URIComponents.Segments
 

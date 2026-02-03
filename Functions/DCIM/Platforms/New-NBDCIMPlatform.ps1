@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Creates a new CIMPlatform in Netbox D module.
+    Creates a new DCIM Platform in Netbox DCIM module.
 
 .DESCRIPTION
-    Creates a new CIMPlatform in Netbox D module.
+    Creates a new DCIM Platform in Netbox DCIM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     New-NBDCIMPlatform
 
-    Returns all CIMPlatform objects.
+    Creates a new DCIM Platform object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing ostScheme in Netbox H module.
+    Sets the HTTP scheme (http/https) for Netbox API connections.
 
 .DESCRIPTION
-    Updates an existing ostScheme in Netbox H module.
+    Sets the HTTP scheme (http/https) for Netbox API connections.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBHostScheme
 
-    Returns all ostScheme objects.
+    Sets the Netbox API host scheme (http or https).
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

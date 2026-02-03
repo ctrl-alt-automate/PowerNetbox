@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing PAMAddressRange in Netbox I module.
+    Updates an existing IPAM AddressRange in Netbox IPAM module.
 
 .DESCRIPTION
-    Updates an existing PAMAddressRange in Netbox I module.
+    Updates an existing IPAM AddressRange in Netbox IPAM module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBIPAMAddressRange
 
-    Returns all PAMAddressRange objects.
+    Updates an existing IPAM Address Range object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -32,13 +32,14 @@ function Set-NBIPAMAddressRange {
 
         [string]$End_Address,
 
-        [object]$Status,
+        [ValidateSet('active', 'reserved', 'deprecated', IgnoreCase = $true)]
+        [string]$Status,
 
         [uint64]$Tenant,
 
         [uint64]$VRF,
 
-        [object]$Role,
+        [uint64]$Role,
 
         [hashtable]$Custom_Fields,
 
@@ -63,12 +64,15 @@ function Set-NBIPAMAddressRange {
         foreach ($RangeID in $Id) {
             $Segments = [System.Collections.ArrayList]::new(@('ipam', 'ip-ranges', $RangeID))
 
-            if ($Force -or $PSCmdlet.ShouldProcess("IP Range ID $RangeID", 'Set')) {
-                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Force'
+            Write-Verbose "Obtaining IP range from ID $RangeID"
+            $CurrentRange = Get-NBIPAMAddressRange -Id $RangeID -ErrorAction Stop
+
+            if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentRange.Start_Address) - $($CurrentRange.End_Address)", 'Set')) {
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'Force'
 
                 $URI = BuildNewURI -Segments $URIComponents.Segments
 
-                InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method $Method
+                InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method $Method -Raw:$Raw
             }
         }
     }

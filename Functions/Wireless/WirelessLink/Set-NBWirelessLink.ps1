@@ -12,7 +12,7 @@
 .EXAMPLE
     Set-NBWirelessLink
 
-    Returns all irelessLink objects.
+    Updates an existing Wireless Link object.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
