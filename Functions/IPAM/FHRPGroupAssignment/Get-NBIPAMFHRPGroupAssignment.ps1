@@ -27,6 +27,9 @@ function Get-NBIPAMFHRPGroupAssignment {
 
         [string[]]$Fields,
 
+
+        [string[]]$Omit,
+
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][uint64]$Group_Id,
         [Parameter(ParameterSetName = 'Query')][uint64]$Interface_Id,

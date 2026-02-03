@@ -27,6 +27,9 @@ function Get-NBWirelessLANGroup {
 
         [string[]]$Fields,
 
+
+        [string[]]$Omit,
+
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,[Parameter(ParameterSetName = 'Query')][string]$Slug,
         [Parameter(ParameterSetName = 'Query')][uint64]$Parent_Id,[ValidateRange(1, 1000)]

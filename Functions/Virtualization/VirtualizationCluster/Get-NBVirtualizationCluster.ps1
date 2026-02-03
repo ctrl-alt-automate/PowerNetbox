@@ -60,6 +60,9 @@ function Get-NBVirtualizationCluster {
 
         [string[]]$Fields,
 
+
+        [string[]]$Omit,
+
         [string]$Name,
 
         [Alias('q')]

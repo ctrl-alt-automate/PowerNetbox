@@ -27,6 +27,9 @@ function Get-NBDCIMMACAddress {
 
         [string[]]$Fields,
 
+
+        [string[]]$Omit,
+
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Mac_Address,
         [Parameter(ParameterSetName = 'Query')][uint64]$Assigned_Object_Id,

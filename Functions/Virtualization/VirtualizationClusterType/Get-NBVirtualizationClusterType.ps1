@@ -62,6 +62,9 @@ function Get-NBVirtualizationClusterType {
 
         [string[]]$Fields,
 
+
+        [string[]]$Omit,
+
         [Parameter(ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 

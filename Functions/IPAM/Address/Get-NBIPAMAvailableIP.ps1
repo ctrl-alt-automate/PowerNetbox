@@ -45,6 +45,9 @@ function Get-NBIPAMAvailableIP {
 
         [string[]]$Fields,
 
+
+        [string[]]$Omit,
+
         [Parameter(Mandatory = $true,
             ValueFromPipelineByPropertyName = $true)]
         [Alias('Id')]
