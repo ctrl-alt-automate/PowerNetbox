@@ -109,9 +109,6 @@ function New-NBDCIMInterface {
         [bool]$Enabled,
 
         [Parameter(ParameterSetName = 'Single')]
-        [object]$Form_Factor,
-
-        [Parameter(ParameterSetName = 'Single')]
         [ValidateRange(1, 65535)]
         [uint16]$MTU,
 
@@ -190,15 +187,6 @@ function New-NBDCIMInterface {
                 foreach ($prop in $InputObject.PSObject.Properties) {
                     $key = $prop.Name.ToLower()
                     $value = $prop.Value
-
-                    # Handle property name mappings
-                    switch ($key) {
-                        'mac_address' { $key = 'mac_address' }
-                        'mgmt_only' { $key = 'mgmt_only' }
-                        'untagged_vlan' { $key = 'untagged_vlan' }
-                        'tagged_vlans' { $key = 'tagged_vlans' }
-                        'form_factor' { $key = 'form_factor' }
-                    }
 
                     # Convert Mode friendly names
                     if ($key -eq 'mode' -and $value -is [string]) {

@@ -63,17 +63,14 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
             $Result.Uri | Should -BeExactly 'https://netbox.domain.com/api/dcim/interfaces/?enabled=True'
         }
 
-        It "Should request with a form factor name" {
-            $Result = Get-NBDCIMInterface -Form_Factor '10GBASE-T (10GE)'
-            # Form factor is passed through to API as-is (no client-side validation)
-            $Result.Uri | Should -Match 'form_factor='
+        It "Should request with a type filter" {
+            $Result = Get-NBDCIMInterface -Type '10gbase-t'
+            $Result.Uri | Should -Match 'type=10gbase-t'
         }
 
-        It "Should pass invalid form factor to API" {
-            # Invalid values are now passed through to the API
-            $Result = Get-NBDCIMInterface -Form_Factor 'Fake'
-            $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Match 'form_factor=Fake'
+        It "Should throw for invalid type" {
+            # Type parameter has ValidateSet - invalid values throw at parameter binding
+            { Get-NBDCIMInterface -Type 'Fake' } | Should -Throw
         }
 
         It "Should request devices that are mgmt only" {
@@ -107,7 +104,7 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
             $params = @{
                 Device      = 123
                 Name        = "TestInterface"
-                Form_Factor = '10GBASE-T (10GE)'
+                Type        = '10gbase-t'
                 MTU         = 9000
                 MGMT_Only   = $true
                 Description = 'Test Description'
@@ -119,6 +116,7 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
             $bodyObj = $Result.Body | ConvertFrom-Json
             $bodyObj.name | Should -Be 'TestInterface'
             $bodyObj.device | Should -Be 123
+            $bodyObj.type | Should -Be '10gbase-t'
             $bodyObj.mtu | Should -Be 9000
             $bodyObj.mgmt_only | Should -Be $true
             $bodyObj.description | Should -Be 'Test Description'
@@ -165,10 +163,9 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
             $Result.Uri | Should -BeExactly 'https://netbox.domain.com/api/dcim/interfaces/1234/', 'https://netbox.domain.com/api/dcim/interfaces/4231/'
         }
 
-        It "Should pass invalid form factor to API" {
-            # Invalid values are now passed through to the API
-            $Result = Set-NBDCIMInterface -Id 1234 -Form_Factor 'fake'
-            $Result.Method | Should -Be 'PATCH'
+        It "Should throw for invalid type" {
+            # Type parameter has ValidateSet - invalid values throw at parameter binding
+            { Set-NBDCIMInterface -Id 1234 -Type 'fake' } | Should -Throw
         }
     }
 
