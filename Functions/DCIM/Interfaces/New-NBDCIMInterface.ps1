@@ -188,14 +188,6 @@ function New-NBDCIMInterface {
                     $key = $prop.Name.ToLower()
                     $value = $prop.Value
 
-                    # Handle property name mappings
-                    switch ($key) {
-                        'mac_address' { $key = 'mac_address' }
-                        'mgmt_only' { $key = 'mgmt_only' }
-                        'untagged_vlan' { $key = 'untagged_vlan' }
-                        'tagged_vlans' { $key = 'tagged_vlans' }
-                    }
-
                     # Convert Mode friendly names
                     if ($key -eq 'mode' -and $value -is [string]) {
                         $value = switch ($value) {
