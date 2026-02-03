@@ -46,10 +46,18 @@ function BuildNewURI {
     # Begin a URI builder with HTTP/HTTPS and the provided hostname
     $uriBuilder = [System.UriBuilder]::new($script:NetboxConfig.HostScheme, $script:NetboxConfig.Hostname, $script:NetboxConfig.HostPort)
 
-    # Generate the path by trimming excess slashes and whitespace from the $segments[] and joining together
-    $uriBuilder.Path = "api/{0}/" -f ($Segments.ForEach({
-                $_.trim('/').trim()
-            }) -join '/')
+    # Validate and sanitize segments (defense-in-depth)
+    $sanitizedSegments = $Segments.ForEach({
+        $segment = $_.trim('/').trim()
+        # Warn if segment contains unexpected characters (not alphanumeric, hyphen, underscore, or digits)
+        if ($segment -and $segment -notmatch '^[\w\-]+$') {
+            Write-Warning "URI segment contains unexpected characters: $segment"
+        }
+        $segment
+    })
+
+    # Generate the path by joining sanitized segments
+    $uriBuilder.Path = "api/{0}/" -f ($sanitizedSegments -join '/')
 
     Write-Verbose " URIPath: $($uriBuilder.Path)"
 
