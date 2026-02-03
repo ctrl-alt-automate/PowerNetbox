@@ -103,7 +103,8 @@ function Get-NBIPAMPrefix {
         [uint64[]]$Id,
 
         [Parameter(ParameterSetName = 'Query')]
-        [object]$Family,
+        [ValidateSet(4, 6)]
+        [int]$Family,
 
         [Parameter(ParameterSetName = 'Query')]
         [boolean]$Is_Pool,
@@ -146,7 +147,8 @@ function Get-NBIPAMPrefix {
         [uint64]$Vlan_Id,
 
         [Parameter(ParameterSetName = 'Query')]
-        [object]$Status,
+        [ValidateSet('container', 'active', 'reserved', 'deprecated', IgnoreCase = $true)]
+        [string]$Status,
 
         [Parameter(ParameterSetName = 'Query')]
         [string]$Role,

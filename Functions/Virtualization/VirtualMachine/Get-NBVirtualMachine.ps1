@@ -127,7 +127,8 @@ function Get-NBVirtualMachine {
 
         [uint64[]]$Id,
 
-        [object]$Status,
+        [ValidateSet('offline', 'active', 'planned', 'staged', 'failed', 'decommissioning', IgnoreCase = $true)]
+        [string]$Status,
 
         [string]$Tenant,
 

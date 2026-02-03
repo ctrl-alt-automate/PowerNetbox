@@ -36,7 +36,8 @@ function Get-NBDCIMInterfaceConnection {
 
         [uint64[]]$Id,
 
-        [object]$Connection_Status,
+        [ValidateSet('connected', 'planned', 'decommissioning', IgnoreCase = $true)]
+        [string]$Connection_Status,
 
         [uint64]$Site,
 

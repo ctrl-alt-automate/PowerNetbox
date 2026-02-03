@@ -91,13 +91,14 @@ function New-NBIPAMPrefix {
         [string]$Prefix,
 
         [Parameter(ParameterSetName = 'Single')]
-        [object]$Status = 'Active',
+        [ValidateSet('container', 'active', 'reserved', 'deprecated', IgnoreCase = $true)]
+        [string]$Status = 'active',
 
         [Parameter(ParameterSetName = 'Single')]
         [uint64]$Tenant,
 
         [Parameter(ParameterSetName = 'Single')]
-        [object]$Role,
+        [uint64]$Role,
 
         [Parameter(ParameterSetName = 'Single')]
         [bool]$IsPool,

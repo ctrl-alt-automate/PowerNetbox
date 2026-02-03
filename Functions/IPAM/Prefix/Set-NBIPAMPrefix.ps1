@@ -40,7 +40,7 @@ function Set-NBIPAMPrefix {
 
         [uint64]$VLAN,
 
-        [object]$Role,
+        [uint64]$Role,
 
         [hashtable]$Custom_Fields,
 

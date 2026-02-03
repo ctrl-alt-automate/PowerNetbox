@@ -67,13 +67,14 @@ function New-NBIPAMAddressRange {
         [ValidateNotNullOrEmpty()]
         [string]$End_Address,
 
-        [object]$Status = 'Active',
+        [ValidateSet('active', 'reserved', 'deprecated', IgnoreCase = $true)]
+        [string]$Status = 'active',
 
         [uint64]$Tenant,
 
         [uint64]$VRF,
 
-        [object]$Role,
+        [uint64]$Role,
 
         [hashtable]$Custom_Fields,
 
