@@ -17,7 +17,13 @@
 function Get-NBWirelessLAN {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([PSCustomObject])]
-    param([switch]$Brief,
+    param(
+        [switch]$All,
+
+        [ValidateRange(1, 1000)]
+        [int]$PageSize = 100,
+
+        [switch]$Brief,
 
         [string[]]$Fields,
 
@@ -31,7 +37,7 @@ function Get-NBWirelessLAN {
         Write-Verbose "Retrieving Wireless LAN"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('wireless','wireless-lans',$i)) -Raw:$Raw } }
-            default { $s = [System.Collections.ArrayList]::new(@('wireless','wireless-lans')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'; InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments -Parameters $u.Parameters) -Raw:$Raw }
+            default { $s = [System.Collections.ArrayList]::new(@('wireless','wireless-lans')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'; InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments -Parameters $u.Parameters) -Raw:$Raw -All:$All -PageSize $PageSize }
         }
     }
 }

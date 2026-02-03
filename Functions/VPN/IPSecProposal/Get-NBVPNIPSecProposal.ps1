@@ -26,6 +26,11 @@ function Get-NBVPNIPSecProposal {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([PSCustomObject])]
     param(
+        [switch]$All,
+
+        [ValidateRange(1, 1000)]
+        [int]$PageSize = 100,
+
         [switch]$Brief,
 
         [string[]]$Fields,
@@ -56,8 +61,8 @@ function Get-NBVPNIPSecProposal {
             }
             default {
                 $Segments = [System.Collections.ArrayList]::new(@('vpn', 'ipsec-proposals'))
-                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
-                InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'
+                InvokeNetboxRequest -URI (BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters) -Raw:$Raw -All:$All -PageSize $PageSize
             }
         }
     }
