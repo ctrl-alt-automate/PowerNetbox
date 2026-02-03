@@ -73,6 +73,9 @@ function Get-NBDCIMRackElevation {
 
         [string[]]$Fields,
 
+
+        [string[]]$Omit,
+
         [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
         [uint64[]]$Id,
 

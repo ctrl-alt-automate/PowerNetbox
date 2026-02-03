@@ -13,6 +13,11 @@
     Specify which fields to include in the response.
     Supports nested field selection (e.g., 'site.name').
 
+.PARAMETER Omit
+    Specify which fields to exclude from the response.
+    Requires Netbox 4.5.0 or later.
+
+
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
@@ -34,6 +39,9 @@ function Get-NBVPNIKEPolicy {
         [switch]$Brief,
 
         [string[]]$Fields,
+
+
+        [string[]]$Omit,
 
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,

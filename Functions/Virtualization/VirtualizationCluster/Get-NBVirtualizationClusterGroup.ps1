@@ -28,6 +28,9 @@ function Get-NBVirtualizationClusterGroup {
 
         [string[]]$Fields,
 
+
+        [string[]]$Omit,
+
         [string]$Name,
 
         [string]$Slug,

@@ -27,6 +27,9 @@ function Get-NBDCIMModule {
 
         [string[]]$Fields,
 
+
+        [string[]]$Omit,
+
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][uint64]$Device_Id,
         [Parameter(ParameterSetName = 'Query')][uint64]$Module_Bay_Id,

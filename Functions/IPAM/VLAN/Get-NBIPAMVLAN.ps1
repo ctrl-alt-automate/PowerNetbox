@@ -28,6 +28,9 @@ function Get-NBIPAMVLAN {
 
         [string[]]$Fields,
 
+
+        [string[]]$Omit,
+
         [Parameter(ParameterSetName = 'Query',
                    Position = 0)]
         [ValidateRange(1, 4096)]

@@ -27,6 +27,9 @@ function Get-NBDCIMVirtualChassis {
 
         [string[]]$Fields,
 
+
+        [string[]]$Omit,
+
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')][string]$Name,
         [Parameter(ParameterSetName = 'Query')][string]$Domain,

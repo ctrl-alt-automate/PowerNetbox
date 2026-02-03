@@ -65,6 +65,9 @@ function Get-NBTenantGroup {
 
         [string[]]$Fields,
 
+
+        [string[]]$Omit,
+
         [Parameter(ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 

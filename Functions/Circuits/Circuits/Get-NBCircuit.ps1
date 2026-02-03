@@ -75,6 +75,9 @@ function Get-NBCircuit {
 
         [string[]]$Fields,
 
+
+        [string[]]$Omit,
+
         [Parameter(ParameterSetName = 'ById')]
         [uint64[]]$Id,
 

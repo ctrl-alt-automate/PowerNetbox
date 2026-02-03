@@ -28,6 +28,9 @@ function Get-NBTag {
 
         [string[]]$Fields,
 
+
+        [string[]]$Omit,
+
         [Parameter(ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
