@@ -20,7 +20,7 @@ on:
       test_versions:
         description: 'Netbox versions to test (comma-separated)'
         required: false
-        default: '4.3.7,4.4.10,4.5.0'
+        default: '4.3.7,4.4.10,4.5.2'
         type: string
       include_beta:
         description: 'Include beta/pre-release versions'
@@ -62,8 +62,9 @@ jobs:
           # - Token v2 with Bearer auth (#102)
           # - New: cable-profiles, authentication-check (#103, #105)
           # - New fields: VM.interface_count, Token.allowed_ips (#106)
-          - netbox: "v4.5.0-3.4.2"
-            netbox_short: "4.5.0"
+          # Docker 4.0.0: Granian web server, PostgreSQL 18, Valkey 9
+          - netbox: "v4.5.2-4.0.0"
+            netbox_short: "4.5.2"
             is_beta: false
             expected_failures: []
 
@@ -127,11 +128,8 @@ jobs:
           else
             echo "V1 token failed (HTTP $RESPONSE) - creating v2 token for Netbox 4.5.0+"
 
-            # Create a v2 token by generating it ourselves (don't rely on save() return value)
-            # This approach generates the key and plaintext manually, hashes it, and saves
+            # Create a v2 token using Netbox's Token model
             TOKEN_OUTPUT=$(docker exec powernetbox-netbox-1 /opt/netbox/venv/bin/python /opt/netbox/netbox/manage.py shell -c "
-          import secrets
-          from django.contrib.auth.hashers import make_password
           from users.models import Token
           from django.contrib.auth import get_user_model
 
@@ -143,17 +141,14 @@ jobs:
           # Delete existing tokens
           Token.objects.filter(user=user).delete()
 
-          # Generate token components ourselves (same logic as Netbox 4.5 Token model)
-          key = secrets.token_urlsafe(16)[:12]  # 12 char key
-          plaintext = secrets.token_urlsafe(48)[:40]  # 40 char secret
-          hashed = make_password(plaintext)
-
-          # Create and save token with pre-generated values
-          token = Token(user=user, key=key, hashed=hashed)
+          # Create token instance and use the proper Token API
+          token = Token(user=user)
+          secret = Token.generate()  # Static method for random secret
+          token.token = secret       # Property setter triggers key + HMAC digest
           token.save()
 
-          # Output the full token
-          print(f'nbt_{key}.{plaintext}')
+          # Output the full v2 token: nbt_{key}.{secret}
+          print(f'nbt_{token.key}.{secret}')
           " 2>&1 | grep -E '^nbt_' || true)
 
             if [ -n "$TOKEN_OUTPUT" ] && [[ "$TOKEN_OUTPUT" == nbt_* ]]; then
@@ -460,11 +455,11 @@ jobs:
           echo "" >> compatibility-report.md
           echo "Generated: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> compatibility-report.md
           echo "" >> compatibility-report.md
-          echo "| Test | 4.3.7 | 4.4.10 | 4.5.0 |" >> compatibility-report.md
+          echo "| Test | 4.3.7 | 4.4.10 | 4.5.2 |" >> compatibility-report.md
           echo "|------|-------|--------|-------|" >> compatibility-report.md
 
           # Parse results from each version
-          for version in 4.3.7 4.4.10 4.5.0; do
+          for version in 4.3.7 4.4.10 4.5.2; do
             if [ -f "results/compatibility-$version/compatibility-results-$version.json" ]; then
               echo "Found results for $version"
               cat "results/compatibility-$version/compatibility-results-$version.json"
