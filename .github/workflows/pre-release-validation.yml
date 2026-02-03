@@ -603,14 +603,15 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - netbox: "v4.1.11-3.0.2"
-            netbox_short: "4.1.11"
-          - netbox: "v4.2.9-3.2.1"
-            netbox_short: "4.2.9"
+          # Minimum supported version
           - netbox: "v4.3.7-3.3.0"
             netbox_short: "4.3.7"
-          - netbox: "v4.4.9-3.4.2"
-            netbox_short: "4.4.9"
+          # Stable version
+          - netbox: "v4.4.10-3.4.2"
+            netbox_short: "4.4.10"
+          # Latest version
+          - netbox: "v4.5.0-3.4.2"
+            netbox_short: "4.5.0"
 
     env:
       NETBOX_VERSION: ${{ matrix.netbox }}
@@ -631,8 +632,8 @@ jobs:
 
       - name: Wait for Netbox
         run: |
-          echo "Waiting for Netbox to be ready..."
-          MAX_WAIT=300
+          echo "Waiting for Netbox to be ready (may take 5-7 minutes for 4.5+ migrations)..."
+          MAX_WAIT=420
           ELAPSED=0
           while [ $ELAPSED -lt $MAX_WAIT ]; do
             HEALTH=$(docker inspect --format='{{.State.Health.Status}}' powernetbox-netbox-1 2>/dev/null || echo "starting")
@@ -645,6 +646,64 @@ jobs:
             ELAPSED=$((ELAPSED + 10))
           done
           exit 1
+
+      - name: Setup API Token
+        id: token
+        run: |
+          set +e  # Don't exit on error - we handle errors ourselves
+
+          echo "Testing v1 token authentication..."
+          V1_TOKEN="0123456789abcdef0123456789abcdef01234567"
+
+          # Test if v1 token works
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Token $V1_TOKEN" http://localhost:8000/api/status/)
+
+          if [ "$RESPONSE" = "200" ]; then
+            echo "V1 token works - using legacy token"
+            echo "token=$V1_TOKEN" >> $GITHUB_OUTPUT
+          else
+            echo "V1 token failed (HTTP $RESPONSE) - creating v2 token for Netbox 4.5.0+"
+
+            # Create a v2 token using Netbox's Token model
+            DJANGO_OUTPUT=$(docker exec powernetbox-netbox-1 /opt/netbox/venv/bin/python /opt/netbox/netbox/manage.py shell -c "
+          import sys
+          from users.models import Token
+          from django.contrib.auth import get_user_model
+
+          try:
+              User = get_user_model()
+              user = User.objects.filter(username='admin').first()
+              if not user:
+                  user = User.objects.create_superuser('admin', 'admin@example.com', 'admin')
+
+              # Delete existing tokens
+              Token.objects.filter(user=user).delete()
+
+              # Create token instance
+              token = Token(user=user)
+
+              # Generate the plaintext secret and set via property
+              secret = Token.generate()
+              token.token = secret
+              token.save()
+
+              # Output the full v2 token: nbt_{key}.{secret}
+              print(f'nbt_{token.key}.{secret}')
+          except Exception as e:
+              print(f'ERROR: {e}', file=sys.stderr)
+          " 2>&1)
+
+            # Extract the token line
+            TOKEN_OUTPUT=$(echo "$DJANGO_OUTPUT" | grep -E '^nbt_' || true)
+
+            if [ -n "$TOKEN_OUTPUT" ] && [[ "$TOKEN_OUTPUT" == nbt_* ]]; then
+              echo "Created v2 token: ${TOKEN_OUTPUT:0:20}..."
+              echo "token=$TOKEN_OUTPUT" >> $GITHUB_OUTPUT
+            else
+              echo "WARNING: Failed to create v2 token, using v1 fallback"
+              echo "token=$V1_TOKEN" >> $GITHUB_OUTPUT
+            fi
+          fi
 
       - name: Install PowerShell dependencies
         shell: pwsh
@@ -662,7 +721,7 @@ jobs:
         shell: pwsh
         env:
           NETBOX_HOST: ${{ env.NETBOX_HOST }}
-          NETBOX_TOKEN: ${{ env.NETBOX_TOKEN }}
+          NETBOX_TOKEN: ${{ steps.token.outputs.token }}
         run: |
           $config = New-PesterConfiguration
           $config.Run.Path = './Tests/Integration.Tests.ps1'
@@ -851,12 +910,12 @@ jobs:
           $bcResult = if ($breakingChanges -eq 'success') { 'PASS' } else { 'FAIL' }
           $itResult = if ($skipIntegration) { 'SKIPPED' } elseif ($integration -eq 'success') { 'PASS' } else { 'FAIL' }
           $mvResult = if ($moduleVerify -eq 'success') { 'PASS' } else { 'FAIL' }
-          [void]$sb.AppendLine("| Unit Tests (4 platforms) | $utResult | Ubuntu, Windows, macOS x PS 5.1/7.x |")
+          [void]$sb.AppendLine("| Unit Tests (4 platforms) | $utResult | Ubuntu, Windows, macOS + PS 5.1/7.x |")
           [void]$sb.AppendLine("| Code Coverage | $ccResult | $coveragePercent% coverage |")
           [void]$sb.AppendLine("| Code Quality (PSSA) | $cqResult | PSScriptAnalyzer |")
           [void]$sb.AppendLine("| Documentation | $dvResult | $docsPercent% documented |")
           [void]$sb.AppendLine("| Breaking Changes | $bcResult | $removedCount breaking, $addedCount new |")
-          [void]$sb.AppendLine("| Integration Tests | $itResult | Netbox 4.1, 4.2, 4.3, 4.4 |")
+          [void]$sb.AppendLine("| Integration Tests | $itResult | Netbox 4.3, 4.4, 4.5 |")
           [void]$sb.AppendLine("| Module Verification | $mvResult | Import, command count |")
           [void]$sb.AppendLine("")
           [void]$sb.AppendLine("---")
@@ -878,10 +937,9 @@ jobs:
           [void]$sb.AppendLine("| Version | Status |")
           [void]$sb.AppendLine("|---------|--------|")
           $nbStatus = if ($skipIntegration) { 'SKIP' } elseif ($integration -eq 'success') { 'OK' } else { '?' }
-          [void]$sb.AppendLine("| 4.1.11 | $nbStatus |")
-          [void]$sb.AppendLine("| 4.2.9 | $nbStatus |")
           [void]$sb.AppendLine("| 4.3.7 | $nbStatus |")
-          [void]$sb.AppendLine("| 4.4.9 | $nbStatus |")
+          [void]$sb.AppendLine("| 4.4.10 | $nbStatus |")
+          [void]$sb.AppendLine("| 4.5.0 | $nbStatus |")
           [void]$sb.AppendLine("")
           [void]$sb.AppendLine("---")
           [void]$sb.AppendLine("")
