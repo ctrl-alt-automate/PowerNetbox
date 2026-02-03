@@ -14,7 +14,7 @@ function SetupNetboxConfigVariable {
             }
             'APIDefinition' = $null
             'ContentTypes' = $null
-            'BranchStack'   = [System.Collections.Generic.Stack[string]]::new()
+            'BranchStack'   = [System.Collections.Generic.Stack[object]]::new()
         }
     }
 
