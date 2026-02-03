@@ -39,8 +39,6 @@ function Get-NBDCIMInterface {
 
         [string]$Name,
 
-        [object]$Form_Factor,
-
         [bool]$Enabled,
 
         [uint16]$MTU,

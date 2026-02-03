@@ -109,9 +109,6 @@ function New-NBDCIMInterface {
         [bool]$Enabled,
 
         [Parameter(ParameterSetName = 'Single')]
-        [object]$Form_Factor,
-
-        [Parameter(ParameterSetName = 'Single')]
         [ValidateRange(1, 65535)]
         [uint16]$MTU,
 
@@ -197,7 +194,6 @@ function New-NBDCIMInterface {
                         'mgmt_only' { $key = 'mgmt_only' }
                         'untagged_vlan' { $key = 'untagged_vlan' }
                         'tagged_vlans' { $key = 'tagged_vlans' }
-                        'form_factor' { $key = 'form_factor' }
                     }
 
                     # Convert Mode friendly names
