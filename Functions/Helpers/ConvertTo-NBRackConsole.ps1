@@ -27,6 +27,27 @@
 
     .PARAMETER NoColor
         Disable ANSI color codes for terminals that don't support them
+
+    .EXAMPLE
+        $elevation = Get-NBDCIMRackElevation -Id 24
+        ConvertTo-NBRackConsole -RackName "DC1-R01" -SiteName "Amsterdam" -UHeight 42 -Face Front -ElevationData $elevation
+
+        Generates ASCII-art rack elevation for display in terminal with ANSI colors.
+
+    .EXAMPLE
+        $elevation = Get-NBDCIMRackElevation -Id 24
+        ConvertTo-NBRackConsole -RackName "DC1-R01" -SiteName "Amsterdam" -UHeight 42 -Face Front -ElevationData $elevation -Compact
+
+        Generates compact output hiding empty slots and showing summary counts.
+
+    .EXAMPLE
+        $elevation = Get-NBDCIMRackElevation -Id 24
+        ConvertTo-NBRackConsole -RackName "DC1-R01" -SiteName "Amsterdam" -UHeight 42 -Face Front -ElevationData $elevation -NoColor | Out-File rack.txt
+
+        Generates plain text output without ANSI colors for file logging or piping.
+
+    .NOTES
+        This is an internal helper function. Use Export-NBRackElevation -Format Console for the public interface.
 #>
     [CmdletBinding()]
     [OutputType([string[]])]

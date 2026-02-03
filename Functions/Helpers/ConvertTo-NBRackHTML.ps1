@@ -24,6 +24,27 @@ function ConvertTo-NBRackHTML {
 
     .PARAMETER SvgContent
         Optional SVG content to embed (when using native renderer)
+
+    .EXAMPLE
+        $elevation = Get-NBDCIMRackElevation -Id 24
+        ConvertTo-NBRackHTML -RackName "DC1-R01" -SiteName "Amsterdam" -UHeight 42 -Face Front -ElevationData $elevation
+
+        Generates a standalone HTML page with a styled rack elevation table.
+
+    .EXAMPLE
+        $svg = Get-NBDCIMRackElevation -Id 24 -Render svg
+        ConvertTo-NBRackHTML -RackName "DC1-R01" -SiteName "Amsterdam" -UHeight 42 -Face Front -SvgContent $svg
+
+        Generates an HTML page with embedded SVG from Netbox native renderer.
+
+    .EXAMPLE
+        $elevation = Get-NBDCIMRackElevation -Id 24
+        ConvertTo-NBRackHTML -RackName "DC1-R01" -SiteName "Amsterdam" -UHeight 42 -Face Front -ElevationData $elevation | Out-File rack.html -Encoding utf8
+
+        Generates HTML and saves to file.
+
+    .NOTES
+        This is an internal helper function. Use Export-NBRackElevation -Format HTML for the public interface.
 #>
     [CmdletBinding()]
     [OutputType([string])]

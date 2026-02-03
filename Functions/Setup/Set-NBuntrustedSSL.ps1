@@ -9,9 +9,23 @@ function Set-NBuntrustedSSL {
         is specified. PowerShell Core (7+) uses the -SkipCertificateCheck parameter
         on Invoke-RestMethod directly.
 
+    .EXAMPLE
+        Set-NBuntrustedSSL
+
+        Disables SSL certificate validation for the current PowerShell session.
+        This is automatically called by Connect-NBAPI -SkipCertificateCheck on PowerShell Desktop (5.1).
+
+    .EXAMPLE
+        Set-NBuntrustedSSL -Verbose
+        Connect-NBAPI -Hostname "netbox.local" -Credential $cred
+
+        Manually disables certificate validation with verbose output, then connects to a Netbox instance
+        with a self-signed certificate.
+
     .NOTES
         This function should only be called on PowerShell Desktop edition.
-        Security Warning: Only use in development/testing environments.
+        Security Warning: Only use in development/testing environments with self-signed certificates.
+        PowerShell Core (7+) uses the -SkipCertificateCheck parameter on Invoke-RestMethod directly.
     #>
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessForStateChangingFunctions", "")]
     [CmdletBinding()]
