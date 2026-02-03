@@ -116,8 +116,7 @@ function Set-NBDCIMSite {
     process {
         Write-Verbose "Updating DCIM Site"
         foreach ($SiteID in $Id) {
-            if ($Force -or $PSCmdlet.ShouldProcess("Site ID $SiteID", "Update site")) {
-                $Segments = [System.Collections.ArrayList]::new(@('dcim', 'sites', $SiteID))
+            $CurrentSite = Get-NBDCIMSite -Id $SiteID -ErrorAction Stop
 
             if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentSite.Name)", "Update site")) {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'sites', $CurrentSite.Id))
