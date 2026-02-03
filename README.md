@@ -330,6 +330,18 @@ Original copyright (c) 2018 Ben Claussen. Fork maintained by ctrl-alt-automate.
 
 ## Changelog
 
+### v4.5.0.3
+
+- **VPN/Wireless Pagination** - Added `-All` and `-PageSize` parameters to 12 VPN and Wireless Get- functions for automatic pagination (#250)
+  - VPN: `Get-NBVPNTunnel`, `Get-NBVPNTunnelGroup`, `Get-NBVPNTunnelTermination`, `Get-NBVPNIKEPolicy`, `Get-NBVPNIKEProposal`, `Get-NBVPNIPSecPolicy`, `Get-NBVPNIPSecProfile`, `Get-NBVPNIPSecProposal`, `Get-NBVPNL2VPN`, `Get-NBVPNL2VPNTermination`
+  - Wireless: `Get-NBWirelessLAN`, `Get-NBWirelessLANGroup`, `Get-NBWirelessLink`
+- **Removed Form_Factor Parameter** - Removed obsolete `Form_Factor` parameter from interface functions (#252)
+  - Removed from `Get-NBDCIMInterface`, `New-NBDCIMInterface`, `Set-NBDCIMInterface`
+  - Use `-Type` parameter instead (e.g., `1000base-t`, `virtual`, `lag`)
+- **Strong Parameter Typing** - Added ValidateSet attributes for stricter parameter validation (#248)
+- **Input Validation** - Added URL segment validation in BuildNewURI helper (#247)
+- **Security Fixes** - Verbose logging redacts sensitive fields, SecureString for webhook secrets (#234)
+
 ### v4.5.0.2
 
 - **Bug Fix: PowerShell Core 7.x Error Messages** - Fixed issue where API error messages were not displayed correctly in PowerShell Core 7.x (#164)

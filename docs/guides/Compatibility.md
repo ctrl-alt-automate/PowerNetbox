@@ -43,6 +43,7 @@ PowerNetbox handles API changes between Netbox versions automatically:
 | Cable Profiles | New `profile` field on cables | `Cable_Profile` parameter on cable functions |
 | Object Ownership | New `/api/users/owners/` endpoint | `Get/New/Set/Remove-NBOwner` functions |
 | Port Mappings | Bidirectional `front_ports`/`rear_ports` | Full support in port functions |
+| Form_Factor removed | Interface `form_factor` replaced by `type` | `-Form_Factor` parameter removed, use `-Type` |
 
 ### Content Types / Object Types
 
