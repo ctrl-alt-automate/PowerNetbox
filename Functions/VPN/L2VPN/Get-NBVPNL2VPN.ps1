@@ -65,7 +65,7 @@ function Get-NBVPNL2VPN {
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
                 foreach ($i in $Id) {
-                    InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn', 'l2vpns', $i)) -Raw:$Raw -All:$All -PageSize $PageSize
+                    InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn', 'l2vpns', $i)) -Raw:$Raw
                 }
             }
             default {

@@ -56,7 +56,7 @@ function Get-NBVPNIKEPolicy {
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
                 foreach ($i in $Id) {
-                    InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn', 'ike-policies', $i)) -Raw:$Raw -All:$All -PageSize $PageSize
+                    InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn', 'ike-policies', $i)) -Raw:$Raw
                 }
             }
             default {

@@ -59,7 +59,7 @@ function Get-NBVPNTunnelGroup {
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
                 foreach ($i in $Id) {
-                    InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn', 'tunnel-groups', $i)) -Raw:$Raw -All:$All -PageSize $PageSize
+                    InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn', 'tunnel-groups', $i)) -Raw:$Raw
                 }
             }
             default {
