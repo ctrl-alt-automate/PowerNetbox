@@ -25,6 +25,10 @@
     Specify which fields to include in the response.
     Supports nested field selection (e.g., 'site.name', 'device_type.model').
 
+.PARAMETER Omit
+    Specify which fields to exclude from the response.
+    Requires Netbox 4.5.0 or later.
+
 .PARAMETER IncludeConfigContext
     Include config_context in the response. By default, config_context is
     excluded for performance (can be 10-100x faster without it).
@@ -53,6 +57,10 @@
     Returns devices with config_context included.
 
 .EXAMPLE
+    Get-NBDCIMDevice -Omit 'comments','description'
+    Returns devices without comments and description fields (Netbox 4.5+).
+
+.EXAMPLE
     Get-NBDCIMDevice -All -PageSize 200 -Verbose
     Returns all devices with 200 items per request, showing progress.
 
@@ -73,6 +81,8 @@ function Get-NBDCIMDevice {
         [switch]$Brief,
 
         [string[]]$Fields,
+
+        [string[]]$Omit,
 
         [switch]$IncludeConfigContext,
 
@@ -154,9 +164,16 @@ function Get-NBDCIMDevice {
         # Build parameters to pass, excluding config_context by default
         $paramsToPass = @{} + $PSBoundParameters
 
-        # Add exclude=config_context unless IncludeConfigContext is specified
+        # Build omit list: start with user-provided fields, add config_context unless explicitly included
+        $omitFields = @()
+        if ($PSBoundParameters.ContainsKey('Omit')) {
+            $omitFields += $Omit
+        }
         if (-not $IncludeConfigContext) {
-            $paramsToPass['Exclude'] = @('config_context')
+            $omitFields += 'config_context'
+        }
+        if ($omitFields.Count -gt 0) {
+            $paramsToPass['Omit'] = $omitFields | Select-Object -Unique
         }
         [void]$paramsToPass.Remove('IncludeConfigContext')
 

@@ -71,11 +71,19 @@ function Get-NBIPAMPrefix {
     .PARAMETER Role_Id
         Filter by IPAM role database ID.
 
+    .PARAMETER Omit
+        Specify which fields to exclude from the response.
+        Requires Netbox 4.5.0 or later.
+
     .PARAMETER Raw
         Return the raw API response instead of extracting the results array.
 
     .EXAMPLE
         PS C:\> Get-NBIPAMPrefix
+
+    .EXAMPLE
+        PS C:\> Get-NBIPAMPrefix -Omit 'description','comments'
+        Returns prefixes without description and comments fields (Netbox 4.5+).
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]
@@ -90,6 +98,8 @@ function Get-NBIPAMPrefix {
         [switch]$Brief,
 
         [string[]]$Fields,
+
+        [string[]]$Omit,
 
         [Parameter(ParameterSetName = 'Query',
                    Position = 0)]
