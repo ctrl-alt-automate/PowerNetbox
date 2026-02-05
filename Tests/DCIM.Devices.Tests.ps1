@@ -1,4 +1,3 @@
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param()
 
 BeforeAll {
@@ -20,31 +19,12 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             return $true
         }
 
-        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+        Mock -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -MockWith {
             return [ordered]@{
-                'Method'      = $Method
-                'Uri'         = $Uri
-                'Headers'     = $Headers
-                'Timeout'     = $Timeout
-                'ContentType' = $ContentType
-                'Body'        = $Body
+                'Method' = if ($Method) { $Method } else { 'GET' }
+                'Uri'    = $URI.Uri.AbsoluteUri
+                'Body'   = if ($Body) { $Body | ConvertTo-Json -Compress } else { $null }
             }
-        }
-
-        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
-            return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
-        }
-
-        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith {
-            return 'netbox.domain.com'
-        }
-
-        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith {
-            return 30
-        }
-
-        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith {
-            return @{}
         }
 
         # Set up module internal state and load choices data
@@ -64,7 +44,6 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             $Result.Method | Should -Be 'GET'
             # By default, config_context is excluded for performance
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/devices/?omit=config_context'
-            $Result.Headers.Keys.Count | Should -BeExactly 1
         }
 
         It "Should request with a limit and offset" {
@@ -89,8 +68,8 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             $Result = Get-NBDCIMDevice -Query 'test device'
 
             $Result.Method | Should -Be 'GET'
-            # Module doesn't URL-encode spaces in query strings
-            $Result.Uri | Should -Match 'q=test device'
+            # UriBuilder encodes spaces as %20 in the URI
+            $Result.Uri | Should -Match 'q=test%20device'
             $Result.Uri | Should -Match 'omit=config_context'
         }
 
@@ -232,7 +211,7 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
         It "Should request the default number of device roles" {
             $Result = Get-NBDCIMDeviceRole
 
-            Should -Invoke -CommandName "Invoke-RestMethod" -Times 1 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
+            Should -Invoke -CommandName "InvokeNetboxRequest" -Times 1 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
 
             $Result.Method | Should -Be 'GET'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/device-roles/'
@@ -271,7 +250,7 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
         It "Should create a new device" {
             $Result = New-NBDCIMDevice -Name "newdevice" -Device_Role 4 -Device_Type 10 -Site 1 -Face 'front'
 
-            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -Times 1 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
 
             $Result.Method | Should -Be 'POST'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/devices/'

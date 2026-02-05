@@ -1,4 +1,3 @@
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param()
 
 BeforeAll {
@@ -14,22 +13,13 @@ BeforeAll {
 Describe "DCIM Platforms Tests" -Tag 'DCIM', 'platforms' {
     BeforeAll {
         Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
-        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+        Mock -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -MockWith {
             return [ordered]@{
-                'Method'      = $Method
-                'Uri'         = $Uri
-                'Headers'     = $Headers
-                'Timeout'     = $Timeout
-                'ContentType' = $ContentType
-                'Body'        = $Body
+                'Method' = if ($Method) { $Method } else { 'GET' }
+                'Uri'    = $URI.Uri.AbsoluteUri
+                'Body'   = if ($Body) { $Body | ConvertTo-Json -Compress } else { $null }
             }
         }
-        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
-            return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
-        }
-        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { return 'netbox.domain.com' }
-        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
-        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
 
         InModuleScope -ModuleName 'PowerNetbox' {
             $script:NetboxConfig.Hostname = 'netbox.domain.com'
@@ -41,7 +31,7 @@ Describe "DCIM Platforms Tests" -Tag 'DCIM', 'platforms' {
     Context "Get-NBDCIMPlatform" {
         It "Should request the default number of platforms" {
             $Result = Get-NBDCIMPlatform
-            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -Times 1 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'GET'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/platforms/'
         }
@@ -56,8 +46,8 @@ Describe "DCIM Platforms Tests" -Tag 'DCIM', 'platforms' {
 
         It "Should request with a platform name" {
             $Result = Get-NBDCIMPlatform -Name "Windows Server 2016"
-            # Module doesn't URL-encode spaces in query strings
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/platforms/?name=Windows Server 2016'
+            # UriBuilder encodes spaces as %20 in the URI
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/platforms/?name=Windows%20Server%202016'
         }
 
         It "Should request a platform by manufacturer" {
@@ -72,7 +62,7 @@ Describe "DCIM Platforms Tests" -Tag 'DCIM', 'platforms' {
 
         It "Should request multiple platforms by ID" {
             $Result = Get-NBDCIMPlatform -Id 10, 20
-            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 2 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -Times 2 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'GET', 'GET'
         }
     }

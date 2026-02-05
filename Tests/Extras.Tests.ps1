@@ -8,7 +8,6 @@
     and ImageAttachments functions.
 #>
 
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param()
 
 BeforeAll {
@@ -24,22 +23,13 @@ BeforeAll {
 Describe "Extras Module Tests" -Tag 'Extras' {
     BeforeAll {
         Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
-        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+        Mock -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -MockWith {
             return [ordered]@{
-                'Method'      = $Method
-                'Uri'         = $Uri
-                'Headers'     = $Headers
-                'Timeout'     = $Timeout
-                'ContentType' = $ContentType
-                'Body'        = $Body
+                'Method' = if ($Method) { $Method } else { 'GET' }
+                'Uri'    = $URI.Uri.AbsoluteUri
+                'Body'   = if ($Body) { $Body | ConvertTo-Json -Compress } else { $null }
             }
         }
-        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
-            return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
-        }
-        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { return 'netbox.domain.com' }
-        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
-        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
 
         InModuleScope -ModuleName 'PowerNetbox' {
             $script:NetboxConfig.Hostname = 'netbox.domain.com'
@@ -206,7 +196,7 @@ Describe "Extras Module Tests" -Tag 'Extras' {
 
         It "Should request a choice set by name" {
             $Result = Get-NBCustomFieldChoiceSet -Name 'Status Options'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/extras/custom-field-choice-sets/?name=Status Options'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/extras/custom-field-choice-sets/?name=Status%20Options'
         }
     }
 
@@ -258,7 +248,7 @@ Describe "Extras Module Tests" -Tag 'Extras' {
 
         It "Should request a config context by name" {
             $Result = Get-NBConfigContext -Name 'DNS Servers'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/extras/config-contexts/?name=DNS Servers'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/extras/config-contexts/?name=DNS%20Servers'
         }
     }
 
@@ -316,7 +306,7 @@ Describe "Extras Module Tests" -Tag 'Extras' {
 
         It "Should request a webhook by name" {
             $Result = Get-NBWebhook -Name 'Slack Notification'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/extras/webhooks/?name=Slack Notification'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/extras/webhooks/?name=Slack%20Notification'
         }
     }
 
@@ -422,7 +412,7 @@ Describe "Extras Module Tests" -Tag 'Extras' {
 
         It "Should request an export template by name" {
             $Result = Get-NBExportTemplate -Name 'Device CSV'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/extras/export-templates/?name=Device CSV'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/extras/export-templates/?name=Device%20CSV'
         }
     }
 
@@ -474,7 +464,7 @@ Describe "Extras Module Tests" -Tag 'Extras' {
 
         It "Should request a saved filter by name" {
             $Result = Get-NBSavedFilter -Name 'Active Devices'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/extras/saved-filters/?name=Active Devices'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/extras/saved-filters/?name=Active%20Devices'
         }
     }
 
@@ -567,7 +557,7 @@ Describe "Extras Module Tests" -Tag 'Extras' {
 
         It "Should request an event rule by name" {
             $Result = Get-NBEventRule -Name 'Device Created'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/extras/event-rules/?name=Device Created'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/extras/event-rules/?name=Device%20Created'
         }
     }
 

@@ -6,7 +6,6 @@
     Tests for Tenant, TenantGroup, Contact, ContactRole, and ContactAssignment functions.
 #>
 
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param()
 
 BeforeAll {
@@ -22,22 +21,13 @@ BeforeAll {
 Describe "Tenancy Module Tests" -Tag 'Tenancy' {
     BeforeAll {
         Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
-        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+        Mock -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -MockWith {
             return [ordered]@{
-                'Method'      = $Method
-                'Uri'         = $Uri
-                'Headers'     = $Headers
-                'Timeout'     = $Timeout
-                'ContentType' = $ContentType
-                'Body'        = $Body
+                'Method' = if ($Method) { $Method } else { 'GET' }
+                'Uri'    = $URI.Uri.AbsoluteUri
+                'Body'   = if ($Body) { $Body | ConvertTo-Json -Compress } else { $null }
             }
         }
-        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
-            return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
-        }
-        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { return 'netbox.domain.com' }
-        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
-        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
 
         InModuleScope -ModuleName 'PowerNetbox' {
             $script:NetboxConfig.Hostname = 'netbox.domain.com'
@@ -61,7 +51,7 @@ Describe "Tenancy Module Tests" -Tag 'Tenancy' {
 
         It "Should request a tenant by name" {
             $Result = Get-NBTenant -Name 'Acme Corp'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/tenancy/tenants/?name=Acme Corp'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/tenancy/tenants/?name=Acme%20Corp'
         }
 
         It "Should request a tenant by slug" {
@@ -224,7 +214,7 @@ Describe "Tenancy Module Tests" -Tag 'Tenancy' {
 
         It "Should request a contact by name" {
             $Result = Get-NBContact -Name 'John Doe'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/tenancy/contacts/?name=John Doe'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/tenancy/contacts/?name=John%20Doe'
         }
     }
 

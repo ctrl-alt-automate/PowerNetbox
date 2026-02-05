@@ -1,4 +1,3 @@
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param()
 
 BeforeAll {
@@ -14,12 +13,6 @@ BeforeAll {
 Describe "DCIM Rack Elevation Tests" -Tag 'DCIM', 'Racks', 'RackElevation' {
     BeforeAll {
         Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
-        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
-            return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
-        }
-        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { return 'netbox.domain.com' }
-        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
-        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
 
         InModuleScope -ModuleName 'PowerNetbox' {
             $script:NetboxConfig.Hostname = 'netbox.domain.com'
@@ -46,14 +39,11 @@ Describe "DCIM Rack Elevation Tests" -Tag 'DCIM', 'Racks', 'RackElevation' {
 
     Context "Get-NBDCIMRackElevation" {
         BeforeAll {
-            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+            Mock -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -MockWith {
                 return [ordered]@{
-                    'Method'      = $Method
-                    'Uri'         = $Uri
-                    'Headers'     = $Headers
-                    'Timeout'     = $Timeout
-                    'ContentType' = $ContentType
-                    'Body'        = $Body
+                    'Method' = if ($Method) { $Method } else { 'GET' }
+                    'Uri'    = $URI.Uri.AbsoluteUri
+                    'Body'   = if ($Body) { $Body | ConvertTo-Json -Compress } else { $null }
                 }
             }
         }
@@ -107,6 +97,14 @@ Describe "DCIM Rack Elevation Tests" -Tag 'DCIM', 'Racks', 'RackElevation' {
 
     Context "Get-NBDCIMRackElevation SVG Mode" {
         BeforeAll {
+            # SVG mode calls Invoke-WebRequest directly (not InvokeNetboxRequest),
+            # so it needs auth helper mocks for Get-NBRequestHeaders and Get-NBInvokeParams
+            Mock -CommandName 'Get-NBRequestHeaders' -ModuleName 'PowerNetbox' -MockWith {
+                return @{ 'Authorization' = 'Token testtoken' }
+            }
+            Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith {
+                return @{}
+            }
             Mock -CommandName 'Invoke-WebRequest' -ModuleName 'PowerNetbox' -MockWith {
                 return [PSCustomObject]@{
                     Content = '<svg xmlns="http://www.w3.org/2000/svg"><rect/></svg>'
@@ -148,7 +146,7 @@ Describe "DCIM Rack Elevation Tests" -Tag 'DCIM', 'Racks', 'RackElevation' {
     Context "Get-NBDCIMRackElevation -All Pagination" {
         BeforeAll {
             $script:CallCount = 0
-            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+            Mock -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -MockWith {
                 $script:CallCount++
                 if ($script:CallCount -eq 1) {
                     return @{
@@ -199,12 +197,6 @@ Describe "DCIM Rack Elevation Tests" -Tag 'DCIM', 'Racks', 'RackElevation' {
 Describe "Export-NBRackElevation Tests" -Tag 'DCIM', 'Racks', 'RackElevation', 'Export' {
     BeforeAll {
         Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
-        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
-            return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
-        }
-        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { return 'netbox.domain.com' }
-        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
-        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
 
         InModuleScope -ModuleName 'PowerNetbox' {
             $script:NetboxConfig.Hostname = 'netbox.domain.com'
