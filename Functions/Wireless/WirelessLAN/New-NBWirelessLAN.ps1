@@ -4,13 +4,45 @@
 
 .DESCRIPTION
     Creates a new Wireless LAN in Netbox Wireless module.
-    Supports pipeline input for Id parameter where applicable.
+
+.PARAMETER SSID
+    The SSID of the wireless LAN (required).
+
+.PARAMETER Group
+    Wireless LAN group ID.
+
+.PARAMETER Status
+    Wireless LAN status.
+
+.PARAMETER VLAN
+    Associated VLAN ID.
+
+.PARAMETER Tenant
+    Tenant ID.
+
+.PARAMETER Auth_Type
+    Authentication type.
+
+.PARAMETER Auth_Cipher
+    Authentication cipher.
+
+.PARAMETER Auth_PSK
+    Pre-shared key for authentication.
+
+.PARAMETER Description
+    Description of the wireless LAN.
+
+.PARAMETER Comments
+    Additional comments.
+
+.PARAMETER Custom_Fields
+    Hashtable of custom field values.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBWirelessLAN
+    New-NBWirelessLAN -SSID "Corporate-WiFi"
 
     Creates a new Wireless LAN object.
 
@@ -20,11 +52,41 @@
 function New-NBWirelessLAN {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
-    param([Parameter(Mandatory = $true)][string]$SSID,[uint64]$Group,[string]$Status,[uint64]$VLAN,[uint64]$Tenant,
-        [string]$Auth_Type,[string]$Auth_Cipher,[string]$Auth_PSK,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$SSID,
+
+        [uint64]$Group,
+
+        [string]$Status,
+
+        [uint64]$VLAN,
+
+        [uint64]$Tenant,
+
+        [string]$Auth_Type,
+
+        [string]$Auth_Cipher,
+
+        [string]$Auth_PSK,
+
+        [string]$Description,
+
+        [string]$Comments,
+
+        [hashtable]$Custom_Fields,
+
+        [switch]$Raw
+    )
+
     process {
         Write-Verbose "Creating Wireless LAN"
-        $s = [System.Collections.ArrayList]::new(@('wireless','wireless-lans')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
-        if ($PSCmdlet.ShouldProcess($SSID, 'Create wireless LAN')) { InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments) -Method POST -Body $u.Parameters -Raw:$Raw }
+        $Segments = [System.Collections.ArrayList]::new(@('wireless', 'wireless-lans'))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSCmdlet.ShouldProcess($SSID, 'Create wireless LAN')) {
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
+        }
     }
 }
