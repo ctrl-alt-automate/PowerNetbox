@@ -12,7 +12,7 @@
     Array of IPSec proposal IDs to associate with this policy.
 
 .PARAMETER Pfs_Group
-    Enable Perfect Forward Secrecy group.
+    Diffie-Hellman group ID for Perfect Forward Secrecy (e.g., 1, 2, 5, 14, 19, 20, 21).
 
 .PARAMETER Description
     Description of the IPSec policy.
@@ -43,7 +43,7 @@ function New-NBVPNIPSecPolicy {
 
         [uint64[]]$Proposals,
 
-        [bool]$Pfs_Group,
+        [uint16]$Pfs_Group,
 
         [string]$Description,
 

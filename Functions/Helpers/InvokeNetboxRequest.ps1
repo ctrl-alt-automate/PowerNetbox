@@ -180,10 +180,11 @@ function InvokeNetboxRequest {
 
     if ($Body) {
         # Sanitize sensitive fields before logging (handles both hashtables and PSCustomObjects)
-        $sensitiveFields = @('secret', 'password', 'key', 'token')
+        $sensitivePatterns = @('secret', 'password', 'key', 'token', 'psk')
         $sanitizedBody = @{}
         foreach ($prop in $Body.PSObject.Properties) {
-            if ($sensitiveFields -contains $prop.Name -and $prop.Value) {
+            $isSensitive = $prop.Value -and ($sensitivePatterns | Where-Object { $prop.Name -match $_ })
+            if ($isSensitive) {
                 $sanitizedBody[$prop.Name] = '***REDACTED***'
             }
             else {
