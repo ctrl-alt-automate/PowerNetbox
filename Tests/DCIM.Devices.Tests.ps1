@@ -121,10 +121,12 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
         It "Should request with multiple IDs" {
             $Result = Get-NBDCIMDevice -Id 10, 12, 15
 
-            $Result.Method | Should -Be 'GET'
-            # Commas may or may not be URL-encoded depending on PS version
-            $Result.Uri | Should -Match 'id__in=10(%2C|,)12(%2C|,)15'
-            $Result.Uri | Should -Match 'omit=config_context'
+            $Result | Should -HaveCount 3
+            $Result[0].Method | Should -Be 'GET'
+            $Result[0].Uri | Should -Match 'dcim/devices/10/'
+            $Result[1].Uri | Should -Match 'dcim/devices/12/'
+            $Result[2].Uri | Should -Match 'dcim/devices/15/'
+            $Result | ForEach-Object { $_.Uri | Should -Match 'omit=config_context' }
         }
 
         It "Should request a status" {

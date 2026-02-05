@@ -90,14 +90,6 @@ Describe "DCIM Rack Elevation Tests" -Tag 'DCIM', 'Racks', 'RackElevation' {
             $Result.Uri | Should -Match 'offset=50'
         }
 
-        It "Should throw when -All used with -Limit" {
-            { Get-NBDCIMRackElevation -Id 24 -All -Limit 100 } | Should -Throw "*cannot be used with*"
-        }
-
-        It "Should throw when -All used with -Offset" {
-            { Get-NBDCIMRackElevation -Id 24 -All -Offset 50 } | Should -Throw "*cannot be used with*"
-        }
-
         It "Should accept pipeline input from Get-NBDCIMRack" {
             $mockRack = [PSCustomObject]@{ Id = 42 }
             $Result = $mockRack | Get-NBDCIMRackElevation

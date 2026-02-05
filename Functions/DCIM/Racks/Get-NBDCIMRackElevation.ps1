@@ -69,6 +69,11 @@ function Get-NBDCIMRackElevation {
     [OutputType([PSCustomObject], [string])]
     param
     (
+        [switch]$All,
+
+        [ValidateRange(1, 1000)]
+        [int]$PageSize = 100,
+
         [switch]$Brief,
 
         [string[]]$Fields,
@@ -93,16 +98,8 @@ function Get-NBDCIMRackElevation {
         [ValidateRange(0, [uint16]::MaxValue)]
         [uint16]$Offset,
 
-        [switch]$All,
-
         [switch]$Raw
     )
-
-    begin {
-        if ($All -and ($PSBoundParameters.ContainsKey('Limit') -or $PSBoundParameters.ContainsKey('Offset'))) {
-            throw "The -All parameter cannot be used with -Limit or -Offset"
-        }
-    }
 
     process {
         Write-Verbose "Retrieving DCIM Rack Elevation for rack ID $Id"
@@ -162,43 +159,8 @@ function Get-NBDCIMRackElevation {
             }
         }
         else {
-            # JSON mode
-            if ($All) {
-                # Auto-paginate through all results
-                $allResults = [System.Collections.ArrayList]::new()
-                $currentOffset = 0
-                $pageSize = 1000
-
-                do {
-                    $Parameters['limit'] = $pageSize
-                    $Parameters['offset'] = $currentOffset
-                    $URI = BuildNewURI -Segments $Segments -Parameters $Parameters
-
-                    $response = InvokeNetboxRequest -URI $URI -Raw:$true
-                    if ($response.results) {
-                        [void]$allResults.AddRange($response.results)
-                    }
-
-                    $currentOffset += $pageSize
-                } while ($response.next)
-
-                if ($Raw) {
-                    # Return as paginated structure
-                    [PSCustomObject]@{
-                        count    = $allResults.Count
-                        next     = $null
-                        previous = $null
-                        results  = $allResults.ToArray()
-                    }
-                }
-                else {
-                    $allResults.ToArray()
-                }
-            }
-            else {
-                # Standard paginated response
-                InvokeNetboxRequest -URI $URI -Raw:$Raw
-            }
+            # JSON mode - use centralized pagination
+            InvokeNetboxRequest -URI $URI -Raw:$Raw -All:$All -PageSize $PageSize
         }
     }
 }
