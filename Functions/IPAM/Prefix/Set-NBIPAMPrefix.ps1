@@ -55,27 +55,6 @@ function Set-NBIPAMPrefix {
         [switch]$Raw
     )
 
-    begin {
-        #        Write-Verbose "Validating enum properties"
-        #        $Segments = [System.Collections.ArrayList]::new(@('ipam', 'ip-addresses', 0))
-        $Method = 'PATCH'
-        #
-        #        # Value validation
-        #        $ModelDefinition = GetModelDefinitionFromURIPath -Segments $Segments -Method $Method
-        #        $EnumProperties = GetModelEnumProperties -ModelDefinition $ModelDefinition
-        #
-        #        foreach ($Property in $EnumProperties.Keys) {
-        #            if ($PSBoundParameters.ContainsKey($Property)) {
-        #                Write-Verbose "Validating property [$Property] with value [$($PSBoundParameters.$Property)]"
-        #                $PSBoundParameters.$Property = ValidateValue -ModelDefinition $ModelDefinition -Property $Property -ProvidedValue $PSBoundParameters.$Property
-        #            } else {
-        #                Write-Verbose "User did not provide a value for [$Property]"
-        #            }
-        #        }
-        #
-        #        Write-Verbose "Finished enum validation"
-    }
-
     process {
         foreach ($PrefixId in $Id) {
             $Segments = [System.Collections.ArrayList]::new(@('ipam', 'prefixes', $PrefixId))
@@ -87,13 +66,11 @@ function Set-NBIPAMPrefix {
 
                 $URI = BuildNewURI -Segments $URIComponents.Segments
 
-                InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method $Method -Raw:$Raw
+                InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method PATCH -Raw:$Raw
             }
         }
     }
 }
-
-
 
 
 
