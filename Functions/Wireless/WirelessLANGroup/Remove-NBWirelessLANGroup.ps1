@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Removes a irelessLANGroup from Netbox W module.
+    Removes a Wireless LAN Group from Netbox Wireless module.
 
 .DESCRIPTION
-    Removes a irelessLANGroup from Netbox W module.
+    Removes a Wireless LAN Group from Netbox Wireless module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw

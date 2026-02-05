@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing WirelessLAN in Netbox W module.
+    Updates an existing Wireless LAN in Netbox Wireless module.
 
 .DESCRIPTION
-    Updates an existing WirelessLAN in Netbox W module.
+    Updates an existing Wireless LAN in Netbox Wireless module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw

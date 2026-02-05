@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Creates a new WirelessLANGroup in Netbox Wireless module.
+    Creates a new Wireless LAN Group in Netbox Wireless module.
 
 .DESCRIPTION
-    Creates a new WirelessLANGroup in Netbox Wireless module.
+    Creates a new Wireless LAN Group in Netbox Wireless module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw

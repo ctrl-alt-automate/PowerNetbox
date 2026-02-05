@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Removes a irelessLAN from Netbox W module.
+    Removes a Wireless LAN from Netbox Wireless module.
 
 .DESCRIPTION
-    Removes a irelessLAN from Netbox W module.
+    Removes a Wireless LAN from Netbox Wireless module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw

@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Retrieves Wireless LANGroup objects from Netbox Wireless module.
+    Retrieves Wireless LAN Group objects from Netbox Wireless module.
 
 .DESCRIPTION
-    Retrieves Wireless LANGroup objects from Netbox Wireless module.
+    Retrieves Wireless LAN Group objects from Netbox Wireless module.
 
 .PARAMETER Raw
     Return the raw API response instead of the results array.
@@ -36,7 +36,7 @@ function Get-NBWirelessLANGroup {
         [uint16]$Limit,[ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,[switch]$Raw)
     process {
-        Write-Verbose "Retrieving Wireless LANGroup"
+        Write-Verbose "Retrieving Wireless LAN Group"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('wireless','wireless-lan-groups',$i)) -Raw:$Raw } }
             default { $s = [System.Collections.ArrayList]::new(@('wireless','wireless-lan-groups')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'; InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments -Parameters $u.Parameters) -Raw:$Raw -All:$All -PageSize $PageSize }
