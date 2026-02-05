@@ -117,7 +117,8 @@ function New-NBImageAttachment {
                     }
                 }
                 catch {
-                    $ErrorBody = GetNetboxAPIErrorBody -ErrorRecord $_
+                    $errorResponse = GetNetboxAPIErrorBody -Response $_.Exception.Response
+                    $ErrorBody = $errorResponse.Body
                     $PSCmdlet.ThrowTerminatingError(
                         [System.Management.Automation.ErrorRecord]::new(
                             [System.Exception]::new("Failed to upload image attachment: $ErrorBody"),
