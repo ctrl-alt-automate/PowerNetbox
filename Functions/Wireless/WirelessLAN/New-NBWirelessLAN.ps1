@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Creates a new irelessLAN in Netbox W module.
+    Creates a new Wireless LAN in Netbox Wireless module.
 
 .DESCRIPTION
-    Creates a new irelessLAN in Netbox W module.
+    Creates a new Wireless LAN in Netbox Wireless module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw

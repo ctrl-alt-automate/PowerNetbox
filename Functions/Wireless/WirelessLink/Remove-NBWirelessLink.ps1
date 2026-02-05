@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Removes a irelessLink from Netbox W module.
+    Removes a Wireless Link from Netbox Wireless module.
 
 .DESCRIPTION
-    Removes a irelessLink from Netbox W module.
+    Removes a Wireless Link from Netbox Wireless module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw

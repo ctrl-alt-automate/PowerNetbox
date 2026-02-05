@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Updates an existing irelessLANGroup in Netbox W module.
+    Updates an existing Wireless LAN Group in Netbox Wireless module.
 
 .DESCRIPTION
-    Updates an existing irelessLANGroup in Netbox W module.
+    Updates an existing Wireless LAN Group in Netbox Wireless module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
