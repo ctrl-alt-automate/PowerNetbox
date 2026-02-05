@@ -68,7 +68,7 @@
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 function Get-NBDCIMDevice {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([PSCustomObject])]
     #region Parameters
     param
@@ -92,64 +92,92 @@ function Get-NBDCIMDevice {
         [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
-        [Parameter(ValueFromPipelineByPropertyName = $true)]
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Query,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Name,
 
+        [Parameter(ParameterSetName = 'Query')]
         [uint64]$Manufacturer_Id,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Manufacturer,
 
+        [Parameter(ParameterSetName = 'Query')]
         [uint64]$Device_Type_Id,
 
+        [Parameter(ParameterSetName = 'Query')]
         [uint64]$Role_Id,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Role,
 
+        [Parameter(ParameterSetName = 'Query')]
         [uint64]$Tenant_Id,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Tenant,
 
+        [Parameter(ParameterSetName = 'Query')]
         [uint64]$Platform_Id,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Platform,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Asset_Tag,
 
+        [Parameter(ParameterSetName = 'Query')]
         [uint64]$Site_Id,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Site,
 
+        [Parameter(ParameterSetName = 'Query')]
         [uint64]$Rack_Group_Id,
 
+        [Parameter(ParameterSetName = 'Query')]
         [uint64]$Rack_Id,
 
+        [Parameter(ParameterSetName = 'Query')]
         [uint64]$Cluster_Id,
 
+        [Parameter(ParameterSetName = 'Query')]
         [uint64]$Model,
 
+        [Parameter(ParameterSetName = 'Query')]
         [ValidateSet('offline', 'active', 'planned', 'staged', 'failed', 'inventory', 'decommissioning', IgnoreCase = $true)]
         [string]$Status,
 
+        [Parameter(ParameterSetName = 'Query')]
         [bool]$Is_Full_Depth,
 
+        [Parameter(ParameterSetName = 'Query')]
         [bool]$Is_Console_Server,
 
+        [Parameter(ParameterSetName = 'Query')]
         [bool]$Is_PDU,
 
+        [Parameter(ParameterSetName = 'Query')]
         [bool]$Is_Network_Device,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$MAC_Address,
 
+        [Parameter(ParameterSetName = 'Query')]
         [bool]$Has_Primary_IP,
 
+        [Parameter(ParameterSetName = 'Query')]
         [uint64]$Virtual_Chassis_Id,
 
+        [Parameter(ParameterSetName = 'Query')]
         [uint16]$Position,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Serial,
 
         [switch]$Raw
@@ -159,12 +187,8 @@ function Get-NBDCIMDevice {
 
     process {
         Write-Verbose "Retrieving DCIM Device"
-        $Segments = [System.Collections.ArrayList]::new(@('dcim', 'devices'))
 
-        # Build parameters to pass, excluding config_context by default
-        $paramsToPass = @{} + $PSBoundParameters
-
-        # Build omit list: start with user-provided fields, add config_context unless explicitly included
+        # Build omit list: add config_context unless explicitly included
         $omitFields = @()
         if ($PSBoundParameters.ContainsKey('Omit')) {
             $omitFields += $Omit
@@ -172,15 +196,33 @@ function Get-NBDCIMDevice {
         if (-not $IncludeConfigContext) {
             $omitFields += 'config_context'
         }
-        if ($omitFields.Count -gt 0) {
-            $paramsToPass['Omit'] = $omitFields | Select-Object -Unique
+
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' {
+                foreach ($i in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('dcim', 'devices', $i))
+                    $paramsToPass = @{}
+                    if ($omitFields.Count -gt 0) {
+                        $paramsToPass['Omit'] = $omitFields | Select-Object -Unique
+                    }
+                    if ($PSBoundParameters.ContainsKey('Brief')) { $paramsToPass['Brief'] = $Brief }
+                    if ($PSBoundParameters.ContainsKey('Fields')) { $paramsToPass['Fields'] = $Fields }
+                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $paramsToPass -SkipParameterByName 'Id', 'Raw', 'All', 'PageSize'
+                    $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim', 'devices'))
+                $paramsToPass = @{} + $PSBoundParameters
+                if ($omitFields.Count -gt 0) {
+                    $paramsToPass['Omit'] = $omitFields | Select-Object -Unique
+                }
+                [void]$paramsToPass.Remove('IncludeConfigContext')
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $paramsToPass -SkipParameterByName 'Raw', 'All', 'PageSize'
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                InvokeNetboxRequest -URI $URI -Raw:$Raw -All:$All -PageSize $PageSize
+            }
         }
-        [void]$paramsToPass.Remove('IncludeConfigContext')
-
-        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $paramsToPass -SkipParameterByName 'Raw', 'All', 'PageSize'
-
-        $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
-
-        InvokeNetboxRequest -URI $URI -Raw:$Raw -All:$All -PageSize $PageSize
     }
 }
