@@ -1,4 +1,3 @@
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param()
 
 BeforeAll {
@@ -16,22 +15,13 @@ BeforeAll {
 Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
     BeforeAll {
         Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
-        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+        Mock -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -MockWith {
             return [ordered]@{
-                'Method'      = $Method
-                'Uri'         = $Uri
-                'Headers'     = $Headers
-                'Timeout'     = $Timeout
-                'ContentType' = $ContentType
-                'Body'        = $Body
+                'Method' = if ($Method) { $Method } else { 'GET' }
+                'Uri'    = $URI.Uri.AbsoluteUri
+                'Body'   = if ($Body) { $Body | ConvertTo-Json -Compress } else { $null }
             }
         }
-        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
-            return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
-        }
-        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { return 'netbox.domain.com' }
-        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
-        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
 
         InModuleScope -ModuleName 'PowerNetbox' -ArgumentList $script:TestPath -ScriptBlock {
             param($TestPath)
@@ -45,7 +35,7 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
     Context "Get-NBDCIMInterface" {
         It "Should request the default number of interfaces" {
             $Result = Get-NBDCIMInterface
-            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -Times 1 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'GET'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/interfaces/'
         }

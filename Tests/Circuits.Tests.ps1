@@ -8,7 +8,6 @@
     VirtualCircuitType, and VirtualCircuitTermination functions.
 #>
 
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param()
 
 BeforeAll {
@@ -24,22 +23,13 @@ BeforeAll {
 Describe "Circuits Module Tests" -Tag 'Circuits' {
     BeforeAll {
         Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
-        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+        Mock -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -MockWith {
             return [ordered]@{
-                'Method'      = $Method
-                'Uri'         = $Uri
-                'Headers'     = $Headers
-                'Timeout'     = $Timeout
-                'ContentType' = $ContentType
-                'Body'        = $Body
+                'Method' = if ($Method) { $Method } else { 'GET' }
+                'Uri'    = $URI.Uri.AbsoluteUri
+                'Body'   = if ($Body) { $Body | ConvertTo-Json -Compress } else { $null }
             }
         }
-        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
-            return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
-        }
-        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { return 'netbox.domain.com' }
-        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
-        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
 
         InModuleScope -ModuleName 'PowerNetbox' {
             $script:NetboxConfig.Hostname = 'netbox.domain.com'
@@ -310,7 +300,7 @@ Describe "Circuits Module Tests" -Tag 'Circuits' {
 
         It "Should request a circuit group by name" {
             $Result = Get-NBCircuitGroup -Name 'Primary Links'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/circuits/circuit-groups/?name=Primary Links'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/circuits/circuit-groups/?name=Primary%20Links'
         }
     }
 
@@ -417,7 +407,7 @@ Describe "Circuits Module Tests" -Tag 'Circuits' {
 
         It "Should request a provider account by name" {
             $Result = Get-NBCircuitProviderAccount -Name 'Main Account'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/circuits/provider-accounts/?name=Main Account'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/circuits/provider-accounts/?name=Main%20Account'
         }
     }
 
@@ -471,7 +461,7 @@ Describe "Circuits Module Tests" -Tag 'Circuits' {
 
         It "Should request a provider network by name" {
             $Result = Get-NBCircuitProviderNetwork -Name 'Global Network'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/circuits/provider-networks/?name=Global Network'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/circuits/provider-networks/?name=Global%20Network'
         }
     }
 

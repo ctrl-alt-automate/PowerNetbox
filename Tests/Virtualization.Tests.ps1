@@ -1,4 +1,3 @@
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param()
 
 BeforeAll {
@@ -16,22 +15,13 @@ BeforeAll {
 Describe "Virtualization tests" -Tag 'Virtualization' {
     BeforeAll {
         Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
-        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+        Mock -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -MockWith {
             return [ordered]@{
-                'Method'      = $Method
-                'Uri'         = $Uri
-                'Headers'     = $Headers
-                'Timeout'     = $Timeout
-                'ContentType' = $ContentType
-                'Body'        = $Body
+                'Method' = if ($Method) { $Method } else { 'GET' }
+                'Uri'    = $URI.Uri.AbsoluteUri
+                'Body'   = if ($Body) { $Body | ConvertTo-Json -Compress } else { $null }
             }
         }
-        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
-            return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
-        }
-        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { return 'netbox.domain.com' }
-        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
-        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
 
         InModuleScope -ModuleName 'PowerNetbox' -ArgumentList $script:TestPath -ScriptBlock {
             param($TestPath)
@@ -69,8 +59,8 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
         It "Should request with an escaped query" {
             $Result = Get-NBVirtualMachine -Query 'test vm'
             $Result.Method | Should -Be 'GET'
-            # Module doesn't URL-encode spaces in query strings
-            $Result.Uri | Should -Match 'q=test vm'
+            # UriBuilder encodes spaces as %20 in the URI
+            $Result.Uri | Should -Match 'q=test%20vm'
             $Result.Uri | Should -Match 'omit=config_context'
         }
 
@@ -202,8 +192,8 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
         It "Should request with an escaped query" {
             $Result = Get-NBVirtualizationCluster -Query 'test cluster'
             $Result.Method | Should -Be 'GET'
-            # Module doesn't URL-encode spaces in query strings
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/clusters/?q=test cluster'
+            # UriBuilder encodes spaces as %20 in the URI
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/clusters/?q=test%20cluster'
         }
 
         It "Should request with a name" {
@@ -257,7 +247,7 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
     Context "New-NBVirtualMachine" {
         It "Should create a basic VM" {
             $Result = New-NBVirtualMachine -Name 'testvm' -Cluster 1
-            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -Exactly -Scope 'It' -ModuleName 'PowerNetbox'
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -Times 1 -Exactly -Scope 'It' -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'POST'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/'
             # Module no longer adds default status
@@ -307,7 +297,7 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
     Context "New-NBVirtualMachineInterface" {
         It "Should add a basic interface" {
             $Result = New-NBVirtualMachineInterface -Name 'Ethernet0' -Virtual_Machine 10
-            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -Exactly -Scope 'It' -ModuleName 'PowerNetbox'
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -Times 1 -Exactly -Scope 'It' -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'POST'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/interfaces/'
             $bodyObj = $Result.Body | ConvertFrom-Json
