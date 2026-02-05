@@ -130,7 +130,7 @@ function Send-NBBulkRequest {
 
             # Check if this is a 500 Internal Server Error
             # This can occur due to Redis cache inconsistency when referencing newly created objects
-            if ($errorMessage -like "*500 Internal Server Error*" -or $errorMessage -like "*500*") {
+            if ($errorMessage -like "*500 Internal Server Error*") {
                 Write-Warning "Batch $currentBatch failed with 500 Server Error. Retrying $($batch.Count) items sequentially with exponential backoff..."
 
                 # Wait before retrying to allow Redis cache to sync (longer initial delay)
