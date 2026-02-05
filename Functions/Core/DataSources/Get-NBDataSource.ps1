@@ -82,7 +82,7 @@ function Get-NBDataSource {
             'ById' {
                 foreach ($i in $Id) {
                     $Segments = [System.Collections.ArrayList]::new(@('core', 'data-sources', $i))
-                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'All', 'PageSize'
                     $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
                     InvokeNetboxRequest -URI $URI -Raw:$Raw -All:$All -PageSize $PageSize
                 }

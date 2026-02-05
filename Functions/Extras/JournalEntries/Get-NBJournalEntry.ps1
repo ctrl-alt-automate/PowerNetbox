@@ -88,7 +88,7 @@ function Get-NBJournalEntry {
             'ById' {
                 foreach ($i in $Id) {
                     $Segments = [System.Collections.ArrayList]::new(@('extras', 'journal-entries', $i))
-                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'All', 'PageSize'
                     $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
                     InvokeNetboxRequest -URI $URI -Raw:$Raw -All:$All -PageSize $PageSize
                 }

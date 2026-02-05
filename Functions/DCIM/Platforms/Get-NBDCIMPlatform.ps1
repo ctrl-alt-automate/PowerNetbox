@@ -58,7 +58,7 @@ function Get-NBDCIMPlatform {
             foreach ($PlatformID in $Id) {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'platforms', $PlatformID))
 
-                $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+                $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'All', 'PageSize'
 
                 $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 

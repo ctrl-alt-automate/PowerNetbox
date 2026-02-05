@@ -58,7 +58,7 @@ function Get-NBDCIMDeviceRole {
             foreach ($DRId in $Id) {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'device-roles', $DRId))
 
-                $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+                $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'All', 'PageSize'
 
                 $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
