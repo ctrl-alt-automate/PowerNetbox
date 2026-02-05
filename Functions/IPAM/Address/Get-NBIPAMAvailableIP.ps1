@@ -54,7 +54,7 @@ function Get-NBIPAMAvailableIP {
         [uint64]$Prefix_ID,
 
         [Alias('NumberOfIPs')]
-        [uint64]$Limit,
+        [uint16]$Limit,
 
         [switch]$Raw
     )

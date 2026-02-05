@@ -90,8 +90,8 @@ function Get-NBDCIMRackElevation {
         [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
-        [ValidateRange(0, [uint32]::MaxValue)]
-        [uint32]$Offset,
+        [ValidateRange(0, [uint16]::MaxValue)]
+        [uint16]$Offset,
 
         [switch]$All,
 
