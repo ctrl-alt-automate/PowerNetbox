@@ -31,9 +31,6 @@ function VerifyAPIConnectivity {
         # Validate we got a proper response
         if ($status.'netbox-version') {
             Write-Verbose "Successfully connected to Netbox $($status.'netbox-version')"
-
-            # Store version in module scope for later compatibility checks
-            $script:NetboxVersion = $status.'netbox-version'
         }
         else {
             Write-Warning "Connected to API but received unexpected response format"

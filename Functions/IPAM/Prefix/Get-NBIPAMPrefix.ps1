@@ -177,13 +177,6 @@ function Get-NBIPAMPrefix {
 
     process {
         Write-Verbose "Retrieving IPAM Prefix"
-        #    if ($null -ne $Family) {
-        #        $PSBoundParameters.Family = ValidateIPAMChoice -ProvidedValue $Family -PrefixFamily
-        #    }
-        #
-        #    if ($null -ne $Status) {
-        #        $PSBoundParameters.Status = ValidateIPAMChoice -ProvidedValue $Status -PrefixStatus
-        #    }
 
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {
