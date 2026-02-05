@@ -124,7 +124,9 @@ function New-NBDCIMFrontPort {
 
         [bool]$Mark_Connected,
 
-        [uint64[]]$Tags
+        [uint64[]]$Tags,
+
+        [switch]$Raw
     )
 
     process {
@@ -138,7 +140,7 @@ function New-NBDCIMFrontPort {
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'front-ports'))
 
         # Use BuildURIComponents but skip port mapping params (handled separately)
-        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Rear_Ports', 'Rear_Port', 'Rear_Port_Position'
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Rear_Ports', 'Rear_Port', 'Rear_Port_Position', 'Raw'
 
         $URI = BuildNewURI -Segments $URIComponents.Segments
 
@@ -174,7 +176,7 @@ function New-NBDCIMFrontPort {
         }
 
         if ($PSCmdlet.ShouldProcess("Device $Device", "Create front port '$Name'")) {
-            InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method POST
+            InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method POST -Raw:$Raw
         }
     }
 }

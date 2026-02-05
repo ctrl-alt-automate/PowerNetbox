@@ -64,10 +64,9 @@ function Set-NBIPAMAddressRange {
         foreach ($RangeID in $Id) {
             $Segments = [System.Collections.ArrayList]::new(@('ipam', 'ip-ranges', $RangeID))
 
-            Write-Verbose "Obtaining IP range from ID $RangeID"
-            $CurrentRange = Get-NBIPAMAddressRange -Id $RangeID -ErrorAction Stop
+            Write-Verbose "Updating IP range ID $RangeID"
 
-            if ($Force -or $PSCmdlet.ShouldProcess("$($CurrentRange.Start_Address) - $($CurrentRange.End_Address)", 'Set')) {
+            if ($Force -or $PSCmdlet.ShouldProcess("ID $RangeID", 'Set IP Range')) {
                 $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'Force'
 
                 $URI = BuildNewURI -Segments $URIComponents.Segments

@@ -117,7 +117,9 @@ function New-NBDCIMRearPort {
 
         [bool]$Mark_Connected,
 
-        [uint64[]]$Tags
+        [uint64[]]$Tags,
+
+        [switch]$Raw
     )
 
     process {
@@ -125,7 +127,7 @@ function New-NBDCIMRearPort {
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'rear-ports'))
 
         # Use BuildURIComponents but skip Front_Ports (handled separately)
-        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Front_Ports'
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Front_Ports', 'Raw'
 
         $URI = BuildNewURI -Segments $URIComponents.Segments
 
@@ -144,7 +146,7 @@ function New-NBDCIMRearPort {
         }
 
         if ($PSCmdlet.ShouldProcess("Device $Device", "Create rear port '$Name'")) {
-            InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method POST
+            InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method POST -Raw:$Raw
         }
     }
 }
