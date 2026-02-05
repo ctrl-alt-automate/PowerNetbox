@@ -26,7 +26,7 @@ function Set-NBContactRole {
         PS C:\> Set-NBContactRole -Id 1 -Name 'Updated Role Name'
 #>
 
-    [CmdletBinding(ConfirmImpact = 'Low',
+    [CmdletBinding(ConfirmImpact = 'Medium',
                    SupportsShouldProcess = $true)]
     [OutputType([pscustomobject])]
     param
@@ -60,11 +60,11 @@ function Set-NBContactRole {
         foreach ($ContactRoleId in $Id) {
             $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'contact-roles', $ContactRoleId))
 
-            $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'Force'
+            $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
 
             $URI = BuildNewURI -Segments $URIComponents.Segments
 
-            if ($Force -or $PSCmdlet.ShouldProcess("ID $ContactRoleId", 'Update contact role')) {
+            if ($PSCmdlet.ShouldProcess("ID $ContactRoleId", 'Update contact role')) {
                 InvokeNetboxRequest -URI $URI -Method $Method -Body $URIComponents.Parameters -Raw:$Raw
             }
         }

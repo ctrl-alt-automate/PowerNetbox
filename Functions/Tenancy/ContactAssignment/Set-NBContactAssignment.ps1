@@ -33,7 +33,7 @@ function Set-NBContactAssignment {
         Valid content types: https://docs.netbox.dev/en/stable/features/contacts/#contacts_1
 #>
 
-    [CmdletBinding(ConfirmImpact = 'Low',
+    [CmdletBinding(ConfirmImpact = 'Medium',
                    SupportsShouldProcess = $true)]
     [OutputType([pscustomobject])]
     param
@@ -59,7 +59,7 @@ function Set-NBContactAssignment {
     )
 
     begin {
-        $Method = 'Patch'
+        $Method = 'PATCH'
     }
 
     process {
@@ -67,7 +67,7 @@ function Set-NBContactAssignment {
         foreach ($ContactAssignmentId in $Id) {
             $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'contact-assignments', $ContactAssignmentId))
 
-            $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'Force'
+            $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
 
             $URI = BuildNewURI -Segments $URIComponents.Segments
 

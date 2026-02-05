@@ -51,7 +51,7 @@ function Set-NBContact {
 
 #>
 
-    [CmdletBinding(ConfirmImpact = 'Low',
+    [CmdletBinding(ConfirmImpact = 'Medium',
                    SupportsShouldProcess = $true)]
     [OutputType([pscustomobject])]
     param
