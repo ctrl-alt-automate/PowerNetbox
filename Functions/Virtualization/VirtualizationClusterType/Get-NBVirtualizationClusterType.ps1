@@ -49,7 +49,7 @@
     https://netbox.readthedocs.io/en/stable/models/virtualization/clustertype/
 #>
 function Get-NBVirtualizationClusterType {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([PSCustomObject])]
     param
     (
@@ -65,15 +65,19 @@ function Get-NBVirtualizationClusterType {
 
         [string[]]$Omit,
 
-        [Parameter(ValueFromPipelineByPropertyName = $true)]
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Name,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Slug,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Description,
 
+        [Parameter(ParameterSetName = 'Query')]
         [Alias('q')]
         [string]$Query,
 
@@ -88,12 +92,14 @@ function Get-NBVirtualizationClusterType {
 
     process {
         Write-Verbose "Retrieving Virtualization Cluster Type"
-        $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'cluster-types'))
-
-        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'
-
-        $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
-
-        InvokeNetboxRequest -URI $URI -Raw:$Raw -All:$All -PageSize $PageSize
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('virtualization', 'cluster-types', $i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'cluster-types'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                InvokeNetboxRequest -URI $URI -Raw:$Raw -All:$All -PageSize $PageSize
+            }
+        }
     }
 }

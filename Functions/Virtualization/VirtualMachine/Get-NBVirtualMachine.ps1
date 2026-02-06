@@ -113,7 +113,7 @@ function Get-NBVirtualMachine {
         Returns VMs without comments and description fields (Netbox 4.5+).
 #>
 
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([PSCustomObject])]
     param
     (
@@ -130,40 +130,57 @@ function Get-NBVirtualMachine {
 
         [switch]$IncludeConfigContext,
 
+        [Parameter(ParameterSetName = 'Query')]
         [Alias('q')]
         [string]$Query,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Name,
 
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
+        [Parameter(ParameterSetName = 'Query')]
         [ValidateSet('offline', 'active', 'planned', 'staged', 'failed', 'decommissioning', IgnoreCase = $true)]
         [string]$Status,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Tenant,
 
+        [Parameter(ParameterSetName = 'Query')]
         [uint64]$Tenant_ID,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Platform,
 
+        [Parameter(ParameterSetName = 'Query')]
         [uint64]$Platform_ID,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Cluster_Group,
 
+        [Parameter(ParameterSetName = 'Query')]
         [uint64]$Cluster_Group_Id,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Cluster_Type,
 
+        [Parameter(ParameterSetName = 'Query')]
         [uint64]$Cluster_Type_Id,
 
+        [Parameter(ParameterSetName = 'Query')]
         [uint64]$Cluster_Id,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Site,
 
+        [Parameter(ParameterSetName = 'Query')]
         [uint64]$Site_Id,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Role,
 
+        [Parameter(ParameterSetName = 'Query')]
         [uint64]$Role_Id,
 
         [ValidateRange(1, 1000)]
@@ -177,12 +194,8 @@ function Get-NBVirtualMachine {
 
     process {
         Write-Verbose "Retrieving Virtual Machine"
-        $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'virtual-machines'))
 
-        # Build parameters to pass, excluding config_context by default
-        $paramsToPass = @{} + $PSBoundParameters
-
-        # Build omit list: start with user-provided fields, add config_context unless explicitly included
+        # Build omit list: add config_context unless explicitly included
         $omitFields = @()
         if ($PSBoundParameters.ContainsKey('Omit')) {
             $omitFields += $Omit
@@ -190,15 +203,33 @@ function Get-NBVirtualMachine {
         if (-not $IncludeConfigContext) {
             $omitFields += 'config_context'
         }
-        if ($omitFields.Count -gt 0) {
-            $paramsToPass['Omit'] = $omitFields | Select-Object -Unique
+
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' {
+                foreach ($i in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'virtual-machines', $i))
+                    $paramsToPass = @{}
+                    if ($omitFields.Count -gt 0) {
+                        $paramsToPass['Omit'] = $omitFields | Select-Object -Unique
+                    }
+                    if ($PSBoundParameters.ContainsKey('Brief')) { $paramsToPass['Brief'] = $Brief }
+                    if ($PSBoundParameters.ContainsKey('Fields')) { $paramsToPass['Fields'] = $Fields }
+                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $paramsToPass -SkipParameterByName 'Id', 'Raw', 'All', 'PageSize'
+                    $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'virtual-machines'))
+                $paramsToPass = @{} + $PSBoundParameters
+                if ($omitFields.Count -gt 0) {
+                    $paramsToPass['Omit'] = $omitFields | Select-Object -Unique
+                }
+                [void]$paramsToPass.Remove('IncludeConfigContext')
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $paramsToPass -SkipParameterByName 'Raw', 'All', 'PageSize'
+                $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                InvokeNetboxRequest -URI $uri -Raw:$Raw -All:$All -PageSize $PageSize
+            }
         }
-        [void]$paramsToPass.Remove('IncludeConfigContext')
-
-        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $paramsToPass -SkipParameterByName 'Raw', 'All', 'PageSize'
-
-        $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
-
-        InvokeNetboxRequest -URI $uri -Raw:$Raw -All:$All -PageSize $PageSize
     }
 }

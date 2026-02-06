@@ -70,7 +70,7 @@
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 function Get-NBDCIMCable {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([PSCustomObject])]
     #region Parameters
     param
@@ -93,25 +93,34 @@ function Get-NBDCIMCable {
         [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
-        [Parameter(ValueFromPipelineByPropertyName = $true)]
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Label,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Termination_A_Type,
 
+        [Parameter(ParameterSetName = 'Query')]
         [uint64]$Termination_A_ID,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Termination_B_Type,
 
+        [Parameter(ParameterSetName = 'Query')]
         [uint64]$Termination_B_ID,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Type,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Status,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Color,
 
+        [Parameter(ParameterSetName = 'Query')]
         [ValidateSet('1c1p', '1c2p', '1c4p', '1c6p', '1c8p', '1c12p', '1c16p',
                      '2c1p', '2c2p', '2c4p', '2c4p-shuffle', '2c6p', '2c8p', '2c12p',
                      '4c1p', '4c2p', '4c4p', '4c4p-shuffle', '4c6p', '4c8p', '8c4p',
@@ -119,16 +128,22 @@ function Get-NBDCIMCable {
         [Alias('Profile')]
         [string]$Cable_Profile,
 
+        [Parameter(ParameterSetName = 'Query')]
         [uint64]$Device_ID,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Device,
 
+        [Parameter(ParameterSetName = 'Query')]
         [uint64]$Rack_Id,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Rack,
 
+        [Parameter(ParameterSetName = 'Query')]
         [uint64]$Location_ID,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Location,
 
         [switch]$Raw
@@ -138,23 +153,28 @@ function Get-NBDCIMCable {
 
     process {
         Write-Verbose "Retrieving DCIM Cable"
-        $Segments = [System.Collections.ArrayList]::new(@('dcim', 'cables'))
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim', 'cables', $i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim', 'cables'))
 
-        # Check for version-specific parameters
-        $excludeProfile = Test-NBMinimumVersion -ParameterName 'Cable_Profile' -MinimumVersion '4.5.0' -BoundParameters $PSBoundParameters -FeatureName 'Cable Profiles'
+                # Check for version-specific parameters
+                $excludeProfile = Test-NBMinimumVersion -ParameterName 'Cable_Profile' -MinimumVersion '4.5.0' -BoundParameters $PSBoundParameters -FeatureName 'Cable Profiles'
 
-        # Build skip parameters list (always skip Cable_Profile, we'll add it manually as 'profile')
-        $skipParams = @('Raw', 'All', 'PageSize', 'Cable_Profile')
+                # Build skip parameters list (always skip Cable_Profile, we'll add it manually as 'profile')
+                $skipParams = @('Raw', 'All', 'PageSize', 'Cable_Profile')
 
-        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName $skipParams
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName $skipParams
 
-        # Add Cable_Profile as 'profile' in query params (API uses 'profile')
-        if ($PSBoundParameters.ContainsKey('Cable_Profile') -and -not $excludeProfile) {
-            $URIComponents.Parameters['profile'] = $Cable_Profile
+                # Add Cable_Profile as 'profile' in query params (API uses 'profile')
+                if ($PSBoundParameters.ContainsKey('Cable_Profile') -and -not $excludeProfile) {
+                    $URIComponents.Parameters['profile'] = $Cable_Profile
+                }
+
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+
+                InvokeNetboxRequest -URI $URI -Raw:$Raw -All:$All -PageSize $PageSize
+            }
         }
-
-        $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
-
-        InvokeNetboxRequest -URI $URI -Raw:$Raw -All:$All -PageSize $PageSize
     }
 }

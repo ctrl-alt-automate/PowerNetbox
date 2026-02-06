@@ -52,7 +52,7 @@
     https://netbox.readthedocs.io/en/stable/models/tenancy/tenantgroup/
 #>
 function Get-NBTenantGroup {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([PSCustomObject])]
     param
     (
@@ -68,17 +68,22 @@ function Get-NBTenantGroup {
 
         [string[]]$Omit,
 
-        [Parameter(ValueFromPipelineByPropertyName = $true)]
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Name,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Slug,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Description,
 
+        [Parameter(ParameterSetName = 'Query')]
         [uint64]$Parent_Id,
 
+        [Parameter(ParameterSetName = 'Query')]
         [Alias('q')]
         [string]$Query,
 
@@ -93,12 +98,14 @@ function Get-NBTenantGroup {
 
     process {
         Write-Verbose "Retrieving Tenant Group"
-        $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'tenant-groups'))
-
-        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'
-
-        $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
-
-        InvokeNetboxRequest -URI $URI -Raw:$Raw -All:$All -PageSize $PageSize
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('tenancy', 'tenant-groups', $i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'tenant-groups'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                InvokeNetboxRequest -URI $URI -Raw:$Raw -All:$All -PageSize $PageSize
+            }
+        }
     }
 }

@@ -41,7 +41,7 @@ function Get-NBVirtualMachineInterface {
         PS C:\> Get-NBVirtualMachineInterface
 #>
 
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([PSCustomObject])]
     param
     (
@@ -57,21 +57,28 @@ function Get-NBVirtualMachineInterface {
 
         [string[]]$Omit,
 
-        [Parameter(ValueFromPipeline = $true)]
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Name,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Query,
 
+        [Parameter(ParameterSetName = 'Query')]
         [boolean]$Enabled,
 
+        [Parameter(ParameterSetName = 'Query')]
         [uint16]$MTU,
 
+        [Parameter(ParameterSetName = 'Query')]
         [uint64]$Virtual_Machine_Id,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Virtual_Machine,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$MAC_Address,
 
         [ValidateRange(1, 1000)]
@@ -85,12 +92,14 @@ function Get-NBVirtualMachineInterface {
 
     process {
         Write-Verbose "Retrieving Virtual Machine Interface"
-        $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'interfaces'))
-
-        $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'All', 'PageSize'
-
-        $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
-
-        InvokeNetboxRequest -URI $uri -Raw:$Raw -All:$All -PageSize $PageSize
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('virtualization', 'interfaces', $i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'interfaces'))
+                $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'All', 'PageSize'
+                $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                InvokeNetboxRequest -URI $uri -Raw:$Raw -All:$All -PageSize $PageSize
+            }
+        }
     }
 }
