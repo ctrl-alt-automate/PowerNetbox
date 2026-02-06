@@ -137,47 +137,55 @@ Describe "DCIM Rack Elevation Tests" -Tag 'DCIM', 'Racks', 'RackElevation' {
 
     Context "Get-NBDCIMRackElevation -All Pagination" {
         BeforeAll {
-            $script:CallCount = 0
+            # When InvokeNetboxRequest is mocked, the real -All pagination loop doesn't execute.
+            # The mock must return combined results directly when -All is passed,
+            # simulating what the real function would produce after paginating.
             Mock -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -MockWith {
-                $script:CallCount++
-                if ($script:CallCount -eq 1) {
-                    return @{
-                        count = 84
-                        next = 'https://netbox.domain.com/api/dcim/racks/24/elevation/?limit=1000&offset=1000'
-                        previous = $null
-                        results = @(
+                if ($All) {
+                    if ($Raw) {
+                        return [PSCustomObject]@{
+                            count    = 3
+                            next     = $null
+                            previous = $null
+                            results  = @(
+                                [PSCustomObject]@{ id = 42; device = $null }
+                                [PSCustomObject]@{ id = 41; device = $null }
+                                [PSCustomObject]@{ id = 1; device = [PSCustomObject]@{ display = 'server-01' } }
+                            )
+                        }
+                    } else {
+                        return @(
                             [PSCustomObject]@{ id = 42; device = $null }
                             [PSCustomObject]@{ id = 41; device = $null }
+                            [PSCustomObject]@{ id = 1; device = [PSCustomObject]@{ display = 'server-01' } }
                         )
                     }
                 } else {
-                    return @{
-                        count = 84
-                        next = $null
-                        previous = 'https://netbox.domain.com/api/dcim/racks/24/elevation/?limit=1000'
-                        results = @(
-                            [PSCustomObject]@{ id = 1; device = [PSCustomObject]@{ display = 'server-01' } }
-                        )
+                    return [ordered]@{
+                        'Method' = if ($Method) { $Method } else { 'GET' }
+                        'Uri'    = $URI.Uri.AbsoluteUri
+                        'Body'   = if ($Body) { $Body | ConvertTo-Json -Compress } else { $null }
                     }
                 }
             }
         }
 
-        It "Should paginate through all results with -All" {
-            $script:CallCount = 0
+        It "Should pass -All flag to InvokeNetboxRequest" {
+            Get-NBDCIMRackElevation -Id 24 -All
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -Times 1 -Exactly -Scope It -ModuleName 'PowerNetbox' -ParameterFilter { $All -eq $true }
+        }
+
+        It "Should return all results with -All" {
             $Result = Get-NBDCIMRackElevation -Id 24 -All
             $Result.Count | Should -Be 3
-            $script:CallCount | Should -Be 2
         }
 
         It "Should return multiple results without -Raw" {
-            $script:CallCount = 0
             $Result = Get-NBDCIMRackElevation -Id 24 -All
             @($Result).Count | Should -Be 3
         }
 
         It "Should return structured object with -Raw" {
-            $script:CallCount = 0
             $Result = Get-NBDCIMRackElevation -Id 24 -All -Raw
             $Result.count | Should -Be 3
             $Result.next | Should -BeNullOrEmpty
