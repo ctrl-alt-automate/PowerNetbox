@@ -1544,4 +1544,41 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         }
     }
     #endregion
+
+    #region Cable Terminations
+    Context "Get-NBDCIMCableTermination" {
+        It "Should request cable terminations" {
+            $Result = Get-NBDCIMCableTermination
+            $Result.Method | Should -Be 'GET'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/cable-terminations/'
+        }
+
+        It "Should request cable terminations by cable ID" {
+            $Result = Get-NBDCIMCableTermination -Cable 10
+            $Result.Uri | Should -BeExactly 'https://netbox.domain.com/api/dcim/cable-terminations/?cable=10'
+        }
+
+        It "Should request cable terminations by cable end" {
+            $Result = Get-NBDCIMCableTermination -Cable_End 'A'
+            $Result.Uri | Should -BeExactly 'https://netbox.domain.com/api/dcim/cable-terminations/?cable_end=A'
+        }
+    }
+    #endregion
+
+    #region Connected Device
+    Context "Get-NBDCIMConnectedDevice" {
+        It "Should request a connected device" {
+            $Result = Get-NBDCIMConnectedDevice -Peer_Device 'switch01' -Peer_Interface 'eth0'
+            $Result.Method | Should -Be 'GET'
+            $Result.Uri | Should -Match 'peer_device=switch01'
+            $Result.Uri | Should -Match 'peer_interface=eth0'
+        }
+
+        It "Should have mandatory Peer_Device and Peer_Interface parameters" {
+            $cmd = Get-Command Get-NBDCIMConnectedDevice
+            $cmd.Parameters['Peer_Device'].Attributes.Mandatory | Should -Contain $true
+            $cmd.Parameters['Peer_Interface'].Attributes.Mandatory | Should -Contain $true
+        }
+    }
+    #endregion
 }

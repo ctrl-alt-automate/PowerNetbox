@@ -661,6 +661,85 @@ Describe "Extras Module Tests" -Tag 'Extras' {
         }
     }
 
+    Context "New-NBImageAttachment" {
+        BeforeAll {
+            # New-NBImageAttachment bypasses InvokeNetboxRequest (uses Invoke-RestMethod directly)
+            # Mock the helpers it calls and Invoke-RestMethod
+            Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith {
+                return @{}
+            }
+            Mock -CommandName 'Get-NBRequestHeaders' -ModuleName 'PowerNetbox' -MockWith {
+                return @{ 'Authorization' = 'Bearer test-token' }
+            }
+            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+                return [pscustomobject]@{
+                    id          = 1
+                    url         = 'https://netbox.domain.com/api/extras/image-attachments/1/'
+                    object_type = 'dcim.device'
+                    object_id   = 42
+                    image       = '/media/image-attachments/test.png'
+                }
+            }
+
+            # Create a temporary test image file
+            $script:TestImagePath = Join-Path $TestDrive 'test-image.png'
+            [byte[]]$pngBytes = @(137, 80, 78, 71, 13, 10, 26, 10)  # PNG magic bytes
+            [System.IO.File]::WriteAllBytes($script:TestImagePath, $pngBytes)
+        }
+
+        It "Should have mandatory Object_Type parameter" {
+            $cmd = Get-Command New-NBImageAttachment
+            $cmd.Parameters['Object_Type'].Attributes.Mandatory | Should -Contain $true
+        }
+
+        It "Should have mandatory Object_Id parameter" {
+            $cmd = Get-Command New-NBImageAttachment
+            $cmd.Parameters['Object_Id'].Attributes.Mandatory | Should -Contain $true
+        }
+
+        It "Should have mandatory ImagePath parameter" {
+            $cmd = Get-Command New-NBImageAttachment
+            $cmd.Parameters['ImagePath'].Attributes.Mandatory | Should -Contain $true
+        }
+
+        It "Should accept Object_Id from pipeline via Id alias" {
+            $cmd = Get-Command New-NBImageAttachment
+            $param = $cmd.Parameters['Object_Id']
+            $param.Aliases | Should -Contain 'Id'
+            $pipeAttr = $param.Attributes | Where-Object { $_ -is [System.Management.Automation.ParameterAttribute] }
+            $pipeAttr.ValueFromPipelineByPropertyName | Should -Contain $true
+        }
+
+        It "Should validate Name max length of 50" {
+            $cmd = Get-Command New-NBImageAttachment
+            $validateLength = $cmd.Parameters['Name'].Attributes | Where-Object { $_ -is [System.Management.Automation.ValidateLengthAttribute] }
+            $validateLength | Should -Not -BeNullOrEmpty
+            $validateLength.MaxLength | Should -Be 50
+        }
+
+        It "Should validate Description max length of 200" {
+            $cmd = Get-Command New-NBImageAttachment
+            $validateLength = $cmd.Parameters['Description'].Attributes | Where-Object { $_ -is [System.Management.Automation.ValidateLengthAttribute] }
+            $validateLength | Should -Not -BeNullOrEmpty
+            $validateLength.MaxLength | Should -Be 200
+        }
+
+        It "Should throw when image file does not exist" {
+            { New-NBImageAttachment -Object_Type 'dcim.device' -Object_Id 1 -ImagePath '/nonexistent/fake.png' } | Should -Throw
+        }
+
+        It "Should not upload when WhatIf is specified" {
+            New-NBImageAttachment -Object_Type 'dcim.device' -Object_Id 42 -ImagePath $script:TestImagePath -WhatIf
+            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 0 -Scope 'It' -ModuleName 'PowerNetbox'
+        }
+
+        It "Should support ShouldProcess" {
+            $cmd = Get-Command New-NBImageAttachment
+            $cmd.Parameters.Keys | Should -Contain 'Confirm'
+            $cmd.Parameters.Keys | Should -Contain 'WhatIf'
+        }
+    }
+
     Context "Remove-NBImageAttachment" {
         BeforeAll {
             Mock -CommandName "Get-NBImageAttachment" -ModuleName PowerNetbox -MockWith {

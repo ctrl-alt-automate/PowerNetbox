@@ -384,4 +384,44 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             }
         }
     }
+
+    Context "Set-NBDCIMDeviceRole" {
+        It "Should update a device role" {
+            $Result = Set-NBDCIMDeviceRole -Id 1 -Name 'UpdatedRole' -Confirm:$false
+            $Result.Method | Should -Be 'PATCH'
+            $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/device-roles/1/'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.name | Should -Be 'UpdatedRole'
+        }
+
+        It "Should update a device role with multiple properties" {
+            $Result = Set-NBDCIMDeviceRole -Id 2 -Name 'ServerRole' -Color 'ff0000' -VM_Role $true -Confirm:$false
+            $Result.Method | Should -Be 'PATCH'
+            $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/device-roles/2/'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.name | Should -Be 'ServerRole'
+            $bodyObj.color | Should -Be 'ff0000'
+            $bodyObj.vm_role | Should -Be $true
+        }
+    }
+
+    Context "Set-NBDCIMDeviceType" {
+        It "Should update a device type" {
+            $Result = Set-NBDCIMDeviceType -Id 1 -Model 'UpdatedModel' -Confirm:$false
+            $Result.Method | Should -Be 'PATCH'
+            $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/device-types/1/'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.model | Should -Be 'UpdatedModel'
+        }
+
+        It "Should update a device type with multiple properties" {
+            $Result = Set-NBDCIMDeviceType -Id 3 -Manufacturer 5 -U_Height 2 -Is_Full_Depth $true -Confirm:$false
+            $Result.Method | Should -Be 'PATCH'
+            $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/device-types/3/'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.manufacturer | Should -Be 5
+            $bodyObj.u_height | Should -Be 2
+            $bodyObj.is_full_depth | Should -Be $true
+        }
+    }
 }
