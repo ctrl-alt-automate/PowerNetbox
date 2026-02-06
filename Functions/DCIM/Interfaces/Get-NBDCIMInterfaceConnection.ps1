@@ -15,7 +15,7 @@
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 function Get-NBDCIMInterfaceConnection {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([pscustomobject])]
     param
     (
@@ -37,13 +37,17 @@ function Get-NBDCIMInterfaceConnection {
         [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
+        [Parameter(ParameterSetName = 'Query')]
         [ValidateSet('connected', 'planned', 'decommissioning', IgnoreCase = $true)]
         [string]$Connection_Status,
 
+        [Parameter(ParameterSetName = 'Query')]
         [uint64]$Site,
 
+        [Parameter(ParameterSetName = 'Query')]
         [uint64]$Device,
 
         [switch]$Raw
@@ -51,12 +55,14 @@ function Get-NBDCIMInterfaceConnection {
 
     process {
         Write-Verbose "Retrieving DCIM Interface Connection"
-        $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interface-connections'))
-
-        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'
-
-        $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
-
-        InvokeNetboxRequest -URI $URI -Raw:$Raw -All:$All -PageSize $PageSize
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim', 'interface-connections', $i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interface-connections'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                InvokeNetboxRequest -URI $URI -Raw:$Raw -All:$All -PageSize $PageSize
+            }
+        }
     }
 }

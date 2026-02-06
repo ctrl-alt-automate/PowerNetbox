@@ -73,6 +73,19 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
             $Result.Uri | Should -BeExactly 'https://netbox.domain.com/api/dcim/interfaces/?name=eth0'
         }
 
+        It "Should request an interface by ID" {
+            $Result = Get-NBDCIMInterface -Id 10
+            $Result.Method | Should -Be 'GET'
+            $Result.Uri | Should -Match '/api/dcim/interfaces/10/'
+        }
+
+        It "Should request multiple interfaces by ID" {
+            $Result = Get-NBDCIMInterface -Id 10, 12
+            $Result | Should -HaveCount 2
+            $Result[0].Uri | Should -Match '/api/dcim/interfaces/10/'
+            $Result[1].Uri | Should -Match '/api/dcim/interfaces/12/'
+        }
+
         It "Should request an interface from the pipeline" {
             $Result = [pscustomobject]@{ 'Id' = 1234 } | Get-NBDCIMInterface
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/interfaces/1234/'
@@ -212,6 +225,12 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
             $validateSet = $param.Attributes | Where-Object { $_ -is [System.Management.Automation.ValidateSetAttribute] }
             $validateSet | Should -Not -BeNullOrEmpty
             $validateSet.ValidValues | Should -Contain 'connected'
+        }
+
+        It "Should request an interface connection by ID" {
+            $Result = Get-NBDCIMInterfaceConnection -Id 7
+            $Result.Method | Should -Be 'GET'
+            $Result.Uri | Should -Match '/api/dcim/interface-connections/7/'
         }
     }
 

@@ -15,7 +15,7 @@
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 function Get-NBTag {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([pscustomobject])]
     param
     (
@@ -31,11 +31,13 @@ function Get-NBTag {
 
         [string[]]$Omit,
 
-        [Parameter(ValueFromPipelineByPropertyName = $true)]
+        [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Name,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Slug,
 
         [ValidateRange(1, 1000)]
@@ -49,13 +51,14 @@ function Get-NBTag {
 
     process {
         Write-Verbose "Retrieving Tag"
-
-        $Segments = [System.Collections.ArrayList]::new(@('extras', 'tags'))
-
-        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'All', 'PageSize'
-
-        $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
-
-        InvokeNetboxRequest -URI $URI -Raw:$Raw -All:$All -PageSize $PageSize
+        switch ($PSCmdlet.ParameterSetName) {
+            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('extras', 'tags', $i)) -Raw:$Raw } }
+            default {
+                $Segments = [System.Collections.ArrayList]::new(@('extras', 'tags'))
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'All', 'PageSize'
+                $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                InvokeNetboxRequest -URI $URI -Raw:$Raw -All:$All -PageSize $PageSize
+            }
+        }
     }
 }

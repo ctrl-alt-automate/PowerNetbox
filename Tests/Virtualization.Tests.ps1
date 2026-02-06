@@ -80,10 +80,13 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
 
         It "Should request with multiple IDs" {
             $Result = Get-NBVirtualMachine -Id 10, 12, 15
-            $Result.Method | Should -Be 'GET'
-            # Commas may or may not be URL-encoded depending on PS version
-            $Result.Uri | Should -Match 'id__in=10(%2C|,)12(%2C|,)15'
-            $Result.Uri | Should -Match 'omit=config_context'
+
+            $Result | Should -HaveCount 3
+            $Result[0].Method | Should -Be 'GET'
+            $Result[0].Uri | Should -Match 'virtualization/virtual-machines/10/'
+            $Result[1].Uri | Should -Match 'virtualization/virtual-machines/12/'
+            $Result[2].Uri | Should -Match 'virtualization/virtual-machines/15/'
+            $Result | ForEach-Object { $_.Uri | Should -Match 'omit=config_context' }
         }
 
         It "Should request a status" {
@@ -210,9 +213,12 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
 
         It "Should request with multiple IDs" {
             $Result = Get-NBVirtualizationCluster -Id 10, 12, 15
-            $Result.Method | Should -Be 'GET'
-            # Commas may or may not be URL-encoded depending on PS version
-            $Result.Uri | Should -Match 'id__in=10(%2C|,)12(%2C|,)15'
+
+            $Result | Should -HaveCount 3
+            $Result[0].Method | Should -Be 'GET'
+            $Result[0].Uri | Should -Match 'virtualization/clusters/10/'
+            $Result[1].Uri | Should -Match 'virtualization/clusters/12/'
+            $Result[2].Uri | Should -Match 'virtualization/clusters/15/'
         }
     }
 
@@ -241,6 +247,12 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
             $Result = Get-NBVirtualizationClusterGroup -Slug 'test-cluster-group'
             $Result.Method | Should -Be 'GET'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/virtualization/cluster-groups/?slug=test-cluster-group'
+        }
+
+        It "Should request a cluster group by ID" {
+            $Result = Get-NBVirtualizationClusterGroup -Id 5
+            $Result.Method | Should -Be 'GET'
+            $Result.Uri | Should -Match '/api/virtualization/cluster-groups/5/'
         }
     }
 
