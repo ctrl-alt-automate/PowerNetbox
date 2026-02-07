@@ -4,10 +4,6 @@
 
 .DESCRIPTION
     Sets the credential for Netbox API authentication.
-    Supports pipeline input for Id parameter where applicable.
-
-.PARAMETER Raw
-    Return the raw API response instead of the results array.
 
 .EXAMPLE
     Set-NBCredential

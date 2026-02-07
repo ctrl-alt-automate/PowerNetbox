@@ -1,12 +1,9 @@
 <#
 .SYNOPSIS
-    Retrieves Get-NBTimeout.ps1 objects from Netbox Setup module.
+    Retrieves the current API request timeout.
 
 .DESCRIPTION
-    Retrieves Get-NBTimeout.ps1 objects from Netbox Setup module.
-
-.PARAMETER Raw
-    Return the raw API response instead of the results array.
+    Retrieves the current API request timeout.
 
 .EXAMPLE
     Get-NBTimeout
