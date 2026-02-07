@@ -166,6 +166,4 @@ function Set-NBDCIMFrontPort {
         }
     }
 
-    end {
-    }
 }

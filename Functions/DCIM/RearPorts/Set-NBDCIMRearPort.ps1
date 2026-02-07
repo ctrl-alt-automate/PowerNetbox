@@ -140,6 +140,4 @@ function Set-NBDCIMRearPort {
         }
     }
 
-    end {
-    }
 }

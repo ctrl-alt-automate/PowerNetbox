@@ -33,10 +33,6 @@ function Remove-NBDCIMFrontPort {
         [switch]$Raw
     )
 
-    begin {
-
-    }
-
     process {
         Write-Verbose "Removing DCIM Front Port"
         foreach ($FrontPortID in $Id) {
@@ -48,9 +44,5 @@ function Remove-NBDCIMFrontPort {
                 InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
             }
         }
-    }
-
-    end {
-
     }
 }

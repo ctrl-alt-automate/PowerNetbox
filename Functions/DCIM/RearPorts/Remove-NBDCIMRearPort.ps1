@@ -33,10 +33,6 @@ function Remove-NBDCIMRearPort {
         [switch]$Raw
     )
 
-    begin {
-
-    }
-
     process {
         Write-Verbose "Removing DCIM Rear Port"
         foreach ($RearPortID in $Id) {
@@ -48,9 +44,5 @@ function Remove-NBDCIMRearPort {
                 InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
             }
         }
-    }
-
-    end {
-
     }
 }

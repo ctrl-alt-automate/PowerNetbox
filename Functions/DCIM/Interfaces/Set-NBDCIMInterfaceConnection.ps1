@@ -69,7 +69,4 @@ function Set-NBDCIMInterfaceConnection {
         }
     }
 
-    end {
-
-    }
 }

@@ -45,10 +45,6 @@ function Set-NBVirtualMachineInterface {
         [switch]$Raw
     )
 
-    begin {
-
-    }
-
     process {
         foreach ($VMI_ID in $Id) {
             Write-Verbose "Updating VM Interface ID $VMI_ID"
@@ -63,9 +59,5 @@ function Set-NBVirtualMachineInterface {
                 InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method PATCH -Raw:$Raw
             }
         }
-    }
-
-    end {
-
     }
 }
