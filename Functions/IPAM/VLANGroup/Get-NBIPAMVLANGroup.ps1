@@ -47,7 +47,14 @@ function Get-NBIPAMVLANGroup {
     process {
         Write-Verbose "Retrieving IPAM VLAN Group"
         switch ($PSCmdlet.ParameterSetName) {
-            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('ipam','vlan-groups',$i)) -Raw:$Raw } }
+            'ByID' {
+                foreach ($i in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('ipam', 'vlan-groups', $i))
+                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'All', 'PageSize'
+                    $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
             default {
                 $Segments = [System.Collections.ArrayList]::new(@('ipam','vlan-groups'))
                 $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'

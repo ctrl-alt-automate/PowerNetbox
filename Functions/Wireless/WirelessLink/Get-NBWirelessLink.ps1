@@ -38,7 +38,14 @@ function Get-NBWirelessLink {
     process {
         Write-Verbose "Retrieving Wireless Link"
         switch ($PSCmdlet.ParameterSetName) {
-            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('wireless','wireless-links',$i)) -Raw:$Raw } }
+            'ByID' {
+                foreach ($i in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('wireless', 'wireless-links', $i))
+                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'All', 'PageSize'
+                    $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
             default { $s = [System.Collections.ArrayList]::new(@('wireless','wireless-links')); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'; InvokeNetboxRequest -URI (BuildNewURI -Segments $u.Segments -Parameters $u.Parameters) -Raw:$Raw -All:$All -PageSize $PageSize }
         }
     }

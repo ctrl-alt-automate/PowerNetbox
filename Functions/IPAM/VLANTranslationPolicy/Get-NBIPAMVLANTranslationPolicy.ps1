@@ -42,7 +42,14 @@ function Get-NBIPAMVLANTranslationPolicy {
     process {
         Write-Verbose "Retrieving IPAM VLAN Translation Policy"
         switch ($PSCmdlet.ParameterSetName) {
-            'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('ipam','vlan-translation-policies',$i)) -Raw:$Raw } }
+            'ByID' {
+                foreach ($i in $Id) {
+                    $Segments = [System.Collections.ArrayList]::new(@('ipam', 'vlan-translation-policies', $i))
+                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'All', 'PageSize'
+                    $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
+                }
+            }
             default {
                 $Segments = [System.Collections.ArrayList]::new(@('ipam','vlan-translation-policies'))
                 $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'
