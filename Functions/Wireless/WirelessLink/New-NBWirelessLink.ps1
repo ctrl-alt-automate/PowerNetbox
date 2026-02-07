@@ -69,7 +69,7 @@ function New-NBWirelessLink {
 
         [string]$Auth_Cipher,
 
-        [string]$Auth_PSK,
+        [securestring]$Auth_PSK,
 
         [string]$Description,
 
@@ -83,8 +83,12 @@ function New-NBWirelessLink {
     process {
         Write-Verbose "Creating Wireless Link"
         $Segments = [System.Collections.ArrayList]::new(@('wireless', 'wireless-links'))
-        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'Auth_PSK'
         $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSBoundParameters.ContainsKey('Auth_PSK')) {
+            $URIComponents.Parameters['auth_psk'] = [System.Net.NetworkCredential]::new('', $Auth_PSK).Password
+        }
 
         if ($PSCmdlet.ShouldProcess("$Interface_A to $Interface_B", 'Create wireless link')) {
             InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw

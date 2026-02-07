@@ -68,7 +68,7 @@ function New-NBWirelessLAN {
 
         [string]$Auth_Cipher,
 
-        [string]$Auth_PSK,
+        [securestring]$Auth_PSK,
 
         [string]$Description,
 
@@ -82,8 +82,12 @@ function New-NBWirelessLAN {
     process {
         Write-Verbose "Creating Wireless LAN"
         $Segments = [System.Collections.ArrayList]::new(@('wireless', 'wireless-lans'))
-        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'Auth_PSK'
         $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSBoundParameters.ContainsKey('Auth_PSK')) {
+            $URIComponents.Parameters['auth_psk'] = [System.Net.NetworkCredential]::new('', $Auth_PSK).Password
+        }
 
         if ($PSCmdlet.ShouldProcess($SSID, 'Create wireless LAN')) {
             InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
