@@ -57,7 +57,7 @@ function Get-NBCircuitType {
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($i in $ID) {
-                $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuit_types', $i))
+                $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuit-types', $i))
 
                 $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'All', 'PageSize'
 

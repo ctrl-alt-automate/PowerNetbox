@@ -46,7 +46,7 @@ function Set-NBIPAMPrefix {
 
         [string]$Description,
 
-        [switch]$Is_Pool,
+        [bool]$Is_Pool,
 
         [uint64]$Owner,
 
