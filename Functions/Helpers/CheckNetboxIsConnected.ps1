@@ -1,7 +1,7 @@
 
 function CheckNetboxIsConnected {
     [CmdletBinding()]
-    [OutputType([PSCustomObject])]
+    [OutputType([void])]
     param ()
 
     Write-Verbose "Checking connection status"

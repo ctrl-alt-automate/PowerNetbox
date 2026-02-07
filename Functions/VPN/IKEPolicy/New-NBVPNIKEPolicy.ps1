@@ -59,7 +59,7 @@ function New-NBVPNIKEPolicy {
 
         [string]$Comments,
 
-        [hashtable]$CustomFields,
+        [hashtable]$Custom_Fields,
 
         [switch]$Raw
     )

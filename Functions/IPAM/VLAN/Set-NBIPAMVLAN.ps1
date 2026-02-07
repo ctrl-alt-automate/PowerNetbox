@@ -22,7 +22,7 @@ function Set-NBIPAMVLAN {
     [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
-        [ValidateRange(1, 4096)][uint16]$VID,
+        [ValidateRange(1, 4094)][uint16]$VID,
         [string]$Name,
         [string]$Status,
         [uint64]$Site,

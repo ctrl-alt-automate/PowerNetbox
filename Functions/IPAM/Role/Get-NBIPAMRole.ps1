@@ -45,6 +45,12 @@ function Get-NBIPAMRole {
         [ValidateRange(1, 1000)]
         [int]$PageSize = 100,
 
+        [switch]$Brief,
+
+        [string[]]$Fields,
+
+        [string[]]$Omit,
+
         [Parameter(ParameterSetName = 'Query',
                    Position = 0)]
         [string]$Name,
@@ -58,21 +64,12 @@ function Get-NBIPAMRole {
         [Parameter(ParameterSetName = 'Query')]
         [string]$Slug,
 
-        [Parameter(ParameterSetName = 'Query')]
-        [switch]$Brief,
-
-        [Parameter(ParameterSetName = 'Query')]
-        [Parameter(ParameterSetName = 'ByID')]
         [ValidateRange(1, 1000)]
         [uint16]$Limit,
 
-        [Parameter(ParameterSetName = 'Query')]
-        [Parameter(ParameterSetName = 'ByID')]
         [ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,
 
-        [Parameter(ParameterSetName = 'Query')]
-        [Parameter(ParameterSetName = 'ByID')]
         [switch]$Raw
     )
 

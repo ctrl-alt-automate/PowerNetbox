@@ -39,7 +39,7 @@ function New-NBVPNTunnelGroup {
 
         [string]$Description,
 
-        [hashtable]$CustomFields,
+        [hashtable]$Custom_Fields,
 
         [switch]$Raw
     )

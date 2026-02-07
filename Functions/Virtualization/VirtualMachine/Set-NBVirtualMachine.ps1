@@ -126,7 +126,7 @@ function Set-NBVirtualMachine {
         [uint64]$Primary_IP6,
 
         [Parameter(ParameterSetName = 'Single')]
-        [byte]$VCPUs,
+        [uint16]$VCPUs,
 
         [Parameter(ParameterSetName = 'Single')]
         [uint64]$Memory,
