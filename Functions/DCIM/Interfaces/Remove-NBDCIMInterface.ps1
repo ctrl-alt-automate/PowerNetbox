@@ -30,10 +30,6 @@ function Remove-NBDCIMInterface {
         [switch]$Raw
     )
 
-    begin {
-
-    }
-
     process {
         Write-Verbose "Removing DCIM Interface"
         foreach ($InterfaceId in $Id) {
@@ -46,9 +42,5 @@ function Remove-NBDCIMInterface {
                 InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
             }
         }
-    }
-
-    end {
-
     }
 }

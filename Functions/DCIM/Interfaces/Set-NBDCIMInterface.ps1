@@ -101,7 +101,4 @@ function Set-NBDCIMInterface {
         }
     }
 
-    end {
-
-    }
 }
