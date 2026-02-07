@@ -77,6 +77,11 @@ function Get-ModelDefinition {
                     $script:NetboxConfig.APIDefinition.definitions.$ModelName
                     break
                 }
+
+                default {
+                    Write-Warning "Model definition lookup for method '$Method' is not supported. Use 'get' or 'post'."
+                    break
+                }
             }
 
             break
