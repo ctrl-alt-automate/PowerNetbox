@@ -33,7 +33,7 @@ function Get-NBIPAMVLAN {
 
         [Parameter(ParameterSetName = 'Query',
                    Position = 0)]
-        [ValidateRange(1, 4096)]
+        [ValidateRange(1, 4094)]
         [uint16]$VID,
 
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)]

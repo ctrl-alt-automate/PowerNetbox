@@ -123,8 +123,7 @@ Describe "Circuits Module Tests" -Tag 'Circuits' {
 
         It "Should request a circuit type by ID" {
             $Result = Get-NBCircuitType -Id 3
-            # Bug: uses circuit_types (underscore) for ID lookup
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/circuits/circuit_types/3/'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/circuits/circuit-types/3/'
         }
 
         It "Should request a circuit type by name" {
