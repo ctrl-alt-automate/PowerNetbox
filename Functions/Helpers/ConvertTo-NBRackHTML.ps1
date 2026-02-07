@@ -130,7 +130,7 @@ function ConvertTo-NBRackHTML {
 
         if ($unit -and $unit.device) {
             $deviceName = [System.Net.WebUtility]::HtmlEncode($unit.device.display)
-            $deviceDesc = if ($unit.device.description) { [System.Net.WebUtility]::HtmlEncode($unit.device.description) } else { '' }
+            $deviceDesc = [System.Net.WebUtility]::HtmlEncode($unit.device.description)
 
             [void]$tableRows.AppendLine(@"
         <tr class="occupied">
