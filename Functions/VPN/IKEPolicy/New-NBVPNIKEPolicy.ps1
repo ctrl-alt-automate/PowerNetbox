@@ -53,7 +53,7 @@ function New-NBVPNIKEPolicy {
 
         [uint64[]]$Proposals,
 
-        [string]$Preshared_Key,
+        [securestring]$Preshared_Key,
 
         [string]$Description,
 
@@ -67,8 +67,12 @@ function New-NBVPNIKEPolicy {
     process {
         Write-Verbose "Creating VPN IKE Policy"
         $Segments = [System.Collections.ArrayList]::new(@('vpn', 'ike-policies'))
-        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'Preshared_Key'
         $URI = BuildNewURI -Segments $URIComponents.Segments
+
+        if ($PSBoundParameters.ContainsKey('Preshared_Key')) {
+            $URIComponents.Parameters['preshared_key'] = [System.Net.NetworkCredential]::new('', $Preshared_Key).Password
+        }
 
         if ($PSCmdlet.ShouldProcess($Name, 'Create IKE policy')) {
             InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
