@@ -60,7 +60,7 @@ function Get-ModelDefinition {
         'ByPath' {
             switch ($Method) {
                 "get" {
-
+                    Write-Warning "GET model definition lookup is not implemented. Use 'post' method instead."
                     break
                 }
 
@@ -75,6 +75,11 @@ function Get-ModelDefinition {
 
                     $ModelName = $script:NetboxConfig.APIDefinition.paths.$URIPath.post.parameters.schema.'$ref'.split('/')[-1]
                     $script:NetboxConfig.APIDefinition.definitions.$ModelName
+                    break
+                }
+
+                default {
+                    Write-Warning "Model definition lookup for method '$Method' is not supported. Use 'get' or 'post'."
                     break
                 }
             }
