@@ -64,7 +64,10 @@ function Get-NBVPNIPSecProposal {
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
                 foreach ($i in $Id) {
-                    InvokeNetboxRequest -URI (BuildNewURI -Segments @('vpn', 'ipsec-proposals', $i)) -Raw:$Raw
+                    $Segments = [System.Collections.ArrayList]::new(@('vpn', 'ipsec-proposals', $i))
+                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'All', 'PageSize'
+                    $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
                 }
             }
             default {
