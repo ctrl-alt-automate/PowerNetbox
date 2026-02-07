@@ -60,7 +60,7 @@ function Get-ModelDefinition {
         'ByPath' {
             switch ($Method) {
                 "get" {
-
+                    Write-Warning "GET model definition lookup is not implemented. Use 'post' method instead."
                     break
                 }
 
