@@ -143,10 +143,11 @@ function Connect-NBAPI {
 
     try {
         Write-Verbose "Verifying API connectivity..."
-        $null = VerifyAPIConnectivity
+        $statusResponse = VerifyAPIConnectivity
     } catch {
         Write-Verbose "Failed to connect. Generating error"
         Write-Verbose $_.Exception.Message
+        $script:NetboxConfig.Connected = $false
         if (($_.Exception.Response) -and ($_.Exception.Response.StatusCode -eq 403)) {
             throw "Invalid token"
         } else {
@@ -154,15 +155,17 @@ function Connect-NBAPI {
         }
     }
 
+    # Reuse the status response from VerifyAPIConnectivity (avoids duplicate /api/status/ call)
     Write-Verbose "Checking Netbox version compatibility"
-    $script:NetboxConfig.NetboxVersion = Get-NBVersion
-    $versionString = $script:NetboxConfig.NetboxVersion.'netbox-version'
+    $script:NetboxConfig.NetboxVersion = $statusResponse
+    $versionString = $statusResponse.'netbox-version'
     $script:NetboxConfig.ParsedVersion = ConvertTo-NetboxVersion -VersionString $versionString
 
     if ($null -eq $script:NetboxConfig.ParsedVersion) {
         Write-Warning "Could not parse Netbox version '$versionString', assuming compatible"
     } elseif ($script:NetboxConfig.ParsedVersion -lt [version]'4.3') {
-        $Script:NetboxConfig.Connected = $false
+        # Reset config state on incompatible version
+        SetupNetboxConfigVariable -Overwrite
         throw "Netbox version is incompatible with this PS module. Requires >=4.3, found version $versionString"
     } else {
         Write-Verbose "Found compatible version [$versionString] (parsed: $($script:NetboxConfig.ParsedVersion))!"
