@@ -16,7 +16,7 @@
 #>
 function Get-NBDCIMInterfaceConnection {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
-    [OutputType([pscustomobject])]
+    [OutputType([PSCustomObject])]
     param
     (
         [switch]$All,

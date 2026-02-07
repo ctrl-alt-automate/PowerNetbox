@@ -106,7 +106,7 @@ function Get-NBVirtualizationCluster {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('virtualization', 'clusters', $i)) -Raw:$Raw } }
             default {
                 $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'clusters'))
-                $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'All', 'PageSize'
+                $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'
                 $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
                 InvokeNetboxRequest -URI $uri -Raw:$Raw -All:$All -PageSize $PageSize
             }

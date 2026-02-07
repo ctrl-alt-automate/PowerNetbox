@@ -65,7 +65,7 @@ function Get-NBDCIMRackElevation {
         https://netbox.readthedocs.io/en/stable/models/dcim/rack/
 #>
 
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([PSCustomObject], [string])]
     param
     (

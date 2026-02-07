@@ -98,25 +98,22 @@ function Get-NBTenant {
             foreach ($Tenant_ID in $Id) {
                 $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'tenants', $Tenant_ID))
 
-                $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'All', 'PageSize'
+                $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'All', 'PageSize'
 
                 $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
                 InvokeNetboxRequest -URI $uri -Raw:$Raw -All:$All -PageSize $PageSize
             }
-
-            break
         }
 
         default {
             $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'tenants'))
 
-            $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'All', 'PageSize'
+            $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'
 
             $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
             InvokeNetboxRequest -URI $uri -Raw:$Raw -All:$All -PageSize $PageSize
-            break
         }
     }
     }

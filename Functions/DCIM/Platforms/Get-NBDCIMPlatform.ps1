@@ -15,8 +15,8 @@
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 function Get-NBDCIMPlatform {
-    [CmdletBinding()]
-    [OutputType([pscustomobject])]
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
+    [OutputType([PSCustomObject])]
     param
     (
         [switch]$All,
@@ -40,12 +40,16 @@ function Get-NBDCIMPlatform {
         [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Name,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Slug,
 
+        [Parameter(ParameterSetName = 'Query')]
         [uint64]$Manufacturer_Id,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Manufacturer,
 
         [switch]$Raw

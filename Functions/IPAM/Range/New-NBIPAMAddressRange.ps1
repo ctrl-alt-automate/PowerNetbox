@@ -92,14 +92,13 @@ function New-NBIPAMAddressRange {
     process {
         Write-Verbose "Creating IPAM Address Range"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'ip-ranges'))
-        $Method = 'POST'
 
         $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
 
         $URI = BuildNewURI -Segments $URIComponents.Segments
 
         if ($PSCmdlet.ShouldProcess($Start_Address, 'Create new IP address range')) {
-            InvokeNetboxRequest -URI $URI -Method $Method -Body $URIComponents.Parameters -Raw:$Raw
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
         }
     }
 }

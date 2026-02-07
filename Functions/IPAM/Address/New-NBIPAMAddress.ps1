@@ -184,15 +184,6 @@ function New-NBIPAMAddress {
                     $key = $prop.Name.ToLower()
                     $value = $prop.Value
 
-                    # Handle property name mappings
-                    switch ($key) {
-                        'nat_inside' { $key = 'nat_inside' }
-                        'custom_fields' { $key = 'custom_fields' }
-                        'dns_name' { $key = 'dns_name' }
-                        'assigned_object_type' { $key = 'assigned_object_type' }
-                        'assigned_object_id' { $key = 'assigned_object_id' }
-                    }
-
                     $item[$key] = $value
                 }
 

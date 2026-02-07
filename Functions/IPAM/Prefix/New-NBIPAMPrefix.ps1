@@ -165,7 +165,6 @@ function New-NBIPAMPrefix {
                     # Handle property name mappings
                     switch ($key) {
                         'ispool' { $key = 'is_pool' }
-                        'custom_fields' { $key = 'custom_fields' }
                     }
 
                     $item[$key] = $value

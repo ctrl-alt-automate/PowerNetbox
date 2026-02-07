@@ -15,7 +15,7 @@
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 function Get-NBDCIMDeviceRole {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([PSCustomObject])]
     param
     (
@@ -40,12 +40,16 @@ function Get-NBDCIMDeviceRole {
         [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Name,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Slug,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Color,
 
+        [Parameter(ParameterSetName = 'Query')]
         [bool]$VM_Role,
 
         [switch]$Raw

@@ -157,11 +157,6 @@ function New-NBIPAMVLAN {
                     $key = $prop.Name.ToLower()
                     $value = $prop.Value
 
-                    # Handle property name mappings
-                    switch ($key) {
-                        'custom_fields' { $key = 'custom_fields' }
-                    }
-
                     # Validate VID range in bulk mode
                     if ($key -eq 'vid') {
                         if ($value -lt 1 -or $value -gt 4094) {

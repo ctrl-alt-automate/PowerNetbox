@@ -51,7 +51,7 @@ function Set-NBVirtualMachineInterface {
 
             $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'interfaces', $VMI_ID))
 
-            if ($Force -or $pscmdlet.ShouldProcess("VM Interface ID $VMI_ID", "Set")) {
+            if ($Force -or $PSCmdlet.ShouldProcess("VM Interface ID $VMI_ID", "Set")) {
                 $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'Force'
 
                 $URI = BuildNewURI -Segments $URIComponents.Segments

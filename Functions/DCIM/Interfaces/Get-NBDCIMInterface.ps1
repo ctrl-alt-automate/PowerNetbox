@@ -24,7 +24,7 @@
 #>
 function Get-NBDCIMInterface {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
-    [OutputType([pscustomobject])]
+    [OutputType([PSCustomObject])]
     param
     (
         [switch]$All,
@@ -84,7 +84,7 @@ function Get-NBDCIMInterface {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim', 'interfaces', $i)) -Raw:$Raw } }
             default {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interfaces'))
-                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'All', 'PageSize'
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'
                 $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
                 InvokeNetboxRequest -URI $URI -Raw:$Raw -All:$All -PageSize $PageSize
             }
