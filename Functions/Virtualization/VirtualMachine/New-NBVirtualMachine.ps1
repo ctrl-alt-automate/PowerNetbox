@@ -192,10 +192,6 @@ function New-NBVirtualMachine {
 
                     # Handle property name mappings
                     switch ($key) {
-                        'vcpus' { $key = 'vcpus' }
-                        'primary_ip4' { $key = 'primary_ip4' }
-                        'primary_ip6' { $key = 'primary_ip6' }
-                        'custom_fields' { $key = 'custom_fields' }
                         'device_role' { $key = 'role' }  # Backwards compatibility
                     }
 

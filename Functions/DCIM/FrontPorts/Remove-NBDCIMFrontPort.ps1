@@ -21,7 +21,7 @@ function Remove-NBDCIMFrontPort {
 
     [CmdletBinding(ConfirmImpact = 'High',
         SupportsShouldProcess = $true)]
-    [OutputType([PSCustomObject])]
+    [OutputType([void])]
     param
     (
         [Parameter(Mandatory = $true,
@@ -36,7 +36,7 @@ function Remove-NBDCIMFrontPort {
     process {
         Write-Verbose "Removing DCIM Front Port"
         foreach ($FrontPortID in $Id) {
-            if ($Force -or $pscmdlet.ShouldProcess("Front Port ID $FrontPortID", "Remove")) {
+            if ($Force -or $PSCmdlet.ShouldProcess("Front Port ID $FrontPortID", "Remove")) {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'front-ports', $FrontPortID))
 
                 $URI = BuildNewURI -Segments $Segments

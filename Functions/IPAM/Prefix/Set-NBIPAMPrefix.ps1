@@ -30,6 +30,7 @@ function Set-NBIPAMPrefix {
 
         [string]$Prefix,
 
+        [ValidateSet('active', 'reserved', 'deprecated', 'container', IgnoreCase = $true)]
         [string]$Status,
 
         [uint64]$Tenant,

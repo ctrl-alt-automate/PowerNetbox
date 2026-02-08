@@ -234,14 +234,6 @@ function Set-NBDCIMDevice {
                     # Handle property name mappings
                     switch ($key) {
                         'device_role' { $key = 'role' }
-                        'device_type' { $key = 'device_type' }
-                        'asset_tag' { $key = 'asset_tag' }
-                        'virtual_chassis' { $key = 'virtual_chassis' }
-                        'vc_priority' { $key = 'vc_priority' }
-                        'vc_position' { $key = 'vc_position' }
-                        'primary_ip4' { $key = 'primary_ip4' }
-                        'primary_ip6' { $key = 'primary_ip6' }
-                        'custom_fields' { $key = 'custom_fields' }
                     }
 
                     $item[$key] = $value

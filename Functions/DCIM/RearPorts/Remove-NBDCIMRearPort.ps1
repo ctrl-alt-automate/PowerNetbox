@@ -21,7 +21,7 @@ function Remove-NBDCIMRearPort {
 
     [CmdletBinding(ConfirmImpact = 'High',
         SupportsShouldProcess = $true)]
-    [OutputType([PSCustomObject])]
+    [OutputType([void])]
     param
     (
         [Parameter(Mandatory = $true,
@@ -36,7 +36,7 @@ function Remove-NBDCIMRearPort {
     process {
         Write-Verbose "Removing DCIM Rear Port"
         foreach ($RearPortID in $Id) {
-            if ($Force -or $pscmdlet.ShouldProcess("Rear Port ID $RearPortID", "Remove")) {
+            if ($Force -or $PSCmdlet.ShouldProcess("Rear Port ID $RearPortID", "Remove")) {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'rear-ports', $RearPortID))
 
                 $URI = BuildNewURI -Segments $Segments

@@ -15,7 +15,7 @@
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 function Get-NBDCIMCableTermination {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([PSCustomObject])]
     #region Parameters
     param
@@ -41,12 +41,16 @@ function Get-NBDCIMCableTermination {
         [Parameter(ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
+        [Parameter(ParameterSetName = 'Query')]
         [uint64]$Cable,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Cable_End,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Termination_Type,
 
+        [Parameter(ParameterSetName = 'Query')]
         [uint64]$Termination_ID,
 
         [switch]$Raw

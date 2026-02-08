@@ -71,7 +71,7 @@
 function Set-NBDCIMRearPort {
     [CmdletBinding(ConfirmImpact = 'Medium',
         SupportsShouldProcess = $true)]
-    [OutputType([pscustomobject])]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(Mandatory = $true,
@@ -134,7 +134,7 @@ function Set-NBDCIMRearPort {
                 $URIComponents.Parameters['front_ports'] = $Front_Ports
             }
 
-            if ($Force -or $pscmdlet.ShouldProcess("Rear Port ID $RearPortID", "Set")) {
+            if ($Force -or $PSCmdlet.ShouldProcess("Rear Port ID $RearPortID", "Set")) {
                 InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method PATCH -Raw:$Raw
             }
         }

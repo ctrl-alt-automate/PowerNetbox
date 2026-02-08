@@ -186,15 +186,6 @@ function New-NBVirtualMachineInterface {
                     $key = $prop.Name.ToLower()
                     $value = $prop.Value
 
-                    # Handle property name mappings
-                    switch ($key) {
-                        'virtual_machine' { $key = 'virtual_machine' }
-                        'mac_address' { $key = 'mac_address' }
-                        'untagged_vlan' { $key = 'untagged_vlan' }
-                        'tagged_vlans' { $key = 'tagged_vlans' }
-                        'custom_fields' { $key = 'custom_fields' }
-                    }
-
                     $item[$key] = $value
                 }
 
