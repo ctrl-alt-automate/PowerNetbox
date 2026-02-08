@@ -91,7 +91,7 @@ Describe "Tenancy Module Tests" -Tag 'Tenancy' {
         }
 
         It "Should update a tenant" {
-            $Result = Set-NBTenant -Id 1 -Name 'UpdatedTenant' -Force
+            $Result = Set-NBTenant -Id 1 -Name 'UpdatedTenant' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/tenancy/tenants/1/'
             $bodyObj = $Result.Body | ConvertFrom-Json
@@ -99,7 +99,7 @@ Describe "Tenancy Module Tests" -Tag 'Tenancy' {
         }
 
         It "Should update a tenant description" {
-            $Result = Set-NBTenant -Id 1 -Description 'New description' -Force
+            $Result = Set-NBTenant -Id 1 -Description 'New description' -Confirm:$false
             $bodyObj = $Result.Body | ConvertFrom-Json
             $bodyObj.description | Should -Be 'New description'
         }
@@ -113,7 +113,7 @@ Describe "Tenancy Module Tests" -Tag 'Tenancy' {
         }
 
         It "Should remove a tenant" {
-            $Result = Remove-NBTenant -Id 10 -Force
+            $Result = Remove-NBTenant -Id 10 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/tenancy/tenants/10/'
         }
@@ -123,7 +123,7 @@ Describe "Tenancy Module Tests" -Tag 'Tenancy' {
             $Result = @(
                 [pscustomobject]@{ 'Id' = 10 },
                 [pscustomobject]@{ 'Id' = 11 }
-            ) | Remove-NBTenant -Force
+            ) | Remove-NBTenant -Confirm:$false
             $Result.Method | Should -Be 'DELETE', 'DELETE'
         }
     }
@@ -178,7 +178,7 @@ Describe "Tenancy Module Tests" -Tag 'Tenancy' {
         }
 
         It "Should update a tenant group" {
-            $Result = Set-NBTenantGroup -Id 1 -Name 'UpdatedGroup' -Force
+            $Result = Set-NBTenantGroup -Id 1 -Name 'UpdatedGroup' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/tenancy/tenant-groups/1/'
         }
@@ -192,7 +192,7 @@ Describe "Tenancy Module Tests" -Tag 'Tenancy' {
         }
 
         It "Should remove a tenant group" {
-            $Result = Remove-NBTenantGroup -Id 5 -Force
+            $Result = Remove-NBTenantGroup -Id 5 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/tenancy/tenant-groups/5/'
         }
@@ -237,13 +237,13 @@ Describe "Tenancy Module Tests" -Tag 'Tenancy' {
 
     Context "Set-NBContact" {
         It "Should update a contact" {
-            $Result = Set-NBContact -Id 1 -Name 'Updated Name' -Force
+            $Result = Set-NBContact -Id 1 -Name 'Updated Name' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/tenancy/contacts/1/'
         }
 
         It "Should update contact email" {
-            $Result = Set-NBContact -Id 1 -Email 'new@example.com' -Force
+            $Result = Set-NBContact -Id 1 -Email 'new@example.com' -Confirm:$false
             $bodyObj = $Result.Body | ConvertFrom-Json
             $bodyObj.email | Should -Be 'new@example.com'
         }
@@ -257,7 +257,7 @@ Describe "Tenancy Module Tests" -Tag 'Tenancy' {
         }
 
         It "Should remove a contact" {
-            $Result = Remove-NBContact -Id 8 -Force
+            $Result = Remove-NBContact -Id 8 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/tenancy/contacts/8/'
         }
@@ -318,7 +318,7 @@ Describe "Tenancy Module Tests" -Tag 'Tenancy' {
         }
 
         It "Should remove a contact role" {
-            $Result = Remove-NBContactRole -Id 3 -Force
+            $Result = Remove-NBContactRole -Id 3 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/tenancy/contact-roles/3/'
         }
@@ -374,7 +374,7 @@ Describe "Tenancy Module Tests" -Tag 'Tenancy' {
         }
 
         It "Should remove a contact assignment" {
-            $Result = Remove-NBContactAssignment -Id 6 -Force
+            $Result = Remove-NBContactAssignment -Id 6 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/tenancy/contact-assignments/6/'
         }

@@ -96,13 +96,13 @@ Describe "IPAM tests" -Tag 'Ipam' {
         }
 
         It "Should update an IP address" {
-            $Result = Set-NBIPAMAddress -Id 4109 -Status 'reserved' -Force
+            $Result = Set-NBIPAMAddress -Id 4109 -Status 'reserved' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/4109/'
         }
 
         It "Should update IP with VRF and Tenant" {
-            $Result = Set-NBIPAMAddress -Id 4110 -VRF 10 -Tenant 14 -Description 'Test' -Force
+            $Result = Set-NBIPAMAddress -Id 4110 -VRF 10 -Tenant 14 -Description 'Test' -Confirm:$false
             $bodyObj = $Result.Body | ConvertFrom-Json
             $bodyObj.vrf | Should -Be 10
             $bodyObj.tenant | Should -Be 14
@@ -117,7 +117,7 @@ Describe "IPAM tests" -Tag 'Ipam' {
         }
 
         It "Should remove an IP address" {
-            $Result = Remove-NBIPAMAddress -Id 4109 -Force
+            $Result = Remove-NBIPAMAddress -Id 4109 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/4109/'
         }
@@ -189,7 +189,7 @@ Describe "IPAM tests" -Tag 'Ipam' {
         }
 
         It "Should update a prefix" {
-            $Result = Set-NBIPAMPrefix -Id 1 -Description 'Updated' -Force
+            $Result = Set-NBIPAMPrefix -Id 1 -Description 'Updated' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
             $Result.Uri | Should -Match '/api/ipam/prefixes/1/'
         }

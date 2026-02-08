@@ -54,7 +54,7 @@ Describe "DCIM Racks Tests" -Tag 'DCIM', 'Racks' {
 
     Context "Set-NBDCIMRack" {
         It "Should update a rack" {
-            $Result = Set-NBDCIMRack -Id 1 -Name 'UpdatedRack' -Force
+            $Result = Set-NBDCIMRack -Id 1 -Name 'UpdatedRack' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/racks/1/'
         }
@@ -62,7 +62,7 @@ Describe "DCIM Racks Tests" -Tag 'DCIM', 'Racks' {
 
     Context "Remove-NBDCIMRack" {
         It "Should remove a rack" {
-            $Result = Remove-NBDCIMRack -Id 10 -Force
+            $Result = Remove-NBDCIMRack -Id 10 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/racks/10/'
         }

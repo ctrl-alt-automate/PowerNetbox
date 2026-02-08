@@ -81,7 +81,7 @@ Describe "Circuits Module Tests" -Tag 'Circuits' {
 
     Context "New-NBCircuit" {
         It "Should create a circuit" {
-            $Result = New-NBCircuit -Cid 'CIR-001' -Provider 1 -Type 1 -Status 'active' -Force
+            $Result = New-NBCircuit -Cid 'CIR-001' -Provider 1 -Type 1 -Status 'active' -Confirm:$false
             $Result.Method | Should -Be 'POST'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/circuits/circuits/'
             $bodyObj = $Result.Body | ConvertFrom-Json
@@ -92,13 +92,13 @@ Describe "Circuits Module Tests" -Tag 'Circuits' {
         }
 
         It "Should create a circuit with commit rate" {
-            $Result = New-NBCircuit -Cid 'CIR-002' -Provider 1 -Type 1 -Status 'active' -Commit_Rate 1000 -Force
+            $Result = New-NBCircuit -Cid 'CIR-002' -Provider 1 -Type 1 -Status 'active' -Commit_Rate 1000 -Confirm:$false
             $bodyObj = $Result.Body | ConvertFrom-Json
             $bodyObj.commit_rate | Should -Be 1000
         }
 
         It "Should create a circuit with description" {
-            $Result = New-NBCircuit -Cid 'CIR-003' -Provider 1 -Type 1 -Status 'active' -Description 'Test circuit' -Force
+            $Result = New-NBCircuit -Cid 'CIR-003' -Provider 1 -Type 1 -Status 'active' -Description 'Test circuit' -Confirm:$false
             $bodyObj = $Result.Body | ConvertFrom-Json
             $bodyObj.description | Should -Be 'Test circuit'
         }

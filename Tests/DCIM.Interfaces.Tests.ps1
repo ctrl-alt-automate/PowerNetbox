@@ -180,7 +180,7 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
         }
 
         It "Should remove an interface" {
-            $Result = Remove-NBDCIMInterface -Id 10 -Force
+            $Result = Remove-NBDCIMInterface -Id 10 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/interfaces/10/'
         }
@@ -190,7 +190,7 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
             $Result = @(
                 [pscustomobject]@{ 'Id' = 10 },
                 [pscustomobject]@{ 'Id' = 12 }
-            ) | Remove-NBDCIMInterface -Force
+            ) | Remove-NBDCIMInterface -Confirm:$false
             $Result.Method | Should -Be 'DELETE', 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/interfaces/10/', 'https://netbox.domain.com/api/dcim/interfaces/12/'
         }
@@ -199,7 +199,7 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
             $Result = @(
                 [pscustomobject]@{ 'Id' = 30 },
                 [pscustomobject]@{ 'Id' = 40 }
-            ) | Remove-NBDCIMInterface -Force
+            ) | Remove-NBDCIMInterface -Confirm:$false
             $Result.Method | Should -Be 'DELETE', 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/interfaces/30/', 'https://netbox.domain.com/api/dcim/interfaces/40/'
         }
@@ -259,7 +259,7 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
         }
 
         It "Should set an interface connection" {
-            $Result = Set-NBDCIMInterfaceConnection -Id 123 -Interface_B 2 -Force
+            $Result = Set-NBDCIMInterfaceConnection -Id 123 -Interface_B 2 -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
             $Result.Uri | Should -BeExactly 'https://netbox.domain.com/api/dcim/interface-connections/123/'
             $Result.Body | Should -Be '{"interface_b":2}'
@@ -267,7 +267,7 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
 
         It "Should throw when trying to set multiple connections" {
             # Set- functions only accept single Id; this test verifies the validation works
-            { Set-NBDCIMInterfaceConnection -Id 456, 789 -Interface_B 22 -Force } | Should -Throw
+            { Set-NBDCIMInterfaceConnection -Id 456, 789 -Interface_B 22 -Confirm:$false } | Should -Throw
         }
     }
 
@@ -279,7 +279,7 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
         }
 
         It "Should remove an interface connection" {
-            $Result = Remove-NBDCIMInterfaceConnection -Id 10 -Force
+            $Result = Remove-NBDCIMInterfaceConnection -Id 10 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/interface-connections/10/'
         }
@@ -289,7 +289,7 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
             $Result = @(
                 [pscustomobject]@{ 'Id' = 10 },
                 [pscustomobject]@{ 'Id' = 12 }
-            ) | Remove-NBDCIMInterfaceConnection -Force
+            ) | Remove-NBDCIMInterfaceConnection -Confirm:$false
             $Result.Method | Should -Be 'DELETE', 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/interface-connections/10/', 'https://netbox.domain.com/api/dcim/interface-connections/12/'
         }
