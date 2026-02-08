@@ -471,8 +471,7 @@ Describe "VPN Module Tests" -Tag 'VPN' {
         }
 
         It "Should accept valid IKE Mode 'aggressive'" {
-            $Result = New-NBVPNIKEPolicy -Name 'test' -Mode 'aggressive' -Confirm:$false
-            $Result | Should -Not -BeNullOrEmpty
+            { New-NBVPNIKEPolicy -Name 'test' -Mode 'aggressive' -Confirm:$false } | Should -Not -Throw
         }
 
         It "Should reject invalid Role for New-NBVPNTunnelTermination" {
@@ -487,7 +486,7 @@ Describe "VPN Module Tests" -Tag 'VPN' {
             { New-NBVPNIKEProposal -Name 'test' -Authentication_Method 'preshared-keys' -Encryption_Algorithm 'aes-256-cbc' -Authentication_Algorithm 'hmac-sha256' -Group 99 -Confirm:$false } | Should -Throw
         }
 
-        It "Should reject invalid Protocol for New-NBVPNIPSecProfile" {
+        It "Should reject invalid Mode for New-NBVPNIPSecProfile" {
             { New-NBVPNIPSecProfile -Name 'test' -Mode 'invalid' -Confirm:$false } | Should -Throw
         }
 

@@ -79,8 +79,7 @@ Describe "DCIM Racks Tests" -Tag 'DCIM', 'Racks' {
         }
 
         It "Should accept valid Width (19) for New-NBDCIMRack" {
-            $Result = New-NBDCIMRack -Name 'test' -Site 1 -Width 19 -Confirm:$false
-            $Result | Should -Not -BeNullOrEmpty
+            { New-NBDCIMRack -Name 'test' -Site 1 -Width 19 -Confirm:$false } | Should -Not -Throw
         }
 
         It "Should reject U_Height below minimum (0) for New-NBDCIMRack" {

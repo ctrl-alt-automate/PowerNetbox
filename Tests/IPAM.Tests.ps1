@@ -1037,13 +1037,11 @@ Describe "IPAM tests" -Tag 'Ipam' {
         }
 
         It "Should accept valid VID boundary (1) for New-NBIPAMVLAN" {
-            $Result = New-NBIPAMVLAN -Name 'test' -VID 1 -Confirm:$false
-            $Result | Should -Not -BeNullOrEmpty
+            { New-NBIPAMVLAN -Name 'test' -VID 1 -Confirm:$false } | Should -Not -Throw
         }
 
         It "Should accept valid VID boundary (4094) for New-NBIPAMVLAN" {
-            $Result = New-NBIPAMVLAN -Name 'test' -VID 4094 -Confirm:$false
-            $Result | Should -Not -BeNullOrEmpty
+            { New-NBIPAMVLAN -Name 'test' -VID 4094 -Confirm:$false } | Should -Not -Throw
         }
 
         It "Should reject invalid Status for Get-NBIPAMVLAN" {

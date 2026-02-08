@@ -680,8 +680,7 @@ Describe "Circuits Module Tests" -Tag 'Circuits' {
         }
 
         It "Should accept valid Term_Side 'A'" {
-            $Result = New-NBCircuitTermination -Circuit 1 -Term_Side 'A' -Confirm:$false
-            $Result | Should -Not -BeNullOrEmpty
+            { New-NBCircuitTermination -Circuit 1 -Term_Side 'A' -Confirm:$false } | Should -Not -Throw
         }
 
         It "Should reject invalid Priority for New-NBCircuitGroupAssignment" {

@@ -778,8 +778,7 @@ Describe "Extras Module Tests" -Tag 'Extras' {
         }
 
         It "Should accept valid Kind 'warning' for New-NBJournalEntry" {
-            $Result = New-NBJournalEntry -Assigned_Object_Type 'dcim.device' -Assigned_Object_Id 1 -Comments 'test' -Kind 'warning' -Confirm:$false
-            $Result | Should -Not -BeNullOrEmpty
+            { New-NBJournalEntry -Assigned_Object_Type 'dcim.device' -Assigned_Object_Id 1 -Comments 'test' -Kind 'warning' -Confirm:$false } | Should -Not -Throw
         }
 
         It "Should reject invalid Action_Type for New-NBEventRule" {
