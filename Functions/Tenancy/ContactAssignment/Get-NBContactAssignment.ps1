@@ -103,6 +103,7 @@ function Get-NBContactAssignment {
 
                 InvokeNetboxRequest -URI $uri -Raw:$Raw -All:$All -PageSize $PageSize
             }
+            return
         }
 
         default {

@@ -85,6 +85,7 @@ function Get-NBContactRole {
 
                 InvokeNetboxRequest -URI $uri -Raw:$Raw -All:$All -PageSize $PageSize
             }
+            return
         }
 
         default {

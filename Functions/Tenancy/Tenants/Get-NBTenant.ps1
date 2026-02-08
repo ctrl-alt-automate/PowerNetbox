@@ -104,6 +104,7 @@ function Get-NBTenant {
 
                 InvokeNetboxRequest -URI $uri -Raw:$Raw -All:$All -PageSize $PageSize
             }
+            return
         }
 
         default {
