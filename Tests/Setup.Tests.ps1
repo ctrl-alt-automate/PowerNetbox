@@ -331,6 +331,7 @@ Describe "Setup tests" -Tag 'Core', 'Setup' {
 
         It "Should support YAML format" {
             $Result = Get-NBAPIDefinition -Format 'yaml'
+            $Result.Uri | Should -Match '/api/schema/'
             $Result.Uri | Should -Match 'format=yaml'
         }
     }
