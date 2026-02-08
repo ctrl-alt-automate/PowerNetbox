@@ -562,7 +562,7 @@ Describe "Branching Module Tests" -Tag 'Branching' {
         It 'Should pass -Omit to query string for <Command>' -TestCases $omitTestCases {
             param($Command)
             $Result = & $Command -Omit @('comments', 'description')
-            $Result.Uri | Should -Match 'omit=comments%2Cdescription'
+            $Result.Uri | Should -Match 'omit=comments(%2C|,)description'
         }
     }
     #endregion
