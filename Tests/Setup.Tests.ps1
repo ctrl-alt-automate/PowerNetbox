@@ -251,56 +251,36 @@ Describe "Setup tests" -Tag 'Core', 'Setup' {
     }
 
     Context "Host Port" {
-        It "Should set the host port" {
+        It "Should set, get, and reset the host port" {
             Set-NBHostPort -Port 8443 | Should -Be 8443
-        }
-
-        It "Should get the host port" {
             Get-NBHostPort | Should -Be 8443
-        }
-
-        It "Should set port back to default" {
             Set-NBHostPort -Port 443 | Should -Be 443
         }
     }
 
     Context "Host Scheme" {
-        It "Should set the host scheme" {
+        It "Should set, get, and reset the host scheme" {
             Set-NBHostScheme -Scheme 'http' | Should -Be 'http'
-        }
-
-        It "Should get the host scheme" {
             Get-NBHostScheme | Should -Be 'http'
-        }
-
-        It "Should set scheme back to https" {
             Set-NBHostScheme -Scheme 'https' | Should -Be 'https'
         }
     }
 
     Context "Invoke Params" {
-        It "Should set invoke params" {
+        It "Should set and get invoke params" {
             $params = @{ SkipCertificateCheck = $true }
-            $result = Set-NBInvokeParams -InvokeParams $params
-            $result.SkipCertificateCheck | Should -Be $true
-        }
+            Set-NBInvokeParams -InvokeParams $params | Should -Be $params
 
-        It "Should get invoke params" {
-            $result = Get-NBInvokeParams
-            $result | Should -BeOfType [hashtable]
+            $getResult = Get-NBInvokeParams
+            $getResult | Should -BeOfType [hashtable]
+            $getResult.SkipCertificateCheck | Should -Be $true
         }
     }
 
     Context "Timeout" {
-        It "Should set the timeout" {
+        It "Should set, get, and reset the timeout" {
             Set-NBTimeout -TimeoutSeconds 60 | Should -Be 60
-        }
-
-        It "Should get the timeout" {
             Get-NBTimeout | Should -Be 60
-        }
-
-        It "Should set timeout back to default" {
             Set-NBTimeout -TimeoutSeconds 30 | Should -Be 30
         }
     }

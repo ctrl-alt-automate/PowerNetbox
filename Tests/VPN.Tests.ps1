@@ -465,6 +465,20 @@ Describe "VPN Module Tests" -Tag 'VPN' {
             }
         }
 
+        It "Should pass -PageSize to InvokeNetboxRequest for Get-NBVPNTunnel" {
+            Get-NBVPNTunnel -All -PageSize 500
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
+                $PageSize -eq 500
+            }
+        }
+
+        It "Should pass -All switch to InvokeNetboxRequest for Get-NBVPNIKEPolicy" {
+            Get-NBVPNIKEPolicy -All
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
+                $All -eq $true
+            }
+        }
+
         It "Should pass -PageSize to InvokeNetboxRequest for Get-NBVPNIKEPolicy" {
             Get-NBVPNIKEPolicy -All -PageSize 500
             Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
