@@ -684,4 +684,27 @@ Describe "DCIM Template Functions" -Tag 'Build', 'DCIM' {
         }
     }
     #endregion
+
+    #region Omit Parameter Tests
+    Context "Omit Parameter" {
+        $omitTestCases = @(
+            @{ Command = 'Get-NBDCIMConsolePortTemplate' }
+            @{ Command = 'Get-NBDCIMConsoleServerPortTemplate' }
+            @{ Command = 'Get-NBDCIMDeviceBayTemplate' }
+            @{ Command = 'Get-NBDCIMFrontPortTemplate' }
+            @{ Command = 'Get-NBDCIMInterfaceTemplate' }
+            @{ Command = 'Get-NBDCIMInventoryItemTemplate' }
+            @{ Command = 'Get-NBDCIMModuleBayTemplate' }
+            @{ Command = 'Get-NBDCIMPowerOutletTemplate' }
+            @{ Command = 'Get-NBDCIMPowerPortTemplate' }
+            @{ Command = 'Get-NBDCIMRearPortTemplate' }
+        )
+
+        It 'Should pass -Omit to query string for <Command>' -TestCases $omitTestCases {
+            param($Command)
+            $Result = & $Command -Omit @('comments', 'description')
+            $Result.Uri | Should -Match 'omit=comments%2Cdescription'
+        }
+    }
+    #endregion
 }

@@ -716,4 +716,28 @@ Describe "Circuits Module Tests" -Tag 'Circuits' {
         }
     }
     #endregion
+
+    #region Omit Parameter Tests
+    Context "Omit Parameter" {
+        $omitTestCases = @(
+            @{ Command = 'Get-NBCircuit' }
+            @{ Command = 'Get-NBCircuitGroup' }
+            @{ Command = 'Get-NBCircuitGroupAssignment' }
+            @{ Command = 'Get-NBCircuitProvider' }
+            @{ Command = 'Get-NBCircuitProviderAccount' }
+            @{ Command = 'Get-NBCircuitProviderNetwork' }
+            @{ Command = 'Get-NBCircuitTermination' }
+            @{ Command = 'Get-NBCircuitType' }
+            @{ Command = 'Get-NBVirtualCircuit' }
+            @{ Command = 'Get-NBVirtualCircuitTermination' }
+            @{ Command = 'Get-NBVirtualCircuitType' }
+        )
+
+        It 'Should pass -Omit to query string for <Command>' -TestCases $omitTestCases {
+            param($Command)
+            $Result = & $Command -Omit @('comments', 'description')
+            $Result.Uri | Should -Match 'omit=comments%2Cdescription'
+        }
+    }
+    #endregion
 }

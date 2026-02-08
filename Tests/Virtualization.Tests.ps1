@@ -645,4 +645,22 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
         }
     }
     #endregion
+
+    #region Omit Parameter Tests
+    Context "Omit Parameter" {
+        $omitTestCases = @(
+            @{ Command = 'Get-NBVirtualizationCluster' }
+            @{ Command = 'Get-NBVirtualizationClusterGroup' }
+            @{ Command = 'Get-NBVirtualizationClusterType' }
+            @{ Command = 'Get-NBVirtualMachine' }
+            @{ Command = 'Get-NBVirtualMachineInterface' }
+        )
+
+        It 'Should pass -Omit to query string for <Command>' -TestCases $omitTestCases {
+            param($Command)
+            $Result = & $Command -Omit @('comments', 'description')
+            $Result.Uri | Should -Match 'omit=comments%2Cdescription'
+        }
+    }
+    #endregion
 }

@@ -1082,4 +1082,40 @@ Describe "IPAM tests" -Tag 'Ipam' {
         }
     }
     #endregion
+
+    #region Omit Parameter Tests
+    Context "Omit Parameter" {
+        $omitTestCases = @(
+            @{ Command = 'Get-NBIPAMAddress' }
+            @{ Command = 'Get-NBIPAMAddressRange' }
+            @{ Command = 'Get-NBIPAMAggregate' }
+            @{ Command = 'Get-NBIPAMASN' }
+            @{ Command = 'Get-NBIPAMASNRange' }
+            @{ Command = 'Get-NBIPAMAvailableIP'; Parameters = @{ Prefix_ID = 1 } }
+            @{ Command = 'Get-NBIPAMFHRPGroup' }
+            @{ Command = 'Get-NBIPAMFHRPGroupAssignment' }
+            @{ Command = 'Get-NBIPAMPrefix' }
+            @{ Command = 'Get-NBIPAMRIR' }
+            @{ Command = 'Get-NBIPAMRole' }
+            @{ Command = 'Get-NBIPAMRouteTarget' }
+            @{ Command = 'Get-NBIPAMService' }
+            @{ Command = 'Get-NBIPAMServiceTemplate' }
+            @{ Command = 'Get-NBIPAMVLAN' }
+            @{ Command = 'Get-NBIPAMVLANGroup' }
+            @{ Command = 'Get-NBIPAMVLANTranslationPolicy' }
+            @{ Command = 'Get-NBIPAMVLANTranslationRule' }
+            @{ Command = 'Get-NBIPAMVRF' }
+        )
+
+        It 'Should pass -Omit to query string for <Command>' -TestCases $omitTestCases {
+            param($Command, $Parameters)
+            $splat = @{ Omit = @('comments', 'description') }
+            if ($Parameters) {
+                foreach ($key in $Parameters.Keys) { $splat[$key] = $Parameters[$key] }
+            }
+            $Result = & $Command @splat
+            $Result.Uri | Should -Match 'omit=comments%2Cdescription'
+        }
+    }
+    #endregion
 }

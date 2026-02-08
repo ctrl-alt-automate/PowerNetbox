@@ -307,4 +307,23 @@ Describe "Core Module Tests" -Tag 'Core' {
         }
     }
     #endregion
+
+    #region Omit Parameter Tests
+    Context "Omit Parameter" {
+        $omitTestCases = @(
+            @{ Command = 'Get-NBContentType' }
+            @{ Command = 'Get-NBDataFile' }
+            @{ Command = 'Get-NBDataSource' }
+            @{ Command = 'Get-NBJob' }
+            @{ Command = 'Get-NBObjectChange' }
+            @{ Command = 'Get-NBObjectType' }
+        )
+
+        It 'Should pass -Omit to query string for <Command>' -TestCases $omitTestCases {
+            param($Command)
+            $Result = & $Command -Omit @('comments', 'description')
+            $Result.Uri | Should -Match 'omit=comments%2Cdescription'
+        }
+    }
+    #endregion
 }

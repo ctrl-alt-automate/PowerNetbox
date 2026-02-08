@@ -1674,4 +1674,49 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         }
     }
     #endregion
+
+    #region Omit Parameter Tests
+    Context "Omit Parameter" {
+        $omitTestCases = @(
+            @{ Command = 'Get-NBDCIMCable' }
+            @{ Command = 'Get-NBDCIMCableTermination' }
+            @{ Command = 'Get-NBDCIMConnectedDevice'; Parameters = @{ Peer_Device = 'switch01'; Peer_Interface = 'eth0' } }
+            @{ Command = 'Get-NBDCIMConsolePort' }
+            @{ Command = 'Get-NBDCIMConsoleServerPort' }
+            @{ Command = 'Get-NBDCIMDeviceBay' }
+            @{ Command = 'Get-NBDCIMFrontPort' }
+            @{ Command = 'Get-NBDCIMInventoryItem' }
+            @{ Command = 'Get-NBDCIMInventoryItemRole' }
+            @{ Command = 'Get-NBDCIMLocation' }
+            @{ Command = 'Get-NBDCIMMACAddress' }
+            @{ Command = 'Get-NBDCIMManufacturer' }
+            @{ Command = 'Get-NBDCIMModule' }
+            @{ Command = 'Get-NBDCIMModuleBay' }
+            @{ Command = 'Get-NBDCIMModuleType' }
+            @{ Command = 'Get-NBDCIMModuleTypeProfile' }
+            @{ Command = 'Get-NBDCIMPowerFeed' }
+            @{ Command = 'Get-NBDCIMPowerOutlet' }
+            @{ Command = 'Get-NBDCIMPowerPanel' }
+            @{ Command = 'Get-NBDCIMPowerPort' }
+            @{ Command = 'Get-NBDCIMRackReservation' }
+            @{ Command = 'Get-NBDCIMRackRole' }
+            @{ Command = 'Get-NBDCIMRackType' }
+            @{ Command = 'Get-NBDCIMRearPort' }
+            @{ Command = 'Get-NBDCIMRegion' }
+            @{ Command = 'Get-NBDCIMSiteGroup' }
+            @{ Command = 'Get-NBDCIMVirtualChassis' }
+            @{ Command = 'Get-NBDCIMVirtualDeviceContext' }
+        )
+
+        It 'Should pass -Omit to query string for <Command>' -TestCases $omitTestCases {
+            param($Command, $Parameters)
+            $splat = @{ Omit = @('comments', 'description') }
+            if ($Parameters) {
+                foreach ($key in $Parameters.Keys) { $splat[$key] = $Parameters[$key] }
+            }
+            $Result = & $Command @splat
+            $Result.Uri | Should -Match 'omit=comments%2Cdescription'
+        }
+    }
+    #endregion
 }
