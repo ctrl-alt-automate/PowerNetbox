@@ -13,18 +13,21 @@ BeforeAll {
 
 Describe "Setup tests" -Tag 'Core', 'Setup' {
     It "Throws an error for an empty hostname" {
+        InModuleScope -ModuleName 'PowerNetbox' {
+            $script:NetboxConfig.Hostname = $null
+        }
         { Get-NBHostname } | Should -Throw
     }
 
-    It "Sets the hostname" {
+    It "Should set and get the hostname" {
         Set-NBHostName -HostName 'netbox.domain.com' | Should -Be 'netbox.domain.com'
-    }
-
-    It "Gets the hostname from the variable" {
         Get-NBHostName | Should -Be 'netbox.domain.com'
     }
 
     It "Throws an error for empty credentials" {
+        InModuleScope -ModuleName 'PowerNetbox' {
+            $script:NetboxConfig.Credential = $null
+        }
         { Get-NBCredential } | Should -Throw
     }
 
@@ -40,12 +43,9 @@ Describe "Setup tests" -Tag 'Core', 'Setup' {
     }
 
     Context "Credentials object" {
-        It "Sets the credentials using [pscredential]" {
+        It "Should set and get credentials using [pscredential]" {
             $Creds = [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
             Set-NBCredential -Credential $Creds | Should -BeOfType [pscredential]
-        }
-
-        It "Checks the set credentials" {
             (Get-NBCredential).GetNetworkCredential().Password | Should -BeExactly 'faketoken'
         }
     }
@@ -303,6 +303,36 @@ Describe "Setup tests" -Tag 'Core', 'Setup' {
             $Result = Test-NBAuthentication -Detailed
             $Result.Authenticated | Should -Be $false
             $Result.Error | Should -Match 'Connect-NBAPI'
+        }
+    }
+
+    Context "Get-NBAPIDefinition" {
+        BeforeAll {
+            Mock -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -MockWith {
+                return [PSCustomObject]@{
+                    Method = if ($Method) { $Method } else { 'GET' }
+                    Uri    = $URI.ToString()
+                    Body   = $Body
+                }
+            }
+
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.Hostname = 'netbox.domain.com'
+                $script:NetboxConfig.HostScheme = 'https'
+                $script:NetboxConfig.HostPort = 443
+            }
+        }
+
+        It "Should retrieve the API definition in JSON format by default" {
+            $Result = Get-NBAPIDefinition
+            $Result.Uri | Should -Match '/api/schema/'
+            $Result.Uri | Should -Match 'format=json'
+        }
+
+        It "Should support YAML format" {
+            $Result = Get-NBAPIDefinition -Format 'yaml'
+            $Result.Uri | Should -Match '/api/schema/'
+            $Result.Uri | Should -Match 'format=yaml'
         }
     }
 }
