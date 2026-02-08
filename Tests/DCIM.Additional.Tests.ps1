@@ -1675,6 +1675,61 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
     }
     #endregion
 
+    #region All/PageSize Passthrough Tests
+    Context "All/PageSize Passthrough" {
+        $allPageSizeTestCases = @(
+            @{ Command = 'Get-NBDCIMCable' }
+            @{ Command = 'Get-NBDCIMCableTermination' }
+            @{ Command = 'Get-NBDCIMConnectedDevice'; Parameters = @{ Peer_Device = 'switch01'; Peer_Interface = 'eth0' } }
+            @{ Command = 'Get-NBDCIMConsolePort' }
+            @{ Command = 'Get-NBDCIMConsoleServerPort' }
+            @{ Command = 'Get-NBDCIMDeviceBay' }
+            @{ Command = 'Get-NBDCIMFrontPort' }
+            @{ Command = 'Get-NBDCIMInventoryItem' }
+            @{ Command = 'Get-NBDCIMInventoryItemRole' }
+            @{ Command = 'Get-NBDCIMLocation' }
+            @{ Command = 'Get-NBDCIMMACAddress' }
+            @{ Command = 'Get-NBDCIMManufacturer' }
+            @{ Command = 'Get-NBDCIMModule' }
+            @{ Command = 'Get-NBDCIMModuleBay' }
+            @{ Command = 'Get-NBDCIMModuleType' }
+            @{ Command = 'Get-NBDCIMModuleTypeProfile' }
+            @{ Command = 'Get-NBDCIMPowerFeed' }
+            @{ Command = 'Get-NBDCIMPowerOutlet' }
+            @{ Command = 'Get-NBDCIMPowerPanel' }
+            @{ Command = 'Get-NBDCIMPowerPort' }
+            @{ Command = 'Get-NBDCIMRackReservation' }
+            @{ Command = 'Get-NBDCIMRackRole' }
+            @{ Command = 'Get-NBDCIMRackType' }
+            @{ Command = 'Get-NBDCIMRearPort' }
+            @{ Command = 'Get-NBDCIMRegion' }
+            @{ Command = 'Get-NBDCIMSiteGroup' }
+            @{ Command = 'Get-NBDCIMVirtualChassis' }
+            @{ Command = 'Get-NBDCIMVirtualDeviceContext' }
+        )
+
+        It 'Should pass -All to InvokeNetboxRequest for <Command>' -TestCases $allPageSizeTestCases {
+            param($Command, $Parameters)
+            $splat = @{ All = $true }
+            if ($Parameters) { $splat += $Parameters }
+            & $Command @splat
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
+                $All -eq $true
+            }
+        }
+
+        It 'Should pass -PageSize to InvokeNetboxRequest for <Command>' -TestCases $allPageSizeTestCases {
+            param($Command, $Parameters)
+            $splat = @{ All = $true; PageSize = 500 }
+            if ($Parameters) { $splat += $Parameters }
+            & $Command @splat
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
+                $PageSize -eq 500
+            }
+        }
+    }
+    #endregion
+
     #region Omit Parameter Tests
     Context "Omit Parameter" {
         $omitTestCases = @(
