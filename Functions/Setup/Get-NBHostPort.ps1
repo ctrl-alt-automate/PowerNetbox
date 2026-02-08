@@ -5,9 +5,6 @@
 .DESCRIPTION
     Retrieves the current port for Netbox API connections from Netbox Setup module.
 
-.PARAMETER Raw
-    Return the raw API response instead of the results array.
-
 .EXAMPLE
     Get-NBHostPort
 
@@ -16,12 +13,12 @@
 #>
 function Get-NBHostPort {
     [CmdletBinding()]
-    [OutputType([PSCustomObject])]
+    [OutputType([uint16])]
     param ()
 
     Write-Verbose "Getting Netbox host port"
     if ($null -eq $script:NetboxConfig.HostPort) {
-        throw "Netbox host port is not set! You may set it with Set-NBHostPort -Port 'https'"
+        throw "Netbox host port is not set! You may set it with Set-NBHostPort -Port 443"
     }
 
     $script:NetboxConfig.HostPort

@@ -5,9 +5,6 @@
 .DESCRIPTION
     Retrieves the current invoke parameters for Netbox API connections from Netbox Setup module.
 
-.PARAMETER Raw
-    Return the raw API response instead of the results array.
-
 .EXAMPLE
     Get-NBInvokeParams
 
@@ -17,7 +14,7 @@
 function Get-NBInvokeParams {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', '', Justification = 'Params refers to a collection of invoke parameters')]
     [CmdletBinding()]
-    [OutputType([PSCustomObject])]
+    [OutputType([hashtable])]
     param ()
 
     Write-Verbose "Getting Netbox InvokeParams"
