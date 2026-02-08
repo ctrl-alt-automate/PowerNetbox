@@ -771,6 +771,51 @@ Describe "Extras Module Tests" -Tag 'Extras' {
     }
     #endregion
 
+    #region Parameter Validation Tests
+    Context "Parameter Validation" {
+        It "Should reject invalid Kind for New-NBJournalEntry" {
+            { New-NBJournalEntry -Assigned_Object_Type 'dcim.device' -Assigned_Object_Id 1 -Comments 'test' -Kind 'invalid' -Confirm:$false } | Should -Throw
+        }
+
+        It "Should accept valid Kind 'warning' for New-NBJournalEntry" {
+            $Result = New-NBJournalEntry -Assigned_Object_Type 'dcim.device' -Assigned_Object_Id 1 -Comments 'test' -Kind 'warning' -Confirm:$false
+            $Result | Should -Not -BeNullOrEmpty
+        }
+
+        It "Should reject invalid Action_Type for New-NBEventRule" {
+            { New-NBEventRule -Name 'test' -Object_Types @('dcim.device') -Action_Type 'invalid' -Confirm:$false } | Should -Throw
+        }
+
+        It "Should reject invalid Kind for Get-NBJournalEntry" {
+            { Get-NBJournalEntry -Kind 'invalid' } | Should -Throw
+        }
+
+        It "Should reject invalid CustomField Type for Set-NBCustomField" {
+            { Set-NBCustomField -Id 1 -Type 'invalid' -Confirm:$false } | Should -Throw
+        }
+
+        It "Should reject Weight below minimum (0) for New-NBConfigContext" {
+            { New-NBConfigContext -Name 'test' -Data @{key = 'value'} -Weight -1 -Confirm:$false } | Should -Throw
+        }
+
+        It "Should reject Weight above maximum (32767) for New-NBConfigContext" {
+            { New-NBConfigContext -Name 'test' -Data @{key = 'value'} -Weight 32768 -Confirm:$false } | Should -Throw
+        }
+
+        It "Should require mandatory Assigned_Object_Type for New-NBJournalEntry" {
+            { New-NBJournalEntry -Assigned_Object_Id 1 -Comments 'test' -Confirm:$false } | Should -Throw
+        }
+
+        It "Should require mandatory Name for New-NBEventRule" {
+            { New-NBEventRule -Object_Types @('dcim.device') -Action_Type 'webhook' -Confirm:$false } | Should -Throw
+        }
+
+        It "Should reject PageSize above maximum (1001) for Get-NBJournalEntry" {
+            { Get-NBJournalEntry -PageSize 1001 } | Should -Throw
+        }
+    }
+    #endregion
+
     #region All/PageSize Passthrough Tests
     Context "All/PageSize Passthrough" {
         $allPageSizeTestCases = @(

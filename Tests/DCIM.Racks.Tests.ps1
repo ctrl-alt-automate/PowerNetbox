@@ -68,6 +68,55 @@ Describe "DCIM Racks Tests" -Tag 'DCIM', 'Racks' {
         }
     }
 
+    #region Parameter Validation Tests
+    Context "Parameter Validation" {
+        It "Should reject invalid Status for New-NBDCIMRack" {
+            { New-NBDCIMRack -Name 'test' -Site 1 -Status 'invalid' -Confirm:$false } | Should -Throw
+        }
+
+        It "Should reject invalid Width for New-NBDCIMRack" {
+            { New-NBDCIMRack -Name 'test' -Site 1 -Width 15 -Confirm:$false } | Should -Throw
+        }
+
+        It "Should accept valid Width (19) for New-NBDCIMRack" {
+            $Result = New-NBDCIMRack -Name 'test' -Site 1 -Width 19 -Confirm:$false
+            $Result | Should -Not -BeNullOrEmpty
+        }
+
+        It "Should reject U_Height below minimum (0) for New-NBDCIMRack" {
+            { New-NBDCIMRack -Name 'test' -Site 1 -U_Height 0 -Confirm:$false } | Should -Throw
+        }
+
+        It "Should reject U_Height above maximum (101) for New-NBDCIMRack" {
+            { New-NBDCIMRack -Name 'test' -Site 1 -U_Height 101 -Confirm:$false } | Should -Throw
+        }
+
+        It "Should reject invalid Weight_Unit for New-NBDCIMRack" {
+            { New-NBDCIMRack -Name 'test' -Site 1 -Weight_Unit 'ton' -Confirm:$false } | Should -Throw
+        }
+
+        It "Should reject invalid Face for Get-NBDCIMRackElevation" {
+            { Get-NBDCIMRackElevation -Id 1 -Face 'invalid' } | Should -Throw
+        }
+
+        It "Should reject invalid Render for Get-NBDCIMRackElevation" {
+            { Get-NBDCIMRackElevation -Id 1 -Render 'invalid' } | Should -Throw
+        }
+
+        It "Should reject invalid Status for Get-NBDCIMRack" {
+            { Get-NBDCIMRack -Status 'invalid' } | Should -Throw
+        }
+
+        It "Should require mandatory Name for New-NBDCIMRack" {
+            { New-NBDCIMRack -Site 1 -Confirm:$false } | Should -Throw
+        }
+
+        It "Should require mandatory Site for New-NBDCIMRack" {
+            { New-NBDCIMRack -Name 'test' -Confirm:$false } | Should -Throw
+        }
+    }
+    #endregion
+
     #region WhatIf Tests
     Context "WhatIf Support" {
         $whatIfTestCases = @(

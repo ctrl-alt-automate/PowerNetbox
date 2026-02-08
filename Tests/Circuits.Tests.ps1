@@ -669,6 +669,35 @@ Describe "Circuits Module Tests" -Tag 'Circuits' {
     }
     #endregion
 
+    #region Parameter Validation Tests
+    Context "Parameter Validation" {
+        It "Should reject invalid Status for New-NBCircuit" {
+            { New-NBCircuit -Cid 'test' -Provider 1 -Type 1 -Status 'invalid' -Confirm:$false } | Should -Throw
+        }
+
+        It "Should reject invalid Term_Side for New-NBCircuitTermination" {
+            { New-NBCircuitTermination -Circuit 1 -Term_Side 'B' -Confirm:$false } | Should -Throw
+        }
+
+        It "Should accept valid Term_Side 'A'" {
+            $Result = New-NBCircuitTermination -Circuit 1 -Term_Side 'A' -Confirm:$false
+            $Result | Should -Not -BeNullOrEmpty
+        }
+
+        It "Should reject invalid Priority for New-NBCircuitGroupAssignment" {
+            { New-NBCircuitGroupAssignment -Group 1 -Circuit 1 -Priority 'invalid' -Confirm:$false } | Should -Throw
+        }
+
+        It "Should require mandatory Cid for New-NBCircuit" {
+            { New-NBCircuit -Provider 1 -Type 1 -Confirm:$false } | Should -Throw
+        }
+
+        It "Should require mandatory Provider for New-NBCircuit" {
+            { New-NBCircuit -Cid 'test' -Type 1 -Confirm:$false } | Should -Throw
+        }
+    }
+    #endregion
+
     #region WhatIf Tests
     Context "WhatIf Support" {
         $whatIfTestCases = @(

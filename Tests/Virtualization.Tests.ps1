@@ -616,6 +616,38 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
     }
     #endregion
 
+    #region Parameter Validation Tests
+    Context "Parameter Validation" {
+        It "Should reject invalid Status for New-NBVirtualMachine" {
+            { New-NBVirtualMachine -Name 'test' -Status 'invalid' -Confirm:$false } | Should -Throw
+        }
+
+        It "Should reject invalid Start_On_Boot for New-NBVirtualMachine" {
+            { New-NBVirtualMachine -Name 'test' -Start_On_Boot 'maybe' -Confirm:$false } | Should -Throw
+        }
+
+        It "Should reject invalid Mode for New-NBVirtualMachineInterface" {
+            { New-NBVirtualMachineInterface -Virtual_Machine 1 -Name 'test' -Mode 'invalid' -Confirm:$false } | Should -Throw
+        }
+
+        It "Should reject MTU below minimum (0) for New-NBVirtualMachineInterface" {
+            { New-NBVirtualMachineInterface -Virtual_Machine 1 -Name 'test' -MTU 0 -Confirm:$false } | Should -Throw
+        }
+
+        It "Should reject MTU above maximum (65536) for New-NBVirtualMachineInterface" {
+            { New-NBVirtualMachineInterface -Virtual_Machine 1 -Name 'test' -MTU 65536 -Confirm:$false } | Should -Throw
+        }
+
+        It "Should require mandatory Name for New-NBVirtualMachine" {
+            { New-NBVirtualMachine -Cluster 1 -Confirm:$false } | Should -Throw
+        }
+
+        It "Should require mandatory Type for New-NBVirtualizationCluster" {
+            { New-NBVirtualizationCluster -Name 'test' -Confirm:$false } | Should -Throw
+        }
+    }
+    #endregion
+
     #region WhatIf Tests
     Context "WhatIf Support" {
         $whatIfTestCases = @(

@@ -305,6 +305,34 @@ Describe "Wireless Module Tests" -Tag 'Wireless' {
     }
     #endregion
 
+    #region Parameter Validation Tests
+    Context "Parameter Validation" {
+        It "Should reject PageSize below minimum (0) for Get-NBWirelessLAN" {
+            { Get-NBWirelessLAN -PageSize 0 } | Should -Throw
+        }
+
+        It "Should reject PageSize above maximum (1001) for Get-NBWirelessLAN" {
+            { Get-NBWirelessLAN -PageSize 1001 } | Should -Throw
+        }
+
+        It "Should reject PageSize below minimum (0) for Get-NBWirelessLink" {
+            { Get-NBWirelessLink -PageSize 0 } | Should -Throw
+        }
+
+        It "Should require mandatory SSID for New-NBWirelessLAN" {
+            { New-NBWirelessLAN -Confirm:$false } | Should -Throw
+        }
+
+        It "Should require mandatory Interface_A for New-NBWirelessLink" {
+            { New-NBWirelessLink -Interface_B 1 -Confirm:$false } | Should -Throw
+        }
+
+        It "Should require mandatory Interface_B for New-NBWirelessLink" {
+            { New-NBWirelessLink -Interface_A 1 -Confirm:$false } | Should -Throw
+        }
+    }
+    #endregion
+
     #region Pagination Parameter Tests
     Context "Wireless Get- Functions Pagination Support" {
         It "Get-NBWirelessLAN should have -All parameter" {
