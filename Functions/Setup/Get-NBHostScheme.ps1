@@ -17,7 +17,7 @@ function Get-NBHostScheme {
     param ()
 
     Write-Verbose "Getting Netbox host scheme"
-    if ($null -eq $script:NetboxConfig.Hostscheme) {
+    if ($null -eq $script:NetboxConfig.HostScheme) {
         throw "Netbox host scheme is not set! You may set it with Set-NBHostScheme -Scheme 'https'"
     }
 
