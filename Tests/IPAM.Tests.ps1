@@ -1161,4 +1161,19 @@ Describe "IPAM tests" -Tag 'Ipam' {
         }
     }
     #endregion
+
+    #region Pipeline Input Tests
+    Context "Pipeline Input" {
+        $pipelineTestCases = @(
+            @{ Command = 'Get-NBIPAMAddress' }
+            @{ Command = 'Get-NBIPAMVLAN' }
+        )
+
+        It 'Should accept pipeline input by property name for <Command>' -TestCases $pipelineTestCases {
+            param($Command)
+            $Result = [pscustomobject]@{ 'Id' = 10 } | & $Command
+            $Result.Uri | Should -Match '/10/'
+        }
+    }
+    #endregion
 }
