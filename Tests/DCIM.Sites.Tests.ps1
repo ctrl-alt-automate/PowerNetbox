@@ -81,7 +81,7 @@ Describe "DCIM Sites Tests" -Tag 'DCIM', 'Sites' {
         }
 
         It "Should update a site" {
-            $Result = Set-NBDCIMSite -Id 1 -Name 'UpdatedSite' -Force
+            $Result = Set-NBDCIMSite -Id 1 -Name 'UpdatedSite' -Confirm:$false
             # Performance optimization: no longer fetches the object before updating
             Should -Invoke -CommandName 'Get-NBDCIMSite' -Times 0 -Exactly -Scope 'It' -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'PATCH'

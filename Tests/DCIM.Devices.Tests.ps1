@@ -320,7 +320,7 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
         }
 
         It "Should set a device to a new name" {
-            $Result = Set-NBDCIMDevice -Id 1234 -Name 'newtestname' -Force
+            $Result = Set-NBDCIMDevice -Id 1234 -Name 'newtestname' -Confirm:$false
 
             # Uses Id directly without fetching device first (performance optimization #177)
             $Result.Method | Should -Be 'PATCH'
@@ -329,7 +329,7 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
         }
 
         It "Should set a device with new properties" {
-            $Result = Set-NBDCIMDevice -Id 1234 -Name 'newtestname' -Cluster 10 -Platform 20 -Site 15 -Force
+            $Result = Set-NBDCIMDevice -Id 1234 -Name 'newtestname' -Cluster 10 -Platform 20 -Site 15 -Confirm:$false
 
             $Result.Method | Should -Be 'PATCH'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/devices/1234/'
@@ -356,7 +356,7 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
         }
 
         It "Should remove a device" {
-            $Result = Remove-NBDCIMDevice -Id 10 -Force
+            $Result = Remove-NBDCIMDevice -Id 10 -Confirm:$false
 
             $Result.Method | Should -Be 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/devices/10/'
@@ -376,7 +376,7 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
                 [pscustomobject]@{ 'Id' = 30 },
                 [pscustomobject]@{ 'Id' = 31 }
             )
-            $items | Remove-NBDCIMDevice -Force
+            $items | Remove-NBDCIMDevice -Confirm:$false
 
             # Verify InvokeNetboxRequest was called with DELETE and the bulk endpoint
             Should -Invoke -CommandName "InvokeNetboxRequest" -ModuleName PowerNetbox -ParameterFilter {
