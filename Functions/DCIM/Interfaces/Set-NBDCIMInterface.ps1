@@ -20,7 +20,7 @@
 function Set-NBDCIMInterface {
     [CmdletBinding(ConfirmImpact = 'Medium',
         SupportsShouldProcess = $true)]
-    [OutputType([pscustomobject])]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(Mandatory = $true,
@@ -95,7 +95,7 @@ function Set-NBDCIMInterface {
 
             $URI = BuildNewURI -Segments $Segments
 
-            if ($Force -or $pscmdlet.ShouldProcess("Interface ID $InterfaceId", "Set")) {
+            if ($Force -or $PSCmdlet.ShouldProcess("Interface ID $InterfaceId", "Set")) {
                 InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method PATCH -Raw:$Raw
             }
         }

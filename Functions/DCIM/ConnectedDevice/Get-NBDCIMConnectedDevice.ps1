@@ -15,7 +15,7 @@
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 function Get-NBDCIMConnectedDevice {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([PSCustomObject])]
     param(
         [switch]$All,
@@ -30,8 +30,8 @@ function Get-NBDCIMConnectedDevice {
 
         [string[]]$Omit,
 
-        [Parameter(Mandatory = $true)][string]$Peer_Device,
-        [Parameter(Mandatory = $true)][string]$Peer_Interface,
+        [Parameter(ParameterSetName = 'Query', Mandatory = $true)][string]$Peer_Device,
+        [Parameter(ParameterSetName = 'Query', Mandatory = $true)][string]$Peer_Interface,
         [switch]$Raw
     )
     process {

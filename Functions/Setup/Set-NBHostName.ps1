@@ -4,13 +4,9 @@
 
 .DESCRIPTION
     Sets the hostname for Netbox API connections.
-    Supports pipeline input for Id parameter where applicable.
-
-.PARAMETER Raw
-    Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBHostName
+    Set-NBHostName -Hostname 'netbox.example.com'
 
     Sets the Netbox API hostname.
 

@@ -110,11 +110,7 @@ function New-NBImageAttachment {
 
                 try {
                     $Response = Invoke-RestMethod -Uri $URI -Method POST -Form $Form -Headers $Headers @InvokeParams
-                    if ($Raw) {
-                        $Response
-                    } else {
-                        $Response
-                    }
+                    $Response
                 }
                 catch {
                     $ErrorBody = (GetNetboxAPIErrorBody -Response $_.Exception.Response).Body
@@ -192,11 +188,7 @@ function New-NBImageAttachment {
 
                     if ($HttpResponse.IsSuccessStatusCode) {
                         $Result = $ResponseContent | ConvertFrom-Json
-                        if ($Raw) {
-                            $Result
-                        } else {
-                            $Result
-                        }
+                        $Result
                     }
                     else {
                         throw "HTTP $([int]$HttpResponse.StatusCode): $ResponseContent"

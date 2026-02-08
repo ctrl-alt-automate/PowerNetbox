@@ -35,7 +35,7 @@
 #>
 function Remove-NBTenant {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
-    [OutputType([PSCustomObject])]
+    [OutputType([void])]
     param
     (
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
@@ -54,7 +54,7 @@ function Remove-NBTenant {
 
             $URI = BuildNewURI -Segments $Segments
 
-            if ($Force -or $PSCmdlet.ShouldProcess("$("ID $TenantId")", 'Delete tenant')) {
+            if ($Force -or $PSCmdlet.ShouldProcess("ID $TenantId", 'Delete tenant')) {
                 InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
             }
         }

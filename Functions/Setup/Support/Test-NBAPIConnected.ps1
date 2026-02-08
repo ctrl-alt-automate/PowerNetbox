@@ -1,18 +1,14 @@
 <#
 .SYNOPSIS
-    Manages PIConnected in Netbox A module.
+    Tests whether the Netbox API connection is established.
 
 .DESCRIPTION
-    Manages PIConnected in Netbox A module.
-    Supports pipeline input for Id parameter where applicable.
-
-.PARAMETER Raw
-    Return the raw API response instead of the results array.
+    Tests whether the Netbox API connection is established.
 
 .EXAMPLE
     Test-NBAPIConnected
 
-    Returns all PIConnected objects.
+    Returns $true if the API connection is established, $false otherwise.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -20,7 +16,7 @@
 
 function Test-NBAPIConnected {
     [CmdletBinding()]
-    [OutputType([PSCustomObject])]
+    [OutputType([bool])]
     param ()
 
     $script:NetboxConfig.Connected

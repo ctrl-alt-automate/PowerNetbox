@@ -5,9 +5,6 @@
 .DESCRIPTION
     Retrieves the current hostname for Netbox API connections from Netbox Setup module.
 
-.PARAMETER Raw
-    Return the raw API response instead of the results array.
-
 .EXAMPLE
     Get-NBHostname
 
@@ -16,7 +13,7 @@
 #>
 function Get-NBHostname {
     [CmdletBinding()]
-    [OutputType([PSCustomObject])]
+    [OutputType([string])]
     param ()
 
     Write-Verbose "Getting Netbox hostname"

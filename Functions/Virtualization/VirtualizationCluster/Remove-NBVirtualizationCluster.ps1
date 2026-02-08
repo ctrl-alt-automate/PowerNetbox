@@ -36,7 +36,7 @@
 #>
 function Remove-NBVirtualizationCluster {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
-    [OutputType([PSCustomObject])]
+    [OutputType([void])]
     param
     (
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
@@ -55,7 +55,7 @@ function Remove-NBVirtualizationCluster {
 
             $URI = BuildNewURI -Segments $Segments
 
-            if ($Force -or $PSCmdlet.ShouldProcess("$("ID $ClusterId")", 'Delete cluster')) {
+            if ($Force -or $PSCmdlet.ShouldProcess("ID $ClusterId", 'Delete cluster')) {
                 InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
             }
         }

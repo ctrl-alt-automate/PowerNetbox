@@ -16,7 +16,7 @@
 #>
 function Get-NBDCIMSite {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
-    [OutputType([pscustomobject])]
+    [OutputType([PSCustomObject])]
     param
     (
         [switch]$All,
@@ -101,7 +101,7 @@ function Get-NBDCIMSite {
                 foreach ($Site_ID in $ID) {
                     $Segments = [System.Collections.ArrayList]::new(@('dcim', 'sites', $Site_Id))
 
-                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'All', 'PageSize'
+                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'All', 'PageSize'
 
                     $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
@@ -112,7 +112,7 @@ function Get-NBDCIMSite {
             default {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'sites'))
 
-                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'All', 'PageSize'
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'
 
                 $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 

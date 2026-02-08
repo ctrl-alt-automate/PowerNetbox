@@ -49,13 +49,13 @@ function Get-NBIPAMAddressRange {
         [string]$VRF,
 
         [Parameter(ParameterSetName = 'Query')]
-        [uint32]$VRF_Id,
+        [uint64]$VRF_Id,
 
         [Parameter(ParameterSetName = 'Query')]
         [string]$Tenant,
 
         [Parameter(ParameterSetName = 'Query')]
-        [uint32]$Tenant_Id,
+        [uint64]$Tenant_Id,
 
         [Parameter(ParameterSetName = 'Query')]
         [ValidateSet('active', 'reserved', 'deprecated', IgnoreCase = $true)]
@@ -80,7 +80,7 @@ function Get-NBIPAMAddressRange {
             foreach ($Range_ID in $Id) {
                 $Segments = [System.Collections.ArrayList]::new(@('ipam', 'ip-ranges', $Range_ID))
 
-                $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'All', 'PageSize'
+                $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'All', 'PageSize'
 
                 $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
@@ -93,7 +93,7 @@ function Get-NBIPAMAddressRange {
         default {
             $Segments = [System.Collections.ArrayList]::new(@('ipam', 'ip-ranges'))
 
-            $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'All', 'PageSize'
+            $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'
 
             $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 

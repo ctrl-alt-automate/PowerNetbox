@@ -24,6 +24,7 @@ function Set-NBIPAMVLAN {
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [ValidateRange(1, 4094)][uint16]$VID,
         [string]$Name,
+        [ValidateSet('active', 'reserved', 'deprecated', IgnoreCase = $true)]
         [string]$Status,
         [uint64]$Site,
         [uint64]$Group,

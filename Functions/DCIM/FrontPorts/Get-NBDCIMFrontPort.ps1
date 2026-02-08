@@ -16,7 +16,7 @@
 #>
 function Get-NBDCIMFrontPort {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
-    [OutputType([pscustomobject])]
+    [OutputType([PSCustomObject])]
     param
     (
         [switch]$All,
@@ -61,7 +61,7 @@ function Get-NBDCIMFrontPort {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim', 'front-ports', $i)) -Raw:$Raw } }
             default {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'front-ports'))
-                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'All', 'PageSize'
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'
                 $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
                 InvokeNetboxRequest -URI $URI -Raw:$Raw -All:$All -PageSize $PageSize
             }

@@ -102,7 +102,7 @@ function Set-NBVirtualizationCluster {
 
             $URI = BuildNewURI -Segments $URIComponents.Segments
 
-            if ($Force -or $PSCmdlet.ShouldProcess("$("ID $ClusterId")", 'Update cluster')) {
+            if ($Force -or $PSCmdlet.ShouldProcess("ID $ClusterId", 'Update cluster')) {
                 InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
             }
         }

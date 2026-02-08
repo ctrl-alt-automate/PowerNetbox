@@ -19,7 +19,7 @@
 #>
 function Remove-NBCircuitTermination {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
-    [OutputType([PSCustomObject])]
+    [OutputType([void])]
     param (
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [uint64]$Id,

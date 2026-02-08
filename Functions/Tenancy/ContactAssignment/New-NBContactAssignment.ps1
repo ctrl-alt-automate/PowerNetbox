@@ -57,10 +57,6 @@ function New-NBContactAssignment {
         [switch]$Raw
     )
 
-    begin {
-        $Method = 'POST'
-    }
-
     process {
         Write-Verbose "Creating Contact Assignment"
         $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'contact-assignments'))
@@ -70,7 +66,7 @@ function New-NBContactAssignment {
         $URI = BuildNewURI -Segments $URIComponents.Segments
 
         if ($PSCmdlet.ShouldProcess($Content_Type, 'Create new contact assignment')) {
-            InvokeNetboxRequest -URI $URI -Method $Method -Body $URIComponents.Parameters -Raw:$Raw
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
         }
     }
 }

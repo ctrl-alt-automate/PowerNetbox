@@ -202,13 +202,6 @@ function Set-NBVirtualMachine {
                     $key = $prop.Name.ToLower()
                     $value = $prop.Value
 
-                    # Handle property name mappings
-                    switch ($key) {
-                        'primary_ip4' { $key = 'primary_ip4' }
-                        'primary_ip6' { $key = 'primary_ip6' }
-                        'custom_fields' { $key = 'custom_fields' }
-                    }
-
                     $item[$key] = $value
                 }
                 [void]$bulkItems.Add([PSCustomObject]$item)
