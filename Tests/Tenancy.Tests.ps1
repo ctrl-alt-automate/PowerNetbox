@@ -411,6 +411,38 @@ Describe "Tenancy Module Tests" -Tag 'Tenancy' {
     }
     #endregion
 
+    #region All/PageSize Passthrough Tests
+    Context "All/PageSize Passthrough" {
+        $allPageSizeTestCases = @(
+            @{ Command = 'Get-NBContact' }
+            @{ Command = 'Get-NBContactAssignment' }
+            @{ Command = 'Get-NBContactRole' }
+            @{ Command = 'Get-NBTenant' }
+            @{ Command = 'Get-NBTenantGroup' }
+        )
+
+        It 'Should pass -All to InvokeNetboxRequest for <Command>' -TestCases $allPageSizeTestCases {
+            param($Command, $Parameters)
+            $splat = @{ All = $true }
+            if ($Parameters) { $splat += $Parameters }
+            & $Command @splat
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
+                $All -eq $true
+            }
+        }
+
+        It 'Should pass -PageSize to InvokeNetboxRequest for <Command>' -TestCases $allPageSizeTestCases {
+            param($Command, $Parameters)
+            $splat = @{ All = $true; PageSize = 500 }
+            if ($Parameters) { $splat += $Parameters }
+            & $Command @splat
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
+                $PageSize -eq 500
+            }
+        }
+    }
+    #endregion
+
     #region Omit Parameter Tests
     Context "Omit Parameter" {
         $omitTestCases = @(

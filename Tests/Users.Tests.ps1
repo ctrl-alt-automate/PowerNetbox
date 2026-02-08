@@ -708,6 +708,39 @@ Describe "Users Module Tests" -Tag 'Users' {
     }
     #endregion
 
+    #region All/PageSize Passthrough Tests
+    Context "All/PageSize Passthrough" {
+        $allPageSizeTestCases = @(
+            @{ Command = 'Get-NBGroup' }
+            @{ Command = 'Get-NBOwner' }
+            @{ Command = 'Get-NBOwnerGroup' }
+            @{ Command = 'Get-NBPermission' }
+            @{ Command = 'Get-NBToken' }
+            @{ Command = 'Get-NBUser' }
+        )
+
+        It 'Should pass -All to InvokeNetboxRequest for <Command>' -TestCases $allPageSizeTestCases {
+            param($Command, $Parameters)
+            $splat = @{ All = $true }
+            if ($Parameters) { $splat += $Parameters }
+            & $Command @splat
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
+                $All -eq $true
+            }
+        }
+
+        It 'Should pass -PageSize to InvokeNetboxRequest for <Command>' -TestCases $allPageSizeTestCases {
+            param($Command, $Parameters)
+            $splat = @{ All = $true; PageSize = 500 }
+            if ($Parameters) { $splat += $Parameters }
+            & $Command @splat
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
+                $PageSize -eq 500
+            }
+        }
+    }
+    #endregion
+
     #region Omit Parameter Tests
     Context "Omit Parameter" {
         $omitTestCases = @(
