@@ -668,4 +668,52 @@ Describe "Circuits Module Tests" -Tag 'Circuits' {
         }
     }
     #endregion
+
+    #region WhatIf Tests
+    Context "WhatIf Support" {
+        $whatIfTestCases = @(
+            @{ Command = 'New-NBCircuit'; Parameters = @{ CID = 'whatif-test'; Provider = 1; Type = 1 } }
+            @{ Command = 'New-NBCircuitGroup'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'New-NBCircuitGroupAssignment'; Parameters = @{ Group = 1; Circuit = 1 } }
+            @{ Command = 'New-NBCircuitProvider'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'New-NBCircuitProviderAccount'; Parameters = @{ Provider = 1; Account = 'whatif-test' } }
+            @{ Command = 'New-NBCircuitProviderNetwork'; Parameters = @{ Provider = 1; Name = 'whatif-test' } }
+            @{ Command = 'New-NBCircuitTermination'; Parameters = @{ Circuit = 1; Term_Side = 'A' } }
+            @{ Command = 'New-NBCircuitType'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'New-NBVirtualCircuit'; Parameters = @{ Cid = 'whatif-test'; Provider_Network = 1; Type = 1 } }
+            @{ Command = 'New-NBVirtualCircuitTermination'; Parameters = @{ Virtual_Circuit = 1; Interface = 1 } }
+            @{ Command = 'New-NBVirtualCircuitType'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'Set-NBCircuit'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBCircuitGroup'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBCircuitGroupAssignment'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBCircuitProvider'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBCircuitProviderAccount'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBCircuitProviderNetwork'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBCircuitTermination'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBCircuitType'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBVirtualCircuit'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBVirtualCircuitTermination'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBVirtualCircuitType'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBCircuit'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBCircuitGroup'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBCircuitGroupAssignment'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBCircuitProvider'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBCircuitProviderAccount'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBCircuitProviderNetwork'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBCircuitTermination'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBCircuitType'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBVirtualCircuit'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBVirtualCircuitTermination'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBVirtualCircuitType'; Parameters = @{ Id = 1 } }
+        )
+
+        It 'Should support -WhatIf for <Command>' -TestCases $whatIfTestCases {
+            param($Command, $Parameters)
+            $splat = $Parameters.Clone()
+            $splat.Add('WhatIf', $true)
+            $Result = & $Command @splat
+            $Result | Should -BeNullOrEmpty
+        }
+    }
+    #endregion
 }

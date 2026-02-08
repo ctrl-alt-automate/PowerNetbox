@@ -67,4 +67,22 @@ Describe "DCIM Racks Tests" -Tag 'DCIM', 'Racks' {
             $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/racks/10/'
         }
     }
+
+    #region WhatIf Tests
+    Context "WhatIf Support" {
+        $whatIfTestCases = @(
+            @{ Command = 'New-NBDCIMRack'; Parameters = @{ Name = 'whatif-test'; Site = 1 } }
+            @{ Command = 'Set-NBDCIMRack'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMRack'; Parameters = @{ Id = 1 } }
+        )
+
+        It 'Should support -WhatIf for <Command>' -TestCases $whatIfTestCases {
+            param($Command, $Parameters)
+            $splat = $Parameters.Clone()
+            $splat.Add('WhatIf', $true)
+            $Result = & $Command @splat
+            $Result | Should -BeNullOrEmpty
+        }
+    }
+    #endregion
 }

@@ -424,4 +424,28 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             $bodyObj.is_full_depth | Should -Be $true
         }
     }
+
+    #region WhatIf Tests
+    Context "WhatIf Support" {
+        $whatIfTestCases = @(
+            @{ Command = 'New-NBDCIMDevice'; Parameters = @{ Name = 'whatif-test'; Role = 1; Device_Type = 1; Site = 1 } }
+            @{ Command = 'New-NBDCIMDeviceRole'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'New-NBDCIMDeviceType'; Parameters = @{ Manufacturer = 1; Model = 'whatif-test' } }
+            @{ Command = 'Set-NBDCIMDevice'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMDeviceRole'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMDeviceType'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMDevice'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMDeviceRole'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMDeviceType'; Parameters = @{ Id = 1 } }
+        )
+
+        It 'Should support -WhatIf for <Command>' -TestCases $whatIfTestCases {
+            param($Command, $Parameters)
+            $splat = $Parameters.Clone()
+            $splat.Add('WhatIf', $true)
+            $Result = & $Command @splat
+            $Result | Should -BeNullOrEmpty
+        }
+    }
+    #endregion
 }

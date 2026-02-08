@@ -294,4 +294,25 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
             $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/interface-connections/10/', 'https://netbox.domain.com/api/dcim/interface-connections/12/'
         }
     }
+
+    #region WhatIf Tests
+    Context "WhatIf Support" {
+        $whatIfTestCases = @(
+            @{ Command = 'New-NBDCIMInterface'; Parameters = @{ Device = 1; Name = 'whatif-test' } }
+            @{ Command = 'New-NBDCIMInterfaceConnection'; Parameters = @{ Interface_A = 1; Interface_B = 1 } }
+            @{ Command = 'Set-NBDCIMInterface'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMInterfaceConnection'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMInterface'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMInterfaceConnection'; Parameters = @{ Id = 1 } }
+        )
+
+        It 'Should support -WhatIf for <Command>' -TestCases $whatIfTestCases {
+            param($Command, $Parameters)
+            $splat = $Parameters.Clone()
+            $splat.Add('WhatIf', $true)
+            $Result = & $Command @splat
+            $Result | Should -BeNullOrEmpty
+        }
+    }
+    #endregion
 }

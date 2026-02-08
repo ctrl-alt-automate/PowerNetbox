@@ -380,4 +380,34 @@ Describe "Tenancy Module Tests" -Tag 'Tenancy' {
         }
     }
     #endregion
+
+    #region WhatIf Tests
+    Context "WhatIf Support" {
+        $whatIfTestCases = @(
+            @{ Command = 'New-NBContact'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'New-NBContactAssignment'; Parameters = @{ Content_Type = 'dcim.device'; Object_Id = 1; Contact = 1; Role = 1 } }
+            @{ Command = 'New-NBContactRole'; Parameters = @{ Name = 'whatif-test'; Slug = 'whatif-test' } }
+            @{ Command = 'New-NBTenant'; Parameters = @{ Name = 'whatif-test'; Slug = 'whatif-test' } }
+            @{ Command = 'New-NBTenantGroup'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'Set-NBContact'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBContactAssignment'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBContactRole'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBTenant'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBTenantGroup'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBContact'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBContactAssignment'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBContactRole'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBTenant'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBTenantGroup'; Parameters = @{ Id = 1 } }
+        )
+
+        It 'Should support -WhatIf for <Command>' -TestCases $whatIfTestCases {
+            param($Command, $Parameters)
+            $splat = $Parameters.Clone()
+            $splat.Add('WhatIf', $true)
+            $Result = & $Command @splat
+            $Result | Should -BeNullOrEmpty
+        }
+    }
+    #endregion
 }

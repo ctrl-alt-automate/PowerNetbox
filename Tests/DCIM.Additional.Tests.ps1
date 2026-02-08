@@ -1581,4 +1581,97 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         }
     }
     #endregion
+
+    #region WhatIf Tests
+    Context "WhatIf Support" {
+        $whatIfTestCases = @(
+            @{ Command = 'New-NBDCIMCable'; Parameters = @{ A_Terminations = @(@{object_id=1;object_type='dcim.interface'}); B_Terminations = @(@{object_id=1;object_type='dcim.interface'}) } }
+            @{ Command = 'New-NBDCIMConsolePort'; Parameters = @{ Device = 1; Name = 'whatif-test' } }
+            @{ Command = 'New-NBDCIMConsoleServerPort'; Parameters = @{ Device = 1; Name = 'whatif-test' } }
+            @{ Command = 'New-NBDCIMDeviceBay'; Parameters = @{ Device = 1; Name = 'whatif-test' } }
+            @{ Command = 'New-NBDCIMFrontPort'; Parameters = @{ Device = 1; Name = 'whatif-test'; Type = '8p8c' } }
+            @{ Command = 'New-NBDCIMInventoryItem'; Parameters = @{ Device = 1; Name = 'whatif-test' } }
+            @{ Command = 'New-NBDCIMInventoryItemRole'; Parameters = @{ Name = 'whatif-test'; Slug = 'whatif-test' } }
+            @{ Command = 'New-NBDCIMLocation'; Parameters = @{ Name = 'whatif-test'; Slug = 'whatif-test'; Site = 1 } }
+            @{ Command = 'New-NBDCIMMACAddress'; Parameters = @{ Mac_Address = 'whatif-test' } }
+            @{ Command = 'New-NBDCIMManufacturer'; Parameters = @{ Name = 'whatif-test'; Slug = 'whatif-test' } }
+            @{ Command = 'New-NBDCIMModule'; Parameters = @{ Device = 1; Module_Bay = 1; Module_Type = 1 } }
+            @{ Command = 'New-NBDCIMModuleBay'; Parameters = @{ Device = 1; Name = 'whatif-test' } }
+            @{ Command = 'New-NBDCIMModuleType'; Parameters = @{ Manufacturer = 1; Model = 'whatif-test' } }
+            @{ Command = 'New-NBDCIMModuleTypeProfile'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'New-NBDCIMPowerFeed'; Parameters = @{ Power_Panel = 1; Name = 'whatif-test' } }
+            @{ Command = 'New-NBDCIMPowerOutlet'; Parameters = @{ Device = 1; Name = 'whatif-test' } }
+            @{ Command = 'New-NBDCIMPowerPanel'; Parameters = @{ Site = 1; Name = 'whatif-test' } }
+            @{ Command = 'New-NBDCIMPowerPort'; Parameters = @{ Device = 1; Name = 'whatif-test' } }
+            @{ Command = 'New-NBDCIMRackReservation'; Parameters = @{ Rack = 1; Units = 1; User = 1 } }
+            @{ Command = 'New-NBDCIMRackRole'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'New-NBDCIMRackType'; Parameters = @{ Manufacturer = 1; Model = 'whatif-test'; Form_Factor = 'whatif-test' } }
+            @{ Command = 'New-NBDCIMRearPort'; Parameters = @{ Device = 1; Name = 'whatif-test'; Type = '8p8c' } }
+            @{ Command = 'New-NBDCIMRegion'; Parameters = @{ Name = 'whatif-test'; Slug = 'whatif-test' } }
+            @{ Command = 'New-NBDCIMSiteGroup'; Parameters = @{ Name = 'whatif-test'; Slug = 'whatif-test' } }
+            @{ Command = 'New-NBDCIMVirtualChassis'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'New-NBDCIMVirtualDeviceContext'; Parameters = @{ Name = 'whatif-test'; Device = 1 } }
+            @{ Command = 'Set-NBDCIMCable'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMConsolePort'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMConsoleServerPort'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMDeviceBay'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMFrontPort'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMInventoryItem'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMInventoryItemRole'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMLocation'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMMACAddress'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMManufacturer'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMModule'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMModuleBay'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMModuleType'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMModuleTypeProfile'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMPowerFeed'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMPowerOutlet'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMPowerPanel'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMPowerPort'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMRackReservation'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMRackRole'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMRackType'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMRearPort'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMRegion'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMSiteGroup'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMVirtualChassis'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMVirtualDeviceContext'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMCable'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMConsolePort'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMConsoleServerPort'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMDeviceBay'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMFrontPort'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMInventoryItem'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMInventoryItemRole'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMLocation'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMMACAddress'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMManufacturer'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMModule'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMModuleBay'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMModuleType'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMModuleTypeProfile'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMPowerFeed'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMPowerOutlet'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMPowerPanel'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMPowerPort'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMRackReservation'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMRackRole'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMRackType'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMRearPort'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMRegion'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMSiteGroup'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMVirtualChassis'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMVirtualDeviceContext'; Parameters = @{ Id = 1 } }
+        )
+
+        It 'Should support -WhatIf for <Command>' -TestCases $whatIfTestCases {
+            param($Command, $Parameters)
+            $splat = $Parameters.Clone()
+            $splat.Add('WhatIf', $true)
+            $Result = & $Command @splat
+            $Result | Should -BeNullOrEmpty
+        }
+    }
+    #endregion
 }

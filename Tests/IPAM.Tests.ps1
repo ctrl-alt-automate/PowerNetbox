@@ -1013,4 +1013,73 @@ Describe "IPAM tests" -Tag 'Ipam' {
         }
     }
     #endregion
+
+    #region WhatIf Tests
+    Context "WhatIf Support" {
+        $whatIfTestCases = @(
+            @{ Command = 'New-NBIPAMAddress'; Parameters = @{ Address = 'whatif-test' } }
+            @{ Command = 'New-NBIPAMAddressRange'; Parameters = @{ Start_Address = 'whatif-test'; End_Address = 'whatif-test' } }
+            @{ Command = 'New-NBIPAMAggregate'; Parameters = @{ Prefix = 'whatif-test'; RIR = 1 } }
+            @{ Command = 'New-NBIPAMASN'; Parameters = @{ ASN = 1 } }
+            @{ Command = 'New-NBIPAMASNRange'; Parameters = @{ Name = 'whatif-test'; Slug = 'whatif-test'; RIR = 1; Start = 1; End = 1 } }
+            @{ Command = 'New-NBIPAMFHRPGroup'; Parameters = @{ Protocol = 'other'; Group_Id = 1 } }
+            @{ Command = 'New-NBIPAMFHRPGroupAssignment'; Parameters = @{ Group = 1; Interface_Type = 'whatif-test'; Interface_Id = 1 } }
+            @{ Command = 'New-NBIPAMPrefix'; Parameters = @{ Prefix = 'whatif-test' } }
+            @{ Command = 'New-NBIPAMRIR'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'New-NBIPAMRole'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'New-NBIPAMRouteTarget'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'New-NBIPAMService'; Parameters = @{ Name = 'whatif-test'; Ports = 1 } }
+            @{ Command = 'New-NBIPAMServiceTemplate'; Parameters = @{ Name = 'whatif-test'; Ports = 1 } }
+            @{ Command = 'New-NBIPAMVLAN'; Parameters = @{ VID = 1; Name = 'whatif-test' } }
+            @{ Command = 'New-NBIPAMVLANGroup'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'New-NBIPAMVLANTranslationPolicy'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'New-NBIPAMVLANTranslationRule'; Parameters = @{ Policy = 1; Local_Vid = 1; Remote_Vid = 1 } }
+            @{ Command = 'New-NBIPAMVRF'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'Set-NBIPAMAddress'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMAddressRange'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMAggregate'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMASN'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMASNRange'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMFHRPGroup'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMFHRPGroupAssignment'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMPrefix'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMRIR'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMRole'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMRouteTarget'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMService'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMServiceTemplate'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMVLAN'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMVLANGroup'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMVLANTranslationPolicy'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMVLANTranslationRule'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMVRF'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMAddress'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMAddressRange'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMAggregate'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMASN'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMASNRange'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMFHRPGroup'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMFHRPGroupAssignment'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMPrefix'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMRIR'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMRole'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMRouteTarget'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMService'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMServiceTemplate'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMVLAN'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMVLANGroup'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMVLANTranslationPolicy'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMVLANTranslationRule'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMVRF'; Parameters = @{ Id = 1 } }
+        )
+
+        It 'Should support -WhatIf for <Command>' -TestCases $whatIfTestCases {
+            param($Command, $Parameters)
+            $splat = $Parameters.Clone()
+            $splat.Add('WhatIf', $true)
+            $Result = & $Command @splat
+            $Result | Should -BeNullOrEmpty
+        }
+    }
+    #endregion
 }

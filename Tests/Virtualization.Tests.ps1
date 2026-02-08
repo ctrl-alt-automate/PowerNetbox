@@ -615,4 +615,34 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
         }
     }
     #endregion
+
+    #region WhatIf Tests
+    Context "WhatIf Support" {
+        $whatIfTestCases = @(
+            @{ Command = 'New-NBVirtualizationCluster'; Parameters = @{ Name = 'whatif-test'; Type = 1 } }
+            @{ Command = 'New-NBVirtualizationClusterGroup'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'New-NBVirtualizationClusterType'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'New-NBVirtualMachine'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'New-NBVirtualMachineInterface'; Parameters = @{ Name = 'whatif-test'; Virtual_Machine = 1 } }
+            @{ Command = 'Set-NBVirtualizationCluster'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBVirtualizationClusterGroup'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBVirtualizationClusterType'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBVirtualMachine'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBVirtualMachineInterface'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBVirtualizationCluster'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBVirtualizationClusterGroup'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBVirtualizationClusterType'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBVirtualMachine'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBVirtualMachineInterface'; Parameters = @{ Id = 1 } }
+        )
+
+        It 'Should support -WhatIf for <Command>' -TestCases $whatIfTestCases {
+            param($Command, $Parameters)
+            $splat = $Parameters.Clone()
+            $splat.Add('WhatIf', $true)
+            $Result = & $Command @splat
+            $Result | Should -BeNullOrEmpty
+        }
+    }
+    #endregion
 }
