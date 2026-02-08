@@ -116,4 +116,18 @@ Describe "DCIM Sites Tests" -Tag 'DCIM', 'Sites' {
         }
     }
     #endregion
+
+    #region Omit Parameter Tests
+    Context "Omit Parameter" {
+        $omitTestCases = @(
+            @{ Command = 'Get-NBDCIMSite' }
+        )
+
+        It 'Should pass -Omit to query string for <Command>' -TestCases $omitTestCases {
+            param($Command)
+            $Result = & $Command -Omit @('comments', 'description')
+            $Result.Uri | Should -Match 'omit=comments%2Cdescription'
+        }
+    }
+    #endregion
 }

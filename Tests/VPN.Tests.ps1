@@ -543,4 +543,27 @@ Describe "VPN Module Tests" -Tag 'VPN' {
         }
     }
     #endregion
+
+    #region Omit Parameter Tests
+    Context "Omit Parameter" {
+        $omitTestCases = @(
+            @{ Command = 'Get-NBVPNIKEPolicy' }
+            @{ Command = 'Get-NBVPNIKEProposal' }
+            @{ Command = 'Get-NBVPNIPSecPolicy' }
+            @{ Command = 'Get-NBVPNIPSecProfile' }
+            @{ Command = 'Get-NBVPNIPSecProposal' }
+            @{ Command = 'Get-NBVPNL2VPN' }
+            @{ Command = 'Get-NBVPNL2VPNTermination' }
+            @{ Command = 'Get-NBVPNTunnel' }
+            @{ Command = 'Get-NBVPNTunnelGroup' }
+            @{ Command = 'Get-NBVPNTunnelTermination' }
+        )
+
+        It 'Should pass -Omit to query string for <Command>' -TestCases $omitTestCases {
+            param($Command)
+            $Result = & $Command -Omit @('comments', 'description')
+            $Result.Uri | Should -Match 'omit=comments%2Cdescription'
+        }
+    }
+    #endregion
 }

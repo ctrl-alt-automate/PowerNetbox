@@ -340,4 +340,20 @@ Describe "Wireless Module Tests" -Tag 'Wireless' {
         }
     }
     #endregion
+
+    #region Omit Parameter Tests
+    Context "Omit Parameter" {
+        $omitTestCases = @(
+            @{ Command = 'Get-NBWirelessLAN' }
+            @{ Command = 'Get-NBWirelessLANGroup' }
+            @{ Command = 'Get-NBWirelessLink' }
+        )
+
+        It 'Should pass -Omit to query string for <Command>' -TestCases $omitTestCases {
+            param($Command)
+            $Result = & $Command -Omit @('comments', 'description')
+            $Result.Uri | Should -Match 'omit=comments%2Cdescription'
+        }
+    }
+    #endregion
 }

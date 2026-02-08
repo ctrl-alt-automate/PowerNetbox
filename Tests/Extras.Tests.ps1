@@ -770,4 +770,29 @@ Describe "Extras Module Tests" -Tag 'Extras' {
         }
     }
     #endregion
+
+    #region Omit Parameter Tests
+    Context "Omit Parameter" {
+        $omitTestCases = @(
+            @{ Command = 'Get-NBBookmark' }
+            @{ Command = 'Get-NBConfigContext' }
+            @{ Command = 'Get-NBCustomField' }
+            @{ Command = 'Get-NBCustomFieldChoiceSet' }
+            @{ Command = 'Get-NBCustomLink' }
+            @{ Command = 'Get-NBEventRule' }
+            @{ Command = 'Get-NBExportTemplate' }
+            @{ Command = 'Get-NBImageAttachment' }
+            @{ Command = 'Get-NBJournalEntry' }
+            @{ Command = 'Get-NBSavedFilter' }
+            @{ Command = 'Get-NBTag' }
+            @{ Command = 'Get-NBWebhook' }
+        )
+
+        It 'Should pass -Omit to query string for <Command>' -TestCases $omitTestCases {
+            param($Command)
+            $Result = & $Command -Omit @('comments', 'description')
+            $Result.Uri | Should -Match 'omit=comments%2Cdescription'
+        }
+    }
+    #endregion
 }

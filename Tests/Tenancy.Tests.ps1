@@ -410,4 +410,22 @@ Describe "Tenancy Module Tests" -Tag 'Tenancy' {
         }
     }
     #endregion
+
+    #region Omit Parameter Tests
+    Context "Omit Parameter" {
+        $omitTestCases = @(
+            @{ Command = 'Get-NBContact' }
+            @{ Command = 'Get-NBContactAssignment' }
+            @{ Command = 'Get-NBContactRole' }
+            @{ Command = 'Get-NBTenant' }
+            @{ Command = 'Get-NBTenantGroup' }
+        )
+
+        It 'Should pass -Omit to query string for <Command>' -TestCases $omitTestCases {
+            param($Command)
+            $Result = & $Command -Omit @('comments', 'description')
+            $Result.Uri | Should -Match 'omit=comments%2Cdescription'
+        }
+    }
+    #endregion
 }
