@@ -1110,9 +1110,7 @@ Describe "IPAM tests" -Tag 'Ipam' {
         It 'Should pass -Omit to query string for <Command>' -TestCases $omitTestCases {
             param($Command, $Parameters)
             $splat = @{ Omit = @('comments', 'description') }
-            if ($Parameters) {
-                foreach ($key in $Parameters.Keys) { $splat[$key] = $Parameters[$key] }
-            }
+            if ($Parameters) { $splat += $Parameters }
             $Result = & $Command @splat
             $Result.Uri | Should -Match 'omit=comments%2Cdescription'
         }
