@@ -250,6 +250,41 @@ Describe "Setup tests" -Tag 'Core', 'Setup' {
         }
     }
 
+    Context "Host Port" {
+        It "Should set, get, and reset the host port" {
+            Set-NBHostPort -Port 8443 | Should -Be 8443
+            Get-NBHostPort | Should -Be 8443
+            Set-NBHostPort -Port 443 | Should -Be 443
+        }
+    }
+
+    Context "Host Scheme" {
+        It "Should set, get, and reset the host scheme" {
+            Set-NBHostScheme -Scheme 'http' | Should -Be 'http'
+            Get-NBHostScheme | Should -Be 'http'
+            Set-NBHostScheme -Scheme 'https' | Should -Be 'https'
+        }
+    }
+
+    Context "Invoke Params" {
+        It "Should set and get invoke params" {
+            $params = @{ SkipCertificateCheck = $true }
+            Set-NBInvokeParams -InvokeParams $params | Should -Be $params
+
+            $getResult = Get-NBInvokeParams
+            $getResult | Should -BeOfType [hashtable]
+            $getResult.SkipCertificateCheck | Should -Be $true
+        }
+    }
+
+    Context "Timeout" {
+        It "Should set, get, and reset the timeout" {
+            Set-NBTimeout -TimeoutSeconds 60 | Should -Be 60
+            Get-NBTimeout | Should -Be 60
+            Set-NBTimeout -TimeoutSeconds 30 | Should -Be 30
+        }
+    }
+
     Context "Test-NBAuthentication Not Connected" {
         It "Should return false when not connected to Netbox" {
             Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith {

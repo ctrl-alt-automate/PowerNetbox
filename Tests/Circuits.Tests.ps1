@@ -63,6 +63,22 @@ Describe "Circuits Module Tests" -Tag 'Circuits' {
         }
     }
 
+    Context "Get-NBCircuit -All/-PageSize passthrough" {
+        It "Should pass -All switch to InvokeNetboxRequest" {
+            Get-NBCircuit -All
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
+                $All -eq $true
+            }
+        }
+
+        It "Should pass -PageSize to InvokeNetboxRequest" {
+            Get-NBCircuit -All -PageSize 500
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
+                $PageSize -eq 500
+            }
+        }
+    }
+
     Context "New-NBCircuit" {
         It "Should create a circuit" {
             $Result = New-NBCircuit -Cid 'CIR-001' -Provider 1 -Type 1 -Status 'active' -Force
