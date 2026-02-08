@@ -668,4 +668,173 @@ Describe "Circuits Module Tests" -Tag 'Circuits' {
         }
     }
     #endregion
+
+    #region WhatIf Tests
+    Context "WhatIf Support" {
+        It "Should support -WhatIf for New-NBCircuit" {
+            $Result = New-NBCircuit -CID 'whatif-test' -Provider 1 -Type 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBCircuitGroup" {
+            $Result = New-NBCircuitGroup -Name 'whatif-test' -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBCircuitGroupAssignment" {
+            $Result = New-NBCircuitGroupAssignment -Group 1 -Circuit 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBCircuitProvider" {
+            $Result = New-NBCircuitProvider -Name 'whatif-test' -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBCircuitProviderAccount" {
+            $Result = New-NBCircuitProviderAccount -Provider 1 -Account 'whatif-test' -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBCircuitProviderNetwork" {
+            $Result = New-NBCircuitProviderNetwork -Provider 1 -Name 'whatif-test' -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBCircuitTermination" {
+            $Result = New-NBCircuitTermination -Circuit 1 -Term_Side 'A' -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBCircuitType" {
+            $Result = New-NBCircuitType -Name 'whatif-test' -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBVirtualCircuit" {
+            $Result = New-NBVirtualCircuit -Cid 'whatif-test' -Provider_Network 1 -Type 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBVirtualCircuitTermination" {
+            $Result = New-NBVirtualCircuitTermination -Virtual_Circuit 1 -Interface 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBVirtualCircuitType" {
+            $Result = New-NBVirtualCircuitType -Name 'whatif-test' -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBCircuit" {
+            $Result = Set-NBCircuit -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBCircuitGroup" {
+            $Result = Set-NBCircuitGroup -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBCircuitGroupAssignment" {
+            $Result = Set-NBCircuitGroupAssignment -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBCircuitProvider" {
+            $Result = Set-NBCircuitProvider -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBCircuitProviderAccount" {
+            $Result = Set-NBCircuitProviderAccount -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBCircuitProviderNetwork" {
+            $Result = Set-NBCircuitProviderNetwork -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBCircuitTermination" {
+            $Result = Set-NBCircuitTermination -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBCircuitType" {
+            $Result = Set-NBCircuitType -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBVirtualCircuit" {
+            $Result = Set-NBVirtualCircuit -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBVirtualCircuitTermination" {
+            $Result = Set-NBVirtualCircuitTermination -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBVirtualCircuitType" {
+            $Result = Set-NBVirtualCircuitType -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBCircuit" {
+            $Result = Remove-NBCircuit -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBCircuitGroup" {
+            $Result = Remove-NBCircuitGroup -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBCircuitGroupAssignment" {
+            $Result = Remove-NBCircuitGroupAssignment -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBCircuitProvider" {
+            $Result = Remove-NBCircuitProvider -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBCircuitProviderAccount" {
+            $Result = Remove-NBCircuitProviderAccount -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBCircuitProviderNetwork" {
+            $Result = Remove-NBCircuitProviderNetwork -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBCircuitTermination" {
+            $Result = Remove-NBCircuitTermination -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBCircuitType" {
+            $Result = Remove-NBCircuitType -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBVirtualCircuit" {
+            $Result = Remove-NBVirtualCircuit -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBVirtualCircuitTermination" {
+            $Result = Remove-NBVirtualCircuitTermination -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBVirtualCircuitType" {
+            $Result = Remove-NBVirtualCircuitType -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+    }
+    #endregion
 }

@@ -1013,4 +1013,278 @@ Describe "IPAM tests" -Tag 'Ipam' {
         }
     }
     #endregion
+
+    #region WhatIf Tests
+    Context "WhatIf Support" {
+        It "Should support -WhatIf for New-NBIPAMAddress" {
+            $Result = New-NBIPAMAddress -Address 'whatif-test' -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBIPAMAddressRange" {
+            $Result = New-NBIPAMAddressRange -Start_Address 'whatif-test' -End_Address 'whatif-test' -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBIPAMAggregate" {
+            $Result = New-NBIPAMAggregate -Prefix 'whatif-test' -RIR 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBIPAMASN" {
+            $Result = New-NBIPAMASN -ASN 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBIPAMASNRange" {
+            $Result = New-NBIPAMASNRange -Name 'whatif-test' -Slug 'whatif-test' -RIR 1 -Start 1 -End 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBIPAMFHRPGroup" {
+            $Result = New-NBIPAMFHRPGroup -Protocol 'other' -Group_Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBIPAMFHRPGroupAssignment" {
+            $Result = New-NBIPAMFHRPGroupAssignment -Group 1 -Interface_Type 'whatif-test' -Interface_Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBIPAMPrefix" {
+            $Result = New-NBIPAMPrefix -Prefix 'whatif-test' -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBIPAMRIR" {
+            $Result = New-NBIPAMRIR -Name 'whatif-test' -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBIPAMRole" {
+            $Result = New-NBIPAMRole -Name 'whatif-test' -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBIPAMRouteTarget" {
+            $Result = New-NBIPAMRouteTarget -Name 'whatif-test' -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBIPAMService" {
+            $Result = New-NBIPAMService -Name 'whatif-test' -Ports 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBIPAMServiceTemplate" {
+            $Result = New-NBIPAMServiceTemplate -Name 'whatif-test' -Ports 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBIPAMVLAN" {
+            $Result = New-NBIPAMVLAN -VID 1 -Name 'whatif-test' -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBIPAMVLANGroup" {
+            $Result = New-NBIPAMVLANGroup -Name 'whatif-test' -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBIPAMVLANTranslationPolicy" {
+            $Result = New-NBIPAMVLANTranslationPolicy -Name 'whatif-test' -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBIPAMVLANTranslationRule" {
+            $Result = New-NBIPAMVLANTranslationRule -Policy 1 -Local_Vid 1 -Remote_Vid 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBIPAMVRF" {
+            $Result = New-NBIPAMVRF -Name 'whatif-test' -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBIPAMAddress" {
+            $Result = Set-NBIPAMAddress -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBIPAMAddressRange" {
+            $Result = Set-NBIPAMAddressRange -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBIPAMAggregate" {
+            $Result = Set-NBIPAMAggregate -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBIPAMASN" {
+            $Result = Set-NBIPAMASN -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBIPAMASNRange" {
+            $Result = Set-NBIPAMASNRange -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBIPAMFHRPGroup" {
+            $Result = Set-NBIPAMFHRPGroup -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBIPAMFHRPGroupAssignment" {
+            $Result = Set-NBIPAMFHRPGroupAssignment -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBIPAMPrefix" {
+            $Result = Set-NBIPAMPrefix -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBIPAMRIR" {
+            $Result = Set-NBIPAMRIR -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBIPAMRole" {
+            $Result = Set-NBIPAMRole -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBIPAMRouteTarget" {
+            $Result = Set-NBIPAMRouteTarget -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBIPAMService" {
+            $Result = Set-NBIPAMService -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBIPAMServiceTemplate" {
+            $Result = Set-NBIPAMServiceTemplate -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBIPAMVLAN" {
+            $Result = Set-NBIPAMVLAN -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBIPAMVLANGroup" {
+            $Result = Set-NBIPAMVLANGroup -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBIPAMVLANTranslationPolicy" {
+            $Result = Set-NBIPAMVLANTranslationPolicy -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBIPAMVLANTranslationRule" {
+            $Result = Set-NBIPAMVLANTranslationRule -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBIPAMVRF" {
+            $Result = Set-NBIPAMVRF -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBIPAMAddress" {
+            $Result = Remove-NBIPAMAddress -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBIPAMAddressRange" {
+            $Result = Remove-NBIPAMAddressRange -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBIPAMAggregate" {
+            $Result = Remove-NBIPAMAggregate -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBIPAMASN" {
+            $Result = Remove-NBIPAMASN -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBIPAMASNRange" {
+            $Result = Remove-NBIPAMASNRange -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBIPAMFHRPGroup" {
+            $Result = Remove-NBIPAMFHRPGroup -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBIPAMFHRPGroupAssignment" {
+            $Result = Remove-NBIPAMFHRPGroupAssignment -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBIPAMPrefix" {
+            $Result = Remove-NBIPAMPrefix -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBIPAMRIR" {
+            $Result = Remove-NBIPAMRIR -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBIPAMRole" {
+            $Result = Remove-NBIPAMRole -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBIPAMRouteTarget" {
+            $Result = Remove-NBIPAMRouteTarget -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBIPAMService" {
+            $Result = Remove-NBIPAMService -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBIPAMServiceTemplate" {
+            $Result = Remove-NBIPAMServiceTemplate -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBIPAMVLAN" {
+            $Result = Remove-NBIPAMVLAN -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBIPAMVLANGroup" {
+            $Result = Remove-NBIPAMVLANGroup -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBIPAMVLANTranslationPolicy" {
+            $Result = Remove-NBIPAMVLANTranslationPolicy -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBIPAMVLANTranslationRule" {
+            $Result = Remove-NBIPAMVLANTranslationRule -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBIPAMVRF" {
+            $Result = Remove-NBIPAMVRF -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+    }
+    #endregion
 }

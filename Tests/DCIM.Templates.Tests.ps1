@@ -639,4 +639,158 @@ Describe "DCIM Template Functions" -Tag 'Build', 'DCIM' {
         }
     }
     #endregion
+
+    #region WhatIf Tests
+    Context "WhatIf Support" {
+        It "Should support -WhatIf for New-NBDCIMConsolePortTemplate" {
+            $Result = New-NBDCIMConsolePortTemplate -Name 'whatif-test' -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBDCIMConsoleServerPortTemplate" {
+            $Result = New-NBDCIMConsoleServerPortTemplate -Name 'whatif-test' -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBDCIMDeviceBayTemplate" {
+            $Result = New-NBDCIMDeviceBayTemplate -Device_Type 1 -Name 'whatif-test' -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBDCIMFrontPortTemplate" {
+            $Result = New-NBDCIMFrontPortTemplate -Name 'whatif-test' -Type 'whatif-test' -Rear_Port 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBDCIMInterfaceTemplate" {
+            $Result = New-NBDCIMInterfaceTemplate -Name 'whatif-test' -Type 'whatif-test' -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBDCIMInventoryItemTemplate" {
+            $Result = New-NBDCIMInventoryItemTemplate -Device_Type 1 -Name 'whatif-test' -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBDCIMModuleBayTemplate" {
+            $Result = New-NBDCIMModuleBayTemplate -Device_Type 1 -Name 'whatif-test' -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBDCIMPowerOutletTemplate" {
+            $Result = New-NBDCIMPowerOutletTemplate -Name 'whatif-test' -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBDCIMPowerPortTemplate" {
+            $Result = New-NBDCIMPowerPortTemplate -Name 'whatif-test' -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBDCIMRearPortTemplate" {
+            $Result = New-NBDCIMRearPortTemplate -Name 'whatif-test' -Type 'whatif-test' -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBDCIMConsolePortTemplate" {
+            $Result = Set-NBDCIMConsolePortTemplate -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBDCIMConsoleServerPortTemplate" {
+            $Result = Set-NBDCIMConsoleServerPortTemplate -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBDCIMDeviceBayTemplate" {
+            $Result = Set-NBDCIMDeviceBayTemplate -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBDCIMFrontPortTemplate" {
+            $Result = Set-NBDCIMFrontPortTemplate -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBDCIMInterfaceTemplate" {
+            $Result = Set-NBDCIMInterfaceTemplate -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBDCIMInventoryItemTemplate" {
+            $Result = Set-NBDCIMInventoryItemTemplate -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBDCIMModuleBayTemplate" {
+            $Result = Set-NBDCIMModuleBayTemplate -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBDCIMPowerOutletTemplate" {
+            $Result = Set-NBDCIMPowerOutletTemplate -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBDCIMPowerPortTemplate" {
+            $Result = Set-NBDCIMPowerPortTemplate -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBDCIMRearPortTemplate" {
+            $Result = Set-NBDCIMRearPortTemplate -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBDCIMConsolePortTemplate" {
+            $Result = Remove-NBDCIMConsolePortTemplate -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBDCIMConsoleServerPortTemplate" {
+            $Result = Remove-NBDCIMConsoleServerPortTemplate -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBDCIMDeviceBayTemplate" {
+            $Result = Remove-NBDCIMDeviceBayTemplate -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBDCIMFrontPortTemplate" {
+            $Result = Remove-NBDCIMFrontPortTemplate -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBDCIMInterfaceTemplate" {
+            $Result = Remove-NBDCIMInterfaceTemplate -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBDCIMInventoryItemTemplate" {
+            $Result = Remove-NBDCIMInventoryItemTemplate -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBDCIMModuleBayTemplate" {
+            $Result = Remove-NBDCIMModuleBayTemplate -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBDCIMPowerOutletTemplate" {
+            $Result = Remove-NBDCIMPowerOutletTemplate -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBDCIMPowerPortTemplate" {
+            $Result = Remove-NBDCIMPowerPortTemplate -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBDCIMRearPortTemplate" {
+            $Result = Remove-NBDCIMRearPortTemplate -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+    }
+    #endregion
 }

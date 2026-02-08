@@ -98,4 +98,23 @@ Describe "DCIM Sites Tests" -Tag 'DCIM', 'Sites' {
             $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/sites/10/'
         }
     }
+
+    #region WhatIf Tests
+    Context "WhatIf Support" {
+        It "Should support -WhatIf for New-NBDCIMSite" {
+            $Result = New-NBDCIMSite -Name 'whatif-test' -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBDCIMSite" {
+            $Result = Set-NBDCIMSite -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBDCIMSite" {
+            $Result = Remove-NBDCIMSite -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+    }
+    #endregion
 }

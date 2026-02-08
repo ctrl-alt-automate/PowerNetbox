@@ -380,4 +380,83 @@ Describe "Tenancy Module Tests" -Tag 'Tenancy' {
         }
     }
     #endregion
+
+    #region WhatIf Tests
+    Context "WhatIf Support" {
+        It "Should support -WhatIf for New-NBContact" {
+            $Result = New-NBContact -Name 'whatif-test' -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBContactAssignment" {
+            $Result = New-NBContactAssignment -Content_Type 'dcim.device' -Object_Id 1 -Contact 1 -Role 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBContactRole" {
+            $Result = New-NBContactRole -Name 'whatif-test' -Slug 'whatif-test' -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBTenant" {
+            $Result = New-NBTenant -Name 'whatif-test' -Slug 'whatif-test' -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBTenantGroup" {
+            $Result = New-NBTenantGroup -Name 'whatif-test' -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBContact" {
+            $Result = Set-NBContact -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBContactAssignment" {
+            $Result = Set-NBContactAssignment -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBContactRole" {
+            $Result = Set-NBContactRole -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBTenant" {
+            $Result = Set-NBTenant -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBTenantGroup" {
+            $Result = Set-NBTenantGroup -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBContact" {
+            $Result = Remove-NBContact -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBContactAssignment" {
+            $Result = Remove-NBContactAssignment -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBContactRole" {
+            $Result = Remove-NBContactRole -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBTenant" {
+            $Result = Remove-NBTenant -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBTenantGroup" {
+            $Result = Remove-NBTenantGroup -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+    }
+    #endregion
 }

@@ -294,4 +294,38 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
             $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/interface-connections/10/', 'https://netbox.domain.com/api/dcim/interface-connections/12/'
         }
     }
+
+    #region WhatIf Tests
+    Context "WhatIf Support" {
+        It "Should support -WhatIf for New-NBDCIMInterface" {
+            $Result = New-NBDCIMInterface -Device 1 -Name 'whatif-test' -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBDCIMInterfaceConnection" {
+            $Result = New-NBDCIMInterfaceConnection -Interface_A 1 -Interface_B 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBDCIMInterface" {
+            $Result = Set-NBDCIMInterface -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBDCIMInterfaceConnection" {
+            $Result = Set-NBDCIMInterfaceConnection -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBDCIMInterface" {
+            $Result = Remove-NBDCIMInterface -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBDCIMInterfaceConnection" {
+            $Result = Remove-NBDCIMInterfaceConnection -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+    }
+    #endregion
 }

@@ -424,4 +424,53 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             $bodyObj.is_full_depth | Should -Be $true
         }
     }
+
+    #region WhatIf Tests
+    Context "WhatIf Support" {
+        It "Should support -WhatIf for New-NBDCIMDevice" {
+            $Result = New-NBDCIMDevice -Name 'whatif-test' -Role 1 -Device_Type 1 -Site 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBDCIMDeviceRole" {
+            $Result = New-NBDCIMDeviceRole -Name 'whatif-test' -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for New-NBDCIMDeviceType" {
+            $Result = New-NBDCIMDeviceType -Manufacturer 1 -Model 'whatif-test' -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBDCIMDevice" {
+            $Result = Set-NBDCIMDevice -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBDCIMDeviceRole" {
+            $Result = Set-NBDCIMDeviceRole -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Set-NBDCIMDeviceType" {
+            $Result = Set-NBDCIMDeviceType -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBDCIMDevice" {
+            $Result = Remove-NBDCIMDevice -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBDCIMDeviceRole" {
+            $Result = Remove-NBDCIMDeviceRole -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+
+        It "Should support -WhatIf for Remove-NBDCIMDeviceType" {
+            $Result = Remove-NBDCIMDeviceType -Id 1 -WhatIf
+            $Result | Should -BeNullOrEmpty
+        }
+    }
+    #endregion
 }
