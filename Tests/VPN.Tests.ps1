@@ -456,6 +456,50 @@ Describe "VPN Module Tests" -Tag 'VPN' {
     }
     #endregion
 
+    #region Parameter Validation Tests
+    Context "Parameter Validation" {
+        It "Should reject invalid Status for New-NBVPNTunnel" {
+            { New-NBVPNTunnel -Name 'test' -Status 'invalid' -Encapsulation 'gre' -Confirm:$false } | Should -Throw
+        }
+
+        It "Should reject invalid Encapsulation for New-NBVPNTunnel" {
+            { New-NBVPNTunnel -Name 'test' -Status 'active' -Encapsulation 'invalid' -Confirm:$false } | Should -Throw
+        }
+
+        It "Should reject invalid IKE Mode for New-NBVPNIKEPolicy" {
+            { New-NBVPNIKEPolicy -Name 'test' -Mode 'invalid' -Confirm:$false } | Should -Throw
+        }
+
+        It "Should accept valid IKE Mode 'aggressive'" {
+            { New-NBVPNIKEPolicy -Name 'test' -Mode 'aggressive' -Confirm:$false } | Should -Not -Throw
+        }
+
+        It "Should reject invalid Role for New-NBVPNTunnelTermination" {
+            { New-NBVPNTunnelTermination -Tunnel 1 -Role 'invalid' -Confirm:$false } | Should -Throw
+        }
+
+        It "Should reject invalid Encryption_Algorithm for New-NBVPNIKEProposal" {
+            { New-NBVPNIKEProposal -Name 'test' -Authentication_Method 'preshared-keys' -Encryption_Algorithm 'invalid' -Authentication_Algorithm 'hmac-sha256' -Group 14 -Confirm:$false } | Should -Throw
+        }
+
+        It "Should reject invalid DH Group for New-NBVPNIKEProposal" {
+            { New-NBVPNIKEProposal -Name 'test' -Authentication_Method 'preshared-keys' -Encryption_Algorithm 'aes-256-cbc' -Authentication_Algorithm 'hmac-sha256' -Group 99 -Confirm:$false } | Should -Throw
+        }
+
+        It "Should reject invalid Mode for New-NBVPNIPSecProfile" {
+            { New-NBVPNIPSecProfile -Name 'test' -Mode 'invalid' -Confirm:$false } | Should -Throw
+        }
+
+        It "Should reject PageSize below minimum (0) for Get-NBVPNTunnel" {
+            { Get-NBVPNTunnel -PageSize 0 } | Should -Throw
+        }
+
+        It "Should require mandatory Name for New-NBVPNTunnel" {
+            { New-NBVPNTunnel -Status 'active' -Encapsulation 'gre' -Confirm:$false } | Should -Throw
+        }
+    }
+    #endregion
+
     #region -All/-PageSize Passthrough Tests
     Context "VPN Get- Functions -All/-PageSize passthrough" {
         It "Should pass -All switch to InvokeNetboxRequest for Get-NBVPNTunnel" {

@@ -425,6 +425,38 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
         }
     }
 
+    #region Parameter Validation Tests
+    Context "Parameter Validation" {
+        It "Should reject invalid Status value for Get-NBDCIMDevice" {
+            { Get-NBDCIMDevice -Status 'invalid_status' } | Should -Throw
+        }
+
+        It "Should reject invalid Face value for New-NBDCIMDevice" {
+            { New-NBDCIMDevice -Name 'test' -Role 1 -Device_Type 1 -Site 1 -Face 'top' -Confirm:$false } | Should -Throw
+        }
+
+        It "Should reject PageSize below minimum (0)" {
+            { Get-NBDCIMDevice -PageSize 0 } | Should -Throw
+        }
+
+        It "Should reject PageSize above maximum (1001)" {
+            { Get-NBDCIMDevice -PageSize 1001 } | Should -Throw
+        }
+
+        It "Should reject Limit below minimum (0)" {
+            { Get-NBDCIMDevice -Limit 0 } | Should -Throw
+        }
+
+        It "Should require mandatory Name for New-NBDCIMDevice" {
+            { New-NBDCIMDevice -Role 1 -Device_Type 1 -Site 1 -Confirm:$false } | Should -Throw
+        }
+
+        It "Should require mandatory Role for New-NBDCIMDevice" {
+            { New-NBDCIMDevice -Name 'test' -Device_Type 1 -Site 1 -Confirm:$false } | Should -Throw
+        }
+    }
+    #endregion
+
     #region WhatIf Tests
     Context "WhatIf Support" {
         $whatIfTestCases = @(

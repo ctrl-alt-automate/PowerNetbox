@@ -1014,6 +1014,54 @@ Describe "IPAM tests" -Tag 'Ipam' {
     }
     #endregion
 
+    #region Parameter Validation Tests
+    Context "Parameter Validation" {
+        It "Should reject invalid Status for Get-NBIPAMAddress" {
+            { Get-NBIPAMAddress -Status 'invalid' } | Should -Throw
+        }
+
+        It "Should reject invalid Family for Get-NBIPAMAddress" {
+            { Get-NBIPAMAddress -Family 5 } | Should -Throw
+        }
+
+        It "Should accept valid Family value 4" {
+            { Get-NBIPAMAddress -Family 4 } | Should -Not -Throw
+        }
+
+        It "Should reject VID below minimum (0) for New-NBIPAMVLAN" {
+            { New-NBIPAMVLAN -Name 'test' -VID 0 -Confirm:$false } | Should -Throw
+        }
+
+        It "Should reject VID above maximum (4095) for New-NBIPAMVLAN" {
+            { New-NBIPAMVLAN -Name 'test' -VID 4095 -Confirm:$false } | Should -Throw
+        }
+
+        It "Should accept valid VID boundary (1) for New-NBIPAMVLAN" {
+            { New-NBIPAMVLAN -Name 'test' -VID 1 -Confirm:$false } | Should -Not -Throw
+        }
+
+        It "Should accept valid VID boundary (4094) for New-NBIPAMVLAN" {
+            { New-NBIPAMVLAN -Name 'test' -VID 4094 -Confirm:$false } | Should -Not -Throw
+        }
+
+        It "Should reject invalid Status for Get-NBIPAMVLAN" {
+            { Get-NBIPAMVLAN -Status 'invalid' } | Should -Throw
+        }
+
+        It "Should require mandatory Address for New-NBIPAMAddress" {
+            { New-NBIPAMAddress -Status 'active' -Confirm:$false } | Should -Throw
+        }
+
+        It "Should reject invalid Assigned_Object_Type for New-NBIPAMAddress" {
+            { New-NBIPAMAddress -Address '10.0.0.1/24' -Assigned_Object_Type 'invalid.type' -Confirm:$false } | Should -Throw
+        }
+
+        It "Should reject PageSize above maximum (1001)" {
+            { Get-NBIPAMAddress -PageSize 1001 } | Should -Throw
+        }
+    }
+    #endregion
+
     #region WhatIf Tests
     Context "WhatIf Support" {
         $whatIfTestCases = @(
