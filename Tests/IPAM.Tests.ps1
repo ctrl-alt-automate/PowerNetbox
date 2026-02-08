@@ -394,6 +394,22 @@ Describe "IPAM tests" -Tag 'Ipam' {
         }
     }
 
+    Context "Get-NBIPAMVRF -All/-PageSize passthrough" {
+        It "Should pass -All switch to InvokeNetboxRequest" {
+            Get-NBIPAMVRF -All
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
+                $All -eq $true
+            }
+        }
+
+        It "Should pass -PageSize to InvokeNetboxRequest" {
+            Get-NBIPAMVRF -All -PageSize 500
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
+                $PageSize -eq 500
+            }
+        }
+    }
+
     Context "New-NBIPAMVRF" {
         It "Should create a VRF" {
             $Result = New-NBIPAMVRF -Name 'TestVRF'

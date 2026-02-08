@@ -46,6 +46,22 @@ Describe "DCIM Sites Tests" -Tag 'DCIM', 'Sites' {
         }
     }
 
+    Context "Get-NBDCIMSite -All/-PageSize passthrough" {
+        It "Should pass -All switch to InvokeNetboxRequest" {
+            Get-NBDCIMSite -All
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
+                $All -eq $true
+            }
+        }
+
+        It "Should pass -PageSize to InvokeNetboxRequest" {
+            Get-NBDCIMSite -All -PageSize 500
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
+                $PageSize -eq 500
+            }
+        }
+    }
+
     Context "New-NBDCIMSite" {
         It "Should create a new site" {
             $Result = New-NBDCIMSite -Name "NewSite" -Slug "newsite"

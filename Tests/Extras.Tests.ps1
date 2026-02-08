@@ -68,6 +68,22 @@ Describe "Extras Module Tests" -Tag 'Extras' {
         }
     }
 
+    Context "Get-NBTag -All/-PageSize passthrough" {
+        It "Should pass -All switch to InvokeNetboxRequest" {
+            Get-NBTag -All
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
+                $All -eq $true
+            }
+        }
+
+        It "Should pass -PageSize to InvokeNetboxRequest" {
+            Get-NBTag -All -PageSize 500
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
+                $PageSize -eq 500
+            }
+        }
+    }
+
     Context "New-NBTag" {
         It "Should create a tag" {
             $Result = New-NBTag -Name 'Development' -Slug 'development'

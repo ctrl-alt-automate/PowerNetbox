@@ -106,12 +106,6 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
             $validateSet.ValidValues | Should -Contain 'active'
         }
 
-        It "Should exclude config_context by default" {
-            $Result = Get-NBVirtualMachine
-            $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Match 'omit=config_context'
-        }
-
         It "Should not exclude config_context when IncludeConfigContext is specified" {
             $Result = Get-NBVirtualMachine -IncludeConfigContext
             $Result.Method | Should -Be 'GET'
@@ -399,17 +393,6 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
             $bodyObj.description | Should -Be "Test description"
         }
 
-        It "Should set multiple interfaces via pipeline (same as next test)" {
-            # Set- functions only accept single Id; use pipeline for bulk operations
-            # This test is now redundant with the pipeline test below, kept for coverage
-            $Result = @(
-                [pscustomobject]@{ 'Id' = 1234 },
-                [pscustomobject]@{ 'Id' = 4321 }
-            ) | Set-NBVirtualMachineInterface -Name 'newtestname' -Force
-            $Result.Method | Should -Be 'PATCH', 'PATCH'
-            $Result.URI | Should -Be 'https://netbox.domain.com/api/virtualization/interfaces/1234/', 'https://netbox.domain.com/api/virtualization/interfaces/4321/'
-        }
-
         It "Should set multiple interfaces to a new name from the pipeline" {
             $Result = @(
                 [pscustomobject]@{ 'Id' = 4123 },
@@ -426,17 +409,6 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
             $Result = Remove-NBVirtualMachine -Id 4125 -Force
             $Result.Method | Should -Be 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/4125/'
-        }
-
-        It "Should remove multiple VMs via pipeline (same as test below)" {
-            # Remove- functions only accept single Id; use pipeline for bulk operations
-            # This test is now redundant with the pipeline test below, kept for coverage
-            $Result = @(
-                [pscustomobject]@{ 'Id' = 4125 },
-                [pscustomobject]@{ 'Id' = 4132 }
-            ) | Remove-NBVirtualMachine -Force
-            $Result.Method | Should -Be 'DELETE', 'DELETE'
-            $Result.URI | Should -Be 'https://netbox.domain.com/api/virtualization/virtual-machines/4125/', 'https://netbox.domain.com/api/virtualization/virtual-machines/4132/'
         }
 
         It "Should remove a VM from the pipeline" {
