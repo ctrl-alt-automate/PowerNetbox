@@ -100,7 +100,7 @@ function Get-NBContentType {
             foreach ($ContentType_ID in $Id) {
                 $Segments = [System.Collections.ArrayList]::new(@($ObjectTypesEndpoint[0], $ObjectTypesEndpoint[1], $ContentType_ID))
 
-                $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'All', 'PageSize'
+                $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'All', 'PageSize'
 
                 $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
@@ -113,7 +113,7 @@ function Get-NBContentType {
         default {
             $Segments = [System.Collections.ArrayList]::new(@($ObjectTypesEndpoint[0], $ObjectTypesEndpoint[1]))
 
-            $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'All', 'PageSize'
+            $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'
 
             $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 

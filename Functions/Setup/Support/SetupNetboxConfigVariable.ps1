@@ -10,10 +10,17 @@ function SetupNetboxConfigVariable {
         Write-Verbose "Creating Netbox Config hashtable"
         $script:NetboxConfig = @{
             'Connected'     = $false
-            'Choices'       = @{
-            }
+            'Hostname'      = $null
+            'Credential'    = $null
+            'HostScheme'    = $null
+            'HostPort'      = $null
+            'InvokeParams'  = $null
+            'Timeout'       = $null
+            'NetboxVersion' = $null
+            'ParsedVersion' = $null
+            'Choices'       = @{}
             'APIDefinition' = $null
-            'ContentTypes' = $null
+            'ContentTypes'  = $null
             'BranchStack'   = [System.Collections.Generic.Stack[object]]::new()
         }
     }

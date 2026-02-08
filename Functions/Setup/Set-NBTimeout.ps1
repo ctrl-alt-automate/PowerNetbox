@@ -4,13 +4,9 @@
 
 .DESCRIPTION
     Sets the timeout for Netbox API requests.
-    Supports pipeline input for Id parameter where applicable.
-
-.PARAMETER Raw
-    Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBTimeout
+    Set-NBTimeout -TimeoutSeconds 60
 
     Sets the Netbox API request timeout.
 

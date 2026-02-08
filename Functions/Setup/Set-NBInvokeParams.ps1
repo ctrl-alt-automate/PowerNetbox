@@ -4,13 +4,9 @@
 
 .DESCRIPTION
     Sets additional parameters for Netbox API invocations.
-    Supports pipeline input for Id parameter where applicable.
-
-.PARAMETER Raw
-    Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBInvokeParams
+    Set-NBInvokeParams -InvokeParams @{ SkipCertificateCheck = $true }
 
     Sets additional parameters for Invoke-RestMethod calls.
 
@@ -21,10 +17,10 @@ function Set-NBInvokeParams {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', '', Justification = 'Params refers to a collection of invoke parameters')]
     [CmdletBinding(ConfirmImpact = 'Low',
         SupportsShouldProcess = $true)]
-    [OutputType([string])]
+    [OutputType([hashtable])]
     param(
         [Parameter(Mandatory = $true)]
-        [array]$InvokeParams
+        [hashtable]$InvokeParams
     )
 
     if ($PSCmdlet.ShouldProcess('Netbox Invoke Params', 'Set')) {
