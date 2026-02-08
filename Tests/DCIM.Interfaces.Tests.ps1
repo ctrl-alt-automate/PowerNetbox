@@ -297,33 +297,20 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
 
     #region WhatIf Tests
     Context "WhatIf Support" {
-        It "Should support -WhatIf for New-NBDCIMInterface" {
-            $Result = New-NBDCIMInterface -Device 1 -Name 'whatif-test' -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
+        $whatIfTestCases = @(
+            @{ Command = 'New-NBDCIMInterface'; Parameters = @{ Device = 1; Name = 'whatif-test' } }
+            @{ Command = 'New-NBDCIMInterfaceConnection'; Parameters = @{ Interface_A = 1; Interface_B = 1 } }
+            @{ Command = 'Set-NBDCIMInterface'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMInterfaceConnection'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMInterface'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMInterfaceConnection'; Parameters = @{ Id = 1 } }
+        )
 
-        It "Should support -WhatIf for New-NBDCIMInterfaceConnection" {
-            $Result = New-NBDCIMInterfaceConnection -Interface_A 1 -Interface_B 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Set-NBDCIMInterface" {
-            $Result = Set-NBDCIMInterface -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Set-NBDCIMInterfaceConnection" {
-            $Result = Set-NBDCIMInterfaceConnection -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Remove-NBDCIMInterface" {
-            $Result = Remove-NBDCIMInterface -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Remove-NBDCIMInterfaceConnection" {
-            $Result = Remove-NBDCIMInterfaceConnection -Id 1 -WhatIf
+        It 'Should support -WhatIf for <Command>' -TestCases $whatIfTestCases {
+            param($Command, $Parameters)
+            $splat = $Parameters.Clone()
+            $splat.Add('WhatIf', $true)
+            $Result = & $Command @splat
             $Result | Should -BeNullOrEmpty
         }
     }

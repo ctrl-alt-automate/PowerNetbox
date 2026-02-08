@@ -1016,273 +1016,68 @@ Describe "IPAM tests" -Tag 'Ipam' {
 
     #region WhatIf Tests
     Context "WhatIf Support" {
-        It "Should support -WhatIf for New-NBIPAMAddress" {
-            $Result = New-NBIPAMAddress -Address 'whatif-test' -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
+        $whatIfTestCases = @(
+            @{ Command = 'New-NBIPAMAddress'; Parameters = @{ Address = 'whatif-test' } }
+            @{ Command = 'New-NBIPAMAddressRange'; Parameters = @{ Start_Address = 'whatif-test'; End_Address = 'whatif-test' } }
+            @{ Command = 'New-NBIPAMAggregate'; Parameters = @{ Prefix = 'whatif-test'; RIR = 1 } }
+            @{ Command = 'New-NBIPAMASN'; Parameters = @{ ASN = 1 } }
+            @{ Command = 'New-NBIPAMASNRange'; Parameters = @{ Name = 'whatif-test'; Slug = 'whatif-test'; RIR = 1; Start = 1; End = 1 } }
+            @{ Command = 'New-NBIPAMFHRPGroup'; Parameters = @{ Protocol = 'other'; Group_Id = 1 } }
+            @{ Command = 'New-NBIPAMFHRPGroupAssignment'; Parameters = @{ Group = 1; Interface_Type = 'whatif-test'; Interface_Id = 1 } }
+            @{ Command = 'New-NBIPAMPrefix'; Parameters = @{ Prefix = 'whatif-test' } }
+            @{ Command = 'New-NBIPAMRIR'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'New-NBIPAMRole'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'New-NBIPAMRouteTarget'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'New-NBIPAMService'; Parameters = @{ Name = 'whatif-test'; Ports = 1 } }
+            @{ Command = 'New-NBIPAMServiceTemplate'; Parameters = @{ Name = 'whatif-test'; Ports = 1 } }
+            @{ Command = 'New-NBIPAMVLAN'; Parameters = @{ VID = 1; Name = 'whatif-test' } }
+            @{ Command = 'New-NBIPAMVLANGroup'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'New-NBIPAMVLANTranslationPolicy'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'New-NBIPAMVLANTranslationRule'; Parameters = @{ Policy = 1; Local_Vid = 1; Remote_Vid = 1 } }
+            @{ Command = 'New-NBIPAMVRF'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'Set-NBIPAMAddress'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMAddressRange'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMAggregate'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMASN'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMASNRange'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMFHRPGroup'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMFHRPGroupAssignment'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMPrefix'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMRIR'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMRole'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMRouteTarget'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMService'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMServiceTemplate'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMVLAN'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMVLANGroup'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMVLANTranslationPolicy'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMVLANTranslationRule'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMVRF'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMAddress'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMAddressRange'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMAggregate'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMASN'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMASNRange'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMFHRPGroup'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMFHRPGroupAssignment'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMPrefix'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMRIR'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMRole'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMRouteTarget'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMService'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMServiceTemplate'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMVLAN'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMVLANGroup'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMVLANTranslationPolicy'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMVLANTranslationRule'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMVRF'; Parameters = @{ Id = 1 } }
+        )
 
-        It "Should support -WhatIf for New-NBIPAMAddressRange" {
-            $Result = New-NBIPAMAddressRange -Start_Address 'whatif-test' -End_Address 'whatif-test' -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for New-NBIPAMAggregate" {
-            $Result = New-NBIPAMAggregate -Prefix 'whatif-test' -RIR 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for New-NBIPAMASN" {
-            $Result = New-NBIPAMASN -ASN 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for New-NBIPAMASNRange" {
-            $Result = New-NBIPAMASNRange -Name 'whatif-test' -Slug 'whatif-test' -RIR 1 -Start 1 -End 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for New-NBIPAMFHRPGroup" {
-            $Result = New-NBIPAMFHRPGroup -Protocol 'other' -Group_Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for New-NBIPAMFHRPGroupAssignment" {
-            $Result = New-NBIPAMFHRPGroupAssignment -Group 1 -Interface_Type 'whatif-test' -Interface_Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for New-NBIPAMPrefix" {
-            $Result = New-NBIPAMPrefix -Prefix 'whatif-test' -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for New-NBIPAMRIR" {
-            $Result = New-NBIPAMRIR -Name 'whatif-test' -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for New-NBIPAMRole" {
-            $Result = New-NBIPAMRole -Name 'whatif-test' -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for New-NBIPAMRouteTarget" {
-            $Result = New-NBIPAMRouteTarget -Name 'whatif-test' -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for New-NBIPAMService" {
-            $Result = New-NBIPAMService -Name 'whatif-test' -Ports 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for New-NBIPAMServiceTemplate" {
-            $Result = New-NBIPAMServiceTemplate -Name 'whatif-test' -Ports 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for New-NBIPAMVLAN" {
-            $Result = New-NBIPAMVLAN -VID 1 -Name 'whatif-test' -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for New-NBIPAMVLANGroup" {
-            $Result = New-NBIPAMVLANGroup -Name 'whatif-test' -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for New-NBIPAMVLANTranslationPolicy" {
-            $Result = New-NBIPAMVLANTranslationPolicy -Name 'whatif-test' -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for New-NBIPAMVLANTranslationRule" {
-            $Result = New-NBIPAMVLANTranslationRule -Policy 1 -Local_Vid 1 -Remote_Vid 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for New-NBIPAMVRF" {
-            $Result = New-NBIPAMVRF -Name 'whatif-test' -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Set-NBIPAMAddress" {
-            $Result = Set-NBIPAMAddress -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Set-NBIPAMAddressRange" {
-            $Result = Set-NBIPAMAddressRange -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Set-NBIPAMAggregate" {
-            $Result = Set-NBIPAMAggregate -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Set-NBIPAMASN" {
-            $Result = Set-NBIPAMASN -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Set-NBIPAMASNRange" {
-            $Result = Set-NBIPAMASNRange -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Set-NBIPAMFHRPGroup" {
-            $Result = Set-NBIPAMFHRPGroup -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Set-NBIPAMFHRPGroupAssignment" {
-            $Result = Set-NBIPAMFHRPGroupAssignment -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Set-NBIPAMPrefix" {
-            $Result = Set-NBIPAMPrefix -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Set-NBIPAMRIR" {
-            $Result = Set-NBIPAMRIR -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Set-NBIPAMRole" {
-            $Result = Set-NBIPAMRole -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Set-NBIPAMRouteTarget" {
-            $Result = Set-NBIPAMRouteTarget -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Set-NBIPAMService" {
-            $Result = Set-NBIPAMService -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Set-NBIPAMServiceTemplate" {
-            $Result = Set-NBIPAMServiceTemplate -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Set-NBIPAMVLAN" {
-            $Result = Set-NBIPAMVLAN -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Set-NBIPAMVLANGroup" {
-            $Result = Set-NBIPAMVLANGroup -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Set-NBIPAMVLANTranslationPolicy" {
-            $Result = Set-NBIPAMVLANTranslationPolicy -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Set-NBIPAMVLANTranslationRule" {
-            $Result = Set-NBIPAMVLANTranslationRule -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Set-NBIPAMVRF" {
-            $Result = Set-NBIPAMVRF -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Remove-NBIPAMAddress" {
-            $Result = Remove-NBIPAMAddress -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Remove-NBIPAMAddressRange" {
-            $Result = Remove-NBIPAMAddressRange -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Remove-NBIPAMAggregate" {
-            $Result = Remove-NBIPAMAggregate -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Remove-NBIPAMASN" {
-            $Result = Remove-NBIPAMASN -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Remove-NBIPAMASNRange" {
-            $Result = Remove-NBIPAMASNRange -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Remove-NBIPAMFHRPGroup" {
-            $Result = Remove-NBIPAMFHRPGroup -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Remove-NBIPAMFHRPGroupAssignment" {
-            $Result = Remove-NBIPAMFHRPGroupAssignment -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Remove-NBIPAMPrefix" {
-            $Result = Remove-NBIPAMPrefix -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Remove-NBIPAMRIR" {
-            $Result = Remove-NBIPAMRIR -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Remove-NBIPAMRole" {
-            $Result = Remove-NBIPAMRole -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Remove-NBIPAMRouteTarget" {
-            $Result = Remove-NBIPAMRouteTarget -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Remove-NBIPAMService" {
-            $Result = Remove-NBIPAMService -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Remove-NBIPAMServiceTemplate" {
-            $Result = Remove-NBIPAMServiceTemplate -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Remove-NBIPAMVLAN" {
-            $Result = Remove-NBIPAMVLAN -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Remove-NBIPAMVLANGroup" {
-            $Result = Remove-NBIPAMVLANGroup -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Remove-NBIPAMVLANTranslationPolicy" {
-            $Result = Remove-NBIPAMVLANTranslationPolicy -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Remove-NBIPAMVLANTranslationRule" {
-            $Result = Remove-NBIPAMVLANTranslationRule -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Remove-NBIPAMVRF" {
-            $Result = Remove-NBIPAMVRF -Id 1 -WhatIf
+        It 'Should support -WhatIf for <Command>' -TestCases $whatIfTestCases {
+            param($Command, $Parameters)
+            $splat = $Parameters.Clone()
+            $splat.Add('WhatIf', $true)
+            $Result = & $Command @splat
             $Result | Should -BeNullOrEmpty
         }
     }

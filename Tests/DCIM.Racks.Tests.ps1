@@ -70,18 +70,17 @@ Describe "DCIM Racks Tests" -Tag 'DCIM', 'Racks' {
 
     #region WhatIf Tests
     Context "WhatIf Support" {
-        It "Should support -WhatIf for New-NBDCIMRack" {
-            $Result = New-NBDCIMRack -Name 'whatif-test' -Site 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
+        $whatIfTestCases = @(
+            @{ Command = 'New-NBDCIMRack'; Parameters = @{ Name = 'whatif-test'; Site = 1 } }
+            @{ Command = 'Set-NBDCIMRack'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMRack'; Parameters = @{ Id = 1 } }
+        )
 
-        It "Should support -WhatIf for Set-NBDCIMRack" {
-            $Result = Set-NBDCIMRack -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Remove-NBDCIMRack" {
-            $Result = Remove-NBDCIMRack -Id 1 -WhatIf
+        It 'Should support -WhatIf for <Command>' -TestCases $whatIfTestCases {
+            param($Command, $Parameters)
+            $splat = $Parameters.Clone()
+            $splat.Add('WhatIf', $true)
+            $Result = & $Command @splat
             $Result | Should -BeNullOrEmpty
         }
     }

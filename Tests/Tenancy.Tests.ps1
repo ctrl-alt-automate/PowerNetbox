@@ -383,78 +383,29 @@ Describe "Tenancy Module Tests" -Tag 'Tenancy' {
 
     #region WhatIf Tests
     Context "WhatIf Support" {
-        It "Should support -WhatIf for New-NBContact" {
-            $Result = New-NBContact -Name 'whatif-test' -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
+        $whatIfTestCases = @(
+            @{ Command = 'New-NBContact'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'New-NBContactAssignment'; Parameters = @{ Content_Type = 'dcim.device'; Object_Id = 1; Contact = 1; Role = 1 } }
+            @{ Command = 'New-NBContactRole'; Parameters = @{ Name = 'whatif-test'; Slug = 'whatif-test' } }
+            @{ Command = 'New-NBTenant'; Parameters = @{ Name = 'whatif-test'; Slug = 'whatif-test' } }
+            @{ Command = 'New-NBTenantGroup'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'Set-NBContact'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBContactAssignment'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBContactRole'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBTenant'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBTenantGroup'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBContact'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBContactAssignment'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBContactRole'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBTenant'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBTenantGroup'; Parameters = @{ Id = 1 } }
+        )
 
-        It "Should support -WhatIf for New-NBContactAssignment" {
-            $Result = New-NBContactAssignment -Content_Type 'dcim.device' -Object_Id 1 -Contact 1 -Role 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for New-NBContactRole" {
-            $Result = New-NBContactRole -Name 'whatif-test' -Slug 'whatif-test' -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for New-NBTenant" {
-            $Result = New-NBTenant -Name 'whatif-test' -Slug 'whatif-test' -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for New-NBTenantGroup" {
-            $Result = New-NBTenantGroup -Name 'whatif-test' -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Set-NBContact" {
-            $Result = Set-NBContact -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Set-NBContactAssignment" {
-            $Result = Set-NBContactAssignment -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Set-NBContactRole" {
-            $Result = Set-NBContactRole -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Set-NBTenant" {
-            $Result = Set-NBTenant -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Set-NBTenantGroup" {
-            $Result = Set-NBTenantGroup -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Remove-NBContact" {
-            $Result = Remove-NBContact -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Remove-NBContactAssignment" {
-            $Result = Remove-NBContactAssignment -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Remove-NBContactRole" {
-            $Result = Remove-NBContactRole -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Remove-NBTenant" {
-            $Result = Remove-NBTenant -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Remove-NBTenantGroup" {
-            $Result = Remove-NBTenantGroup -Id 1 -WhatIf
+        It 'Should support -WhatIf for <Command>' -TestCases $whatIfTestCases {
+            param($Command, $Parameters)
+            $splat = $Parameters.Clone()
+            $splat.Add('WhatIf', $true)
+            $Result = & $Command @splat
             $Result | Should -BeNullOrEmpty
         }
     }

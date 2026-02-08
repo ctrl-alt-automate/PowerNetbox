@@ -618,78 +618,29 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
 
     #region WhatIf Tests
     Context "WhatIf Support" {
-        It "Should support -WhatIf for New-NBVirtualizationCluster" {
-            $Result = New-NBVirtualizationCluster -Name 'whatif-test' -Type 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
+        $whatIfTestCases = @(
+            @{ Command = 'New-NBVirtualizationCluster'; Parameters = @{ Name = 'whatif-test'; Type = 1 } }
+            @{ Command = 'New-NBVirtualizationClusterGroup'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'New-NBVirtualizationClusterType'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'New-NBVirtualMachine'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'New-NBVirtualMachineInterface'; Parameters = @{ Name = 'whatif-test'; Virtual_Machine = 1 } }
+            @{ Command = 'Set-NBVirtualizationCluster'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBVirtualizationClusterGroup'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBVirtualizationClusterType'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBVirtualMachine'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBVirtualMachineInterface'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBVirtualizationCluster'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBVirtualizationClusterGroup'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBVirtualizationClusterType'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBVirtualMachine'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBVirtualMachineInterface'; Parameters = @{ Id = 1 } }
+        )
 
-        It "Should support -WhatIf for New-NBVirtualizationClusterGroup" {
-            $Result = New-NBVirtualizationClusterGroup -Name 'whatif-test' -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for New-NBVirtualizationClusterType" {
-            $Result = New-NBVirtualizationClusterType -Name 'whatif-test' -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for New-NBVirtualMachine" {
-            $Result = New-NBVirtualMachine -Name 'whatif-test' -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for New-NBVirtualMachineInterface" {
-            $Result = New-NBVirtualMachineInterface -Name 'whatif-test' -Virtual_Machine 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Set-NBVirtualizationCluster" {
-            $Result = Set-NBVirtualizationCluster -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Set-NBVirtualizationClusterGroup" {
-            $Result = Set-NBVirtualizationClusterGroup -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Set-NBVirtualizationClusterType" {
-            $Result = Set-NBVirtualizationClusterType -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Set-NBVirtualMachine" {
-            $Result = Set-NBVirtualMachine -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Set-NBVirtualMachineInterface" {
-            $Result = Set-NBVirtualMachineInterface -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Remove-NBVirtualizationCluster" {
-            $Result = Remove-NBVirtualizationCluster -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Remove-NBVirtualizationClusterGroup" {
-            $Result = Remove-NBVirtualizationClusterGroup -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Remove-NBVirtualizationClusterType" {
-            $Result = Remove-NBVirtualizationClusterType -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Remove-NBVirtualMachine" {
-            $Result = Remove-NBVirtualMachine -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Remove-NBVirtualMachineInterface" {
-            $Result = Remove-NBVirtualMachineInterface -Id 1 -WhatIf
+        It 'Should support -WhatIf for <Command>' -TestCases $whatIfTestCases {
+            param($Command, $Parameters)
+            $splat = $Parameters.Clone()
+            $splat.Add('WhatIf', $true)
+            $Result = & $Command @splat
             $Result | Should -BeNullOrEmpty
         }
     }

@@ -427,48 +427,23 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
 
     #region WhatIf Tests
     Context "WhatIf Support" {
-        It "Should support -WhatIf for New-NBDCIMDevice" {
-            $Result = New-NBDCIMDevice -Name 'whatif-test' -Role 1 -Device_Type 1 -Site 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
+        $whatIfTestCases = @(
+            @{ Command = 'New-NBDCIMDevice'; Parameters = @{ Name = 'whatif-test'; Role = 1; Device_Type = 1; Site = 1 } }
+            @{ Command = 'New-NBDCIMDeviceRole'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'New-NBDCIMDeviceType'; Parameters = @{ Manufacturer = 1; Model = 'whatif-test' } }
+            @{ Command = 'Set-NBDCIMDevice'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMDeviceRole'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMDeviceType'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMDevice'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMDeviceRole'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMDeviceType'; Parameters = @{ Id = 1 } }
+        )
 
-        It "Should support -WhatIf for New-NBDCIMDeviceRole" {
-            $Result = New-NBDCIMDeviceRole -Name 'whatif-test' -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for New-NBDCIMDeviceType" {
-            $Result = New-NBDCIMDeviceType -Manufacturer 1 -Model 'whatif-test' -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Set-NBDCIMDevice" {
-            $Result = Set-NBDCIMDevice -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Set-NBDCIMDeviceRole" {
-            $Result = Set-NBDCIMDeviceRole -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Set-NBDCIMDeviceType" {
-            $Result = Set-NBDCIMDeviceType -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Remove-NBDCIMDevice" {
-            $Result = Remove-NBDCIMDevice -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Remove-NBDCIMDeviceRole" {
-            $Result = Remove-NBDCIMDeviceRole -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Remove-NBDCIMDeviceType" {
-            $Result = Remove-NBDCIMDeviceType -Id 1 -WhatIf
+        It 'Should support -WhatIf for <Command>' -TestCases $whatIfTestCases {
+            param($Command, $Parameters)
+            $splat = $Parameters.Clone()
+            $splat.Add('WhatIf', $true)
+            $Result = & $Command @splat
             $Result | Should -BeNullOrEmpty
         }
     }

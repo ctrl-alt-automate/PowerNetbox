@@ -101,18 +101,17 @@ Describe "DCIM Sites Tests" -Tag 'DCIM', 'Sites' {
 
     #region WhatIf Tests
     Context "WhatIf Support" {
-        It "Should support -WhatIf for New-NBDCIMSite" {
-            $Result = New-NBDCIMSite -Name 'whatif-test' -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
+        $whatIfTestCases = @(
+            @{ Command = 'New-NBDCIMSite'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'Set-NBDCIMSite'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMSite'; Parameters = @{ Id = 1 } }
+        )
 
-        It "Should support -WhatIf for Set-NBDCIMSite" {
-            $Result = Set-NBDCIMSite -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Remove-NBDCIMSite" {
-            $Result = Remove-NBDCIMSite -Id 1 -WhatIf
+        It 'Should support -WhatIf for <Command>' -TestCases $whatIfTestCases {
+            param($Command, $Parameters)
+            $splat = $Parameters.Clone()
+            $splat.Add('WhatIf', $true)
+            $Result = & $Command @splat
             $Result | Should -BeNullOrEmpty
         }
     }

@@ -69,18 +69,17 @@ Describe "DCIM Platforms Tests" -Tag 'DCIM', 'platforms' {
 
     #region WhatIf Tests
     Context "WhatIf Support" {
-        It "Should support -WhatIf for New-NBDCIMPlatform" {
-            $Result = New-NBDCIMPlatform -Name 'whatif-test' -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
+        $whatIfTestCases = @(
+            @{ Command = 'New-NBDCIMPlatform'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'Set-NBDCIMPlatform'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMPlatform'; Parameters = @{ Id = 1 } }
+        )
 
-        It "Should support -WhatIf for Set-NBDCIMPlatform" {
-            $Result = Set-NBDCIMPlatform -Id 1 -WhatIf
-            $Result | Should -BeNullOrEmpty
-        }
-
-        It "Should support -WhatIf for Remove-NBDCIMPlatform" {
-            $Result = Remove-NBDCIMPlatform -Id 1 -WhatIf
+        It 'Should support -WhatIf for <Command>' -TestCases $whatIfTestCases {
+            param($Command, $Parameters)
+            $splat = $Parameters.Clone()
+            $splat.Add('WhatIf', $true)
+            $Result = & $Command @splat
             $Result | Should -BeNullOrEmpty
         }
     }
