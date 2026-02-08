@@ -558,16 +558,20 @@ Describe "VPN Module Tests" -Tag 'VPN' {
         )
 
         It 'Should pass -All to InvokeNetboxRequest for <Command>' -TestCases $allPageSizeTestCases {
-            param($Command)
-            & $Command -All
+            param($Command, $Parameters)
+            $splat = @{ All = $true }
+            if ($Parameters) { $splat += $Parameters }
+            & $Command @splat
             Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
                 $All -eq $true
             }
         }
 
         It 'Should pass -PageSize to InvokeNetboxRequest for <Command>' -TestCases $allPageSizeTestCases {
-            param($Command)
-            & $Command -All -PageSize 500
+            param($Command, $Parameters)
+            $splat = @{ All = $true; PageSize = 500 }
+            if ($Parameters) { $splat += $Parameters }
+            & $Command @splat
             Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
                 $PageSize -eq 500
             }
