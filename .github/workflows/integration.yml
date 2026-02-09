@@ -9,18 +9,20 @@
 # - Only runs on ubuntu (Docker required)
 #
 # Triggers:
-# - Push to dev/main/beta branches
-# - Pull requests to dev/main
+# - Push to dev/main/beta branches (post-merge validation)
 # - Manual dispatch with custom Netbox version
 # - Weekly scheduled run (catch upstream changes)
+#
+# NOTE: Intentionally not triggered on pull_request. Integration tests
+# take ~5 min (mostly Docker/Netbox startup) and are not required checks.
+# Unit tests (2350+) provide sufficient pre-merge coverage. Integration
+# runs post-merge on push to catch any regressions immediately.
 
 name: Integration Tests
 
 on:
   push:
     branches: [dev, main, beta]
-  pull_request:
-    branches: [dev, main]
   # Allow manual trigger with custom version
   workflow_dispatch:
     inputs:
