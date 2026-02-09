@@ -35,7 +35,6 @@ function Get-NBDCIMRackElevation {
         Number of items per page when using -All. Default: 100.
         Range: 1-1000.
 
-
     .EXAMPLE
         Get-NBDCIMRackElevation -Id 24
 

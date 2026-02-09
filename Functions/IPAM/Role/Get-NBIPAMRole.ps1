@@ -47,7 +47,6 @@ function Get-NBIPAMRole {
         Specify which fields to exclude from the response.
         Requires Netbox 4.5.0 or later.
 
-
     .EXAMPLE
         PS C:\> Get-NBIPAMRole
 
@@ -65,7 +64,6 @@ function Get-NBIPAMRole {
         [switch]$Brief,
 
         [string[]]$Fields,
-
 
         [string[]]$Omit,
 

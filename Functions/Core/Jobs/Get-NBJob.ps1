@@ -55,7 +55,6 @@
     Specify which fields to exclude from the response.
     Requires Netbox 4.5.0 or later.
 
-
 .EXAMPLE
     Get-NBJob
 

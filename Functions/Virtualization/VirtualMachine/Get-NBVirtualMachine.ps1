@@ -126,7 +126,6 @@ function Get-NBVirtualMachine {
 
         [string[]]$Fields,
 
-
         [string[]]$Omit,
 
         [switch]$IncludeConfigContext,

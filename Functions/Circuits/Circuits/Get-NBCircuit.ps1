@@ -77,7 +77,6 @@ function Get-NBCircuit {
         Specify which fields to exclude from the response.
         Requires Netbox 4.5.0 or later.
 
-
     .EXAMPLE
         PS C:\> Get-NBCircuit
 

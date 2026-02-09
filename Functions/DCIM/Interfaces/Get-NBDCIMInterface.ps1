@@ -28,7 +28,6 @@
     Specify which fields to include in the response.
     Supports nested field selection (e.g., 'site.name', 'device_type.model').
 
-
 .EXAMPLE
     Get-NBDCIMInterface
 
@@ -52,7 +51,6 @@ function Get-NBDCIMInterface {
         [switch]$Brief,
 
         [string[]]$Fields,
-
 
         [string[]]$Omit,
 

@@ -17,7 +17,6 @@
     Specify which fields to exclude from the response.
     Requires Netbox 4.5.0 or later.
 
-
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
@@ -28,7 +27,6 @@
 .PARAMETER PageSize
     Number of items per page when using -All. Default: 100.
     Range: 1-1000.
-
 
 .EXAMPLE
     Get-NBVPNIPSecProfile
