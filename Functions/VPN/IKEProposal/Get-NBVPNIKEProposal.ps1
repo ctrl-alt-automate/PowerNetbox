@@ -40,7 +40,6 @@ function Get-NBVPNIKEProposal {
 
         [string[]]$Fields,
 
-
         [string[]]$Omit,
 
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)]

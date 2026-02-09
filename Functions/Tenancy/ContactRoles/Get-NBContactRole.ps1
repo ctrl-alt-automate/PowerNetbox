@@ -44,7 +44,6 @@ function Get-NBContactRole {
 
         [string[]]$Fields,
 
-
         [string[]]$Omit,
 
         [Parameter(ParameterSetName = 'Query',

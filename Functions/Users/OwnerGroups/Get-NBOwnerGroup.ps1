@@ -56,7 +56,6 @@ function Get-NBOwnerGroup {
 
         [string[]]$Fields,
 
-
         [string[]]$Omit,
 
         [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]

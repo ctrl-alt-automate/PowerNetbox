@@ -28,7 +28,6 @@ function Get-NBDCIMRearPort {
 
         [string[]]$Fields,
 
-
         [string[]]$Omit,
 
         [ValidateRange(1, 1000)]

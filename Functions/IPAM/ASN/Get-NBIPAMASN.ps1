@@ -57,7 +57,6 @@ function Get-NBIPAMASN {
 
         [string[]]$Fields,
 
-
         [string[]]$Omit,
 
         [Parameter(ParameterSetName = 'ByID',

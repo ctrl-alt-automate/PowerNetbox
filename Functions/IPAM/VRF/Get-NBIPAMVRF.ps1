@@ -65,7 +65,6 @@ function Get-NBIPAMVRF {
 
         [string[]]$Fields,
 
-
         [string[]]$Omit,
 
         [Parameter(ParameterSetName = 'ByID',

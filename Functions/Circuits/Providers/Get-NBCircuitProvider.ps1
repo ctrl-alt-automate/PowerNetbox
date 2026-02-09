@@ -28,7 +28,6 @@ function Get-NBCircuitProvider {
 
         [string[]]$Fields,
 
-
         [string[]]$Omit,
 
         [Parameter(ParameterSetName = 'ById',

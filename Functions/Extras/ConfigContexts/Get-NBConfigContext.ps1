@@ -45,7 +45,6 @@ function Get-NBConfigContext {
 
         [string[]]$Fields,
 
-
         [string[]]$Omit,
 
         [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]

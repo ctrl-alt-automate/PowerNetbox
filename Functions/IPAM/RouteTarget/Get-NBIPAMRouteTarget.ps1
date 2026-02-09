@@ -61,7 +61,6 @@ function Get-NBIPAMRouteTarget {
 
         [string[]]$Fields,
 
-
         [string[]]$Omit,
 
         [Parameter(ParameterSetName = 'ByID',

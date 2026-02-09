@@ -82,6 +82,7 @@ function Get-NBDCIMDevice {
 
         [string[]]$Fields,
 
+
         [string[]]$Omit,
 
         [switch]$IncludeConfigContext,

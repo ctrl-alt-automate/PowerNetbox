@@ -45,7 +45,6 @@ function Get-NBCircuitGroupAssignment {
 
         [string[]]$Fields,
 
-
         [string[]]$Omit,
 
         [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]

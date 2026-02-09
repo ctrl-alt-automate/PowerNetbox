@@ -48,7 +48,6 @@ function Get-NBCircuitGroup {
 
         [string[]]$Fields,
 
-
         [string[]]$Omit,
 
         [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]

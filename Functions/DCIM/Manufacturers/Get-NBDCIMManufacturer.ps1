@@ -51,7 +51,6 @@ function Get-NBDCIMManufacturer {
 
         [string[]]$Fields,
 
-
         [string[]]$Omit,
 
         [Parameter(ParameterSetName = 'ByID',

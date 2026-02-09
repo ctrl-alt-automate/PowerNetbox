@@ -61,7 +61,6 @@ function Get-NBContact {
 
         [string[]]$Fields,
 
-
         [string[]]$Omit,
 
         [Parameter(ParameterSetName = 'Query',

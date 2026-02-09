@@ -49,6 +49,7 @@ function Get-NBIPAMRole {
 
         [string[]]$Fields,
 
+
         [string[]]$Omit,
 
         [Parameter(ParameterSetName = 'Query',

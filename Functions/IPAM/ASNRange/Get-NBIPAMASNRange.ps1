@@ -54,7 +54,6 @@ function Get-NBIPAMASNRange {
 
         [string[]]$Fields,
 
-
         [string[]]$Omit,
 
         [Parameter(ParameterSetName = 'ByID',

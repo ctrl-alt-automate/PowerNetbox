@@ -36,6 +36,7 @@ function Get-NBIPAMAddress {
 
         [string[]]$Fields,
 
+
         [string[]]$Omit,
 
         [Parameter(ParameterSetName = 'Query',

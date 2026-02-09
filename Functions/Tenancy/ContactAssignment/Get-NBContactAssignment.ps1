@@ -56,7 +56,6 @@ function Get-NBContactAssignment {
 
         [string[]]$Fields,
 
-
         [string[]]$Omit,
 
         [Parameter(ParameterSetName = 'Query',

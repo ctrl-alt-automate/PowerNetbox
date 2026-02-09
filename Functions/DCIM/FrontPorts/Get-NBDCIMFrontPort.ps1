@@ -28,7 +28,6 @@ function Get-NBDCIMFrontPort {
 
         [string[]]$Fields,
 
-
         [string[]]$Omit,
 
         [ValidateRange(1, 1000)]

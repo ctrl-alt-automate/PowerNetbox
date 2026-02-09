@@ -84,7 +84,6 @@ function Get-NBDCIMCable {
 
         [string[]]$Fields,
 
-
         [string[]]$Omit,
 
         [ValidateRange(1, 1000)]

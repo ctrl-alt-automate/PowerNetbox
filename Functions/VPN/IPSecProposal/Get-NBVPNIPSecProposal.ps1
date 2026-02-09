@@ -40,7 +40,6 @@ function Get-NBVPNIPSecProposal {
 
         [string[]]$Fields,
 
-
         [string[]]$Omit,
 
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)]

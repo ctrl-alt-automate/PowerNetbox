@@ -28,7 +28,6 @@ function Get-NBIPAMAggregate {
 
         [string[]]$Fields,
 
-
         [string[]]$Omit,
 
         [Parameter(ParameterSetName = 'Query')]

@@ -61,7 +61,6 @@ function Get-NBIPAMService {
 
         [string[]]$Fields,
 
-
         [string[]]$Omit,
 
         [Parameter(ParameterSetName = 'ByID',
