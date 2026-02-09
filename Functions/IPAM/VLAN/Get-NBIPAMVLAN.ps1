@@ -27,8 +27,6 @@ function Get-NBIPAMVLAN {
         [switch]$Brief,
 
         [string[]]$Fields,
-
-
         [string[]]$Omit,
 
         [Parameter(ParameterSetName = 'Query',

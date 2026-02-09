@@ -26,8 +26,6 @@ function Get-NBDCIMModuleType {
         [switch]$Brief,
 
         [string[]]$Fields,
-
-
         [string[]]$Omit,
 
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)][uint64[]]$Id,

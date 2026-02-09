@@ -53,8 +53,6 @@ function Get-NBEventRule {
         [switch]$Brief,
 
         [string[]]$Fields,
-
-
         [string[]]$Omit,
 
         [Parameter(ParameterSetName = 'ById', ValueFromPipelineByPropertyName = $true)]

@@ -44,8 +44,6 @@ function Get-NBIPAMAvailableIP {
         [switch]$Brief,
 
         [string[]]$Fields,
-
-
         [string[]]$Omit,
 
         [Parameter(Mandatory = $true,

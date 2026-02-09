@@ -28,8 +28,6 @@ function Get-NBDCIMCableTermination {
         [switch]$Brief,
 
         [string[]]$Fields,
-
-
         [string[]]$Omit,
 
         [ValidateRange(1, 1000)]

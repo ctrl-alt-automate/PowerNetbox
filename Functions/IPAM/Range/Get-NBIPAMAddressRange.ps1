@@ -27,8 +27,6 @@ function Get-NBIPAMAddressRange {
         [switch]$Brief,
 
         [string[]]$Fields,
-
-
         [string[]]$Omit,
 
         [Parameter(ParameterSetName = 'Query',

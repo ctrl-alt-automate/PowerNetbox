@@ -27,8 +27,6 @@ function Get-NBVirtualizationClusterGroup {
         [switch]$Brief,
 
         [string[]]$Fields,
-
-
         [string[]]$Omit,
 
         [Parameter(ParameterSetName = 'Query')]

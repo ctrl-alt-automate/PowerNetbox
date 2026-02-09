@@ -27,8 +27,6 @@ function Get-NBDCIMInterfaceConnection {
         [switch]$Brief,
 
         [string[]]$Fields,
-
-
         [string[]]$Omit,
 
         [ValidateRange(1, 1000)]

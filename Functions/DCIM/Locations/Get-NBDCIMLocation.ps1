@@ -71,8 +71,6 @@ function Get-NBDCIMLocation {
         [switch]$Brief,
 
         [string[]]$Fields,
-
-
         [string[]]$Omit,
 
         [Parameter(ParameterSetName = 'ByID',

@@ -26,8 +26,6 @@ function Get-NBDCIMConnectedDevice {
         [switch]$Brief,
 
         [string[]]$Fields,
-
-
         [string[]]$Omit,
 
         [Parameter(ParameterSetName = 'Query', Mandatory = $true)][string]$Peer_Device,
