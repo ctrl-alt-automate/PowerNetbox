@@ -54,7 +54,9 @@ function Connect-NBAPI {
         [string]$Hostname,
 
         [Parameter(Mandatory = $false)]
-        [pscredential]$Credential,
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.Credential()]
+        $Credential,
 
         [Parameter(ParameterSetName = 'Manual')]
         [ValidateSet('https', 'http', IgnoreCase = $true)]
@@ -69,7 +71,7 @@ function Connect-NBAPI {
         [string]$URI,
 
         [Parameter(Mandatory = $false)]
-        [switch]$SkipCertificateCheck = $false,
+        [switch]$SkipCertificateCheck,
 
         [ValidateNotNullOrEmpty()]
         [ValidateRange(1, 65535)]
