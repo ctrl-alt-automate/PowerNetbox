@@ -29,7 +29,7 @@ function Set-NBuntrustedSSL {
     #>
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessForStateChangingFunctions", "")]
     [CmdletBinding()]
-    [OutputType([PSCustomObject])]
+    [OutputType([void])]
     param()
 
     # Only apply to Desktop edition (PS 5.1)
