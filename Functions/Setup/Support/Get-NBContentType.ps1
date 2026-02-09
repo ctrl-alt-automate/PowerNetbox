@@ -4,10 +4,9 @@ function Get-NBContentType {
         Get a content type (object type) definition from Netbox
 
     .DESCRIPTION
+        Wrapper for Get-NBObjectType for backward compatibility.
         Retrieves content type / object type definitions from Netbox.
-        Supports Netbox 4.0+ with automatic endpoint detection:
-        - Netbox 4.4+: /api/core/object-types/
-        - Netbox 4.0-4.3: /api/extras/object-types/
+        Supports Netbox 4.0+ with automatic endpoint detection.
 
     .PARAMETER Model
         Filter by model name (e.g., 'device', 'site')
@@ -39,6 +38,7 @@ function Get-NBContentType {
         Get the device content type
 
     .NOTES
+        This function delegates to Get-NBObjectType.
         Backward compatible with Netbox 4.0+
 #>
 
@@ -79,45 +79,6 @@ function Get-NBContentType {
         [switch]$Raw
     )
 
-    # Determine the correct endpoint based on Netbox version
-    # - Netbox 4.4+: /api/core/object-types/ (primary)
-    # - Netbox 4.0-4.3: /api/extras/object-types/ (legacy, still works in 4.4 for backward compat)
-    # We use 'extras' as the default for maximum compatibility across all 4.x versions
-    $ObjectTypesEndpoint = @('extras', 'object-types')
-
-    # Use cached ParsedVersion from Connect-NBAPI (set by ConvertTo-NetboxVersion)
-    $version = $script:NetboxConfig.ParsedVersion
-    if ($version -and $version -ge [version]'4.4') {
-        $ObjectTypesEndpoint = @('core', 'object-types')
-        Write-Verbose "Using /api/core/object-types/ endpoint (Netbox $version)"
-    } else {
-        Write-Verbose "Using /api/extras/object-types/ endpoint (Netbox $version)"
-    }
-
-    switch ($PSCmdlet.ParameterSetName) {
-        'ById' {
-            foreach ($ContentType_ID in $Id) {
-                $Segments = [System.Collections.ArrayList]::new(@($ObjectTypesEndpoint[0], $ObjectTypesEndpoint[1], $ContentType_ID))
-
-                $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'All', 'PageSize'
-
-                $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
-
-                InvokeNetboxRequest -URI $uri -Raw:$Raw -All:$All -PageSize $PageSize
-            }
-
-            break
-        }
-
-        default {
-            $Segments = [System.Collections.ArrayList]::new(@($ObjectTypesEndpoint[0], $ObjectTypesEndpoint[1]))
-
-            $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'
-
-            $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
-
-            InvokeNetboxRequest -URI $uri -Raw:$Raw -All:$All -PageSize $PageSize
-            break
-        }
-    }
+    # Delegate to Get-NBObjectType (the canonical function)
+    Get-NBObjectType @PSBoundParameters
 }
