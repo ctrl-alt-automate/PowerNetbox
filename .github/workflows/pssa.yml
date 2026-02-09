@@ -23,7 +23,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Cache PSScriptAnalyzer
+        uses: actions/cache@v4
+        id: ps-cache
+        with:
+          path: ~/.local/share/powershell/Modules
+          key: ps-modules-ubuntu-pssa-v1
+
       - name: Install PSScriptAnalyzer
+        if: steps.ps-cache.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
           Set-PSRepository PSGallery -InstallationPolicy Trusted
