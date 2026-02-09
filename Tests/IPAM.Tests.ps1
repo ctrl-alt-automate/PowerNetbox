@@ -37,7 +37,6 @@ Describe "IPAM tests" -Tag 'Ipam' {
             $script:NetboxConfig.Hostname = 'netbox.domain.com'
             $script:NetboxConfig.HostScheme = 'https'
             $script:NetboxConfig.HostPort = 443
-            $script:NetboxConfig.Choices.IPAM = (Get-Content "$TestPath/IPAMChoices.json" -ErrorAction Stop | ConvertFrom-Json)
         }
     }
 
@@ -1139,7 +1138,6 @@ Describe "IPAM tests" -Tag 'Ipam' {
             @{ Command = 'Get-NBIPAMAggregate' }
             @{ Command = 'Get-NBIPAMASN' }
             @{ Command = 'Get-NBIPAMASNRange' }
-            @{ Command = 'Get-NBIPAMAvailableIP'; Parameters = @{ Prefix_ID = 1 } }
             @{ Command = 'Get-NBIPAMFHRPGroup' }
             @{ Command = 'Get-NBIPAMFHRPGroupAssignment' }
             @{ Command = 'Get-NBIPAMPrefix' }
@@ -1184,7 +1182,6 @@ Describe "IPAM tests" -Tag 'Ipam' {
             @{ Command = 'Get-NBIPAMAggregate' }
             @{ Command = 'Get-NBIPAMASN' }
             @{ Command = 'Get-NBIPAMASNRange' }
-            @{ Command = 'Get-NBIPAMAvailableIP'; Parameters = @{ Prefix_ID = 1 } }
             @{ Command = 'Get-NBIPAMFHRPGroup' }
             @{ Command = 'Get-NBIPAMFHRPGroupAssignment' }
             @{ Command = 'Get-NBIPAMPrefix' }

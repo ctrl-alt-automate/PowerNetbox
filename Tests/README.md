@@ -49,9 +49,6 @@ Tests/
 ├── README.md                    # This file
 ├── common.ps1                   # Shared test configuration
 ├── credential.example.ps1       # Credential template
-├── DCIMChoices.json             # Mock data for DCIM choices
-├── IPAMChoices.json             # Mock data for IPAM choices
-├── VirtualizationChoices.json   # Mock data for Virtualization choices
 │
 ├── # Unit Tests (root level)
 ├── DCIM.Devices.Tests.ps1       # Device function tests

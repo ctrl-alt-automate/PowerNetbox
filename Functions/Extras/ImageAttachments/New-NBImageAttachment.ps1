@@ -169,8 +169,8 @@ function New-NBImageAttachment {
                     $Handler = New-Object System.Net.Http.HttpClientHandler
 
                     # Check if we need to skip certificate validation
-                    $Config = GetNetboxConfigVariable
-                    if ($Config.InvokeParams.ContainsKey('SkipCertificateCheck') -and $Config.InvokeParams.SkipCertificateCheck) {
+                    $Config = $script:NetboxConfig
+                    if ($Config.InvokeParams -and $Config.InvokeParams.ContainsKey('SkipCertificateCheck') -and $Config.InvokeParams.SkipCertificateCheck) {
                         $Handler.ServerCertificateCustomValidationCallback = { $true }
                     }
 
