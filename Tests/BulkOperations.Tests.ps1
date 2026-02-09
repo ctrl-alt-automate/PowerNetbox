@@ -205,7 +205,6 @@ Describe "New-NBDCIMDevice Bulk Mode" -Tag 'Bulk', 'DCIM' {
             $script:NetboxConfig.Hostname = 'netbox.domain.com'
             $script:NetboxConfig.HostScheme = 'https'
             $script:NetboxConfig.HostPort = 443
-            $script:NetboxConfig.Choices.DCIM = (Get-Content "$TestPath/DCIMChoices.json" -ErrorAction Stop | ConvertFrom-Json)
         }
 
         Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {

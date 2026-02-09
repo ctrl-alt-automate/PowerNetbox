@@ -37,7 +37,6 @@ Describe "IPAM tests" -Tag 'Ipam' {
             $script:NetboxConfig.Hostname = 'netbox.domain.com'
             $script:NetboxConfig.HostScheme = 'https'
             $script:NetboxConfig.HostPort = 443
-            $script:NetboxConfig.Choices.IPAM = (Get-Content "$TestPath/IPAMChoices.json" -ErrorAction Stop | ConvertFrom-Json)
         }
     }
 
