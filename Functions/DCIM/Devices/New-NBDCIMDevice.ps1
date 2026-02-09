@@ -204,8 +204,15 @@ function New-NBDCIMDevice {
             if ($Force -or $PSCmdlet.ShouldProcess($target, 'Create devices (bulk)')) {
                 Write-Verbose "Processing $($bulkItems.Count) devices in bulk mode with batch size $BatchSize"
 
-                $result = Send-NBBulkRequest -URI $URI -Items $bulkItems.ToArray() -Method POST `
-                    -BatchSize $BatchSize -ShowProgress -ActivityName 'Creating devices'
+                $bulkParams = @{
+                    URI          = $URI
+                    Items        = $bulkItems.ToArray()
+                    Method       = 'POST'
+                    BatchSize    = $BatchSize
+                    ShowProgress = $true
+                    ActivityName = 'Creating devices'
+                }
+                $result = Send-NBBulkRequest @bulkParams
 
                 # Output succeeded items to pipeline
                 foreach ($item in $result.Succeeded) {

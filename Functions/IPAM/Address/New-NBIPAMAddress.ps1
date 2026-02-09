@@ -205,8 +205,15 @@ function New-NBIPAMAddress {
             if ($Force -or $PSCmdlet.ShouldProcess($target, 'Create IP addresses (bulk)')) {
                 Write-Verbose "Processing $($bulkItems.Count) IP addresses in bulk mode with batch size $BatchSize"
 
-                $result = Send-NBBulkRequest -URI $URI -Items $bulkItems.ToArray() -Method POST `
-                    -BatchSize $BatchSize -ShowProgress -ActivityName 'Creating IP addresses'
+                $bulkParams = @{
+                    URI          = $URI
+                    Items        = $bulkItems.ToArray()
+                    Method       = 'POST'
+                    BatchSize    = $BatchSize
+                    ShowProgress = $true
+                    ActivityName = 'Creating IP addresses'
+                }
+                $result = Send-NBBulkRequest @bulkParams
 
                 # Output succeeded items to pipeline
                 foreach ($item in $result.Succeeded) {

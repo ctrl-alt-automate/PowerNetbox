@@ -206,8 +206,15 @@ function New-NBVirtualMachineInterface {
             if ($Force -or $PSCmdlet.ShouldProcess($target, 'Create VM interfaces (bulk)')) {
                 Write-Verbose "Processing $($bulkItems.Count) VM interfaces in bulk mode with batch size $BatchSize"
 
-                $result = Send-NBBulkRequest -URI $URI -Items $bulkItems.ToArray() -Method POST `
-                    -BatchSize $BatchSize -ShowProgress -ActivityName 'Creating VM interfaces'
+                $bulkParams = @{
+                    URI          = $URI
+                    Items        = $bulkItems.ToArray()
+                    Method       = 'POST'
+                    BatchSize    = $BatchSize
+                    ShowProgress = $true
+                    ActivityName = 'Creating VM interfaces'
+                }
+                $result = Send-NBBulkRequest @bulkParams
 
                 # Output succeeded items to pipeline
                 foreach ($item in $result.Succeeded) {
