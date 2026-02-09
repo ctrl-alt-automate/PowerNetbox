@@ -37,11 +37,6 @@ function Connect-NBAPI {
     .PARAMETER TimeoutSeconds
         The number of seconds before the HTTP call times out. Defaults to 30 seconds
 
-    .PARAMETER CacheContentTypes
-        If specified, caches content types during connection. This makes an additional API call
-        but can be useful for custom scripts that need content type information.
-        By default, content types are not cached to improve connection speed.
-
     .EXAMPLE
         PS C:\> Connect-NBAPI -Hostname "netbox.domain.com"
 
@@ -78,10 +73,7 @@ function Connect-NBAPI {
 
         [ValidateNotNullOrEmpty()]
         [ValidateRange(1, 65535)]
-        [uint16]$TimeoutSeconds = 30,
-
-        [Parameter(Mandatory = $false)]
-        [switch]$CacheContentTypes = $false
+        [uint16]$TimeoutSeconds = 30
     )
 
     if (-not $Credential) {
@@ -173,12 +165,6 @@ function Connect-NBAPI {
 
     $script:NetboxConfig.Connected = $true
     Write-Verbose "Successfully connected!"
-
-    # Only cache content types if explicitly requested (saves an API call)
-    if ($CacheContentTypes) {
-        Write-Verbose "Caching content types..."
-        $script:NetboxConfig.ContentTypes = Get-NBContentType -Limit 500
-    }
 
     Write-Verbose "Connection process completed"
 }

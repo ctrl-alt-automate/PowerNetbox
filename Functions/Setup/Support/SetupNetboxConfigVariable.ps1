@@ -18,7 +18,6 @@ function SetupNetboxConfigVariable {
             'Timeout'       = $null
             'NetboxVersion' = $null
             'ParsedVersion' = $null
-            'ContentTypes'  = $null
             'BranchStack'   = [System.Collections.Generic.Stack[object]]::new()
         }
     }
