@@ -27,6 +27,7 @@ function Get-NBTag {
         [switch]$Brief,
 
         [string[]]$Fields,
+
         [string[]]$Omit,
 
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)]

@@ -99,6 +99,7 @@ function Get-NBIPAMPrefix {
 
         [string[]]$Fields,
 
+
         [string[]]$Omit,
 
         [Parameter(ParameterSetName = 'Query',

@@ -39,6 +39,7 @@ function Get-NBVPNTunnelGroup {
         [switch]$Brief,
 
         [string[]]$Fields,
+
         [string[]]$Omit,
 
         [Parameter(ParameterSetName = 'ByID', ValueFromPipelineByPropertyName = $true)]

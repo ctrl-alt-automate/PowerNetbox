@@ -59,6 +59,7 @@ function Get-NBDCIMRegion {
         [switch]$Brief,
 
         [string[]]$Fields,
+
         [string[]]$Omit,
 
         [Parameter(ParameterSetName = 'ByID',

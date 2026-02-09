@@ -28,6 +28,7 @@ function Get-NBDCIMDeviceType {
         [switch]$Brief,
 
         [string[]]$Fields,
+
         [string[]]$Omit,
 
         [ValidateRange(0, [int]::MaxValue)]

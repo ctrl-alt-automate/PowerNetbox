@@ -36,6 +36,7 @@ function Get-NBDCIMInterface {
 
         [string[]]$Fields,
 
+
         [string[]]$Omit,
 
         [ValidateRange(1, 1000)]

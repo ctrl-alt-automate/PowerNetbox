@@ -59,6 +59,7 @@ function Get-NBDCIMSiteGroup {
         [switch]$Brief,
 
         [string[]]$Fields,
+
         [string[]]$Omit,
 
         [Parameter(ParameterSetName = 'ByID',

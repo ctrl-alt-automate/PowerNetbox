@@ -50,6 +50,7 @@ function Get-NBDCIMManufacturer {
         [switch]$Brief,
 
         [string[]]$Fields,
+
         [string[]]$Omit,
 
         [Parameter(ParameterSetName = 'ByID',

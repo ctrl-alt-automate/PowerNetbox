@@ -59,6 +59,7 @@ function Get-NBVirtualizationCluster {
         [switch]$Brief,
 
         [string[]]$Fields,
+
         [string[]]$Omit,
 
         [Parameter(ParameterSetName = 'Query')]

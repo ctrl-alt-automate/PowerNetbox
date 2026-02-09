@@ -79,6 +79,7 @@ function Get-NBDCIMRack {
         [switch]$Brief,
 
         [string[]]$Fields,
+
         [string[]]$Omit,
 
         [Parameter(ParameterSetName = 'ByID',

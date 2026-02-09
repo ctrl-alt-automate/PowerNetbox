@@ -27,6 +27,7 @@ function Get-NBCircuitTermination {
         [switch]$Brief,
 
         [string[]]$Fields,
+
         [string[]]$Omit,
 
         [Parameter(ParameterSetName = 'ById',
