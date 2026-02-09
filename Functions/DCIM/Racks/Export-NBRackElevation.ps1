@@ -212,8 +212,8 @@ function Export-NBRackElevation {
                             UHeight       = $rackHeight
                             Face          = $faceLabel
                             ElevationData = $elevation
-                            Compact       = [bool]$Compact
-                            NoColor       = [bool]$NoColor
+                            Compact       = $Compact
+                            NoColor       = $NoColor
                         }
                         ConvertTo-NBRackConsole @consoleParams
                     }
