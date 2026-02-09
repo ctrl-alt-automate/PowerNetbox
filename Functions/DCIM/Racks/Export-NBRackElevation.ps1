@@ -159,8 +159,14 @@ function Export-NBRackElevation {
                 }
                 else {
                     # HTML with embedded SVG
-                    ConvertTo-NBRackHTML -RackName $rackName -SiteName $siteName -UHeight $rackHeight `
-                        -Face $faceLabel -SvgContent $svgContent
+                    $htmlParams = @{
+                        RackName   = $rackName
+                        SiteName   = $siteName
+                        UHeight    = $rackHeight
+                        Face       = $faceLabel
+                        SvgContent = $svgContent
+                    }
+                    ConvertTo-NBRackHTML @htmlParams
                 }
             }
             else {
@@ -180,16 +186,36 @@ function Export-NBRackElevation {
 
                 switch ($Format) {
                     'HTML' {
-                        ConvertTo-NBRackHTML -RackName $rackName -SiteName $siteName -UHeight $rackHeight `
-                            -Face $faceLabel -ElevationData $elevation
+                        $htmlParams = @{
+                            RackName      = $rackName
+                            SiteName      = $siteName
+                            UHeight       = $rackHeight
+                            Face          = $faceLabel
+                            ElevationData = $elevation
+                        }
+                        ConvertTo-NBRackHTML @htmlParams
                     }
                     'Markdown' {
-                        ConvertTo-NBRackMarkdown -RackName $rackName -SiteName $siteName -UHeight $rackHeight `
-                            -Face $faceLabel -ElevationData $elevation
+                        $mdParams = @{
+                            RackName      = $rackName
+                            SiteName      = $siteName
+                            UHeight       = $rackHeight
+                            Face          = $faceLabel
+                            ElevationData = $elevation
+                        }
+                        ConvertTo-NBRackMarkdown @mdParams
                     }
                     'Console' {
-                        ConvertTo-NBRackConsole -RackName $rackName -SiteName $siteName -UHeight $rackHeight `
-                            -Face $faceLabel -ElevationData $elevation -Compact:$Compact -NoColor:$NoColor
+                        $consoleParams = @{
+                            RackName      = $rackName
+                            SiteName      = $siteName
+                            UHeight       = $rackHeight
+                            Face          = $faceLabel
+                            ElevationData = $elevation
+                            Compact       = [bool]$Compact
+                            NoColor       = [bool]$NoColor
+                        }
+                        ConvertTo-NBRackConsole @consoleParams
                     }
                 }
             }

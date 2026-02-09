@@ -250,8 +250,15 @@ function Set-NBDCIMDevice {
             if ($Force -or $PSCmdlet.ShouldProcess($target, 'Update devices (bulk)')) {
                 Write-Verbose "Processing $($bulkItems.Count) devices in bulk PATCH mode with batch size $BatchSize"
 
-                $result = Send-NBBulkRequest -URI $URI -Items $bulkItems.ToArray() -Method PATCH `
-                    -BatchSize $BatchSize -ShowProgress -ActivityName 'Updating devices'
+                $bulkParams = @{
+                    URI          = $URI
+                    Items        = $bulkItems.ToArray()
+                    Method       = 'PATCH'
+                    BatchSize    = $BatchSize
+                    ShowProgress = $true
+                    ActivityName = 'Updating devices'
+                }
+                $result = Send-NBBulkRequest @bulkParams
 
                 # Output succeeded items to pipeline
                 foreach ($item in $result.Succeeded) {
