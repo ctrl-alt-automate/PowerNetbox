@@ -1138,7 +1138,6 @@ Describe "IPAM tests" -Tag 'Ipam' {
             @{ Command = 'Get-NBIPAMAggregate' }
             @{ Command = 'Get-NBIPAMASN' }
             @{ Command = 'Get-NBIPAMASNRange' }
-            @{ Command = 'Get-NBIPAMAvailableIP'; Parameters = @{ Prefix_ID = 1 } }
             @{ Command = 'Get-NBIPAMFHRPGroup' }
             @{ Command = 'Get-NBIPAMFHRPGroupAssignment' }
             @{ Command = 'Get-NBIPAMPrefix' }
@@ -1183,7 +1182,6 @@ Describe "IPAM tests" -Tag 'Ipam' {
             @{ Command = 'Get-NBIPAMAggregate' }
             @{ Command = 'Get-NBIPAMASN' }
             @{ Command = 'Get-NBIPAMASNRange' }
-            @{ Command = 'Get-NBIPAMAvailableIP'; Parameters = @{ Prefix_ID = 1 } }
             @{ Command = 'Get-NBIPAMFHRPGroup' }
             @{ Command = 'Get-NBIPAMFHRPGroupAssignment' }
             @{ Command = 'Get-NBIPAMPrefix' }

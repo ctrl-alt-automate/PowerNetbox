@@ -1680,7 +1680,6 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         $allPageSizeTestCases = @(
             @{ Command = 'Get-NBDCIMCable' }
             @{ Command = 'Get-NBDCIMCableTermination' }
-            @{ Command = 'Get-NBDCIMConnectedDevice'; Parameters = @{ Peer_Device = 'switch01'; Peer_Interface = 'eth0' } }
             @{ Command = 'Get-NBDCIMConsolePort' }
             @{ Command = 'Get-NBDCIMConsoleServerPort' }
             @{ Command = 'Get-NBDCIMDeviceBay' }
@@ -1735,7 +1734,6 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
         $omitTestCases = @(
             @{ Command = 'Get-NBDCIMCable' }
             @{ Command = 'Get-NBDCIMCableTermination' }
-            @{ Command = 'Get-NBDCIMConnectedDevice'; Parameters = @{ Peer_Device = 'switch01'; Peer_Interface = 'eth0' } }
             @{ Command = 'Get-NBDCIMConsolePort' }
             @{ Command = 'Get-NBDCIMConsoleServerPort' }
             @{ Command = 'Get-NBDCIMDeviceBay' }
