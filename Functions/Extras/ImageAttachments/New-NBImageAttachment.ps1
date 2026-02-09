@@ -170,7 +170,7 @@ function New-NBImageAttachment {
 
                     # Check if we need to skip certificate validation
                     $Config = $script:NetboxConfig
-                    if ($Config.InvokeParams.ContainsKey('SkipCertificateCheck') -and $Config.InvokeParams.SkipCertificateCheck) {
+                    if ($Config.InvokeParams -and $Config.InvokeParams.ContainsKey('SkipCertificateCheck') -and $Config.InvokeParams.SkipCertificateCheck) {
                         $Handler.ServerCertificateCustomValidationCallback = { $true }
                     }
 
