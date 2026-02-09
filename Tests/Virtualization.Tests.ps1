@@ -28,7 +28,6 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
             $script:NetboxConfig.Hostname = 'netbox.domain.com'
             $script:NetboxConfig.HostScheme = 'https'
             $script:NetboxConfig.HostPort = 443
-            $script:NetboxConfig.Choices.Virtualization = (Get-Content "$TestPath/VirtualizationChoices.json" -ErrorAction Stop | ConvertFrom-Json)
         }
     }
 
