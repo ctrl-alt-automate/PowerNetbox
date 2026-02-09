@@ -82,10 +82,13 @@ function Send-NBBulkRequest {
 
         if ($ShowProgress) {
             $percentComplete = [int](($currentBatch / $totalBatches) * 100)
-            Write-Progress -Activity $ActivityName `
-                -Status "Batch $currentBatch of $totalBatches ($($batch.Count) items)" `
-                -PercentComplete $percentComplete `
-                -CurrentOperation "$Method request"
+            $progressParams = @{
+                Activity         = $ActivityName
+                Status           = "Batch $currentBatch of $totalBatches ($($batch.Count) items)"
+                PercentComplete  = $percentComplete
+                CurrentOperation = "$Method request"
+            }
+            Write-Progress @progressParams
         }
 
         try {
