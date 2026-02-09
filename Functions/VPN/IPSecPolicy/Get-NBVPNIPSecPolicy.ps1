@@ -17,9 +17,16 @@
     Specify which fields to exclude from the response.
     Requires Netbox 4.5.0 or later.
 
-
 .PARAMETER Raw
     Return the raw API response instead of the results array.
+
+.PARAMETER All
+    Automatically fetch all pages of results. Uses the API's pagination
+    to retrieve all items across multiple requests.
+
+.PARAMETER PageSize
+    Number of items per page when using -All. Default: 100.
+    Range: 1-1000.
 
 .EXAMPLE
     Get-NBVPNIPSecPolicy

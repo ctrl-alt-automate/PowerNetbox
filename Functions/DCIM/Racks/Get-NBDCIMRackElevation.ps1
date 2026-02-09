@@ -31,6 +31,10 @@ function Get-NBDCIMRackElevation {
     .PARAMETER Raw
         Return the raw API response
 
+    .PARAMETER PageSize
+        Number of items per page when using -All. Default: 100.
+        Range: 1-1000.
+
     .EXAMPLE
         Get-NBDCIMRackElevation -Id 24
 
