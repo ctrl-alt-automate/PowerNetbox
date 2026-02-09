@@ -22,7 +22,9 @@ function Set-NBCredential {
     (
         [Parameter(ParameterSetName = 'CredsObject',
             Mandatory = $true)]
-        [pscredential]$Credential,
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.Credential()]
+        $Credential,
 
         [Parameter(ParameterSetName = 'UserPass',
             Mandatory = $true)]
