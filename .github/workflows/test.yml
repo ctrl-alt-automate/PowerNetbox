@@ -25,8 +25,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Cache PowerShell modules
+        uses: actions/cache@v4
+        id: ps-cache
+        with:
+          path: ${{ runner.os != 'Windows' && '~/.local/share/powershell/Modules' || (matrix.pwsh && '~/Documents/PowerShell/Modules' || '~/Documents/WindowsPowerShell/Modules') }}
+          key: ps-modules-${{ matrix.os }}-${{ matrix.pwsh }}-v1
+
       - name: Install dependencies (pwsh)
-        if: matrix.pwsh
+        if: matrix.pwsh && steps.ps-cache.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
           # Register PSGallery if not present (required for Windows Server 2025)
@@ -38,7 +45,7 @@ jobs:
           Install-Module PSScriptAnalyzer -Force -Scope CurrentUser
 
       - name: Install dependencies (powershell)
-        if: '!matrix.pwsh'
+        if: "!matrix.pwsh && steps.ps-cache.outputs.cache-hit != 'true'"
         shell: powershell
         run: |
           # Register PSGallery if not present (required for Windows Server 2025)
