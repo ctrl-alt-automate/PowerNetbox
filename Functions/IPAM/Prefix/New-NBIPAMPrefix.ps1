@@ -148,6 +148,14 @@ function New-NBIPAMPrefix {
 
     process {
         if ($PSCmdlet.ParameterSetName -eq 'Single') {
+            # Transform Site parameter to scope_type and scope_id for new NetBox API
+            if ($PSBoundParameters.ContainsKey('Site')) {
+                Write-Verbose "Converting Site parameter to scope_type and scope_id"
+                $PSBoundParameters['scope_type'] = 'dcim.site'
+                $PSBoundParameters['scope_id'] = $PSBoundParameters['Site']
+                $PSBoundParameters.Remove('Site')
+            }
+
             $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
 
             if ($PSCmdlet.ShouldProcess($Prefix, 'Create new Prefix')) {
@@ -169,6 +177,14 @@ function New-NBIPAMPrefix {
 
                     $item[$key] = $value
                 }
+
+                # Transform Site to scope_type and scope_id for new NetBox API
+                if ($item.ContainsKey('site')) {
+                    $item['scope_type'] = 'dcim.site'
+                    $item['scope_id'] = $item['site']
+                    $item.Remove('site')
+                }
+
                 [void]$bulkItems.Add([PSCustomObject]$item)
             }
         }

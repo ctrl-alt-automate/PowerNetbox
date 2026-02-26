@@ -20,12 +20,12 @@
 
 function Set-NBIPAMPrefix {
     [CmdletBinding(ConfirmImpact = 'Medium',
-                   SupportsShouldProcess = $true)]
+        SupportsShouldProcess = $true)]
     [OutputType([PSCustomObject])]
     param
     (
         [Parameter(Mandatory = $true,
-                   ValueFromPipelineByPropertyName = $true)]
+            ValueFromPipelineByPropertyName = $true)]
         [uint64]$Id,
 
         [string]$Prefix,
@@ -63,6 +63,14 @@ function Set-NBIPAMPrefix {
             Write-Verbose "Obtaining Prefix from ID $PrefixId"
 
             if ($Force -or $PSCmdlet.ShouldProcess("ID: $PrefixId", 'Set')) {
+                # Transform Site parameter to scope_type and scope_id for new NetBox API
+                if ($PSBoundParameters.ContainsKey('Site')) {
+                    Write-Verbose "Converting Site parameter to scope_type and scope_id"
+                    $PSBoundParameters['scope_type'] = 'dcim.site'
+                    $PSBoundParameters['scope_id'] = $PSBoundParameters['Site']
+                    $PSBoundParameters.Remove('Site')
+                }
+
                 $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'Force'
 
                 $URI = BuildNewURI -Segments $URIComponents.Segments
@@ -72,9 +80,3 @@ function Set-NBIPAMPrefix {
         }
     }
 }
-
-
-
-
-
-
