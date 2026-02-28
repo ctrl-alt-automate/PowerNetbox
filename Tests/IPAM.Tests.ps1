@@ -224,6 +224,14 @@ Describe "IPAM tests" -Tag 'Ipam' {
             { New-NBIPAMPrefix -Prefix "10.0.0.0/24" -Scope_Type 'invalid.type' } | Should -Throw
         }
 
+        It "Should throw when Scope_Type is provided without Scope_Id" {
+            { New-NBIPAMPrefix -Prefix "10.0.0.0/24" -Scope_Type 'dcim.site' } | Should -Throw '*must be used together*'
+        }
+
+        It "Should throw when Scope_Id is provided without Scope_Type" {
+            { New-NBIPAMPrefix -Prefix "10.0.0.0/24" -Scope_Id 5 } | Should -Throw '*must be used together*'
+        }
+
         It "Should not have Site parameter" {
             $cmd = Get-Command New-NBIPAMPrefix
             $cmd.Parameters.Keys | Should -Not -Contain 'Site'
@@ -252,6 +260,14 @@ Describe "IPAM tests" -Tag 'Ipam' {
 
         It "Should reject invalid scope_type" {
             { Set-NBIPAMPrefix -Id 1 -Scope_Type 'invalid.type' -Confirm:$false } | Should -Throw
+        }
+
+        It "Should throw when Scope_Type is provided without Scope_Id" {
+            { Set-NBIPAMPrefix -Id 1 -Scope_Type 'dcim.site' -Confirm:$false } | Should -Throw '*must be used together*'
+        }
+
+        It "Should throw when Scope_Id is provided without Scope_Type" {
+            { Set-NBIPAMPrefix -Id 1 -Scope_Id 5 -Confirm:$false } | Should -Throw '*must be used together*'
         }
 
         It "Should not have Site parameter" {
