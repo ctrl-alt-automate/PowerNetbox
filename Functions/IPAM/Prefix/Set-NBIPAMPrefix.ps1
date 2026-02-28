@@ -60,6 +60,11 @@ function Set-NBIPAMPrefix {
     )
 
     process {
+        if (($PSBoundParameters.ContainsKey('Scope_Type') -and -not $PSBoundParameters.ContainsKey('Scope_Id')) -or
+            ($PSBoundParameters.ContainsKey('Scope_Id') -and -not $PSBoundParameters.ContainsKey('Scope_Type'))) {
+            throw 'Parameters -Scope_Type and -Scope_Id must be used together.'
+        }
+
         foreach ($PrefixId in $Id) {
             $Segments = [System.Collections.ArrayList]::new(@('ipam', 'prefixes', $PrefixId))
 
