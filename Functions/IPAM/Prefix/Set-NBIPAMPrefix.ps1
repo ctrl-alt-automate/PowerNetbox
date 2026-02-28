@@ -60,8 +60,7 @@ function Set-NBIPAMPrefix {
     )
 
     process {
-        if (($PSBoundParameters.ContainsKey('Scope_Type') -and -not $PSBoundParameters.ContainsKey('Scope_Id')) -or
-            ($PSBoundParameters.ContainsKey('Scope_Id') -and -not $PSBoundParameters.ContainsKey('Scope_Type'))) {
+        if ($PSBoundParameters.ContainsKey('Scope_Type') -xor $PSBoundParameters.ContainsKey('Scope_Id')) {
             throw 'Parameters -Scope_Type and -Scope_Id must be used together.'
         }
 
