@@ -50,11 +50,11 @@ function Get-NBIPAMPrefix {
     .PARAMETER Tenant_Id
         Filter by tenant database ID.
 
-    .PARAMETER Site
-        Filter by site name.
+    .PARAMETER Scope_Type
+        Filter by scope type (e.g., 'dcim.site', 'dcim.region', 'dcim.sitegroup', 'dcim.location').
 
-    .PARAMETER Site_Id
-        Filter by site database ID.
+    .PARAMETER Scope_Id
+        Filter by scope object database ID.
 
     .PARAMETER Vlan_VId
         Filter by VLAN ID number.
@@ -161,10 +161,11 @@ function Get-NBIPAMPrefix {
         [uint64]$Tenant_Id,
 
         [Parameter(ParameterSetName = 'Query')]
-        [string]$Site,
+        [ValidateSet('dcim.region', 'dcim.sitegroup', 'dcim.site', 'dcim.location', IgnoreCase = $true)]
+        [string]$Scope_Type,
 
         [Parameter(ParameterSetName = 'Query')]
-        [uint64]$Site_Id,
+        [uint64]$Scope_Id,
 
         [Parameter(ParameterSetName = 'Query')]
         [string]$Vlan_VId,

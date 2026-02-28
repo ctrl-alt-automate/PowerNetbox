@@ -35,7 +35,10 @@ function Set-NBIPAMPrefix {
 
         [uint64]$Tenant,
 
-        [uint64]$Site,
+        [ValidateSet('dcim.region', 'dcim.sitegroup', 'dcim.site', 'dcim.location', IgnoreCase = $true)]
+        [string]$Scope_Type,
+
+        [uint64]$Scope_Id,
 
         [uint64]$VRF,
 

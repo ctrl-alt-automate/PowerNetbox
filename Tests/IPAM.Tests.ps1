@@ -161,6 +161,33 @@ Describe "IPAM tests" -Tag 'Ipam' {
         It "Should throw for invalid mask length" {
             { Get-NBIPAMPrefix -Mask_length 128 } | Should -Throw
         }
+
+        It "Should filter by scope_type" {
+            $Result = Get-NBIPAMPrefix -Scope_Type 'dcim.site'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/prefixes/?scope_type=dcim.site'
+        }
+
+        It "Should filter by scope_type and scope_id" {
+            $Result = Get-NBIPAMPrefix -Scope_Type 'dcim.site' -Scope_Id 5
+            $Result.Uri | Should -Match 'scope_type=dcim.site'
+            $Result.Uri | Should -Match 'scope_id=5'
+        }
+
+        It "Should filter by scope_type dcim.region" {
+            $Result = Get-NBIPAMPrefix -Scope_Type 'dcim.region' -Scope_Id 3
+            $Result.Uri | Should -Match 'scope_type=dcim.region'
+            $Result.Uri | Should -Match 'scope_id=3'
+        }
+
+        It "Should reject invalid scope_type" {
+            { Get-NBIPAMPrefix -Scope_Type 'invalid.type' } | Should -Throw
+        }
+
+        It "Should not have Site parameter" {
+            $cmd = Get-Command Get-NBIPAMPrefix
+            $cmd.Parameters.Keys | Should -Not -Contain 'Site'
+            $cmd.Parameters.Keys | Should -Not -Contain 'Site_Id'
+        }
     }
 
     Context "New-NBIPAMPrefix" {
@@ -178,6 +205,29 @@ Describe "IPAM tests" -Tag 'Ipam' {
             $bodyObj.status | Should -Be 'active'
             $bodyObj.role | Should -Be 1
         }
+
+        It "Should create a prefix with scope_type and scope_id" {
+            $Result = New-NBIPAMPrefix -Prefix "10.0.0.0/24" -Scope_Type 'dcim.site' -Scope_Id 5
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.scope_type | Should -Be 'dcim.site'
+            $bodyObj.scope_id | Should -Be 5
+        }
+
+        It "Should create a prefix with scope_type dcim.location" {
+            $Result = New-NBIPAMPrefix -Prefix "10.0.0.0/24" -Scope_Type 'dcim.location' -Scope_Id 10
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.scope_type | Should -Be 'dcim.location'
+            $bodyObj.scope_id | Should -Be 10
+        }
+
+        It "Should reject invalid scope_type" {
+            { New-NBIPAMPrefix -Prefix "10.0.0.0/24" -Scope_Type 'invalid.type' } | Should -Throw
+        }
+
+        It "Should not have Site parameter" {
+            $cmd = Get-Command New-NBIPAMPrefix
+            $cmd.Parameters.Keys | Should -Not -Contain 'Site'
+        }
     }
 
     Context "Set-NBIPAMPrefix" {
@@ -191,6 +241,22 @@ Describe "IPAM tests" -Tag 'Ipam' {
             $Result = Set-NBIPAMPrefix -Id 1 -Description 'Updated' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
             $Result.Uri | Should -Match '/api/ipam/prefixes/1/'
+        }
+
+        It "Should update prefix scope" {
+            $Result = Set-NBIPAMPrefix -Id 1 -Scope_Type 'dcim.site' -Scope_Id 5 -Confirm:$false
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.scope_type | Should -Be 'dcim.site'
+            $bodyObj.scope_id | Should -Be 5
+        }
+
+        It "Should reject invalid scope_type" {
+            { Set-NBIPAMPrefix -Id 1 -Scope_Type 'invalid.type' -Confirm:$false } | Should -Throw
+        }
+
+        It "Should not have Site parameter" {
+            $cmd = Get-Command Set-NBIPAMPrefix
+            $cmd.Parameters.Keys | Should -Not -Contain 'Site'
         }
     }
 
