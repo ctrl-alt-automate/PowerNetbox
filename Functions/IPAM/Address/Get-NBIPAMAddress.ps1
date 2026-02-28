@@ -12,6 +12,22 @@
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
+.PARAMETER All
+    Automatically fetch all pages of results. Uses the API's pagination
+    to retrieve all items across multiple requests.
+
+.PARAMETER PageSize
+    Number of items per page when using -All. Default: 100.
+    Range: 1-1000.
+
+.PARAMETER Brief
+    Return a minimal representation of objects (id, url, display, name only).
+    Reduces response size by ~90%. Ideal for dropdowns and reference lists.
+
+.PARAMETER Fields
+    Specify which fields to include in the response.
+    Supports nested field selection (e.g., 'site.name', 'device_type.model').
+
 .EXAMPLE
     Get-NBIPAMAddress
 
@@ -109,7 +125,7 @@ function Get-NBIPAMAddress {
             foreach ($IP_ID in $Id) {
                 $Segments = [System.Collections.ArrayList]::new(@('ipam', 'ip-addresses', $IP_ID))
 
-                $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'All', 'PageSize'
+                $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'All', 'PageSize'
 
                 $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
@@ -122,7 +138,7 @@ function Get-NBIPAMAddress {
         default {
             $Segments = [System.Collections.ArrayList]::new(@('ipam', 'ip-addresses'))
 
-            $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'All', 'PageSize'
+            $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'
 
             $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 

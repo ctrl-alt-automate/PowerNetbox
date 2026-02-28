@@ -63,6 +63,11 @@ function ConvertTo-NBRackHTML {
         [string]$SvgContent
     )
 
+    # HTML-encode all user-supplied values to prevent XSS
+    $safeRackName = [System.Net.WebUtility]::HtmlEncode($RackName)
+    $safeSiteName = [System.Net.WebUtility]::HtmlEncode($SiteName)
+    $safeFace = [System.Net.WebUtility]::HtmlEncode($Face)
+
     # If SVG content provided, embed it
     if ($SvgContent) {
         return @"
@@ -71,7 +76,7 @@ function ConvertTo-NBRackHTML {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>$RackName - $Face Face | $SiteName</title>
+    <title>$safeRackName - $safeFace Face | $safeSiteName</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -94,8 +99,8 @@ function ConvertTo-NBRackHTML {
 </head>
 <body>
     <div class="container">
-        <h1>$RackName - $Face Face</h1>
-        <p class="meta">Site: $SiteName | Height: ${UHeight}U</p>
+        <h1>$safeRackName - $safeFace Face</h1>
+        <p class="meta">Site: $safeSiteName | Height: ${UHeight}U</p>
         <div class="svg-container">
             $SvgContent
         </div>
@@ -124,8 +129,8 @@ function ConvertTo-NBRackHTML {
         $unit = $deviceLookup[$u]
 
         if ($unit -and $unit.device) {
-            $deviceName = $unit.device.display
-            $deviceDesc = if ($unit.device.description) { $unit.device.description } else { '' }
+            $deviceName = [System.Net.WebUtility]::HtmlEncode($unit.device.display)
+            $deviceDesc = [System.Net.WebUtility]::HtmlEncode($unit.device.description)
 
             [void]$tableRows.AppendLine(@"
         <tr class="occupied">
@@ -152,7 +157,7 @@ function ConvertTo-NBRackHTML {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>$RackName - $Face Face | $SiteName</title>
+    <title>$safeRackName - $safeFace Face | $safeSiteName</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -212,8 +217,8 @@ function ConvertTo-NBRackHTML {
 </head>
 <body>
     <div class="container">
-        <h1>$RackName - $Face Face</h1>
-        <p class="meta">Site: $SiteName | Height: ${UHeight}U</p>
+        <h1>$safeRackName - $safeFace Face</h1>
+        <p class="meta">Site: $safeSiteName | Height: ${UHeight}U</p>
         <table class="rack-table">
             <thead>
                 <tr>

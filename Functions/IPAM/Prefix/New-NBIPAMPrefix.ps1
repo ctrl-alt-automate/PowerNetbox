@@ -28,8 +28,13 @@
 .PARAMETER Description
     A description of the prefix.
 
-.PARAMETER Site
-    The site ID where this prefix is used.
+.PARAMETER Scope_Type
+    The scope type for this prefix. Defines what kind of object the prefix is scoped to.
+    Valid values: dcim.region, dcim.sitegroup, dcim.site, dcim.location.
+    Must be used together with -Scope_Id.
+
+.PARAMETER Scope_Id
+    The database ID of the scope object. Must be used together with -Scope_Type.
 
 .PARAMETER VRF
     The VRF ID for this prefix.
@@ -58,13 +63,18 @@
     Return the raw API response instead of the results array.
 
 .EXAMPLE
-    New-NBIPAMPrefix -Prefix "10.0.0.0/24" -Status "active" -Site 1
+    New-NBIPAMPrefix -Prefix "10.0.0.0/24" -Status "active" -Scope_Type "dcim.site" -Scope_Id 1
 
-    Creates a single prefix.
+    Creates a single prefix scoped to site ID 1.
+
+.EXAMPLE
+    New-NBIPAMPrefix -Prefix "10.0.0.0/24" -Scope_Type "dcim.location" -Scope_Id 5
+
+    Creates a prefix scoped to location ID 5.
 
 .EXAMPLE
     $prefixes = 1..50 | ForEach-Object {
-        [PSCustomObject]@{Prefix="10.$_.0.0/24"; Status="active"; Site=1}
+        [PSCustomObject]@{Prefix="10.$_.0.0/24"; Status="active"; Scope_Type="dcim.site"; Scope_Id=1}
     }
     $prefixes | New-NBIPAMPrefix -BatchSize 50 -Force
 
@@ -107,7 +117,11 @@ function New-NBIPAMPrefix {
         [string]$Description,
 
         [Parameter(ParameterSetName = 'Single')]
-        [uint64]$Site,
+        [ValidateSet('dcim.region', 'dcim.sitegroup', 'dcim.site', 'dcim.location', IgnoreCase = $true)]
+        [string]$Scope_Type,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [uint64]$Scope_Id,
 
         [Parameter(ParameterSetName = 'Single')]
         [uint64]$VRF,
@@ -165,10 +179,17 @@ function New-NBIPAMPrefix {
                     # Handle property name mappings
                     switch ($key) {
                         'ispool' { $key = 'is_pool' }
-                        'custom_fields' { $key = 'custom_fields' }
+                        'site' {
+                            # Backward compat: translate site to scope_type + scope_id
+                            $item['scope_type'] = 'dcim.site'
+                            $item['scope_id'] = $value
+                            $key = $null
+                        }
                     }
 
-                    $item[$key] = $value
+                    if ($null -ne $key) {
+                        $item[$key] = $value
+                    }
                 }
                 [void]$bulkItems.Add([PSCustomObject]$item)
             }
@@ -182,8 +203,15 @@ function New-NBIPAMPrefix {
             if ($Force -or $PSCmdlet.ShouldProcess($target, 'Create prefixes (bulk)')) {
                 Write-Verbose "Processing $($bulkItems.Count) prefixes in bulk mode with batch size $BatchSize"
 
-                $result = Send-NBBulkRequest -URI $URI -Items $bulkItems.ToArray() -Method POST `
-                    -BatchSize $BatchSize -ShowProgress -ActivityName 'Creating prefixes'
+                $bulkParams = @{
+                    URI          = $URI
+                    Items        = $bulkItems.ToArray()
+                    Method       = 'POST'
+                    BatchSize    = $BatchSize
+                    ShowProgress = $true
+                    ActivityName = 'Creating prefixes'
+                }
+                $result = Send-NBBulkRequest @bulkParams
 
                 # Output succeeded items to pipeline
                 foreach ($item in $result.Succeeded) {

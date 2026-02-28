@@ -7,16 +7,21 @@ function SetupNetboxConfigVariable {
 
     Write-Verbose "Checking for NetboxConfig hashtable"
     if ((-not ($script:NetboxConfig)) -or $Overwrite) {
-        Write-Verbose "Creating Netbox Confighashtable"
+        Write-Verbose "Creating Netbox Config hashtable"
         $script:NetboxConfig = @{
             'Connected'     = $false
-            'Choices'       = @{
-            }
-            'APIDefinition' = $null
-            'ContentTypes' = $null
+            'Hostname'      = $null
+            'Credential'    = $null
+            'HostScheme'    = $null
+            'HostPort'      = $null
+            'InvokeParams'  = $null
+            'Timeout'       = $null
+            'NetboxVersion' = $null
+            'ParsedVersion' = $null
             'BranchStack'   = [System.Collections.Generic.Stack[object]]::new()
         }
     }
-
-    Write-Verbose "NetboxConfig hashtable already exists"
+    else {
+        Write-Verbose "NetboxConfig hashtable already exists"
+    }
 }

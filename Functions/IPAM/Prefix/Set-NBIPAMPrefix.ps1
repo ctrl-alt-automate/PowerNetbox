@@ -30,11 +30,15 @@ function Set-NBIPAMPrefix {
 
         [string]$Prefix,
 
+        [ValidateSet('active', 'reserved', 'deprecated', 'container', IgnoreCase = $true)]
         [string]$Status,
 
         [uint64]$Tenant,
 
-        [uint64]$Site,
+        [ValidateSet('dcim.region', 'dcim.sitegroup', 'dcim.site', 'dcim.location', IgnoreCase = $true)]
+        [string]$Scope_Type,
+
+        [uint64]$Scope_Id,
 
         [uint64]$VRF,
 
@@ -46,7 +50,7 @@ function Set-NBIPAMPrefix {
 
         [string]$Description,
 
-        [switch]$Is_Pool,
+        [bool]$Is_Pool,
 
         [uint64]$Owner,
 
@@ -54,27 +58,6 @@ function Set-NBIPAMPrefix {
 
         [switch]$Raw
     )
-
-    begin {
-        #        Write-Verbose "Validating enum properties"
-        #        $Segments = [System.Collections.ArrayList]::new(@('ipam', 'ip-addresses', 0))
-        $Method = 'PATCH'
-        #
-        #        # Value validation
-        #        $ModelDefinition = GetModelDefinitionFromURIPath -Segments $Segments -Method $Method
-        #        $EnumProperties = GetModelEnumProperties -ModelDefinition $ModelDefinition
-        #
-        #        foreach ($Property in $EnumProperties.Keys) {
-        #            if ($PSBoundParameters.ContainsKey($Property)) {
-        #                Write-Verbose "Validating property [$Property] with value [$($PSBoundParameters.$Property)]"
-        #                $PSBoundParameters.$Property = ValidateValue -ModelDefinition $ModelDefinition -Property $Property -ProvidedValue $PSBoundParameters.$Property
-        #            } else {
-        #                Write-Verbose "User did not provide a value for [$Property]"
-        #            }
-        #        }
-        #
-        #        Write-Verbose "Finished enum validation"
-    }
 
     process {
         foreach ($PrefixId in $Id) {
@@ -87,13 +70,11 @@ function Set-NBIPAMPrefix {
 
                 $URI = BuildNewURI -Segments $URIComponents.Segments
 
-                InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method $Method -Raw:$Raw
+                InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method PATCH -Raw:$Raw
             }
         }
     }
 }
-
-
 
 
 

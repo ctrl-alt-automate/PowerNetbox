@@ -50,11 +50,11 @@ function Get-NBIPAMPrefix {
     .PARAMETER Tenant_Id
         Filter by tenant database ID.
 
-    .PARAMETER Site
-        Filter by site name.
+    .PARAMETER Scope_Type
+        Filter by scope type (e.g., 'dcim.site', 'dcim.region', 'dcim.sitegroup', 'dcim.location').
 
-    .PARAMETER Site_Id
-        Filter by site database ID.
+    .PARAMETER Scope_Id
+        Filter by scope object database ID.
 
     .PARAMETER Vlan_VId
         Filter by VLAN ID number.
@@ -77,6 +77,22 @@ function Get-NBIPAMPrefix {
 
     .PARAMETER Raw
         Return the raw API response instead of extracting the results array.
+
+    .PARAMETER All
+        Automatically fetch all pages of results. Uses the API's pagination
+        to retrieve all items across multiple requests.
+
+    .PARAMETER PageSize
+        Number of items per page when using -All. Default: 100.
+        Range: 1-1000.
+
+    .PARAMETER Brief
+        Return a minimal representation of objects (id, url, display, name only).
+        Reduces response size by ~90%. Ideal for dropdowns and reference lists.
+
+    .PARAMETER Fields
+        Specify which fields to include in the response.
+        Supports nested field selection (e.g., 'site.name', 'device_type.model').
 
     .EXAMPLE
         PS C:\> Get-NBIPAMPrefix
@@ -145,10 +161,11 @@ function Get-NBIPAMPrefix {
         [uint64]$Tenant_Id,
 
         [Parameter(ParameterSetName = 'Query')]
-        [string]$Site,
+        [ValidateSet('dcim.region', 'dcim.sitegroup', 'dcim.site', 'dcim.location', IgnoreCase = $true)]
+        [string]$Scope_Type,
 
         [Parameter(ParameterSetName = 'Query')]
-        [uint64]$Site_Id,
+        [uint64]$Scope_Id,
 
         [Parameter(ParameterSetName = 'Query')]
         [string]$Vlan_VId,
@@ -177,20 +194,13 @@ function Get-NBIPAMPrefix {
 
     process {
         Write-Verbose "Retrieving IPAM Prefix"
-        #    if ($null -ne $Family) {
-        #        $PSBoundParameters.Family = ValidateIPAMChoice -ProvidedValue $Family -PrefixFamily
-        #    }
-        #
-        #    if ($null -ne $Status) {
-        #        $PSBoundParameters.Status = ValidateIPAMChoice -ProvidedValue $Status -PrefixStatus
-        #    }
 
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {
             foreach ($Prefix_ID in $Id) {
                 $Segments = [System.Collections.ArrayList]::new(@('ipam', 'prefixes', $Prefix_ID))
 
-                $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'All', 'PageSize'
+                $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'All', 'PageSize'
 
                 $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
@@ -203,7 +213,7 @@ function Get-NBIPAMPrefix {
         default {
             $Segments = [System.Collections.ArrayList]::new(@('ipam', 'prefixes'))
 
-            $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'All', 'PageSize'
+            $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'
 
             $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 

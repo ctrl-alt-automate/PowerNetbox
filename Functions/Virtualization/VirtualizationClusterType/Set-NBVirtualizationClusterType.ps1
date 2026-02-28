@@ -76,7 +76,7 @@ function Set-NBVirtualizationClusterType {
 
             $URI = BuildNewURI -Segments $URIComponents.Segments
 
-            if ($Force -or $PSCmdlet.ShouldProcess("$("ID $TypeId")", 'Update cluster type')) {
+            if ($Force -or $PSCmdlet.ShouldProcess("ID $TypeId", 'Update cluster type')) {
                 InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
             }
         }

@@ -110,14 +110,10 @@ function New-NBImageAttachment {
 
                 try {
                     $Response = Invoke-RestMethod -Uri $URI -Method POST -Form $Form -Headers $Headers @InvokeParams
-                    if ($Raw) {
-                        $Response
-                    } else {
-                        $Response
-                    }
+                    $Response
                 }
                 catch {
-                    $ErrorBody = GetNetboxAPIErrorBody -ErrorRecord $_
+                    $ErrorBody = (GetNetboxAPIErrorBody -Response $_.Exception.Response).Body
                     $PSCmdlet.ThrowTerminatingError(
                         [System.Management.Automation.ErrorRecord]::new(
                             [System.Exception]::new("Failed to upload image attachment: $ErrorBody"),
@@ -173,8 +169,8 @@ function New-NBImageAttachment {
                     $Handler = New-Object System.Net.Http.HttpClientHandler
 
                     # Check if we need to skip certificate validation
-                    $Config = GetNetboxConfigVariable
-                    if ($Config.InvokeParams.ContainsKey('SkipCertificateCheck') -and $Config.InvokeParams.SkipCertificateCheck) {
+                    $Config = $script:NetboxConfig
+                    if ($Config.InvokeParams -and $Config.InvokeParams.ContainsKey('SkipCertificateCheck') -and $Config.InvokeParams.SkipCertificateCheck) {
                         $Handler.ServerCertificateCustomValidationCallback = { $true }
                     }
 
@@ -192,11 +188,7 @@ function New-NBImageAttachment {
 
                     if ($HttpResponse.IsSuccessStatusCode) {
                         $Result = $ResponseContent | ConvertFrom-Json
-                        if ($Raw) {
-                            $Result
-                        } else {
-                            $Result
-                        }
+                        $Result
                     }
                     else {
                         throw "HTTP $([int]$HttpResponse.StatusCode): $ResponseContent"

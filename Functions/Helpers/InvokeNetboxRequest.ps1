@@ -120,8 +120,17 @@ function InvokeNetboxRequest {
             Write-Verbose "Fetching page ${pageNum}..."
 
             # Make single-page request (recursive call without -All)
-            $pageResult = InvokeNetboxRequest -URI $currentUri -Headers $Headers -Body $Body `
-                -Timeout $Timeout -Method $Method -Raw -MaxRetries $MaxRetries -RetryDelayMs $RetryDelayMs
+            $pageParams = @{
+                URI         = $currentUri
+                Headers     = $Headers
+                Body        = $Body
+                Timeout     = $Timeout
+                Method      = $Method
+                Raw         = $true
+                MaxRetries  = $MaxRetries
+                RetryDelayMs = $RetryDelayMs
+            }
+            $pageResult = InvokeNetboxRequest @pageParams
 
             if ($pageResult.results) {
                 $itemCount = $pageResult.results.Count
@@ -131,9 +140,12 @@ function InvokeNetboxRequest {
                 # Show progress for large datasets
                 if ($pageResult.count -gt 0) {
                     $percentComplete = [Math]::Min(100, [int](($allResults.Count / $pageResult.count) * 100))
-                    Write-Progress -Activity "Fetching all results" `
-                        -Status "$($allResults.Count) of $($pageResult.count) items" `
-                        -PercentComplete $percentComplete
+                    $progressParams = @{
+                        Activity        = 'Fetching all results'
+                        Status          = "$($allResults.Count) of $($pageResult.count) items"
+                        PercentComplete = $percentComplete
+                    }
+                    Write-Progress @progressParams
                 }
             }
 
@@ -180,10 +192,11 @@ function InvokeNetboxRequest {
 
     if ($Body) {
         # Sanitize sensitive fields before logging (handles both hashtables and PSCustomObjects)
-        $sensitiveFields = @('secret', 'password', 'key', 'token')
+        $sensitivePatterns = @('secret', 'password', 'key', 'token', 'psk')
         $sanitizedBody = @{}
         foreach ($prop in $Body.PSObject.Properties) {
-            if ($sensitiveFields -contains $prop.Name -and $prop.Value) {
+            $isSensitive = $prop.Value -and ($sensitivePatterns | Where-Object { $prop.Name -match $_ })
+            if ($isSensitive) {
                 $sanitizedBody[$prop.Name] = '***REDACTED***'
             }
             else {
@@ -296,12 +309,14 @@ function InvokeNetboxRequest {
             # Non-retryable error or max retries reached - throw detailed error
             $statusName = if ($statusCode) { GetHttpStatusName -StatusCode $statusCode } else { "Unknown" }
 
-            $detailedMessage = BuildDetailedErrorMessage `
-                -StatusCode $statusCode `
-                -StatusName $statusName `
-                -Method $Method `
-                -Endpoint $URI.Uri.AbsoluteUri `
-                -ErrorMessage $errorMessage
+            $errorParams = @{
+                StatusCode   = $statusCode
+                StatusName   = $statusName
+                Method       = $Method
+                Endpoint     = $URI.Uri.AbsoluteUri
+                ErrorMessage = $errorMessage
+            }
+            $detailedMessage = BuildDetailedErrorMessage @errorParams
 
             $errorRecord = [System.Management.Automation.ErrorRecord]::new(
                 [System.Exception]::new($detailedMessage),

@@ -192,10 +192,6 @@ function New-NBVirtualMachine {
 
                     # Handle property name mappings
                     switch ($key) {
-                        'vcpus' { $key = 'vcpus' }
-                        'primary_ip4' { $key = 'primary_ip4' }
-                        'primary_ip6' { $key = 'primary_ip6' }
-                        'custom_fields' { $key = 'custom_fields' }
                         'device_role' { $key = 'role' }  # Backwards compatibility
                     }
 
@@ -213,8 +209,15 @@ function New-NBVirtualMachine {
             if ($Force -or $PSCmdlet.ShouldProcess($target, 'Create virtual machines (bulk)')) {
                 Write-Verbose "Processing $($bulkItems.Count) VMs in bulk mode with batch size $BatchSize"
 
-                $result = Send-NBBulkRequest -URI $URI -Items $bulkItems.ToArray() -Method POST `
-                    -BatchSize $BatchSize -ShowProgress -ActivityName 'Creating virtual machines'
+                $bulkParams = @{
+                    URI          = $URI
+                    Items        = $bulkItems.ToArray()
+                    Method       = 'POST'
+                    BatchSize    = $BatchSize
+                    ShowProgress = $true
+                    ActivityName = 'Creating virtual machines'
+                }
+                $result = Send-NBBulkRequest @bulkParams
 
                 # Output succeeded items to pipeline
                 foreach ($item in $result.Succeeded) {

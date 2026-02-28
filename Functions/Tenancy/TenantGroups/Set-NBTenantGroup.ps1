@@ -81,7 +81,7 @@ function Set-NBTenantGroup {
 
             $URI = BuildNewURI -Segments $URIComponents.Segments
 
-            if ($Force -or $PSCmdlet.ShouldProcess("$("ID $GroupId")", 'Update tenant group')) {
+            if ($Force -or $PSCmdlet.ShouldProcess("ID $GroupId", 'Update tenant group')) {
                 InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
             }
         }

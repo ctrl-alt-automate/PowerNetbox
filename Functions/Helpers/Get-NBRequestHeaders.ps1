@@ -13,8 +13,8 @@ function Get-NBRequestHeaders {
     .PARAMETER Branch
         Optional explicit branch schema_id to use instead of the stack context
 
-    .PARAMETER IncludeBranchContext
-        Whether to include branch context header. Defaults to $true.
+    .PARAMETER SkipBranchContext
+        If specified, omits the X-NetBox-Branch header from the returned headers.
 
     .EXAMPLE
         $headers = Get-NBRequestHeaders
@@ -25,7 +25,7 @@ function Get-NBRequestHeaders {
         # Uses explicit branch instead of stack context
 
     .EXAMPLE
-        $headers = Get-NBRequestHeaders -IncludeBranchContext:$false
+        $headers = Get-NBRequestHeaders -SkipBranchContext
         # Only returns Authorization header, no branch context
 #>
 
@@ -34,7 +34,7 @@ function Get-NBRequestHeaders {
     param(
         [string]$Branch,
 
-        [switch]$IncludeBranchContext = $true
+        [switch]$SkipBranchContext
     )
 
     $creds = Get-NBCredential
@@ -54,7 +54,7 @@ function Get-NBRequestHeaders {
     }
 
     # Add branch context if requested
-    if ($IncludeBranchContext) {
+    if (-not $SkipBranchContext) {
         # Determine effective branch context: explicit param > stack context > main
         $effectiveBranchContext = if ($Branch) {
             # Explicit -Branch parameter (schema_id string)

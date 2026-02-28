@@ -63,14 +63,13 @@ function New-NBCircuit {
     process {
         Write-Verbose "Creating Circuit"
         $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuits'))
-        $Method = 'POST'
 
-        $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'Force'
 
         $URI = BuildNewURI -Segments $URIComponents.Segments
 
         if ($Force -or $PSCmdlet.ShouldProcess($CID, 'Create new circuit')) {
-            InvokeNetboxRequest -URI $URI -Method $Method -Body $URIComponents.Parameters -Raw:$Raw
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
         }
     }
 }

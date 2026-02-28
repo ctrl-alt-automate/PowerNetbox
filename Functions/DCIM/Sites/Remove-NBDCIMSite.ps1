@@ -1,36 +1,21 @@
 <#
-    .NOTES
-    ===========================================================================
-     Created with:  SAPIEN Technologies, Inc., PowerShell Studio 2020 v5.7.181
-     Created on:    2020-10-02 15:52
-     Created by:    Claussen
-     Organization:  NEOnet
-     Filename:      New-NBDCIMSite.ps1
-    ===========================================================================
-    .DESCRIPTION
-        A description of the file.
+.SYNOPSIS
+    Removes a DCIM Site from Netbox.
+
+.DESCRIPTION
+    Removes a DCIM Site from Netbox.
+    Supports pipeline input for Id parameter.
+
+.EXAMPLE
+    Remove-NBDCIMSite -Id 1
+
+.EXAMPLE
+    Get-NBDCIMSite -Name 'My Site' | Remove-NBDCIMSite -Confirm:$false
+
+.LINK
+    https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
-
-
 function Remove-NBDCIMSite {
-    <#
-        .SYNOPSIS
-            Remove a Site
-
-        .DESCRIPTION
-            Remove a DCIM Site from Netbox
-
-        .EXAMPLE
-            Remove-NBDCIMSite -Id 1
-
-            Remove DCM Site with id 1
-
-        .EXAMPLE
-            Get-NBDCIMSite -name My Site | Remove-NBDCIMSite -confirm:$false
-
-            Remove DCM Site with name My Site without confirmation
-
-    #>
 
     [CmdletBinding(ConfirmImpact = 'High',
         SupportsShouldProcess = $true)]
@@ -44,23 +29,15 @@ function Remove-NBDCIMSite {
         [switch]$Raw
     )
 
-    begin {
-
-    }
-
     process {
         Write-Verbose "Removing DCIM Site"
 
-        if ($pscmdlet.ShouldProcess("ID $Id", "Remove Site")) {
+        if ($PSCmdlet.ShouldProcess("ID $Id", "Remove Site")) {
             $Segments = [System.Collections.ArrayList]::new(@('dcim', 'sites', $Id))
 
             $URI = BuildNewURI -Segments $Segments
 
             InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
         }
-    }
-
-    end {
-
     }
 }

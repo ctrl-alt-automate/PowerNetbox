@@ -202,15 +202,6 @@ function Set-NBIPAMAddress {
                     $key = $prop.Name.ToLower()
                     $value = $prop.Value
 
-                    # Handle property name mappings
-                    switch ($key) {
-                        'nat_inside' { $key = 'nat_inside' }
-                        'custom_fields' { $key = 'custom_fields' }
-                        'assigned_object_type' { $key = 'assigned_object_type' }
-                        'assigned_object_id' { $key = 'assigned_object_id' }
-                        'dns_name' { $key = 'dns_name' }
-                    }
-
                     $item[$key] = $value
                 }
                 [void]$bulkItems.Add([PSCustomObject]$item)
@@ -225,8 +216,15 @@ function Set-NBIPAMAddress {
             if ($Force -or $PSCmdlet.ShouldProcess($target, 'Update IP addresses (bulk)')) {
                 Write-Verbose "Processing $($bulkItems.Count) IP addresses in bulk PATCH mode with batch size $BatchSize"
 
-                $result = Send-NBBulkRequest -URI $URI -Items $bulkItems.ToArray() -Method PATCH `
-                    -BatchSize $BatchSize -ShowProgress -ActivityName 'Updating IP addresses'
+                $bulkParams = @{
+                    URI          = $URI
+                    Items        = $bulkItems.ToArray()
+                    Method       = 'PATCH'
+                    BatchSize    = $BatchSize
+                    ShowProgress = $true
+                    ActivityName = 'Updating IP addresses'
+                }
+                $result = Send-NBBulkRequest @bulkParams
 
                 # Output succeeded items to pipeline
                 foreach ($item in $result.Succeeded) {

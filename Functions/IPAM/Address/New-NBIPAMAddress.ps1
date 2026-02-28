@@ -184,15 +184,6 @@ function New-NBIPAMAddress {
                     $key = $prop.Name.ToLower()
                     $value = $prop.Value
 
-                    # Handle property name mappings
-                    switch ($key) {
-                        'nat_inside' { $key = 'nat_inside' }
-                        'custom_fields' { $key = 'custom_fields' }
-                        'dns_name' { $key = 'dns_name' }
-                        'assigned_object_type' { $key = 'assigned_object_type' }
-                        'assigned_object_id' { $key = 'assigned_object_id' }
-                    }
-
                     $item[$key] = $value
                 }
 
@@ -214,8 +205,15 @@ function New-NBIPAMAddress {
             if ($Force -or $PSCmdlet.ShouldProcess($target, 'Create IP addresses (bulk)')) {
                 Write-Verbose "Processing $($bulkItems.Count) IP addresses in bulk mode with batch size $BatchSize"
 
-                $result = Send-NBBulkRequest -URI $URI -Items $bulkItems.ToArray() -Method POST `
-                    -BatchSize $BatchSize -ShowProgress -ActivityName 'Creating IP addresses'
+                $bulkParams = @{
+                    URI          = $URI
+                    Items        = $bulkItems.ToArray()
+                    Method       = 'POST'
+                    BatchSize    = $BatchSize
+                    ShowProgress = $true
+                    ActivityName = 'Creating IP addresses'
+                }
+                $result = Send-NBBulkRequest @bulkParams
 
                 # Output succeeded items to pipeline
                 foreach ($item in $result.Succeeded) {

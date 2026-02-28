@@ -8,6 +8,26 @@
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
+.PARAMETER All
+    Automatically fetch all pages of results. Uses the API's pagination
+    to retrieve all items across multiple requests.
+
+.PARAMETER PageSize
+    Number of items per page when using -All. Default: 100.
+    Range: 1-1000.
+
+.PARAMETER Brief
+    Return a minimal representation of objects (id, url, display, name only).
+    Reduces response size by ~90%. Ideal for dropdowns and reference lists.
+
+.PARAMETER Fields
+    Specify which fields to include in the response.
+    Supports nested field selection (e.g., 'site.name', 'device_type.model').
+
+.PARAMETER Omit
+    Specify which fields to exclude from the response.
+    Requires Netbox 4.5.0 or later.
+
 .EXAMPLE
     Get-NBCircuitTermination
 
@@ -27,7 +47,6 @@ function Get-NBCircuitTermination {
         [switch]$Brief,
 
         [string[]]$Fields,
-
 
         [string[]]$Omit,
 
@@ -72,7 +91,7 @@ function Get-NBCircuitTermination {
                 foreach ($i in $ID) {
                     $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuit-terminations', $i))
 
-                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'All', 'PageSize'
+                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'All', 'PageSize'
 
                     $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
@@ -83,7 +102,7 @@ function Get-NBCircuitTermination {
             default {
                 $Segments = [System.Collections.ArrayList]::new(@('circuits', 'circuit-terminations'))
 
-                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'All', 'PageSize'
+                $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'
 
                 $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 

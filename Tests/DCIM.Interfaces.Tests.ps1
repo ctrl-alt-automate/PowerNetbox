@@ -1,4 +1,3 @@
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param()
 
 BeforeAll {
@@ -16,36 +15,26 @@ BeforeAll {
 Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
     BeforeAll {
         Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
-        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+        Mock -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -MockWith {
             return [ordered]@{
-                'Method'      = $Method
-                'Uri'         = $Uri
-                'Headers'     = $Headers
-                'Timeout'     = $Timeout
-                'ContentType' = $ContentType
-                'Body'        = $Body
+                'Method' = if ($Method) { $Method } else { 'GET' }
+                'Uri'    = $URI.Uri.AbsoluteUri
+                'Body'   = if ($Body) { $Body | ConvertTo-Json -Compress } else { $null }
             }
         }
-        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
-            return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
-        }
-        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { return 'netbox.domain.com' }
-        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
-        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
 
         InModuleScope -ModuleName 'PowerNetbox' -ArgumentList $script:TestPath -ScriptBlock {
             param($TestPath)
             $script:NetboxConfig.Hostname = 'netbox.domain.com'
             $script:NetboxConfig.HostScheme = 'https'
             $script:NetboxConfig.HostPort = 443
-            $script:NetboxConfig.Choices.DCIM = (Get-Content "$TestPath/DCIMChoices.json" -ErrorAction Stop | ConvertFrom-Json)
         }
     }
 
     Context "Get-NBDCIMInterface" {
         It "Should request the default number of interfaces" {
             $Result = Get-NBDCIMInterface
-            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -Times 1 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'GET'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/interfaces/'
         }
@@ -81,6 +70,19 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
         It "Should request with a name filter" {
             $Result = Get-NBDCIMInterface -Name "eth0"
             $Result.Uri | Should -BeExactly 'https://netbox.domain.com/api/dcim/interfaces/?name=eth0'
+        }
+
+        It "Should request an interface by ID" {
+            $Result = Get-NBDCIMInterface -Id 10
+            $Result.Method | Should -Be 'GET'
+            $Result.Uri | Should -Match '/api/dcim/interfaces/10/'
+        }
+
+        It "Should request multiple interfaces by ID" {
+            $Result = Get-NBDCIMInterface -Id 10, 12
+            $Result | Should -HaveCount 2
+            $Result[0].Uri | Should -Match '/api/dcim/interfaces/10/'
+            $Result[1].Uri | Should -Match '/api/dcim/interfaces/12/'
         }
 
         It "Should request an interface from the pipeline" {
@@ -177,7 +179,7 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
         }
 
         It "Should remove an interface" {
-            $Result = Remove-NBDCIMInterface -Id 10 -Force
+            $Result = Remove-NBDCIMInterface -Id 10 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/interfaces/10/'
         }
@@ -187,7 +189,7 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
             $Result = @(
                 [pscustomobject]@{ 'Id' = 10 },
                 [pscustomobject]@{ 'Id' = 12 }
-            ) | Remove-NBDCIMInterface -Force
+            ) | Remove-NBDCIMInterface -Confirm:$false
             $Result.Method | Should -Be 'DELETE', 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/interfaces/10/', 'https://netbox.domain.com/api/dcim/interfaces/12/'
         }
@@ -196,7 +198,7 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
             $Result = @(
                 [pscustomobject]@{ 'Id' = 30 },
                 [pscustomobject]@{ 'Id' = 40 }
-            ) | Remove-NBDCIMInterface -Force
+            ) | Remove-NBDCIMInterface -Confirm:$false
             $Result.Method | Should -Be 'DELETE', 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/interfaces/30/', 'https://netbox.domain.com/api/dcim/interfaces/40/'
         }
@@ -222,6 +224,12 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
             $validateSet = $param.Attributes | Where-Object { $_ -is [System.Management.Automation.ValidateSetAttribute] }
             $validateSet | Should -Not -BeNullOrEmpty
             $validateSet.ValidValues | Should -Contain 'connected'
+        }
+
+        It "Should request an interface connection by ID" {
+            $Result = Get-NBDCIMInterfaceConnection -Id 7
+            $Result.Method | Should -Be 'GET'
+            $Result.Uri | Should -Match '/api/dcim/interface-connections/7/'
         }
     }
 
@@ -250,7 +258,7 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
         }
 
         It "Should set an interface connection" {
-            $Result = Set-NBDCIMInterfaceConnection -Id 123 -Interface_B 2 -Force
+            $Result = Set-NBDCIMInterfaceConnection -Id 123 -Interface_B 2 -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
             $Result.Uri | Should -BeExactly 'https://netbox.domain.com/api/dcim/interface-connections/123/'
             $Result.Body | Should -Be '{"interface_b":2}'
@@ -258,7 +266,7 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
 
         It "Should throw when trying to set multiple connections" {
             # Set- functions only accept single Id; this test verifies the validation works
-            { Set-NBDCIMInterfaceConnection -Id 456, 789 -Interface_B 22 -Force } | Should -Throw
+            { Set-NBDCIMInterfaceConnection -Id 456, 789 -Interface_B 22 -Confirm:$false } | Should -Throw
         }
     }
 
@@ -270,7 +278,7 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
         }
 
         It "Should remove an interface connection" {
-            $Result = Remove-NBDCIMInterfaceConnection -Id 10 -Force
+            $Result = Remove-NBDCIMInterfaceConnection -Id 10 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/interface-connections/10/'
         }
@@ -280,9 +288,74 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
             $Result = @(
                 [pscustomobject]@{ 'Id' = 10 },
                 [pscustomobject]@{ 'Id' = 12 }
-            ) | Remove-NBDCIMInterfaceConnection -Force
+            ) | Remove-NBDCIMInterfaceConnection -Confirm:$false
             $Result.Method | Should -Be 'DELETE', 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/interface-connections/10/', 'https://netbox.domain.com/api/dcim/interface-connections/12/'
         }
     }
+
+    #region WhatIf Tests
+    Context "WhatIf Support" {
+        $whatIfTestCases = @(
+            @{ Command = 'New-NBDCIMInterface'; Parameters = @{ Device = 1; Name = 'whatif-test' } }
+            @{ Command = 'New-NBDCIMInterfaceConnection'; Parameters = @{ Interface_A = 1; Interface_B = 1 } }
+            @{ Command = 'Set-NBDCIMInterface'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMInterfaceConnection'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMInterface'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMInterfaceConnection'; Parameters = @{ Id = 1 } }
+        )
+
+        It 'Should support -WhatIf for <Command>' -TestCases $whatIfTestCases {
+            param($Command, $Parameters)
+            $splat = $Parameters.Clone()
+            $splat.Add('WhatIf', $true)
+            $Result = & $Command @splat
+            $Result | Should -BeNullOrEmpty
+        }
+    }
+    #endregion
+
+    #region All/PageSize Passthrough Tests
+    Context "All/PageSize Passthrough" {
+        $allPageSizeTestCases = @(
+            @{ Command = 'Get-NBDCIMInterface' }
+            @{ Command = 'Get-NBDCIMInterfaceConnection' }
+        )
+
+        It 'Should pass -All to InvokeNetboxRequest for <Command>' -TestCases $allPageSizeTestCases {
+            param($Command, $Parameters)
+            $splat = @{ All = $true }
+            if ($Parameters) { $splat += $Parameters }
+            & $Command @splat
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
+                $All -eq $true
+            }
+        }
+
+        It 'Should pass -PageSize to InvokeNetboxRequest for <Command>' -TestCases $allPageSizeTestCases {
+            param($Command, $Parameters)
+            $splat = @{ All = $true; PageSize = 500 }
+            if ($Parameters) { $splat += $Parameters }
+            & $Command @splat
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
+                $PageSize -eq 500
+            }
+        }
+    }
+    #endregion
+
+    #region Omit Parameter Tests
+    Context "Omit Parameter" {
+        $omitTestCases = @(
+            @{ Command = 'Get-NBDCIMInterface' }
+            @{ Command = 'Get-NBDCIMInterfaceConnection' }
+        )
+
+        It 'Should pass -Omit to query string for <Command>' -TestCases $omitTestCases {
+            param($Command)
+            $Result = & $Command -Omit @('comments', 'description')
+            $Result.Uri | Should -Match 'omit=comments%2Cdescription'
+        }
+    }
+    #endregion
 }

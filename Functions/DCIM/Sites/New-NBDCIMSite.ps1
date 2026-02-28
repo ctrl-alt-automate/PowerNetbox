@@ -30,7 +30,7 @@ function New-NBDCIMSite {
 
     [CmdletBinding(ConfirmImpact = 'Low',
         SupportsShouldProcess = $true)]
-    [OutputType([pscustomobject])]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(Mandatory = $true)]
@@ -73,7 +73,6 @@ function New-NBDCIMSite {
     process {
         Write-Verbose "Creating DCIM Site"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'sites'))
-        $Method = 'POST'
 
         if (-not $PSBoundParameters.ContainsKey('slug')) {
             $PSBoundParameters.Add('slug', $name)
@@ -84,7 +83,7 @@ function New-NBDCIMSite {
         $URI = BuildNewURI -Segments $URIComponents.Segments
 
         if ($PSCmdlet.ShouldProcess($name, 'Create new Site')) {
-            InvokeNetboxRequest -URI $URI -Method $Method -Body $URIComponents.Parameters -Raw:$Raw
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
         }
     }
 }

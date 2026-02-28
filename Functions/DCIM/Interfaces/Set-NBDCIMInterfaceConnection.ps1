@@ -58,7 +58,7 @@ function Set-NBDCIMInterfaceConnection {
         foreach ($ConnectionID in $Id) {
             $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interface-connections', $ConnectionID))
 
-            if ($Force -or $pscmdlet.ShouldProcess("Interface Connection ID $ConnectionID", "Set")) {
+            if ($Force -or $PSCmdlet.ShouldProcess("Interface Connection ID $ConnectionID", "Set")) {
 
                 $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'Force'
 
@@ -69,7 +69,4 @@ function Set-NBDCIMInterfaceConnection {
         }
     }
 
-    end {
-
-    }
 }

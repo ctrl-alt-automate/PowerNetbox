@@ -4,10 +4,6 @@
 
 .DESCRIPTION
     Sets the credential for Netbox API authentication.
-    Supports pipeline input for Id parameter where applicable.
-
-.PARAMETER Raw
-    Return the raw API response instead of the results array.
 
 .EXAMPLE
     Set-NBCredential
@@ -26,7 +22,9 @@ function Set-NBCredential {
     (
         [Parameter(ParameterSetName = 'CredsObject',
             Mandatory = $true)]
-        [pscredential]$Credential,
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.Credential()]
+        $Credential,
 
         [Parameter(ParameterSetName = 'UserPass',
             Mandatory = $true)]

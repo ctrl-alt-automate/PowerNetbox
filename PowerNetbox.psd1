@@ -12,7 +12,7 @@
 RootModule = 'PowerNetbox.psm1'
 
 # Version number of this module.
-ModuleVersion = '4.5.2.0'
+ModuleVersion = '4.5.2.1'
 
 # Supported PSEditions
 CompatiblePSEditions = 'Desktop', 'Core'
@@ -72,8 +72,8 @@ NestedModules = @()
 FunctionsToExport = 'BuildNewURI', 'BuildURIComponents', 'CheckNetboxIsConnected',
                'Clear-NBCredential', 'Connect-NBAPI', 'ConvertTo-NBRackConsole',
                'ConvertTo-NBRackHTML', 'ConvertTo-NBRackMarkdown',
-               'ConvertTo-NetboxVersion', 'CreateEnum', 'Enter-NBBranch',
-               'Exit-NBBranch', 'Export-NBRackElevation', 'Get-ModelDefinition',
+               'ConvertTo-NetboxVersion', 'Enter-NBBranch',
+               'Exit-NBBranch', 'Export-NBRackElevation',
                'Get-NBAPIDefinition', 'Get-NBBookmark', 'Get-NBBranch',
                'Get-NBBranchContext', 'Get-NBBranchEvent', 'Get-NBChangeDiff',
                'Get-NBCircuit', 'Get-NBCircuitGroup', 'Get-NBCircuitGroupAssignment',
@@ -129,7 +129,7 @@ FunctionsToExport = 'BuildNewURI', 'BuildURIComponents', 'CheckNetboxIsConnected
                'Get-NBVPNL2VPNTermination', 'Get-NBVPNTunnel',
                'Get-NBVPNTunnelGroup', 'Get-NBVPNTunnelTermination', 'Get-NBWebhook',
                'Get-NBWirelessLAN', 'Get-NBWirelessLANGroup', 'Get-NBWirelessLink',
-               'GetNetboxAPIErrorBody', 'GetNetboxConfigVariable',
+               'GetNetboxAPIErrorBody',
                'Invoke-NBGraphQL', 'Invoke-NBInBranch', 'InvokeNetboxRequest',
                'Merge-NBBranch', 'New-NBBookmark', 'New-NBBranch', 'New-NBCircuit',
                'New-NBCircuitGroup', 'New-NBCircuitGroupAssignment',

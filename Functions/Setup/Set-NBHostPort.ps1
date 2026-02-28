@@ -4,13 +4,9 @@
 
 .DESCRIPTION
     Sets the port for Netbox API connections.
-    Supports pipeline input for Id parameter where applicable.
-
-.PARAMETER Raw
-    Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBHostPort
+    Set-NBHostPort -Port 443
 
     Sets the Netbox API host port.
 
@@ -20,7 +16,7 @@
 function Set-NBHostPort {
     [CmdletBinding(ConfirmImpact = 'Low',
                    SupportsShouldProcess = $true)]
-    [OutputType([string])]
+    [OutputType([uint16])]
     param
     (
         [Parameter(Mandatory = $true)]

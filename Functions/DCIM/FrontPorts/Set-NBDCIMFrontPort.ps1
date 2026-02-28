@@ -76,7 +76,7 @@
 function Set-NBDCIMFrontPort {
     [CmdletBinding(ConfirmImpact = 'Medium',
         SupportsShouldProcess = $true)]
-    [OutputType([pscustomobject])]
+    [OutputType([PSCustomObject])]
     param
     (
         [Parameter(Mandatory = $true,
@@ -161,11 +161,9 @@ function Set-NBDCIMFrontPort {
             }
         }
 
-        if ($Force -or $pscmdlet.ShouldProcess("Front Port ID $Id", "Set")) {
+        if ($Force -or $PSCmdlet.ShouldProcess("Front Port ID $Id", "Set")) {
             InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method PATCH -Raw:$Raw
         }
     }
 
-    end {
-    }
 }

@@ -38,7 +38,7 @@ function Remove-NBIPAMAddressRange {
 
             $Segments = [System.Collections.ArrayList]::new(@('ipam', 'ip-ranges', $Range_Id))
 
-            if ($Force -or $pscmdlet.ShouldProcess("ID $Range_Id", "Delete")) {
+            if ($Force -or $PSCmdlet.ShouldProcess("ID $Range_Id", "Delete")) {
                 $URI = BuildNewURI -Segments $Segments
 
                 InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw

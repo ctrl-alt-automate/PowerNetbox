@@ -45,17 +45,13 @@ function Set-NBVirtualMachineInterface {
         [switch]$Raw
     )
 
-    begin {
-
-    }
-
     process {
         foreach ($VMI_ID in $Id) {
             Write-Verbose "Updating VM Interface ID $VMI_ID"
 
             $Segments = [System.Collections.ArrayList]::new(@('virtualization', 'interfaces', $VMI_ID))
 
-            if ($Force -or $pscmdlet.ShouldProcess("VM Interface ID $VMI_ID", "Set")) {
+            if ($Force -or $PSCmdlet.ShouldProcess("VM Interface ID $VMI_ID", "Set")) {
                 $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'Force'
 
                 $URI = BuildNewURI -Segments $URIComponents.Segments
@@ -63,9 +59,5 @@ function Set-NBVirtualMachineInterface {
                 InvokeNetboxRequest -URI $URI -Body $URIComponents.Parameters -Method PATCH -Raw:$Raw
             }
         }
-    }
-
-    end {
-
     }
 }

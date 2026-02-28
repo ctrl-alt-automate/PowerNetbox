@@ -8,6 +8,26 @@
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 
+.PARAMETER All
+    Automatically fetch all pages of results. Uses the API's pagination
+    to retrieve all items across multiple requests.
+
+.PARAMETER PageSize
+    Number of items per page when using -All. Default: 100.
+    Range: 1-1000.
+
+.PARAMETER Brief
+    Return a minimal representation of objects (id, url, display, name only).
+    Reduces response size by ~90%. Ideal for dropdowns and reference lists.
+
+.PARAMETER Fields
+    Specify which fields to include in the response.
+    Supports nested field selection (e.g., 'site.name', 'device_type.model').
+
+.PARAMETER Omit
+    Specify which fields to exclude from the response.
+    Requires Netbox 4.5.0 or later.
+
 .EXAMPLE
     Get-NBDCIMCableTermination
 
@@ -15,7 +35,7 @@
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
 function Get-NBDCIMCableTermination {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName = 'Query')]
     [OutputType([PSCustomObject])]
     #region Parameters
     param
@@ -29,7 +49,6 @@ function Get-NBDCIMCableTermination {
 
         [string[]]$Fields,
 
-
         [string[]]$Omit,
 
         [ValidateRange(1, 1000)]
@@ -41,12 +60,16 @@ function Get-NBDCIMCableTermination {
         [Parameter(ValueFromPipelineByPropertyName = $true)]
         [uint64[]]$Id,
 
+        [Parameter(ParameterSetName = 'Query')]
         [uint64]$Cable,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Cable_End,
 
+        [Parameter(ParameterSetName = 'Query')]
         [string]$Termination_Type,
 
+        [Parameter(ParameterSetName = 'Query')]
         [uint64]$Termination_ID,
 
         [switch]$Raw

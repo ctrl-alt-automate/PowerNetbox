@@ -30,7 +30,7 @@
 #>
 function Remove-NBContactRole {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
-    [OutputType([PSCustomObject])]
+    [OutputType([void])]
     param
     (
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
@@ -49,7 +49,7 @@ function Remove-NBContactRole {
 
             $URI = BuildNewURI -Segments $Segments
 
-            if ($Force -or $PSCmdlet.ShouldProcess("$("ID $RoleId")", 'Delete contact role')) {
+            if ($Force -or $PSCmdlet.ShouldProcess("ID $RoleId", 'Delete contact role')) {
                 InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
             }
         }

@@ -1,12 +1,9 @@
 <#
 .SYNOPSIS
-    Retrieves Get-NBVersion.ps1 objects from Netbox Setup module.
+    Retrieves version and status information from the Netbox API.
 
 .DESCRIPTION
-    Retrieves Get-NBVersion.ps1 objects from Netbox Setup module.
-
-.PARAMETER Raw
-    Return the raw API response instead of the results array.
+    Calls the /api/status/ endpoint to retrieve the Netbox version and status information.
 
 .EXAMPLE
     Get-NBVersion
@@ -21,11 +18,7 @@ function Get-NBVersion {
 
     $Segments = [System.Collections.ArrayList]::new(@('status'))
 
-    $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary @{
-        'format' = 'json'
-    }
-
-    $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters -SkipConnectedCheck
+    $URI = BuildNewURI -Segments $Segments -SkipConnectedCheck
 
     InvokeNetboxRequest -URI $URI
 }

@@ -86,7 +86,7 @@ function Set-NBTenant {
 
             $URI = BuildNewURI -Segments $URIComponents.Segments
 
-            if ($Force -or $PSCmdlet.ShouldProcess("$("ID $TenantId")", 'Update tenant')) {
+            if ($Force -or $PSCmdlet.ShouldProcess("ID $TenantId", 'Update tenant')) {
                 InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
             }
         }

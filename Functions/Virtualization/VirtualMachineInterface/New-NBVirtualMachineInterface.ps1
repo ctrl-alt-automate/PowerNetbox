@@ -186,15 +186,6 @@ function New-NBVirtualMachineInterface {
                     $key = $prop.Name.ToLower()
                     $value = $prop.Value
 
-                    # Handle property name mappings
-                    switch ($key) {
-                        'virtual_machine' { $key = 'virtual_machine' }
-                        'mac_address' { $key = 'mac_address' }
-                        'untagged_vlan' { $key = 'untagged_vlan' }
-                        'tagged_vlans' { $key = 'tagged_vlans' }
-                        'custom_fields' { $key = 'custom_fields' }
-                    }
-
                     $item[$key] = $value
                 }
 
@@ -215,8 +206,15 @@ function New-NBVirtualMachineInterface {
             if ($Force -or $PSCmdlet.ShouldProcess($target, 'Create VM interfaces (bulk)')) {
                 Write-Verbose "Processing $($bulkItems.Count) VM interfaces in bulk mode with batch size $BatchSize"
 
-                $result = Send-NBBulkRequest -URI $URI -Items $bulkItems.ToArray() -Method POST `
-                    -BatchSize $BatchSize -ShowProgress -ActivityName 'Creating VM interfaces'
+                $bulkParams = @{
+                    URI          = $URI
+                    Items        = $bulkItems.ToArray()
+                    Method       = 'POST'
+                    BatchSize    = $BatchSize
+                    ShowProgress = $true
+                    ActivityName = 'Creating VM interfaces'
+                }
+                $result = Send-NBBulkRequest @bulkParams
 
                 # Output succeeded items to pipeline
                 foreach ($item in $result.Succeeded) {

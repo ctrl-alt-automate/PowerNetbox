@@ -25,8 +25,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Cache PowerShell modules
+        uses: actions/cache@v4
+        id: ps-cache
+        with:
+          path: ${{ runner.os != 'Windows' && '~/.local/share/powershell/Modules' || (matrix.pwsh && '~/Documents/PowerShell/Modules' || '~/Documents/WindowsPowerShell/Modules') }}
+          key: ps-modules-${{ matrix.os }}-${{ matrix.pwsh }}-v1
+
       - name: Install dependencies (pwsh)
-        if: matrix.pwsh
+        if: matrix.pwsh && steps.ps-cache.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
           # Register PSGallery if not present (required for Windows Server 2025)
@@ -38,7 +45,7 @@ jobs:
           Install-Module PSScriptAnalyzer -Force -Scope CurrentUser
 
       - name: Install dependencies (powershell)
-        if: '!matrix.pwsh'
+        if: "!matrix.pwsh && steps.ps-cache.outputs.cache-hit != 'true'"
         shell: powershell
         run: |
           # Register PSGallery if not present (required for Windows Server 2025)
@@ -65,7 +72,7 @@ jobs:
         run: |
           $config = New-PesterConfiguration
           $config.Run.Path = './Tests/*.Tests.ps1'
-          $config.Run.Exit = $true
+          $config.Run.PassThru = $true
           $config.Filter.ExcludeTag = @('Integration', 'Live')
           $config.TestResult.Enabled = $true
           $config.TestResult.OutputPath = 'TestResults.xml'
@@ -73,10 +80,30 @@ jobs:
           $config.Output.Verbosity = 'Detailed'
           # Code coverage configuration
           $config.CodeCoverage.Enabled = $true
-          $config.CodeCoverage.Path = @('./Functions/')
+          $config.CodeCoverage.Path = @('./PowerNetbox/PowerNetbox.psm1')
           $config.CodeCoverage.OutputPath = 'coverage.xml'
           $config.CodeCoverage.OutputFormat = 'JaCoCo'
-          Invoke-Pester -Configuration $config
+          $config.CodeCoverage.CoveragePercentTarget = 70
+          $config.CodeCoverage.UseBreakpoints = $false
+
+          $result = Invoke-Pester -Configuration $config
+
+          # Fail on test failures
+          if ($result.FailedCount -gt 0) {
+              Write-Error "$($result.FailedCount) test(s) failed"
+              exit 1
+          }
+
+          # Enforce coverage threshold on Linux runner (single canonical measurement)
+          if ($env:RUNNER_OS -eq 'Linux') {
+              $coverage = [math]::Round($result.CodeCoverage.CoveragePercent, 2)
+              Write-Host "Code coverage: $coverage% (threshold: 70%)"
+              if ($coverage -lt 70) {
+                  Write-Error "Code coverage ($coverage%) is below the 70% threshold"
+                  exit 1
+              }
+              Write-Host "Coverage threshold passed"
+          }
 
       - name: Run Pester tests (powershell)
         if: '!matrix.pwsh'
@@ -90,11 +117,8 @@ jobs:
           $config.TestResult.OutputPath = 'TestResults.xml'
           $config.TestResult.OutputFormat = 'NUnitXml'
           $config.Output.Verbosity = 'Detailed'
-          # Code coverage configuration
-          $config.CodeCoverage.Enabled = $true
-          $config.CodeCoverage.Path = @('./Functions/')
-          $config.CodeCoverage.OutputPath = 'coverage.xml'
-          $config.CodeCoverage.OutputFormat = 'JaCoCo'
+          # Code coverage disabled on PS 5.1: profiler requires PS 7+,
+          # and breakpoint-based coverage is too slow on 40K-line built module
           Invoke-Pester -Configuration $config
 
       - name: Upload test results
@@ -107,9 +131,9 @@ jobs:
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
-        if: always()
+        if: always() && matrix.pwsh
         with:
-          name: coverage-${{ matrix.os }}-${{ matrix.pwsh && 'pwsh' || 'ps51' }}
+          name: coverage-${{ matrix.os }}
           path: coverage.xml
           retention-days: 30
 

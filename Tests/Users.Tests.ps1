@@ -22,22 +22,13 @@ BeforeAll {
 Describe "Users Module Tests" -Tag 'Users' {
     BeforeAll {
         Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
-        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+        Mock -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -MockWith {
             return [ordered]@{
-                'Method'      = $Method
-                'Uri'         = $Uri
-                'Headers'     = $Headers
-                'Timeout'     = $Timeout
-                'ContentType' = $ContentType
-                'Body'        = $Body
+                'Method' = if ($Method) { $Method } else { 'GET' }
+                'Uri'    = $URI.Uri.AbsoluteUri
+                'Body'   = if ($Body) { $Body | ConvertTo-Json -Compress } else { $null }
             }
         }
-        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
-            return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
-        }
-        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { return 'netbox.domain.com' }
-        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
-        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
 
         InModuleScope -ModuleName 'PowerNetbox' {
             $script:NetboxConfig.Hostname = 'netbox.domain.com'
@@ -713,6 +704,72 @@ Describe "Users Module Tests" -Tag 'Users' {
         It "Should support -WhatIf" {
             $Result = Remove-NBOwner -Id 1 -WhatIf
             $Result | Should -BeNullOrEmpty
+        }
+    }
+    #endregion
+
+    #region All/PageSize Passthrough Tests
+    Context "All/PageSize Passthrough" {
+        $allPageSizeTestCases = @(
+            @{ Command = 'Get-NBGroup' }
+            @{ Command = 'Get-NBOwner' }
+            @{ Command = 'Get-NBOwnerGroup' }
+            @{ Command = 'Get-NBPermission' }
+            @{ Command = 'Get-NBToken' }
+            @{ Command = 'Get-NBUser' }
+        )
+
+        It 'Should pass -All to InvokeNetboxRequest for <Command>' -TestCases $allPageSizeTestCases {
+            param($Command, $Parameters)
+            $splat = @{ All = $true }
+            if ($Parameters) { $splat += $Parameters }
+            & $Command @splat
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
+                $All -eq $true
+            }
+        }
+
+        It 'Should pass -PageSize to InvokeNetboxRequest for <Command>' -TestCases $allPageSizeTestCases {
+            param($Command, $Parameters)
+            $splat = @{ All = $true; PageSize = 500 }
+            if ($Parameters) { $splat += $Parameters }
+            & $Command @splat
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
+                $PageSize -eq 500
+            }
+        }
+    }
+    #endregion
+
+    #region Omit Parameter Tests
+    Context "Omit Parameter" {
+        $omitTestCases = @(
+            @{ Command = 'Get-NBGroup' }
+            @{ Command = 'Get-NBOwner' }
+            @{ Command = 'Get-NBOwnerGroup' }
+            @{ Command = 'Get-NBPermission' }
+            @{ Command = 'Get-NBToken' }
+            @{ Command = 'Get-NBUser' }
+        )
+
+        It 'Should pass -Omit to query string for <Command>' -TestCases $omitTestCases {
+            param($Command)
+            $Result = & $Command -Omit @('comments', 'description')
+            $Result.Uri | Should -Match 'omit=comments%2Cdescription'
+        }
+    }
+    #endregion
+
+    #region Pipeline Input Tests
+    Context "Pipeline Input" {
+        $pipelineTestCases = @(
+            @{ Command = 'Get-NBUser' }
+        )
+
+        It 'Should accept pipeline input by property name for <Command>' -TestCases $pipelineTestCases {
+            param($Command)
+            $Result = [pscustomobject]@{ 'Id' = 10 } | & $Command
+            $Result.Uri | Should -Match '/10/'
         }
     }
     #endregion

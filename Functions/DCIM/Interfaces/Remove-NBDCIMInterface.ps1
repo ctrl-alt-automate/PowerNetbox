@@ -30,15 +30,11 @@ function Remove-NBDCIMInterface {
         [switch]$Raw
     )
 
-    begin {
-
-    }
-
     process {
         Write-Verbose "Removing DCIM Interface"
         foreach ($InterfaceId in $Id) {
 
-            if ($Force -or $pscmdlet.ShouldProcess("Name: $("ID $InterfaceId") | ID: $($InterfaceId)", "Remove")) {
+            if ($Force -or $PSCmdlet.ShouldProcess("ID $InterfaceId", "Remove")) {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interfaces', $InterfaceId))
 
                 $URI = BuildNewURI -Segments $Segments
@@ -46,9 +42,5 @@ function Remove-NBDCIMInterface {
                 InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
             }
         }
-    }
-
-    end {
-
     }
 }

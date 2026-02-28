@@ -124,8 +124,15 @@ function Remove-NBDCIMDevice {
             if ($Force -or $PSCmdlet.ShouldProcess($target, 'Delete devices (bulk)')) {
                 Write-Verbose "Processing $($bulkItems.Count) devices in bulk DELETE mode with batch size $BatchSize"
 
-                $result = Send-NBBulkRequest -URI $URI -Items $bulkItems.ToArray() -Method DELETE `
-                    -BatchSize $BatchSize -ShowProgress -ActivityName 'Deleting devices'
+                $bulkParams = @{
+                    URI          = $URI
+                    Items        = $bulkItems.ToArray()
+                    Method       = 'DELETE'
+                    BatchSize    = $BatchSize
+                    ShowProgress = $true
+                    ActivityName = 'Deleting devices'
+                }
+                $result = Send-NBBulkRequest @bulkParams
 
                 # Write summary
                 if ($result.HasErrors) {

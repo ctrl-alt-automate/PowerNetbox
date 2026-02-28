@@ -13,18 +13,21 @@ BeforeAll {
 
 Describe "Setup tests" -Tag 'Core', 'Setup' {
     It "Throws an error for an empty hostname" {
+        InModuleScope -ModuleName 'PowerNetbox' {
+            $script:NetboxConfig.Hostname = $null
+        }
         { Get-NBHostname } | Should -Throw
     }
 
-    It "Sets the hostname" {
+    It "Should set and get the hostname" {
         Set-NBHostName -HostName 'netbox.domain.com' | Should -Be 'netbox.domain.com'
-    }
-
-    It "Gets the hostname from the variable" {
         Get-NBHostName | Should -Be 'netbox.domain.com'
     }
 
     It "Throws an error for empty credentials" {
+        InModuleScope -ModuleName 'PowerNetbox' {
+            $script:NetboxConfig.Credential = $null
+        }
         { Get-NBCredential } | Should -Throw
     }
 
@@ -40,12 +43,9 @@ Describe "Setup tests" -Tag 'Core', 'Setup' {
     }
 
     Context "Credentials object" {
-        It "Sets the credentials using [pscredential]" {
+        It "Should set and get credentials using [pscredential]" {
             $Creds = [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
             Set-NBCredential -Credential $Creds | Should -BeOfType [pscredential]
-        }
-
-        It "Checks the set credentials" {
             (Get-NBCredential).GetNetworkCredential().Password | Should -BeExactly 'faketoken'
         }
     }
@@ -250,6 +250,41 @@ Describe "Setup tests" -Tag 'Core', 'Setup' {
         }
     }
 
+    Context "Host Port" {
+        It "Should set, get, and reset the host port" {
+            Set-NBHostPort -Port 8443 | Should -Be 8443
+            Get-NBHostPort | Should -Be 8443
+            Set-NBHostPort -Port 443 | Should -Be 443
+        }
+    }
+
+    Context "Host Scheme" {
+        It "Should set, get, and reset the host scheme" {
+            Set-NBHostScheme -Scheme 'http' | Should -Be 'http'
+            Get-NBHostScheme | Should -Be 'http'
+            Set-NBHostScheme -Scheme 'https' | Should -Be 'https'
+        }
+    }
+
+    Context "Invoke Params" {
+        It "Should set and get invoke params" {
+            $params = @{ SkipCertificateCheck = $true }
+            Set-NBInvokeParams -InvokeParams $params | Should -Be $params
+
+            $getResult = Get-NBInvokeParams
+            $getResult | Should -BeOfType [hashtable]
+            $getResult.SkipCertificateCheck | Should -Be $true
+        }
+    }
+
+    Context "Timeout" {
+        It "Should set, get, and reset the timeout" {
+            Set-NBTimeout -TimeoutSeconds 60 | Should -Be 60
+            Get-NBTimeout | Should -Be 60
+            Set-NBTimeout -TimeoutSeconds 30 | Should -Be 30
+        }
+    }
+
     Context "Test-NBAuthentication Not Connected" {
         It "Should return false when not connected to Netbox" {
             Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith {
@@ -268,6 +303,36 @@ Describe "Setup tests" -Tag 'Core', 'Setup' {
             $Result = Test-NBAuthentication -Detailed
             $Result.Authenticated | Should -Be $false
             $Result.Error | Should -Match 'Connect-NBAPI'
+        }
+    }
+
+    Context "Get-NBAPIDefinition" {
+        BeforeAll {
+            Mock -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -MockWith {
+                return [PSCustomObject]@{
+                    Method = if ($Method) { $Method } else { 'GET' }
+                    Uri    = $URI.ToString()
+                    Body   = $Body
+                }
+            }
+
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.Hostname = 'netbox.domain.com'
+                $script:NetboxConfig.HostScheme = 'https'
+                $script:NetboxConfig.HostPort = 443
+            }
+        }
+
+        It "Should retrieve the API definition in JSON format by default" {
+            $Result = Get-NBAPIDefinition
+            $Result.Uri | Should -Match '/api/schema/'
+            $Result.Uri | Should -Match 'format=json'
+        }
+
+        It "Should support YAML format" {
+            $Result = Get-NBAPIDefinition -Format 'yaml'
+            $Result.Uri | Should -Match '/api/schema/'
+            $Result.Uri | Should -Match 'format=yaml'
         }
     }
 }

@@ -10,7 +10,6 @@
     and Platform functions (New/Set/Remove).
 #>
 
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param()
 
 BeforeAll {
@@ -26,22 +25,13 @@ BeforeAll {
 Describe "DCIM Template Functions" -Tag 'Build', 'DCIM' {
     BeforeAll {
         Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
-        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+        Mock -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -MockWith {
             return [ordered]@{
-                'Method'      = $Method
-                'Uri'         = $Uri
-                'Headers'     = $Headers
-                'Timeout'     = $Timeout
-                'ContentType' = $ContentType
-                'Body'        = $Body
+                'Method' = if ($Method) { $Method } else { 'GET' }
+                'Uri'    = $URI.Uri.AbsoluteUri
+                'Body'   = if ($Body) { $Body | ConvertTo-Json -Compress } else { $null }
             }
         }
-        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
-            return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
-        }
-        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { return 'netbox.domain.com' }
-        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
-        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
 
         InModuleScope -ModuleName 'PowerNetbox' {
             $script:NetboxConfig.Hostname = 'netbox.domain.com'
@@ -646,6 +636,125 @@ Describe "DCIM Template Functions" -Tag 'Build', 'DCIM' {
             $Result = Remove-NBDCIMPlatform -Id 2 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
             $Result.URI | Should -Match '/api/dcim/platforms/2/'
+        }
+    }
+    #endregion
+
+    #region WhatIf Tests
+    Context "WhatIf Support" {
+        $whatIfTestCases = @(
+            @{ Command = 'New-NBDCIMConsolePortTemplate'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'New-NBDCIMConsoleServerPortTemplate'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'New-NBDCIMDeviceBayTemplate'; Parameters = @{ Device_Type = 1; Name = 'whatif-test' } }
+            @{ Command = 'New-NBDCIMFrontPortTemplate'; Parameters = @{ Name = 'whatif-test'; Type = 'whatif-test'; Rear_Port = 1 } }
+            @{ Command = 'New-NBDCIMInterfaceTemplate'; Parameters = @{ Name = 'whatif-test'; Type = 'whatif-test' } }
+            @{ Command = 'New-NBDCIMInventoryItemTemplate'; Parameters = @{ Device_Type = 1; Name = 'whatif-test' } }
+            @{ Command = 'New-NBDCIMModuleBayTemplate'; Parameters = @{ Device_Type = 1; Name = 'whatif-test' } }
+            @{ Command = 'New-NBDCIMPowerOutletTemplate'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'New-NBDCIMPowerPortTemplate'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'New-NBDCIMRearPortTemplate'; Parameters = @{ Name = 'whatif-test'; Type = 'whatif-test' } }
+            @{ Command = 'Set-NBDCIMConsolePortTemplate'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMConsoleServerPortTemplate'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMDeviceBayTemplate'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMFrontPortTemplate'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMInterfaceTemplate'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMInventoryItemTemplate'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMModuleBayTemplate'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMPowerOutletTemplate'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMPowerPortTemplate'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMRearPortTemplate'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMConsolePortTemplate'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMConsoleServerPortTemplate'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMDeviceBayTemplate'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMFrontPortTemplate'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMInterfaceTemplate'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMInventoryItemTemplate'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMModuleBayTemplate'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMPowerOutletTemplate'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMPowerPortTemplate'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMRearPortTemplate'; Parameters = @{ Id = 1 } }
+        )
+
+        It 'Should support -WhatIf for <Command>' -TestCases $whatIfTestCases {
+            param($Command, $Parameters)
+            $splat = $Parameters.Clone()
+            $splat.Add('WhatIf', $true)
+            $Result = & $Command @splat
+            $Result | Should -BeNullOrEmpty
+        }
+    }
+    #endregion
+
+    #region All/PageSize Passthrough Tests
+    Context "All/PageSize Passthrough" {
+        $allPageSizeTestCases = @(
+            @{ Command = 'Get-NBDCIMConsolePortTemplate' }
+            @{ Command = 'Get-NBDCIMConsoleServerPortTemplate' }
+            @{ Command = 'Get-NBDCIMDeviceBayTemplate' }
+            @{ Command = 'Get-NBDCIMFrontPortTemplate' }
+            @{ Command = 'Get-NBDCIMInterfaceTemplate' }
+            @{ Command = 'Get-NBDCIMInventoryItemTemplate' }
+            @{ Command = 'Get-NBDCIMModuleBayTemplate' }
+            @{ Command = 'Get-NBDCIMPowerOutletTemplate' }
+            @{ Command = 'Get-NBDCIMPowerPortTemplate' }
+            @{ Command = 'Get-NBDCIMRearPortTemplate' }
+        )
+
+        It 'Should pass -All to InvokeNetboxRequest for <Command>' -TestCases $allPageSizeTestCases {
+            param($Command, $Parameters)
+            $splat = @{ All = $true }
+            if ($Parameters) { $splat += $Parameters }
+            & $Command @splat
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
+                $All -eq $true
+            }
+        }
+
+        It 'Should pass -PageSize to InvokeNetboxRequest for <Command>' -TestCases $allPageSizeTestCases {
+            param($Command, $Parameters)
+            $splat = @{ All = $true; PageSize = 500 }
+            if ($Parameters) { $splat += $Parameters }
+            & $Command @splat
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
+                $PageSize -eq 500
+            }
+        }
+    }
+    #endregion
+
+    #region Omit Parameter Tests
+    Context "Omit Parameter" {
+        $omitTestCases = @(
+            @{ Command = 'Get-NBDCIMConsolePortTemplate' }
+            @{ Command = 'Get-NBDCIMConsoleServerPortTemplate' }
+            @{ Command = 'Get-NBDCIMDeviceBayTemplate' }
+            @{ Command = 'Get-NBDCIMFrontPortTemplate' }
+            @{ Command = 'Get-NBDCIMInterfaceTemplate' }
+            @{ Command = 'Get-NBDCIMInventoryItemTemplate' }
+            @{ Command = 'Get-NBDCIMModuleBayTemplate' }
+            @{ Command = 'Get-NBDCIMPowerOutletTemplate' }
+            @{ Command = 'Get-NBDCIMPowerPortTemplate' }
+            @{ Command = 'Get-NBDCIMRearPortTemplate' }
+        )
+
+        It 'Should pass -Omit to query string for <Command>' -TestCases $omitTestCases {
+            param($Command)
+            $Result = & $Command -Omit @('comments', 'description')
+            $Result.Uri | Should -Match 'omit=comments%2Cdescription'
+        }
+    }
+    #endregion
+
+    #region Pipeline Input Tests
+    Context "Pipeline Input" {
+        $pipelineTestCases = @(
+            @{ Command = 'Get-NBDCIMConsolePortTemplate' }
+        )
+
+        It 'Should accept pipeline input by property name for <Command>' -TestCases $pipelineTestCases {
+            param($Command)
+            $Result = [pscustomobject]@{ 'Id' = 10 } | & $Command
+            $Result.Uri | Should -Match '/10/'
         }
     }
     #endregion

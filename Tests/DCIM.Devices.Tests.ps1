@@ -1,4 +1,3 @@
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param()
 
 BeforeAll {
@@ -20,31 +19,12 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             return $true
         }
 
-        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+        Mock -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -MockWith {
             return [ordered]@{
-                'Method'      = $Method
-                'Uri'         = $Uri
-                'Headers'     = $Headers
-                'Timeout'     = $Timeout
-                'ContentType' = $ContentType
-                'Body'        = $Body
+                'Method' = if ($Method) { $Method } else { 'GET' }
+                'Uri'    = $URI.Uri.AbsoluteUri
+                'Body'   = if ($Body) { $Body | ConvertTo-Json -Compress } else { $null }
             }
-        }
-
-        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
-            return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
-        }
-
-        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith {
-            return 'netbox.domain.com'
-        }
-
-        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith {
-            return 30
-        }
-
-        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith {
-            return @{}
         }
 
         # Set up module internal state and load choices data
@@ -53,7 +33,6 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             $script:NetboxConfig.Hostname = 'netbox.domain.com'
             $script:NetboxConfig.HostScheme = 'https'
             $script:NetboxConfig.HostPort = 443
-            $script:NetboxConfig.Choices.DCIM = (Get-Content "$TestPath/DCIMChoices.json" -ErrorAction Stop | ConvertFrom-Json)
         }
     }
 
@@ -64,7 +43,6 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             $Result.Method | Should -Be 'GET'
             # By default, config_context is excluded for performance
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/devices/?omit=config_context'
-            $Result.Headers.Keys.Count | Should -BeExactly 1
         }
 
         It "Should request with a limit and offset" {
@@ -89,8 +67,8 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             $Result = Get-NBDCIMDevice -Query 'test device'
 
             $Result.Method | Should -Be 'GET'
-            # Module doesn't URL-encode spaces in query strings
-            $Result.Uri | Should -Match 'q=test device'
+            # UriBuilder encodes spaces as %20 in the URI
+            $Result.Uri | Should -Match 'q=test%20device'
             $Result.Uri | Should -Match 'omit=config_context'
         }
 
@@ -121,10 +99,12 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
         It "Should request with multiple IDs" {
             $Result = Get-NBDCIMDevice -Id 10, 12, 15
 
-            $Result.Method | Should -Be 'GET'
-            # Commas may or may not be URL-encoded depending on PS version
-            $Result.Uri | Should -Match 'id__in=10(%2C|,)12(%2C|,)15'
-            $Result.Uri | Should -Match 'omit=config_context'
+            $Result | Should -HaveCount 3
+            $Result[0].Method | Should -Be 'GET'
+            $Result[0].Uri | Should -Match 'dcim/devices/10/'
+            $Result[1].Uri | Should -Match 'dcim/devices/12/'
+            $Result[2].Uri | Should -Match 'dcim/devices/15/'
+            $Result | ForEach-Object { $_.Uri | Should -Match 'omit=config_context' }
         }
 
         It "Should request a status" {
@@ -232,7 +212,7 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
         It "Should request the default number of device roles" {
             $Result = Get-NBDCIMDeviceRole
 
-            Should -Invoke -CommandName "Invoke-RestMethod" -Times 1 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
+            Should -Invoke -CommandName "InvokeNetboxRequest" -Times 1 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
 
             $Result.Method | Should -Be 'GET'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/device-roles/'
@@ -271,7 +251,7 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
         It "Should create a new device" {
             $Result = New-NBDCIMDevice -Name "newdevice" -Device_Role 4 -Device_Type 10 -Site 1 -Face 'front'
 
-            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -Times 1 -Scope 'It' -Exactly -ModuleName 'PowerNetbox'
 
             $Result.Method | Should -Be 'POST'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/devices/'
@@ -339,7 +319,7 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
         }
 
         It "Should set a device to a new name" {
-            $Result = Set-NBDCIMDevice -Id 1234 -Name 'newtestname' -Force
+            $Result = Set-NBDCIMDevice -Id 1234 -Name 'newtestname' -Confirm:$false
 
             # Uses Id directly without fetching device first (performance optimization #177)
             $Result.Method | Should -Be 'PATCH'
@@ -348,7 +328,7 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
         }
 
         It "Should set a device with new properties" {
-            $Result = Set-NBDCIMDevice -Id 1234 -Name 'newtestname' -Cluster 10 -Platform 20 -Site 15 -Force
+            $Result = Set-NBDCIMDevice -Id 1234 -Name 'newtestname' -Cluster 10 -Platform 20 -Site 15 -Confirm:$false
 
             $Result.Method | Should -Be 'PATCH'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/devices/1234/'
@@ -375,7 +355,7 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
         }
 
         It "Should remove a device" {
-            $Result = Remove-NBDCIMDevice -Id 10 -Force
+            $Result = Remove-NBDCIMDevice -Id 10 -Confirm:$false
 
             $Result.Method | Should -Be 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/devices/10/'
@@ -395,7 +375,7 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
                 [pscustomobject]@{ 'Id' = 30 },
                 [pscustomobject]@{ 'Id' = 31 }
             )
-            $items | Remove-NBDCIMDevice -Force
+            $items | Remove-NBDCIMDevice -Confirm:$false
 
             # Verify InvokeNetboxRequest was called with DELETE and the bulk endpoint
             Should -Invoke -CommandName "InvokeNetboxRequest" -ModuleName PowerNetbox -ParameterFilter {
@@ -403,4 +383,146 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             }
         }
     }
+
+    Context "Set-NBDCIMDeviceRole" {
+        It "Should update a device role" {
+            $Result = Set-NBDCIMDeviceRole -Id 1 -Name 'UpdatedRole' -Confirm:$false
+            $Result.Method | Should -Be 'PATCH'
+            $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/device-roles/1/'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.name | Should -Be 'UpdatedRole'
+        }
+
+        It "Should update a device role with multiple properties" {
+            $Result = Set-NBDCIMDeviceRole -Id 2 -Name 'ServerRole' -Color 'ff0000' -VM_Role $true -Confirm:$false
+            $Result.Method | Should -Be 'PATCH'
+            $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/device-roles/2/'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.name | Should -Be 'ServerRole'
+            $bodyObj.color | Should -Be 'ff0000'
+            $bodyObj.vm_role | Should -Be $true
+        }
+    }
+
+    Context "Set-NBDCIMDeviceType" {
+        It "Should update a device type" {
+            $Result = Set-NBDCIMDeviceType -Id 1 -Model 'UpdatedModel' -Confirm:$false
+            $Result.Method | Should -Be 'PATCH'
+            $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/device-types/1/'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.model | Should -Be 'UpdatedModel'
+        }
+
+        It "Should update a device type with multiple properties" {
+            $Result = Set-NBDCIMDeviceType -Id 3 -Manufacturer 5 -U_Height 2 -Is_Full_Depth $true -Confirm:$false
+            $Result.Method | Should -Be 'PATCH'
+            $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/device-types/3/'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.manufacturer | Should -Be 5
+            $bodyObj.u_height | Should -Be 2
+            $bodyObj.is_full_depth | Should -Be $true
+        }
+    }
+
+    #region Parameter Validation Tests
+    Context "Parameter Validation" {
+        It "Should reject invalid Status value for Get-NBDCIMDevice" {
+            { Get-NBDCIMDevice -Status 'invalid_status' } | Should -Throw
+        }
+
+        It "Should reject invalid Face value for New-NBDCIMDevice" {
+            { New-NBDCIMDevice -Name 'test' -Role 1 -Device_Type 1 -Site 1 -Face 'top' -Confirm:$false } | Should -Throw
+        }
+
+        It "Should reject PageSize below minimum (0)" {
+            { Get-NBDCIMDevice -PageSize 0 } | Should -Throw
+        }
+
+        It "Should reject PageSize above maximum (1001)" {
+            { Get-NBDCIMDevice -PageSize 1001 } | Should -Throw
+        }
+
+        It "Should reject Limit below minimum (0)" {
+            { Get-NBDCIMDevice -Limit 0 } | Should -Throw
+        }
+
+        It "Should require mandatory Name for New-NBDCIMDevice" {
+            { New-NBDCIMDevice -Role 1 -Device_Type 1 -Site 1 -Confirm:$false } | Should -Throw
+        }
+
+        It "Should require mandatory Role for New-NBDCIMDevice" {
+            { New-NBDCIMDevice -Name 'test' -Device_Type 1 -Site 1 -Confirm:$false } | Should -Throw
+        }
+    }
+    #endregion
+
+    #region WhatIf Tests
+    Context "WhatIf Support" {
+        $whatIfTestCases = @(
+            @{ Command = 'New-NBDCIMDevice'; Parameters = @{ Name = 'whatif-test'; Role = 1; Device_Type = 1; Site = 1 } }
+            @{ Command = 'New-NBDCIMDeviceRole'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'New-NBDCIMDeviceType'; Parameters = @{ Manufacturer = 1; Model = 'whatif-test' } }
+            @{ Command = 'Set-NBDCIMDevice'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMDeviceRole'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBDCIMDeviceType'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMDevice'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMDeviceRole'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMDeviceType'; Parameters = @{ Id = 1 } }
+        )
+
+        It 'Should support -WhatIf for <Command>' -TestCases $whatIfTestCases {
+            param($Command, $Parameters)
+            $splat = $Parameters.Clone()
+            $splat.Add('WhatIf', $true)
+            $Result = & $Command @splat
+            $Result | Should -BeNullOrEmpty
+        }
+    }
+    #endregion
+
+    #region All/PageSize Passthrough Tests
+    Context "All/PageSize Passthrough" {
+        $allPageSizeTestCases = @(
+            @{ Command = 'Get-NBDCIMDevice' }
+            @{ Command = 'Get-NBDCIMDeviceRole' }
+            @{ Command = 'Get-NBDCIMDeviceType' }
+        )
+
+        It 'Should pass -All to InvokeNetboxRequest for <Command>' -TestCases $allPageSizeTestCases {
+            param($Command, $Parameters)
+            $splat = @{ All = $true }
+            if ($Parameters) { $splat += $Parameters }
+            & $Command @splat
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
+                $All -eq $true
+            }
+        }
+
+        It 'Should pass -PageSize to InvokeNetboxRequest for <Command>' -TestCases $allPageSizeTestCases {
+            param($Command, $Parameters)
+            $splat = @{ All = $true; PageSize = 500 }
+            if ($Parameters) { $splat += $Parameters }
+            & $Command @splat
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
+                $PageSize -eq 500
+            }
+        }
+    }
+    #endregion
+
+    #region Omit Parameter Tests
+    Context "Omit Parameter" {
+        $omitTestCases = @(
+            @{ Command = 'Get-NBDCIMDevice' }
+            @{ Command = 'Get-NBDCIMDeviceRole' }
+            @{ Command = 'Get-NBDCIMDeviceType' }
+        )
+
+        It 'Should pass -Omit to query string for <Command>' -TestCases $omitTestCases {
+            param($Command)
+            $Result = & $Command -Omit @('comments', 'description')
+            $Result.Uri | Should -Match 'omit=comments%2Cdescription'
+        }
+    }
+    #endregion
 }

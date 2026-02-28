@@ -1,5 +1,7 @@
 # Functions by Module
 
+> Last updated: 2026-02-10
+
 Complete listing of all PowerNetbox functions organized by Netbox module.
 
 ## Summary
@@ -8,7 +10,7 @@ Complete listing of all PowerNetbox functions organized by Netbox module.
 |--------|-----------|-------------|
 | [DCIM](#dcim) | 180 | Sites, devices, racks, cables, interfaces |
 | [IPAM](#ipam) | 73 | IP addresses, prefixes, VLANs, VRFs |
-| [Extras](#extras) | 45 | Tags, webhooks, custom fields |
+| [Extras](#extras) | 46 | Tags, webhooks, custom fields, images |
 | [Circuits](#circuits) | 44 | Circuits, providers, terminations |
 | [VPN](#vpn) | 40 | Tunnels, L2VPN, IKE/IPsec |
 | [Users](#users) | 24 | Users, groups, permissions |
@@ -184,7 +186,7 @@ Wireless LANs and links - 12 functions
 
 ## Extras
 
-Tags, webhooks, custom fields - 45 functions
+Tags, webhooks, custom fields, images - 46 functions
 
 | Resource | Get | New | Set | Remove |
 |----------|-----|-----|-----|--------|
@@ -199,7 +201,10 @@ Tags, webhooks, custom fields - 45 functions
 | ExportTemplate | `Get-NBExportTemplate` | `New-NBExportTemplate` | `Set-NBExportTemplate` | `Remove-NBExportTemplate` |
 | JournalEntry | `Get-NBJournalEntry` | `New-NBJournalEntry` | `Set-NBJournalEntry` | `Remove-NBJournalEntry` |
 | Bookmark | `Get-NBBookmark` | `New-NBBookmark` | - | `Remove-NBBookmark` |
-| ObjectNotification | `Get-NBObjectNotification` | `New-NBObjectNotification` | `Set-NBObjectNotification` | `Remove-NBObjectNotification` |
+| ImageAttachment | `Get-NBImageAttachment` | `New-NBImageAttachment` | - | `Remove-NBImageAttachment` |
+| SavedFilter | `Get-NBSavedFilter` | `New-NBSavedFilter` | `Set-NBSavedFilter` | `Remove-NBSavedFilter` |
+
+**Note:** `New-NBImageAttachment` uses multipart form upload (bypasses `InvokeNetboxRequest`).
 
 ---
 
@@ -214,6 +219,8 @@ Data sources and jobs - 8 functions
 | Job | `Get-NBJob` | - | - | - |
 | ObjectChange | `Get-NBObjectChange` | - | - | - |
 | ObjectType | `Get-NBObjectType` | - | - | - |
+
+**Note:** `Get-NBObjectType` uses version-aware endpoints (core for 4.4+, extras for <4.4).
 
 ---
 
@@ -236,7 +243,7 @@ Users, groups, permissions - 24 functions
 
 ### Branching (netbox-branching)
 
-Requires [netbox-branching](https://github.com/netboxlabs/netbox-branching) plugin.
+Requires [netbox-branching](https://github.com/netboxlabs/netbox-branching) plugin - 14 functions.
 
 | Resource | Functions |
 |----------|-----------|
@@ -250,13 +257,13 @@ Requires [netbox-branching](https://github.com/netboxlabs/netbox-branching) plug
 
 ## Setup
 
-Connection and configuration functions - 25 functions
+Connection and configuration functions - 25 functions (19 main + 6 support)
 
 ### Connection
 
 | Function | Purpose |
 |----------|---------|
-| `Connect-NBAPI` | Establish connection to Netbox |
+| `Connect-NBAPI` | Establish connection to Netbox (v1 Token + v2 Bearer auth) |
 | `Test-NBAuthentication` | Verify authentication |
 | `Get-NBVersion` | Get Netbox version |
 
@@ -272,12 +279,11 @@ Connection and configuration functions - 25 functions
 
 | Function | Purpose |
 |----------|---------|
-| `Get-NBHostname` | Get configured hostname |
-| `Set-NBHostname` | Set hostname |
-| `Get-NBHostScheme` | Get scheme (http/https) |
-| `Set-NBHostScheme` | Set scheme |
-| `Get-NBTimeout` | Get request timeout |
-| `Set-NBTimeout` | Set request timeout |
+| `Get-NBHostname` / `Set-NBHostName` | Hostname |
+| `Get-NBHostScheme` / `Set-NBHostScheme` | Scheme (http/https) |
+| `Get-NBHostPort` / `Set-NBHostPort` | Port |
+| `Get-NBTimeout` / `Set-NBTimeout` | Request timeout |
+| `Get-NBInvokeParams` / `Set-NBInvokeParams` | Extra REST params |
 
 ### SSL
 
@@ -291,3 +297,14 @@ Connection and configuration functions - 25 functions
 | Function | Purpose |
 |----------|---------|
 | `Invoke-NBGraphQL` | Execute GraphQL query |
+
+### Support (Internal)
+
+| Function | Purpose |
+|----------|---------|
+| `SetupNetboxConfigVariable` | Initialize `$script:NetboxConfig` |
+| `GetNetboxConfigVariable` | Config retrieval |
+| `Get-NBAPIDefinition` | API schema discovery |
+| `Get-NBContentType` | Content type lookup (deprecated in 4.5+) |
+| `Test-NBAPIConnected` | Connection check |
+| `VerifyAPIConnectivity` | Connectivity validation |

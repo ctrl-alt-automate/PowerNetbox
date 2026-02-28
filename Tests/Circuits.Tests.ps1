@@ -8,7 +8,6 @@
     VirtualCircuitType, and VirtualCircuitTermination functions.
 #>
 
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param()
 
 BeforeAll {
@@ -24,22 +23,13 @@ BeforeAll {
 Describe "Circuits Module Tests" -Tag 'Circuits' {
     BeforeAll {
         Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
-        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+        Mock -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -MockWith {
             return [ordered]@{
-                'Method'      = $Method
-                'Uri'         = $Uri
-                'Headers'     = $Headers
-                'Timeout'     = $Timeout
-                'ContentType' = $ContentType
-                'Body'        = $Body
+                'Method' = if ($Method) { $Method } else { 'GET' }
+                'Uri'    = $URI.Uri.AbsoluteUri
+                'Body'   = if ($Body) { $Body | ConvertTo-Json -Compress } else { $null }
             }
         }
-        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
-            return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
-        }
-        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { return 'netbox.domain.com' }
-        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
-        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
 
         InModuleScope -ModuleName 'PowerNetbox' {
             $script:NetboxConfig.Hostname = 'netbox.domain.com'
@@ -73,9 +63,25 @@ Describe "Circuits Module Tests" -Tag 'Circuits' {
         }
     }
 
+    Context "Get-NBCircuit -All/-PageSize passthrough" {
+        It "Should pass -All switch to InvokeNetboxRequest" {
+            Get-NBCircuit -All
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
+                $All -eq $true
+            }
+        }
+
+        It "Should pass -PageSize to InvokeNetboxRequest" {
+            Get-NBCircuit -All -PageSize 500
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
+                $PageSize -eq 500
+            }
+        }
+    }
+
     Context "New-NBCircuit" {
         It "Should create a circuit" {
-            $Result = New-NBCircuit -Cid 'CIR-001' -Provider 1 -Type 1 -Status 'active' -Force
+            $Result = New-NBCircuit -Cid 'CIR-001' -Provider 1 -Type 1 -Status 'active' -Confirm:$false
             $Result.Method | Should -Be 'POST'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/circuits/circuits/'
             $bodyObj = $Result.Body | ConvertFrom-Json
@@ -86,13 +92,13 @@ Describe "Circuits Module Tests" -Tag 'Circuits' {
         }
 
         It "Should create a circuit with commit rate" {
-            $Result = New-NBCircuit -Cid 'CIR-002' -Provider 1 -Type 1 -Status 'active' -Commit_Rate 1000 -Force
+            $Result = New-NBCircuit -Cid 'CIR-002' -Provider 1 -Type 1 -Status 'active' -Commit_Rate 1000 -Confirm:$false
             $bodyObj = $Result.Body | ConvertFrom-Json
             $bodyObj.commit_rate | Should -Be 1000
         }
 
         It "Should create a circuit with description" {
-            $Result = New-NBCircuit -Cid 'CIR-003' -Provider 1 -Type 1 -Status 'active' -Description 'Test circuit' -Force
+            $Result = New-NBCircuit -Cid 'CIR-003' -Provider 1 -Type 1 -Status 'active' -Description 'Test circuit' -Confirm:$false
             $bodyObj = $Result.Body | ConvertFrom-Json
             $bodyObj.description | Should -Be 'Test circuit'
         }
@@ -133,8 +139,7 @@ Describe "Circuits Module Tests" -Tag 'Circuits' {
 
         It "Should request a circuit type by ID" {
             $Result = Get-NBCircuitType -Id 3
-            # Bug: uses circuit_types (underscore) for ID lookup
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/circuits/circuit_types/3/'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/circuits/circuit-types/3/'
         }
 
         It "Should request a circuit type by name" {
@@ -310,7 +315,7 @@ Describe "Circuits Module Tests" -Tag 'Circuits' {
 
         It "Should request a circuit group by name" {
             $Result = Get-NBCircuitGroup -Name 'Primary Links'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/circuits/circuit-groups/?name=Primary Links'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/circuits/circuit-groups/?name=Primary%20Links'
         }
     }
 
@@ -417,7 +422,7 @@ Describe "Circuits Module Tests" -Tag 'Circuits' {
 
         It "Should request a provider account by name" {
             $Result = Get-NBCircuitProviderAccount -Name 'Main Account'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/circuits/provider-accounts/?name=Main Account'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/circuits/provider-accounts/?name=Main%20Account'
         }
     }
 
@@ -471,7 +476,7 @@ Describe "Circuits Module Tests" -Tag 'Circuits' {
 
         It "Should request a provider network by name" {
             $Result = Get-NBCircuitProviderNetwork -Name 'Global Network'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/circuits/provider-networks/?name=Global Network'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/circuits/provider-networks/?name=Global%20Network'
         }
     }
 
@@ -660,6 +665,157 @@ Describe "Circuits Module Tests" -Tag 'Circuits' {
             $Result = Remove-NBVirtualCircuitTermination -Id 16 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
             $Result.URI | Should -Match '/api/circuits/virtual.circuit.terminations/16/'
+        }
+    }
+    #endregion
+
+    #region Parameter Validation Tests
+    Context "Parameter Validation" {
+        It "Should reject invalid Status for New-NBCircuit" {
+            { New-NBCircuit -Cid 'test' -Provider 1 -Type 1 -Status 'invalid' -Confirm:$false } | Should -Throw
+        }
+
+        It "Should reject invalid Term_Side for New-NBCircuitTermination" {
+            { New-NBCircuitTermination -Circuit 1 -Term_Side 'B' -Confirm:$false } | Should -Throw
+        }
+
+        It "Should accept valid Term_Side 'A'" {
+            { New-NBCircuitTermination -Circuit 1 -Term_Side 'A' -Confirm:$false } | Should -Not -Throw
+        }
+
+        It "Should reject invalid Priority for New-NBCircuitGroupAssignment" {
+            { New-NBCircuitGroupAssignment -Group 1 -Circuit 1 -Priority 'invalid' -Confirm:$false } | Should -Throw
+        }
+
+        It "Should require mandatory Cid for New-NBCircuit" {
+            { New-NBCircuit -Provider 1 -Type 1 -Confirm:$false } | Should -Throw
+        }
+
+        It "Should require mandatory Provider for New-NBCircuit" {
+            { New-NBCircuit -Cid 'test' -Type 1 -Confirm:$false } | Should -Throw
+        }
+    }
+    #endregion
+
+    #region WhatIf Tests
+    Context "WhatIf Support" {
+        $whatIfTestCases = @(
+            @{ Command = 'New-NBCircuit'; Parameters = @{ CID = 'whatif-test'; Provider = 1; Type = 1 } }
+            @{ Command = 'New-NBCircuitGroup'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'New-NBCircuitGroupAssignment'; Parameters = @{ Group = 1; Circuit = 1 } }
+            @{ Command = 'New-NBCircuitProvider'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'New-NBCircuitProviderAccount'; Parameters = @{ Provider = 1; Account = 'whatif-test' } }
+            @{ Command = 'New-NBCircuitProviderNetwork'; Parameters = @{ Provider = 1; Name = 'whatif-test' } }
+            @{ Command = 'New-NBCircuitTermination'; Parameters = @{ Circuit = 1; Term_Side = 'A' } }
+            @{ Command = 'New-NBCircuitType'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'New-NBVirtualCircuit'; Parameters = @{ Cid = 'whatif-test'; Provider_Network = 1; Type = 1 } }
+            @{ Command = 'New-NBVirtualCircuitTermination'; Parameters = @{ Virtual_Circuit = 1; Interface = 1 } }
+            @{ Command = 'New-NBVirtualCircuitType'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'Set-NBCircuit'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBCircuitGroup'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBCircuitGroupAssignment'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBCircuitProvider'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBCircuitProviderAccount'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBCircuitProviderNetwork'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBCircuitTermination'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBCircuitType'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBVirtualCircuit'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBVirtualCircuitTermination'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBVirtualCircuitType'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBCircuit'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBCircuitGroup'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBCircuitGroupAssignment'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBCircuitProvider'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBCircuitProviderAccount'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBCircuitProviderNetwork'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBCircuitTermination'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBCircuitType'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBVirtualCircuit'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBVirtualCircuitTermination'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBVirtualCircuitType'; Parameters = @{ Id = 1 } }
+        )
+
+        It 'Should support -WhatIf for <Command>' -TestCases $whatIfTestCases {
+            param($Command, $Parameters)
+            $splat = $Parameters.Clone()
+            $splat.Add('WhatIf', $true)
+            $Result = & $Command @splat
+            $Result | Should -BeNullOrEmpty
+        }
+    }
+    #endregion
+
+    #region All/PageSize Passthrough Tests
+    Context "All/PageSize Passthrough" {
+        $allPageSizeTestCases = @(
+            @{ Command = 'Get-NBCircuitGroup' }
+            @{ Command = 'Get-NBCircuitGroupAssignment' }
+            @{ Command = 'Get-NBCircuitProvider' }
+            @{ Command = 'Get-NBCircuitProviderAccount' }
+            @{ Command = 'Get-NBCircuitProviderNetwork' }
+            @{ Command = 'Get-NBCircuitTermination' }
+            @{ Command = 'Get-NBCircuitType' }
+            @{ Command = 'Get-NBVirtualCircuit' }
+            @{ Command = 'Get-NBVirtualCircuitTermination' }
+            @{ Command = 'Get-NBVirtualCircuitType' }
+        )
+
+        It 'Should pass -All to InvokeNetboxRequest for <Command>' -TestCases $allPageSizeTestCases {
+            param($Command, $Parameters)
+            $splat = @{ All = $true }
+            if ($Parameters) { $splat += $Parameters }
+            & $Command @splat
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
+                $All -eq $true
+            }
+        }
+
+        It 'Should pass -PageSize to InvokeNetboxRequest for <Command>' -TestCases $allPageSizeTestCases {
+            param($Command, $Parameters)
+            $splat = @{ All = $true; PageSize = 500 }
+            if ($Parameters) { $splat += $Parameters }
+            & $Command @splat
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
+                $PageSize -eq 500
+            }
+        }
+    }
+    #endregion
+
+    #region Omit Parameter Tests
+    Context "Omit Parameter" {
+        $omitTestCases = @(
+            @{ Command = 'Get-NBCircuit' }
+            @{ Command = 'Get-NBCircuitGroup' }
+            @{ Command = 'Get-NBCircuitGroupAssignment' }
+            @{ Command = 'Get-NBCircuitProvider' }
+            @{ Command = 'Get-NBCircuitProviderAccount' }
+            @{ Command = 'Get-NBCircuitProviderNetwork' }
+            @{ Command = 'Get-NBCircuitTermination' }
+            @{ Command = 'Get-NBCircuitType' }
+            @{ Command = 'Get-NBVirtualCircuit' }
+            @{ Command = 'Get-NBVirtualCircuitTermination' }
+            @{ Command = 'Get-NBVirtualCircuitType' }
+        )
+
+        It 'Should pass -Omit to query string for <Command>' -TestCases $omitTestCases {
+            param($Command)
+            $Result = & $Command -Omit @('comments', 'description')
+            $Result.Uri | Should -Match 'omit=comments%2Cdescription'
+        }
+    }
+    #endregion
+
+    #region Pipeline Input Tests
+    Context "Pipeline Input" {
+        $pipelineTestCases = @(
+            @{ Command = 'Get-NBCircuitType' }
+        )
+
+        It 'Should accept pipeline input by property name for <Command>' -TestCases $pipelineTestCases {
+            param($Command)
+            $Result = [pscustomobject]@{ 'Id' = 10 } | & $Command
+            $Result.Uri | Should -Match '/10/'
         }
     }
     #endregion

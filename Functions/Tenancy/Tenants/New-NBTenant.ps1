@@ -53,14 +53,13 @@ function New-NBTenant {
     process {
         Write-Verbose "Creating Tenant"
         $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'tenants'))
-        $Method = 'POST'
 
         $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
 
         $URI = BuildNewURI -Segments $URIComponents.Segments
 
         if ($PSCmdlet.ShouldProcess($Name, 'Create new tenant')) {
-            InvokeNetboxRequest -URI $URI -Method $Method -Body $URIComponents.Parameters -Raw:$Raw
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
         }
     }
 }

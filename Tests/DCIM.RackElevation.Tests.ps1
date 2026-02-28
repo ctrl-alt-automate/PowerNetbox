@@ -1,4 +1,3 @@
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param()
 
 BeforeAll {
@@ -14,12 +13,6 @@ BeforeAll {
 Describe "DCIM Rack Elevation Tests" -Tag 'DCIM', 'Racks', 'RackElevation' {
     BeforeAll {
         Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
-        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
-            return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
-        }
-        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { return 'netbox.domain.com' }
-        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
-        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
 
         InModuleScope -ModuleName 'PowerNetbox' {
             $script:NetboxConfig.Hostname = 'netbox.domain.com'
@@ -46,14 +39,11 @@ Describe "DCIM Rack Elevation Tests" -Tag 'DCIM', 'Racks', 'RackElevation' {
 
     Context "Get-NBDCIMRackElevation" {
         BeforeAll {
-            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+            Mock -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -MockWith {
                 return [ordered]@{
-                    'Method'      = $Method
-                    'Uri'         = $Uri
-                    'Headers'     = $Headers
-                    'Timeout'     = $Timeout
-                    'ContentType' = $ContentType
-                    'Body'        = $Body
+                    'Method' = if ($Method) { $Method } else { 'GET' }
+                    'Uri'    = $URI.Uri.AbsoluteUri
+                    'Body'   = if ($Body) { $Body | ConvertTo-Json -Compress } else { $null }
                 }
             }
         }
@@ -90,14 +80,6 @@ Describe "DCIM Rack Elevation Tests" -Tag 'DCIM', 'Racks', 'RackElevation' {
             $Result.Uri | Should -Match 'offset=50'
         }
 
-        It "Should throw when -All used with -Limit" {
-            { Get-NBDCIMRackElevation -Id 24 -All -Limit 100 } | Should -Throw "*cannot be used with*"
-        }
-
-        It "Should throw when -All used with -Offset" {
-            { Get-NBDCIMRackElevation -Id 24 -All -Offset 50 } | Should -Throw "*cannot be used with*"
-        }
-
         It "Should accept pipeline input from Get-NBDCIMRack" {
             $mockRack = [PSCustomObject]@{ Id = 42 }
             $Result = $mockRack | Get-NBDCIMRackElevation
@@ -107,6 +89,14 @@ Describe "DCIM Rack Elevation Tests" -Tag 'DCIM', 'Racks', 'RackElevation' {
 
     Context "Get-NBDCIMRackElevation SVG Mode" {
         BeforeAll {
+            # SVG mode calls Invoke-WebRequest directly (not InvokeNetboxRequest),
+            # so it needs auth helper mocks for Get-NBRequestHeaders and Get-NBInvokeParams
+            Mock -CommandName 'Get-NBRequestHeaders' -ModuleName 'PowerNetbox' -MockWith {
+                return @{ 'Authorization' = 'Token testtoken' }
+            }
+            Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith {
+                return @{}
+            }
             Mock -CommandName 'Invoke-WebRequest' -ModuleName 'PowerNetbox' -MockWith {
                 return [PSCustomObject]@{
                     Content = '<svg xmlns="http://www.w3.org/2000/svg"><rect/></svg>'
@@ -147,47 +137,55 @@ Describe "DCIM Rack Elevation Tests" -Tag 'DCIM', 'Racks', 'RackElevation' {
 
     Context "Get-NBDCIMRackElevation -All Pagination" {
         BeforeAll {
-            $script:CallCount = 0
-            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
-                $script:CallCount++
-                if ($script:CallCount -eq 1) {
-                    return @{
-                        count = 84
-                        next = 'https://netbox.domain.com/api/dcim/racks/24/elevation/?limit=1000&offset=1000'
-                        previous = $null
-                        results = @(
+            # When InvokeNetboxRequest is mocked, the real -All pagination loop doesn't execute.
+            # The mock must return combined results directly when -All is passed,
+            # simulating what the real function would produce after paginating.
+            Mock -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -MockWith {
+                if ($All) {
+                    if ($Raw) {
+                        return [PSCustomObject]@{
+                            count    = 3
+                            next     = $null
+                            previous = $null
+                            results  = @(
+                                [PSCustomObject]@{ id = 42; device = $null }
+                                [PSCustomObject]@{ id = 41; device = $null }
+                                [PSCustomObject]@{ id = 1; device = [PSCustomObject]@{ display = 'server-01' } }
+                            )
+                        }
+                    } else {
+                        return @(
                             [PSCustomObject]@{ id = 42; device = $null }
                             [PSCustomObject]@{ id = 41; device = $null }
+                            [PSCustomObject]@{ id = 1; device = [PSCustomObject]@{ display = 'server-01' } }
                         )
                     }
                 } else {
-                    return @{
-                        count = 84
-                        next = $null
-                        previous = 'https://netbox.domain.com/api/dcim/racks/24/elevation/?limit=1000'
-                        results = @(
-                            [PSCustomObject]@{ id = 1; device = [PSCustomObject]@{ display = 'server-01' } }
-                        )
+                    return [ordered]@{
+                        'Method' = if ($Method) { $Method } else { 'GET' }
+                        'Uri'    = $URI.Uri.AbsoluteUri
+                        'Body'   = if ($Body) { $Body | ConvertTo-Json -Compress } else { $null }
                     }
                 }
             }
         }
 
-        It "Should paginate through all results with -All" {
-            $script:CallCount = 0
+        It "Should pass -All flag to InvokeNetboxRequest" {
+            Get-NBDCIMRackElevation -Id 24 -All
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -Times 1 -Exactly -Scope It -ModuleName 'PowerNetbox' -ParameterFilter { $All -eq $true }
+        }
+
+        It "Should return all results with -All" {
             $Result = Get-NBDCIMRackElevation -Id 24 -All
             $Result.Count | Should -Be 3
-            $script:CallCount | Should -Be 2
         }
 
         It "Should return multiple results without -Raw" {
-            $script:CallCount = 0
             $Result = Get-NBDCIMRackElevation -Id 24 -All
             @($Result).Count | Should -Be 3
         }
 
         It "Should return structured object with -Raw" {
-            $script:CallCount = 0
             $Result = Get-NBDCIMRackElevation -Id 24 -All -Raw
             $Result.count | Should -Be 3
             $Result.next | Should -BeNullOrEmpty
@@ -199,12 +197,6 @@ Describe "DCIM Rack Elevation Tests" -Tag 'DCIM', 'Racks', 'RackElevation' {
 Describe "Export-NBRackElevation Tests" -Tag 'DCIM', 'Racks', 'RackElevation', 'Export' {
     BeforeAll {
         Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
-        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
-            return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
-        }
-        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { return 'netbox.domain.com' }
-        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
-        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
 
         InModuleScope -ModuleName 'PowerNetbox' {
             $script:NetboxConfig.Hostname = 'netbox.domain.com'

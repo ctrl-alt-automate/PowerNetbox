@@ -6,7 +6,6 @@
     Tests for Tenant, TenantGroup, Contact, ContactRole, and ContactAssignment functions.
 #>
 
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param()
 
 BeforeAll {
@@ -22,22 +21,13 @@ BeforeAll {
 Describe "Tenancy Module Tests" -Tag 'Tenancy' {
     BeforeAll {
         Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
-        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+        Mock -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -MockWith {
             return [ordered]@{
-                'Method'      = $Method
-                'Uri'         = $Uri
-                'Headers'     = $Headers
-                'Timeout'     = $Timeout
-                'ContentType' = $ContentType
-                'Body'        = $Body
+                'Method' = if ($Method) { $Method } else { 'GET' }
+                'Uri'    = $URI.Uri.AbsoluteUri
+                'Body'   = if ($Body) { $Body | ConvertTo-Json -Compress } else { $null }
             }
         }
-        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
-            return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
-        }
-        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { return 'netbox.domain.com' }
-        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
-        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
 
         InModuleScope -ModuleName 'PowerNetbox' {
             $script:NetboxConfig.Hostname = 'netbox.domain.com'
@@ -61,7 +51,7 @@ Describe "Tenancy Module Tests" -Tag 'Tenancy' {
 
         It "Should request a tenant by name" {
             $Result = Get-NBTenant -Name 'Acme Corp'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/tenancy/tenants/?name=Acme Corp'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/tenancy/tenants/?name=Acme%20Corp'
         }
 
         It "Should request a tenant by slug" {
@@ -101,7 +91,7 @@ Describe "Tenancy Module Tests" -Tag 'Tenancy' {
         }
 
         It "Should update a tenant" {
-            $Result = Set-NBTenant -Id 1 -Name 'UpdatedTenant' -Force
+            $Result = Set-NBTenant -Id 1 -Name 'UpdatedTenant' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/tenancy/tenants/1/'
             $bodyObj = $Result.Body | ConvertFrom-Json
@@ -109,7 +99,7 @@ Describe "Tenancy Module Tests" -Tag 'Tenancy' {
         }
 
         It "Should update a tenant description" {
-            $Result = Set-NBTenant -Id 1 -Description 'New description' -Force
+            $Result = Set-NBTenant -Id 1 -Description 'New description' -Confirm:$false
             $bodyObj = $Result.Body | ConvertFrom-Json
             $bodyObj.description | Should -Be 'New description'
         }
@@ -123,7 +113,7 @@ Describe "Tenancy Module Tests" -Tag 'Tenancy' {
         }
 
         It "Should remove a tenant" {
-            $Result = Remove-NBTenant -Id 10 -Force
+            $Result = Remove-NBTenant -Id 10 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/tenancy/tenants/10/'
         }
@@ -133,7 +123,7 @@ Describe "Tenancy Module Tests" -Tag 'Tenancy' {
             $Result = @(
                 [pscustomobject]@{ 'Id' = 10 },
                 [pscustomobject]@{ 'Id' = 11 }
-            ) | Remove-NBTenant -Force
+            ) | Remove-NBTenant -Confirm:$false
             $Result.Method | Should -Be 'DELETE', 'DELETE'
         }
     }
@@ -188,7 +178,7 @@ Describe "Tenancy Module Tests" -Tag 'Tenancy' {
         }
 
         It "Should update a tenant group" {
-            $Result = Set-NBTenantGroup -Id 1 -Name 'UpdatedGroup' -Force
+            $Result = Set-NBTenantGroup -Id 1 -Name 'UpdatedGroup' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/tenancy/tenant-groups/1/'
         }
@@ -202,7 +192,7 @@ Describe "Tenancy Module Tests" -Tag 'Tenancy' {
         }
 
         It "Should remove a tenant group" {
-            $Result = Remove-NBTenantGroup -Id 5 -Force
+            $Result = Remove-NBTenantGroup -Id 5 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/tenancy/tenant-groups/5/'
         }
@@ -224,7 +214,7 @@ Describe "Tenancy Module Tests" -Tag 'Tenancy' {
 
         It "Should request a contact by name" {
             $Result = Get-NBContact -Name 'John Doe'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/tenancy/contacts/?name=John Doe'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/tenancy/contacts/?name=John%20Doe'
         }
     }
 
@@ -247,13 +237,13 @@ Describe "Tenancy Module Tests" -Tag 'Tenancy' {
 
     Context "Set-NBContact" {
         It "Should update a contact" {
-            $Result = Set-NBContact -Id 1 -Name 'Updated Name' -Force
+            $Result = Set-NBContact -Id 1 -Name 'Updated Name' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/tenancy/contacts/1/'
         }
 
         It "Should update contact email" {
-            $Result = Set-NBContact -Id 1 -Email 'new@example.com' -Force
+            $Result = Set-NBContact -Id 1 -Email 'new@example.com' -Confirm:$false
             $bodyObj = $Result.Body | ConvertFrom-Json
             $bodyObj.email | Should -Be 'new@example.com'
         }
@@ -267,7 +257,7 @@ Describe "Tenancy Module Tests" -Tag 'Tenancy' {
         }
 
         It "Should remove a contact" {
-            $Result = Remove-NBContact -Id 8 -Force
+            $Result = Remove-NBContact -Id 8 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/tenancy/contacts/8/'
         }
@@ -328,7 +318,7 @@ Describe "Tenancy Module Tests" -Tag 'Tenancy' {
         }
 
         It "Should remove a contact role" {
-            $Result = Remove-NBContactRole -Id 3 -Force
+            $Result = Remove-NBContactRole -Id 3 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/tenancy/contact-roles/3/'
         }
@@ -384,9 +374,103 @@ Describe "Tenancy Module Tests" -Tag 'Tenancy' {
         }
 
         It "Should remove a contact assignment" {
-            $Result = Remove-NBContactAssignment -Id 6 -Force
+            $Result = Remove-NBContactAssignment -Id 6 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/tenancy/contact-assignments/6/'
+        }
+    }
+    #endregion
+
+    #region WhatIf Tests
+    Context "WhatIf Support" {
+        $whatIfTestCases = @(
+            @{ Command = 'New-NBContact'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'New-NBContactAssignment'; Parameters = @{ Content_Type = 'dcim.device'; Object_Id = 1; Contact = 1; Role = 1 } }
+            @{ Command = 'New-NBContactRole'; Parameters = @{ Name = 'whatif-test'; Slug = 'whatif-test' } }
+            @{ Command = 'New-NBTenant'; Parameters = @{ Name = 'whatif-test'; Slug = 'whatif-test' } }
+            @{ Command = 'New-NBTenantGroup'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'Set-NBContact'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBContactAssignment'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBContactRole'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBTenant'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBTenantGroup'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBContact'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBContactAssignment'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBContactRole'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBTenant'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBTenantGroup'; Parameters = @{ Id = 1 } }
+        )
+
+        It 'Should support -WhatIf for <Command>' -TestCases $whatIfTestCases {
+            param($Command, $Parameters)
+            $splat = $Parameters.Clone()
+            $splat.Add('WhatIf', $true)
+            $Result = & $Command @splat
+            $Result | Should -BeNullOrEmpty
+        }
+    }
+    #endregion
+
+    #region All/PageSize Passthrough Tests
+    Context "All/PageSize Passthrough" {
+        $allPageSizeTestCases = @(
+            @{ Command = 'Get-NBContact' }
+            @{ Command = 'Get-NBContactAssignment' }
+            @{ Command = 'Get-NBContactRole' }
+            @{ Command = 'Get-NBTenant' }
+            @{ Command = 'Get-NBTenantGroup' }
+        )
+
+        It 'Should pass -All to InvokeNetboxRequest for <Command>' -TestCases $allPageSizeTestCases {
+            param($Command, $Parameters)
+            $splat = @{ All = $true }
+            if ($Parameters) { $splat += $Parameters }
+            & $Command @splat
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
+                $All -eq $true
+            }
+        }
+
+        It 'Should pass -PageSize to InvokeNetboxRequest for <Command>' -TestCases $allPageSizeTestCases {
+            param($Command, $Parameters)
+            $splat = @{ All = $true; PageSize = 500 }
+            if ($Parameters) { $splat += $Parameters }
+            & $Command @splat
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
+                $PageSize -eq 500
+            }
+        }
+    }
+    #endregion
+
+    #region Omit Parameter Tests
+    Context "Omit Parameter" {
+        $omitTestCases = @(
+            @{ Command = 'Get-NBContact' }
+            @{ Command = 'Get-NBContactAssignment' }
+            @{ Command = 'Get-NBContactRole' }
+            @{ Command = 'Get-NBTenant' }
+            @{ Command = 'Get-NBTenantGroup' }
+        )
+
+        It 'Should pass -Omit to query string for <Command>' -TestCases $omitTestCases {
+            param($Command)
+            $Result = & $Command -Omit @('comments', 'description')
+            $Result.Uri | Should -Match 'omit=comments%2Cdescription'
+        }
+    }
+    #endregion
+
+    #region Pipeline Input Tests
+    Context "Pipeline Input" {
+        $pipelineTestCases = @(
+            @{ Command = 'Get-NBTenant' }
+        )
+
+        It 'Should accept pipeline input by property name for <Command>' -TestCases $pipelineTestCases {
+            param($Command)
+            $Result = [pscustomobject]@{ 'Id' = 10 } | & $Command
+            $Result.Uri | Should -Match '/10/'
         }
     }
     #endregion

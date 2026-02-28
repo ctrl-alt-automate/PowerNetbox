@@ -4,13 +4,9 @@
 
 .DESCRIPTION
     Sets the HTTP scheme (http/https) for Netbox API connections.
-    Supports pipeline input for Id parameter where applicable.
-
-.PARAMETER Raw
-    Return the raw API response instead of the results array.
 
 .EXAMPLE
-    Set-NBHostScheme
+    Set-NBHostScheme -Scheme 'https'
 
     Sets the Netbox API host scheme (http or https).
 

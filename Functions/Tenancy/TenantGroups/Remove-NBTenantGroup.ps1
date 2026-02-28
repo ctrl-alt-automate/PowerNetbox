@@ -30,7 +30,7 @@
 #>
 function Remove-NBTenantGroup {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
-    [OutputType([PSCustomObject])]
+    [OutputType([void])]
     param
     (
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
@@ -49,7 +49,7 @@ function Remove-NBTenantGroup {
 
             $URI = BuildNewURI -Segments $Segments
 
-            if ($Force -or $PSCmdlet.ShouldProcess("$("ID $GroupId")", 'Delete tenant group')) {
+            if ($Force -or $PSCmdlet.ShouldProcess("ID $GroupId", 'Delete tenant group')) {
                 InvokeNetboxRequest -URI $URI -Method DELETE -Raw:$Raw
             }
         }

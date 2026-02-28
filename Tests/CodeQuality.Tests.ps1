@@ -1,8 +1,69 @@
 BeforeAll {
     . "$PSScriptRoot/common.ps1"
+
+    # Get all public functions (those with a hyphen in the name)
+    $script:PublicFunctions = Get-Command -Module PowerNetbox -CommandType Function |
+        Where-Object { $_.Name -match '-' }
 }
 
 Describe "Code Quality Tests" -Tag 'Quality' {
+
+    Context "CmdletBinding" {
+        It "All public functions should have CmdletBinding" {
+            $missing = $script:PublicFunctions | Where-Object {
+                -not $_.CmdletBinding
+            }
+            $missing | Should -BeNullOrEmpty -Because "all public functions should use [CmdletBinding()]"
+        }
+    }
+
+    Context "Approved Verbs" {
+        It "All public functions should use approved verbs" {
+            $approvedVerbs = (Get-Verb).Verb
+            $badVerbs = $script:PublicFunctions | Where-Object {
+                $_.Verb -notin $approvedVerbs
+            }
+            $badVerbs | Should -BeNullOrEmpty -Because "all public functions should use approved PowerShell verbs"
+        }
+    }
+
+    Context "ShouldProcess" {
+        It "State-changing functions should declare SupportsShouldProcess" {
+            $stateChangingVerbs = @('New', 'Set', 'Remove')
+            # Exclude Setup/config functions that don't change Netbox state
+            $setupFunctions = @(
+                'Set-NBCredential', 'Set-NBHostName', 'Set-NBHostPort',
+                'Set-NBHostScheme', 'Set-NBInvokeParams', 'Set-NBTimeout',
+                'Set-NBCipherSSL', 'Set-NBuntrustedSSL'
+            )
+            $stateChangingFunctions = $script:PublicFunctions | Where-Object {
+                $_.Verb -in $stateChangingVerbs -and $_.Name -notin $setupFunctions
+            }
+            $missing = $stateChangingFunctions | Where-Object {
+                'WhatIf' -notin $_.Parameters.Keys
+            }
+            $missing | Should -BeNullOrEmpty -Because "New/Set/Remove API functions should support ShouldProcess for -WhatIf/-Confirm"
+        }
+    }
+
+    Context "Raw Parameter" {
+        It "All API Get functions should have a -Raw parameter" {
+            # Exclude Setup/config getters and internal helpers
+            $excludedFunctions = @(
+                'Get-NBCredential', 'Get-NBHostname', 'Get-NBHostPort',
+                'Get-NBHostScheme', 'Get-NBInvokeParams', 'Get-NBTimeout',
+                'Get-NBRequestHeaders', 'Get-NBVersion', 'Get-NBBranchContext',
+                'Get-NBAPIDefinition'
+            )
+            $getFunctions = $script:PublicFunctions | Where-Object {
+                $_.Verb -eq 'Get' -and $_.Name -notin $excludedFunctions
+            }
+            $missing = $getFunctions | Where-Object {
+                'Raw' -notin $_.Parameters.Keys
+            }
+            $missing | Should -BeNullOrEmpty -Because "all API Get functions should support the -Raw switch"
+        }
+    }
 
     Context "Parameter Type Validation" {
 

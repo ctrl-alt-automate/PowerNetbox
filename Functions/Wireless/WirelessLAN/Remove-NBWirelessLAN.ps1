@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Removes a irelessLAN from Netbox W module.
+    Removes a Wireless LAN from Netbox Wireless module.
 
 .DESCRIPTION
-    Removes a irelessLAN from Netbox W module.
+    Removes a Wireless LAN from Netbox Wireless module.
     Supports pipeline input for Id parameter where applicable.
 
 .PARAMETER Raw
@@ -19,7 +19,7 @@
 #>
 function Remove-NBWirelessLAN {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
-    [OutputType([PSCustomObject])]
+    [OutputType([void])]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,[switch]$Raw)
     process { if ($PSCmdlet.ShouldProcess($Id, 'Delete wireless LAN')) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('wireless','wireless-lans',$Id)) -Method DELETE -Raw:$Raw } }
 }

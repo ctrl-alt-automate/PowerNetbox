@@ -161,7 +161,7 @@ function Set-NBDCIMRack {
         Write-Verbose "Updating DCIM Rack"
         foreach ($RackId in $Id) {
 
-            if ($Force -or $PSCmdlet.ShouldProcess("$("ID $RackId")", "Update rack")) {
+            if ($Force -or $PSCmdlet.ShouldProcess("ID $RackId", "Update rack")) {
                 $Segments = [System.Collections.ArrayList]::new(@('dcim', 'racks', $RackId))
 
                 $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'Force'

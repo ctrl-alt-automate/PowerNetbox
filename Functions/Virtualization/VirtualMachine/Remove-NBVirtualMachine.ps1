@@ -85,7 +85,7 @@ function Remove-NBVirtualMachine {
         if ($PSCmdlet.ParameterSetName -eq 'Single') {
             foreach ($VMId in $Id) {
 
-                if ($Force -or $PSCmdlet.ShouldProcess("$("ID $VMId")/$($VMId)", "Remove")) {
+                if ($Force -or $PSCmdlet.ShouldProcess("ID $VMId", "Remove")) {
                     $VMSegments = [System.Collections.ArrayList]::new(@('virtualization', 'virtual-machines', $VMId))
 
                     $VMURI = BuildNewURI -Segments $VMSegments
@@ -120,8 +120,15 @@ function Remove-NBVirtualMachine {
             if ($Force -or $PSCmdlet.ShouldProcess($target, 'Delete virtual machines (bulk)')) {
                 Write-Verbose "Processing $($bulkItems.Count) VMs in bulk DELETE mode with batch size $BatchSize"
 
-                $result = Send-NBBulkRequest -URI $URI -Items $bulkItems.ToArray() -Method DELETE `
-                    -BatchSize $BatchSize -ShowProgress -ActivityName 'Deleting virtual machines'
+                $bulkParams = @{
+                    URI          = $URI
+                    Items        = $bulkItems.ToArray()
+                    Method       = 'DELETE'
+                    BatchSize    = $BatchSize
+                    ShowProgress = $true
+                    ActivityName = 'Deleting virtual machines'
+                }
+                $result = Send-NBBulkRequest @bulkParams
 
                 # Write errors for failed items
                 foreach ($failure in $result.Failed) {

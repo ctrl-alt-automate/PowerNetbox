@@ -126,7 +126,7 @@ function Set-NBVirtualMachine {
         [uint64]$Primary_IP6,
 
         [Parameter(ParameterSetName = 'Single')]
-        [byte]$VCPUs,
+        [uint16]$VCPUs,
 
         [Parameter(ParameterSetName = 'Single')]
         [uint64]$Memory,
@@ -202,13 +202,6 @@ function Set-NBVirtualMachine {
                     $key = $prop.Name.ToLower()
                     $value = $prop.Value
 
-                    # Handle property name mappings
-                    switch ($key) {
-                        'primary_ip4' { $key = 'primary_ip4' }
-                        'primary_ip6' { $key = 'primary_ip6' }
-                        'custom_fields' { $key = 'custom_fields' }
-                    }
-
                     $item[$key] = $value
                 }
                 [void]$bulkItems.Add([PSCustomObject]$item)
@@ -223,8 +216,15 @@ function Set-NBVirtualMachine {
             if ($Force -or $PSCmdlet.ShouldProcess($target, 'Update virtual machines (bulk)')) {
                 Write-Verbose "Processing $($bulkItems.Count) VMs in bulk PATCH mode with batch size $BatchSize"
 
-                $result = Send-NBBulkRequest -URI $URI -Items $bulkItems.ToArray() -Method PATCH `
-                    -BatchSize $BatchSize -ShowProgress -ActivityName 'Updating virtual machines'
+                $bulkParams = @{
+                    URI          = $URI
+                    Items        = $bulkItems.ToArray()
+                    Method       = 'PATCH'
+                    BatchSize    = $BatchSize
+                    ShowProgress = $true
+                    ActivityName = 'Updating virtual machines'
+                }
+                $result = Send-NBBulkRequest @bulkParams
 
                 # Output succeeded items to pipeline
                 foreach ($item in $result.Succeeded) {

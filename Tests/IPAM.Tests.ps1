@@ -7,7 +7,6 @@
     ASN, RIR, Role, Aggregate, FHRPGroup, Service, RouteTarget, and more.
 #>
 
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param()
 
 BeforeAll {
@@ -25,29 +24,19 @@ BeforeAll {
 Describe "IPAM tests" -Tag 'Ipam' {
     BeforeAll {
         Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
-        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+        Mock -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -MockWith {
             return [ordered]@{
-                'Method'      = $Method
-                'Uri'         = $Uri
-                'Headers'     = $Headers
-                'Timeout'     = $Timeout
-                'ContentType' = $ContentType
-                'Body'        = $Body
+                'Method' = if ($Method) { $Method } else { 'GET' }
+                'Uri'    = $URI.Uri.AbsoluteUri
+                'Body'   = if ($Body) { $Body | ConvertTo-Json -Compress } else { $null }
             }
         }
-        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
-            return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
-        }
-        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { return 'netbox.domain.com' }
-        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
-        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
 
         InModuleScope -ModuleName 'PowerNetbox' -ArgumentList $script:TestPath -ScriptBlock {
             param($TestPath)
             $script:NetboxConfig.Hostname = 'netbox.domain.com'
             $script:NetboxConfig.HostScheme = 'https'
             $script:NetboxConfig.HostPort = 443
-            $script:NetboxConfig.Choices.IPAM = (Get-Content "$TestPath/IPAMChoices.json" -ErrorAction Stop | ConvertFrom-Json)
         }
     }
 
@@ -106,13 +95,13 @@ Describe "IPAM tests" -Tag 'Ipam' {
         }
 
         It "Should update an IP address" {
-            $Result = Set-NBIPAMAddress -Id 4109 -Status 'reserved' -Force
+            $Result = Set-NBIPAMAddress -Id 4109 -Status 'reserved' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/4109/'
         }
 
         It "Should update IP with VRF and Tenant" {
-            $Result = Set-NBIPAMAddress -Id 4110 -VRF 10 -Tenant 14 -Description 'Test' -Force
+            $Result = Set-NBIPAMAddress -Id 4110 -VRF 10 -Tenant 14 -Description 'Test' -Confirm:$false
             $bodyObj = $Result.Body | ConvertFrom-Json
             $bodyObj.vrf | Should -Be 10
             $bodyObj.tenant | Should -Be 14
@@ -127,7 +116,7 @@ Describe "IPAM tests" -Tag 'Ipam' {
         }
 
         It "Should remove an IP address" {
-            $Result = Remove-NBIPAMAddress -Id 4109 -Force
+            $Result = Remove-NBIPAMAddress -Id 4109 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/4109/'
         }
@@ -172,6 +161,33 @@ Describe "IPAM tests" -Tag 'Ipam' {
         It "Should throw for invalid mask length" {
             { Get-NBIPAMPrefix -Mask_length 128 } | Should -Throw
         }
+
+        It "Should filter by scope_type" {
+            $Result = Get-NBIPAMPrefix -Scope_Type 'dcim.site'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/prefixes/?scope_type=dcim.site'
+        }
+
+        It "Should filter by scope_type and scope_id" {
+            $Result = Get-NBIPAMPrefix -Scope_Type 'dcim.site' -Scope_Id 5
+            $Result.Uri | Should -Match 'scope_type=dcim.site'
+            $Result.Uri | Should -Match 'scope_id=5'
+        }
+
+        It "Should filter by scope_type dcim.region" {
+            $Result = Get-NBIPAMPrefix -Scope_Type 'dcim.region' -Scope_Id 3
+            $Result.Uri | Should -Match 'scope_type=dcim.region'
+            $Result.Uri | Should -Match 'scope_id=3'
+        }
+
+        It "Should reject invalid scope_type" {
+            { Get-NBIPAMPrefix -Scope_Type 'invalid.type' } | Should -Throw
+        }
+
+        It "Should not have Site parameter" {
+            $cmd = Get-Command Get-NBIPAMPrefix
+            $cmd.Parameters.Keys | Should -Not -Contain 'Site'
+            $cmd.Parameters.Keys | Should -Not -Contain 'Site_Id'
+        }
     }
 
     Context "New-NBIPAMPrefix" {
@@ -189,6 +205,29 @@ Describe "IPAM tests" -Tag 'Ipam' {
             $bodyObj.status | Should -Be 'active'
             $bodyObj.role | Should -Be 1
         }
+
+        It "Should create a prefix with scope_type and scope_id" {
+            $Result = New-NBIPAMPrefix -Prefix "10.0.0.0/24" -Scope_Type 'dcim.site' -Scope_Id 5
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.scope_type | Should -Be 'dcim.site'
+            $bodyObj.scope_id | Should -Be 5
+        }
+
+        It "Should create a prefix with scope_type dcim.location" {
+            $Result = New-NBIPAMPrefix -Prefix "10.0.0.0/24" -Scope_Type 'dcim.location' -Scope_Id 10
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.scope_type | Should -Be 'dcim.location'
+            $bodyObj.scope_id | Should -Be 10
+        }
+
+        It "Should reject invalid scope_type" {
+            { New-NBIPAMPrefix -Prefix "10.0.0.0/24" -Scope_Type 'invalid.type' } | Should -Throw
+        }
+
+        It "Should not have Site parameter" {
+            $cmd = Get-Command New-NBIPAMPrefix
+            $cmd.Parameters.Keys | Should -Not -Contain 'Site'
+        }
     }
 
     Context "Set-NBIPAMPrefix" {
@@ -199,9 +238,25 @@ Describe "IPAM tests" -Tag 'Ipam' {
         }
 
         It "Should update a prefix" {
-            $Result = Set-NBIPAMPrefix -Id 1 -Description 'Updated' -Force
+            $Result = Set-NBIPAMPrefix -Id 1 -Description 'Updated' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
             $Result.Uri | Should -Match '/api/ipam/prefixes/1/'
+        }
+
+        It "Should update prefix scope" {
+            $Result = Set-NBIPAMPrefix -Id 1 -Scope_Type 'dcim.site' -Scope_Id 5 -Confirm:$false
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.scope_type | Should -Be 'dcim.site'
+            $bodyObj.scope_id | Should -Be 5
+        }
+
+        It "Should reject invalid scope_type" {
+            { Set-NBIPAMPrefix -Id 1 -Scope_Type 'invalid.type' -Confirm:$false } | Should -Throw
+        }
+
+        It "Should not have Site parameter" {
+            $cmd = Get-Command Set-NBIPAMPrefix
+            $cmd.Parameters.Keys | Should -Not -Contain 'Site'
         }
     }
 
@@ -401,6 +456,22 @@ Describe "IPAM tests" -Tag 'Ipam' {
         It "Should request a VRF by name" {
             $Result = Get-NBIPAMVRF -Name 'Production'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/vrfs/?name=Production'
+        }
+    }
+
+    Context "Get-NBIPAMVRF -All/-PageSize passthrough" {
+        It "Should pass -All switch to InvokeNetboxRequest" {
+            Get-NBIPAMVRF -All
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
+                $All -eq $true
+            }
+        }
+
+        It "Should pass -PageSize to InvokeNetboxRequest" {
+            Get-NBIPAMVRF -All -PageSize 500
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
+                $PageSize -eq 500
+            }
         }
     }
 
@@ -1004,6 +1075,215 @@ Describe "IPAM tests" -Tag 'Ipam' {
             $Result = Remove-NBIPAMVLANTranslationRule -Id 1 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
             $Result.Uri | Should -Match '/api/ipam/vlan.translation.rules/1/'
+        }
+    }
+    #endregion
+
+    #region Parameter Validation Tests
+    Context "Parameter Validation" {
+        It "Should reject invalid Status for Get-NBIPAMAddress" {
+            { Get-NBIPAMAddress -Status 'invalid' } | Should -Throw
+        }
+
+        It "Should reject invalid Family for Get-NBIPAMAddress" {
+            { Get-NBIPAMAddress -Family 5 } | Should -Throw
+        }
+
+        It "Should accept valid Family value 4" {
+            { Get-NBIPAMAddress -Family 4 } | Should -Not -Throw
+        }
+
+        It "Should reject VID below minimum (0) for New-NBIPAMVLAN" {
+            { New-NBIPAMVLAN -Name 'test' -VID 0 -Confirm:$false } | Should -Throw
+        }
+
+        It "Should reject VID above maximum (4095) for New-NBIPAMVLAN" {
+            { New-NBIPAMVLAN -Name 'test' -VID 4095 -Confirm:$false } | Should -Throw
+        }
+
+        It "Should accept valid VID boundary (1) for New-NBIPAMVLAN" {
+            { New-NBIPAMVLAN -Name 'test' -VID 1 -Confirm:$false } | Should -Not -Throw
+        }
+
+        It "Should accept valid VID boundary (4094) for New-NBIPAMVLAN" {
+            { New-NBIPAMVLAN -Name 'test' -VID 4094 -Confirm:$false } | Should -Not -Throw
+        }
+
+        It "Should reject invalid Status for Get-NBIPAMVLAN" {
+            { Get-NBIPAMVLAN -Status 'invalid' } | Should -Throw
+        }
+
+        It "Should require mandatory Address for New-NBIPAMAddress" {
+            { New-NBIPAMAddress -Status 'active' -Confirm:$false } | Should -Throw
+        }
+
+        It "Should reject invalid Assigned_Object_Type for New-NBIPAMAddress" {
+            { New-NBIPAMAddress -Address '10.0.0.1/24' -Assigned_Object_Type 'invalid.type' -Confirm:$false } | Should -Throw
+        }
+
+        It "Should reject PageSize above maximum (1001)" {
+            { Get-NBIPAMAddress -PageSize 1001 } | Should -Throw
+        }
+    }
+    #endregion
+
+    #region WhatIf Tests
+    Context "WhatIf Support" {
+        $whatIfTestCases = @(
+            @{ Command = 'New-NBIPAMAddress'; Parameters = @{ Address = 'whatif-test' } }
+            @{ Command = 'New-NBIPAMAddressRange'; Parameters = @{ Start_Address = 'whatif-test'; End_Address = 'whatif-test' } }
+            @{ Command = 'New-NBIPAMAggregate'; Parameters = @{ Prefix = 'whatif-test'; RIR = 1 } }
+            @{ Command = 'New-NBIPAMASN'; Parameters = @{ ASN = 1 } }
+            @{ Command = 'New-NBIPAMASNRange'; Parameters = @{ Name = 'whatif-test'; Slug = 'whatif-test'; RIR = 1; Start = 1; End = 1 } }
+            @{ Command = 'New-NBIPAMFHRPGroup'; Parameters = @{ Protocol = 'other'; Group_Id = 1 } }
+            @{ Command = 'New-NBIPAMFHRPGroupAssignment'; Parameters = @{ Group = 1; Interface_Type = 'whatif-test'; Interface_Id = 1 } }
+            @{ Command = 'New-NBIPAMPrefix'; Parameters = @{ Prefix = 'whatif-test' } }
+            @{ Command = 'New-NBIPAMRIR'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'New-NBIPAMRole'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'New-NBIPAMRouteTarget'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'New-NBIPAMService'; Parameters = @{ Name = 'whatif-test'; Ports = 1 } }
+            @{ Command = 'New-NBIPAMServiceTemplate'; Parameters = @{ Name = 'whatif-test'; Ports = 1 } }
+            @{ Command = 'New-NBIPAMVLAN'; Parameters = @{ VID = 1; Name = 'whatif-test' } }
+            @{ Command = 'New-NBIPAMVLANGroup'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'New-NBIPAMVLANTranslationPolicy'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'New-NBIPAMVLANTranslationRule'; Parameters = @{ Policy = 1; Local_Vid = 1; Remote_Vid = 1 } }
+            @{ Command = 'New-NBIPAMVRF'; Parameters = @{ Name = 'whatif-test' } }
+            @{ Command = 'Set-NBIPAMAddress'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMAddressRange'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMAggregate'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMASN'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMASNRange'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMFHRPGroup'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMFHRPGroupAssignment'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMPrefix'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMRIR'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMRole'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMRouteTarget'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMService'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMServiceTemplate'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMVLAN'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMVLANGroup'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMVLANTranslationPolicy'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMVLANTranslationRule'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Set-NBIPAMVRF'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMAddress'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMAddressRange'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMAggregate'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMASN'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMASNRange'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMFHRPGroup'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMFHRPGroupAssignment'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMPrefix'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMRIR'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMRole'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMRouteTarget'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMService'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMServiceTemplate'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMVLAN'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMVLANGroup'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMVLANTranslationPolicy'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMVLANTranslationRule'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBIPAMVRF'; Parameters = @{ Id = 1 } }
+        )
+
+        It 'Should support -WhatIf for <Command>' -TestCases $whatIfTestCases {
+            param($Command, $Parameters)
+            $splat = $Parameters.Clone()
+            $splat.Add('WhatIf', $true)
+            $Result = & $Command @splat
+            $Result | Should -BeNullOrEmpty
+        }
+    }
+    #endregion
+
+    #region All/PageSize Passthrough Tests
+    Context "All/PageSize Passthrough" {
+        $allPageSizeTestCases = @(
+            @{ Command = 'Get-NBIPAMAddress' }
+            @{ Command = 'Get-NBIPAMAddressRange' }
+            @{ Command = 'Get-NBIPAMAggregate' }
+            @{ Command = 'Get-NBIPAMASN' }
+            @{ Command = 'Get-NBIPAMASNRange' }
+            @{ Command = 'Get-NBIPAMFHRPGroup' }
+            @{ Command = 'Get-NBIPAMFHRPGroupAssignment' }
+            @{ Command = 'Get-NBIPAMPrefix' }
+            @{ Command = 'Get-NBIPAMRIR' }
+            @{ Command = 'Get-NBIPAMRole' }
+            @{ Command = 'Get-NBIPAMRouteTarget' }
+            @{ Command = 'Get-NBIPAMService' }
+            @{ Command = 'Get-NBIPAMServiceTemplate' }
+            @{ Command = 'Get-NBIPAMVLAN' }
+            @{ Command = 'Get-NBIPAMVLANGroup' }
+            @{ Command = 'Get-NBIPAMVLANTranslationPolicy' }
+            @{ Command = 'Get-NBIPAMVLANTranslationRule' }
+        )
+
+        It 'Should pass -All to InvokeNetboxRequest for <Command>' -TestCases $allPageSizeTestCases {
+            param($Command, $Parameters)
+            $splat = @{ All = $true }
+            if ($Parameters) { $splat += $Parameters }
+            & $Command @splat
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
+                $All -eq $true
+            }
+        }
+
+        It 'Should pass -PageSize to InvokeNetboxRequest for <Command>' -TestCases $allPageSizeTestCases {
+            param($Command, $Parameters)
+            $splat = @{ All = $true; PageSize = 500 }
+            if ($Parameters) { $splat += $Parameters }
+            & $Command @splat
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
+                $PageSize -eq 500
+            }
+        }
+    }
+    #endregion
+
+    #region Omit Parameter Tests
+    Context "Omit Parameter" {
+        $omitTestCases = @(
+            @{ Command = 'Get-NBIPAMAddress' }
+            @{ Command = 'Get-NBIPAMAddressRange' }
+            @{ Command = 'Get-NBIPAMAggregate' }
+            @{ Command = 'Get-NBIPAMASN' }
+            @{ Command = 'Get-NBIPAMASNRange' }
+            @{ Command = 'Get-NBIPAMFHRPGroup' }
+            @{ Command = 'Get-NBIPAMFHRPGroupAssignment' }
+            @{ Command = 'Get-NBIPAMPrefix' }
+            @{ Command = 'Get-NBIPAMRIR' }
+            @{ Command = 'Get-NBIPAMRole' }
+            @{ Command = 'Get-NBIPAMRouteTarget' }
+            @{ Command = 'Get-NBIPAMService' }
+            @{ Command = 'Get-NBIPAMServiceTemplate' }
+            @{ Command = 'Get-NBIPAMVLAN' }
+            @{ Command = 'Get-NBIPAMVLANGroup' }
+            @{ Command = 'Get-NBIPAMVLANTranslationPolicy' }
+            @{ Command = 'Get-NBIPAMVLANTranslationRule' }
+            @{ Command = 'Get-NBIPAMVRF' }
+        )
+
+        It 'Should pass -Omit to query string for <Command>' -TestCases $omitTestCases {
+            param($Command, $Parameters)
+            $splat = @{ Omit = @('comments', 'description') }
+            if ($Parameters) { $splat += $Parameters }
+            $Result = & $Command @splat
+            $Result.Uri | Should -Match 'omit=comments%2Cdescription'
+        }
+    }
+    #endregion
+
+    #region Pipeline Input Tests
+    Context "Pipeline Input" {
+        $pipelineTestCases = @(
+            @{ Command = 'Get-NBIPAMAddress' }
+            @{ Command = 'Get-NBIPAMVLAN' }
+        )
+
+        It 'Should accept pipeline input by property name for <Command>' -TestCases $pipelineTestCases {
+            param($Command)
+            $Result = [pscustomobject]@{ 'Id' = 10 } | & $Command
+            $Result.Uri | Should -Match '/10/'
         }
     }
     #endregion

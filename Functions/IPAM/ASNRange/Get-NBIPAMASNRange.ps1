@@ -30,6 +30,26 @@ function Get-NBIPAMASNRange {
     .PARAMETER Raw
         Return the raw API response
 
+    .PARAMETER All
+        Automatically fetch all pages of results. Uses the API's pagination
+        to retrieve all items across multiple requests.
+
+    .PARAMETER PageSize
+        Number of items per page when using -All. Default: 100.
+        Range: 1-1000.
+
+    .PARAMETER Brief
+        Return a minimal representation of objects (id, url, display, name only).
+        Reduces response size by ~90%. Ideal for dropdowns and reference lists.
+
+    .PARAMETER Fields
+        Specify which fields to include in the response.
+        Supports nested field selection (e.g., 'site.name', 'device_type.model').
+
+    .PARAMETER Omit
+        Specify which fields to exclude from the response.
+        Requires Netbox 4.5.0 or later.
+
     .EXAMPLE
         Get-NBIPAMASNRange
 
@@ -53,7 +73,6 @@ function Get-NBIPAMASNRange {
         [switch]$Brief,
 
         [string[]]$Fields,
-
 
         [string[]]$Omit,
 

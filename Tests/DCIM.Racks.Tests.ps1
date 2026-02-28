@@ -1,4 +1,3 @@
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param()
 
 BeforeAll {
@@ -14,22 +13,13 @@ BeforeAll {
 Describe "DCIM Racks Tests" -Tag 'DCIM', 'Racks' {
     BeforeAll {
         Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
-        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+        Mock -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -MockWith {
             return [ordered]@{
-                'Method'      = $Method
-                'Uri'         = $Uri
-                'Headers'     = $Headers
-                'Timeout'     = $Timeout
-                'ContentType' = $ContentType
-                'Body'        = $Body
+                'Method' = if ($Method) { $Method } else { 'GET' }
+                'Uri'    = $URI.Uri.AbsoluteUri
+                'Body'   = if ($Body) { $Body | ConvertTo-Json -Compress } else { $null }
             }
         }
-        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
-            return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
-        }
-        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { return 'netbox.domain.com' }
-        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
-        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
 
         InModuleScope -ModuleName 'PowerNetbox' {
             $script:NetboxConfig.Hostname = 'netbox.domain.com'
@@ -54,7 +44,7 @@ Describe "DCIM Racks Tests" -Tag 'DCIM', 'Racks' {
     Context "New-NBDCIMRack" {
         It "Should create a new rack" {
             $Result = New-NBDCIMRack -Name "Rack01" -Site 1
-            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 1 -Exactly -Scope 'It' -ModuleName 'PowerNetbox'
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -Times 1 -Exactly -Scope 'It' -ModuleName 'PowerNetbox'
             $Result.Method | Should -Be 'POST'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/racks/'
             $Result.Body | Should -Match '"name":"Rack01"'
@@ -64,7 +54,7 @@ Describe "DCIM Racks Tests" -Tag 'DCIM', 'Racks' {
 
     Context "Set-NBDCIMRack" {
         It "Should update a rack" {
-            $Result = Set-NBDCIMRack -Id 1 -Name 'UpdatedRack' -Force
+            $Result = Set-NBDCIMRack -Id 1 -Name 'UpdatedRack' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/racks/1/'
         }
@@ -72,9 +62,118 @@ Describe "DCIM Racks Tests" -Tag 'DCIM', 'Racks' {
 
     Context "Remove-NBDCIMRack" {
         It "Should remove a rack" {
-            $Result = Remove-NBDCIMRack -Id 10 -Force
+            $Result = Remove-NBDCIMRack -Id 10 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/racks/10/'
         }
     }
+
+    #region Parameter Validation Tests
+    Context "Parameter Validation" {
+        It "Should reject invalid Status for New-NBDCIMRack" {
+            { New-NBDCIMRack -Name 'test' -Site 1 -Status 'invalid' -Confirm:$false } | Should -Throw
+        }
+
+        It "Should reject invalid Width for New-NBDCIMRack" {
+            { New-NBDCIMRack -Name 'test' -Site 1 -Width 15 -Confirm:$false } | Should -Throw
+        }
+
+        It "Should accept valid Width (19) for New-NBDCIMRack" {
+            { New-NBDCIMRack -Name 'test' -Site 1 -Width 19 -Confirm:$false } | Should -Not -Throw
+        }
+
+        It "Should reject U_Height below minimum (0) for New-NBDCIMRack" {
+            { New-NBDCIMRack -Name 'test' -Site 1 -U_Height 0 -Confirm:$false } | Should -Throw
+        }
+
+        It "Should reject U_Height above maximum (101) for New-NBDCIMRack" {
+            { New-NBDCIMRack -Name 'test' -Site 1 -U_Height 101 -Confirm:$false } | Should -Throw
+        }
+
+        It "Should reject invalid Weight_Unit for New-NBDCIMRack" {
+            { New-NBDCIMRack -Name 'test' -Site 1 -Weight_Unit 'ton' -Confirm:$false } | Should -Throw
+        }
+
+        It "Should reject invalid Face for Get-NBDCIMRackElevation" {
+            { Get-NBDCIMRackElevation -Id 1 -Face 'invalid' } | Should -Throw
+        }
+
+        It "Should reject invalid Render for Get-NBDCIMRackElevation" {
+            { Get-NBDCIMRackElevation -Id 1 -Render 'invalid' } | Should -Throw
+        }
+
+        It "Should reject invalid Status for Get-NBDCIMRack" {
+            { Get-NBDCIMRack -Status 'invalid' } | Should -Throw
+        }
+
+        It "Should require mandatory Name for New-NBDCIMRack" {
+            { New-NBDCIMRack -Site 1 -Confirm:$false } | Should -Throw
+        }
+
+        It "Should require mandatory Site for New-NBDCIMRack" {
+            { New-NBDCIMRack -Name 'test' -Confirm:$false } | Should -Throw
+        }
+    }
+    #endregion
+
+    #region WhatIf Tests
+    Context "WhatIf Support" {
+        $whatIfTestCases = @(
+            @{ Command = 'New-NBDCIMRack'; Parameters = @{ Name = 'whatif-test'; Site = 1 } }
+            @{ Command = 'Set-NBDCIMRack'; Parameters = @{ Id = 1 } }
+            @{ Command = 'Remove-NBDCIMRack'; Parameters = @{ Id = 1 } }
+        )
+
+        It 'Should support -WhatIf for <Command>' -TestCases $whatIfTestCases {
+            param($Command, $Parameters)
+            $splat = $Parameters.Clone()
+            $splat.Add('WhatIf', $true)
+            $Result = & $Command @splat
+            $Result | Should -BeNullOrEmpty
+        }
+    }
+    #endregion
+
+    #region All/PageSize Passthrough Tests
+    Context "All/PageSize Passthrough" {
+        $allPageSizeTestCases = @(
+            @{ Command = 'Get-NBDCIMRack' }
+            @{ Command = 'Get-NBDCIMRackElevation'; Parameters = @{ Id = 1 } }
+        )
+
+        It 'Should pass -All to InvokeNetboxRequest for <Command>' -TestCases $allPageSizeTestCases {
+            param($Command, $Parameters)
+            $splat = @{ All = $true }
+            if ($Parameters) { $splat += $Parameters }
+            & $Command @splat
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
+                $All -eq $true
+            }
+        }
+
+        It 'Should pass -PageSize to InvokeNetboxRequest for <Command>' -TestCases $allPageSizeTestCases {
+            param($Command, $Parameters)
+            $splat = @{ All = $true; PageSize = 500 }
+            if ($Parameters) { $splat += $Parameters }
+            & $Command @splat
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
+                $PageSize -eq 500
+            }
+        }
+    }
+    #endregion
+
+    #region Omit Parameter Tests
+    Context "Omit Parameter" {
+        $omitTestCases = @(
+            @{ Command = 'Get-NBDCIMRack' }
+        )
+
+        It 'Should pass -Omit to query string for <Command>' -TestCases $omitTestCases {
+            param($Command)
+            $Result = & $Command -Omit @('comments', 'description')
+            $Result.Uri | Should -Match 'omit=comments%2Cdescription'
+        }
+    }
+    #endregion
 }

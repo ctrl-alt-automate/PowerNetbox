@@ -38,6 +38,26 @@ function Get-NBTenant {
     .PARAMETER Raw
         Return the unparsed data from the HTTP request
 
+    .PARAMETER All
+        Automatically fetch all pages of results. Uses the API's pagination
+        to retrieve all items across multiple requests.
+
+    .PARAMETER PageSize
+        Number of items per page when using -All. Default: 100.
+        Range: 1-1000.
+
+    .PARAMETER Brief
+        Return a minimal representation of objects (id, url, display, name only).
+        Reduces response size by ~90%. Ideal for dropdowns and reference lists.
+
+    .PARAMETER Fields
+        Specify which fields to include in the response.
+        Supports nested field selection (e.g., 'site.name', 'device_type.model').
+
+    .PARAMETER Omit
+        Specify which fields to exclude from the response.
+        Requires Netbox 4.5.0 or later.
+
     .EXAMPLE
         PS C:\> Get-NBTenant
 
@@ -55,7 +75,6 @@ function Get-NBTenant {
         [switch]$Brief,
 
         [string[]]$Fields,
-
 
         [string[]]$Omit,
 
@@ -98,25 +117,23 @@ function Get-NBTenant {
             foreach ($Tenant_ID in $Id) {
                 $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'tenants', $Tenant_ID))
 
-                $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'All', 'PageSize'
+                $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw', 'All', 'PageSize'
 
                 $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
                 InvokeNetboxRequest -URI $uri -Raw:$Raw -All:$All -PageSize $PageSize
             }
-
-            break
+            return
         }
 
         default {
             $Segments = [System.Collections.ArrayList]::new(@('tenancy', 'tenants'))
 
-            $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'All', 'PageSize'
+            $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'All', 'PageSize'
 
             $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
             InvokeNetboxRequest -URI $uri -Raw:$Raw -All:$All -PageSize $PageSize
-            break
         }
     }
     }

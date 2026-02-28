@@ -36,25 +36,13 @@ function Get-NBIPAMAvailableIP {
     [OutputType([PSCustomObject])]
     param
     (
-        [switch]$All,
-
-        [ValidateRange(1, 1000)]
-        [int]$PageSize = 100,
-
-        [switch]$Brief,
-
-        [string[]]$Fields,
-
-
-        [string[]]$Omit,
-
         [Parameter(Mandatory = $true,
             ValueFromPipelineByPropertyName = $true)]
         [Alias('Id')]
         [uint64]$Prefix_ID,
 
         [Alias('NumberOfIPs')]
-        [uint64]$Limit,
+        [uint16]$Limit,
 
         [switch]$Raw
     )
@@ -63,10 +51,10 @@ function Get-NBIPAMAvailableIP {
         Write-Verbose "Retrieving IPAM Available IP"
         $Segments = [System.Collections.ArrayList]::new(@('ipam', 'prefixes', $Prefix_ID, 'available-ips'))
 
-        $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'prefix_id', 'All', 'PageSize'
+        $URIComponents = BuildURIComponents -URISegments $Segments -ParametersDictionary $PSBoundParameters -SkipParameterByName 'prefix_id', 'Raw'
 
         $uri = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
 
-        InvokeNetboxRequest -URI $uri -Raw:$Raw -All:$All -PageSize $PageSize
+        InvokeNetboxRequest -URI $uri -Raw:$Raw
     }
 }

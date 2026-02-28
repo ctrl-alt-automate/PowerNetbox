@@ -8,7 +8,6 @@
     and ImageAttachments functions.
 #>
 
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param()
 
 BeforeAll {
@@ -24,22 +23,13 @@ BeforeAll {
 Describe "Extras Module Tests" -Tag 'Extras' {
     BeforeAll {
         Mock -CommandName 'CheckNetboxIsConnected' -ModuleName 'PowerNetbox' -MockWith { return $true }
-        Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+        Mock -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -MockWith {
             return [ordered]@{
-                'Method'      = $Method
-                'Uri'         = $Uri
-                'Headers'     = $Headers
-                'Timeout'     = $Timeout
-                'ContentType' = $ContentType
-                'Body'        = $Body
+                'Method' = if ($Method) { $Method } else { 'GET' }
+                'Uri'    = $URI.Uri.AbsoluteUri
+                'Body'   = if ($Body) { $Body | ConvertTo-Json -Compress } else { $null }
             }
         }
-        Mock -CommandName 'Get-NBCredential' -ModuleName 'PowerNetbox' -MockWith {
-            return [PSCredential]::new('notapplicable', (ConvertTo-SecureString -String "faketoken" -AsPlainText -Force))
-        }
-        Mock -CommandName 'Get-NBHostname' -ModuleName 'PowerNetbox' -MockWith { return 'netbox.domain.com' }
-        Mock -CommandName 'Get-NBTimeout' -ModuleName 'PowerNetbox' -MockWith { return 30 }
-        Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith { return @{} }
 
         InModuleScope -ModuleName 'PowerNetbox' {
             $script:NetboxConfig.Hostname = 'netbox.domain.com'
@@ -75,6 +65,22 @@ Describe "Extras Module Tests" -Tag 'Extras' {
             $Result = Get-NBTag -Limit 10 -Offset 20
             $Result.Uri | Should -Match 'limit=10'
             $Result.Uri | Should -Match 'offset=20'
+        }
+    }
+
+    Context "Get-NBTag -All/-PageSize passthrough" {
+        It "Should pass -All switch to InvokeNetboxRequest" {
+            Get-NBTag -All
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
+                $All -eq $true
+            }
+        }
+
+        It "Should pass -PageSize to InvokeNetboxRequest" {
+            Get-NBTag -All -PageSize 500
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
+                $PageSize -eq 500
+            }
         }
     }
 
@@ -206,7 +212,7 @@ Describe "Extras Module Tests" -Tag 'Extras' {
 
         It "Should request a choice set by name" {
             $Result = Get-NBCustomFieldChoiceSet -Name 'Status Options'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/extras/custom-field-choice-sets/?name=Status Options'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/extras/custom-field-choice-sets/?name=Status%20Options'
         }
     }
 
@@ -258,7 +264,7 @@ Describe "Extras Module Tests" -Tag 'Extras' {
 
         It "Should request a config context by name" {
             $Result = Get-NBConfigContext -Name 'DNS Servers'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/extras/config-contexts/?name=DNS Servers'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/extras/config-contexts/?name=DNS%20Servers'
         }
     }
 
@@ -316,7 +322,7 @@ Describe "Extras Module Tests" -Tag 'Extras' {
 
         It "Should request a webhook by name" {
             $Result = Get-NBWebhook -Name 'Slack Notification'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/extras/webhooks/?name=Slack Notification'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/extras/webhooks/?name=Slack%20Notification'
         }
     }
 
@@ -422,7 +428,7 @@ Describe "Extras Module Tests" -Tag 'Extras' {
 
         It "Should request an export template by name" {
             $Result = Get-NBExportTemplate -Name 'Device CSV'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/extras/export-templates/?name=Device CSV'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/extras/export-templates/?name=Device%20CSV'
         }
     }
 
@@ -474,7 +480,7 @@ Describe "Extras Module Tests" -Tag 'Extras' {
 
         It "Should request a saved filter by name" {
             $Result = Get-NBSavedFilter -Name 'Active Devices'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/extras/saved-filters/?name=Active Devices'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/extras/saved-filters/?name=Active%20Devices'
         }
     }
 
@@ -567,7 +573,7 @@ Describe "Extras Module Tests" -Tag 'Extras' {
 
         It "Should request an event rule by name" {
             $Result = Get-NBEventRule -Name 'Device Created'
-            $Result.Uri | Should -Be 'https://netbox.domain.com/api/extras/event-rules/?name=Device Created'
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/extras/event-rules/?name=Device%20Created'
         }
     }
 
@@ -671,6 +677,85 @@ Describe "Extras Module Tests" -Tag 'Extras' {
         }
     }
 
+    Context "New-NBImageAttachment" {
+        BeforeAll {
+            # New-NBImageAttachment bypasses InvokeNetboxRequest (uses Invoke-RestMethod directly)
+            # Mock the helpers it calls and Invoke-RestMethod
+            Mock -CommandName 'Get-NBInvokeParams' -ModuleName 'PowerNetbox' -MockWith {
+                return @{}
+            }
+            Mock -CommandName 'Get-NBRequestHeaders' -ModuleName 'PowerNetbox' -MockWith {
+                return @{ 'Authorization' = 'Bearer test-token' }
+            }
+            Mock -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -MockWith {
+                return [pscustomobject]@{
+                    id          = 1
+                    url         = 'https://netbox.domain.com/api/extras/image-attachments/1/'
+                    object_type = 'dcim.device'
+                    object_id   = 42
+                    image       = '/media/image-attachments/test.png'
+                }
+            }
+
+            # Create a temporary test image file
+            $script:TestImagePath = Join-Path $TestDrive 'test-image.png'
+            [byte[]]$pngBytes = @(137, 80, 78, 71, 13, 10, 26, 10)  # PNG magic bytes
+            [System.IO.File]::WriteAllBytes($script:TestImagePath, $pngBytes)
+        }
+
+        It "Should have mandatory Object_Type parameter" {
+            $cmd = Get-Command New-NBImageAttachment
+            $cmd.Parameters['Object_Type'].Attributes.Mandatory | Should -Contain $true
+        }
+
+        It "Should have mandatory Object_Id parameter" {
+            $cmd = Get-Command New-NBImageAttachment
+            $cmd.Parameters['Object_Id'].Attributes.Mandatory | Should -Contain $true
+        }
+
+        It "Should have mandatory ImagePath parameter" {
+            $cmd = Get-Command New-NBImageAttachment
+            $cmd.Parameters['ImagePath'].Attributes.Mandatory | Should -Contain $true
+        }
+
+        It "Should accept Object_Id from pipeline via Id alias" {
+            $cmd = Get-Command New-NBImageAttachment
+            $param = $cmd.Parameters['Object_Id']
+            $param.Aliases | Should -Contain 'Id'
+            $pipeAttr = $param.Attributes | Where-Object { $_ -is [System.Management.Automation.ParameterAttribute] }
+            $pipeAttr.ValueFromPipelineByPropertyName | Should -Contain $true
+        }
+
+        It "Should validate Name max length of 50" {
+            $cmd = Get-Command New-NBImageAttachment
+            $validateLength = $cmd.Parameters['Name'].Attributes | Where-Object { $_ -is [System.Management.Automation.ValidateLengthAttribute] }
+            $validateLength | Should -Not -BeNullOrEmpty
+            $validateLength.MaxLength | Should -Be 50
+        }
+
+        It "Should validate Description max length of 200" {
+            $cmd = Get-Command New-NBImageAttachment
+            $validateLength = $cmd.Parameters['Description'].Attributes | Where-Object { $_ -is [System.Management.Automation.ValidateLengthAttribute] }
+            $validateLength | Should -Not -BeNullOrEmpty
+            $validateLength.MaxLength | Should -Be 200
+        }
+
+        It "Should throw when image file does not exist" {
+            { New-NBImageAttachment -Object_Type 'dcim.device' -Object_Id 1 -ImagePath '/nonexistent/fake.png' } | Should -Throw
+        }
+
+        It "Should not upload when WhatIf is specified" {
+            New-NBImageAttachment -Object_Type 'dcim.device' -Object_Id 42 -ImagePath $script:TestImagePath -WhatIf
+            Should -Invoke -CommandName 'Invoke-RestMethod' -Times 0 -Scope 'It' -ModuleName 'PowerNetbox'
+        }
+
+        It "Should support ShouldProcess" {
+            $cmd = Get-Command New-NBImageAttachment
+            $cmd.Parameters.Keys | Should -Contain 'Confirm'
+            $cmd.Parameters.Keys | Should -Contain 'WhatIf'
+        }
+    }
+
     Context "Remove-NBImageAttachment" {
         BeforeAll {
             Mock -CommandName "Get-NBImageAttachment" -ModuleName PowerNetbox -MockWith {
@@ -682,6 +767,128 @@ Describe "Extras Module Tests" -Tag 'Extras' {
             $Result = Remove-NBImageAttachment -Id 25 -Confirm:$false
             $Result.Method | Should -Be 'DELETE'
             $Result.URI | Should -Match '/api/extras/image.attachments/25/'
+        }
+    }
+    #endregion
+
+    #region Parameter Validation Tests
+    Context "Parameter Validation" {
+        It "Should reject invalid Kind for New-NBJournalEntry" {
+            { New-NBJournalEntry -Assigned_Object_Type 'dcim.device' -Assigned_Object_Id 1 -Comments 'test' -Kind 'invalid' -Confirm:$false } | Should -Throw
+        }
+
+        It "Should accept valid Kind 'warning' for New-NBJournalEntry" {
+            { New-NBJournalEntry -Assigned_Object_Type 'dcim.device' -Assigned_Object_Id 1 -Comments 'test' -Kind 'warning' -Confirm:$false } | Should -Not -Throw
+        }
+
+        It "Should reject invalid Action_Type for New-NBEventRule" {
+            { New-NBEventRule -Name 'test' -Object_Types @('dcim.device') -Action_Type 'invalid' -Confirm:$false } | Should -Throw
+        }
+
+        It "Should reject invalid Kind for Get-NBJournalEntry" {
+            { Get-NBJournalEntry -Kind 'invalid' } | Should -Throw
+        }
+
+        It "Should reject invalid CustomField Type for Set-NBCustomField" {
+            { Set-NBCustomField -Id 1 -Type 'invalid' -Confirm:$false } | Should -Throw
+        }
+
+        It "Should reject Weight below minimum (0) for New-NBConfigContext" {
+            { New-NBConfigContext -Name 'test' -Data @{key = 'value'} -Weight -1 -Confirm:$false } | Should -Throw
+        }
+
+        It "Should reject Weight above maximum (32767) for New-NBConfigContext" {
+            { New-NBConfigContext -Name 'test' -Data @{key = 'value'} -Weight 32768 -Confirm:$false } | Should -Throw
+        }
+
+        It "Should require mandatory Assigned_Object_Type for New-NBJournalEntry" {
+            { New-NBJournalEntry -Assigned_Object_Id 1 -Comments 'test' -Confirm:$false } | Should -Throw
+        }
+
+        It "Should require mandatory Name for New-NBEventRule" {
+            { New-NBEventRule -Object_Types @('dcim.device') -Action_Type 'webhook' -Confirm:$false } | Should -Throw
+        }
+
+        It "Should reject PageSize above maximum (1001) for Get-NBJournalEntry" {
+            { Get-NBJournalEntry -PageSize 1001 } | Should -Throw
+        }
+    }
+    #endregion
+
+    #region All/PageSize Passthrough Tests
+    Context "All/PageSize Passthrough" {
+        $allPageSizeTestCases = @(
+            @{ Command = 'Get-NBBookmark' }
+            @{ Command = 'Get-NBConfigContext' }
+            @{ Command = 'Get-NBCustomField' }
+            @{ Command = 'Get-NBCustomFieldChoiceSet' }
+            @{ Command = 'Get-NBCustomLink' }
+            @{ Command = 'Get-NBEventRule' }
+            @{ Command = 'Get-NBExportTemplate' }
+            @{ Command = 'Get-NBImageAttachment' }
+            @{ Command = 'Get-NBJournalEntry' }
+            @{ Command = 'Get-NBSavedFilter' }
+            @{ Command = 'Get-NBWebhook' }
+        )
+
+        It 'Should pass -All to InvokeNetboxRequest for <Command>' -TestCases $allPageSizeTestCases {
+            param($Command, $Parameters)
+            $splat = @{ All = $true }
+            if ($Parameters) { $splat += $Parameters }
+            & $Command @splat
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
+                $All -eq $true
+            }
+        }
+
+        It 'Should pass -PageSize to InvokeNetboxRequest for <Command>' -TestCases $allPageSizeTestCases {
+            param($Command, $Parameters)
+            $splat = @{ All = $true; PageSize = 500 }
+            if ($Parameters) { $splat += $Parameters }
+            & $Command @splat
+            Should -Invoke -CommandName 'InvokeNetboxRequest' -ModuleName 'PowerNetbox' -ParameterFilter {
+                $PageSize -eq 500
+            }
+        }
+    }
+    #endregion
+
+    #region Omit Parameter Tests
+    Context "Omit Parameter" {
+        $omitTestCases = @(
+            @{ Command = 'Get-NBBookmark' }
+            @{ Command = 'Get-NBConfigContext' }
+            @{ Command = 'Get-NBCustomField' }
+            @{ Command = 'Get-NBCustomFieldChoiceSet' }
+            @{ Command = 'Get-NBCustomLink' }
+            @{ Command = 'Get-NBEventRule' }
+            @{ Command = 'Get-NBExportTemplate' }
+            @{ Command = 'Get-NBImageAttachment' }
+            @{ Command = 'Get-NBJournalEntry' }
+            @{ Command = 'Get-NBSavedFilter' }
+            @{ Command = 'Get-NBTag' }
+            @{ Command = 'Get-NBWebhook' }
+        )
+
+        It 'Should pass -Omit to query string for <Command>' -TestCases $omitTestCases {
+            param($Command)
+            $Result = & $Command -Omit @('comments', 'description')
+            $Result.Uri | Should -Match 'omit=comments%2Cdescription'
+        }
+    }
+    #endregion
+
+    #region Pipeline Input Tests
+    Context "Pipeline Input" {
+        $pipelineTestCases = @(
+            @{ Command = 'Get-NBTag' }
+            @{ Command = 'Get-NBCustomField' }
+        )
+
+        It 'Should accept pipeline input by property name for <Command>' -TestCases $pipelineTestCases {
+            param($Command)
+            $Result = [pscustomobject]@{ 'Id' = 10 } | & $Command
+            $Result.Uri | Should -Match '/10/'
         }
     }
     #endregion
