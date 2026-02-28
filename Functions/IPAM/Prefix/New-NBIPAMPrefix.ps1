@@ -162,6 +162,10 @@ function New-NBIPAMPrefix {
 
     process {
         if ($PSCmdlet.ParameterSetName -eq 'Single') {
+            if ($PSBoundParameters.ContainsKey('Scope_Type') -xor $PSBoundParameters.ContainsKey('Scope_Id')) {
+                throw 'Parameters -Scope_Type and -Scope_Id must be used together.'
+            }
+
             $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
 
             if ($PSCmdlet.ShouldProcess($Prefix, 'Create new Prefix')) {
@@ -181,8 +185,11 @@ function New-NBIPAMPrefix {
                         'ispool' { $key = 'is_pool' }
                         'site' {
                             # Backward compat: translate site to scope_type + scope_id
-                            $item['scope_type'] = 'dcim.site'
-                            $item['scope_id'] = $value
+                            # Only if scope_type is not already explicitly provided
+                            if (-not $InputObject.PSObject.Properties['scope_type']) {
+                                $item['scope_type'] = 'dcim.site'
+                                $item['scope_id'] = $value
+                            }
                             $key = $null
                         }
                     }
