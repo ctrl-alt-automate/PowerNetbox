@@ -20,7 +20,7 @@ on:
       test_versions:
         description: 'Netbox versions to test (comma-separated)'
         required: false
-        default: '4.3.7,4.4.10,4.5.2'
+        default: '4.3.7,4.4.10,4.5.3'
         type: string
       include_beta:
         description: 'Include beta/pre-release versions'
@@ -62,9 +62,9 @@ jobs:
           # - Token v2 with Bearer auth (#102)
           # - New: cable-profiles, authentication-check (#103, #105)
           # - New fields: VM.interface_count, Token.allowed_ips (#106)
-          # Docker 4.0.0: Granian web server, PostgreSQL 18, Valkey 9
-          - netbox: "v4.5.2-4.0.0"
-            netbox_short: "4.5.2"
+          # Docker 4.0.1: Granian web server, PostgreSQL 18, Valkey 9
+          - netbox: "v4.5.3-4.0.1"
+            netbox_short: "4.5.3"
             is_beta: false
             expected_failures: []
 
@@ -455,11 +455,11 @@ jobs:
           echo "" >> compatibility-report.md
           echo "Generated: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> compatibility-report.md
           echo "" >> compatibility-report.md
-          echo "| Test | 4.3.7 | 4.4.10 | 4.5.2 |" >> compatibility-report.md
+          echo "| Test | 4.3.7 | 4.4.10 | 4.5.3 |" >> compatibility-report.md
           echo "|------|-------|--------|-------|" >> compatibility-report.md
 
           # Parse results from each version
-          for version in 4.3.7 4.4.10 4.5.2; do
+          for version in 4.3.7 4.4.10 4.5.3; do
             if [ -f "results/compatibility-$version/compatibility-results-$version.json" ]; then
               echo "Found results for $version"
               cat "results/compatibility-$version/compatibility-results-$version.json"
