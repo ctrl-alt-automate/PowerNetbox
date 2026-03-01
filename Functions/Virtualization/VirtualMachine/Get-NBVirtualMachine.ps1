@@ -39,7 +39,9 @@ function Get-NBVirtualMachine {
         The initial index from which to return the results
 
     .PARAMETER Query
-        A general query used to search for a VM
+        Search query (maps to the 'q' API filter). Matches against VM name
+        and primary IP address. Note: in Netbox 4.5.3+, this only matches the
+        primary IP, not all assigned IPs.
 
     .PARAMETER Name
         Name of the VM

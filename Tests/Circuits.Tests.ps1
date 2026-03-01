@@ -162,6 +162,13 @@ Describe "Circuits Module Tests" -Tag 'Circuits' {
             $bodyObj.name | Should -Be 'MPLS'
             $bodyObj.slug | Should -Be 'mpls'
         }
+
+        It "Should create a circuit type with owner" {
+            $Result = New-NBCircuitType -Name 'DarkFiber' -Owner 5
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.name | Should -Be 'DarkFiber'
+            $bodyObj.owner | Should -Be 5
+        }
     }
 
     Context "Set-NBCircuitType" {
@@ -169,6 +176,12 @@ Describe "Circuits Module Tests" -Tag 'Circuits' {
             $Result = Set-NBCircuitType -Id 1 -Name 'Updated Type' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
             $Result.URI | Should -Match '/api/circuits/circuit.types/1/'
+        }
+
+        It "Should update circuit type owner" {
+            $Result = Set-NBCircuitType -Id 1 -Owner 10 -Confirm:$false
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.owner | Should -Be 10
         }
     }
 
