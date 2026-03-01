@@ -33,6 +33,11 @@
     Include config_context in the response. By default, config_context is
     excluded for performance (can be 10-100x faster without it).
 
+.PARAMETER Query
+    Search query (maps to the 'q' API filter). Matches against device name
+    and primary IP address. Note: in Netbox 4.5.3+, this only matches the
+    primary IP, not all assigned IPs.
+
 .PARAMETER Raw
     Return the raw API response instead of the results array.
 

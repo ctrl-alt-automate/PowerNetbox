@@ -17,6 +17,9 @@
 .PARAMETER Description
     Description of the circuit type.
 
+.PARAMETER Owner
+    ID of the owner (tenant).
+
 .PARAMETER Custom_Fields
     Custom fields hashtable.
 
@@ -43,6 +46,8 @@ function New-NBCircuitType {
         [string]$Color,
 
         [string]$Description,
+
+        [uint64]$Owner,
 
         [hashtable]$Custom_Fields,
 
