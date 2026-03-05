@@ -166,6 +166,24 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
             $bodyObj = $Result.Body | ConvertFrom-Json
             $bodyObj.mode | Should -Be 'tagged-all'
         }
+
+        It "Should convert legacy numeric Mode '100' to 'access'" {
+            $Result = New-NBDCIMInterface -Device 123 -Name "Test" -Mode '100'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.mode | Should -Be 'access'
+        }
+
+        It "Should convert legacy numeric Mode '200' to 'tagged'" {
+            $Result = New-NBDCIMInterface -Device 123 -Name "Test" -Mode '200'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.mode | Should -Be 'tagged'
+        }
+
+        It "Should convert legacy numeric Mode '300' to 'tagged-all'" {
+            $Result = New-NBDCIMInterface -Device 123 -Name "Test" -Mode '300'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.mode | Should -Be 'tagged-all'
+        }
     }
 
     Context "Set-NBDCIMInterface" {

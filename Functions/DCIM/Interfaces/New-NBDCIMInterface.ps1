@@ -166,8 +166,11 @@ function New-NBDCIMInterface {
             if (-not [System.String]::IsNullOrWhiteSpace($Mode)) {
                 $PSBoundParameters.Mode = switch ($Mode) {
                     'Access' { 'access' }
+                    '100' { 'access' }
                     'Tagged' { 'tagged' }
+                    '200' { 'tagged' }
                     'Tagged All' { 'tagged-all' }
+                    '300' { 'tagged-all' }
                     default { $_ }
                 }
             }

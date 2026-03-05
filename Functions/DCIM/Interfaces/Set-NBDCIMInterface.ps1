@@ -66,12 +66,27 @@ function Set-NBDCIMInterface {
                     break
                 }
 
+                '100' {
+                    'access'
+                    break
+                }
+
                 'Tagged' {
                     'tagged'
                     break
                 }
 
+                '200' {
+                    'tagged'
+                    break
+                }
+
                 'Tagged All' {
+                    'tagged-all'
+                    break
+                }
+
+                '300' {
                     'tagged-all'
                     break
                 }
