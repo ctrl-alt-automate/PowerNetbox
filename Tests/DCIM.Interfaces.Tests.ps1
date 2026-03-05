@@ -137,8 +137,34 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
             { New-NBDCIMInterface -Device 321 -Name "Test123" -Mode 'Fake' } | Should -Throw
         }
 
-        It "Should throw for out of range VLAN" {
-            { New-NBDCIMInterface -Device 321 -Name "Test123" -Untagged_VLAN 4100 } | Should -Throw
+        It "Should accept VLAN database IDs larger than 4094" {
+            $Result = New-NBDCIMInterface -Device 321 -Name "Test123" -Untagged_VLAN 14402
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.untagged_vlan | Should -Be 14402
+        }
+
+        It "Should accept Tagged_VLANs with database IDs larger than 4094" {
+            $Result = New-NBDCIMInterface -Device 321 -Name "Test123" -Mode 'Tagged' -Tagged_VLANs 5000, 14402
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.tagged_vlans | Should -Be @(5000, 14402)
+        }
+
+        It "Should convert Mode 'Access' to API string 'access'" {
+            $Result = New-NBDCIMInterface -Device 123 -Name "Test" -Mode 'Access'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.mode | Should -Be 'access'
+        }
+
+        It "Should convert Mode 'Tagged' to API string 'tagged'" {
+            $Result = New-NBDCIMInterface -Device 123 -Name "Test" -Mode 'Tagged'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.mode | Should -Be 'tagged'
+        }
+
+        It "Should convert Mode 'Tagged All' to API string 'tagged-all'" {
+            $Result = New-NBDCIMInterface -Device 123 -Name "Test" -Mode 'Tagged All'
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.mode | Should -Be 'tagged-all'
         }
     }
 
@@ -168,6 +194,24 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
         It "Should throw for invalid type" {
             # Type parameter has ValidateSet - invalid values throw at parameter binding
             { Set-NBDCIMInterface -Id 1234 -Type 'fake' } | Should -Throw
+        }
+
+        It "Should convert Mode 'Access' to API string 'access'" {
+            $Result = Set-NBDCIMInterface -Id 123 -Mode 'Access' -Force
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.mode | Should -Be 'access'
+        }
+
+        It "Should convert Mode 'Tagged All' to API string 'tagged-all'" {
+            $Result = Set-NBDCIMInterface -Id 123 -Mode 'Tagged All' -Force
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.mode | Should -Be 'tagged-all'
+        }
+
+        It "Should accept VLAN database IDs larger than 4094" {
+            $Result = Set-NBDCIMInterface -Id 123 -Untagged_VLAN 14402 -Force
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.untagged_vlan | Should -Be 14402
         }
     }
 

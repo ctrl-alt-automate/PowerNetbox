@@ -49,11 +49,9 @@ function Set-NBDCIMInterface {
         [ValidateSet('Access', 'Tagged', 'Tagged All', '100', '200', '300', IgnoreCase = $true)]
         [string]$Mode,
 
-        [ValidateRange(1, 4094)]
-        [uint16]$Untagged_VLAN,
+        [uint64]$Untagged_VLAN,
 
-        [ValidateRange(1, 4094)]
-        [uint16[]]$Tagged_VLANs,
+        [uint64[]]$Tagged_VLANs,
 
         [switch]$Force,
 
@@ -64,17 +62,17 @@ function Set-NBDCIMInterface {
         if (-not [System.String]::IsNullOrWhiteSpace($Mode)) {
             $PSBoundParameters.Mode = switch ($Mode) {
                 'Access' {
-                    100
+                    'access'
                     break
                 }
 
                 'Tagged' {
-                    200
+                    'tagged'
                     break
                 }
 
                 'Tagged All' {
-                    300
+                    'tagged-all'
                     break
                 }
 
