@@ -42,10 +42,10 @@
     VLAN mode: 'Access' (untagged), 'Tagged' (trunk), or 'Tagged All'.
 
 .PARAMETER Untagged_VLAN
-    VLAN ID for untagged/native VLAN (1-4094).
+    The database ID of the VLAN object for the untagged/native VLAN.
 
 .PARAMETER Tagged_VLANs
-    Array of VLAN IDs for tagged VLANs (1-4094 each).
+    Array of database IDs of VLAN objects for tagged VLANs.
 
 .PARAMETER InputObject
     Pipeline input for bulk operations. Each object should contain
@@ -130,12 +130,10 @@ function New-NBDCIMInterface {
         [string]$Mode,
 
         [Parameter(ParameterSetName = 'Single')]
-        [ValidateRange(1, 4094)]
-        [uint16]$Untagged_VLAN,
+        [uint64]$Untagged_VLAN,
 
         [Parameter(ParameterSetName = 'Single')]
-        [ValidateRange(1, 4094)]
-        [uint16[]]$Tagged_VLANs,
+        [uint64[]]$Tagged_VLANs,
 
         # Bulk mode parameters
         [Parameter(ParameterSetName = 'Bulk', Mandatory = $true, ValueFromPipeline = $true)]
@@ -167,9 +165,12 @@ function New-NBDCIMInterface {
             # Convert Mode friendly names to API values
             if (-not [System.String]::IsNullOrWhiteSpace($Mode)) {
                 $PSBoundParameters.Mode = switch ($Mode) {
-                    'Access' { 100 }
-                    'Tagged' { 200 }
-                    'Tagged All' { 300 }
+                    'Access' { 'access' }
+                    '100' { 'access' }
+                    'Tagged' { 'tagged' }
+                    '200' { 'tagged' }
+                    'Tagged All' { 'tagged-all' }
+                    '300' { 'tagged-all' }
                     default { $_ }
                 }
             }
