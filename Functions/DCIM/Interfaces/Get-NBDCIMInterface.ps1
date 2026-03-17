@@ -91,6 +91,9 @@ function Get-NBDCIMInterface {
         [Parameter(ParameterSetName = 'Query')]
         [string]$MAC_Address,
 
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Label,
+
         [switch]$Raw
     )
 

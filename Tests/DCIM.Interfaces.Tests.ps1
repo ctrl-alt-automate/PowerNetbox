@@ -57,6 +57,11 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
             $Result.Uri | Should -Match 'type=10gbase-t'
         }
 
+        It "Should request with a label filter" {
+            $Result = Get-NBDCIMInterface -Label "mgmt"
+            $Result.Uri | Should -Match 'label=mgmt'
+        }
+
         It "Should throw for invalid type" {
             # Type parameter has ValidateSet - invalid values throw at parameter binding
             { Get-NBDCIMInterface -Type 'Fake' } | Should -Throw

@@ -83,6 +83,9 @@ function Get-NBIPAMAddressRange {
         [Parameter(ParameterSetName = 'Query')]
         [string]$Role,
 
+        [Parameter(ParameterSetName = 'Query')]
+        [string]$Parent,
+
         [ValidateRange(1, 1000)]
         [uint16]$Limit,
 

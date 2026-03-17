@@ -778,6 +778,11 @@ Describe "IPAM tests" -Tag 'Ipam' {
             $Result = Get-NBIPAMAddressRange -Id 6
             $Result.Uri | Should -Match '/api/ipam/ip.ranges/6/'
         }
+
+        It "Should request address ranges by parent prefix" {
+            $Result = Get-NBIPAMAddressRange -Parent '10.0.0.0/24'
+            $Result.Uri | Should -Match 'parent=10\.0\.0\.0'
+        }
     }
 
     Context "New-NBIPAMAddressRange" {
