@@ -46,7 +46,7 @@ function New-NBToken {
 
         [datetime]$Expires,
 
-        [string]$Key,
+        [securestring]$Key,
 
         [bool]$Write_Enabled,
 
@@ -63,7 +63,10 @@ function New-NBToken {
     process {
         Write-Verbose "Creating Token"
         $Segments = [System.Collections.ArrayList]::new(@('users', 'tokens'))
-        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw', 'Key'
+        if ($PSBoundParameters.ContainsKey('Key')) {
+            $URIComponents.Parameters['key'] = [System.Net.NetworkCredential]::new('', $Key).Password
+        }
         $URI = BuildNewURI -Segments $URIComponents.Segments
 
         if ($PSCmdlet.ShouldProcess("User $User", 'Create Token')) {
