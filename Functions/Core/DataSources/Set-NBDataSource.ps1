@@ -65,6 +65,9 @@ function Set-NBDataSource {
 
         [string]$Comments,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

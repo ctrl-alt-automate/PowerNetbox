@@ -119,6 +119,9 @@ function Set-NBCustomField {
 
         [uint64]$Choice_Set,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

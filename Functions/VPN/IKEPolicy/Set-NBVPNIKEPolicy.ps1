@@ -21,7 +21,7 @@ function Set-NBVPNIKEPolicy {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
-        [string]$Name,[uint16]$Version,[string]$Mode,[uint64[]]$Proposals,[securestring]$Preshared_Key,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[switch]$Raw)
+        [string]$Name,[uint16]$Version,[string]$Mode,[uint64[]]$Proposals,[securestring]$Preshared_Key,[string]$Description,[string]$Comments,[hashtable]$Custom_Fields,[object[]]$Tags,[switch]$Raw)
     process {
         Write-Verbose "Updating VPN IKE Policy"
         $s = [System.Collections.ArrayList]::new(@('vpn','ike-policies',$Id)); $u = BuildURIComponents -URISegments $s.Clone() -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id','Raw','Preshared_Key'

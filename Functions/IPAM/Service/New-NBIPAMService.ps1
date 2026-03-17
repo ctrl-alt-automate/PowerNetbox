@@ -74,6 +74,8 @@ function New-NBIPAMService {
 
         [hashtable]$Custom_Fields,
 
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

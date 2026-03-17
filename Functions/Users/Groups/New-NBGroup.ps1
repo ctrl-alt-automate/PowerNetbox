@@ -30,6 +30,9 @@ function New-NBGroup {
 
         [uint64[]]$Permissions,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

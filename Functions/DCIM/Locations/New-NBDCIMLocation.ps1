@@ -81,6 +81,9 @@ function New-NBDCIMLocation {
 
         [hashtable]$Custom_Fields,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

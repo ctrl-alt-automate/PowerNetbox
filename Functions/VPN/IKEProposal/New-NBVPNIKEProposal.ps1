@@ -72,6 +72,9 @@ function New-NBVPNIKEProposal {
 
         [hashtable]$Custom_Fields,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

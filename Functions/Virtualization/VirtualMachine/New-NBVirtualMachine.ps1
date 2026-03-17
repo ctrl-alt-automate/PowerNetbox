@@ -162,6 +162,9 @@ function New-NBVirtualMachine {
 
         # Common parameters
         [Parameter()]
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

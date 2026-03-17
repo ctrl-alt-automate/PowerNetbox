@@ -49,6 +49,9 @@ function Set-NBCircuitGroup {
 
         [hashtable]$Custom_Fields,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

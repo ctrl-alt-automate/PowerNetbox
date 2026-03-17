@@ -55,6 +55,9 @@ function Set-NBContactAssignment {
         [ValidateSet('primary', 'secondary', 'tertiary', 'inactive', IgnoreCase = $true)]
         [string]$Priority,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

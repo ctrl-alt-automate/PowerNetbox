@@ -80,6 +80,9 @@ function Set-NBCircuit {
 
         [hashtable]$Custom_Fields,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

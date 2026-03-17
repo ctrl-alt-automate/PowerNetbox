@@ -29,6 +29,9 @@ function New-NBDCIMRearPortTemplate {
         [string]$Color,
         [uint16]$Positions,
         [string]$Description,
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
     process {

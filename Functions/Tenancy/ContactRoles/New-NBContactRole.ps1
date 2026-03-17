@@ -46,6 +46,9 @@ function New-NBContactRole {
 
         [hashtable]$Custom_Fields,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

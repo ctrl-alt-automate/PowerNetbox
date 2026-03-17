@@ -57,6 +57,9 @@ function Set-NBOwner {
 
         [uint64[]]$Users,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

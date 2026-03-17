@@ -67,6 +67,9 @@ function New-NBDCIMSite {
 
         [uint64]$Owner,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

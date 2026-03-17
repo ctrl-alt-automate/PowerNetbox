@@ -47,6 +47,9 @@ function New-NBTenant {
 
         [hashtable]$Custom_Fields,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

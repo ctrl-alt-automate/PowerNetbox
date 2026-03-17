@@ -81,6 +81,9 @@ function Set-NBWebhook {
 
         [hashtable]$Custom_Fields,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

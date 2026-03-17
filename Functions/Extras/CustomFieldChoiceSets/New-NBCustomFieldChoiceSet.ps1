@@ -45,6 +45,9 @@ function New-NBCustomFieldChoiceSet {
 
         [bool]$Order_Alphabetically,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

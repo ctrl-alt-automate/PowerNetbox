@@ -59,6 +59,9 @@ function New-NBVPNIPSecProfile {
 
         [hashtable]$Custom_Fields,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

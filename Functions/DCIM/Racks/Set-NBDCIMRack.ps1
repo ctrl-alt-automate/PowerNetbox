@@ -154,6 +154,9 @@ function Set-NBDCIMRack {
 
         [switch]$Force,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

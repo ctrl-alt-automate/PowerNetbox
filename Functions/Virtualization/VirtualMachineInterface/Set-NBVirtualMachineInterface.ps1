@@ -42,6 +42,9 @@ function Set-NBVirtualMachineInterface {
 
         [switch]$Force,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

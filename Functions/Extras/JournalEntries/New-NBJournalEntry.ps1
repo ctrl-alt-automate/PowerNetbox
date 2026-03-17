@@ -49,6 +49,9 @@ function New-NBJournalEntry {
 
         [hashtable]$Custom_Fields,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

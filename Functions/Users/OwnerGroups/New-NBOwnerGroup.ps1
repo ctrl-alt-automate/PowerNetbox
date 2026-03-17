@@ -35,6 +35,9 @@ function New-NBOwnerGroup {
 
         [string]$Description,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

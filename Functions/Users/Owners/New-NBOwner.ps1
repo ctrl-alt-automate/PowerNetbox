@@ -53,6 +53,9 @@ function New-NBOwner {
 
         [uint64[]]$Users,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

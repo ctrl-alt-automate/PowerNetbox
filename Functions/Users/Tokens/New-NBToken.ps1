@@ -54,6 +54,9 @@ function New-NBToken {
 
         [bool]$Enabled,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

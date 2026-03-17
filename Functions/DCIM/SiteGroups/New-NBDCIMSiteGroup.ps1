@@ -59,6 +59,9 @@ function New-NBDCIMSiteGroup {
 
         [hashtable]$Custom_Fields,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

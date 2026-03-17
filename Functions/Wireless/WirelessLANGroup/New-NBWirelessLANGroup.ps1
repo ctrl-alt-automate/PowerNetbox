@@ -47,6 +47,9 @@ function New-NBWirelessLANGroup {
 
         [hashtable]$Custom_Fields,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

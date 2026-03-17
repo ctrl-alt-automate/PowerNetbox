@@ -39,6 +39,9 @@ function Set-NBGroup {
 
         [uint64[]]$Permissions,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

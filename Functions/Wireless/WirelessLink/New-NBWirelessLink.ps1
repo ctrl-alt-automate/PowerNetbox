@@ -77,6 +77,9 @@ function New-NBWirelessLink {
 
         [hashtable]$Custom_Fields,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

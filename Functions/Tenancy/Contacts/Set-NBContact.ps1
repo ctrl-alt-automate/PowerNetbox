@@ -89,6 +89,9 @@ function Set-NBContact {
 
         [switch]$Force,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

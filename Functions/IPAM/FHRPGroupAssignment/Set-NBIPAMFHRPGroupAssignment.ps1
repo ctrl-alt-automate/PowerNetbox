@@ -26,6 +26,9 @@ function Set-NBIPAMFHRPGroupAssignment {
         [string]$Interface_Type,
         [uint64]$Interface_Id,
         [uint16]$Priority,
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
     process {

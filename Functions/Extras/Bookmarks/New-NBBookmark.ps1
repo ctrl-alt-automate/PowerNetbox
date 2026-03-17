@@ -31,6 +31,9 @@ function New-NBBookmark {
         [Parameter(Mandatory = $true)]
         [uint64]$Object_Id,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

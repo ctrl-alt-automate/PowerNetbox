@@ -55,6 +55,9 @@ function Set-NBDCIMInterface {
 
         [switch]$Force,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

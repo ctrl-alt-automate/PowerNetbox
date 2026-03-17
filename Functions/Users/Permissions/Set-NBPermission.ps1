@@ -65,6 +65,9 @@ function Set-NBPermission {
 
         [uint64[]]$Users,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

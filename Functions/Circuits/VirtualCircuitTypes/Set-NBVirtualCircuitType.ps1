@@ -50,6 +50,9 @@ function Set-NBVirtualCircuitType {
 
         [hashtable]$Custom_Fields,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

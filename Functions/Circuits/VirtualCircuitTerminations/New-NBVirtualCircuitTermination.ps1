@@ -46,6 +46,9 @@ function New-NBVirtualCircuitTermination {
 
         [hashtable]$Custom_Fields,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

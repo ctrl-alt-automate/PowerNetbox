@@ -57,6 +57,9 @@ function New-NBCircuit {
 
         [switch]$Force,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

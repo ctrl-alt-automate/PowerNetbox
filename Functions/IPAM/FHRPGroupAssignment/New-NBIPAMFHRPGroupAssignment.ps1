@@ -25,6 +25,9 @@ function New-NBIPAMFHRPGroupAssignment {
         [Parameter(Mandatory = $true)][string]$Interface_Type,
         [Parameter(Mandatory = $true)][uint64]$Interface_Id,
         [uint16]$Priority,
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
     process {

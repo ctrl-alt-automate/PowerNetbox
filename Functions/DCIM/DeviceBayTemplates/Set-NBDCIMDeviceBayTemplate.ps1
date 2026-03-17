@@ -26,6 +26,9 @@ function Set-NBDCIMDeviceBayTemplate {
         [string]$Name,
         [string]$Label,
         [string]$Description,
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
     process {

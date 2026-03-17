@@ -30,6 +30,9 @@ function Set-NBDCIMPowerPortTemplate {
         [uint16]$Maximum_Draw,
         [uint16]$Allocated_Draw,
         [string]$Description,
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
     process {

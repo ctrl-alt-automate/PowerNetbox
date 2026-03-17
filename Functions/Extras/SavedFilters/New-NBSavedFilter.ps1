@@ -64,6 +64,9 @@ function New-NBSavedFilter {
         [Parameter(Mandatory = $true)]
         [hashtable]$Parameters,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

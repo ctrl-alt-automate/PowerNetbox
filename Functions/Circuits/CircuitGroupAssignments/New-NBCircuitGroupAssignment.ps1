@@ -41,6 +41,9 @@ function New-NBCircuitGroupAssignment {
 
         [hashtable]$Custom_Fields,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

@@ -110,6 +110,9 @@ function Set-NBDCIMSite {
 
         [switch]$Force,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

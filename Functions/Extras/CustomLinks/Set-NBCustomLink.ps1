@@ -70,6 +70,9 @@ function Set-NBCustomLink {
 
         [bool]$New_Window,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

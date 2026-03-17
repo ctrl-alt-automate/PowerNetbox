@@ -157,6 +157,9 @@ function New-NBDCIMDevice {
 
         # Common parameters
         [Parameter()]
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

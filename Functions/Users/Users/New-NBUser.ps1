@@ -68,6 +68,8 @@ function New-NBUser {
 
         [uint64[]]$Groups,
 
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

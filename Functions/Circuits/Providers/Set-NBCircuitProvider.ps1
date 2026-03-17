@@ -49,6 +49,9 @@ function Set-NBCircuitProvider {
 
         [hashtable]$Custom_Fields,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

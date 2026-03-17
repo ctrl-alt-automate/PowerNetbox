@@ -41,6 +41,9 @@ function New-NBVPNTunnelGroup {
 
         [hashtable]$Custom_Fields,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

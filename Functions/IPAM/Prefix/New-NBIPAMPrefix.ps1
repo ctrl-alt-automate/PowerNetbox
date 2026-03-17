@@ -148,6 +148,9 @@ function New-NBIPAMPrefix {
 
         # Common parameters
         [Parameter()]
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

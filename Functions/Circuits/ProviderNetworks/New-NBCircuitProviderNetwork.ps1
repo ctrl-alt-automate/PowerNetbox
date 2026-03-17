@@ -51,6 +51,9 @@ function New-NBCircuitProviderNetwork {
 
         [hashtable]$Custom_Fields,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

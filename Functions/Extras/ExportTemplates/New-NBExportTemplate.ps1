@@ -66,6 +66,9 @@ function New-NBExportTemplate {
 
         [uint64]$Data_File,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

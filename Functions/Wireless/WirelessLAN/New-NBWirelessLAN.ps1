@@ -76,6 +76,9 @@ function New-NBWirelessLAN {
 
         [hashtable]$Custom_Fields,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

@@ -68,6 +68,9 @@ function New-NBVirtualCircuit {
 
         [hashtable]$Custom_Fields,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

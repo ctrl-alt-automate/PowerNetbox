@@ -64,6 +64,9 @@ function Set-NBSavedFilter {
 
         [hashtable]$Parameters,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

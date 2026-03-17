@@ -70,6 +70,8 @@ function Set-NBUser {
 
         [uint64[]]$Groups,
 
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

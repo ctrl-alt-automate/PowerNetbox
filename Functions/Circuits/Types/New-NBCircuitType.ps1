@@ -51,6 +51,9 @@ function New-NBCircuitType {
 
         [hashtable]$Custom_Fields,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

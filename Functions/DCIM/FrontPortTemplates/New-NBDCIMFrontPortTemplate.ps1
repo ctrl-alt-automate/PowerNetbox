@@ -30,6 +30,9 @@ function New-NBDCIMFrontPortTemplate {
         [Parameter(Mandatory = $true)][uint64]$Rear_Port,
         [uint16]$Rear_Port_Position,
         [string]$Description,
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
     process {

@@ -56,6 +56,9 @@ function Set-NBIPAMASN {
 
         [hashtable]$Custom_Fields,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

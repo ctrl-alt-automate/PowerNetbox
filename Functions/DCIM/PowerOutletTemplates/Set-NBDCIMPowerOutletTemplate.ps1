@@ -31,6 +31,9 @@ function Set-NBDCIMPowerOutletTemplate {
         [string]$Feed_Leg,
         [string]$Description,
         [string]$Color,
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
     process {

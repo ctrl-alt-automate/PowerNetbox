@@ -42,6 +42,9 @@ function Set-NBOwnerGroup {
 
         [string]$Description,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

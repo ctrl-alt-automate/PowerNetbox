@@ -55,6 +55,9 @@ function Set-NBIPAMRouteTarget {
 
         [hashtable]$Custom_Fields,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

@@ -149,6 +149,9 @@ function Set-NBIPAMAddress {
         [switch]$Force,
 
         [Parameter()]
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

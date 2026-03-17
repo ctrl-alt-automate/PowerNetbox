@@ -59,6 +59,9 @@ function New-NBIPAMServiceTemplate {
 
         [hashtable]$Custom_Fields,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

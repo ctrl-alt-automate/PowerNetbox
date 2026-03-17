@@ -49,6 +49,9 @@ function Set-NBDCIMManufacturer {
 
         [switch]$Force,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

@@ -56,6 +56,9 @@ function Set-NBIPAMPrefix {
 
         [switch]$Force,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

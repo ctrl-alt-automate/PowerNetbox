@@ -27,6 +27,9 @@ function New-NBDCIMConsoleServerPortTemplate {
         [string]$Label,
         [string]$Type,
         [string]$Description,
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
     process {

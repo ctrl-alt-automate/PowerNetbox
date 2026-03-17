@@ -76,6 +76,9 @@ function New-NBCircuitTermination {
 
         [hashtable]$Custom_Fields,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

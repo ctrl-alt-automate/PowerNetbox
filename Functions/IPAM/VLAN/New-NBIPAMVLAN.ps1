@@ -129,6 +129,9 @@ function New-NBIPAMVLAN {
 
         # Common parameters
         [Parameter()]
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

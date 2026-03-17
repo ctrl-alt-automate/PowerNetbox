@@ -152,6 +152,9 @@ function New-NBDCIMRack {
 
         [uint64]$Owner,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

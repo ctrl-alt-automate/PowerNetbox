@@ -156,6 +156,9 @@ function New-NBIPAMAddress {
 
         # Common parameters
         [Parameter()]
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

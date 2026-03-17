@@ -68,6 +68,9 @@ function New-NBIPAMASNRange {
 
         [hashtable]$Custom_Fields,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

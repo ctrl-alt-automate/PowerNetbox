@@ -59,6 +59,9 @@ function New-NBDCIMInterfaceConnection {
         [ValidateSet('connected', 'planned', IgnoreCase = $true)]
         [string]$Connection_Status,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

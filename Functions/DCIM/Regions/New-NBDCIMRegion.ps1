@@ -59,6 +59,9 @@ function New-NBDCIMRegion {
 
         [hashtable]$Custom_Fields,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

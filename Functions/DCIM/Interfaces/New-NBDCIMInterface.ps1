@@ -148,6 +148,9 @@ function New-NBDCIMInterface {
 
         # Common parameters
         [Parameter()]
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

@@ -32,6 +32,9 @@ function New-NBDCIMInterfaceTemplate {
         [string]$Poe_Mode,
         [string]$Poe_Type,
         [string]$Rf_Role,
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
     process {

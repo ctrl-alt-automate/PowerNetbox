@@ -73,6 +73,9 @@ function New-NBContact {
 
         [hashtable]$Custom_Fields,
 
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 

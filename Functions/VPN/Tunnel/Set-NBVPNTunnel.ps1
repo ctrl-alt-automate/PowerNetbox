@@ -32,6 +32,9 @@ function Set-NBVPNTunnel {
         [string]$Description,
         [string]$Comments,
         [hashtable]$Custom_Fields,
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
     process {

@@ -32,6 +32,9 @@ function Set-NBDCIMInventoryItemTemplate {
         [string]$Description,
         [uint64]$Component_Type,
         [string]$Component_Name,
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
     process {

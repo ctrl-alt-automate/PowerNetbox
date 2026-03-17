@@ -26,6 +26,9 @@ function New-NBDCIMModuleBayTemplate {
         [string]$Label,
         [string]$Position,
         [string]$Description,
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
     process {

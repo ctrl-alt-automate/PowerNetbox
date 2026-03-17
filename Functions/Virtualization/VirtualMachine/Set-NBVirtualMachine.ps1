@@ -160,6 +160,9 @@ function Set-NBVirtualMachine {
         [switch]$Force,
 
         [Parameter()]
+
+        [object[]]$Tags,
+
         [switch]$Raw
     )
 
