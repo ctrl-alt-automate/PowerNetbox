@@ -102,7 +102,7 @@ function Connect-NBAPI {
     $psVersion = $PSVersionTable.PSVersion
     if ($SkipCertificateCheck -and $psVersion -ge [version]'7.4') {
         $invokeParams['AllowInsecureRedirect'] = $true
-        Write-Verbose "AllowInsecureRedirect enabled (SkipCertificateCheck is set)"
+        Write-Warning "AllowInsecureRedirect enabled alongside SkipCertificateCheck. HTTP redirects from HTTPS will be followed."
     }
 
     # For PowerShell Desktop (5.1), configure TLS and certificate handling
@@ -126,6 +126,10 @@ function Connect-NBAPI {
                 throw "URI appears to be invalid. Must be in format [host.name], [scheme://host.name], or [scheme://host.name:port]"
             }
         }
+    }
+
+    if ($uriBuilder.Scheme -eq 'http') {
+        Write-Warning "Connecting via HTTP. Your API token will be transmitted in plaintext. Use HTTPS in production."
     }
 
     $null = Set-NBHostName -Hostname $uriBuilder.Host

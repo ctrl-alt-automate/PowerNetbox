@@ -49,6 +49,7 @@ function New-NBImageAttachment {
     param (
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
+        [ValidatePattern('^[a-z]+\.[a-z_]+$')]
         [string]$Object_Type,
 
         [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
@@ -82,6 +83,18 @@ function New-NBImageAttachment {
         # Resolve the full path
         $FullPath = Resolve-Path -Path $ImagePath
         $FileName = Split-Path -Path $FullPath -Leaf
+
+        # Security: Check file size (max 10 MB)
+        $fileInfo = Get-Item -Path $FullPath
+        if ($fileInfo.Length -gt 10MB) {
+            throw "Image file '$FileName' is $([math]::Round($fileInfo.Length / 1MB, 1)) MB. Maximum supported upload size is 10 MB."
+        }
+
+        # Security: Warn about SVG files (potential XSS vector)
+        $fileExtension = [System.IO.Path]::GetExtension($FileName).ToLower()
+        if ($fileExtension -eq '.svg') {
+            Write-Warning "SVG files may contain embedded scripts. Ensure the source file is trusted before uploading to Netbox."
+        }
 
         Write-Verbose "Uploading image: $FileName"
 
@@ -175,6 +188,7 @@ function New-NBImageAttachment {
                     }
 
                     $HttpClient = New-Object System.Net.Http.HttpClient($Handler)
+                    $HttpClient.Timeout = [System.TimeSpan]::FromSeconds((Get-NBTimeout))
                     $HttpClient.DefaultRequestHeaders.Add('Authorization', (Get-NBRequestHeaders).Authorization)
 
                     # Send request

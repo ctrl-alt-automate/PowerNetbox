@@ -118,9 +118,9 @@ services:
       # Security Settings (CI/CD only!)
       # ----------------------------------------------------------------------
       # WARNING: These are insecure defaults for testing only!
-      SECRET_KEY: "ci-test-secret-key-not-for-production-use-$(openssl rand -hex 32)"
-      ALLOWED_HOSTS: "*"
-      CORS_ORIGIN_ALLOW_ALL: "true"
+      SECRET_KEY: "ci-test-secret-key-not-for-production-use-only-do-not-reuse-ever-minimum-50-chars-required"
+      ALLOWED_HOSTS: "localhost,127.0.0.1"
+      CORS_ORIGIN_ALLOW_ALL: "false"
 
       # Netbox 4.5.0+ requires pepper for v2 token HMAC validation (min 50 chars)
       API_TOKEN_PEPPER_1: "ci-pepper-not-for-production-use-only-for-testing-must-be-at-least-50-characters"

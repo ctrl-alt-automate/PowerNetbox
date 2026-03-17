@@ -14,6 +14,9 @@ on:
       - '*.ps1'
       - '*.psm1'
 
+permissions:
+  contents: read
+
 jobs:
   lint:
     name: PSScriptAnalyzer

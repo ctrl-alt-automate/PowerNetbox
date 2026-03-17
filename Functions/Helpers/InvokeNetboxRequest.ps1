@@ -63,7 +63,7 @@ function InvokeNetboxRequest {
 
         [Hashtable]$Headers = @{},
 
-        [pscustomobject]$Body = $null,
+        [object]$Body = $null,
 
         [ValidateRange(1, 65535)]
         [uint16]$Timeout = (Get-NBTimeout),
@@ -185,26 +185,32 @@ function InvokeNetboxRequest {
         'TimeoutSec'  = $Timeout
         'ContentType' = 'application/json'
         'ErrorAction' = 'Stop'
-        'Verbose'     = $VerbosePreference
     }
 
     $splat += Get-NBInvokeParams
 
     if ($Body) {
-        # Sanitize sensitive fields before logging (handles both hashtables and PSCustomObjects)
-        $sensitivePatterns = @('secret', 'password', 'key', 'token', 'psk')
-        $sanitizedBody = @{}
-        foreach ($prop in $Body.PSObject.Properties) {
-            $isSensitive = $prop.Value -and ($sensitivePatterns | Where-Object { $prop.Name -match $_ })
-            if ($isSensitive) {
-                $sanitizedBody[$prop.Name] = '***REDACTED***'
-            }
-            else {
-                $sanitizedBody[$prop.Name] = $prop.Value
-            }
+        if ($Body -is [array]) {
+            # Bulk array: suppress field-level logging to avoid leaking sensitive values
+            Write-Verbose "BODY: [bulk array of $($Body.Count) items]"
+            $null = $splat.Add('Body', ($Body | ConvertTo-Json -Compress -Depth 10))
         }
-        Write-Verbose "BODY: $($sanitizedBody | ConvertTo-Json -Compress)"
-        $null = $splat.Add('Body', ($Body | ConvertTo-Json -Compress -Depth 10))
+        else {
+            # Sanitize sensitive fields before logging
+            $sensitivePatterns = @('secret', 'password', 'key', 'token', 'psk')
+            $sanitizedBody = @{}
+            foreach ($prop in $Body.PSObject.Properties) {
+                $isSensitive = $sensitivePatterns | Where-Object { $prop.Name -match $_ }
+                if ($isSensitive) {
+                    $sanitizedBody[$prop.Name] = '***REDACTED***'
+                }
+                else {
+                    $sanitizedBody[$prop.Name] = $prop.Value
+                }
+            }
+            Write-Verbose "BODY: $($sanitizedBody | ConvertTo-Json -Compress)"
+            $null = $splat.Add('Body', ($Body | ConvertTo-Json -Compress -Depth 10))
+        }
     }
 
     $attempt = 0

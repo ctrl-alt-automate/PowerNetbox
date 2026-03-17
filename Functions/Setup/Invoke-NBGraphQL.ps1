@@ -147,6 +147,7 @@ function Invoke-NBGraphQL {
     param(
         [Parameter(Mandatory, Position = 0, ValueFromPipeline)]
         [ValidateNotNullOrEmpty()]
+        [ValidateLength(1, 65535)]
         [string]$Query,
 
         [Parameter()]
