@@ -34,7 +34,7 @@ on:
       netbox_version:
         description: 'Netbox Docker image tag (e.g., v4.5.0-3.4.2)'
         required: false
-        default: 'v4.5.3-4.0.1'
+        default: 'v4.5.4-4.0.1'
         type: string
       branching_version:
         description: 'Branching plugin version (e.g., 0.8.0)'
@@ -55,8 +55,8 @@ jobs:
       matrix:
         include:
           # Netbox 4.5.x with branching 0.8.0 (netbox-docker 4.0.1)
-          - netbox: "v4.5.3-4.0.1"
-            netbox_short: "4.5.3"
+          - netbox: "v4.5.4-4.0.1"
+            netbox_short: "4.5.4"
             branching: "0.8.0"
 
     env:

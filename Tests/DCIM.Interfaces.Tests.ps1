@@ -186,7 +186,39 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
         }
     }
 
-    Context "Set-NBDCIMInterface" {
+    Context "New-NBDCIMInterface - Interface Type ValidateSet" {
+        $newTypeTestCases = @(
+            @{ Type = '10gbase-cu'; Label = '10GBASE-CU (new in 4.5.4)' }
+            @{ Type = '40gbase-sr4-bd'; Label = '40GBASE-SR4 BiDi (new in 4.5.4)' }
+            @{ Type = '100base-fx'; Label = '100BASE-FX' }
+            @{ Type = '1000base-sx'; Label = '1000BASE-SX' }
+            @{ Type = '1000base-lx'; Label = '1000BASE-LX' }
+            @{ Type = '25gbase-sr'; Label = '25GBASE-SR' }
+            @{ Type = '40gbase-sr4'; Label = '40GBASE-SR4' }
+            @{ Type = '50gbase-sr'; Label = '50GBASE-SR' }
+            @{ Type = '100gbase-sr4'; Label = '100GBASE-SR4' }
+            @{ Type = '200gbase-sr4'; Label = '200GBASE-SR4' }
+            @{ Type = '400gbase-sr8'; Label = '400GBASE-SR8' }
+            @{ Type = '800gbase-sr8'; Label = '800GBASE-SR8' }
+            @{ Type = '100gbase-x-qsfpdd'; Label = '100GBASE-X-QSFPDD' }
+            @{ Type = '800gbase-x-osfp'; Label = '800GBASE-X-OSFP' }
+            @{ Type = 'ieee802.11be'; Label = 'Wi-Fi 7' }
+            @{ Type = '5g'; Label = '5G Cellular' }
+            @{ Type = '50g-pon'; Label = '50G-PON' }
+            @{ Type = '64gfc-sfpp'; Label = '64GFC SFP+' }
+            @{ Type = 'moca'; Label = 'MoCA' }
+            @{ Type = 'cisco-stackwise-1t'; Label = 'Cisco StackWise-1T' }
+        )
+
+        It 'Should accept interface type <Label>' -TestCases $newTypeTestCases {
+            param($Type, $Label)
+            $Result = New-NBDCIMInterface -Device 1 -Name "test-$Type" -Type $Type
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.type | Should -Be $Type
+        }
+    }
+
+        Context "Set-NBDCIMInterface" {
         BeforeAll {
             Mock -CommandName "Get-NBDCIMInterface" -ModuleName "PowerNetbox" -MockWith {
                 return [pscustomobject]@{ 'Id' = $Id }
@@ -212,6 +244,24 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
         It "Should throw for invalid type" {
             # Type parameter has ValidateSet - invalid values throw at parameter binding
             { Set-NBDCIMInterface -Id 1234 -Type 'fake' } | Should -Throw
+        }
+
+        It "Should accept new 4.5.4 interface type '10gbase-cu'" {
+            $Result = Set-NBDCIMInterface -Id 123 -Type '10gbase-cu' -Force
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.type | Should -Be '10gbase-cu'
+        }
+
+        It "Should accept new 4.5.4 interface type '40gbase-sr4-bd'" {
+            $Result = Set-NBDCIMInterface -Id 123 -Type '40gbase-sr4-bd' -Force
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.type | Should -Be '40gbase-sr4-bd'
+        }
+
+        It "Should accept previously missing type '800gbase-sr8'" {
+            $Result = Set-NBDCIMInterface -Id 123 -Type '800gbase-sr8' -Force
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.type | Should -Be '800gbase-sr8'
         }
 
         It "Should convert Mode 'Access' to API string 'access'" {
