@@ -1,7 +1,7 @@
 
 
 function New-NBIPAMAddressRange {
-<#
+    <#
     .SYNOPSIS
         Create a new IP address range to Netbox
 
@@ -42,6 +42,9 @@ function New-NBIPAMAddressRange {
     .PARAMETER Mark_Utilized
         Treat as 100% utilized
 
+    .PARAMETER Mark_Populated
+        Treat as 100% populated
+
     .PARAMETER Raw
         Return raw results from API service
 
@@ -55,7 +58,7 @@ function New-NBIPAMAddressRange {
 #>
 
     [CmdletBinding(ConfirmImpact = 'Low',
-                   SupportsShouldProcess = $true)]
+        SupportsShouldProcess = $true)]
     [OutputType([pscustomobject])]
     param
     (
@@ -84,7 +87,9 @@ function New-NBIPAMAddressRange {
 
         [object[]]$Tags,
 
-        [switch]$Mark_Utilized,
+        [bool]$Mark_Utilized,
+
+        [bool]$Mark_Populated,
 
         [switch]$Raw
     )

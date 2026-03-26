@@ -20,12 +20,12 @@
 
 function Set-NBIPAMAddressRange {
     [CmdletBinding(ConfirmImpact = 'Medium',
-                   SupportsShouldProcess = $true)]
+        SupportsShouldProcess = $true)]
     [OutputType([PSCustomObject])]
     param
     (
         [Parameter(Mandatory = $true,
-                   ValueFromPipelineByPropertyName = $true)]
+            ValueFromPipelineByPropertyName = $true)]
         [uint64]$Id,
 
         [string]$Start_Address,
@@ -49,7 +49,9 @@ function Set-NBIPAMAddressRange {
 
         [object[]]$Tags,
 
-        [switch]$Mark_Utilized,
+        [bool]$Mark_Utilized,
+
+        [bool]$Mark_Populated,
 
         [switch]$Force,
 
