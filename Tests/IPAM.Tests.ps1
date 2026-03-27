@@ -783,6 +783,16 @@ Describe "IPAM tests" -Tag 'Ipam' {
             $Result = Get-NBIPAMAddressRange -Parent '10.0.0.0/24'
             $Result.Uri | Should -Match 'parent=10\.0\.0\.0'
         }
+
+        It "Should filter by mark_utilized" {
+            $Result = Get-NBIPAMAddressRange -Mark_Utilized $true
+            $Result.Uri | Should -Match 'mark_utilized=True'
+        }
+
+        It "Should filter by mark_populated" {
+            $Result = Get-NBIPAMAddressRange -Mark_Populated $false
+            $Result.Uri | Should -Match 'mark_populated=False'
+        }
     }
 
     Context "New-NBIPAMAddressRange" {
@@ -793,6 +803,34 @@ Describe "IPAM tests" -Tag 'Ipam' {
             $bodyObj = $Result.Body | ConvertFrom-Json
             $bodyObj.start_address | Should -Be '10.0.0.1/24'
         }
+
+        It "Should pass mark_utilized in body" {
+            $Result = New-NBIPAMAddressRange -Start_Address '10.0.0.1/24' -End_Address '10.0.0.100/24' -Mark_Utilized $true
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.mark_utilized | Should -BeTrue
+        }
+
+        It "Should pass mark_populated in body" {
+            $Result = New-NBIPAMAddressRange -Start_Address '10.0.0.1/24' -End_Address '10.0.0.100/24' -Mark_Populated $true
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.mark_populated | Should -BeTrue
+        }
+
+        It "Should pass mark_utilized false in body" {
+            $Result = New-NBIPAMAddressRange -Start_Address '10.0.0.1/24' -End_Address '10.0.0.100/24' -Mark_Utilized $false
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.mark_utilized | Should -BeFalse
+        }
+
+        It "Mark_Utilized should be [bool] not [switch]" {
+            $param = (Get-Command New-NBIPAMAddressRange).Parameters['Mark_Utilized']
+            $param.ParameterType.Name | Should -Be 'Boolean'
+        }
+
+        It "Mark_Populated should be [bool]" {
+            $param = (Get-Command New-NBIPAMAddressRange).Parameters['Mark_Populated']
+            $param.ParameterType.Name | Should -Be 'Boolean'
+        }
     }
 
     Context "Set-NBIPAMAddressRange" {
@@ -800,6 +838,28 @@ Describe "IPAM tests" -Tag 'Ipam' {
             $Result = Set-NBIPAMAddressRange -Id 1 -Description 'Updated' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
             $Result.Uri | Should -Match '/api/ipam/ip.ranges/1/'
+        }
+
+        It "Should pass mark_utilized in body" {
+            $Result = Set-NBIPAMAddressRange -Id 1 -Mark_Utilized $true -Confirm:$false
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.mark_utilized | Should -BeTrue
+        }
+
+        It "Should pass mark_populated in body" {
+            $Result = Set-NBIPAMAddressRange -Id 1 -Mark_Populated $true -Confirm:$false
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.mark_populated | Should -BeTrue
+        }
+
+        It "Mark_Utilized should be [bool] not [switch]" {
+            $param = (Get-Command Set-NBIPAMAddressRange).Parameters['Mark_Utilized']
+            $param.ParameterType.Name | Should -Be 'Boolean'
+        }
+
+        It "Mark_Populated should be [bool]" {
+            $param = (Get-Command Set-NBIPAMAddressRange).Parameters['Mark_Populated']
+            $param.ParameterType.Name | Should -Be 'Boolean'
         }
     }
 
