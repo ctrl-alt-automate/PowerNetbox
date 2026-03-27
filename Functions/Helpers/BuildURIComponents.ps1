@@ -75,8 +75,11 @@ function BuildURIComponents {
 
             'CustomFields' {
                 Write-Verbose " Adding custom field query parameters"
+                $cfSensitivePatterns = @('secret', 'password', 'key', 'token', 'psk')
                 foreach ($field in $ParametersDictionary[$CmdletParameterName].GetEnumerator()) {
-                    Write-Verbose "  Adding parameter 'cf_$($field.Key) = $($field.Value)"
+                    $cfIsSensitive = $cfSensitivePatterns | Where-Object { $field.Key -match $_ }
+                    $cfDisplayValue = if ($cfIsSensitive) { '***REDACTED***' } else { $field.Value }
+                    Write-Verbose "  Adding parameter 'cf_$($field.Key) = $cfDisplayValue"
                     $URIParameters["cf_$($field.Key.ToLower())"] = $field.Value
                 }
 

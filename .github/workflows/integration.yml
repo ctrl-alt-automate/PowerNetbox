@@ -41,6 +41,9 @@ env:
   # Docker Compose project name (for predictable container names)
   COMPOSE_PROJECT_NAME: "powernetbox"
 
+permissions:
+  contents: read
+
 jobs:
   # ============================================================
   # Integration Tests - Matrix of Netbox versions
@@ -89,7 +92,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f  # v3
 
       # ----------------------------------------------------------
       # Start Netbox Stack
@@ -368,6 +371,7 @@ jobs:
 
             if [ -n "$TOKEN_OUTPUT" ] && [[ "$TOKEN_OUTPUT" == nbt_* ]]; then
               echo "Created v2 token: ${TOKEN_OUTPUT:0:20}..."
+              echo "::add-mask::$TOKEN_OUTPUT"
               echo "token=$TOKEN_OUTPUT" >> $GITHUB_OUTPUT
               echo "token_type=v2" >> $GITHUB_OUTPUT
             else

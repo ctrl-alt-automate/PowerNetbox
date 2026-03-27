@@ -53,6 +53,9 @@ function Send-NBBulkRequest {
         [ValidateRange(1, 1000)]
         [int]$BatchSize = 100,
 
+        [ValidateRange(1, 100000)]
+        [int]$MaxItems = 10000,
+
         [switch]$ShowProgress,
 
         [string]$ActivityName = 'Bulk operation'
@@ -63,6 +66,10 @@ function Send-NBBulkRequest {
     if ($Items.Count -eq 0) {
         $result.Complete()
         return $result
+    }
+
+    if ($Items.Count -gt $MaxItems) {
+        throw "Item count $($Items.Count) exceeds maximum allowed $MaxItems. Use -MaxItems to override."
     }
 
     # Split items into batches
