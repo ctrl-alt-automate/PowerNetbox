@@ -49,7 +49,9 @@ function Set-NBIPAMAddressRange {
 
         [object[]]$Tags,
 
-        [switch]$Mark_Utilized,
+        [bool]$Mark_Utilized,
+
+        [bool]$Mark_Populated,
 
         [switch]$Force,
 

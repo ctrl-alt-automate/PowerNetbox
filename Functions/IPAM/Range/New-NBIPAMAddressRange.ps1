@@ -42,6 +42,9 @@ function New-NBIPAMAddressRange {
     .PARAMETER Mark_Utilized
         Treat as 100% utilized
 
+    .PARAMETER Mark_Populated
+        Prevent the creation of IP addresses within this range
+
     .PARAMETER Raw
         Return raw results from API service
 
@@ -84,7 +87,9 @@ function New-NBIPAMAddressRange {
 
         [object[]]$Tags,
 
-        [switch]$Mark_Utilized,
+        [bool]$Mark_Utilized,
+
+        [bool]$Mark_Populated,
 
         [switch]$Raw
     )
