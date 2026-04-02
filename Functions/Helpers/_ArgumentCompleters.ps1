@@ -166,6 +166,18 @@ $script:InterfaceTypeValues = @(
     '200gbase-x-qsfp56'
     '400gbase-x-qsfpdd'
     '400gbase-x-osfp'
+    '800gbase-x-qsfpdd'
+    '800gbase-x-osfp'
+    '2.5gbase-x-sfp'
+    '1.6tbase-x-osfp1600'
+    '1.6tbase-x-osfp1600-rhs'
+    '1.6tbase-x-qsfpdd1600'
+    # 1.6TE Fixed
+    '1.6tbase-cr8'
+    '1.6tbase-dr8'
+    '1.6tbase-dr8-2'
+    # 1.6TE Backplane
+    '1.6tbase-kr8'
     # Wireless
     'ieee802.11a'
     'ieee802.11g'

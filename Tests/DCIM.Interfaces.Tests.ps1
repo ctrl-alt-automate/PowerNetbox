@@ -67,6 +67,16 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
             { Get-NBDCIMInterface -Type 'Fake' } | Should -Throw
         }
 
+        It "Should accept new 4.5.6 type filter '1.6tbase-x-osfp1600'" {
+            $Result = Get-NBDCIMInterface -Type '1.6tbase-x-osfp1600'
+            $Result.Uri | Should -Match 'type=1.6tbase-x-osfp1600'
+        }
+
+        It "Should accept new 4.5.6 type filter '2.5gbase-x-sfp'" {
+            $Result = Get-NBDCIMInterface -Type '2.5gbase-x-sfp'
+            $Result.Uri | Should -Match 'type=2.5gbase-x-sfp'
+        }
+
         It "Should request devices that are mgmt only" {
             $Result = Get-NBDCIMInterface -MGMT_Only $True
             $Result.Uri | Should -BeExactly 'https://netbox.domain.com/api/dcim/interfaces/?mgmt_only=True'
@@ -195,6 +205,14 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
         $newTypeTestCases = @(
             @{ Type = '10gbase-cu'; Label = '10GBASE-CU (new in 4.5.4)' }
             @{ Type = '40gbase-sr4-bd'; Label = '40GBASE-SR4 BiDi (new in 4.5.4)' }
+            @{ Type = '1.6tbase-cr8'; Label = '1.6TBASE-CR8 (new in 4.5.6)' }
+            @{ Type = '1.6tbase-dr8'; Label = '1.6TBASE-DR8 (new in 4.5.6)' }
+            @{ Type = '1.6tbase-dr8-2'; Label = '1.6TBASE-DR8-2 (new in 4.5.6)' }
+            @{ Type = '1.6tbase-kr8'; Label = '1.6TBASE-KR8 backplane (new in 4.5.6)' }
+            @{ Type = '1.6tbase-x-osfp1600'; Label = 'OSFP1600 modular (new in 4.5.6)' }
+            @{ Type = '1.6tbase-x-osfp1600-rhs'; Label = 'OSFP1600-RHS modular (new in 4.5.6)' }
+            @{ Type = '1.6tbase-x-qsfpdd1600'; Label = 'QSFP-DD1600 modular (new in 4.5.6)' }
+            @{ Type = '2.5gbase-x-sfp'; Label = '2.5GBASE-X SFP modular (new in 4.5.6)' }
             @{ Type = '100base-fx'; Label = '100BASE-FX' }
             @{ Type = '1000base-sx'; Label = '1000BASE-SX' }
             @{ Type = '1000base-lx'; Label = '1000BASE-LX' }
@@ -267,6 +285,24 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
             $Result = Set-NBDCIMInterface -Id 123 -Type '800gbase-sr8' -Force
             $bodyObj = $Result.Body | ConvertFrom-Json
             $bodyObj.type | Should -Be '800gbase-sr8'
+        }
+
+        It "Should accept new 4.5.6 1.6TE fixed type '1.6tbase-cr8'" {
+            $Result = Set-NBDCIMInterface -Id 123 -Type '1.6tbase-cr8' -Force
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.type | Should -Be '1.6tbase-cr8'
+        }
+
+        It "Should accept new 4.5.6 1.6TE modular type '1.6tbase-x-osfp1600'" {
+            $Result = Set-NBDCIMInterface -Id 123 -Type '1.6tbase-x-osfp1600' -Force
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.type | Should -Be '1.6tbase-x-osfp1600'
+        }
+
+        It "Should accept new 4.5.6 2.5GE modular type '2.5gbase-x-sfp'" {
+            $Result = Set-NBDCIMInterface -Id 123 -Type '2.5gbase-x-sfp' -Force
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.type | Should -Be '2.5gbase-x-sfp'
         }
 
         It "Should convert Mode 'Access' to API string 'access'" {
