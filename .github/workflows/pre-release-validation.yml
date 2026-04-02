@@ -612,9 +612,9 @@ jobs:
           # Stable version
           - netbox: "v4.4.10-3.4.2"
             netbox_short: "4.4.10"
-          # Latest version (netbox-docker 4.0.1)
-          - netbox: "v4.5.4-4.0.1"
-            netbox_short: "4.5.4"
+          # Latest version (netbox-docker 4.0.2)
+          - netbox: "v4.5.6-4.0.2"
+            netbox_short: "4.5.6"
 
     env:
       NETBOX_VERSION: ${{ matrix.netbox }}
@@ -943,7 +943,7 @@ jobs:
           $nbStatus = if ($skipIntegration) { 'SKIP' } elseif ($integration -eq 'success') { 'OK' } else { '?' }
           [void]$sb.AppendLine("| 4.3.7 | $nbStatus |")
           [void]$sb.AppendLine("| 4.4.10 | $nbStatus |")
-          [void]$sb.AppendLine("| 4.5.4 | $nbStatus |")
+          [void]$sb.AppendLine("| 4.5.6 | $nbStatus |")
           [void]$sb.AppendLine("")
           [void]$sb.AppendLine("---")
           [void]$sb.AppendLine("")
