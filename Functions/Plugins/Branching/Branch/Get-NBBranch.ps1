@@ -13,7 +13,20 @@
     Filter branches by name.
 
 .PARAMETER Status
-    Filter branches by status. Valid values: ready, merged, conflict.
+    Filter branches by status. Valid values (from netbox-branching
+    BranchStatusChoices):
+
+    Transitional:
+      provisioning, syncing, migrating, merging, reverting
+
+    Terminal "working":
+      new, ready, pending-migrations
+
+    Terminal "done":
+      merged, archived
+
+    Terminal "failure":
+      failed
 
 .PARAMETER Owner
     Filter branches by owner username.
@@ -94,7 +107,11 @@ function Get-NBBranch {
         [string]$Name,
 
         [Parameter(ParameterSetName = 'Query')]
-        [ValidateSet('ready', 'merged', 'conflict')]
+        [ValidateSet(
+            'new', 'provisioning', 'ready', 'syncing', 'migrating',
+            'merging', 'reverting', 'merged', 'archived',
+            'pending-migrations', 'failed'
+        )]
         [string]$Status,
 
         [Parameter(ParameterSetName = 'Query')]
