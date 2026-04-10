@@ -87,10 +87,24 @@ function Set-NBDCIMCable {
 
         [hashtable]$Custom_Fields,
 
-        [ValidateSet('1c1p', '1c2p', '1c4p', '1c6p', '1c8p', '1c12p', '1c16p',
-                     '2c1p', '2c2p', '2c4p', '2c4p-shuffle', '2c6p', '2c8p', '2c12p',
-                     '4c1p', '4c2p', '4c4p', '4c4p-shuffle', '4c6p', '4c8p', '8c4p',
-                     '1c4p-4c1p', '1c6p-6c1p', '2c4p-8c1p-shuffle')]
+        # Valid values from netbox/dcim/choices.py CableProfileChoices (v4.5.7).
+        # Every value must carry its 'single-' / 'trunk-' / 'breakout-' prefix
+        # or the NetBox API will reject the request. See #389.
+        [ValidateSet(
+            # Single (1 connector)
+            'single-1c1p', 'single-1c2p', 'single-1c4p', 'single-1c6p',
+            'single-1c8p', 'single-1c12p', 'single-1c16p',
+            # Trunks (multi-connector)
+            'trunk-2c1p', 'trunk-2c2p', 'trunk-2c4p', 'trunk-2c4p-shuffle',
+            'trunk-2c6p', 'trunk-2c8p', 'trunk-2c12p',
+            'trunk-4c1p', 'trunk-4c2p', 'trunk-4c4p', 'trunk-4c4p-shuffle',
+            'trunk-4c6p', 'trunk-4c8p', 'trunk-8c4p',
+            # Breakouts
+            'breakout-1c2p-2c1p',       # added in Netbox 4.5.7 (#21760)
+            'breakout-1c4p-4c1p',
+            'breakout-1c6p-6c1p',
+            'breakout-2c4p-8c1p-shuffle'
+        )]
         [Alias('Profile')]
         [string]$Cable_Profile,
 
