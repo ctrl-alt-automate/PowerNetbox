@@ -1,0 +1,49 @@
+# Known-OK ValidateSet discrepancies.
+#
+# Format: <relative-path-under-Functions/>::<ParameterName>
+# Lines starting with '#' and blank lines are ignored.
+#
+# Every entry here should have a reason — these are acknowledged exceptions
+# where PowerNetbox intentionally differs from NetBox's ChoiceSets, not
+# bugs waiting to be fixed.
+#
+# When adding a new entry, include a comment explaining WHY it is a
+# legitimate deviation. When NetBox adds a value that was previously an
+# exclusion, remove the entry and let the finding surface.
+
+# ---------------------------------------------------------------------------
+# Parameters whose ValidateSet is not a NetBox API enum but the script's
+# heuristic matcher coincidentally picks a ChoiceSet with overlapping values.
+# ---------------------------------------------------------------------------
+
+# -Method is an HTTP verb list, not a NetBox enum. The script picks
+# WebhookHttpMethodChoices by value overlap, but these are used for the
+# local Invoke-RestMethod call and Netbox's bulk request dispatcher.
+Helpers/InvokeNetboxRequest.ps1::Method
+Helpers/Send-NBBulkRequest.ps1::Method
+
+# -Face on Export-NBRackElevation includes 'Both' as a PowerNetbox-only
+# value that means "render both sides in the SVG output", not an API filter.
+DCIM/Racks/Export-NBRackElevation.ps1::Face
+
+# -Button_Class on CustomLink is Bootstrap button variants (primary,
+# secondary, success, ...). The script accidentally matches it to
+# DashboardWidgetColorChoices because of overlapping colour names.
+Extras/CustomLinks/New-NBCustomLink.ps1::Button_Class
+Extras/CustomLinks/Set-NBCustomLink.ps1::Button_Class
+
+# ---------------------------------------------------------------------------
+# Parameters where PowerNetbox deliberately accepts backward-compat values
+# that are translated to real API values in the function's begin {} block.
+# ---------------------------------------------------------------------------
+
+# -Mode on DCIMInterface accepts legacy numeric ('100', '200', '300') and
+# title-case ('Tagged All') values for backward compatibility. See #360.
+# The begin {} block translates them to the real API values before the call.
+# q-in-q is a genuine miss and is NOT excluded — it surfaces as a finding.
+# (Excluding only the *extras*, the missing q-in-q still reports.)
+# NB: This exclusion suppresses the whole finding; a future improvement
+# could support per-value exclusion. For now, q-in-q is tracked separately
+# in the issue filed from this script.
+DCIM/Interfaces/New-NBDCIMInterface.ps1::Mode
+DCIM/Interfaces/Set-NBDCIMInterface.ps1::Mode
