@@ -13,20 +13,11 @@
     Filter branches by name.
 
 .PARAMETER Status
-    Filter branches by status. Valid values (from netbox-branching
-    BranchStatusChoices):
-
-    Transitional:
-      provisioning, syncing, migrating, merging, reverting
-
-    Terminal "working":
-      new, ready, pending-migrations
-
-    Terminal "done":
-      merged, archived
-
-    Terminal "failure":
-      failed
+    Filter branches by status. Valid values (from netbox-branching BranchStatusChoices):
+    Transitional: provisioning, syncing, migrating, merging, reverting
+    Terminal "working": new, ready, pending-migrations
+    Terminal "done": merged, archived
+    Terminal "failure": failed
 
 .PARAMETER Owner
     Filter branches by owner username.
