@@ -407,26 +407,32 @@ function BuildDetailedErrorMessage {
 
     $troubleshooting = switch ($StatusCode) {
         401 {
-            $tips = [System.Collections.Generic.List[string]]::new()
-            $tips.Add("- Verify your API token is correct and not expired")
-            $tips.Add("- Check token in Netbox: Admin > API Tokens")
-            $tips.Add("- Ensure token has not been revoked")
+            $tips = @(
+                "- Verify your API token is correct and not expired"
+                "- Check token in Netbox: Admin > API Tokens"
+                "- Ensure token has not been revoked"
+            )
             if ($branchHint) {
-                $tips.Add("- Active branch context: $branchHint")
-                $tips.Add("- Verify the token user has access to this branch")
+                $tips += @(
+                    "- Active branch context: $branchHint"
+                    "- Verify the token user has access to this branch"
+                )
             }
             $tips -join "`n"
         }
         403 {
-            $tips = [System.Collections.Generic.List[string]]::new()
-            $tips.Add("- Verify your API token has permission for this operation")
-            $tips.Add("- Check object-level permissions in Netbox")
-            $tips.Add("- Ensure the token user has the required role")
+            $tips = @(
+                "- Verify your API token has permission for this operation"
+                "- Check object-level permissions in Netbox"
+                "- Ensure the token user has the required role"
+            )
             if ($branchHint) {
-                $tips.Add("- Active branch context: $branchHint")
-                $tips.Add("- Verify write permissions apply within the branch schema")
-                $tips.Add("- Confirm the branch is not merged, archived, or read-only")
-                $tips.Add("- Use Exit-NBBranch to test if the operation succeeds in main context")
+                $tips += @(
+                    "- Active branch context: $branchHint"
+                    "- Verify write permissions apply within the branch schema"
+                    "- Confirm the branch is not merged, archived, or read-only"
+                    "- Use Exit-NBBranch to test if the operation succeeds in main context"
+                )
             }
             $tips -join "`n"
         }
