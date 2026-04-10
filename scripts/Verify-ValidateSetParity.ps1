@@ -110,7 +110,13 @@ $ErrorActionPreference = 'Stop'
 
 if (-not $NetboxVersion) {
     Write-Host "Resolving latest NetBox release..." -ForegroundColor DarkGray
-    $release = Invoke-RestMethod 'https://api.github.com/repos/netbox-community/netbox/releases/latest'
+    try {
+        $release = Invoke-RestMethod 'https://api.github.com/repos/netbox-community/netbox/releases/latest' -ErrorAction Stop
+    }
+    catch {
+        Write-Error "Could not resolve latest NetBox release from the GitHub API: $($_.Exception.Message). Pass -NetboxVersion explicitly (e.g. -NetboxVersion v4.5.7) or check network / rate-limit status."
+        exit 2
+    }
     $NetboxVersion = $release.tag_name
     Write-Host "Latest: $NetboxVersion" -ForegroundColor DarkGray
 }
@@ -173,15 +179,18 @@ foreach ($app in $choicesApps) {
         if ($currentClass) {
             # Simple string literal assignment at class-body indent:
             #     CONSTANT_NAME = 'value'                    [optional  # comment]
+            #     CONSTANT_NAME = "value"                    [optional  # comment]
             # We accept 4-space or 8-space indent. Values with spaces or
             # special chars are fine; we only require a single quoted literal.
             # IMPORTANT: -cmatch (case-sensitive) so we don't catch lowercase
             # metadata lines like `key = 'Device.status'` in the class body.
             # Trailing inline comments are common in NetBox source (e.g.
             # `TYPE_1GE_FIXED = '1000base-t'  # TODO: Rename to _T`) and must
-            # not break the match.
-            if ($line -cmatch '^\s{4,8}([A-Z][A-Z0-9_]*)\s*=\s*[''"]([^''"]+)[''"]\s*(#.*)?$') {
-                $null = $currentValues.Add($matches[2])
+            # not break the match. The quote character is captured in group 2
+            # and backreferenced as \2 so mixed-quote strings like `'it"s'`
+            # or `"it's"` parse correctly.
+            if ($line -cmatch '^\s{4,8}([A-Z][A-Z0-9_]*)\s*=\s*([''"])([^\2]*?)\2\s*(#.*)?$') {
+                $null = $currentValues.Add($matches[3])
             }
         }
     }
@@ -252,11 +261,22 @@ foreach ($file in $files) {
 
         # Extract the string literal arguments. Skip named arguments like
         # `IgnoreCase = $true` which appear as AssignmentStatementAst, not
-        # in PositionalArguments.
+        # in PositionalArguments. Also unwrap [ValidateSet(@('a', 'b'))] array
+        # literal syntax, which shows up as a single ArrayLiteralAst
+        # positional argument instead of N StringConstantExpressionAst args.
         $values = @(
-            $attr.PositionalArguments |
-                Where-Object { $_ -is [System.Management.Automation.Language.StringConstantExpressionAst] } |
-                ForEach-Object { $_.Value }
+            foreach ($posArg in $attr.PositionalArguments) {
+                if ($posArg -is [System.Management.Automation.Language.StringConstantExpressionAst]) {
+                    $posArg.Value
+                }
+                elseif ($posArg -is [System.Management.Automation.Language.ArrayLiteralAst]) {
+                    foreach ($elem in $posArg.Elements) {
+                        if ($elem -is [System.Management.Automation.Language.StringConstantExpressionAst]) {
+                            $elem.Value
+                        }
+                    }
+                }
+            }
         )
         if ($values.Count -eq 0) { continue }
 
@@ -321,24 +341,19 @@ function Get-NormalizedName {
 }
 
 function Get-FunctionApp {
-    param([string]$RelativeFilePath)
+    param(
+        [string]$RelativeFilePath,
+        [string[]]$KnownApps
+    )
     # Functions/DCIM/.../Xxx.ps1 -> 'dcim'
     # Functions/Plugins/Branching/... -> '' (no app hint)
+    # KnownApps is the single source of truth (same list we fetched choices
+    # for, defined once at the top of the script as $choicesApps).
     $parts = $RelativeFilePath -split '[\\/]'
     if ($parts.Count -ge 1) {
         $top = $parts[0].ToLowerInvariant()
-        switch ($top) {
-            'dcim'           { return 'dcim' }
-            'ipam'           { return 'ipam' }
-            'virtualization' { return 'virtualization' }
-            'circuits'       { return 'circuits' }
-            'tenancy'        { return 'tenancy' }
-            'vpn'            { return 'vpn' }
-            'wireless'       { return 'wireless' }
-            'extras'         { return 'extras' }
-            'core'           { return 'core' }
-            'users'          { return 'users' }
-            default          { return '' }
+        if ($KnownApps -contains $top) {
+            return $top
         }
     }
     return ''
@@ -366,6 +381,24 @@ if ($ExclusionFile -and (Test-Path $ExclusionFile)) {
     Write-Host "Loaded $($exclusions.Count) exclusions from $ExclusionFile" -ForegroundColor DarkGray
 }
 
+# Pre-compute each NetBox ChoiceSet's HashSet and normalised class name
+# once, up-front, instead of rebuilding them for every PowerNetbox parameter.
+# With ~130 PN params and ~85 NB classes this removes ~11,000 HashSet
+# allocations per run (observed in a profile on the initial v4.5.7 run).
+$netboxChoicesIndex = [System.Collections.Generic.List[pscustomobject]]::new()
+foreach ($entry in $netboxChoices.GetEnumerator()) {
+    $parts = $entry.Key -split '\.', 2
+    $netboxChoicesIndex.Add([pscustomobject]@{
+            Key              = $entry.Key
+            App              = $parts[0]
+            Class            = $parts[1]
+            ClassNormalized  = Get-NormalizedName -Name $parts[1]
+            Values           = $entry.Value
+            Set              = [System.Collections.Generic.HashSet[string]]::new(
+                [string[]]$entry.Value, [StringComparer]::OrdinalIgnoreCase)
+        })
+}
+
 $findings = [System.Collections.Generic.List[pscustomobject]]::new()
 
 foreach ($pn in $powerNetboxSets) {
@@ -375,41 +408,38 @@ foreach ($pn in $powerNetboxSets) {
         continue
     }
 
-
     $pnSet = [System.Collections.Generic.HashSet[string]]::new(
         [string[]]$pn.Values, [StringComparer]::OrdinalIgnoreCase)
 
-    $pnAppHint = Get-FunctionApp -RelativeFilePath $pn.File
+    $pnAppHint = Get-FunctionApp -RelativeFilePath $pn.File -KnownApps $choicesApps
     $pnParamNormalized = Get-NormalizedName -Name $pn.Parameter
 
     $bestMatch = $null
     $bestScore = 0.0
 
-    foreach ($entry in $netboxChoices.GetEnumerator()) {
-        $nbApp = ($entry.Key -split '\.')[0]
-        $nbClass = ($entry.Key -split '\.')[1]
-        $nbValues = $entry.Value
-        $nbSet = [System.Collections.Generic.HashSet[string]]::new(
-            [string[]]$nbValues, [StringComparer]::OrdinalIgnoreCase)
-
+    foreach ($nb in $netboxChoicesIndex) {
         # --- 1. name_score ---
-        $nbClassNormalized = Get-NormalizedName -Name $nbClass
         $nameScore = 0.0
-        if ($pnParamNormalized -eq $nbClassNormalized) {
+        if ($pnParamNormalized -eq $nb.ClassNormalized) {
             $nameScore = 1.0
         }
-        elseif ($nbClassNormalized -and (
-                $nbClassNormalized.Contains($pnParamNormalized) -or
-                $pnParamNormalized.Contains($nbClassNormalized))) {
+        elseif ($nb.ClassNormalized -and (
+                $nb.ClassNormalized.Contains($pnParamNormalized) -or
+                $pnParamNormalized.Contains($nb.ClassNormalized))) {
             $nameScore = 0.6
         }
 
         # --- 2. value_exact ---
-        $intersection = [System.Collections.Generic.HashSet[string]]::new(
-            $pnSet, [StringComparer]::OrdinalIgnoreCase)
-        $intersection.IntersectWith($nbSet)
+        # Count PN values present in NB by probing the pre-built NB HashSet.
+        # Avoids allocating a per-iteration intersection HashSet.
+        $intersectionCount = 0
+        foreach ($pnVal in $pn.Values) {
+            if ($nb.Set.Contains($pnVal)) {
+                $intersectionCount++
+            }
+        }
         $valueExact = if ($pnSet.Count -gt 0) {
-            $intersection.Count / $pnSet.Count
+            $intersectionCount / $pnSet.Count
         } else { 0 }
 
         # --- 3. value_suffix ---
@@ -417,7 +447,7 @@ foreach ($pn in $powerNetboxSets) {
         # This catches prefix-stripped mistakes.
         $suffixMatches = 0
         foreach ($pnVal in $pn.Values) {
-            foreach ($nbVal in $nbValues) {
+            foreach ($nbVal in $nb.Values) {
                 if ($nbVal.EndsWith("-$pnVal", [StringComparison]::OrdinalIgnoreCase) -or
                     $nbVal -eq $pnVal) {
                     $suffixMatches++
@@ -430,7 +460,7 @@ foreach ($pn in $powerNetboxSets) {
         } else { 0 }
 
         # --- 4. app_bonus ---
-        $appBonus = if ($pnAppHint -and $pnAppHint -eq $nbApp) { 0.15 } else { 0.0 }
+        $appBonus = if ($pnAppHint -and $pnAppHint -eq $nb.App) { 0.15 } else { 0.0 }
 
         # Weighted combination. Name is the strongest signal.
         $score = (0.45 * $nameScore) +
@@ -450,8 +480,8 @@ foreach ($pn in $powerNetboxSets) {
             # to the superset PrefixStatusChoices (4 values) just because the
             # superset happened to iterate first with the same overall score.
             if ($valueExact -eq 1.0 -and $bestMatch.ValueExact -eq 1.0) {
-                $newDistance = [math]::Abs($nbValues.Count - $pn.Count)
-                $oldDistance = [math]::Abs($bestMatch.Entry.Value.Count - $pn.Count)
+                $newDistance = [math]::Abs($nb.Values.Count - $pn.Count)
+                $oldDistance = [math]::Abs($bestMatch.NbEntry.Values.Count - $pn.Count)
                 if ($newDistance -lt $oldDistance) {
                     $isBetter = $true
                 }
@@ -461,7 +491,7 @@ foreach ($pn in $powerNetboxSets) {
         if ($isBetter) {
             $bestScore = $score
             $bestMatch = [pscustomobject]@{
-                Entry       = $entry
+                NbEntry     = $nb
                 NameScore   = $nameScore
                 ValueExact  = $valueExact
                 ValueSuffix = $valueSuffix
@@ -475,7 +505,7 @@ foreach ($pn in $powerNetboxSets) {
     }
 
     # Compute diff against the matched NB ChoiceSet.
-    $nbValuesList = $bestMatch.Entry.Value
+    $nbValuesList = $bestMatch.NbEntry.Values
     $nbValues = [System.Collections.Generic.HashSet[string]]::new(
         [string[]]$nbValuesList, [StringComparer]::OrdinalIgnoreCase)
 
@@ -490,7 +520,7 @@ foreach ($pn in $powerNetboxSets) {
             File        = $pn.File
             Function    = $pn.Function
             Parameter   = $pn.Parameter
-            ChoiceSet   = $bestMatch.Entry.Key
+            ChoiceSet   = $bestMatch.NbEntry.Key
             Score       = [math]::Round($bestScore * 100, 1)
             NameScore   = [math]::Round($bestMatch.NameScore * 100, 1)
             ValueExact  = [math]::Round($bestMatch.ValueExact * 100, 1)
