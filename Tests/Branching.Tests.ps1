@@ -436,6 +436,180 @@ Describe "Branching Module Tests" -Tag 'Branching' {
     }
     #endregion
 
+    #region Wait-NBBranch Tests
+    Context "Wait-NBBranch" {
+        # Wait-NBBranch operates by polling Get-NBBranch; override the default
+        # module-level Invoke-RestMethod mock with a Get-NBBranch mock per test
+        # so we can simulate status transitions across successive polls.
+        BeforeEach {
+            # Shared counter for sequential responses across polls within one test.
+            # Reset before each test to avoid leakage.
+            $script:WaitTestCallCount = 0
+        }
+
+        It "Should return immediately when branch is already at target status" {
+            Mock -CommandName 'Get-NBBranch' -ModuleName 'PowerNetbox' -MockWith {
+                return [PSCustomObject]@{
+                    id     = 42
+                    name   = 'already-ready'
+                    status = [PSCustomObject]@{ value = 'ready'; label = 'Ready' }
+                }
+            }
+
+            $result = Wait-NBBranch -Id 42 -PollIntervalMs 100
+            $result | Should -Not -BeNullOrEmpty
+            $result.id | Should -Be 42
+            $result.status.value | Should -Be 'ready'
+            Should -Invoke -CommandName 'Get-NBBranch' -ModuleName 'PowerNetbox' -Times 1
+        }
+
+        It "Should poll through new → provisioning → ready" {
+            Mock -CommandName 'Get-NBBranch' -ModuleName 'PowerNetbox' -MockWith {
+                $script:WaitTestCallCount++
+                $status = switch ($script:WaitTestCallCount) {
+                    1       { 'new' }
+                    2       { 'provisioning' }
+                    default { 'ready' }
+                }
+                return [PSCustomObject]@{
+                    id     = 42
+                    name   = 'transitional'
+                    status = [PSCustomObject]@{ value = $status }
+                }
+            }
+
+            $result = Wait-NBBranch -Id 42 -PollIntervalMs 100
+            $result.status.value | Should -Be 'ready'
+            $script:WaitTestCallCount | Should -BeGreaterOrEqual 3
+        }
+
+        It "Should support -TargetStatus merged for merge workflow" {
+            Mock -CommandName 'Get-NBBranch' -ModuleName 'PowerNetbox' -MockWith {
+                $script:WaitTestCallCount++
+                $status = if ($script:WaitTestCallCount -lt 2) { 'merging' } else { 'merged' }
+                return [PSCustomObject]@{
+                    id     = 42
+                    name   = 'merging-branch'
+                    status = [PSCustomObject]@{ value = $status }
+                }
+            }
+
+            $result = Wait-NBBranch -Id 42 -TargetStatus 'merged' -PollIntervalMs 100
+            $result.status.value | Should -Be 'merged'
+        }
+
+        It "Should throw on 'failed' status and include branch errors" {
+            Mock -CommandName 'Get-NBBranch' -ModuleName 'PowerNetbox' -MockWith {
+                return [PSCustomObject]@{
+                    id     = 42
+                    name   = 'doomed'
+                    status = [PSCustomObject]@{ value = 'failed' }
+                    errors = @('Schema migration failed: relation already exists')
+                }
+            }
+
+            { Wait-NBBranch -Id 42 -PollIntervalMs 100 } |
+                Should -Throw -ExpectedMessage "*failed*Schema migration failed*"
+        }
+
+        It "Should fail fast on unexpected terminal status (archived while waiting for ready)" {
+            Mock -CommandName 'Get-NBBranch' -ModuleName 'PowerNetbox' -MockWith {
+                return [PSCustomObject]@{
+                    id     = 42
+                    name   = 'stale'
+                    status = [PSCustomObject]@{ value = 'archived' }
+                }
+            }
+
+            { Wait-NBBranch -Id 42 -TargetStatus 'ready' -PollIntervalMs 100 } |
+                Should -Throw -ExpectedMessage "*terminal status 'archived'*"
+        }
+
+        It "Should throw a timeout error when branch never reaches target" {
+            Mock -CommandName 'Get-NBBranch' -ModuleName 'PowerNetbox' -MockWith {
+                return [PSCustomObject]@{
+                    id     = 42
+                    name   = 'slow'
+                    status = [PSCustomObject]@{ value = 'provisioning' }
+                }
+            }
+
+            { Wait-NBBranch -Id 42 -TimeoutSeconds 1 -PollIntervalMs 100 } |
+                Should -Throw -ExpectedMessage "*Timed out*provisioning*"
+        }
+
+        It "Should resolve -Name via Get-NBBranch on first poll" {
+            Mock -CommandName 'Get-NBBranch' -ModuleName 'PowerNetbox' -MockWith {
+                return [PSCustomObject]@{
+                    id     = 99
+                    name   = 'lookup-branch'
+                    status = [PSCustomObject]@{ value = 'ready' }
+                }
+            }
+
+            $result = Wait-NBBranch -Name 'lookup-branch' -PollIntervalMs 100
+            $result.id | Should -Be 99
+            $result.name | Should -Be 'lookup-branch'
+        }
+
+        It "Should accept pipeline input from a New-NBBranch-style object" {
+            Mock -CommandName 'Get-NBBranch' -ModuleName 'PowerNetbox' -MockWith {
+                return [PSCustomObject]@{
+                    id     = 55
+                    name   = 'piped'
+                    status = [PSCustomObject]@{ value = 'ready' }
+                }
+            }
+
+            # Simulate what New-NBBranch returns (status is still 'new')
+            $newBranch = [PSCustomObject]@{
+                id     = 55
+                name   = 'piped'
+                status = [PSCustomObject]@{ value = 'new' }
+            }
+
+            $result = $newBranch | Wait-NBBranch -PollIntervalMs 100
+            $result.id | Should -Be 55
+            $result.status.value | Should -Be 'ready'
+        }
+
+        It "Should throw when branch is not found on first poll" {
+            Mock -CommandName 'Get-NBBranch' -ModuleName 'PowerNetbox' -MockWith { return $null }
+
+            { Wait-NBBranch -Id 99999 -PollIntervalMs 100 } |
+                Should -Throw -ExpectedMessage "*not found*"
+        }
+
+        It "Should throw 'removed' error when branch disappears mid-wait" {
+            Mock -CommandName 'Get-NBBranch' -ModuleName 'PowerNetbox' -MockWith {
+                $script:WaitTestCallCount++
+                if ($script:WaitTestCallCount -eq 1) {
+                    return [PSCustomObject]@{
+                        id     = 42
+                        name   = 'vanishing'
+                        status = [PSCustomObject]@{ value = 'provisioning' }
+                    }
+                }
+                return $null
+            }
+
+            { Wait-NBBranch -Id 42 -PollIntervalMs 100 } |
+                Should -Throw -ExpectedMessage "*removed*"
+        }
+
+        It "Should validate -TargetStatus against known terminal states" {
+            # 'provisioning' is transitional, not a valid terminal target
+            { Wait-NBBranch -Id 1 -TargetStatus 'provisioning' } | Should -Throw
+            # 'failed' is terminal but is always an error path, not a target
+            { Wait-NBBranch -Id 1 -TargetStatus 'failed' } | Should -Throw
+        }
+
+        It "Should reject zero or negative TimeoutSeconds" {
+            { Wait-NBBranch -Id 1 -TimeoutSeconds 0 } | Should -Throw
+        }
+    }
+    #endregion
+
     #region Get-NBBranchEvent Tests
     Context "Get-NBBranchEvent" {
         It "Should request branch events" {
