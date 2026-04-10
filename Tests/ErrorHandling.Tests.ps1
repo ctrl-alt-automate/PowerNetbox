@@ -846,6 +846,9 @@ Describe "BuildDetailedErrorMessage Helper" -Tag 'ErrorHandling', 'Helper' {
 
         It "Should provide 403 Forbidden troubleshooting hints" {
             InModuleScope -ModuleName 'PowerNetbox' {
+                # Ensure no branch context leaks in from other tests
+                $script:NetboxConfig.BranchStack = $null
+
                 $result = BuildDetailedErrorMessage -StatusCode 403 -StatusName "Forbidden" `
                     -Method "DELETE" -Endpoint "/api/dcim/devices/123/" -ErrorMessage "Permission denied"
 
@@ -853,6 +856,58 @@ Describe "BuildDetailedErrorMessage Helper" -Tag 'ErrorHandling', 'Helper' {
                 $result | Should -Match "DELETE /api/dcim/devices/123/"
                 $result | Should -Match "token has permission"
                 $result | Should -Match "object-level permissions"
+                # When no branch context is active, branching hints must NOT appear
+                $result | Should -Not -Match "Active branch context"
+                $result | Should -Not -Match "Exit-NBBranch"
+            }
+        }
+
+        It "Should include branch context hints for 403 errors when a branch is active (#382)" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                # Simulate an Enter-NBBranch context
+                $script:NetboxConfig.BranchStack = [System.Collections.Generic.Stack[object]]::new()
+                $script:NetboxConfig.BranchStack.Push([PSCustomObject]@{
+                    Name     = 'feature/new-datacenter'
+                    SchemaId = 'nbs_abc123'
+                    Id       = 42
+                })
+
+                try {
+                    $result = BuildDetailedErrorMessage -StatusCode 403 -StatusName "Forbidden" `
+                        -Method "PATCH" -Endpoint "/api/dcim/interfaces/382/" -ErrorMessage "Permission denied"
+
+                    $result | Should -Match "403 Forbidden"
+                    $result | Should -Match "Active branch context: feature/new-datacenter"
+                    $result | Should -Match "nbs_abc123"
+                    $result | Should -Match "write permissions apply within the branch schema"
+                    $result | Should -Match "Exit-NBBranch"
+                }
+                finally {
+                    $script:NetboxConfig.BranchStack = $null
+                }
+            }
+        }
+
+        It "Should include branch context hints for 401 errors when a branch is active (#382)" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.BranchStack = [System.Collections.Generic.Stack[object]]::new()
+                $script:NetboxConfig.BranchStack.Push([PSCustomObject]@{
+                    Name     = 'feature/test'
+                    SchemaId = 'nbs_xyz789'
+                    Id       = 7
+                })
+
+                try {
+                    $result = BuildDetailedErrorMessage -StatusCode 401 -StatusName "Unauthorized" `
+                        -Method "GET" -Endpoint "/api/dcim/interfaces/382/" -ErrorMessage "Auth failed"
+
+                    $result | Should -Match "401 Unauthorized"
+                    $result | Should -Match "Active branch context: feature/test"
+                    $result | Should -Match "token user has access to this branch"
+                }
+                finally {
+                    $script:NetboxConfig.BranchStack = $null
+                }
             }
         }
 
