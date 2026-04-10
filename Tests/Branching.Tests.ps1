@@ -260,6 +260,25 @@ Describe "Branching Module Tests" -Tag 'Branching' {
             $Result.Uri | Should -Match 'status=ready'
         }
 
+        It "Should accept all 11 real BranchStatusChoices values (#385)" {
+            # Source of truth: netbox-branching/choices.py → BranchStatusChoices
+            $allStatuses = @(
+                'new', 'provisioning', 'ready', 'syncing', 'migrating',
+                'merging', 'reverting', 'merged', 'archived',
+                'pending-migrations', 'failed'
+            )
+            foreach ($status in $allStatuses) {
+                $Result = Get-NBBranch -Status $status
+                $Result.Uri | Should -Match "status=$([regex]::Escape($status))" -Because "$status is a real plugin status"
+            }
+        }
+
+        It "Should reject the non-existent 'conflict' status (#385)" {
+            # 'conflict' was in the original ValidateSet but does not exist in
+            # BranchStatusChoices. Reject it at parameter binding time.
+            { Get-NBBranch -Status 'conflict' } | Should -Throw
+        }
+
         It "Should request branches by owner" {
             $Result = Get-NBBranch -Owner 'admin'
             $Result.Uri | Should -Match 'owner=admin'
