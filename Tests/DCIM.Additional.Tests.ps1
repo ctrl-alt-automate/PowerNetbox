@@ -99,15 +99,35 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
     }
 
     Context "Cable Profile Support (4.5+)" {
+        # The 26 real CableProfileChoices values from netbox/dcim/choices.py
+        # as of v4.5.7. Kept as script-scope so tests can iterate.
+        BeforeAll {
+            $script:ValidCableProfiles = @(
+                # Single (1 connector)
+                'single-1c1p', 'single-1c2p', 'single-1c4p', 'single-1c6p',
+                'single-1c8p', 'single-1c12p', 'single-1c16p',
+                # Trunks (multi-connector)
+                'trunk-2c1p', 'trunk-2c2p', 'trunk-2c4p', 'trunk-2c4p-shuffle',
+                'trunk-2c6p', 'trunk-2c8p', 'trunk-2c12p',
+                'trunk-4c1p', 'trunk-4c2p', 'trunk-4c4p', 'trunk-4c4p-shuffle',
+                'trunk-4c6p', 'trunk-4c8p', 'trunk-8c4p',
+                # Breakouts
+                'breakout-1c2p-2c1p',       # added in 4.5.7 (#21760)
+                'breakout-1c4p-4c1p',
+                'breakout-1c6p-6c1p',
+                'breakout-2c4p-8c1p-shuffle'
+            )
+        }
+
         It "Should include Profile in New-NBDCIMCable body on Netbox 4.5+" {
             InModuleScope -ModuleName 'PowerNetbox' {
                 $script:NetboxConfig.ParsedVersion = [version]'4.5.0'
             }
             $aTerm = @(@{object_type="dcim.interface"; object_id=1})
             $bTerm = @(@{object_type="dcim.interface"; object_id=2})
-            $Result = New-NBDCIMCable -A_Terminations $aTerm -B_Terminations $bTerm -Profile '1c4p-4c1p' -Confirm:$false
+            $Result = New-NBDCIMCable -A_Terminations $aTerm -B_Terminations $bTerm -Profile 'breakout-1c4p-4c1p' -Confirm:$false
             $bodyObj = $Result.Body | ConvertFrom-Json
-            $bodyObj.profile | Should -Be '1c4p-4c1p'
+            $bodyObj.profile | Should -Be 'breakout-1c4p-4c1p'
         }
 
         It "Should exclude Profile from New-NBDCIMCable body on Netbox 4.4.x" {
@@ -116,7 +136,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
             }
             $aTerm = @(@{object_type="dcim.interface"; object_id=1})
             $bTerm = @(@{object_type="dcim.interface"; object_id=2})
-            $Result = New-NBDCIMCable -A_Terminations $aTerm -B_Terminations $bTerm -Profile '1c4p-4c1p' -Confirm:$false -WarningAction SilentlyContinue
+            $Result = New-NBDCIMCable -A_Terminations $aTerm -B_Terminations $bTerm -Profile 'breakout-1c4p-4c1p' -Confirm:$false -WarningAction SilentlyContinue
             $bodyObj = $Result.Body | ConvertFrom-Json
             $bodyObj.PSObject.Properties.Name | Should -Not -Contain 'profile'
         }
@@ -125,16 +145,16 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
             InModuleScope -ModuleName 'PowerNetbox' {
                 $script:NetboxConfig.ParsedVersion = [version]'4.5.0'
             }
-            $Result = Set-NBDCIMCable -Id 1 -Profile '2c4p' -Confirm:$false
+            $Result = Set-NBDCIMCable -Id 1 -Profile 'trunk-2c4p' -Confirm:$false
             $bodyObj = $Result.Body | ConvertFrom-Json
-            $bodyObj.profile | Should -Be '2c4p'
+            $bodyObj.profile | Should -Be 'trunk-2c4p'
         }
 
         It "Should exclude Profile from Set-NBDCIMCable body on Netbox 4.4.x" {
             InModuleScope -ModuleName 'PowerNetbox' {
                 $script:NetboxConfig.ParsedVersion = [version]'4.4.9'
             }
-            $Result = Set-NBDCIMCable -Id 1 -Profile '2c4p' -Confirm:$false -WarningAction SilentlyContinue
+            $Result = Set-NBDCIMCable -Id 1 -Profile 'trunk-2c4p' -Confirm:$false -WarningAction SilentlyContinue
             $bodyObj = $Result.Body | ConvertFrom-Json
             $bodyObj.PSObject.Properties.Name | Should -Not -Contain 'profile'
         }
@@ -143,16 +163,86 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
             InModuleScope -ModuleName 'PowerNetbox' {
                 $script:NetboxConfig.ParsedVersion = [version]'4.5.0'
             }
-            $Result = Get-NBDCIMCable -Profile '1c4p-4c1p'
-            $Result.Uri | Should -Match 'profile=1c4p-4c1p'
+            $Result = Get-NBDCIMCable -Profile 'breakout-1c4p-4c1p'
+            $Result.Uri | Should -Match 'profile=breakout-1c4p-4c1p'
         }
 
         It "Should exclude Profile filter from Get-NBDCIMCable on Netbox 4.4.x" {
             InModuleScope -ModuleName 'PowerNetbox' {
                 $script:NetboxConfig.ParsedVersion = [version]'4.4.9'
             }
-            $Result = Get-NBDCIMCable -Profile '1c4p-4c1p' -WarningAction SilentlyContinue
+            $Result = Get-NBDCIMCable -Profile 'breakout-1c4p-4c1p' -WarningAction SilentlyContinue
             $Result.Uri | Should -Not -Match 'profile='
+        }
+
+        It "Should accept all 25 real CableProfileChoices values on New-NBDCIMCable (#389)" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.ParsedVersion = [version]'4.5.7'
+            }
+            $aTerm = @(@{object_type="dcim.interface"; object_id=1})
+            $bTerm = @(@{object_type="dcim.interface"; object_id=2})
+            foreach ($profile in $script:ValidCableProfiles) {
+                $Result = New-NBDCIMCable -A_Terminations $aTerm -B_Terminations $bTerm -Profile $profile -Confirm:$false
+                $bodyObj = $Result.Body | ConvertFrom-Json
+                $bodyObj.profile | Should -Be $profile -Because "$profile is a real plugin value"
+            }
+        }
+
+        It "Should accept all 25 real CableProfileChoices values on Get-NBDCIMCable (#389)" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.ParsedVersion = [version]'4.5.7'
+            }
+            foreach ($profile in $script:ValidCableProfiles) {
+                $Result = Get-NBDCIMCable -Profile $profile
+                $Result.Uri | Should -Match "profile=$([regex]::Escape($profile))" -Because "$profile is a real plugin value"
+            }
+        }
+
+        It "Should accept all 25 real CableProfileChoices values on Set-NBDCIMCable (#389)" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.ParsedVersion = [version]'4.5.7'
+            }
+            foreach ($profile in $script:ValidCableProfiles) {
+                $Result = Set-NBDCIMCable -Id 1 -Profile $profile -Confirm:$false
+                $bodyObj = $Result.Body | ConvertFrom-Json
+                $bodyObj.profile | Should -Be $profile -Because "$profile is a real plugin value"
+            }
+        }
+
+        It "Should reject the old prefix-stripped values on New-NBDCIMCable (#389)" {
+            # Before the fix these broken values passed validation and produced
+            # garbage API requests. They must now be rejected at binding time.
+            $aTerm = @(@{object_type="dcim.interface"; object_id=1})
+            $bTerm = @(@{object_type="dcim.interface"; object_id=2})
+            foreach ($broken in @('1c1p', '2c4p', '1c4p-4c1p', '4c4p-shuffle')) {
+                { New-NBDCIMCable -A_Terminations $aTerm -B_Terminations $bTerm -Profile $broken -Confirm:$false } |
+                    Should -Throw -Because "'$broken' is not a real plugin value and must be rejected"
+            }
+        }
+
+        It "Should reject the old prefix-stripped values on Get-NBDCIMCable (#389)" {
+            foreach ($broken in @('1c1p', '2c4p', '1c4p-4c1p', '4c4p-shuffle')) {
+                { Get-NBDCIMCable -Profile $broken } |
+                    Should -Throw -Because "'$broken' is not a real plugin value and must be rejected"
+            }
+        }
+
+        It "Should reject the old prefix-stripped values on Set-NBDCIMCable (#389)" {
+            foreach ($broken in @('1c1p', '2c4p', '1c4p-4c1p', '4c4p-shuffle')) {
+                { Set-NBDCIMCable -Id 1 -Profile $broken -Confirm:$false } |
+                    Should -Throw -Because "'$broken' is not a real plugin value and must be rejected"
+            }
+        }
+
+        It "Should accept the new 'breakout-1c2p-2c1p' profile from Netbox 4.5.7 (#389, #21760)" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $script:NetboxConfig.ParsedVersion = [version]'4.5.7'
+            }
+            $aTerm = @(@{object_type="dcim.interface"; object_id=1})
+            $bTerm = @(@{object_type="dcim.interface"; object_id=2})
+            $Result = New-NBDCIMCable -A_Terminations $aTerm -B_Terminations $bTerm -Profile 'breakout-1c2p-2c1p' -Confirm:$false
+            $bodyObj = $Result.Body | ConvertFrom-Json
+            $bodyObj.profile | Should -Be 'breakout-1c2p-2c1p'
         }
     }
     #endregion
