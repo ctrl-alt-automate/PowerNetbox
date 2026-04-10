@@ -392,20 +392,49 @@ function BuildDetailedErrorMessage {
         [string]$ErrorMessage
     )
 
+    # Detect active branch context (if any) so auth failures can hint at
+    # branch-specific permission issues. See issue #382.
+    $branchHint = $null
+    if ($script:NetboxConfig.BranchStack -and $script:NetboxConfig.BranchStack.Count -gt 0) {
+        $currentBranch = $script:NetboxConfig.BranchStack.Peek()
+        $branchHint = if ($currentBranch -is [PSCustomObject] -and $currentBranch.Name) {
+            "$($currentBranch.Name) (schema_id: $($currentBranch.SchemaId))"
+        }
+        else {
+            [string]$currentBranch
+        }
+    }
+
     $troubleshooting = switch ($StatusCode) {
         401 {
-            @(
+            $tips = @(
                 "- Verify your API token is correct and not expired"
                 "- Check token in Netbox: Admin > API Tokens"
                 "- Ensure token has not been revoked"
-            ) -join "`n"
+            )
+            if ($branchHint) {
+                $tips += @(
+                    "- Active branch context: $branchHint"
+                    "- Verify the token user has access to this branch"
+                )
+            }
+            $tips -join "`n"
         }
         403 {
-            @(
+            $tips = @(
                 "- Verify your API token has permission for this operation"
                 "- Check object-level permissions in Netbox"
                 "- Ensure the token user has the required role"
-            ) -join "`n"
+            )
+            if ($branchHint) {
+                $tips += @(
+                    "- Active branch context: $branchHint"
+                    "- Verify write permissions apply within the branch schema"
+                    "- Confirm the branch is not merged, archived, or read-only"
+                    "- Use Exit-NBBranch to test if the operation succeeds in main context"
+                )
+            }
+            $tips -join "`n"
         }
         404 {
             @(
