@@ -392,20 +392,43 @@ function BuildDetailedErrorMessage {
         [string]$ErrorMessage
     )
 
+    # Detect active branch context (if any) so auth failures can hint at
+    # branch-specific permission issues. See issue #382.
+    $branchHint = $null
+    if ($script:NetboxConfig.BranchStack -and $script:NetboxConfig.BranchStack.Count -gt 0) {
+        $currentBranch = $script:NetboxConfig.BranchStack.Peek()
+        $branchHint = if ($currentBranch -is [PSCustomObject] -and $currentBranch.Name) {
+            "$($currentBranch.Name) (schema_id: $($currentBranch.SchemaId))"
+        }
+        else {
+            [string]$currentBranch
+        }
+    }
+
     $troubleshooting = switch ($StatusCode) {
         401 {
-            @(
-                "- Verify your API token is correct and not expired"
-                "- Check token in Netbox: Admin > API Tokens"
-                "- Ensure token has not been revoked"
-            ) -join "`n"
+            $tips = [System.Collections.Generic.List[string]]::new()
+            $tips.Add("- Verify your API token is correct and not expired")
+            $tips.Add("- Check token in Netbox: Admin > API Tokens")
+            $tips.Add("- Ensure token has not been revoked")
+            if ($branchHint) {
+                $tips.Add("- Active branch context: $branchHint")
+                $tips.Add("- Verify the token user has access to this branch")
+            }
+            $tips -join "`n"
         }
         403 {
-            @(
-                "- Verify your API token has permission for this operation"
-                "- Check object-level permissions in Netbox"
-                "- Ensure the token user has the required role"
-            ) -join "`n"
+            $tips = [System.Collections.Generic.List[string]]::new()
+            $tips.Add("- Verify your API token has permission for this operation")
+            $tips.Add("- Check object-level permissions in Netbox")
+            $tips.Add("- Ensure the token user has the required role")
+            if ($branchHint) {
+                $tips.Add("- Active branch context: $branchHint")
+                $tips.Add("- Verify write permissions apply within the branch schema")
+                $tips.Add("- Confirm the branch is not merged, archived, or read-only")
+                $tips.Add("- Use Exit-NBBranch to test if the operation succeeds in main context")
+            }
+            $tips -join "`n"
         }
         404 {
             @(
