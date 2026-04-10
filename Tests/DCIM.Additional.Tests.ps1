@@ -175,7 +175,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
             $Result.Uri | Should -Not -Match 'profile='
         }
 
-        It "Should accept all 26 real CableProfileChoices values on New-NBDCIMCable (#389)" {
+        It "Should accept all 25 real CableProfileChoices values on New-NBDCIMCable (#389)" {
             InModuleScope -ModuleName 'PowerNetbox' {
                 $script:NetboxConfig.ParsedVersion = [version]'4.5.7'
             }
@@ -188,7 +188,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
             }
         }
 
-        It "Should accept all 26 real CableProfileChoices values on Get-NBDCIMCable (#389)" {
+        It "Should accept all 25 real CableProfileChoices values on Get-NBDCIMCable (#389)" {
             InModuleScope -ModuleName 'PowerNetbox' {
                 $script:NetboxConfig.ParsedVersion = [version]'4.5.7'
             }
@@ -198,7 +198,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
             }
         }
 
-        It "Should accept all 26 real CableProfileChoices values on Set-NBDCIMCable (#389)" {
+        It "Should accept all 25 real CableProfileChoices values on Set-NBDCIMCable (#389)" {
             InModuleScope -ModuleName 'PowerNetbox' {
                 $script:NetboxConfig.ParsedVersion = [version]'4.5.7'
             }
