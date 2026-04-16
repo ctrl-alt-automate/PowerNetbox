@@ -119,6 +119,10 @@ function Get-NBIPAMAddress {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
+
         Write-Verbose "Retrieving IPAM Address"
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {
