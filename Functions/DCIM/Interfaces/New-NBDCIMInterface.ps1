@@ -190,6 +190,9 @@ function New-NBDCIMInterface {
         [string]$MAC_Address,
 
         [Parameter(ParameterSetName = 'Single')]
+        [Int64]$Primary_MAC_Address,
+
+        [Parameter(ParameterSetName = 'Single')]
         [bool]$MGMT_Only,
 
         [Parameter(ParameterSetName = 'Single')]
