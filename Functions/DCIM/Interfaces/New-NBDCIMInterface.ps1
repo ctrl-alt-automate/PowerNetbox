@@ -29,6 +29,9 @@
 .PARAMETER MAC_Address
     The MAC address of the interface in format XX:XX:XX:XX:XX:XX.
 
+.PARAMETER Primary_MAC_Address
+    The Id of the primary MAC address of the interface. Use New-NBDCIPMACAddress to create a new MAC address or Get-NBDCIPMACAddress to retrieve existing MAC addresses Id.
+
 .PARAMETER MGMT_Only
     If true, this interface is used for management traffic only.
 
@@ -46,7 +49,48 @@
 
 .PARAMETER Tagged_VLANs
     Array of database IDs of VLAN objects for tagged VLANs.
-
+.PARAMETER Label
+    Physical label assigned to the interface.
+.PARAMETER WWN
+    World Wide Name for Fibre Channel interfaces in XX:XX:XX:XX:XX:XX format.
+.PARAMETER Parent
+    Name of the parent interface (for subinterfaces).
+.PARAMETER Bridge
+    Name of the bridge this interface belongs to.
+.PARAMETER Speed
+    Speed of the interface in Kbps (e.g., 100000 for 100Gbps).
+.PARAMETER Duplex
+    Duplex mode: 'full', 'half', or 'auto'.
+.PARAMETER Mark_Connected
+    If true, the interface will be marked as connected to another interface.
+.PARAMETER VDCS
+    VDC names separated by commas, encased with double quotes. Example: "vdc1,vdc2,vdc3"
+.PARAMETER POE_Mode
+    Power over Ethernet mode: 'PD', 'PSE'.
+.PARAMETER POE_Type
+    Power over Ethernet type: 'af', 'at', 'bt', 'Passive'.
+.PARAMETER Vlan_Group
+    Name of the VLAN group this interface belongs to.
+.PARAMETER QinQ_SVLAN
+    The VLAN ID (Filtered by the VLAN group) for QinQ Service VLAN.
+.PARAMETER VRF
+    Route distinguisher of the VRF this interface belongs to.
+.PARAMETER RF_Role
+    Wireless RF role: 'AP', 'Station'.
+.PARAMETER RF_Channel
+    Wireless RF channel number. Example:2.4g-1-2412-22
+.PARAMETER RF_Channel_Frequency
+    Wireless RF channel frequency in MHz.
+.PARAMETER RF_Channel_Width
+    Wireless RF channel width in MHz.
+.PARAMETER TX_Power
+    Wireless RF transmit power in dBm.
+.PARAMETER Tags
+    An array of tags to assign to the interface.
+.PARAMETER Owner
+    Name of the Object owner (user or team) to assign ownership of the interface.
+.PARAMETER Changelog_Message
+    A message to include in the changelog entry for this operation.
 .PARAMETER InputObject
     Pipeline input for bulk operations. Each object should contain
     the required properties: Device, Name, Type.
@@ -106,27 +150,61 @@ function New-NBDCIMInterface {
         [string]$Type,
 
         [Parameter(ParameterSetName = 'Single')]
+        [string]$Label,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [uint64]$Parent,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [uint64]$Bridge,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [uint64]$LAG,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [uint64]$Speed,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [ValidateSet('full', 'half', 'auto', IgnoreCase = $false)]
+        [string]$Duplex,
+
+        [Parameter(ParameterSetName = 'Single')]
         [bool]$Enabled,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [bool]$Mark_Connected,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [ValidatePattern('^([0-9a-fA-F]{2}:){7}[0-9a-fA-F]{2}$')]
+        [string]$WWN,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [string[]]$VDCS,
 
         [Parameter(ParameterSetName = 'Single')]
         [ValidateRange(1, 65535)]
         [uint16]$MTU,
 
         [Parameter(ParameterSetName = 'Single')]
-        [ValidatePattern('^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$')]
+        [ValidatePattern('^([0-9a-fA-F]{2}:){5}([0-9a-fA-F]{2})$')]
         [string]$MAC_Address,
 
         [Parameter(ParameterSetName = 'Single')]
         [bool]$MGMT_Only,
 
         [Parameter(ParameterSetName = 'Single')]
-        [uint64]$LAG,
-
-        [Parameter(ParameterSetName = 'Single')]
         [string]$Description,
 
         [Parameter(ParameterSetName = 'Single')]
-        [ValidateSet('Access', 'Tagged', 'Tagged All', '100', '200', '300', IgnoreCase = $true)]
+        [ValidateSet('pd', 'pse', IgnoreCase = $false)]
+        [string]$POE_Mode,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [ValidateSet('type1-ieee802.3af', 'type2-ieee802.3at', 'type3-ieee802.3bt', 'type4-ieee802.3bt', 'passive-24v-2pair', 'passive-24v-4pair', 'passive-48v-2pair', 'passive-48v-4pair', IgnoreCase = $true)]
+        [string]$POE_Type,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [ValidateSet('access', 'tagged', 'tagged-all', 'q-in-q','100','200','300', IgnoreCase = $true)]
         [string]$Mode,
 
         [Parameter(ParameterSetName = 'Single')]
@@ -134,6 +212,36 @@ function New-NBDCIMInterface {
 
         [Parameter(ParameterSetName = 'Single')]
         [uint64[]]$Tagged_VLANs,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [uint64]$QinQ_SVLAN,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [string]$VRF,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [ValidateSet('ap', 'station', IgnoreCase = $false)]
+        [string]$RF_Role,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [string]$RF_Channel,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [ValidateRange(1, 1000000)]
+        [int]$RF_Channel_Frequency,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [ValidateRange(1, 10000)]
+        [int]$RF_Channel_Width,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [int]$TX_Power,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [string]$Changelog_Message,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [Int64]$Owner,
 
         # Bulk mode parameters
         [Parameter(ParameterSetName = 'Bulk', Mandatory = $true, ValueFromPipeline = $true)]
@@ -169,10 +277,11 @@ function New-NBDCIMInterface {
             if (-not [System.String]::IsNullOrWhiteSpace($Mode)) {
                 $PSBoundParameters.Mode = switch ($Mode) {
                     'Access' { 'access' }
-                    '100' { 'access' }
                     'Tagged' { 'tagged' }
-                    '200' { 'tagged' }
                     'Tagged All' { 'tagged-all' }
+                    'Q-in-Q' { 'q-in-q' }
+                    '100' { 'access' }
+                    '200' { 'tagged' }
                     '300' { 'tagged-all' }
                     default { $_ }
                 }
