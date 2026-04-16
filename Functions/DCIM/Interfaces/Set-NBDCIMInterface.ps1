@@ -61,6 +61,8 @@ function Set-NBDCIMInterface {
 
         [string]$MAC_Address,
 
+        [Nullable[UInt64]]$Primary_MAC_Address,
+
         [bool]$MGMT_Only,
 
         [string]$Description,
@@ -73,9 +75,11 @@ function Set-NBDCIMInterface {
         [AllowEmptyString()]
         [string]$POE_Type,
 
-        [ValidateSet('access', 'tagged', 'tagged-all', 'q-in-q','100','200','300','', IgnoreCase = $true)]
+        [ValidateSet('access', 'tagged', 'tagged-all', 'q-in-q','100','200','300','', IgnoreCase = $false)]
         [AllowEmptyString()]
         [string]$Mode,
+
+        [string]$Vlan_Group,
 
         [Nullable[uint64]]$Untagged_VLAN,
 

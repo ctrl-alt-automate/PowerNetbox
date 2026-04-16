@@ -52,11 +52,11 @@
 .PARAMETER Label
     Physical label assigned to the interface.
 .PARAMETER WWN
-    World Wide Name for Fibre Channel interfaces in XX:XX:XX:XX:XX:XX format.
+    World Wide Name for Fibre Channel interfaces in XX:XX:XX:XX:XX:XX:XX:XX format.
 .PARAMETER Parent
-    Name of the parent interface (for subinterfaces).
+    Id of the parent interface (for subinterfaces).
 .PARAMETER Bridge
-    Name of the bridge this interface belongs to.
+    Id of the bridge this interface belongs to.
 .PARAMETER Speed
     Speed of the interface in Kbps (e.g., 100000 for 100Gbps).
 .PARAMETER Duplex
@@ -88,7 +88,7 @@
 .PARAMETER Tags
     An array of tags to assign to the interface.
 .PARAMETER Owner
-    Name of the Object owner (user or team) to assign ownership of the interface.
+    Id of the Object owner (user or team) to assign ownership of the interface.
 .PARAMETER Changelog_Message
     A message to include in the changelog entry for this operation.
 .PARAMETER InputObject
@@ -190,6 +190,9 @@ function New-NBDCIMInterface {
         [string]$MAC_Address,
 
         [Parameter(ParameterSetName = 'Single')]
+        [UInt64]$Primary_MAC_Address,
+
+        [Parameter(ParameterSetName = 'Single')]
         [bool]$MGMT_Only,
 
         [Parameter(ParameterSetName = 'Single')]
@@ -206,6 +209,9 @@ function New-NBDCIMInterface {
         [Parameter(ParameterSetName = 'Single')]
         [ValidateSet('access', 'tagged', 'tagged-all', 'q-in-q','100','200','300', IgnoreCase = $true)]
         [string]$Mode,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [string]$Vlan_Group,
 
         [Parameter(ParameterSetName = 'Single')]
         [uint64]$Untagged_VLAN,
