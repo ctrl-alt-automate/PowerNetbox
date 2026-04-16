@@ -870,4 +870,97 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' {
             }
         }
     }
+
+    Context "AssertNBMutualExclusiveParam" {
+        It "Does not throw when zero parameters from the list are bound" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $bound = @{}
+                { AssertNBMutualExclusiveParam -BoundParameters $bound -Parameters 'Brief', 'Fields', 'Omit' } |
+                    Should -Not -Throw
+            }
+        }
+
+        It "Does not throw when exactly one parameter from the list is bound" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $bound = @{ Brief = $true }
+                { AssertNBMutualExclusiveParam -BoundParameters $bound -Parameters 'Brief', 'Fields', 'Omit' } |
+                    Should -Not -Throw
+            }
+        }
+
+        It "Throws ParameterBindingException when two parameters are bound" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $bound = @{ Brief = $true; Fields = @('id', 'name') }
+                { AssertNBMutualExclusiveParam -BoundParameters $bound -Parameters 'Brief', 'Fields', 'Omit' } |
+                    Should -Throw -ExceptionType ([System.Management.Automation.ParameterBindingException])
+            }
+        }
+
+        It "Throws with a message naming all conflicting parameters when three are bound" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $bound = @{ Brief = $true; Fields = @('id'); Omit = @('x') }
+                try {
+                    AssertNBMutualExclusiveParam -BoundParameters $bound -Parameters 'Brief', 'Fields', 'Omit'
+                    throw "Expected an exception but none was thrown"
+                } catch [System.Management.Automation.ParameterBindingException] {
+                    $_.Exception.Message | Should -Match '-Brief'
+                    $_.Exception.Message | Should -Match '-Fields'
+                    $_.Exception.Message | Should -Match '-Omit'
+                    $_.Exception.Message | Should -Match 'mutually exclusive'
+                }
+            }
+        }
+
+        It "Appends HelpHint to the exception message when supplied" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $bound = @{ Brief = $true; Fields = @('id') }
+                try {
+                    AssertNBMutualExclusiveParam -BoundParameters $bound -Parameters 'Brief', 'Fields', 'Omit' -HelpHint 'See Get-Help for alternatives.'
+                    throw "Expected an exception but none was thrown"
+                } catch [System.Management.Automation.ParameterBindingException] {
+                    $_.Exception.Message | Should -Match 'See Get-Help for alternatives\.'
+                }
+            }
+        }
+
+        It "Rejects calls with fewer than 2 parameter names via ValidateCount" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                { AssertNBMutualExclusiveParam -BoundParameters @{} -Parameters 'Brief' } |
+                    Should -Throw
+            }
+        }
+
+        It "Treats parameter names case-sensitively (matching PSBoundParameters semantics)" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $bound = @{ brief = $true; fields = @('id') }
+                { AssertNBMutualExclusiveParam -BoundParameters $bound -Parameters 'brief', 'fields' } |
+                    Should -Throw -ExceptionType ([System.Management.Automation.ParameterBindingException])
+            }
+        }
+
+        It "Accepts a generic Dictionary as BoundParameters" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $bound = [System.Collections.Generic.Dictionary[string, object]]::new()
+                $bound['Brief'] = $true
+                $bound['Fields'] = @('id')
+                { AssertNBMutualExclusiveParam -BoundParameters $bound -Parameters 'Brief', 'Fields', 'Omit' } |
+                    Should -Throw -ExceptionType ([System.Management.Automation.ParameterBindingException])
+            }
+        }
+
+        It "Does not throw for empty or null BoundParameters" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                { AssertNBMutualExclusiveParam -BoundParameters @{} -Parameters 'Brief', 'Fields', 'Omit' } |
+                    Should -Not -Throw
+            }
+        }
+
+        It "Ignores parameters outside the checked list" {
+            InModuleScope -ModuleName 'PowerNetbox' {
+                $bound = @{ Brief = $true; Limit = 10; Offset = 100 }
+                { AssertNBMutualExclusiveParam -BoundParameters $bound -Parameters 'Brief', 'Fields', 'Omit' } |
+                    Should -Not -Throw
+            }
+        }
+    }
 }
