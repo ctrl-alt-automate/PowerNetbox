@@ -161,16 +161,6 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             $Result.Uri | Should -Match 'fields=id(%2C|,)name(%2C|,)status(%2C|,)site.name'
         }
 
-        It "Should combine Brief with exclude config_context" {
-            # After the guard fix: -Brief does NOT inject omit=config_context because
-            # the server already controls the response shape in brief mode.
-            $Result = Get-NBDCIMDevice -Brief
-
-            $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Match 'brief=True'
-            $Result.Uri | Should -Not -Match 'omit=config_context'
-        }
-
         Context "Brief/Fields/Omit mutual exclusion" {
             It "Throws when -Brief and -Fields are both specified" {
                 { Get-NBDCIMDevice -Brief -Fields 'id' } |
@@ -203,12 +193,10 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
 
             It "With -Fields: URI contains the fields parameter and no config_context omit" {
                 $Result = Get-NBDCIMDevice -Fields 'id', 'name'
-                # Match 'fields=' separately from each value name — commas between
-                # values may be URL-encoded as %2C on some platforms but the field
-                # names themselves will appear literally.
-                $Result.Uri | Should -Match 'fields='
-                $Result.Uri | Should -Match 'id'
-                $Result.Uri | Should -Match 'name'
+                # Anchor field names to the fields= parameter to avoid false-positive
+                # matches elsewhere in the URI. Comma between values may be URL-encoded
+                # as %2C on some platforms (pattern matches both forms).
+                $Result.Uri | Should -Match 'fields=id(%2C|,)name'
                 $Result.Uri | Should -Not -Match 'omit=config_context'
             }
 
