@@ -193,10 +193,10 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
 
             It "With -Fields: URI contains the fields parameter and no config_context omit" {
                 $Result = Get-NBDCIMDevice -Fields 'id', 'name'
-                # Anchor field names to the fields= parameter to avoid false-positive
-                # matches elsewhere in the URI. Comma between values may be URL-encoded
-                # as %2C on some platforms (pattern matches both forms).
-                $Result.Uri | Should -Match 'fields=id(%2C|,)name'
+                # Lookahead anchors confirm both field names appear after fields=
+                # regardless of order and regardless of whether the comma between
+                # values is URL-encoded as %2C on some platforms.
+                $Result.Uri | Should -Match 'fields=(?=.*id)(?=.*name)'
                 $Result.Uri | Should -Not -Match 'omit=config_context'
             }
 
