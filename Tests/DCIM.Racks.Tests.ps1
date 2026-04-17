@@ -39,6 +39,13 @@ Describe "DCIM Racks Tests" -Tag 'DCIM', 'Racks' {
             $Result = Get-NBDCIMRack -Site_Id 1
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/racks/?site_id=1'
         }
+
+        Context "Status drift fix (#392 item 5)" {
+            It "Should accept -Status 'available'" {
+                $Result = Get-NBDCIMRack -Status 'available'
+                $Result.Uri | Should -Match 'status=available'
+            }
+        }
     }
 
     Context "New-NBDCIMRack" {
@@ -50,6 +57,13 @@ Describe "DCIM Racks Tests" -Tag 'DCIM', 'Racks' {
             $Result.Body | Should -Match '"name":"Rack01"'
             $Result.Body | Should -Match '"site":1'
         }
+
+        Context "Status drift fix (#392 item 5)" {
+            It "Should accept -Status 'available'" {
+                $Result = New-NBDCIMRack -Name 'rack' -Site 1 -Status 'available'
+                ($Result.Body | ConvertFrom-Json).status | Should -Be 'available'
+            }
+        }
     }
 
     Context "Set-NBDCIMRack" {
@@ -57,6 +71,13 @@ Describe "DCIM Racks Tests" -Tag 'DCIM', 'Racks' {
             $Result = Set-NBDCIMRack -Id 1 -Name 'UpdatedRack' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
             $Result.URI | Should -Be 'https://netbox.domain.com/api/dcim/racks/1/'
+        }
+
+        Context "Status drift fix (#392 item 5)" {
+            It "Should accept -Status 'available'" {
+                $Result = Set-NBDCIMRack -Id 1 -Status 'available' -Confirm:$false
+                ($Result.Body | ConvertFrom-Json).status | Should -Be 'available'
+            }
         }
     }
 

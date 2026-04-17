@@ -107,7 +107,7 @@ function Set-NBDCIMRack {
 
         [uint64]$Tenant,
 
-        [ValidateSet('active', 'planned', 'reserved', 'deprecated')]
+        [ValidateSet('active', 'planned', 'reserved', 'deprecated', 'available')]
         [string]$Status,
 
         [uint64]$Role,
