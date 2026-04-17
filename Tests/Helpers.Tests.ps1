@@ -926,11 +926,15 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' {
         It "Rejects calls with fewer than 2 parameter names via ValidateCount" {
             InModuleScope -ModuleName 'PowerNetbox' {
                 { AssertNBMutualExclusiveParam -BoundParameters @{} -Parameters 'Brief' } |
-                    Should -Throw
+                    Should -Throw -ExceptionType ([System.Management.Automation.ParameterBindingException])
             }
         }
 
-        It "Treats parameter names case-sensitively (matching PSBoundParameters semantics)" {
+        It "Works with lowercase parameter names when Parameters list also uses lowercase" {
+            # PSBoundParameters (and plain Hashtable) use OrdinalIgnoreCase comparisons,
+            # so key lookup is case-insensitive regardless of the dictionary-key casing.
+            # The helper delegates case behavior to the dictionary; when caller and
+            # dictionary agree on casing the comparison trivially succeeds.
             InModuleScope -ModuleName 'PowerNetbox' {
                 $bound = @{ brief = $true; fields = @('id') }
                 { AssertNBMutualExclusiveParam -BoundParameters $bound -Parameters 'brief', 'fields' } |
