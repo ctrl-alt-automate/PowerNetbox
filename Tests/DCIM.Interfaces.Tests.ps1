@@ -104,6 +104,23 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
             $Result = [pscustomobject]@{ 'Id' = 1234 } | Get-NBDCIMInterface
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/dcim/interfaces/1234/'
         }
+
+        Context "Get-NBDCIMInterface -Type drift fix (#392 item 2)" {
+            It "Accepts the newly-added 800gbase-x-qsfpdd type" {
+                $Result = Get-NBDCIMInterface -Type '800gbase-x-qsfpdd'
+                $Result.Uri | Should -Match 'type=800gbase-x-qsfpdd'
+            }
+
+            It "Accepts the newly-added 1.6tbase-kr8 type" {
+                $Result = Get-NBDCIMInterface -Type '1.6tbase-kr8'
+                $Result.Uri | Should -Match 'type=1\.6tbase-kr8'
+            }
+
+            It "Accepts the newly-added 200gbase-sr4 type" {
+                $Result = Get-NBDCIMInterface -Type '200gbase-sr4'
+                $Result.Uri | Should -Match 'type=200gbase-sr4'
+            }
+        }
     }
 
     Context "New-NBDCIMInterface" {
