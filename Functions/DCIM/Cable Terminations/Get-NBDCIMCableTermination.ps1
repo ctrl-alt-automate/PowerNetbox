@@ -31,6 +31,8 @@
 .EXAMPLE
     Get-NBDCIMCableTermination
 
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
@@ -78,6 +80,9 @@ function Get-NBDCIMCableTermination {
     #endregion Parameters
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving DCIM Cable Termination"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'cable-terminations'))
 

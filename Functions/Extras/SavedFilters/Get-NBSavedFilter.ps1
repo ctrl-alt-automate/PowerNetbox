@@ -61,6 +61,8 @@
 .EXAMPLE
     Get-NBSavedFilter
 
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
@@ -113,6 +115,9 @@ function Get-NBSavedFilter {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Saved Filter"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {

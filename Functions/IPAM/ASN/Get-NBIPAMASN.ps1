@@ -62,6 +62,8 @@ function Get-NBIPAMASN {
         Get-NBIPAMASN -ASN 65001
 
         Returns ASN 65001
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]
@@ -108,6 +110,9 @@ function Get-NBIPAMASN {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving IPAM ASN"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {

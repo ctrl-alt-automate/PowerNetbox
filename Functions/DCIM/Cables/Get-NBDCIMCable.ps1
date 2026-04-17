@@ -78,6 +78,8 @@
 .EXAMPLE
     Get-NBDCIMCable -Status 'connected' -Device_ID 5
 
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
@@ -177,6 +179,9 @@ function Get-NBDCIMCable {
     #endregion Parameters
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving DCIM Cable"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim', 'cables', $i)) -Raw:$Raw } }

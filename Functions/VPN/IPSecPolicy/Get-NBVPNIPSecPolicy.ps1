@@ -31,6 +31,8 @@
 .EXAMPLE
     Get-NBVPNIPSecPolicy
 
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
@@ -65,6 +67,9 @@ function Get-NBVPNIPSecPolicy {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving VPN IPSec Policy"
 
         switch ($PSCmdlet.ParameterSetName) {

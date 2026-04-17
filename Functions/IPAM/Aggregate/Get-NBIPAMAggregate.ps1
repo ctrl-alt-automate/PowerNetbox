@@ -31,6 +31,8 @@
 .EXAMPLE
     Get-NBIPAMAggregate
 
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
@@ -81,7 +83,11 @@ function Get-NBIPAMAggregate {
         [switch]$Raw
     )
 
-process {
+    process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
+
         Write-Verbose "Retrieving IPAM Aggregate"
 
         switch ($PSCmdlet.ParameterSetName) {

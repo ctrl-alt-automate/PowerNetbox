@@ -60,6 +60,8 @@ function Get-NBIPAMServiceTemplate {
         Get-NBIPAMServiceTemplate -Name "HTTP"
 
         Returns service templates matching the name "HTTP"
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]
@@ -104,6 +106,9 @@ function Get-NBIPAMServiceTemplate {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving IPAM Service Template"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {

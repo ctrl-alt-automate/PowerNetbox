@@ -31,6 +31,8 @@
 .EXAMPLE
     Get-NBDCIMDeviceBayTemplate
 
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
@@ -60,6 +62,9 @@ function Get-NBDCIMDeviceBayTemplate {
         [switch]$Raw
     )
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving DCIM Device Bay Template"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','device-bay-templates',$i)) -Raw:$Raw } }

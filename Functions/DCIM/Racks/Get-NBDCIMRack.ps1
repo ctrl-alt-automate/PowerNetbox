@@ -85,6 +85,8 @@ function Get-NBDCIMRack {
         Get-NBDCIMRack -Name "Rack-01"
 
         Returns racks matching the name "Rack-01"
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]
@@ -150,6 +152,9 @@ function Get-NBDCIMRack {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving DCIM Rack"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {

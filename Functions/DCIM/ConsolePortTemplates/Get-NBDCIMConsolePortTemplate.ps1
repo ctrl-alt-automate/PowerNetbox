@@ -31,6 +31,8 @@
 .EXAMPLE
     Get-NBDCIMConsolePortTemplate
 
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
@@ -62,6 +64,9 @@ function Get-NBDCIMConsolePortTemplate {
         [switch]$Raw
     )
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving DCIM Console Port Template"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','console-port-templates',$i)) -Raw:$Raw } }

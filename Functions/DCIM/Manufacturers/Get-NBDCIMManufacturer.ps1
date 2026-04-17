@@ -56,6 +56,8 @@ function Get-NBDCIMManufacturer {
         Get-NBDCIMManufacturer -Name "Cisco"
 
         Returns manufacturers matching the name "Cisco"
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]
@@ -96,6 +98,9 @@ function Get-NBDCIMManufacturer {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving DCIM Manufacturer"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {

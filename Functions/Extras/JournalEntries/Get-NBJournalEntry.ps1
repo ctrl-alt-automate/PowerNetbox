@@ -55,6 +55,8 @@
 .EXAMPLE
     Get-NBJournalEntry
 
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
@@ -102,6 +104,9 @@ function Get-NBJournalEntry {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Journal Entry"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {

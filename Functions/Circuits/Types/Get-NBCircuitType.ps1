@@ -31,6 +31,8 @@
 .EXAMPLE
     Get-NBCircuitType
 
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
@@ -72,6 +74,9 @@ function Get-NBCircuitType {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Circuit Type"
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {

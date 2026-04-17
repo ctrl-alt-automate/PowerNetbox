@@ -129,6 +129,38 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
                 $Result.Uri | Should -Match 'status=paused'
             }
         }
+
+        Context "Brief/Fields/Omit interaction with IncludeConfigContext (#397 PR-2)" {
+            It "With -Brief: URI contains brief=True and no config_context omit" {
+                $Result = Get-NBVirtualMachine -Brief
+                $Result.Uri | Should -Match 'brief=True'
+                $Result.Uri | Should -Not -Match 'omit=config_context'
+            }
+
+            It "With -Fields: URI contains the fields parameter and no config_context omit" {
+                $Result = Get-NBVirtualMachine -Fields 'id', 'name'
+                $Result.Uri | Should -Match 'fields=(?=.*id)(?=.*name)'
+                $Result.Uri | Should -Not -Match 'omit=config_context'
+            }
+
+            It "With -Omit: URI contains the user's omit value merged with config_context" {
+                $Result = Get-NBVirtualMachine -Omit 'comments'
+                $Result.Uri | Should -Match 'omit='
+                $Result.Uri | Should -Match 'comments'
+                $Result.Uri | Should -Match 'config_context'
+            }
+
+            It "With -IncludeConfigContext -Brief: URI contains brief=True only (IncludeConfigContext silently ignored)" {
+                $Result = Get-NBVirtualMachine -IncludeConfigContext -Brief
+                $Result.Uri | Should -Match 'brief=True'
+                $Result.Uri | Should -Not -Match 'config_context'
+            }
+
+            It "With no projection flags: URI contains the default config_context auto-omit" {
+                $Result = Get-NBVirtualMachine
+                $Result.Uri | Should -Match 'omit=config_context'
+            }
+        }
     }
 
     Context "Get-NBVirtualMachineInterface" {

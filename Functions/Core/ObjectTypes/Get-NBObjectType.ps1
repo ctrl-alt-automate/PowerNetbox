@@ -55,6 +55,8 @@
 .EXAMPLE
     Get-NBObjectType -App_Label "dcim"
 
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
@@ -95,6 +97,9 @@ function Get-NBObjectType {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Object Type"
 
         # Version-aware endpoint selection

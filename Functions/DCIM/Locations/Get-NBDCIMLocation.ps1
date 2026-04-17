@@ -77,6 +77,8 @@ function Get-NBDCIMLocation {
         Get-NBDCIMLocation -Name "Server Room"
 
         Returns locations matching the name "Server Room"
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]
@@ -133,6 +135,9 @@ function Get-NBDCIMLocation {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving DCIM Location"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {

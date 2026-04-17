@@ -1,0 +1,32 @@
+name: Filter-Exclusion Audit
+
+on:
+  push:
+    branches: [dev, main, master]
+    paths:
+      - 'Functions/**/Get-NB*.ps1'
+      - 'scripts/Verify-FilterExclusion.ps1'
+      - 'scripts/filter-exclusion-exemptions.txt'
+      - '.github/workflows/filter-exclusion.yml'
+  pull_request:
+    branches: [dev, main, master]
+    paths:
+      - 'Functions/**/Get-NB*.ps1'
+      - 'scripts/Verify-FilterExclusion.ps1'
+      - 'scripts/filter-exclusion-exemptions.txt'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: Filter-exclusion audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run auditor
+        shell: pwsh
+        run: ./scripts/Verify-FilterExclusion.ps1 -FailOnMismatch

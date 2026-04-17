@@ -61,6 +61,8 @@ function Get-NBTenant {
     .EXAMPLE
         PS C:\> Get-NBTenant
 
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]
@@ -111,6 +113,9 @@ function Get-NBTenant {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Tenant"
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {

@@ -60,6 +60,8 @@
     Get-NBChangeDiff -Branch_Id 1 | Where-Object { $_.conflicts }
     Get conflicting changes in branch.
 
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 .LINK
     Get-NBBranch
     Merge-NBBranch
@@ -102,6 +104,9 @@ function Get-NBChangeDiff {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Change Diff"
         CheckNetboxIsConnected
 

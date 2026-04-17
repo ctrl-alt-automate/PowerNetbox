@@ -66,6 +66,8 @@ function Get-NBIPAMService {
         Get-NBIPAMService -Protocol tcp -Port 443
 
         Returns TCP services on port 443
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]
@@ -116,6 +118,9 @@ function Get-NBIPAMService {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving IPAM Service"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {

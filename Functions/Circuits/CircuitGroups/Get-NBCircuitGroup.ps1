@@ -52,6 +52,8 @@
 .EXAMPLE
     Get-NBCircuitGroup -Id 1
 
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
@@ -92,6 +94,9 @@ function Get-NBCircuitGroup {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Circuit Group"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {

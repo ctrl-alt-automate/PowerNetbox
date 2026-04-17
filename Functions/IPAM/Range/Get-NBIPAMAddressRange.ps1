@@ -31,6 +31,8 @@
 .EXAMPLE
     Get-NBIPAMAddressRange
 
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
@@ -102,6 +104,9 @@ function Get-NBIPAMAddressRange {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving IPAM Address Range"
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {

@@ -60,6 +60,7 @@ function Get-NBContentType {
     .NOTES
         This function delegates to Get-NBObjectType.
         Backward compatible with Netbox 4.0+
+        The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]
@@ -99,6 +100,12 @@ function Get-NBContentType {
         [switch]$Raw
     )
 
-    # Delegate to Get-NBObjectType (the canonical function)
-    Get-NBObjectType @PSBoundParameters
+    process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
+
+        # Delegate to Get-NBObjectType (the canonical function)
+        Get-NBObjectType @PSBoundParameters
+    }
 }

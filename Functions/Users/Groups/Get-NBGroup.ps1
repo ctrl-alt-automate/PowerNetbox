@@ -46,6 +46,8 @@
 .EXAMPLE
     Get-NBGroup
 
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
@@ -83,6 +85,9 @@ function Get-NBGroup {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Group"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {

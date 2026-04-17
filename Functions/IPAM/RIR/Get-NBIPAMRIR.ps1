@@ -31,6 +31,8 @@
 .EXAMPLE
     Get-NBIPAMRIR
 
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
@@ -61,6 +63,9 @@ function Get-NBIPAMRIR {
         [switch]$Raw
     )
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving IPAM RIR"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
