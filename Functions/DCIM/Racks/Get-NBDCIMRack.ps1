@@ -150,6 +150,9 @@ function Get-NBDCIMRack {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving DCIM Rack"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {

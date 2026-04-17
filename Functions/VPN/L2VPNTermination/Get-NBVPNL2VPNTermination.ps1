@@ -65,6 +65,9 @@ function Get-NBVPNL2VPNTermination {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving VPN L2VPN Termination"
 
         switch ($PSCmdlet.ParameterSetName) {

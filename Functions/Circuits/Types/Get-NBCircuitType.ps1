@@ -72,6 +72,9 @@ function Get-NBCircuitType {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Circuit Type"
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {

@@ -102,6 +102,9 @@ function Get-NBChangeDiff {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Change Diff"
         CheckNetboxIsConnected
 

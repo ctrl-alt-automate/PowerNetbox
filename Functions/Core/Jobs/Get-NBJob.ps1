@@ -111,6 +111,9 @@ function Get-NBJob {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Job"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {

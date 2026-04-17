@@ -81,7 +81,11 @@ function Get-NBIPAMAggregate {
         [switch]$Raw
     )
 
-process {
+    process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
+
         Write-Verbose "Retrieving IPAM Aggregate"
 
         switch ($PSCmdlet.ParameterSetName) {

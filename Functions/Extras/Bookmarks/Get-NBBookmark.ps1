@@ -89,6 +89,9 @@ function Get-NBBookmark {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Bookmark"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {

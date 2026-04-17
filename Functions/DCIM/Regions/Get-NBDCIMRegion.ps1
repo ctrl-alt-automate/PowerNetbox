@@ -108,6 +108,9 @@ function Get-NBDCIMRegion {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving DCIM Region"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {

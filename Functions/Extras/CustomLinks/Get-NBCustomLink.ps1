@@ -89,6 +89,9 @@ function Get-NBCustomLink {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Custom Link"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {

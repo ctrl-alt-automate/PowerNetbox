@@ -89,6 +89,9 @@ function Get-NBDataFile {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Data File"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {

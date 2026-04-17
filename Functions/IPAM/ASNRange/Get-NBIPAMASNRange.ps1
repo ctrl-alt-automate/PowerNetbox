@@ -102,6 +102,9 @@ function Get-NBIPAMASNRange {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving IPAM ASN Range"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {

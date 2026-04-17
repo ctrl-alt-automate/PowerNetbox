@@ -102,6 +102,9 @@ function Get-NBJournalEntry {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Journal Entry"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {

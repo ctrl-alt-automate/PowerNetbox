@@ -107,6 +107,9 @@ function Get-NBPermission {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Permission"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {

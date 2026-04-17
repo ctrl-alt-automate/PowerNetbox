@@ -78,6 +78,9 @@ function Get-NBDCIMCableTermination {
     #endregion Parameters
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving DCIM Cable Termination"
         $Segments = [System.Collections.ArrayList]::new(@('dcim', 'cable-terminations'))
 

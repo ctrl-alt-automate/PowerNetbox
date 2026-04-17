@@ -92,6 +92,9 @@ function Get-NBCircuitGroup {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Circuit Group"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {

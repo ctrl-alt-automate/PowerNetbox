@@ -119,6 +119,9 @@ function Get-NBIPAMVRF {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving IPAM VRF"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {

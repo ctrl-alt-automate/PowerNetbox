@@ -68,6 +68,9 @@ function Get-NBVPNTunnelGroup {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving VPN Tunnel Group"
 
         switch ($PSCmdlet.ParameterSetName) {

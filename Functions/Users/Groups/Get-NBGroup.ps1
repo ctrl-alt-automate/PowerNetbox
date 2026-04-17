@@ -83,6 +83,9 @@ function Get-NBGroup {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Group"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {

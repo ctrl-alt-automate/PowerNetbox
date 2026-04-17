@@ -74,6 +74,9 @@ function Get-NBVPNL2VPN {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving VPN L2VPN"
 
         switch ($PSCmdlet.ParameterSetName) {

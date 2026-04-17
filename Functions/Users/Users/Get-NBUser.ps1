@@ -128,6 +128,9 @@ function Get-NBUser {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving User"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {

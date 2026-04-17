@@ -95,6 +95,9 @@ function Get-NBCustomField {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Custom Field"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {

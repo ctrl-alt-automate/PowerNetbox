@@ -85,6 +85,9 @@ function Get-NBCircuitTermination {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Circuit Termination"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {

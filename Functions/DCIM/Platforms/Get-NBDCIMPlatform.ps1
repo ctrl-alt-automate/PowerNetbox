@@ -75,6 +75,9 @@ function Get-NBDCIMPlatform {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving DCIM Platform"
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {

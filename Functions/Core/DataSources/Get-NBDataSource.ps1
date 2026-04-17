@@ -96,6 +96,9 @@ function Get-NBDataSource {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Data Source"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {

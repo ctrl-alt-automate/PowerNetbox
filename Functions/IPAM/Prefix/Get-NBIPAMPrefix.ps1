@@ -193,6 +193,9 @@ function Get-NBIPAMPrefix {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving IPAM Prefix"
 
         switch ($PSCmdlet.ParameterSetName) {

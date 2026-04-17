@@ -90,6 +90,9 @@ function Get-NBIPAMRole {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving IPAM Role"
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {

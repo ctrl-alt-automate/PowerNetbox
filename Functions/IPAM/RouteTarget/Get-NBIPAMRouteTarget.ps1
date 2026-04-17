@@ -115,6 +115,9 @@ function Get-NBIPAMRouteTarget {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving IPAM Route Target"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {

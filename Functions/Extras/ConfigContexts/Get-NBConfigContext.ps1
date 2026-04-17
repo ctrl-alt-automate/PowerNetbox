@@ -89,6 +89,9 @@ function Get-NBConfigContext {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Config Context"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {

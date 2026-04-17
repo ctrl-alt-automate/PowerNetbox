@@ -137,6 +137,9 @@ function Get-NBCircuit {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Circuit"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {

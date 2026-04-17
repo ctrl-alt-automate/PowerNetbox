@@ -88,6 +88,9 @@ function Get-NBBranchEvent {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Branch Event"
         CheckNetboxIsConnected
 

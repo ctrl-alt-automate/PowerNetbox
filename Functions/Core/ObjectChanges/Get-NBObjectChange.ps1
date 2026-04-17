@@ -111,6 +111,9 @@ function Get-NBObjectChange {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Object Change"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {

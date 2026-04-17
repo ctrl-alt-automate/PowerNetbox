@@ -95,6 +95,9 @@ function Get-NBObjectType {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Object Type"
 
         # Version-aware endpoint selection

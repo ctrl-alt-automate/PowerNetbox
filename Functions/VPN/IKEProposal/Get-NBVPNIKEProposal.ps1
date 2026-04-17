@@ -65,6 +65,9 @@ function Get-NBVPNIKEProposal {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving VPN IKE Proposal"
 
         switch ($PSCmdlet.ParameterSetName) {

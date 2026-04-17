@@ -96,6 +96,9 @@ function Get-NBDCIMManufacturer {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving DCIM Manufacturer"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {

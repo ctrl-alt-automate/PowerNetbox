@@ -89,6 +89,9 @@ function Get-NBVirtualCircuitType {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Virtual Circuit Type"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {

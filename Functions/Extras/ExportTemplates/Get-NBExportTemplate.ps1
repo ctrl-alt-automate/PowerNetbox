@@ -89,6 +89,9 @@ function Get-NBExportTemplate {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Export Template"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {

@@ -116,6 +116,9 @@ function Get-NBIPAMService {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving IPAM Service"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {

@@ -121,6 +121,9 @@ function Get-NBContact {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Contact"
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {

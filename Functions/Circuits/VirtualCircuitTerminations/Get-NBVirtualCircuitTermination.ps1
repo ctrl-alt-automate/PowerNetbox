@@ -96,6 +96,9 @@ function Get-NBVirtualCircuitTermination {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Virtual Circuit Termination"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {

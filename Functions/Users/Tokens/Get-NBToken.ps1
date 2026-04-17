@@ -95,6 +95,9 @@ function Get-NBToken {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Token"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {

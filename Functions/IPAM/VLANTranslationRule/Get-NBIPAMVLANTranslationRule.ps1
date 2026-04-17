@@ -60,6 +60,9 @@ function Get-NBIPAMVLANTranslationRule {
         [switch]$Raw
     )
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving IPAM VLAN Translation Rule"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {

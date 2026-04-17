@@ -104,6 +104,9 @@ function Get-NBOwner {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Owner"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {

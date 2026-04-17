@@ -64,6 +64,9 @@ function Get-NBIPAMVLANGroup {
         [switch]$Raw
     )
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving IPAM VLAN Group"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {

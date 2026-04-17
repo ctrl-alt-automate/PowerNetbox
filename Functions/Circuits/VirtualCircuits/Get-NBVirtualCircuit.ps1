@@ -119,6 +119,9 @@ function Get-NBVirtualCircuit {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Virtual Circuit"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {

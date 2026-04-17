@@ -68,6 +68,9 @@ function Get-NBVPNTunnelTermination {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving VPN Tunnel Termination"
 
         switch ($PSCmdlet.ParameterSetName) {

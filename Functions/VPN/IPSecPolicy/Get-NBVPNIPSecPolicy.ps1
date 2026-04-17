@@ -65,6 +65,9 @@ function Get-NBVPNIPSecPolicy {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving VPN IPSec Policy"
 
         switch ($PSCmdlet.ParameterSetName) {

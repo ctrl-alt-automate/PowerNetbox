@@ -61,6 +61,9 @@ function Get-NBIPAMFHRPGroupAssignment {
         [switch]$Raw
     )
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving IPAM FHRP Group Assignment"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {

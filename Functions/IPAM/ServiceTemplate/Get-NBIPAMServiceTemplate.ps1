@@ -104,6 +104,9 @@ function Get-NBIPAMServiceTemplate {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving IPAM Service Template"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {

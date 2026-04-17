@@ -99,6 +99,12 @@ function Get-NBContentType {
         [switch]$Raw
     )
 
-    # Delegate to Get-NBObjectType (the canonical function)
-    Get-NBObjectType @PSBoundParameters
+    process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
+
+        # Delegate to Get-NBObjectType (the canonical function)
+        Get-NBObjectType @PSBoundParameters
+    }
 }

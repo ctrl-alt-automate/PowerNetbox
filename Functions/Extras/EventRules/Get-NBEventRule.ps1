@@ -107,6 +107,9 @@ function Get-NBEventRule {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Event Rule"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {

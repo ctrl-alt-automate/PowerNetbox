@@ -108,6 +108,9 @@ function Get-NBIPAMASN {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving IPAM ASN"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {

@@ -111,6 +111,9 @@ function Get-NBIPAMVLAN {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving IPAM VLAN"
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {

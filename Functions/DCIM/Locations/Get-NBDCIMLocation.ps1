@@ -133,6 +133,9 @@ function Get-NBDCIMLocation {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving DCIM Location"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {

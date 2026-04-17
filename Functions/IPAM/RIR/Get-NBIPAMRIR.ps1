@@ -61,6 +61,9 @@ function Get-NBIPAMRIR {
         [switch]$Raw
     )
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving IPAM RIR"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {

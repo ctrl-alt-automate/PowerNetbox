@@ -89,6 +89,9 @@ function Get-NBCircuitProviderNetwork {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Circuit Provider Network"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {

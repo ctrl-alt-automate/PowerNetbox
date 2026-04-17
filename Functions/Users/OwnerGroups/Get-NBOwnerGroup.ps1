@@ -89,6 +89,9 @@ function Get-NBOwnerGroup {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Owner Group"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {

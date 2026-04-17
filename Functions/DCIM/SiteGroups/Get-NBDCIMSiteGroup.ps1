@@ -108,6 +108,9 @@ function Get-NBDCIMSiteGroup {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving DCIM Site Group"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {

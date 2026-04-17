@@ -92,6 +92,9 @@ function Get-NBContactRole {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Contact Role"
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {

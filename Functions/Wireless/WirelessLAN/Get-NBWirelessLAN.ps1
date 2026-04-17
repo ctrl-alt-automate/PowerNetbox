@@ -56,6 +56,9 @@ function Get-NBWirelessLAN {
         [uint16]$Limit,[ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,[switch]$Raw)
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Wireless LAN"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
