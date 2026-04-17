@@ -647,6 +647,33 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
                 ($Result.Body | ConvertFrom-Json).changelog_message | Should -Be 'Updated during maintenance'
             }
         }
+
+        Context "Set-NBDCIMInterface enum null-clearing (#398 follow-up)" {
+            It "Should send null when -Duplex '' is passed" {
+                $Result = Set-NBDCIMInterface -Id 42 -Duplex ''
+                $Result.Body | Should -Match '"duplex"\s*:\s*null'
+            }
+
+            It "Should send null when -POE_Mode '' is passed" {
+                $Result = Set-NBDCIMInterface -Id 42 -POE_Mode ''
+                $Result.Body | Should -Match '"poe_mode"\s*:\s*null'
+            }
+
+            It "Should send null when -POE_Type '' is passed" {
+                $Result = Set-NBDCIMInterface -Id 42 -POE_Type ''
+                $Result.Body | Should -Match '"poe_type"\s*:\s*null'
+            }
+
+            It "Should send null when -RF_Role '' is passed" {
+                $Result = Set-NBDCIMInterface -Id 42 -RF_Role ''
+                $Result.Body | Should -Match '"rf_role"\s*:\s*null'
+            }
+
+            It "Should send null when -Mode '' is passed" {
+                $Result = Set-NBDCIMInterface -Id 42 -Mode ''
+                $Result.Body | Should -Match '"mode"\s*:\s*null'
+            }
+        }
     }
 
     Context "Remove-NBDCIMInterface" {

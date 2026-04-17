@@ -158,7 +158,8 @@ function Set-NBDCIMInterface {
 
         [Nullable[uint64]]$Speed,
 
-        [ValidateSet('full', 'half', 'auto', IgnoreCase = $true)]
+        [AllowEmptyString()]
+        [ValidateSet('full', 'half', 'auto', '', IgnoreCase = $true)]
         [string]$Duplex,
 
         [bool]$Mark_Connected,
@@ -168,10 +169,12 @@ function Set-NBDCIMInterface {
 
         [uint64[]]$VDCS,
 
-        [ValidateSet('pd', 'pse', IgnoreCase = $true)]
+        [AllowEmptyString()]
+        [ValidateSet('pd', 'pse', '', IgnoreCase = $true)]
         [string]$POE_Mode,
 
-        [ValidateSet('type1-ieee802.3af', 'type2-ieee802.3at', 'type3-ieee802.3bt', 'type4-ieee802.3bt', 'passive-24v-2pair', 'passive-24v-4pair', 'passive-48v-2pair', 'passive-48v-4pair', IgnoreCase = $true)]
+        [AllowEmptyString()]
+        [ValidateSet('type1-ieee802.3af', 'type2-ieee802.3at', 'type3-ieee802.3bt', 'type4-ieee802.3bt', 'passive-24v-2pair', 'passive-24v-4pair', 'passive-48v-2pair', 'passive-48v-4pair', '', IgnoreCase = $true)]
         [string]$POE_Type,
 
         [uint64]$Vlan_Group,
@@ -180,7 +183,8 @@ function Set-NBDCIMInterface {
 
         [uint64]$VRF,
 
-        [ValidateSet('ap', 'station', IgnoreCase = $true)]
+        [AllowEmptyString()]
+        [ValidateSet('ap', 'station', '', IgnoreCase = $true)]
         [string]$RF_Role,
 
         [string]$RF_Channel,
@@ -207,7 +211,8 @@ function Set-NBDCIMInterface {
 
         [string]$Description,
 
-        [ValidateSet('Access', 'Tagged', 'Tagged All', 'Q-in-Q', 'q-in-q', '100', '200', '300', '400', IgnoreCase = $true)]
+        [AllowEmptyString()]
+        [ValidateSet('Access', 'Tagged', 'Tagged All', 'Q-in-Q', 'q-in-q', '100', '200', '300', '400', '', IgnoreCase = $true)]
         [string]$Mode,
 
         [uint64]$Untagged_VLAN,
@@ -274,6 +279,17 @@ function Set-NBDCIMInterface {
 
     process {
         Write-Verbose "Updating DCIM Interface"
+
+        # Translate empty-string sentinel to $null for the 5 clearable enum parameters.
+        # Users pass '' to clear a field server-side; BuildURIComponents +
+        # ConvertTo-Json emit "field": null on the wire, which NetBox PATCH accepts.
+        $clearableEnums = @('Duplex', 'POE_Mode', 'POE_Type', 'RF_Role', 'Mode')
+        foreach ($clearable in $clearableEnums) {
+            if ($PSBoundParameters.ContainsKey($clearable) -and $PSBoundParameters[$clearable] -eq '') {
+                $PSBoundParameters[$clearable] = $null
+            }
+        }
+
         foreach ($InterfaceId in $Id) {
 
             $Segments = [System.Collections.ArrayList]::new(@('dcim', 'interfaces', $InterfaceId))
