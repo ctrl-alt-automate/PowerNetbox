@@ -464,6 +464,157 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
             $bodyObj = $Result.Body | ConvertFrom-Json
             $bodyObj.untagged_vlan | Should -Be 14402
         }
+
+        Context "Set-NBDCIMInterface new parameters (#394)" {
+            It "Should pass -Label in PATCH body" {
+                $Result = Set-NBDCIMInterface -Id 42 -Label 'new-label'
+                ($Result.Body | ConvertFrom-Json).label | Should -Be 'new-label'
+            }
+
+            It "Should pass -Parent as numeric ID in PATCH body" {
+                $Result = Set-NBDCIMInterface -Id 42 -Parent 99
+                ($Result.Body | ConvertFrom-Json).parent | Should -Be 99
+            }
+
+            It "Should send null when -Parent is explicitly null" {
+                $Result = Set-NBDCIMInterface -Id 42 -Parent $null
+                $Result.Body | Should -Match '"parent"\s*:\s*null'
+            }
+
+            It "Should pass -Bridge as numeric ID" {
+                $Result = Set-NBDCIMInterface -Id 42 -Bridge 55
+                ($Result.Body | ConvertFrom-Json).bridge | Should -Be 55
+            }
+
+            It "Should send null when -Bridge is explicitly null" {
+                $Result = Set-NBDCIMInterface -Id 42 -Bridge $null
+                $Result.Body | Should -Match '"bridge"\s*:\s*null'
+            }
+
+            It "Should pass -Speed in Kbps" {
+                $Result = Set-NBDCIMInterface -Id 42 -Speed 10000000
+                ($Result.Body | ConvertFrom-Json).speed | Should -Be 10000000
+            }
+
+            It "Should send null when -Speed is explicitly null" {
+                $Result = Set-NBDCIMInterface -Id 42 -Speed $null
+                $Result.Body | Should -Match '"speed"\s*:\s*null'
+            }
+
+            It "Should pass -Duplex with valid value 'auto'" {
+                $Result = Set-NBDCIMInterface -Id 42 -Duplex 'auto'
+                ($Result.Body | ConvertFrom-Json).duplex | Should -Be 'auto'
+            }
+
+            It "Should reject -Duplex with invalid value" {
+                { Set-NBDCIMInterface -Id 42 -Duplex 'wrong' } | Should -Throw
+            }
+
+            It "Should pass -Mark_Connected as boolean" {
+                $Result = Set-NBDCIMInterface -Id 42 -Mark_Connected $true
+                ($Result.Body | ConvertFrom-Json).mark_connected | Should -Be $true
+            }
+
+            It "Should pass -WWN with valid format" {
+                $Result = Set-NBDCIMInterface -Id 42 -WWN 'aa:bb:cc:dd:ee:ff:00:11'
+                ($Result.Body | ConvertFrom-Json).wwn | Should -Be 'aa:bb:cc:dd:ee:ff:00:11'
+            }
+
+            It "Should pass -VDCS as array of integer IDs" {
+                $Result = Set-NBDCIMInterface -Id 42 -VDCS 10, 20
+                $body = $Result.Body | ConvertFrom-Json
+                $body.vdcs | Should -Contain 10
+                $body.vdcs | Should -Contain 20
+            }
+
+            It "Should pass -POE_Mode with valid value" {
+                $Result = Set-NBDCIMInterface -Id 42 -POE_Mode 'pse'
+                ($Result.Body | ConvertFrom-Json).poe_mode | Should -Be 'pse'
+            }
+
+            It "Should reject -POE_Mode with invalid value" {
+                { Set-NBDCIMInterface -Id 42 -POE_Mode 'invalid' } | Should -Throw
+            }
+
+            It "Should pass -POE_Type with valid value" {
+                $Result = Set-NBDCIMInterface -Id 42 -POE_Type 'type2-ieee802.3at'
+                ($Result.Body | ConvertFrom-Json).poe_type | Should -Be 'type2-ieee802.3at'
+            }
+
+            It "Should pass -Vlan_Group as numeric ID" {
+                $Result = Set-NBDCIMInterface -Id 42 -Vlan_Group 12
+                ($Result.Body | ConvertFrom-Json).vlan_group | Should -Be 12
+            }
+
+            It "Should pass -QinQ_SVLAN as numeric ID" {
+                $Result = Set-NBDCIMInterface -Id 42 -QinQ_SVLAN 300
+                ($Result.Body | ConvertFrom-Json).qinq_svlan | Should -Be 300
+            }
+
+            It "Should send null when -QinQ_SVLAN is explicitly null" {
+                $Result = Set-NBDCIMInterface -Id 42 -QinQ_SVLAN $null
+                $Result.Body | Should -Match '"qinq_svlan"\s*:\s*null'
+            }
+
+            It "Should pass -VRF as numeric ID" {
+                $Result = Set-NBDCIMInterface -Id 42 -VRF 8
+                ($Result.Body | ConvertFrom-Json).vrf | Should -Be 8
+            }
+
+            It "Should pass -RF_Role with valid value" {
+                $Result = Set-NBDCIMInterface -Id 42 -RF_Role 'station'
+                ($Result.Body | ConvertFrom-Json).rf_role | Should -Be 'station'
+            }
+
+            It "Should reject -RF_Role with invalid value" {
+                { Set-NBDCIMInterface -Id 42 -RF_Role 'not-a-role' } | Should -Throw
+            }
+
+            It "Should pass -RF_Channel as string" {
+                $Result = Set-NBDCIMInterface -Id 42 -RF_Channel '5g-36-5180-20'
+                ($Result.Body | ConvertFrom-Json).rf_channel | Should -Be '5g-36-5180-20'
+            }
+
+            It "Should pass -RF_Channel_Frequency as integer" {
+                $Result = Set-NBDCIMInterface -Id 42 -RF_Channel_Frequency 5180
+                ($Result.Body | ConvertFrom-Json).rf_channel_frequency | Should -Be 5180
+            }
+
+            It "Should send null when -RF_Channel_Frequency is explicitly null" {
+                $Result = Set-NBDCIMInterface -Id 42 -RF_Channel_Frequency $null
+                $Result.Body | Should -Match '"rf_channel_frequency"\s*:\s*null'
+            }
+
+            It "Should pass -RF_Channel_Width as integer" {
+                $Result = Set-NBDCIMInterface -Id 42 -RF_Channel_Width 80
+                ($Result.Body | ConvertFrom-Json).rf_channel_width | Should -Be 80
+            }
+
+            It "Should pass -TX_Power as integer" {
+                $Result = Set-NBDCIMInterface -Id 42 -TX_Power 17
+                ($Result.Body | ConvertFrom-Json).tx_power | Should -Be 17
+            }
+
+            It "Should pass -Primary_MAC_Address as numeric ID" {
+                $Result = Set-NBDCIMInterface -Id 42 -Primary_MAC_Address 999
+                ($Result.Body | ConvertFrom-Json).primary_mac_address | Should -Be 999
+            }
+
+            It "Should send null when -Primary_MAC_Address is explicitly null" {
+                $Result = Set-NBDCIMInterface -Id 42 -Primary_MAC_Address $null
+                $Result.Body | Should -Match '"primary_mac_address"\s*:\s*null'
+            }
+
+            It "Should pass -Owner as numeric ID" {
+                $Result = Set-NBDCIMInterface -Id 42 -Owner 3
+                ($Result.Body | ConvertFrom-Json).owner | Should -Be 3
+            }
+
+            It "Should pass -Changelog_Message as string" {
+                $Result = Set-NBDCIMInterface -Id 42 -Changelog_Message 'Updated during maintenance'
+                ($Result.Body | ConvertFrom-Json).changelog_message | Should -Be 'Updated during maintenance'
+            }
+        }
     }
 
     Context "Remove-NBDCIMInterface" {
