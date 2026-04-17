@@ -837,8 +837,8 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
     }
     #endregion
 
-    #region DCIM Interface Mode — Q-in-Q support
-    Context "DCIM Interface Mode — Q-in-Q support (#394)" {
+    #region DCIM Interface Mode - Q-in-Q support
+    Context "DCIM Interface Mode - Q-in-Q support (#394)" {
         It "New-NBDCIMInterface: -Mode 'q-in-q' passes through verbatim" {
             $Result = New-NBDCIMInterface -Device 1 -Name 'eth0' -Type '1000base-t' -Mode 'q-in-q'
             ($Result.Body | ConvertFrom-Json).mode | Should -Be 'q-in-q'
