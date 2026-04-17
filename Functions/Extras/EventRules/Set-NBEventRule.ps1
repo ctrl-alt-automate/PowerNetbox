@@ -84,7 +84,7 @@ function Set-NBEventRule {
 
         [bool]$Type_Job_End,
 
-        [ValidateSet('webhook', 'script')]
+        [ValidateSet('webhook', 'script', 'notification')]
         [string]$Action_Type,
 
         [string]$Action_Object_Type,
