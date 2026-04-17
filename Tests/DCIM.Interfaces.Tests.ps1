@@ -610,6 +610,21 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
                 ($Result.Body | ConvertFrom-Json).owner | Should -Be 3
             }
 
+            It "Should send null when -Owner is explicitly null" {
+                $Result = Set-NBDCIMInterface -Id 42 -Owner $null
+                $Result.Body | Should -Match '"owner"\s*:\s*null'
+            }
+
+            It "Should send null when -RF_Channel_Width is explicitly null" {
+                $Result = Set-NBDCIMInterface -Id 42 -RF_Channel_Width $null
+                $Result.Body | Should -Match '"rf_channel_width"\s*:\s*null'
+            }
+
+            It "Should send null when -TX_Power is explicitly null" {
+                $Result = Set-NBDCIMInterface -Id 42 -TX_Power $null
+                $Result.Body | Should -Match '"tx_power"\s*:\s*null'
+            }
+
             It "Should pass -Changelog_Message as string" {
                 $Result = Set-NBDCIMInterface -Id 42 -Changelog_Message 'Updated during maintenance'
                 ($Result.Body | ConvertFrom-Json).changelog_message | Should -Be 'Updated during maintenance'
