@@ -585,6 +585,13 @@ Describe "Extras Module Tests" -Tag 'Extras' {
             $bodyObj = $Result.Body | ConvertFrom-Json
             $bodyObj.name | Should -Be 'Site Alert'
         }
+
+        Context "Action_Type drift fix (#392 item 6)" {
+            It "Should accept -Action_Type 'notification'" {
+                $Result = New-NBEventRule -Name 'rule' -Object_Types 'dcim.device' -Action_Type 'notification' -Action_Object_Id 1
+                ($Result.Body | ConvertFrom-Json).action_type | Should -Be 'notification'
+            }
+        }
     }
 
     Context "Set-NBEventRule" {
@@ -592,6 +599,13 @@ Describe "Extras Module Tests" -Tag 'Extras' {
             $Result = Set-NBEventRule -Id 1 -Name 'Updated Rule' -Confirm:$false
             $Result.Method | Should -Be 'PATCH'
             $Result.URI | Should -Match '/api/extras/event.rules/1/'
+        }
+
+        Context "Action_Type drift fix (#392 item 6)" {
+            It "Should accept -Action_Type 'notification'" {
+                $Result = Set-NBEventRule -Id 1 -Action_Type 'notification' -Confirm:$false
+                ($Result.Body | ConvertFrom-Json).action_type | Should -Be 'notification'
+            }
         }
     }
 

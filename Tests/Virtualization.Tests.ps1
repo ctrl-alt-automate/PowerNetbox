@@ -122,6 +122,13 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
             $Result.Method | Should -Be 'GET'
             $Result.Uri | Should -Match 'fields=id(%2C|,)name(%2C|,)status(%2C|,)site.name'
         }
+
+        Context "Status drift fix (#392 item 4)" {
+            It "Should accept -Status 'paused'" {
+                $Result = Get-NBVirtualMachine -Status 'paused'
+                $Result.Uri | Should -Match 'status=paused'
+            }
+        }
     }
 
     Context "Get-NBVirtualMachineInterface" {
@@ -311,6 +318,13 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
             $bodyObj.enabled | Should -Be $true
         }
 
+        Context "Mode drift fix (#392 item 7)" {
+            It "Should accept -Mode 'q-in-q'" {
+                $Result = New-NBVirtualMachineInterface -Virtual_Machine 1 -Name 'eth0' -Mode 'q-in-q'
+                ($Result.Body | ConvertFrom-Json).mode | Should -Be 'q-in-q'
+            }
+        }
+
         It "Should add an interface with a MAC, MTU, and Description" {
             $Result = New-NBVirtualMachineInterface -Name 'Ethernet0' -Virtual_Machine 10 -Mac_Address '11:22:33:44:55:66' -MTU 1500 -Description "Test description"
             $Result.Method | Should -Be 'POST'
@@ -323,6 +337,13 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
             $bodyObj.mtu | Should -Be 1500
             $bodyObj.description | Should -Be "Test description"
             $bodyObj.enabled | Should -Be $true
+        }
+
+        Context "Status drift fix (#392 item 4)" {
+            It "Should accept -Status 'paused'" {
+                $Result = New-NBVirtualMachine -Name 'vm' -Status 'paused' -Cluster 1
+                ($Result.Body | ConvertFrom-Json).status | Should -Be 'paused'
+            }
         }
     }
 
@@ -361,6 +382,13 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
             $Result = Set-NBVirtualMachine -Id 1234 -Start_On_Boot 'off' -Confirm:$false
             $bodyObj = $Result.Body | ConvertFrom-Json
             $bodyObj.start_on_boot | Should -Be 'off'
+        }
+
+        Context "Status drift fix (#392 item 4)" {
+            It "Should accept -Status 'paused'" {
+                $Result = Set-NBVirtualMachine -Id 1 -Status 'paused' -Confirm:$false
+                ($Result.Body | ConvertFrom-Json).status | Should -Be 'paused'
+            }
         }
     }
 

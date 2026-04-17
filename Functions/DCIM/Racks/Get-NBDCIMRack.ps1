@@ -125,7 +125,7 @@ function Get-NBDCIMRack {
         [uint64]$Tenant_Id,
 
         [Parameter(ParameterSetName = 'Query')]
-        [ValidateSet('active', 'planned', 'reserved', 'deprecated')]
+        [ValidateSet('active', 'planned', 'reserved', 'deprecated', 'available')]
         [string]$Status,
 
         [Parameter(ParameterSetName = 'Query')]

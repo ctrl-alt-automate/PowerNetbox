@@ -25,7 +25,7 @@ function Set-NBVPNTunnel {
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][uint64]$Id,
         [string]$Name,
         [ValidateSet('active', 'planned', 'disabled')][string]$Status,
-        [ValidateSet('ipsec-transport', 'ipsec-tunnel', 'ip-ip', 'gre')][string]$Encapsulation,
+        [ValidateSet('ipsec-transport', 'ipsec-tunnel', 'ip-ip', 'gre', 'l2tp', 'openvpn', 'pptp', 'wireguard')][string]$Encapsulation,
         [uint64]$Group,
         [uint64]$IPSec_Profile,
         [uint64]$Tenant,

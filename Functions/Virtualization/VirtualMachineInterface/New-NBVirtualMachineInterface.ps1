@@ -124,7 +124,7 @@ function New-NBVirtualMachineInterface {
         [string]$Description,
 
         [Parameter(ParameterSetName = 'Single')]
-        [ValidateSet('access', 'tagged', 'tagged-all', IgnoreCase = $true)]
+        [ValidateSet('access', 'tagged', 'tagged-all', 'q-in-q', IgnoreCase = $true)]
         [string]$Mode,
 
         [Parameter(ParameterSetName = 'Single')]

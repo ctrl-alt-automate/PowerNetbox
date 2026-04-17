@@ -115,7 +115,7 @@ function New-NBVirtualMachine {
         [uint64]$Tenant,
 
         [Parameter(ParameterSetName = 'Single')]
-        [ValidateSet('offline', 'active', 'planned', 'staged', 'failed', 'decommissioning', IgnoreCase = $true)]
+        [ValidateSet('offline', 'active', 'planned', 'staged', 'failed', 'decommissioning', 'paused', IgnoreCase = $true)]
         [string]$Status = 'active',
 
         [Parameter(ParameterSetName = 'Single')]
