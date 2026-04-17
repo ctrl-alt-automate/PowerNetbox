@@ -143,7 +143,7 @@ function Get-NBVirtualMachine {
         [uint64[]]$Id,
 
         [Parameter(ParameterSetName = 'Query')]
-        [ValidateSet('offline', 'active', 'planned', 'staged', 'failed', 'decommissioning', IgnoreCase = $true)]
+        [ValidateSet('offline', 'active', 'planned', 'staged', 'failed', 'decommissioning', 'paused', IgnoreCase = $true)]
         [string]$Status,
 
         [Parameter(ParameterSetName = 'Query')]
