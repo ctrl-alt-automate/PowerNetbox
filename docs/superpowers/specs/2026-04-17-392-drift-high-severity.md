@@ -20,11 +20,11 @@ All 6 fixes are **strictly expansive**: add new values to existing ValidateSets,
 | # | Function(s) | Parameter | Current values | Values to add |
 |---|---|---|---|---|
 | 1 | `New/Set-NBVPNTunnel` | `-Encapsulation` | `ipsec-transport, ipsec-tunnel, ip-ip, gre` | `l2tp, openvpn, pptp, wireguard` |
-| 2 | `New-NBVPNIKEProposal` | `-Authentication_Method` | `preshared-keys, certificates` | `rsa-signatures, dsa-signatures` |
-| 3 | `Get/New/Set-NBVirtualMachine` | `-Status` | `offline, active, planned, staged, failed, decommissioning` | `paused` |
-| 4 | `Get/New/Set-NBDCIMRack` | `-Status` | `active, planned, reserved, deprecated` | `available` |
-| 5 | `New/Set-NBEventRule` | `-Action_Type` | `webhook, script` | `notification` |
-| 6 | `New-NBVirtualMachineInterface` | `-Mode` | `access, tagged, tagged-all` | `q-in-q` |
+| 3 | `New-NBVPNIKEProposal` | `-Authentication_Method` | `preshared-keys, certificates` | `rsa-signatures, dsa-signatures` |
+| 4 | `Get/New/Set-NBVirtualMachine` | `-Status` | `offline, active, planned, staged, failed, decommissioning` | `paused` |
+| 5 | `Get/New/Set-NBDCIMRack` | `-Status` | `active, planned, reserved, deprecated` | `available` |
+| 6 | `New/Set-NBEventRule` | `-Action_Type` | `webhook, script` | `notification` |
+| 7 | `New-NBVirtualMachineInterface` | `-Mode` | `access, tagged, tagged-all` | `q-in-q` |
 
 Total: **12 production files modified** (2 + 1 + 3 + 3 + 2 + 1) + test file updates.
 
@@ -48,13 +48,13 @@ Total: **12 production files modified** (2 + 1 + 3 + 3 + 2 + 1) + test file upda
 ### Parity tool target
 
 Pre-PR: parity tool reports 17 actionable findings.
-Post-merge: should report **11 findings** (6 closed):
-- VPN/Tunnel/{New,Set}-NBVPNTunnel.ps1 :: -Encapsulation → removed from findings
-- VPN/IKEProposal/New-NBVPNIKEProposal.ps1 :: -Authentication_Method → removed
-- Virtualization/VirtualMachine/{Get,New,Set}-NBVirtualMachine.ps1 :: -Status → removed
-- DCIM/Racks/{Get,New,Set}-NBDCIMRack.ps1 :: -Status → removed
-- Extras/EventRules/{New,Set}-NBEventRule.ps1 :: -Action_Type → removed
-- Virtualization/VirtualMachineInterface/New-NBVirtualMachineInterface.ps1 :: -Mode → removed
+Post-merge: should report **5 findings** (12 per-function entries closed across 6 issue items):
+- VPN/Tunnel/{New,Set}-NBVPNTunnel.ps1 :: -Encapsulation → 2 entries removed
+- VPN/IKEProposal/New-NBVPNIKEProposal.ps1 :: -Authentication_Method → 1 entry removed
+- Virtualization/VirtualMachine/{Get,New,Set}-NBVirtualMachine.ps1 :: -Status → 3 entries removed
+- DCIM/Racks/{Get,New,Set}-NBDCIMRack.ps1 :: -Status → 3 entries removed
+- Extras/EventRules/{New,Set}-NBEventRule.ps1 :: -Action_Type → 2 entries removed
+- Virtualization/VirtualMachineInterface/New-NBVirtualMachineInterface.ps1 :: -Mode → 1 entry removed
 
 ## Architecture
 
@@ -102,7 +102,7 @@ One test per new value × function that accepts that parameter:
 
 1. `Invoke-Pester ./Tests/` filtered to affected files → all green
 2. Full unit regression excluding Integration/Live/Scenario → 2261 baseline + 19 = 2280, zero failures
-3. `pwsh -NoProfile -File ./scripts/Verify-ValidateSetParity.ps1 -NetboxVersion v4.5.8` → 17 → 11 findings
+3. `pwsh -NoProfile -File ./scripts/Verify-ValidateSetParity.ps1 -NetboxVersion v4.5.8` → 17 → 5 findings
 4. PSScriptAnalyzer on 12 changed production files → zero new findings
 
 ## Release impact

@@ -41,7 +41,7 @@ Record the pass count — the final pass count after all 6 commits should equal 
 pwsh -NoProfile -File ./scripts/Verify-ValidateSetParity.ps1 -NetboxVersion v4.5.8 2>&1 | tail -3
 ```
 
-Expected: `Summary: 17 parameter(s) need attention.` Post-PR, this must be 11.
+Expected: `Summary: 17 parameter(s) need attention.` Post-PR, this must be 5 (the 6 fixes each close multiple per-function entries: 2 + 1 + 3 + 3 + 2 + 1 = 12 closed).
 
 - [ ] **Step 4: Restore build artifact**
 
@@ -195,11 +195,11 @@ Find the closing `}` of `Context "New-NBVPNIKEProposal"` and append inside it:
 ```powershell
 Context "Authentication_Method drift fix (#392 item 3)" {
     It "Should accept -Authentication_Method 'rsa-signatures'" {
-        $Result = New-NBVPNIKEProposal -Name 'prop' -Authentication_Method 'rsa-signatures' -Encryption_Algorithm 'aes-256-cbc' -Authentication_Algorithm 'sha256' -Group 14
+        $Result = New-NBVPNIKEProposal -Name 'prop' -Authentication_Method 'rsa-signatures' -Encryption_Algorithm 'aes-256-cbc' -Authentication_Algorithm 'hmac-sha256' -Group 14
         ($Result.Body | ConvertFrom-Json).authentication_method | Should -Be 'rsa-signatures'
     }
     It "Should accept -Authentication_Method 'dsa-signatures'" {
-        $Result = New-NBVPNIKEProposal -Name 'prop' -Authentication_Method 'dsa-signatures' -Encryption_Algorithm 'aes-256-cbc' -Authentication_Algorithm 'sha256' -Group 14
+        $Result = New-NBVPNIKEProposal -Name 'prop' -Authentication_Method 'dsa-signatures' -Encryption_Algorithm 'aes-256-cbc' -Authentication_Algorithm 'hmac-sha256' -Group 14
         ($Result.Body | ConvertFrom-Json).authentication_method | Should -Be 'dsa-signatures'
     }
 }
@@ -583,7 +583,7 @@ Expected: 2261 baseline (post-4.5.8.0 on dev) + 19 new = 2280 passed, 0 failed.
 pwsh -NoProfile -File ./scripts/Verify-ValidateSetParity.ps1 -NetboxVersion v4.5.8 2>&1 | tail -3
 ```
 
-Expected: `Summary: 11 parameter(s) need attention.` (Was 17 at start; 6 items closed.)
+Expected: `Summary: 5 parameter(s) need attention.` (Was 17 at start; 12 per-function entries closed across 6 issue items.)
 
 - [ ] **Step 3: PSScriptAnalyzer on 12 changed production files**
 
