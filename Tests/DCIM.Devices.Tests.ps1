@@ -161,12 +161,62 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             $Result.Uri | Should -Match 'fields=id(%2C|,)name(%2C|,)status(%2C|,)site.name'
         }
 
-        It "Should combine Brief with exclude config_context" {
-            $Result = Get-NBDCIMDevice -Brief
+        Context "Brief/Fields/Omit mutual exclusion" {
+            It "Throws when -Brief and -Fields are both specified" {
+                { Get-NBDCIMDevice -Brief -Fields 'id' } |
+                    Should -Throw -ExceptionType ([System.Management.Automation.ParameterBindingException])
+            }
 
-            $Result.Method | Should -Be 'GET'
-            $Result.Uri | Should -Match 'brief=True'
-            $Result.Uri | Should -Match 'omit=config_context'
+            It "Throws when -Brief and -Omit are both specified" {
+                { Get-NBDCIMDevice -Brief -Omit 'comments' } |
+                    Should -Throw -ExceptionType ([System.Management.Automation.ParameterBindingException])
+            }
+
+            It "Throws when -Fields and -Omit are both specified" {
+                { Get-NBDCIMDevice -Fields 'id' -Omit 'comments' } |
+                    Should -Throw -ExceptionType ([System.Management.Automation.ParameterBindingException])
+            }
+
+            It "Does not throw when -Brief is specified alone (control)" {
+                $Result = Get-NBDCIMDevice -Brief
+                $Result.Method | Should -Be 'GET'
+                $Result.Uri | Should -Match 'brief=True'
+            }
+        }
+
+        Context "Brief/Fields/Omit interaction with IncludeConfigContext" {
+            It "With -Brief: URI contains brief=True and no config_context omit" {
+                $Result = Get-NBDCIMDevice -Brief
+                $Result.Uri | Should -Match 'brief=True'
+                $Result.Uri | Should -Not -Match 'omit=config_context'
+            }
+
+            It "With -Fields: URI contains the fields parameter and no config_context omit" {
+                $Result = Get-NBDCIMDevice -Fields 'id', 'name'
+                # Lookahead anchors confirm both field names appear after fields=
+                # regardless of order and regardless of whether the comma between
+                # values is URL-encoded as %2C on some platforms.
+                $Result.Uri | Should -Match 'fields=(?=.*id)(?=.*name)'
+                $Result.Uri | Should -Not -Match 'omit=config_context'
+            }
+
+            It "With -Omit: URI contains the user's omit value merged with config_context" {
+                $Result = Get-NBDCIMDevice -Omit 'comments'
+                $Result.Uri | Should -Match 'omit='
+                $Result.Uri | Should -Match 'comments'
+                $Result.Uri | Should -Match 'config_context'
+            }
+
+            It "With -IncludeConfigContext -Brief: URI contains brief=True only (IncludeConfigContext silently ignored)" {
+                $Result = Get-NBDCIMDevice -IncludeConfigContext -Brief
+                $Result.Uri | Should -Match 'brief=True'
+                $Result.Uri | Should -Not -Match 'config_context'
+            }
+
+            It "With no projection flags: URI contains the default config_context auto-omit" {
+                $Result = Get-NBDCIMDevice
+                $Result.Uri | Should -Match 'omit=config_context'
+            }
         }
     }
 

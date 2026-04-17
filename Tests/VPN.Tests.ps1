@@ -60,6 +60,29 @@ Describe "VPN Module Tests" -Tag 'VPN' {
             $Result.Uri | Should -Match 'limit=10'
             $Result.Uri | Should -Match 'offset=20'
         }
+
+        Context "Brief/Fields/Omit mutual exclusion" {
+            It "Throws when -Brief and -Fields are both specified" {
+                { Get-NBVPNTunnel -Brief -Fields 'id' } |
+                    Should -Throw -ExceptionType ([System.Management.Automation.ParameterBindingException])
+            }
+
+            It "Throws when -Brief and -Omit are both specified" {
+                { Get-NBVPNTunnel -Brief -Omit 'comments' } |
+                    Should -Throw -ExceptionType ([System.Management.Automation.ParameterBindingException])
+            }
+
+            It "Throws when -Fields and -Omit are both specified" {
+                { Get-NBVPNTunnel -Fields 'id' -Omit 'comments' } |
+                    Should -Throw -ExceptionType ([System.Management.Automation.ParameterBindingException])
+            }
+
+            It "Does not throw when -Brief is specified alone (control)" {
+                $Result = Get-NBVPNTunnel -Brief
+                $Result.Method | Should -Be 'GET'
+                $Result.Uri | Should -Match 'brief=True'
+            }
+        }
     }
 
     Context "New-NBVPNTunnel" {

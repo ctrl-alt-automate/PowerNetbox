@@ -64,6 +64,10 @@ function Get-NBVPNTunnel {
         [switch]$Raw
     )
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
+
         Write-Verbose "Retrieving VPN Tunnel"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
