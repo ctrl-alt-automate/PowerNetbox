@@ -193,12 +193,14 @@ function Get-FilterExclusionFinding {
     }
 }
 
+# Hoist repo-root calculation out of the per-file loop (invariant across iterations)
+$repoRoot = Split-Path -Parent (Split-Path -Parent $PSCommandPath)
+
 # Collect findings across all Get-NB* files
 $allFindings = @()
 $targetFiles = Get-ChildItem -Path $Path -Recurse -Filter 'Get-NB*.ps1' -File
 foreach ($file in $targetFiles) {
     # Normalise path for exemption match (relative to repo root with forward slashes)
-    $repoRoot = Split-Path -Parent (Split-Path -Parent $PSCommandPath)
     $relativePath = [System.IO.Path]::GetRelativePath($repoRoot, $file.FullName).Replace('\', '/')
     if ($relativePath -in $exemptions) {
         continue
@@ -220,7 +222,6 @@ switch ($OutputFormat) {
             $allFindings | Format-Table -AutoSize @{
                 Name = 'File'
                 Expression = {
-                    $repoRoot = Split-Path -Parent (Split-Path -Parent $PSCommandPath)
                     [System.IO.Path]::GetRelativePath($repoRoot, $_.File).Replace('\', '/')
                 }
             }, Function, Status
