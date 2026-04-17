@@ -35,6 +35,8 @@
     Get-NBIPAMAddress -Omit 'comments','description'
     Returns addresses without comments and description fields (Netbox 4.5+).
 
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>

@@ -31,6 +31,8 @@
 .EXAMPLE
     Get-NBDCIMModule
 
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
@@ -64,6 +66,9 @@ function Get-NBDCIMModule {
         [switch]$Raw
     )
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving DCIM Module"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('dcim','modules',$i)) -Raw:$Raw } }

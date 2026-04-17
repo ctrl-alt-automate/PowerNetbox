@@ -143,7 +143,7 @@ function Get-NBVirtualMachine {
         [uint64[]]$Id,
 
         [Parameter(ParameterSetName = 'Query')]
-        [ValidateSet('offline', 'active', 'planned', 'staged', 'failed', 'decommissioning', IgnoreCase = $true)]
+        [ValidateSet('offline', 'active', 'planned', 'staged', 'failed', 'decommissioning', 'paused', IgnoreCase = $true)]
         [string]$Status,
 
         [Parameter(ParameterSetName = 'Query')]
@@ -195,14 +195,24 @@ function Get-NBVirtualMachine {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
+
         Write-Verbose "Retrieving Virtual Machine"
 
-        # Build omit list: add config_context unless explicitly included
+        # Auto-omit config_context only when the user has not otherwise
+        # restricted the projection. -Brief returns a minimal representation
+        # (config_context is never included). -Fields explicitly selects the
+        # returned shape, so the user owns that choice.
+        $inProjectionMode = $PSBoundParameters.ContainsKey('Brief') -or
+                            $PSBoundParameters.ContainsKey('Fields')
+
         $omitFields = @()
         if ($PSBoundParameters.ContainsKey('Omit')) {
             $omitFields += $Omit
         }
-        if (-not $IncludeConfigContext) {
+        if (-not $IncludeConfigContext -and -not $inProjectionMode) {
             $omitFields += 'config_context'
         }
 

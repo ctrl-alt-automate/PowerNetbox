@@ -50,7 +50,7 @@ function New-NBVPNIKEProposal {
         [string]$Name,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet('preshared-keys', 'certificates')]
+        [ValidateSet('preshared-keys', 'certificates', 'rsa-signatures', 'dsa-signatures')]
         [string]$Authentication_Method,
 
         [Parameter(Mandatory = $true)]

@@ -99,6 +99,25 @@ Describe "VPN Module Tests" -Tag 'VPN' {
             $Result = New-NBVPNTunnel -Name "whatif-tunnel" -Status "active" -Encapsulation "gre" -WhatIf
             $Result | Should -BeNullOrEmpty
         }
+
+        Context "Encapsulation drift fix (#392 item 1)" {
+            It "Should accept -Encapsulation 'l2tp'" {
+                $Result = New-NBVPNTunnel -Name 'tnl' -Status 'active' -Encapsulation 'l2tp' -Confirm:$false
+                ($Result.Body | ConvertFrom-Json).encapsulation | Should -Be 'l2tp'
+            }
+            It "Should accept -Encapsulation 'openvpn'" {
+                $Result = New-NBVPNTunnel -Name 'tnl' -Status 'active' -Encapsulation 'openvpn' -Confirm:$false
+                ($Result.Body | ConvertFrom-Json).encapsulation | Should -Be 'openvpn'
+            }
+            It "Should accept -Encapsulation 'pptp'" {
+                $Result = New-NBVPNTunnel -Name 'tnl' -Status 'active' -Encapsulation 'pptp' -Confirm:$false
+                ($Result.Body | ConvertFrom-Json).encapsulation | Should -Be 'pptp'
+            }
+            It "Should accept -Encapsulation 'wireguard'" {
+                $Result = New-NBVPNTunnel -Name 'tnl' -Status 'active' -Encapsulation 'wireguard' -Confirm:$false
+                ($Result.Body | ConvertFrom-Json).encapsulation | Should -Be 'wireguard'
+            }
+        }
     }
 
     Context "Set-NBVPNTunnel" {
@@ -108,6 +127,25 @@ Describe "VPN Module Tests" -Tag 'VPN' {
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/vpn/tunnels/1/'
             $bodyObj = $Result.Body | ConvertFrom-Json
             $bodyObj.name | Should -Be 'updated-tunnel'
+        }
+
+        Context "Encapsulation drift fix (#392 item 1)" {
+            It "Should accept -Encapsulation 'l2tp'" {
+                $Result = Set-NBVPNTunnel -Id 1 -Encapsulation 'l2tp' -Confirm:$false
+                ($Result.Body | ConvertFrom-Json).encapsulation | Should -Be 'l2tp'
+            }
+            It "Should accept -Encapsulation 'openvpn'" {
+                $Result = Set-NBVPNTunnel -Id 1 -Encapsulation 'openvpn' -Confirm:$false
+                ($Result.Body | ConvertFrom-Json).encapsulation | Should -Be 'openvpn'
+            }
+            It "Should accept -Encapsulation 'pptp'" {
+                $Result = Set-NBVPNTunnel -Id 1 -Encapsulation 'pptp' -Confirm:$false
+                ($Result.Body | ConvertFrom-Json).encapsulation | Should -Be 'pptp'
+            }
+            It "Should accept -Encapsulation 'wireguard'" {
+                $Result = Set-NBVPNTunnel -Id 1 -Encapsulation 'wireguard' -Confirm:$false
+                ($Result.Body | ConvertFrom-Json).encapsulation | Should -Be 'wireguard'
+            }
         }
     }
 
@@ -342,6 +380,17 @@ Describe "VPN Module Tests" -Tag 'VPN' {
             $Result = New-NBVPNIKEProposal -Name "test-proposal" -Authentication_Method "preshared-keys" -Encryption_Algorithm "aes-128-cbc" -Authentication_Algorithm "hmac-sha256" -Group 14 -Confirm:$false
             $Result.Method | Should -Be 'POST'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/vpn/ike-proposals/'
+        }
+
+        Context "Authentication_Method drift fix (#392 item 3)" {
+            It "Should accept -Authentication_Method 'rsa-signatures'" {
+                $Result = New-NBVPNIKEProposal -Name 'prop' -Authentication_Method 'rsa-signatures' -Encryption_Algorithm 'aes-256-cbc' -Group 14 -Confirm:$false
+                ($Result.Body | ConvertFrom-Json).authentication_method | Should -Be 'rsa-signatures'
+            }
+            It "Should accept -Authentication_Method 'dsa-signatures'" {
+                $Result = New-NBVPNIKEProposal -Name 'prop' -Authentication_Method 'dsa-signatures' -Encryption_Algorithm 'aes-256-cbc' -Group 14 -Confirm:$false
+                ($Result.Body | ConvertFrom-Json).authentication_method | Should -Be 'dsa-signatures'
+            }
         }
     }
 

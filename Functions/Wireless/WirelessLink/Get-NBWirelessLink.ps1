@@ -31,6 +31,8 @@
 .EXAMPLE
     Get-NBWirelessLink
 
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
@@ -55,6 +57,9 @@ function Get-NBWirelessLink {
         [uint16]$Limit,[ValidateRange(0, [int]::MaxValue)]
         [uint16]$Offset,[switch]$Raw)
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Wireless Link"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {

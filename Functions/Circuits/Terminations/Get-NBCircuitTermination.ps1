@@ -31,6 +31,8 @@
 .EXAMPLE
     Get-NBCircuitTermination
 
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
@@ -85,6 +87,9 @@ function Get-NBCircuitTermination {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Circuit Termination"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {

@@ -70,6 +70,8 @@ function Get-NBIPAMVRF {
         Get-NBIPAMVRF -RD "65001:100"
 
         Returns VRFs with the specified route distinguisher
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]
@@ -119,6 +121,9 @@ function Get-NBIPAMVRF {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving IPAM VRF"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {

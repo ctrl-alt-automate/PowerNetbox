@@ -66,6 +66,8 @@ function Get-NBIPAMRouteTarget {
         Get-NBIPAMRouteTarget -Name "65001:100"
 
         Returns route targets matching the specified value
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]
@@ -115,6 +117,9 @@ function Get-NBIPAMRouteTarget {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving IPAM Route Target"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {

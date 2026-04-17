@@ -68,6 +68,8 @@
 
     Returns the tenant group with ID 1.
 
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 .LINK
     https://netbox.readthedocs.io/en/stable/models/tenancy/tenantgroup/
 #>
@@ -116,6 +118,9 @@ function Get-NBTenantGroup {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Tenant Group"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('tenancy', 'tenant-groups', $i)) -Raw:$Raw } }

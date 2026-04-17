@@ -71,6 +71,8 @@
     Get-NBBranch -Status "ready"
     Get all ready branches.
 
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 .LINK
     New-NBBranch
     Set-NBBranch
@@ -121,6 +123,9 @@ function Get-NBBranch {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Branch"
         CheckNetboxIsConnected
 

@@ -49,6 +49,8 @@
 .EXAMPLE
     Get-NBExportTemplate
 
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
@@ -89,6 +91,9 @@ function Get-NBExportTemplate {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Export Template"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {

@@ -69,6 +69,8 @@
     Get-NBDCIMDevice -All -PageSize 200 -Verbose
     Returns all devices with 200 items per request, showing progress.
 
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>

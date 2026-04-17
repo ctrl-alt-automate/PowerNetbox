@@ -61,6 +61,8 @@
 .EXAMPLE
     Get-NBJob -Status "running"
 
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
@@ -111,6 +113,9 @@ function Get-NBJob {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Job"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {

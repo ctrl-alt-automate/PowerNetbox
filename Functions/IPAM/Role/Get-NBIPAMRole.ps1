@@ -50,6 +50,8 @@ function Get-NBIPAMRole {
     .EXAMPLE
         PS C:\> Get-NBIPAMRole
 
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]
@@ -90,6 +92,9 @@ function Get-NBIPAMRole {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving IPAM Role"
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {

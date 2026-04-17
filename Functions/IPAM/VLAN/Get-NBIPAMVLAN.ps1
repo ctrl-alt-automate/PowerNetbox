@@ -31,6 +31,8 @@
 .EXAMPLE
     Get-NBIPAMVLAN
 
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
@@ -111,6 +113,9 @@ function Get-NBIPAMVLAN {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving IPAM VLAN"
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {

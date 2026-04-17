@@ -31,6 +31,8 @@
 .EXAMPLE
     Get-NBCircuitProvider
 
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
@@ -81,6 +83,9 @@ function Get-NBCircuitProvider {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Circuit Provider"
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {

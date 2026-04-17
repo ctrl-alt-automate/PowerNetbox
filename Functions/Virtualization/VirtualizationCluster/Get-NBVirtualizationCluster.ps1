@@ -65,6 +65,8 @@ function Get-NBVirtualizationCluster {
 
     .EXAMPLE
         PS C:\> Get-NBVirtualizationCluster
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]
@@ -120,6 +122,9 @@ function Get-NBVirtualizationCluster {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Virtualization Cluster"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('virtualization', 'clusters', $i)) -Raw:$Raw } }

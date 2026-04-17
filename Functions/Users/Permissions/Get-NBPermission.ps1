@@ -58,6 +58,8 @@
 .EXAMPLE
     Get-NBPermission
 
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>
@@ -107,6 +109,9 @@ function Get-NBPermission {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Permission"
         switch ($PSCmdlet.ParameterSetName) {
             'ById' {

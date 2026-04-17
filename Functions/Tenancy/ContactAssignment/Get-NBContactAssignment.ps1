@@ -61,6 +61,8 @@ function Get-NBContactAssignment {
     .EXAMPLE
         PS C:\> Get-NBContactAssignment
 
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]
@@ -110,6 +112,9 @@ function Get-NBContactAssignment {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Contact Assignment"
         switch ($PSCmdlet.ParameterSetName) {
         'ById' {

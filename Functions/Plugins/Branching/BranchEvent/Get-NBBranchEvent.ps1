@@ -54,6 +54,8 @@
     Get-NBBranchEvent -Id 10
     Get specific event by ID.
 
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 .LINK
     Get-NBBranch
 #>
@@ -88,6 +90,9 @@ function Get-NBBranchEvent {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Branch Event"
         CheckNetboxIsConnected
 

@@ -65,6 +65,8 @@
 
     Returns the cluster type with ID 1.
 
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 .LINK
     https://netbox.readthedocs.io/en/stable/models/virtualization/clustertype/
 #>
@@ -110,6 +112,9 @@ function Get-NBVirtualizationClusterType {
     )
 
     process {
+        AssertNBMutualExclusiveParam `
+            -BoundParameters $PSBoundParameters `
+            -Parameters 'Brief', 'Fields', 'Omit'
         Write-Verbose "Retrieving Virtualization Cluster Type"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' { foreach ($i in $Id) { InvokeNetboxRequest -URI (BuildNewURI -Segments @('virtualization', 'cluster-types', $i)) -Raw:$Raw } }
