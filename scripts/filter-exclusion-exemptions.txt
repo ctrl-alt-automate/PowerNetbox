@@ -1,0 +1,13 @@
+# Filter-exclusion auditor exemptions
+# =====================================
+# One relative path per line. Lines starting with # are comments.
+# Listed files are skipped by Verify-FilterExclusion.ps1.
+#
+# Only add entries here when a Get-NB* function legitimately should NOT
+# invoke AssertNBMutualExclusiveParam — typically because the function
+# does not expose all three of -Brief, -Fields, -Omit. The auditor already
+# skips functions that don't declare all three, so this file is a last
+# resort for genuine edge cases.
+#
+# When adding an entry, include a brief rationale comment on the line
+# above it so future maintainers understand why the exemption exists.
