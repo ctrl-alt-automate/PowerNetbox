@@ -68,9 +68,9 @@ Inserted after the existing Mode translation switch, before the call to `BuildUR
 # Users pass '' to clear a field server-side; BuildURIComponents +
 # ConvertTo-Json emit "field": null on the wire, which NetBox PATCH accepts.
 $clearableEnums = @('Duplex', 'POE_Mode', 'POE_Type', 'RF_Role', 'Mode')
-foreach ($p in $clearableEnums) {
-    if ($PSBoundParameters.ContainsKey($p) -and $PSBoundParameters[$p] -eq '') {
-        $PSBoundParameters[$p] = $null
+foreach ($clearable in $clearableEnums) {
+    if ($PSBoundParameters.ContainsKey($clearable) -and $PSBoundParameters[$clearable] -eq '') {
+        $PSBoundParameters[$clearable] = $null
     }
 }
 ```
