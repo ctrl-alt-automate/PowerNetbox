@@ -68,6 +68,29 @@ Describe "IPAM tests" -Tag 'Ipam' {
             $Result = Get-NBIPAMAddress -Family 4
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/ipam/ip-addresses/?family=4'
         }
+
+        Context "Brief/Fields/Omit mutual exclusion" {
+            It "Throws when -Brief and -Fields are both specified" {
+                { Get-NBIPAMAddress -Brief -Fields 'id' } |
+                    Should -Throw -ExceptionType ([System.Management.Automation.ParameterBindingException])
+            }
+
+            It "Throws when -Brief and -Omit are both specified" {
+                { Get-NBIPAMAddress -Brief -Omit 'comments' } |
+                    Should -Throw -ExceptionType ([System.Management.Automation.ParameterBindingException])
+            }
+
+            It "Throws when -Fields and -Omit are both specified" {
+                { Get-NBIPAMAddress -Fields 'id' -Omit 'comments' } |
+                    Should -Throw -ExceptionType ([System.Management.Automation.ParameterBindingException])
+            }
+
+            It "Does not throw when -Brief is specified alone (control)" {
+                $Result = Get-NBIPAMAddress -Brief
+                $Result.Method | Should -Be 'GET'
+                $Result.Uri | Should -Match 'brief=True'
+            }
+        }
     }
 
     Context "New-NBIPAMAddress" {

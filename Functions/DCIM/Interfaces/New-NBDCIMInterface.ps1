@@ -47,6 +47,76 @@
 .PARAMETER Tagged_VLANs
     Array of database IDs of VLAN objects for tagged VLANs.
 
+.PARAMETER Label
+    Physical label assigned to the interface.
+
+.PARAMETER Parent
+    Numeric ID of the parent interface (for subinterfaces).
+
+.PARAMETER Bridge
+    Numeric ID of the bridge this interface belongs to.
+
+.PARAMETER Speed
+    Speed of the interface in Kbps (e.g., 1000000 for 1Gbps).
+
+.PARAMETER Duplex
+    Duplex mode. One of: 'full', 'half', 'auto'.
+
+.PARAMETER Mark_Connected
+    If $true, the interface is marked as connected independent of cable state.
+
+.PARAMETER WWN
+    World Wide Name for Fibre Channel interfaces (8 groups of 2 hex digits,
+    colon-separated, e.g. 'AA:BB:CC:DD:EE:FF:00:11').
+
+.PARAMETER VDCS
+    Array of Virtual Device Context numeric IDs.
+
+.PARAMETER POE_Mode
+    Power-over-Ethernet mode. One of: 'pd', 'pse'.
+
+.PARAMETER POE_Type
+    Power-over-Ethernet type. One of: 'type1-ieee802.3af', 'type2-ieee802.3at',
+    'type3-ieee802.3bt', 'type4-ieee802.3bt', 'passive-24v-2pair',
+    'passive-24v-4pair', 'passive-48v-2pair', 'passive-48v-4pair'.
+
+.PARAMETER Vlan_Group
+    Numeric ID of the VLAN group this interface belongs to.
+
+.PARAMETER QinQ_SVLAN
+    Numeric ID of the Service VLAN for QinQ.
+
+.PARAMETER VRF
+    Numeric ID of the VRF this interface belongs to.
+
+.PARAMETER RF_Role
+    Wireless RF role. One of: 'ap', 'station'.
+
+.PARAMETER RF_Channel
+    Wireless RF channel identifier (e.g. '2.4g-1-2412-22').
+
+.PARAMETER RF_Channel_Frequency
+    Wireless RF channel frequency in MHz (1-1000000).
+
+.PARAMETER RF_Channel_Width
+    Wireless RF channel width in MHz (1-10000).
+
+.PARAMETER TX_Power
+    Wireless transmit power in dBm.
+
+.PARAMETER Primary_MAC_Address
+    Numeric ID of the primary MAC address record. Use New-NBDCIMMACAddress to
+    create a MAC address record, then pass its id here.
+
+.PARAMETER Owner
+    Numeric ID of the owning user or team.
+
+.PARAMETER Changelog_Message
+    Free-form message recorded in the Netbox changelog entry for this operation.
+
+.PARAMETER Tags
+    Array of tag objects (e.g. PSCustomObject with slug and color properties).
+
 .PARAMETER InputObject
     Pipeline input for bulk operations. Each object should contain
     the required properties: Device, Name, Type.
@@ -106,6 +176,76 @@ function New-NBDCIMInterface {
         [string]$Type,
 
         [Parameter(ParameterSetName = 'Single')]
+        [string]$Label,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [uint64]$Parent,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [uint64]$Bridge,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [uint64]$Speed,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [ValidateSet('full', 'half', 'auto', IgnoreCase = $true)]
+        [string]$Duplex,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [bool]$Mark_Connected,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [ValidatePattern('^([0-9a-fA-F]{2}:){7}[0-9a-fA-F]{2}$')]
+        [string]$WWN,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [uint64[]]$VDCS,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [ValidateSet('pd', 'pse', IgnoreCase = $true)]
+        [string]$POE_Mode,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [ValidateSet('type1-ieee802.3af', 'type2-ieee802.3at', 'type3-ieee802.3bt', 'type4-ieee802.3bt', 'passive-24v-2pair', 'passive-24v-4pair', 'passive-48v-2pair', 'passive-48v-4pair', IgnoreCase = $true)]
+        [string]$POE_Type,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [uint64]$Vlan_Group,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [uint64]$QinQ_SVLAN,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [uint64]$VRF,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [ValidateSet('ap', 'station', IgnoreCase = $true)]
+        [string]$RF_Role,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [string]$RF_Channel,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [ValidateRange(1, 1000000)]
+        [int]$RF_Channel_Frequency,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [ValidateRange(1, 10000)]
+        [int]$RF_Channel_Width,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [int]$TX_Power,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [uint64]$Primary_MAC_Address,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [uint64]$Owner,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [string]$Changelog_Message,
+
+        [Parameter(ParameterSetName = 'Single')]
         [bool]$Enabled,
 
         [Parameter(ParameterSetName = 'Single')]
@@ -126,7 +266,7 @@ function New-NBDCIMInterface {
         [string]$Description,
 
         [Parameter(ParameterSetName = 'Single')]
-        [ValidateSet('Access', 'Tagged', 'Tagged All', '100', '200', '300', IgnoreCase = $true)]
+        [ValidateSet('Access', 'Tagged', 'Tagged All', 'Q-in-Q', 'q-in-q', '100', '200', '300', '400', IgnoreCase = $true)]
         [string]$Mode,
 
         [Parameter(ParameterSetName = 'Single')]
@@ -174,6 +314,8 @@ function New-NBDCIMInterface {
                     '200' { 'tagged' }
                     'Tagged All' { 'tagged-all' }
                     '300' { 'tagged-all' }
+                    'Q-in-Q' { 'q-in-q' }
+                    '400' { 'q-in-q' }
                     default { $_ }
                 }
             }
