@@ -709,7 +709,8 @@ explicit null-clearing in this change; see follow-up tracking issue.
 
 Adds 30 integration tests: positive paths for all new parameters, ValidateSet
 negatives on the three enum parameters, plus null-clearing verification on
-the seven [Nullable[T]] numeric parameters.
+the nine [Nullable[T]] numeric parameters (Parent, Bridge, Speed, QinQ_SVLAN,
+Primary_MAC_Address, Owner, RF_Channel_Frequency, RF_Channel_Width, TX_Power).
 
 Reimplementation of community PR #396, closes part of #394.
 
