@@ -18,7 +18,7 @@ AfterAll {
     }
 }
 
-Describe "Verify-FilterExclusion.ps1 auditor" -Tag 'Unit', 'Auditor' {
+Describe "Verify-FilterExclusion.ps1 auditor" -Tag 'Unit', 'Auditor' -Skip:($PSVersionTable.PSVersion.Major -lt 7) {
 
     BeforeAll {
         # Helper function for creating fixture files and invoking the auditor.
