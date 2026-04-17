@@ -841,6 +841,16 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
             $Result = Set-NBDCIMInterface -Id 42 -Mode 'Q-in-Q'
             ($Result.Body | ConvertFrom-Json).mode | Should -Be 'q-in-q'
         }
+
+        It "New-NBDCIMInterface: -Mode '400' legacy code translates to 'q-in-q'" {
+            $Result = New-NBDCIMInterface -Device 1 -Name 'eth0' -Type '1000base-t' -Mode '400'
+            ($Result.Body | ConvertFrom-Json).mode | Should -Be 'q-in-q'
+        }
+
+        It "Set-NBDCIMInterface: -Mode '400' legacy code translates to 'q-in-q'" {
+            $Result = Set-NBDCIMInterface -Id 42 -Mode '400'
+            ($Result.Body | ConvertFrom-Json).mode | Should -Be 'q-in-q'
+        }
     }
     #endregion
 }
