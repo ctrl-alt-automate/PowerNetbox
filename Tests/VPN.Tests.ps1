@@ -381,6 +381,17 @@ Describe "VPN Module Tests" -Tag 'VPN' {
             $Result.Method | Should -Be 'POST'
             $Result.Uri | Should -Be 'https://netbox.domain.com/api/vpn/ike-proposals/'
         }
+
+        Context "Authentication_Method drift fix (#392 item 3)" {
+            It "Should accept -Authentication_Method 'rsa-signatures'" {
+                $Result = New-NBVPNIKEProposal -Name 'prop' -Authentication_Method 'rsa-signatures' -Encryption_Algorithm 'aes-256-cbc' -Group 14 -Confirm:$false
+                ($Result.Body | ConvertFrom-Json).authentication_method | Should -Be 'rsa-signatures'
+            }
+            It "Should accept -Authentication_Method 'dsa-signatures'" {
+                $Result = New-NBVPNIKEProposal -Name 'prop' -Authentication_Method 'dsa-signatures' -Encryption_Algorithm 'aes-256-cbc' -Group 14 -Confirm:$false
+                ($Result.Body | ConvertFrom-Json).authentication_method | Should -Be 'dsa-signatures'
+            }
+        }
     }
 
     Context "Set-NBVPNIKEProposal" {
