@@ -58,7 +58,7 @@ function New-NBVPNTunnel {
         [string]$Status,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet('ipsec-transport', 'ipsec-tunnel', 'ip-ip', 'gre')]
+        [ValidateSet('ipsec-transport', 'ipsec-tunnel', 'ip-ip', 'gre', 'l2tp', 'openvpn', 'pptp', 'wireguard')]
         [string]$Encapsulation,
 
         [uint64]$Group,
