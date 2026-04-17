@@ -199,6 +199,148 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
             $bodyObj = $Result.Body | ConvertFrom-Json
             $bodyObj.mode | Should -Be 'tagged-all'
         }
+
+        Context "New-NBDCIMInterface new parameters (#394)" {
+            It "Should pass -Label in the request body" {
+                $Result = New-NBDCIMInterface -Device 1 -Name 'eth0' -Type '1000base-t' -Label 'port-01'
+                ($Result.Body | ConvertFrom-Json).label | Should -Be 'port-01'
+            }
+
+            It "Should pass -Parent as the parent numeric ID" {
+                $Result = New-NBDCIMInterface -Device 1 -Name 'eth0.100' -Type 'virtual' -Parent 42
+                ($Result.Body | ConvertFrom-Json).parent | Should -Be 42
+            }
+
+            It "Should pass -Bridge as the bridge numeric ID" {
+                $Result = New-NBDCIMInterface -Device 1 -Name 'br0' -Type 'bridge' -Bridge 99
+                ($Result.Body | ConvertFrom-Json).bridge | Should -Be 99
+            }
+
+            It "Should pass -Speed in Kbps" {
+                $Result = New-NBDCIMInterface -Device 1 -Name 'eth0' -Type '1000base-t' -Speed 1000000
+                ($Result.Body | ConvertFrom-Json).speed | Should -Be 1000000
+            }
+
+            It "Should pass -Duplex with valid value 'full'" {
+                $Result = New-NBDCIMInterface -Device 1 -Name 'eth0' -Type '1000base-t' -Duplex 'full'
+                ($Result.Body | ConvertFrom-Json).duplex | Should -Be 'full'
+            }
+
+            It "Should reject -Duplex with invalid value" {
+                { New-NBDCIMInterface -Device 1 -Name 'eth0' -Type '1000base-t' -Duplex 'invalid' } |
+                    Should -Throw
+            }
+
+            It "Should pass -Mark_Connected as boolean true" {
+                $Result = New-NBDCIMInterface -Device 1 -Name 'eth0' -Type '1000base-t' -Mark_Connected $true
+                ($Result.Body | ConvertFrom-Json).mark_connected | Should -Be $true
+            }
+
+            It "Should pass -WWN with valid 8-group FC format" {
+                $Result = New-NBDCIMInterface -Device 1 -Name 'fc0' -Type '16gfc-sfpp' -WWN 'aa:bb:cc:dd:ee:ff:00:11'
+                ($Result.Body | ConvertFrom-Json).wwn | Should -Be 'aa:bb:cc:dd:ee:ff:00:11'
+            }
+
+            It "Should reject -WWN with invalid format" {
+                { New-NBDCIMInterface -Device 1 -Name 'fc0' -Type '16gfc-sfpp' -WWN 'not-a-wwn' } |
+                    Should -Throw
+            }
+
+            It "Should pass -VDCS as array of integer IDs" {
+                $Result = New-NBDCIMInterface -Device 1 -Name 'eth0' -Type '1000base-t' -VDCS 10, 20, 30
+                $body = $Result.Body | ConvertFrom-Json
+                $body.vdcs | Should -Contain 10
+                $body.vdcs | Should -Contain 20
+                $body.vdcs | Should -Contain 30
+            }
+
+            It "Should pass -POE_Mode with valid value 'pse'" {
+                $Result = New-NBDCIMInterface -Device 1 -Name 'eth0' -Type '1000base-t' -POE_Mode 'pse'
+                ($Result.Body | ConvertFrom-Json).poe_mode | Should -Be 'pse'
+            }
+
+            It "Should reject -POE_Mode with invalid value" {
+                { New-NBDCIMInterface -Device 1 -Name 'eth0' -Type '1000base-t' -POE_Mode 'invalid' } |
+                    Should -Throw
+            }
+
+            It "Should pass -POE_Type with valid value 'type3-ieee802.3bt'" {
+                $Result = New-NBDCIMInterface -Device 1 -Name 'eth0' -Type '1000base-t' -POE_Type 'type3-ieee802.3bt'
+                ($Result.Body | ConvertFrom-Json).poe_type | Should -Be 'type3-ieee802.3bt'
+            }
+
+            It "Should reject -POE_Type with invalid value" {
+                { New-NBDCIMInterface -Device 1 -Name 'eth0' -Type '1000base-t' -POE_Type 'wrong' } |
+                    Should -Throw
+            }
+
+            It "Should pass -Vlan_Group as numeric ID" {
+                $Result = New-NBDCIMInterface -Device 1 -Name 'eth0' -Type '1000base-t' -Vlan_Group 77
+                ($Result.Body | ConvertFrom-Json).vlan_group | Should -Be 77
+            }
+
+            It "Should pass -QinQ_SVLAN as numeric ID" {
+                $Result = New-NBDCIMInterface -Device 1 -Name 'eth0' -Type '1000base-t' -QinQ_SVLAN 200
+                ($Result.Body | ConvertFrom-Json).qinq_svlan | Should -Be 200
+            }
+
+            It "Should pass -VRF as numeric ID" {
+                $Result = New-NBDCIMInterface -Device 1 -Name 'eth0' -Type '1000base-t' -VRF 5
+                ($Result.Body | ConvertFrom-Json).vrf | Should -Be 5
+            }
+
+            It "Should pass -RF_Role with valid value 'ap'" {
+                $Result = New-NBDCIMInterface -Device 1 -Name 'wlan0' -Type 'ieee802.11ac' -RF_Role 'ap'
+                ($Result.Body | ConvertFrom-Json).rf_role | Should -Be 'ap'
+            }
+
+            It "Should reject -RF_Role with invalid value" {
+                { New-NBDCIMInterface -Device 1 -Name 'wlan0' -Type 'ieee802.11ac' -RF_Role 'wrong' } |
+                    Should -Throw
+            }
+
+            It "Should pass -RF_Channel as free-form string" {
+                $Result = New-NBDCIMInterface -Device 1 -Name 'wlan0' -Type 'ieee802.11ac' -RF_Channel '2.4g-1-2412-22'
+                ($Result.Body | ConvertFrom-Json).rf_channel | Should -Be '2.4g-1-2412-22'
+            }
+
+            It "Should pass -RF_Channel_Frequency in MHz" {
+                $Result = New-NBDCIMInterface -Device 1 -Name 'wlan0' -Type 'ieee802.11ac' -RF_Channel_Frequency 5180
+                ($Result.Body | ConvertFrom-Json).rf_channel_frequency | Should -Be 5180
+            }
+
+            It "Should pass -RF_Channel_Width in MHz" {
+                $Result = New-NBDCIMInterface -Device 1 -Name 'wlan0' -Type 'ieee802.11ac' -RF_Channel_Width 80
+                ($Result.Body | ConvertFrom-Json).rf_channel_width | Should -Be 80
+            }
+
+            It "Should pass -TX_Power in dBm" {
+                $Result = New-NBDCIMInterface -Device 1 -Name 'wlan0' -Type 'ieee802.11ac' -TX_Power 20
+                ($Result.Body | ConvertFrom-Json).tx_power | Should -Be 20
+            }
+
+            It "Should pass -Primary_MAC_Address as numeric ID" {
+                $Result = New-NBDCIMInterface -Device 1 -Name 'eth0' -Type '1000base-t' -Primary_MAC_Address 12345
+                ($Result.Body | ConvertFrom-Json).primary_mac_address | Should -Be 12345
+            }
+
+            It "Should pass -Owner as numeric ID" {
+                $Result = New-NBDCIMInterface -Device 1 -Name 'eth0' -Type '1000base-t' -Owner 7
+                ($Result.Body | ConvertFrom-Json).owner | Should -Be 7
+            }
+
+            It "Should pass -Changelog_Message as free-form string" {
+                $Result = New-NBDCIMInterface -Device 1 -Name 'eth0' -Type '1000base-t' -Changelog_Message 'Initial provisioning'
+                ($Result.Body | ConvertFrom-Json).changelog_message | Should -Be 'Initial provisioning'
+            }
+
+            It "Should pass -Tags as array of objects" {
+                $tag = [PSCustomObject]@{ slug = 'production'; color = '00ff00' }
+                $Result = New-NBDCIMInterface -Device 1 -Name 'eth0' -Type '1000base-t' -Tags @($tag)
+                $body = $Result.Body | ConvertFrom-Json
+                $body.tags[0].slug | Should -Be 'production'
+            }
+        }
     }
 
     Context "New-NBDCIMInterface - Interface Type ValidateSet" {
