@@ -318,6 +318,13 @@ Describe "Virtualization tests" -Tag 'Virtualization' {
             $bodyObj.enabled | Should -Be $true
         }
 
+        Context "Mode drift fix (#392 item 7)" {
+            It "Should accept -Mode 'q-in-q'" {
+                $Result = New-NBVirtualMachineInterface -Virtual_Machine 1 -Name 'eth0' -Mode 'q-in-q'
+                ($Result.Body | ConvertFrom-Json).mode | Should -Be 'q-in-q'
+            }
+        }
+
         It "Should add an interface with a MAC, MTU, and Description" {
             $Result = New-NBVirtualMachineInterface -Name 'Ethernet0' -Virtual_Machine 10 -Mac_Address '11:22:33:44:55:66' -MTU 1500 -Description "Test description"
             $Result.Method | Should -Be 'POST'
