@@ -266,7 +266,7 @@ function New-NBDCIMInterface {
         [string]$Description,
 
         [Parameter(ParameterSetName = 'Single')]
-        [ValidateSet('Access', 'Tagged', 'Tagged All', '100', '200', '300', IgnoreCase = $true)]
+        [ValidateSet('Access', 'Tagged', 'Tagged All', 'Q-in-Q', 'q-in-q', '100', '200', '300', '400', IgnoreCase = $true)]
         [string]$Mode,
 
         [Parameter(ParameterSetName = 'Single')]
@@ -314,6 +314,8 @@ function New-NBDCIMInterface {
                     '200' { 'tagged' }
                     'Tagged All' { 'tagged-all' }
                     '300' { 'tagged-all' }
+                    'Q-in-Q' { 'q-in-q' }
+                    '400' { 'q-in-q' }
                     default { $_ }
                 }
             }

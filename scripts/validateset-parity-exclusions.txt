@@ -37,13 +37,10 @@ Extras/CustomLinks/Set-NBCustomLink.ps1::Button_Class
 # that are translated to real API values in the function's begin {} block.
 # ---------------------------------------------------------------------------
 
-# -Mode on DCIMInterface accepts legacy numeric ('100', '200', '300') and
-# title-case ('Tagged All') values for backward compatibility. See #360.
-# The begin {} block translates them to the real API values before the call.
-# q-in-q is a genuine miss and is NOT excluded — it surfaces as a finding.
-# (Excluding only the *extras*, the missing q-in-q still reports.)
-# NB: This exclusion suppresses the whole finding; a future improvement
-# could support per-value exclusion. For now, q-in-q is tracked separately
-# in the issue filed from this script.
+# Mode accepts legacy numeric/title-case values translated to API strings in begin {}.
+# As of PR for #394, q-in-q (NetBox 4.2+) and its title-case variant Q-in-Q plus
+# legacy code '400' are also supported via the same translation layer.
+# ValidateSet values: 'Access', 'Tagged', 'Tagged All', 'Q-in-Q', 'q-in-q',
+# '100', '200', '300', '400' — translate to: 'access', 'tagged', 'tagged-all', 'q-in-q'.
 DCIM/Interfaces/New-NBDCIMInterface.ps1::Mode
 DCIM/Interfaces/Set-NBDCIMInterface.ps1::Mode

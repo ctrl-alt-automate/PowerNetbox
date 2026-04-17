@@ -819,4 +819,28 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
         }
     }
     #endregion
+
+    #region DCIM Interface Mode — Q-in-Q support
+    Context "DCIM Interface Mode — Q-in-Q support (#394)" {
+        It "New-NBDCIMInterface: -Mode 'q-in-q' passes through verbatim" {
+            $Result = New-NBDCIMInterface -Device 1 -Name 'eth0' -Type '1000base-t' -Mode 'q-in-q'
+            ($Result.Body | ConvertFrom-Json).mode | Should -Be 'q-in-q'
+        }
+
+        It "New-NBDCIMInterface: -Mode 'Q-in-Q' translates to 'q-in-q'" {
+            $Result = New-NBDCIMInterface -Device 1 -Name 'eth0' -Type '1000base-t' -Mode 'Q-in-Q'
+            ($Result.Body | ConvertFrom-Json).mode | Should -Be 'q-in-q'
+        }
+
+        It "Set-NBDCIMInterface: -Mode 'q-in-q' passes through verbatim" {
+            $Result = Set-NBDCIMInterface -Id 42 -Mode 'q-in-q'
+            ($Result.Body | ConvertFrom-Json).mode | Should -Be 'q-in-q'
+        }
+
+        It "Set-NBDCIMInterface: -Mode 'Q-in-Q' translates to 'q-in-q'" {
+            $Result = Set-NBDCIMInterface -Id 42 -Mode 'Q-in-Q'
+            ($Result.Body | ConvertFrom-Json).mode | Should -Be 'q-in-q'
+        }
+    }
+    #endregion
 }

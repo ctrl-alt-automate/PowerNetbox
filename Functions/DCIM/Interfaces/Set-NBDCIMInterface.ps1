@@ -207,7 +207,7 @@ function Set-NBDCIMInterface {
 
         [string]$Description,
 
-        [ValidateSet('Access', 'Tagged', 'Tagged All', '100', '200', '300', IgnoreCase = $true)]
+        [ValidateSet('Access', 'Tagged', 'Tagged All', 'Q-in-Q', 'q-in-q', '100', '200', '300', '400', IgnoreCase = $true)]
         [string]$Mode,
 
         [uint64]$Untagged_VLAN,
@@ -252,6 +252,16 @@ function Set-NBDCIMInterface {
 
                 '300' {
                     'tagged-all'
+                    break
+                }
+
+                'Q-in-Q' {
+                    'q-in-q'
+                    break
+                }
+
+                '400' {
+                    'q-in-q'
                     break
                 }
 
