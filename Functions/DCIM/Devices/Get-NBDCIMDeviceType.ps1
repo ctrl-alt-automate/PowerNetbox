@@ -31,6 +31,8 @@
 .EXAMPLE
     Get-NBDCIMDeviceType
 
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>

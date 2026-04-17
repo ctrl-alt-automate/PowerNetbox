@@ -71,6 +71,8 @@
     Get-NBBranch -Status "ready"
     Get all ready branches.
 
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 .LINK
     New-NBBranch
     Set-NBBranch

@@ -65,6 +65,8 @@ function Get-NBDCIMSiteGroup {
         Get-NBDCIMSiteGroup -Parent_Id 1
 
         Returns all child site groups of site group 1
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]

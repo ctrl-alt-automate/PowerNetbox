@@ -60,6 +60,8 @@ function Get-NBIPAMServiceTemplate {
         Get-NBIPAMServiceTemplate -Name "HTTP"
 
         Returns service templates matching the name "HTTP"
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]

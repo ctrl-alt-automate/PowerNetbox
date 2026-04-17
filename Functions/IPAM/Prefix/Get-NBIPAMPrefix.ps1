@@ -100,6 +100,8 @@ function Get-NBIPAMPrefix {
     .EXAMPLE
         PS C:\> Get-NBIPAMPrefix -Omit 'description','comments'
         Returns prefixes without description and comments fields (Netbox 4.5+).
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]

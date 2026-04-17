@@ -56,6 +56,8 @@ function Get-NBDCIMManufacturer {
         Get-NBDCIMManufacturer -Name "Cisco"
 
         Returns manufacturers matching the name "Cisco"
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]

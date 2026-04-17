@@ -77,6 +77,8 @@ function Get-NBDCIMLocation {
         Get-NBDCIMLocation -Name "Server Room"
 
         Returns locations matching the name "Server Room"
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]

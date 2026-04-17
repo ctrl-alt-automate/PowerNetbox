@@ -65,6 +65,8 @@ function Get-NBVirtualizationCluster {
 
     .EXAMPLE
         PS C:\> Get-NBVirtualizationCluster
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]

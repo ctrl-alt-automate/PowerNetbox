@@ -65,6 +65,8 @@
 
     Returns the cluster type with ID 1.
 
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 .LINK
     https://netbox.readthedocs.io/en/stable/models/virtualization/clustertype/
 #>

@@ -59,6 +59,8 @@ function Get-NBIPAMASNRange {
         Get-NBIPAMASNRange -Name "Private"
 
         Returns ASN ranges matching the name "Private"
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]

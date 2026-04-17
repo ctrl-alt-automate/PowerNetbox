@@ -60,6 +60,7 @@ function Get-NBContentType {
     .NOTES
         This function delegates to Get-NBObjectType.
         Backward compatible with Netbox 4.0+
+        The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]

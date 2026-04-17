@@ -61,6 +61,8 @@ function Get-NBTenant {
     .EXAMPLE
         PS C:\> Get-NBTenant
 
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]

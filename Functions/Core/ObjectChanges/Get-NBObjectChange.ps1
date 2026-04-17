@@ -61,6 +61,8 @@
 .EXAMPLE
     Get-NBObjectChange -Action "create" -Limit 50
 
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
 #>

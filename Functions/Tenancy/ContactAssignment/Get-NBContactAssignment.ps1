@@ -61,6 +61,8 @@ function Get-NBContactAssignment {
     .EXAMPLE
         PS C:\> Get-NBContactAssignment
 
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]

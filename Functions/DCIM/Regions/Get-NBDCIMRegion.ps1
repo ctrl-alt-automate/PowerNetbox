@@ -65,6 +65,8 @@ function Get-NBDCIMRegion {
         Get-NBDCIMRegion -Parent_Id 1
 
         Returns all child regions of region 1
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]

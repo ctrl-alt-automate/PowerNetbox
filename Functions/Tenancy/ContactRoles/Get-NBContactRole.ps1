@@ -49,6 +49,8 @@ function Get-NBContactRole {
     .EXAMPLE
         PS C:\> Get-NBContactRole
 
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]

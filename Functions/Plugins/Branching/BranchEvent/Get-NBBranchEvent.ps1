@@ -54,6 +54,8 @@
     Get-NBBranchEvent -Id 10
     Get specific event by ID.
 
+.NOTES
+    The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 .LINK
     Get-NBBranch
 #>
