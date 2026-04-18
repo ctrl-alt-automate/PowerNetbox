@@ -21,7 +21,7 @@ subject line starting `[SECURITY]`.
 
 ## What to include
 
-- PowerNetbox version (`Get-Module PowerNetbox | Select-Object Version`)
+- PowerNetbox version (`Get-Module -ListAvailable PowerNetbox | Select-Object -ExpandProperty Version`)
 - NetBox server version (if relevant)
 - PowerShell edition + version (`$PSVersionTable`)
 - Clear reproduction steps and the observed impact
