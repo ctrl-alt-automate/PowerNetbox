@@ -44,3 +44,15 @@ Extras/CustomLinks/Set-NBCustomLink.ps1::Button_Class
 # '100', '200', '300', '400' — translate to: 'access', 'tagged', 'tagged-all', 'q-in-q'.
 DCIM/Interfaces/New-NBDCIMInterface.ps1::Mode
 DCIM/Interfaces/Set-NBDCIMInterface.ps1::Mode
+
+# ---------------------------------------------------------------------------
+# Parameters that include '' as an empty-string sentinel for null-clearing
+# on PATCH. Translated to $null in process {} before the JSON body is built
+# (see PR #401 — Set-NBDCIMInterface enum null-clearing follow-up to PR #398).
+# The '' is a PowerNetbox UX choice, not a value NetBox actually accepts —
+# so the parity tool flags it as "Extra in PowerNetbox". That's expected.
+# ---------------------------------------------------------------------------
+DCIM/Interfaces/Set-NBDCIMInterface.ps1::Duplex
+DCIM/Interfaces/Set-NBDCIMInterface.ps1::POE_Mode
+DCIM/Interfaces/Set-NBDCIMInterface.ps1::POE_Type
+DCIM/Interfaces/Set-NBDCIMInterface.ps1::RF_Role
