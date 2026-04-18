@@ -322,6 +322,46 @@ We welcome contributions! Please follow these guidelines:
 3. Follow [PowerShell Practice and Style Guidelines](https://poshcode.gitbook.io/powershell-practice-and-style/)
 4. Submit a pull request against the `dev` branch
 
+See also [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md).
+
+## Security and privacy
+
+- **Vulnerability reporting:** see [SECURITY.md](SECURITY.md). Use GitHub
+  Security Advisories for private disclosure.
+- **Privacy policy:** see [PRIVACY.md](PRIVACY.md). Short version:
+  PowerNetbox sends requests only to the NetBox host you configure — no
+  telemetry, no analytics.
+- **Recent security reviews:** `docs/superpowers/reviews/`.
+
+## Code signing policy
+
+PowerNetbox follows the [SignPath.io](https://signpath.org) code signing
+model (application in progress with the SignPath Foundation free open
+source tier). Once active:
+
+- Every published release on PSGallery will be signed with a certificate
+  issued to **ctrl-alt-automate / PowerNetbox** via SignPath.
+- Consumers can verify authenticity with:
+
+  ```powershell
+  $module = Get-Module -ListAvailable PowerNetbox | Select-Object -First 1
+  Get-AuthenticodeSignature (Join-Path $module.ModuleBase 'PowerNetbox.psm1')
+  ```
+
+- Team roles for signing governance:
+  - **Author / Reviewer / Approver:** ctrl-alt-automate (solo
+    maintainer; external contributions are reviewed and merged by the
+    same maintainer before a signed release is cut).
+
+Until SignPath signing is live, the module is distributed unsigned on
+PSGallery. Trust anchors meanwhile are the PSGallery publisher identity
+(`ctrl-alt-automate`), signed git tags, and the public MIT-licensed
+source at each release tag.
+
+Credit: code signing sponsored by
+[SignPath Foundation](https://signpath.org) via
+[SignPath.io](https://signpath.io).
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
