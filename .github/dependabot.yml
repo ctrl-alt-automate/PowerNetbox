@@ -1,0 +1,46 @@
+# Dependabot configuration for PowerNetbox.
+#
+# - github-actions: keep action SHAs / tags fresh + grouped to reduce PR noise
+# - docker:         Dockerfile.branching's FROM image (netboxcommunity/netbox)
+#
+# Note: Dependabot does not support PSGallery, so Pester / PSScriptAnalyzer
+# version pins in .github/workflows/release.yml are updated manually.
+
+version: 2
+
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Europe/Amsterdam"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    groups:
+      actions-minor-patch:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+          - "patch"
+    labels:
+      - "dependencies"
+      - "ci"
+
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Europe/Amsterdam"
+    open-pull-requests-limit: 2
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "docker"

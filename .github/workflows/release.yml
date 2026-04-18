@@ -7,6 +7,12 @@ on:
 permissions:
   contents: read
 
+env:
+  # Pinned PSGallery dependency versions. Bump deliberately after review
+  # (Dependabot does not cover PSGallery, so updates are manual).
+  PESTER_VERSION: '5.7.1'
+  PSSA_VERSION:   '1.25.0'
+
 jobs:
   test:
     name: Pre-release Tests
@@ -18,10 +24,13 @@ jobs:
 
       - name: Install dependencies
         shell: pwsh
+        env:
+          PESTER_VERSION: ${{ env.PESTER_VERSION }}
+          PSSA_VERSION:   ${{ env.PSSA_VERSION }}
         run: |
           Set-PSRepository PSGallery -InstallationPolicy Trusted
-          Install-Module Pester -Force -Scope CurrentUser -MinimumVersion 5.0.0
-          Install-Module PSScriptAnalyzer -Force -Scope CurrentUser
+          Install-Module Pester           -Force -Scope CurrentUser -RequiredVersion $env:PESTER_VERSION
+          Install-Module PSScriptAnalyzer -Force -Scope CurrentUser -RequiredVersion $env:PSSA_VERSION
 
       - name: Build module (production)
         shell: pwsh
@@ -47,6 +56,10 @@ jobs:
     name: Publish to PSGallery
     runs-on: ubuntu-latest
     needs: test
+    permissions:
+      contents:     read
+      id-token:     write    # needed by attest-build-provenance for OIDC
+      attestations: write    # needed by attest-build-provenance to write the attestation
 
     steps:
       - name: Checkout repository
@@ -54,9 +67,11 @@ jobs:
 
       - name: Install dependencies
         shell: pwsh
+        env:
+          PSSA_VERSION: ${{ env.PSSA_VERSION }}
         run: |
           Set-PSRepository PSGallery -InstallationPolicy Trusted
-          Install-Module PSScriptAnalyzer -Force -Scope CurrentUser
+          Install-Module PSScriptAnalyzer -Force -Scope CurrentUser -RequiredVersion $env:PSSA_VERSION
 
       - name: Build module (production)
         shell: pwsh
@@ -70,6 +85,18 @@ jobs:
           Write-Host "Module: $($manifest.Name)"
           Write-Host "Version: $($manifest.Version)"
           Write-Host "Functions: $($manifest.ExportedFunctions.Count)"
+
+      - name: Generate build provenance attestation
+        # Creates a cryptographic attestation that this PowerNetbox.psd1 +
+        # PowerNetbox.psm1 were built by THIS workflow run. Consumers can
+        # verify via `gh attestation verify`. Free alternative to a paid
+        # Authenticode code-signing certificate (SignPath application is
+        # in progress separately for the full signature chain).
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            ./PowerNetbox/PowerNetbox.psd1
+            ./PowerNetbox/PowerNetbox.psm1
 
       - name: Publish to PowerShell Gallery
         shell: pwsh
