@@ -86,5 +86,7 @@ verify authenticity via:
 3. **Review the source:** PowerNetbox is MIT-licensed; the full source
    of every released version is public at the matching tag.
 
-Once SignPath signing is live this section will be updated with
-`Get-AuthenticodeSignature` verification steps.
+Once SignPath signing is live, use the `Get-AuthenticodeSignature`
+snippet in [README.md → Code signing policy](README.md#code-signing-policy)
+to verify a local install. Signature verification steps are maintained
+in a single location to avoid drift.

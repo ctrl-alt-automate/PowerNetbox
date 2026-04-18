@@ -348,7 +348,7 @@ source tier). Once active:
       Sort-Object Version -Descending |
       Select-Object -First 1
   if ($module) {
-      Get-AuthenticodeSignature (Join-Path $module.ModuleBase 'PowerNetbox.psd1')
+      Get-AuthenticodeSignature $module.Path
   }
   ```
 
