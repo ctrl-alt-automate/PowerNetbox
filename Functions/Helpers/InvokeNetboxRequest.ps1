@@ -110,8 +110,17 @@ function InvokeNetboxRequest {
         do {
             $pageNum++
             $currentUri = if ($nextUrl) {
-                # Use the next URL from API response
-                [System.UriBuilder]::new($nextUrl)
+                # Validate that the server-returned pagination URL matches the
+                # original request's scheme + host before following it. Without
+                # this check, a compromised or malicious NetBox server could
+                # redirect pagination to an attacker-controlled host and
+                # receive the Authorization header (Bearer token) in plaintext.
+                # Reference: 2026-04-18 Tier 2 security review, finding TM-1/IV-1.
+                $nextBuilder = [System.UriBuilder]::new($nextUrl)
+                if ($nextBuilder.Scheme -ne $URI.Scheme -or $nextBuilder.Host -ne $URI.Host -or $nextBuilder.Port -ne $URI.Port) {
+                    throw "Refusing to follow pagination 'next' URL to a different origin. Expected $($URI.Scheme)://$($URI.Host):$($URI.Port), got $($nextBuilder.Scheme)://$($nextBuilder.Host):$($nextBuilder.Port). This may indicate a compromised server or man-in-the-middle attack."
+                }
+                $nextBuilder
             }
             else {
                 $URI
