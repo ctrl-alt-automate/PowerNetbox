@@ -1,10 +1,20 @@
 # Dependabot configuration for PowerNetbox.
 #
-# - github-actions: keep action SHAs / tags fresh + grouped to reduce PR noise
-# - docker:         Dockerfile.branching's FROM image (netboxcommunity/netbox)
+# Covered ecosystems:
+# - github-actions: action SHAs / tags, grouped to reduce PR noise.
 #
-# Note: Dependabot does not support PSGallery, so Pester / PSScriptAnalyzer
-# version pins in .github/workflows/release.yml are updated manually.
+# NOT covered (documented gaps):
+# - PSGallery modules: Dependabot does not support PSGallery. Pins for
+#   Pester / PSScriptAnalyzer in .github/workflows/release.yml are
+#   bumped manually.
+# - Dockerfile.branching FROM image: the `docker` ecosystem only
+#   recognises files named exactly `Dockerfile` (or standard
+#   docker-compose filenames). Our build-arg-driven
+#   `Dockerfile.branching` + docker-compose.ci.yml are invisible to it.
+#   Renaming to satisfy Dependabot would hurt project clarity more than
+#   the manual NETBOX_VERSION bump cost saves. The netbox-docker image
+#   is tracked manually against the CI matrix in compatibility.yml /
+#   integration.yml.
 
 version: 2
 
@@ -29,18 +39,3 @@ updates:
     labels:
       - "dependencies"
       - "ci"
-
-  - package-ecosystem: "docker"
-    directory: "/"
-    schedule:
-      interval: "monthly"
-      day: "monday"
-      time: "06:00"
-      timezone: "Europe/Amsterdam"
-    open-pull-requests-limit: 2
-    commit-message:
-      prefix: "ci"
-      include: "scope"
-    labels:
-      - "dependencies"
-      - "docker"
