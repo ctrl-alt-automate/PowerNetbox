@@ -1,0 +1,15 @@
+# Pre-commit hooks for PowerNetbox
+#
+# Install:  pip install pre-commit && pre-commit install
+# Run all:  pre-commit run --all-files
+#
+# Gitleaks prevents secrets from landing in commits in the first place.
+# Configuration and baseline live in .gitleaks.toml / .gitleaks-baseline.json.
+
+repos:
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.1
+    hooks:
+      - id: gitleaks
+        name: Detect hardcoded secrets
+        description: Block commits containing hardcoded secrets (uses .gitleaks.toml)

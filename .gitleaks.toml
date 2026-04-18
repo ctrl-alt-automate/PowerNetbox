@@ -1,0 +1,64 @@
+# PowerNetbox Gitleaks Configuration
+# Extends the default rule set with PowerNetbox-specific patterns
+# and an allowlist for known test/placeholder values.
+
+title = "PowerNetbox Gitleaks Configuration"
+
+[extend]
+useDefault = true
+
+# Custom rule: NetBox v2 Bearer token format (nbt_<key>.<secret>)
+[[rules]]
+id = "netbox-v2-token"
+description = "NetBox v2 Bearer token (nbt_<key>.<secret>)"
+regex = '''nbt_[A-Za-z0-9]{10,}\.[A-Za-z0-9]{30,}'''
+keywords = ["nbt_"]
+tags = ["netbox", "token", "v2"]
+
+[rules.allowlist]
+description = "Placeholder v2 tokens used in docs and tests"
+regexTarget = "match"
+regexes = [
+    '''nbt_abc123\.xyz789''',
+    '''nbt_ExampleKey123\.ExampleSecretValue456789''',
+    '''nbt_yourKey\.yourSecret''',
+    '''nbt_\{key\}\.\{secret\}''',
+]
+
+# Custom rule: NetBox v1 token (40-char hex)
+[[rules]]
+id = "netbox-v1-token"
+description = "NetBox v1 API token (40-char hex key)"
+regex = '''(?i)(?:netbox[_-]?token|nb[_-]?token|api[_-]?token)\s*[:=]\s*["']?([a-f0-9]{40})["']?'''
+keywords = ["token", "netbox"]
+tags = ["netbox", "token", "v1"]
+
+# Global allowlist for common PowerNetbox test/placeholder values
+[allowlist]
+description = "PowerNetbox project-wide allowlist"
+
+paths = [
+    # Tests use fake tokens throughout
+    '''(^|/)Tests/.*\.Tests\.ps1$''',
+    # Docs reference example tokens
+    '''(^|/)docs/''',
+    # This file itself
+    '''(^|/)\.gitleaks\.toml$''',
+    # Baseline captures historic findings that have been rotated
+    '''(^|/)\.gitleaks-baseline\.json$''',
+]
+
+regexes = [
+    # docker-compose.ci.yml bootstrap token (public netbox-docker default)
+    '''0123456789abcdef0123456789abcdef01234567''',
+    # Slack webhook placeholder pattern (T00000000/B00000000/XXX...)
+    '''hooks\.slack\.com/services/T0+/B0+/X+''',
+    # Common placeholder patterns
+    '''(?i)your[-_]?(api[-_]?)?(token|key|secret)''',
+    '''(?i)(example|sample|placeholder|fake|dummy|test)[-_]?(token|key|secret)''',
+    '''(?i)(<|\[|\{)[^>\]\}]*(token|key|secret|password)[^>\]\}]*(>|\]|\})''',
+    # xxxxxxxx, ****, 00000000 sequences
+    '''x{8,}''',
+    '''\*{8,}''',
+    '''0{10,}''',
+]
