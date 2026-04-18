@@ -33,6 +33,12 @@ updates:
     groups:
       actions-minor-patch:
         applies-to: version-updates
+        # Dependabot requires at least one of `patterns`, `exclude-patterns`,
+        # or `dependency-type` for the group to match anything. Without it,
+        # the group silently matches zero dependencies and every update
+        # opens its own PR — exactly the noise we meant to avoid.
+        patterns:
+          - "*"
         update-types:
           - "minor"
           - "patch"
