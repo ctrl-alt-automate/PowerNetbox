@@ -107,27 +107,35 @@ Net: **HIGH** due to impact + defense-in-depth principle.
 **Fix applied:**
 
 ```powershell
-$nextBuilder = [System.UriBuilder]::new($nextUrl)
-if ($nextBuilder.Scheme -ne $URI.Scheme -or
-    $nextBuilder.Host   -ne $URI.Host   -or
-    $nextBuilder.Port   -ne $URI.Port) {
+$nextBuilder    = [System.UriBuilder]::new($nextUrl)
+$originalOrigin = $URI.Uri.GetLeftPart([System.UriPartial]::Authority)
+$nextOrigin     = $nextBuilder.Uri.GetLeftPart([System.UriPartial]::Authority)
+if ($nextOrigin -ne $originalOrigin) {
     throw "Refusing to follow pagination 'next' URL to a different origin..."
 }
 $nextBuilder
 ```
 
-The validation compares scheme + host + port against the *original*
-request URI. A response attempting to redirect pagination off-origin
-throws a clear error instead of being silently followed. All modern
-browsers apply this same rule to `Authorization` headers across redirects
-— we match that posture explicitly for an HTTP client library.
+`Uri.GetLeftPart([System.UriPartial]::Authority)` normalises both URIs
+to a canonical `scheme://host[:port]` form. The default port is
+automatically omitted when it matches the scheme's default (443 for
+https, 80 for http), so an original URI constructed with explicit
+`Port = 443` compares equal to a server-returned `next` that omits the
+port. The normalisation also avoids any edge cases with
+`UriBuilder.Port == -1` when a port is not explicitly set.
 
-**Tests added** (`Tests/Helpers.Tests.ps1`, 4 new cases):
+A response attempting to redirect pagination off-origin throws a clear
+error instead of being silently followed. All modern browsers apply
+this same rule to `Authorization` headers across redirects — we match
+that posture explicitly for an HTTP client library.
+
+**Tests added** (`Tests/Helpers.Tests.ps1`, 5 new cases):
 
 1. Different host → throws
 2. Scheme downgrade https→http → throws
 3. Port change → throws
 4. Matching scheme/host/port → follows normally (regression test)
+5. Explicit default port in original vs omitted default port in `next` → follows (edge-case regression for the port normalisation)
 
 ### [MEDIUM — documented] DS-1. PSGallery publish runner installs Pester / PSScriptAnalyzer without upper version bound
 
