@@ -29,7 +29,7 @@ tags = ["netbox", "token", "v2"]
 [[rules]]
 id = "netbox-v1-token"
 description = "NetBox v1 API token (40-char hex key)"
-regex = '''(?i)(?:token|netbox[_-]?token|nb[_-]?token|api[_-]?token|api[_-]?key)\s*[:=]\s*["']?\b([a-f0-9]{40})\b["']?'''
+regex = '''(?i)\b(?:token|netbox[_-]?token|nb[_-]?token|api[_-]?token|api[_-]?key)\s*[:=]\s*["']?\b([a-f0-9]{40})\b["']?'''
 keywords = ["token", "apikey", "api_key", "api-key"]
 secretGroup = 1
 tags = ["netbox", "token", "v1"]

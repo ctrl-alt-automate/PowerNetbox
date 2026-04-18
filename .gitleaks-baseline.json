@@ -152,31 +152,6 @@
  {
   "RuleID": "netbox-v1-token",
   "Description": "NetBox v1 API token (40-char hex key)",
-  "StartLine": 12,
-  "EndLine": 12,
-  "StartColumn": 2,
-  "EndColumn": 49,
-  "Match": "TOKEN=\"a9717b9520d54d19383649066ef3b25e313bf219\"",
-  "Secret": "a9717b9520d54d19383649066ef3b25e313bf219",
-  "File": ".claude/commands/implement.md",
-  "SymlinkFile": "",
-  "Commit": "ef1726d42f622dedf4579016dd6a4fa13df26f17",
-  "Link": "https://github.com/ctrl-alt-automate/PowerNetbox/blob/ef1726d42f622dedf4579016dd6a4fa13df26f17/.claude/commands/implement.md?plain=1#L12",
-  "Entropy": 3.7659574,
-  "Author": "ctrl-alt-automate",
-  "Email": "elvis@deployment-team.nl",
-  "Date": "2025-12-10T22:15:53Z",
-  "Message": "Add development tooling and Claude Code integration\n\n- Add CLAUDE.md with project overview and development guide\n- Add Connect-DevNetbox.ps1 helper script for quick API connection\n- Add .netboxps.config.example.ps1 template for local credentials\n- Add specialized slash commands for AI-assisted development:\n  - /netbox-api: Netbox API expert for endpoint documentation\n  - /powershell-expert: PowerShell best practices guidance\n  - /implement: Combined workflow for new endpoint implementation\n  - /test-endpoint: Compatibility testing against Netbox 4.4.7\n- Update .gitignore to exclude local config files\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 \u003cnoreply@anthropic.com\u003e",
-  "Tags": [
-   "netbox",
-   "token",
-   "v1"
-  ],
-  "Fingerprint": "ef1726d42f622dedf4579016dd6a4fa13df26f17:.claude/commands/implement.md:netbox-v1-token:12"
- },
- {
-  "RuleID": "netbox-v1-token",
-  "Description": "NetBox v1 API token (40-char hex key)",
   "StartLine": 21,
   "EndLine": 21,
   "StartColumn": 2,
@@ -223,5 +198,30 @@
    "v1"
   ],
   "Fingerprint": "ef1726d42f622dedf4579016dd6a4fa13df26f17:.claude/commands/test-endpoint.md:netbox-v1-token:8"
+ },
+ {
+  "RuleID": "netbox-v1-token",
+  "Description": "NetBox v1 API token (40-char hex key)",
+  "StartLine": 12,
+  "EndLine": 12,
+  "StartColumn": 2,
+  "EndColumn": 49,
+  "Match": "TOKEN=\"a9717b9520d54d19383649066ef3b25e313bf219\"",
+  "Secret": "a9717b9520d54d19383649066ef3b25e313bf219",
+  "File": ".claude/commands/implement.md",
+  "SymlinkFile": "",
+  "Commit": "ef1726d42f622dedf4579016dd6a4fa13df26f17",
+  "Link": "https://github.com/ctrl-alt-automate/PowerNetbox/blob/ef1726d42f622dedf4579016dd6a4fa13df26f17/.claude/commands/implement.md?plain=1#L12",
+  "Entropy": 3.7659574,
+  "Author": "ctrl-alt-automate",
+  "Email": "elvis@deployment-team.nl",
+  "Date": "2025-12-10T22:15:53Z",
+  "Message": "Add development tooling and Claude Code integration\n\n- Add CLAUDE.md with project overview and development guide\n- Add Connect-DevNetbox.ps1 helper script for quick API connection\n- Add .netboxps.config.example.ps1 template for local credentials\n- Add specialized slash commands for AI-assisted development:\n  - /netbox-api: Netbox API expert for endpoint documentation\n  - /powershell-expert: PowerShell best practices guidance\n  - /implement: Combined workflow for new endpoint implementation\n  - /test-endpoint: Compatibility testing against Netbox 4.4.7\n- Update .gitignore to exclude local config files\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 \u003cnoreply@anthropic.com\u003e",
+  "Tags": [
+   "netbox",
+   "token",
+   "v1"
+  ],
+  "Fingerprint": "ef1726d42f622dedf4579016dd6a4fa13df26f17:.claude/commands/implement.md:netbox-v1-token:12"
  }
 ]
