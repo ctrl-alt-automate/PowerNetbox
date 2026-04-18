@@ -569,6 +569,118 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' {
                 $result.results | Should -Not -BeNullOrEmpty
             }
         }
+
+        Context "Pagination next-URL origin validation (Tier 2 security review - TM-1/IV-1)" {
+            It "Should throw when 'next' points to a different host" {
+                InModuleScope -ModuleName 'PowerNetbox' {
+                    Mock -CommandName 'Invoke-RestMethod' -MockWith {
+                        return @{
+                            count = 2
+                            next = 'https://attacker.example.com/api/dcim/devices/?limit=1&offset=1'
+                            previous = $null
+                            results = @(@{id=1; name='device1'})
+                        }
+                    }
+
+                    $URI = BuildNewURI -Segments 'dcim', 'devices' -SkipConnectedCheck
+                    { InvokeNetboxRequest -URI $URI -All -PageSize 1 } |
+                        Should -Throw -ExpectedMessage '*Refusing to follow pagination*different origin*attacker.example.com*'
+                }
+            }
+
+            It "Should throw when 'next' downgrades scheme from https to http" {
+                InModuleScope -ModuleName 'PowerNetbox' {
+                    Mock -CommandName 'Invoke-RestMethod' -MockWith {
+                        return @{
+                            count = 2
+                            next = 'http://netbox.domain.com/api/dcim/devices/?limit=1&offset=1'
+                            previous = $null
+                            results = @(@{id=1; name='device1'})
+                        }
+                    }
+
+                    $URI = BuildNewURI -Segments 'dcim', 'devices' -SkipConnectedCheck
+                    { InvokeNetboxRequest -URI $URI -All -PageSize 1 } |
+                        Should -Throw -ExpectedMessage '*Refusing to follow pagination*'
+                }
+            }
+
+            It "Should throw when 'next' changes the port" {
+                InModuleScope -ModuleName 'PowerNetbox' {
+                    Mock -CommandName 'Invoke-RestMethod' -MockWith {
+                        return @{
+                            count = 2
+                            next = 'https://netbox.domain.com:8443/api/dcim/devices/?limit=1&offset=1'
+                            previous = $null
+                            results = @(@{id=1; name='device1'})
+                        }
+                    }
+
+                    $URI = BuildNewURI -Segments 'dcim', 'devices' -SkipConnectedCheck
+                    { InvokeNetboxRequest -URI $URI -All -PageSize 1 } |
+                        Should -Throw -ExpectedMessage '*Refusing to follow pagination*'
+                }
+            }
+
+            It "Should allow 'next' with matching scheme, host, and port" {
+                InModuleScope -ModuleName 'PowerNetbox' {
+                    $script:sameOriginPages = 0
+                    Mock -CommandName 'Invoke-RestMethod' -MockWith {
+                        $script:sameOriginPages++
+                        if ($script:sameOriginPages -eq 1) {
+                            return @{
+                                count = 2
+                                next = 'https://netbox.domain.com/api/dcim/devices/?limit=1&offset=1'
+                                previous = $null
+                                results = @(@{id=1; name='device1'})
+                            }
+                        }
+                        return @{
+                            count = 2
+                            next = $null
+                            previous = $null
+                            results = @(@{id=2; name='device2'})
+                        }
+                    }
+
+                    $URI = BuildNewURI -Segments 'dcim', 'devices' -SkipConnectedCheck
+                    $results = InvokeNetboxRequest -URI $URI -All -PageSize 1
+                    $results.Count | Should -Be 2
+                }
+            }
+
+            It "Should allow 'next' when original URI has explicit default port but 'next' omits it" {
+                # Edge case (Gemini review round 1): URI constructed with
+                # explicit port 443, server returns 'next' without the port.
+                # Both should normalise to the same origin via GetLeftPart.
+                InModuleScope -ModuleName 'PowerNetbox' {
+                    $script:edgeCasePages = 0
+                    Mock -CommandName 'Invoke-RestMethod' -MockWith {
+                        $script:edgeCasePages++
+                        if ($script:edgeCasePages -eq 1) {
+                            return @{
+                                count = 2
+                                # No explicit port - UriBuilder fills 443 but GetLeftPart omits it
+                                next = 'https://netbox.domain.com/api/dcim/devices/?limit=1&offset=1'
+                                previous = $null
+                                results = @(@{id=1; name='device1'})
+                            }
+                        }
+                        return @{
+                            count = 2
+                            next = $null
+                            previous = $null
+                            results = @(@{id=2; name='device2'})
+                        }
+                    }
+
+                    # Construct URI with explicit port 443 to exercise the edge case
+                    $URI = [System.UriBuilder]::new('https', 'netbox.domain.com', 443, '/api/dcim/devices/')
+                    $results = InvokeNetboxRequest -URI $URI -All -PageSize 1
+                    $results.Count | Should -Be 2
+                }
+            }
+        }
     }
 
     Context "InvokeNetboxRequest Error Handling" {
