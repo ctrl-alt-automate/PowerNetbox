@@ -20,6 +20,7 @@ description = "Placeholder v2 tokens used in docs and tests"
 regexTarget = "match"
 regexes = [
     '''nbt_abc123\.xyz789''',
+    '''nbt_abc123def456\.ghijklmnopqrstuvwxyz1234567890''',
     '''nbt_ExampleKey123\.ExampleSecretValue456789''',
     '''nbt_yourKey\.yourSecret''',
     '''nbt_\{key\}\.\{secret\}''',
@@ -42,14 +43,13 @@ tags = ["netbox", "token", "v1"]
 description = "PowerNetbox project-wide allowlist"
 
 paths = [
-    # Tests use fake tokens throughout
-    '''(^|/)Tests/.*\.Tests\.ps1$''',
-    # Docs reference example tokens
-    '''(^|/)docs/''',
-    # This file itself
+    # The config file itself contains example patterns that would trip its own rules.
     '''(^|/)\.gitleaks\.toml$''',
-    # Baseline captures historic findings that have been rotated
+    # Baseline captures historic findings that have been rotated.
     '''(^|/)\.gitleaks-baseline\.json$''',
+    # Note: Tests/ and docs/ are intentionally NOT excluded so real tokens
+    # accidentally landing there are still caught. Rely on the regex
+    # allowlist below for known-safe placeholders.
 ]
 
 regexes = [
@@ -57,10 +57,13 @@ regexes = [
     '''0123456789abcdef0123456789abcdef01234567''',
     # Slack webhook placeholder pattern (T00000000/B00000000/XXX...)
     '''hooks\.slack\.com/services/T0+/B0+/X+''',
-    # Common placeholder patterns
+    # Common placeholder patterns — matches YOUR_TOKEN, my-api-key, etc.
     '''(?i)your[-_]?(api[-_]?)?(token|key|secret)''',
-    '''(?i)(example|sample|placeholder|fake|dummy|test)[-_]?(token|key|secret)''',
-    '''(?i)(<|\[|\{)[^>\]\}]*(token|key|secret|password)[^>\]\}]*(>|\]|\})''',
+    '''(?i)(example|sample|placeholder|fake|dummy|test|insert|my)[-_]?(api[-_]?)?(token|key|secret|password)''',
+    # Angle-bracket placeholders only: <TOKEN>, <YOUR_API_KEY>.
+    # Intentionally narrow — does NOT match PowerShell hashtables (`@{ token = 'x' }`)
+    # or JSON objects (`{"secret": "value"}`), which could hide real secrets.
+    '''(?i)<(your|placeholder|example|fake|insert|my)?[-_]?(api[-_]?)?(token|key|secret|password|pat)>''',
     # xxxxxxxx, ****, 00000000 sequences
     '''x{8,}''',
     '''\*{8,}''',
