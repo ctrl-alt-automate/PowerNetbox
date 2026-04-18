@@ -648,6 +648,38 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' {
                     $results.Count | Should -Be 2
                 }
             }
+
+            It "Should allow 'next' when original URI has explicit default port but 'next' omits it" {
+                # Edge case (Gemini review round 1): URI constructed with
+                # explicit port 443, server returns 'next' without the port.
+                # Both should normalise to the same origin via GetLeftPart.
+                InModuleScope -ModuleName 'PowerNetbox' {
+                    $script:edgeCasePages = 0
+                    Mock -CommandName 'Invoke-RestMethod' -MockWith {
+                        $script:edgeCasePages++
+                        if ($script:edgeCasePages -eq 1) {
+                            return @{
+                                count = 2
+                                # No explicit port — UriBuilder fills 443 but GetLeftPart omits it
+                                next = 'https://netbox.domain.com/api/dcim/devices/?limit=1&offset=1'
+                                previous = $null
+                                results = @(@{id=1; name='device1'})
+                            }
+                        }
+                        return @{
+                            count = 2
+                            next = $null
+                            previous = $null
+                            results = @(@{id=2; name='device2'})
+                        }
+                    }
+
+                    # Construct URI with explicit port 443 to exercise the edge case
+                    $URI = [System.UriBuilder]::new('https', 'netbox.domain.com', 443, '/api/dcim/devices/')
+                    $results = InvokeNetboxRequest -URI $URI -All -PageSize 1
+                    $results.Count | Should -Be 2
+                }
+            }
         }
     }
 

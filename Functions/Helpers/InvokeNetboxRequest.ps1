@@ -111,14 +111,21 @@ function InvokeNetboxRequest {
             $pageNum++
             $currentUri = if ($nextUrl) {
                 # Validate that the server-returned pagination URL matches the
-                # original request's scheme + host before following it. Without
-                # this check, a compromised or malicious NetBox server could
-                # redirect pagination to an attacker-controlled host and
-                # receive the Authorization header (Bearer token) in plaintext.
+                # original request's origin (scheme + host + port) before
+                # following it. Without this check, a compromised or malicious
+                # NetBox server could redirect pagination to an attacker-
+                # controlled host and receive the Authorization header (Bearer
+                # token) in plaintext.
                 # Reference: 2026-04-18 Tier 2 security review, finding TM-1/IV-1.
-                $nextBuilder = [System.UriBuilder]::new($nextUrl)
-                if ($nextBuilder.Scheme -ne $URI.Scheme -or $nextBuilder.Host -ne $URI.Host -or $nextBuilder.Port -ne $URI.Port) {
-                    throw "Refusing to follow pagination 'next' URL to a different origin. Expected $($URI.Scheme)://$($URI.Host):$($URI.Port), got $($nextBuilder.Scheme)://$($nextBuilder.Host):$($nextBuilder.Port). This may indicate a compromised server or man-in-the-middle attack."
+                # Using Uri.GetLeftPart(Authority) gives a canonical
+                # "scheme://host[:port]" that handles default-port substitution
+                # consistently across how the URI was constructed (explicit
+                # port vs parsed from a string).
+                $nextBuilder     = [System.UriBuilder]::new($nextUrl)
+                $originalOrigin  = $URI.Uri.GetLeftPart([System.UriPartial]::Authority)
+                $nextOrigin      = $nextBuilder.Uri.GetLeftPart([System.UriPartial]::Authority)
+                if ($nextOrigin -ne $originalOrigin) {
+                    throw "Refusing to follow pagination 'next' URL to a different origin. Expected $originalOrigin, got $nextOrigin. This may indicate a compromised server or man-in-the-middle attack."
                 }
                 $nextBuilder
             }
