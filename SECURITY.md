@@ -70,7 +70,7 @@ Current hardening includes:
 - Cross-origin validation on pagination `.next` URLs (PR #404)
 - `gitleaks` CI + `.gitleaks-baseline.json` + pre-commit hook (PR #403)
 - Restricted GitHub Actions permissions (`contents: read` default)
-- Max upload size (10 MB) on image attachments; max bulk-operation item cap
+- Client-side 10 MB upload cap on `New-NBImageAttachment` (see `Functions/Extras/ImageAttachments/New-NBImageAttachment.ps1`); client-side default 10 000-item cap on `Send-NBBulkRequest` via `-MaxItems` (see `Functions/Helpers/Send-NBBulkRequest.ps1`). Both are local guards that throw before any network call — server-side limits from NetBox apply on top.
 
 ## Code signing
 

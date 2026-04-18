@@ -344,8 +344,12 @@ source tier). Once active:
 - Consumers can verify authenticity with:
 
   ```powershell
-  $module = Get-Module -ListAvailable PowerNetbox | Select-Object -First 1
-  Get-AuthenticodeSignature (Join-Path $module.ModuleBase 'PowerNetbox.psm1')
+  $module = Get-Module -ListAvailable PowerNetbox |
+      Sort-Object Version -Descending |
+      Select-Object -First 1
+  if ($module) {
+      Get-AuthenticodeSignature (Join-Path $module.ModuleBase 'PowerNetbox.psd1')
+  }
   ```
 
 - Team roles for signing governance:
