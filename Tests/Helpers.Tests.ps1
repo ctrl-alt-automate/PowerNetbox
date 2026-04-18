@@ -570,7 +570,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' {
             }
         }
 
-        Context "Pagination next-URL origin validation (Tier 2 security review — TM-1/IV-1)" {
+        Context "Pagination next-URL origin validation (Tier 2 security review - TM-1/IV-1)" {
             It "Should throw when 'next' points to a different host" {
                 InModuleScope -ModuleName 'PowerNetbox' {
                     Mock -CommandName 'Invoke-RestMethod' -MockWith {
@@ -660,7 +660,7 @@ Describe "Helpers tests" -Tag 'Core', 'Helpers' {
                         if ($script:edgeCasePages -eq 1) {
                             return @{
                                 count = 2
-                                # No explicit port — UriBuilder fills 443 but GetLeftPart omits it
+                                # No explicit port - UriBuilder fills 443 but GetLeftPart omits it
                                 next = 'https://netbox.domain.com/api/dcim/devices/?limit=1&offset=1'
                                 previous = $null
                                 results = @(@{id=1; name='device1'})
