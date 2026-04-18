@@ -25,12 +25,16 @@ regexes = [
     '''nbt_\{key\}\.\{secret\}''',
 ]
 
-# Custom rule: NetBox v1 token (40-char hex)
+# Custom rule: NetBox v1 token (40-char hex). Matches PowerShell assignment
+# style (`Token = '...'`), YAML/JSON style (`token: "..."`), and common
+# variable-name prefixes (NETBOX_TOKEN, API_TOKEN, etc.).
+# This rule catches tokens that gitleaks' built-in generic-api-key rule
+# may miss due to low-entropy leading chars (e.g. 'aaaa4bb9...').
 [[rules]]
 id = "netbox-v1-token"
 description = "NetBox v1 API token (40-char hex key)"
-regex = '''(?i)(?:netbox[_-]?token|nb[_-]?token|api[_-]?token)\s*[:=]\s*["']?([a-f0-9]{40})["']?'''
-keywords = ["token", "netbox"]
+regex = '''(?i)(?:token|netbox[_-]?token|nb[_-]?token|api[_-]?token|api[_-]?key)\s*[:=]\s*["']?([a-f0-9]{40})["']?'''
+keywords = ["token", "apikey", "api_key"]
 tags = ["netbox", "token", "v1"]
 
 # Global allowlist for common PowerNetbox test/placeholder values
