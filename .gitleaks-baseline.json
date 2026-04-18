@@ -25,6 +25,31 @@
   "Fingerprint": "8044791c23a49df78e385aca6ffc74b0023f8ab1:.github/workflows/integration.yml:netbox-v2-token:272"
  },
  {
+  "RuleID": "netbox-v2-token",
+  "Description": "NetBox v2 Bearer token (nbt_\u003ckey\u003e.\u003csecret\u003e)",
+  "StartLine": 28,
+  "EndLine": 28,
+  "StartColumn": 22,
+  "EndColumn": 78,
+  "Match": "nbt_kVJSfSxl3xvO.b4KIab8fc0sKntsws0KK7j6VwWNYnztZ9BOC7NAq",
+  "Secret": "nbt_kVJSfSxl3xvO.b4KIab8fc0sKntsws0KK7j6VwWNYnztZ9BOC7NAq",
+  "File": "Tests/Scenario/ScenarioTestHelper.psm1",
+  "SymlinkFile": "",
+  "Commit": "02c3b9594f380b310bc07ea43487019d3d960e49",
+  "Link": "https://github.com/ctrl-alt-automate/PowerNetbox/blob/02c3b9594f380b310bc07ea43487019d3d960e49/Tests/Scenario/ScenarioTestHelper.psm1#L28",
+  "Entropy": 5.043073,
+  "Author": "ctrl-alt-automate",
+  "Email": "elvis@deployment-team.nl",
+  "Date": "2026-01-03T15:16:15Z",
+  "Message": "feat: Add 500 error fallback for bulk operations\n\nWhen bulk API requests fail with 500 Internal Server Error (which can\noccur due to Redis cache inconsistency on cloud-hosted Netbox instances),\nthe module now automatically falls back to sequential single-item requests.\n\nChanges:\n- Send-NBBulkRequest: Add 500 error detection and sequential fallback\n  with exponential backoff retry (3 attempts, 500ms/1s/2s delays)\n- Connect-NBAPI: Add AllowInsecureRedirect for PS 7.4+ compatibility\n- Set-NBIPAMAddress: Add ValueFromPipelineByPropertyName to Status/Description\n- Get-NBTenant: Rename GroupID to Group_Id with backwards-compatible alias\n- Add Scenario test suite for bulk operations, workflows, filters\n\nFixes: Test file bug where $($i++) in string interpolation doesn't work\nin PowerShell - increment must be on separate line before use.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 \u003cnoreply@anthropic.com\u003e",
+  "Tags": [
+   "netbox",
+   "token",
+   "v2"
+  ],
+  "Fingerprint": "02c3b9594f380b310bc07ea43487019d3d960e49:Tests/Scenario/ScenarioTestHelper.psm1:netbox-v2-token:28"
+ },
+ {
   "RuleID": "netbox-v1-token",
   "Description": "NetBox v1 API token (40-char hex key)",
   "StartLine": 13,
@@ -102,31 +127,6 @@
  {
   "RuleID": "netbox-v2-token",
   "Description": "NetBox v2 Bearer token (nbt_\u003ckey\u003e.\u003csecret\u003e)",
-  "StartLine": 28,
-  "EndLine": 28,
-  "StartColumn": 22,
-  "EndColumn": 78,
-  "Match": "nbt_kVJSfSxl3xvO.b4KIab8fc0sKntsws0KK7j6VwWNYnztZ9BOC7NAq",
-  "Secret": "nbt_kVJSfSxl3xvO.b4KIab8fc0sKntsws0KK7j6VwWNYnztZ9BOC7NAq",
-  "File": "Tests/Scenario/ScenarioTestHelper.psm1",
-  "SymlinkFile": "",
-  "Commit": "02c3b9594f380b310bc07ea43487019d3d960e49",
-  "Link": "https://github.com/ctrl-alt-automate/PowerNetbox/blob/02c3b9594f380b310bc07ea43487019d3d960e49/Tests/Scenario/ScenarioTestHelper.psm1#L28",
-  "Entropy": 5.043073,
-  "Author": "ctrl-alt-automate",
-  "Email": "elvis@deployment-team.nl",
-  "Date": "2026-01-03T15:16:15Z",
-  "Message": "feat: Add 500 error fallback for bulk operations\n\nWhen bulk API requests fail with 500 Internal Server Error (which can\noccur due to Redis cache inconsistency on cloud-hosted Netbox instances),\nthe module now automatically falls back to sequential single-item requests.\n\nChanges:\n- Send-NBBulkRequest: Add 500 error detection and sequential fallback\n  with exponential backoff retry (3 attempts, 500ms/1s/2s delays)\n- Connect-NBAPI: Add AllowInsecureRedirect for PS 7.4+ compatibility\n- Set-NBIPAMAddress: Add ValueFromPipelineByPropertyName to Status/Description\n- Get-NBTenant: Rename GroupID to Group_Id with backwards-compatible alias\n- Add Scenario test suite for bulk operations, workflows, filters\n\nFixes: Test file bug where $($i++) in string interpolation doesn't work\nin PowerShell - increment must be on separate line before use.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 \u003cnoreply@anthropic.com\u003e",
-  "Tags": [
-   "netbox",
-   "token",
-   "v2"
-  ],
-  "Fingerprint": "02c3b9594f380b310bc07ea43487019d3d960e49:Tests/Scenario/ScenarioTestHelper.psm1:netbox-v2-token:28"
- },
- {
-  "RuleID": "netbox-v2-token",
-  "Description": "NetBox v2 Bearer token (nbt_\u003ckey\u003e.\u003csecret\u003e)",
   "StartLine": 242,
   "EndLine": 242,
   "StartColumn": 24,
@@ -150,25 +150,29 @@
   "Fingerprint": "a449cfaa9c6c7618986285ab852df27a9e863c0b:.github/workflows/integration.yml:netbox-v2-token:242"
  },
  {
-  "RuleID": "generic-api-key",
-  "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
-  "StartLine": 86,
-  "EndLine": 86,
-  "StartColumn": 15,
-  "EndColumn": 73,
-  "Match": "v2Token = 'nbt_abc123def456.ghijklmnopqrstuvwxyz1234567890'",
-  "Secret": "nbt_abc123def456.ghijklmnopqrstuvwxyz1234567890",
-  "File": "Tests/Setup.Tests.ps1",
+  "RuleID": "netbox-v1-token",
+  "Description": "NetBox v1 API token (40-char hex key)",
+  "StartLine": 12,
+  "EndLine": 12,
+  "StartColumn": 2,
+  "EndColumn": 49,
+  "Match": "TOKEN=\"a9717b9520d54d19383649066ef3b25e313bf219\"",
+  "Secret": "a9717b9520d54d19383649066ef3b25e313bf219",
+  "File": ".claude/commands/implement.md",
   "SymlinkFile": "",
-  "Commit": "1f4b3efe76d178b60759bc15cde483abf9466ad3",
-  "Link": "https://github.com/ctrl-alt-automate/PowerNetbox/blob/1f4b3efe76d178b60759bc15cde483abf9466ad3/Tests/Setup.Tests.ps1#L86",
-  "Entropy": 5.1716104,
+  "Commit": "ef1726d42f622dedf4579016dd6a4fa13df26f17",
+  "Link": "https://github.com/ctrl-alt-automate/PowerNetbox/blob/ef1726d42f622dedf4579016dd6a4fa13df26f17/.claude/commands/implement.md?plain=1#L12",
+  "Entropy": 3.7659574,
   "Author": "ctrl-alt-automate",
   "Email": "elvis@deployment-team.nl",
-  "Date": "2025-12-26T21:46:36Z",
-  "Message": "feat(auth): Add Token v2 Bearer authentication support (#102)\n\n- Auto-detect token format based on 'nbt_' prefix\n- Use Bearer auth header for v2 tokens (nbt_*)\n- Use Token auth header for v1 legacy tokens\n- Update Connect-NBAPI documentation with token formats\n- Add unit tests for both token formats\n\nToken v2 (introduced in Netbox 4.5) uses HMAC hashing with a\ncryptographic pepper for improved security. The module now\nautomatically selects the correct auth header based on token format.\n\nToken format reference:\n- v1 (legacy): 40-char hex, header: \"Token \u003ctoken\u003e\"\n- v2 (4.5+): nbt_\u003ckey\u003e.\u003ctoken\u003e, header: \"Bearer \u003ctoken\u003e\"\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 \u003cnoreply@anthropic.com\u003e",
-  "Tags": [],
-  "Fingerprint": "1f4b3efe76d178b60759bc15cde483abf9466ad3:Tests/Setup.Tests.ps1:generic-api-key:86"
+  "Date": "2025-12-10T22:15:53Z",
+  "Message": "Add development tooling and Claude Code integration\n\n- Add CLAUDE.md with project overview and development guide\n- Add Connect-DevNetbox.ps1 helper script for quick API connection\n- Add .netboxps.config.example.ps1 template for local credentials\n- Add specialized slash commands for AI-assisted development:\n  - /netbox-api: Netbox API expert for endpoint documentation\n  - /powershell-expert: PowerShell best practices guidance\n  - /implement: Combined workflow for new endpoint implementation\n  - /test-endpoint: Compatibility testing against Netbox 4.4.7\n- Update .gitignore to exclude local config files\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 \u003cnoreply@anthropic.com\u003e",
+  "Tags": [
+   "netbox",
+   "token",
+   "v1"
+  ],
+  "Fingerprint": "ef1726d42f622dedf4579016dd6a4fa13df26f17:.claude/commands/implement.md:netbox-v1-token:12"
  },
  {
   "RuleID": "netbox-v1-token",
@@ -219,30 +223,5 @@
    "v1"
   ],
   "Fingerprint": "ef1726d42f622dedf4579016dd6a4fa13df26f17:.claude/commands/test-endpoint.md:netbox-v1-token:8"
- },
- {
-  "RuleID": "netbox-v1-token",
-  "Description": "NetBox v1 API token (40-char hex key)",
-  "StartLine": 12,
-  "EndLine": 12,
-  "StartColumn": 2,
-  "EndColumn": 49,
-  "Match": "TOKEN=\"a9717b9520d54d19383649066ef3b25e313bf219\"",
-  "Secret": "a9717b9520d54d19383649066ef3b25e313bf219",
-  "File": ".claude/commands/implement.md",
-  "SymlinkFile": "",
-  "Commit": "ef1726d42f622dedf4579016dd6a4fa13df26f17",
-  "Link": "https://github.com/ctrl-alt-automate/PowerNetbox/blob/ef1726d42f622dedf4579016dd6a4fa13df26f17/.claude/commands/implement.md?plain=1#L12",
-  "Entropy": 3.7659574,
-  "Author": "ctrl-alt-automate",
-  "Email": "elvis@deployment-team.nl",
-  "Date": "2025-12-10T22:15:53Z",
-  "Message": "Add development tooling and Claude Code integration\n\n- Add CLAUDE.md with project overview and development guide\n- Add Connect-DevNetbox.ps1 helper script for quick API connection\n- Add .netboxps.config.example.ps1 template for local credentials\n- Add specialized slash commands for AI-assisted development:\n  - /netbox-api: Netbox API expert for endpoint documentation\n  - /powershell-expert: PowerShell best practices guidance\n  - /implement: Combined workflow for new endpoint implementation\n  - /test-endpoint: Compatibility testing against Netbox 4.4.7\n- Update .gitignore to exclude local config files\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 \u003cnoreply@anthropic.com\u003e",
-  "Tags": [
-   "netbox",
-   "token",
-   "v1"
-  ],
-  "Fingerprint": "ef1726d42f622dedf4579016dd6a4fa13df26f17:.claude/commands/implement.md:netbox-v1-token:12"
  }
 ]

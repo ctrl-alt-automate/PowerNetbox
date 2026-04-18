@@ -7,38 +7,36 @@ title = "PowerNetbox Gitleaks Configuration"
 [extend]
 useDefault = true
 
-# Custom rule: NetBox v2 Bearer token format (nbt_<key>.<secret>)
+# Custom rule: NetBox v2 Bearer token format (nbt_<key>.<secret>).
+# Word boundaries (\b) prevent partial matches inside longer alphanumeric
+# strings — e.g. `XnbtX_abc123.xyz...` (unlikely but possible) won't false-
+# positive at the inner "nbt_" position.
 [[rules]]
 id = "netbox-v2-token"
 description = "NetBox v2 Bearer token (nbt_<key>.<secret>)"
-regex = '''nbt_[A-Za-z0-9]{10,}\.[A-Za-z0-9]{30,}'''
+regex = '''\bnbt_[A-Za-z0-9]{10,}\.[A-Za-z0-9]{30,}\b'''
 keywords = ["nbt_"]
 tags = ["netbox", "token", "v2"]
-
-[rules.allowlist]
-description = "Placeholder v2 tokens used in docs and tests"
-regexTarget = "match"
-regexes = [
-    '''nbt_abc123\.xyz789''',
-    '''nbt_abc123def456\.ghijklmnopqrstuvwxyz1234567890''',
-    '''nbt_ExampleKey123\.ExampleSecretValue456789''',
-    '''nbt_yourKey\.yourSecret''',
-    '''nbt_\{key\}\.\{secret\}''',
-]
 
 # Custom rule: NetBox v1 token (40-char hex). Matches PowerShell assignment
 # style (`Token = '...'`), YAML/JSON style (`token: "..."`), and common
 # variable-name prefixes (NETBOX_TOKEN, API_TOKEN, etc.).
 # This rule catches tokens that gitleaks' built-in generic-api-key rule
 # may miss due to low-entropy leading chars (e.g. 'aaaa4bb9...').
+# Word boundaries ensure exactly-40-hex match — a 48-hex string won't
+# match the first 40 chars.  Go's regexp package doesn't support negative
+# lookahead, so `\b` is the portable equivalent.
 [[rules]]
 id = "netbox-v1-token"
 description = "NetBox v1 API token (40-char hex key)"
-regex = '''(?i)(?:token|netbox[_-]?token|nb[_-]?token|api[_-]?token|api[_-]?key)\s*[:=]\s*["']?([a-f0-9]{40})["']?'''
-keywords = ["token", "apikey", "api_key"]
+regex = '''(?i)(?:token|netbox[_-]?token|nb[_-]?token|api[_-]?token|api[_-]?key)\s*[:=]\s*["']?\b([a-f0-9]{40})\b["']?'''
+keywords = ["token", "apikey", "api_key", "api-key"]
+secretGroup = 1
 tags = ["netbox", "token", "v1"]
 
-# Global allowlist for common PowerNetbox test/placeholder values
+# Global allowlist for common PowerNetbox test/placeholder values.
+# Placeholders live here (not per-rule) so they're suppressed against every
+# rule, including the default generic-api-key entropy scan.
 [allowlist]
 description = "PowerNetbox project-wide allowlist"
 
@@ -60,6 +58,14 @@ regexes = [
     # Common placeholder patterns — matches YOUR_TOKEN, my-api-key, etc.
     '''(?i)your[-_]?(api[-_]?)?(token|key|secret)''',
     '''(?i)(example|sample|placeholder|fake|dummy|test|insert|my)[-_]?(api[-_]?)?(token|key|secret|password)''',
+    # NetBox v2 token placeholders used in docs and tests. Kept here (not in
+    # a per-rule allowlist) so they're also ignored by the generic-api-key
+    # rule if its entropy heuristic ever catches them.
+    '''nbt_abc123\.xyz789''',
+    '''nbt_abc123def456\.ghijklmnopqrstuvwxyz1234567890''',
+    '''nbt_ExampleKey123\.ExampleSecretValue456789''',
+    '''nbt_yourKey\.yourSecret''',
+    '''nbt_\{key\}\.\{secret\}''',
     # Angle-bracket placeholders only: <TOKEN>, <YOUR_API_KEY>.
     # Intentionally narrow — does NOT match PowerShell hashtables (`@{ token = 'x' }`)
     # or JSON objects (`{"secret": "value"}`), which could hide real secrets.
