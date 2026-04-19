@@ -77,7 +77,7 @@ function Get-NB[Module][Resource] {
         # [Parameter(ParameterSetName = 'Query')]
         # [uint64]$Site_Id,
         [uint16]$Limit,
-        [uint16]$Offset,
+        [uint32]$Offset,   # uint32, not uint16 — NetBox datasets (IPAM, Circuits) exceed 65 535 items
         [switch]$Brief,
         [string[]]$Fields,
         [string[]]$Omit,
@@ -93,8 +93,19 @@ function Get-NB[Module][Resource] {
         Write-Verbose "Retrieving <Resource>"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
+                # Pass projection params (Brief / Fields / Omit) through on
+                # detail endpoints too — NetBox supports ?brief=1 / ?fields=
+                # / ?omit= on /api/<module>/<resource>/<id>/ (not just on
+                # list endpoints). Call BuildURIComponents with 'Id', 'Raw',
+                # 'All', 'PageSize' skipped so only Brief/Fields/Omit and any
+                # other meaningful flags end up as query params.
                 foreach ($i in $Id) {
-                    InvokeNetboxRequest -URI (BuildNewURI -Segments @('<module>', '<resource>', $i)) -Raw:$Raw
+                    $Segments = [System.Collections.ArrayList]::new(@('<module>', '<resource>', $i))
+                    $URIComponents = BuildURIComponents -URISegments $Segments.Clone() `
+                        -ParametersDictionary $PSBoundParameters `
+                        -SkipParameterByName 'Id', 'Raw', 'All', 'PageSize'
+                    $URI = BuildNewURI -Segments $URIComponents.Segments -Parameters $URIComponents.Parameters
+                    InvokeNetboxRequest -URI $URI -Raw:$Raw
                 }
             }
             default {
