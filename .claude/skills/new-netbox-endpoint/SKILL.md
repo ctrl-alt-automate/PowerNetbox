@@ -1,6 +1,6 @@
 ---
 name: new-netbox-endpoint
-description: Use when adding a new NetBox REST API endpoint to PowerNetbox as a set of PowerShell cmdlets (Get / New / Set / Remove). Covers function templates, parameter conventions, test patterns, ValidateSet parity checks, and the PS 5.1 / Nullable / Tags gotchas that recur on this codebase.
+description: Use when adding or porting a PowerShell cmdlet that wraps a NetBox REST API endpoint in PowerNetbox — creating a Get-NB, New-NB, Set-NB, or Remove-NB function for a new or missing resource, touching a ValidateSet on an existing one, or writing the matching Pester tests.
 ---
 
 # Adding a new NetBox endpoint to PowerNetbox
@@ -52,6 +52,15 @@ logging (never `Write-Host` in non-interactive paths).
 
 ### GET
 
+Add query filter parameters (`-Label`, `-Parent`, `-Status`, etc.) inside
+the `ParameterSet = 'Query'` group — they flow through `BuildURIComponents`
+automatically and appear as `?name=value` query params. Match the NetBox
+API field name one-to-one (e.g. API field `mark_utilized` → PS param
+`Mark_Utilized`; snake→PascalCase via underscore). Type-check each:
+numeric IDs as `[uint64]`, booleans as `[bool]` (never `[switch]`), arrays
+as `[string[]]` or `[uint64[]]` depending on whether the API filter
+expects names or IDs.
+
 ```powershell
 function Get-NB[Module][Resource] {
     [CmdletBinding(DefaultParameterSetName = 'Query')]
@@ -63,6 +72,10 @@ function Get-NB[Module][Resource] {
         [uint64[]]$Id,
         [Parameter(ParameterSetName = 'Query')]
         [string]$Name,
+        # [Parameter(ParameterSetName = 'Query')]
+        # [string]$Status,                                # <-- filter params go here
+        # [Parameter(ParameterSetName = 'Query')]
+        # [uint64]$Site_Id,
         [uint16]$Limit,
         [uint16]$Offset,
         [switch]$Brief,
@@ -71,12 +84,13 @@ function Get-NB[Module][Resource] {
         [switch]$Raw
     )
     process {
-        # Enforce mutual exclusion — user can pick ONE projection strategy.
-        # See Functions/Helpers/AssertNBMutualExclusiveParam.ps1 (PR #397/#400).
+        # MANDATORY on every Get cmdlet since PR #397/#400.
+        # User picks exactly one projection — Brief, Fields, OR Omit.
         AssertNBMutualExclusiveParam `
             -BoundParameters $PSBoundParameters `
             -Parameters 'Brief', 'Fields', 'Omit'
 
+        Write-Verbose "Retrieving <Resource>"
         switch ($PSCmdlet.ParameterSetName) {
             'ByID' {
                 foreach ($i in $Id) {
@@ -105,10 +119,14 @@ function New-NB[Module][Resource] {
     param (
         [Parameter(Mandatory)]
         [string]$Name,
-        [object[]]$Tags,   # prefer [object[]] over [string[]] / [uint64[]] — see Pitfalls
+        # Prefer [object[]] for Tags — it accepts both IDs (uint64) and
+        # strings. Older cmdlets use [string[]] or [uint64[]] and are
+        # kept as-is for back-compat, but new code should use [object[]].
+        [object[]]$Tags,
         [switch]$Raw
     )
     process {
+        Write-Verbose "Creating <Resource>: $Name"
         $Segments = [System.Collections.ArrayList]::new(@('<module>', '<resource>'))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() `
             -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Raw'
@@ -133,6 +151,7 @@ function Set-NB[Module][Resource] {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Updating <Resource> ID $Id"
         $Segments = [System.Collections.ArrayList]::new(@('<module>', '<resource>', $Id))
         $URIComponents = BuildURIComponents -URISegments $Segments.Clone() `
             -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
@@ -157,6 +176,7 @@ function Remove-NB[Module][Resource] {
         [switch]$Raw
     )
     process {
+        Write-Verbose "Deleting <Resource> ID $Id"
         if ($PSCmdlet.ShouldProcess($Id, 'Delete <Resource>')) {
             InvokeNetboxRequest `
                 -URI (BuildNewURI -Segments @('<module>', '<resource>', $Id)) `
