@@ -201,7 +201,7 @@ Describe "<Module> tests" -Tag '<Module>' {
             return [ordered]@{
                 'Method' = if ($Method) { $Method } else { 'GET' }   # defaults don't apply to mocks
                 'Uri'    = $URI.Uri.AbsoluteUri                        # AbsoluteUri encodes spaces as %20
-                'Body'   = if ($Body) { $Body | ConvertTo-Json -Compress } else { $null }
+                'Body'   = if ($Body) { $Body | ConvertTo-Json -Compress -Depth 10 } else { $null }
             }
         }
         InModuleScope -ModuleName 'PowerNetbox' {
@@ -252,6 +252,7 @@ meta-values like `'Both'` for rack elevation), add an exemption to
 | `ConvertTo-Json` mangles nested objects at the default depth | `ConvertTo-Json` defaults to `-Depth 2` | Pass `-Depth 10` explicitly when needed |
 | PSCustomObject iterated like a hashtable throws | PSCustomObject is not a hashtable | Use `$obj.PSObject.Properties` to iterate |
 | Build artefact noise in git diff | `deploy.ps1` updates `PowerNetbox.psd1` date on every build | `git checkout PowerNetbox.psd1` before staging |
+| `-Tags` parameter accepts only names or only IDs, not both | Older cmdlets type `Tags` as `[string[]]` (names) or `[uint64[]]` (IDs) — mutually exclusive | New cmdlets: `[object[]]$Tags` so callers can pass a mix. Legacy cmdlets left as-is for back-compat; add `[object[]]` only on new code |
 | Bulk operations pipeline runs unboundedly | No client throttle by default | `Send-NBBulkRequest` has `MaxItems = 10000` cap; pass `-BatchSize` to size each POST |
 | Pagination `.next` follow to wrong host | Server-controlled URL could be attacker-controlled | `InvokeNetboxRequest` validates origin against original URI via `GetLeftPart(Authority)` (PR #404) |
 
