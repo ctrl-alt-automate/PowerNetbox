@@ -20,7 +20,9 @@ concatenated.ps1
 *.apikey
 
 # Development files (keep in dev branch only)
-.claude/
+.claude/*
+!.claude/skills/
+!.claude/skills/**
 CLAUDE.md
 Connect-DevNetbox.ps1
 .vscode/
