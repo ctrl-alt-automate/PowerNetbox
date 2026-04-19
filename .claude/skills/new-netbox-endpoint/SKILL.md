@@ -175,6 +175,60 @@ function Set-NB[Module][Resource] {
 }
 ```
 
+#### SET — null-clearing for enum string parameters
+
+When a `Set-*` function's parameter has `[ValidateSet]` and the user needs
+to be able to *clear* that field server-side (send JSON `null`), the
+`[AllowNull()] [ValidateSet] [string]` combination doesn't work —
+PowerShell coerces `$null` to `""` at bind time and then ValidateSet
+rejects the empty string (see Pitfalls row 3).
+
+Pattern used on `Set-NBDCIMInterface` (`Duplex`, `POE_Mode`, `POE_Type`,
+`RF_Role`, `Mode`) from PR #401 — add `''` to the ValidateSet as a
+caller-visible sentinel, use `[AllowEmptyString()]`, then translate `''`
+→ `$null` in `process {}` **before** `BuildURIComponents` so the PATCH
+body carries a literal JSON `null`:
+
+```powershell
+function Set-NB[Module][Resource] {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
+    param (
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [uint64]$Id,
+
+        [AllowEmptyString()]
+        [ValidateSet('full', 'half', 'auto', '', IgnoreCase = $true)]
+        [string]$Duplex,                 # pass '' to clear server-side
+
+        [switch]$Raw
+    )
+    process {
+        # Translate '' → $null for the clearable enum params BEFORE
+        # BuildURIComponents, so the PATCH body becomes {"duplex": null}
+        # rather than {"duplex": ""} (which NetBox rejects).
+        $clearable = @('Duplex')
+        foreach ($p in $clearable) {
+            if ($PSBoundParameters.ContainsKey($p) -and $PSBoundParameters[$p] -eq '') {
+                $PSBoundParameters[$p] = $null
+            }
+        }
+
+        $Segments = [System.Collections.ArrayList]::new(@('<module>', '<resource>', $Id))
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() `
+            -ParametersDictionary $PSBoundParameters -SkipParameterByName 'Id', 'Raw'
+        if ($PSCmdlet.ShouldProcess($Id, 'Update <Resource>')) {
+            InvokeNetboxRequest `
+                -URI (BuildNewURI -Segments $URIComponents.Segments) `
+                -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
+        }
+    }
+}
+```
+
+Numeric parameters needing null-clearing use `[Nullable[T]]` instead —
+see Pitfalls row 2 for the `[ValidateRange]` + `[Nullable[int]]` conflict
+and PR #398 for the rollout across 9 numeric Interface parameters.
+
 ### REMOVE
 
 ```powershell
