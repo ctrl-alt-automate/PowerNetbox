@@ -12,12 +12,12 @@
   <br>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/ctrl-alt-automate/PowerNetbox" alt="License"></a>
   <a href="https://github.com/ctrl-alt-automate/PowerNetbox/actions/workflows/pssa.yml"><img src="https://github.com/ctrl-alt-automate/PowerNetbox/actions/workflows/pssa.yml/badge.svg" alt="Lint"></a>
-  <a href="https://github.com/netbox-community/netbox"><img src="https://img.shields.io/badge/Netbox-4.5.0-blue?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyTDIgN2wxMCA1IDEwLTV6TTIgMTdsMTAgNSAxMC01TTIgMTJsMTAgNSAxMC01Ii8+PC9zdmc+" alt="Netbox Version"></a>
+  <a href="https://github.com/netbox-community/netbox"><img src="https://img.shields.io/badge/Netbox-4.5.8-blue?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyTDIgN2wxMCA1IDEwLTV6TTIgMTdsMTAgNSAxMC01TTIgMTJsMTAgNSAxMC01Ii8+PC9zdmc+" alt="Netbox Version"></a>
 </p>
 
 <p align="center">
   <b>The</b> comprehensive PowerShell module for the <a href="https://github.com/netbox-community/netbox">Netbox</a> REST API with <b>100% coverage</b>.<br>
-  Fully compatible with <b>Netbox 4.5.0</b>.
+  Fully compatible with <b>Netbox 4.5.8</b> (supports 4.3+).
 </p>
 
 ---
@@ -43,8 +43,8 @@ We extend our sincere thanks to Ben and all original contributors for building t
 - **524 Functions** - Complete CRUD operations for all resources
 - **Pipeline Support** - Full PowerShell pipeline integration
 - **Performance Optimized** - Brief mode, field selection, config_context exclusion
-- **Secure** - Token-based authentication with TLS 1.2/1.3
-- **Well Tested** - 1436 unit tests + 98 integration tests
+- **Secure** - Token-based authentication (v2 `nbt_` Bearer) with TLS 1.2/1.3
+- **Well Tested** - ~2166 unit tests + 137 integration tests (94 main + 43 branching)
 - **Tab Completion** - Argument completers for common parameters
 - **Verbose Logging** - Write-Verbose in all functions for debugging
 
@@ -52,17 +52,17 @@ We extend our sincere thanks to Ben and all original contributors for building t
 
 | Module | Endpoints | Functions | Status |
 |--------|-----------|-----------|--------|
-| DCIM | 45 | 180 | ✅ Full |
-| IPAM | 18 | 72 | ✅ Full |
-| Virtualization | 5 | 20 | ✅ Full |
+| DCIM | 43 | 180 | ✅ Full |
+| IPAM | 18 | 73 | ✅ Full |
+| Virtualization | 4 | 20 | ✅ Full |
 | Circuits | 11 | 44 | ✅ Full |
 | Tenancy | 5 | 20 | ✅ Full |
 | VPN | 10 | 40 | ✅ Full |
 | Wireless | 3 | 12 | ✅ Full |
-| Extras | 12 | 45 | ✅ Full |
+| Extras | 12 | 46 | ✅ Full |
 | Core | 5 | 8 | ✅ Full |
 | Users | 6 | 24 | ✅ Full |
-| Branching* | 3 | 16 | ✅ Full |
+| Branching* | 4 | 15 | ✅ Full |
 
 \* Requires [netbox-branching](https://github.com/netboxlabs/netbox-branching) plugin
 
@@ -227,7 +227,7 @@ New-NBBranch -Name "feature/new-datacenter" -Description "Planning new DC"
 # Enter branch context - all subsequent operations work in this branch
 Enter-NBBranch -Name "feature/new-datacenter"
     New-NBDCIMSite -Name "DC-New" -Slug "dc-new"
-    New-NBDCIMDevice -Name "server01" -DeviceType 1 -Site 1
+    New-NBDCIMDevice -Name "server01" -Role 1 -Device_Type 1 -Site 1
 Exit-NBBranch
 
 # Or use Invoke-NBInBranch for exception-safe execution
@@ -300,7 +300,7 @@ Import-Module PowerNetbox
 |----------|----------------|
 | PowerShell Desktop | 5.1 |
 | PowerShell Core | 7.0+ |
-| Netbox | 4.1+ (tested with 4.5.0) |
+| Netbox | 4.3+ (tested with 4.3.7, 4.4.10, 4.5.8) |
 
 > **Version Compatibility:** See the [Compatibility Guide](docs/guides/Compatibility.md) for detailed information about supported Netbox versions and API differences.
 
@@ -329,6 +329,44 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 Original copyright (c) 2018 Ben Claussen. Fork maintained by ctrl-alt-automate.
 
 ## Changelog
+
+Full release notes live on [GitHub Releases](https://github.com/ctrl-alt-automate/PowerNetbox/releases). Only the latest versions are detailed below; older versions are summarised for quick lookup.
+
+### v4.5.8.1 (2026-04-17)
+
+- **ValidateSet drift tooling** - `scripts/Verify-ValidateSetParity.ps1` detects drift between PowerNetbox `[ValidateSet]` decorators and NetBox `choices.py` (weighted scoring, CI-gatable via `-FailOnMismatch`)
+- **Full `Brief`/`Fields`/`Omit` mutex rollout** - `AssertNBMutualExclusiveParam` now enforced on all 122 Get functions (completes PR #397 pilot)
+
+### v4.5.8.0 (2026-04-17)
+
+- **Netbox 4.5.8 compatibility** - no API schema changes; CI matrix updated; pure maintenance release upstream
+- **22 new Interface parameters** on `New-NBDCIMInterface` / 21 on `Set-NBDCIMInterface` (#394) - full NetBox Interface API coverage: `label`, `parent`, `bridge`, `speed`, `duplex`, `mark_connected`, `wwn`, `vdcs`, `poe_mode`, `poe_type`, `vlan_group`, `qinq_svlan`, `vrf`, `rf_role`, `rf_channel`, `rf_channel_frequency`, `rf_channel_width`, `tx_power`, `primary_mac_address`, `owner`, `changelog_message`, `tags`
+- **Q-in-Q Mode support** (NetBox 4.2+) with backward-compat translations for existing `Access`/`Tagged`/`Tagged All` and legacy numeric codes
+- **`Brief`/`Fields`/`Omit` mutual exclusion** (#397) - `Get-NBDCIMDevice`, `Get-NBIPAMAddress`, `Get-NBVPNTunnel` now throw a clear `ParameterBindingException` when these flags are combined instead of silently picking one. **Breaking change** for scripts that combined them
+- **`Get-NBDCIMInterface -Type` ValidateSet drift fix** - 104 previously-missing interface types now filterable (100/200/400/800GBASE, 1.6TbE, InfiniBand NDR/XDR, IEEE802.11be)
+- Reimplementation of community PR #396 by @mkarel with `Co-Authored-By` credit
+
+### v4.5.7.0 (2026-04-10)
+
+- **Netbox 4.5.7 compatibility** - maintenance release, no schema changes
+- **New cmdlet `Wait-NBBranch`** (#383) - blocks until branch reaches target status (default `ready`); supports `merged`/`archived` targets; pipeline input from `New-NBBranch`. Solves the `'HttpResponseBadRequest' object has no attribute 'schema_name'` race when using a branch before provisioning completes
+- **Bug fix: Cable_Profile ValidateSet broken since v4.5.0** (#389) - all 24 values were missing their `single-` / `trunk-` / `breakout-` prefix; replaced with all 25 real values including new `breakout-1c2p-2c1p`. **Breaking change** but old values were rejected by Netbox anyway
+- **Bug fix: `Get-NBBranch -Status` ValidateSet** (#385) - replaced non-existent `conflict` value with all 11 real `BranchStatusChoices`
+- **Diagnostics** - 401/403 errors now surface active branch context with troubleshooting hints
+
+### Older releases
+
+| Version | Date | Summary |
+|---|---|---|
+| v4.5.6.0 | 2026-04-02 | NetBox 4.5.6 compat — 8 new 1.6TE interface types |
+| v4.5.4.2 | 2026-03-27 | IPAM AddressRange fixes + security hardening (token redaction, workflow permissions, MaxItems cap, SecureString) |
+| v4.5.4.1 | 2026-03-17 | `-Label` / `-Parent` query filters; `[object[]]$Tags` rolled out to 146 New/Set functions |
+| v4.5.4.0 | 2026-03-17 | NetBox 4.5.4 compat — 119→208 interface types |
+| v4.5.3.2 | 2026-03-16 | DeviceBay depopulation via `[Nullable[uint64]]` on `Installed_Device` |
+| v4.5.3.1 | 2026-03-05 | Interface `-Mode` sends API strings; `-Untagged_VLAN`/`-Tagged_VLANs` → `[uint64]` IDs |
+| v4.5.3.0 | 2026-03-01 | NetBox 4.5.3 compat — `-Owner` on CircuitType |
+| v4.5.2.2 | 2026-02-28 | IPAM Prefix `scope_type`/`scope_id` replaces `-Site` (NetBox 4.2+ schema) |
+| v4.5.2.0 | 2026-02-04 | NetBox 4.5.2 + netbox-docker 4.0.0 (Granian/PG18/Valkey9); `-Omit` on all 123 Get functions; `New-NBImageAttachment` added |
 
 ### v4.5.0.3
 
