@@ -14,6 +14,8 @@
 
 .PARAMETER Name
     The new name for the device.
+.PARAMETER Description
+    The new description for the device.
 
 .PARAMETER Role
     The device role ID.
