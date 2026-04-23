@@ -23,6 +23,9 @@
 .PARAMETER Site
     The site ID. Required for single device creation.
 
+.PARAMETER Description
+    Short description of the device (optional).
+
 .PARAMETER InputObject
     Pipeline input for bulk operations. Each object should contain
     the required properties: Name, Role, Device_Type, Site.
@@ -137,6 +140,9 @@ function New-NBDCIMDevice {
 
         [Parameter(ParameterSetName = 'Single')]
         [string]$Comments,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [string]$Description,
 
         [Parameter(ParameterSetName = 'Single')]
         [hashtable]$Custom_Fields,

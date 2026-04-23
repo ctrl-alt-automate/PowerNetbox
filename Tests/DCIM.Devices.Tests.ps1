@@ -356,6 +356,11 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             $roleParam = $cmd.Parameters['Role']
             $roleParam.Aliases | Should -Contain 'Device_Role'
         }
+
+        It "Should pass -Description through in POST body (#409)" {
+            $Result = New-NBDCIMDevice -Name 'srv-desc' -Role 1 -Device_Type 1 -Site 1 -Description 'Edge gateway'
+            ($Result.Body | ConvertFrom-Json).description | Should -Be 'Edge gateway'
+        }
     }
 
     Context "Set-NBDCIMDevice" {
@@ -390,8 +395,91 @@ Describe "DCIM Devices Tests" -Tag 'DCIM', 'Devices' {
             $bodyObj.site | Should -Be 15
         }
 
+        It "Should pass -Description through in PATCH body (#409)" {
+            $Result = Set-NBDCIMDevice -Id 1234 -Description 'Primary core switch' -Confirm:$false
+            ($Result.Body | ConvertFrom-Json).description | Should -Be 'Primary core switch'
+        }
+
+        It "Should clear -Description with empty string (#409)" {
+            $Result = Set-NBDCIMDevice -Id 1234 -Description '' -Confirm:$false
+            # Empty string is the NetBox convention for clearing a non-nullable string field
+            $Result.Body | Should -Match '"description"\s*:\s*""'
+        }
+
         # Note: Array Id parameters are not supported for Set- functions
         # For bulk operations via pipeline, see BulkOperations.Tests.ps1
+    }
+
+    Context "Set-NBDCIMDevice null-clearing (#409)" {
+        # mkarel requested null-clearing for every uint16/uint64 FK/position
+        # param so scripts can unassign Cluster, Platform, Rack, etc. via PATCH.
+        # Pattern: [Nullable[T]] lets PowerShell bind $null without throwing,
+        # BuildURIComponents passes the key through to $Body, and
+        # ConvertTo-Json emits literal null. NetBox then clears the FK.
+        It "Should send null when -Platform is explicitly null" {
+            $Result = Set-NBDCIMDevice -Id 1234 -Platform $null -Confirm:$false
+            $Result.Body | Should -Match '"platform"\s*:\s*null'
+        }
+
+        It "Should send null when -Tenant is explicitly null" {
+            $Result = Set-NBDCIMDevice -Id 1234 -Tenant $null -Confirm:$false
+            $Result.Body | Should -Match '"tenant"\s*:\s*null'
+        }
+
+        It "Should send null when -Cluster is explicitly null" {
+            $Result = Set-NBDCIMDevice -Id 1234 -Cluster $null -Confirm:$false
+            $Result.Body | Should -Match '"cluster"\s*:\s*null'
+        }
+
+        It "Should send null when -Rack is explicitly null" {
+            $Result = Set-NBDCIMDevice -Id 1234 -Rack $null -Confirm:$false
+            $Result.Body | Should -Match '"rack"\s*:\s*null'
+        }
+
+        It "Should send null when -Position is explicitly null" {
+            $Result = Set-NBDCIMDevice -Id 1234 -Position $null -Confirm:$false
+            $Result.Body | Should -Match '"position"\s*:\s*null'
+        }
+
+        It "Should send null when -Virtual_Chassis is explicitly null" {
+            $Result = Set-NBDCIMDevice -Id 1234 -Virtual_Chassis $null -Confirm:$false
+            $Result.Body | Should -Match '"virtual_chassis"\s*:\s*null'
+        }
+
+        It "Should send null when -VC_Priority is explicitly null" {
+            $Result = Set-NBDCIMDevice -Id 1234 -VC_Priority $null -Confirm:$false
+            $Result.Body | Should -Match '"vc_priority"\s*:\s*null'
+        }
+
+        It "Should send null when -VC_Position is explicitly null" {
+            $Result = Set-NBDCIMDevice -Id 1234 -VC_Position $null -Confirm:$false
+            $Result.Body | Should -Match '"vc_position"\s*:\s*null'
+        }
+
+        It "Should send null when -Primary_IP4 is explicitly null" {
+            $Result = Set-NBDCIMDevice -Id 1234 -Primary_IP4 $null -Confirm:$false
+            $Result.Body | Should -Match '"primary_ip4"\s*:\s*null'
+        }
+
+        It "Should send null when -Primary_IP6 is explicitly null" {
+            $Result = Set-NBDCIMDevice -Id 1234 -Primary_IP6 $null -Confirm:$false
+            $Result.Body | Should -Match '"primary_ip6"\s*:\s*null'
+        }
+
+        It "Should send null when -Owner is explicitly null" {
+            $Result = Set-NBDCIMDevice -Id 1234 -Owner $null -Confirm:$false
+            $Result.Body | Should -Match '"owner"\s*:\s*null'
+        }
+
+        It "Should still accept a numeric Cluster value (not broken by Nullable)" {
+            $Result = Set-NBDCIMDevice -Id 1234 -Cluster 42 -Confirm:$false
+            ($Result.Body | ConvertFrom-Json).cluster | Should -Be 42
+        }
+
+        It "Should still accept a numeric Position value (not broken by Nullable)" {
+            $Result = Set-NBDCIMDevice -Id 1234 -Position 7 -Confirm:$false
+            ($Result.Body | ConvertFrom-Json).position | Should -Be 7
+        }
     }
 
     Context "Remove-NBDCIMDevice" {

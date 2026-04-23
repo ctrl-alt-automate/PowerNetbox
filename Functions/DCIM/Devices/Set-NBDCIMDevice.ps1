@@ -55,11 +55,27 @@
 .PARAMETER Comments
     Comments about the device.
 
+.PARAMETER Description
+    Short description of the device. Pass an empty string to clear the
+    field in Netbox (Description is empty-string-compatible, not nullable).
+
 .PARAMETER Custom_Fields
     Hashtable of custom field values.
 
 .PARAMETER Owner
     The owner ID for object ownership (Netbox 4.5+ only).
+
+.EXAMPLE
+    Set-NBDCIMDevice -Id 123 -Cluster $null
+
+    Clears the Cluster assignment on device 123. Also works for Platform,
+    Tenant, Rack, Position, Virtual_Chassis, VC_Position, VC_Priority,
+    Primary_IP4, Primary_IP6, and Owner.
+
+.EXAMPLE
+    Set-NBDCIMDevice -Id 123 -Description "Replaces legacy gateway"
+
+    Sets the Description. Pass -Description '' to clear it server-side.
 
 .PARAMETER InputObject
     Pipeline input for bulk operations. Each object MUST have an Id property.
@@ -127,19 +143,19 @@ function Set-NBDCIMDevice {
         [string]$Status,
 
         [Parameter(ParameterSetName = 'Single')]
-        [uint64]$Platform,
+        [Nullable[uint64]]$Platform,
 
         [Parameter(ParameterSetName = 'Single')]
-        [uint64]$Tenant,
+        [Nullable[uint64]]$Tenant,
 
         [Parameter(ParameterSetName = 'Single')]
-        [uint64]$Cluster,
+        [Nullable[uint64]]$Cluster,
 
         [Parameter(ParameterSetName = 'Single')]
-        [uint64]$Rack,
+        [Nullable[uint64]]$Rack,
 
         [Parameter(ParameterSetName = 'Single')]
-        [uint16]$Position,
+        [Nullable[uint16]]$Position,
 
         [Parameter(ParameterSetName = 'Single')]
         [ValidateSet('front', 'rear', IgnoreCase = $true)]
@@ -152,28 +168,31 @@ function Set-NBDCIMDevice {
         [string]$Asset_Tag,
 
         [Parameter(ParameterSetName = 'Single')]
-        [uint64]$Virtual_Chassis,
+        [Nullable[uint64]]$Virtual_Chassis,
 
         [Parameter(ParameterSetName = 'Single')]
-        [uint64]$VC_Priority,
+        [Nullable[uint64]]$VC_Priority,
 
         [Parameter(ParameterSetName = 'Single')]
-        [uint64]$VC_Position,
+        [Nullable[uint64]]$VC_Position,
 
         [Parameter(ParameterSetName = 'Single')]
-        [uint64]$Primary_IP4,
+        [Nullable[uint64]]$Primary_IP4,
 
         [Parameter(ParameterSetName = 'Single')]
-        [uint64]$Primary_IP6,
+        [Nullable[uint64]]$Primary_IP6,
 
         [Parameter(ParameterSetName = 'Single')]
         [string]$Comments,
 
         [Parameter(ParameterSetName = 'Single')]
+        [string]$Description,
+
+        [Parameter(ParameterSetName = 'Single')]
         [hashtable]$Custom_Fields,
 
         [Parameter(ParameterSetName = 'Single')]
-        [uint64]$Owner,
+        [Nullable[uint64]]$Owner,
 
         # Bulk mode parameters
         [Parameter(ParameterSetName = 'Bulk', Mandatory = $true, ValueFromPipeline = $true)]
