@@ -114,11 +114,11 @@ Get-NBDCIMDevice -Fields 'id','name','status','site.name'
 Get-NBDCIMDevice -IncludeConfigContext
 ```
 
-See [Performance Optimization](Performance-Optimization.md) for detailed guidance.
+See [Performance Optimization](../guides/performance.md) for detailed guidance.
 
 ## Next Steps
 
-- [Performance Optimization](Performance-Optimization.md) - Optimize your API queries
-- [Common Workflows](Common-Workflows.md) - Real-world examples
-- [DCIM Examples](DCIM-Examples.md) - Device and site management
-- [IPAM Examples](IPAM-Examples.md) - IP address management
+- [Performance Optimization](../guides/performance.md) - Optimize your API queries
+- [Common Workflows](../guides/common-workflows.md) - Real-world examples
+- [DCIM Examples](../guides/dcim-examples.md) - Device and site management
+- [IPAM Examples](../guides/ipam-examples.md) - IP address management

@@ -194,7 +194,7 @@ Get-NBDCIMDevice -Status 'active' -Brief -Limit 100 -Offset 0
 
 ## See Also
 
-- [Getting Started](Getting-Started.md) - Basic setup and connection
-- [Bulk Operations](Bulk-Operations.md) - High-performance batch processing
-- [Common Workflows](Common-Workflows.md) - Real-world examples
+- [Getting Started](../getting-started/connecting.md) - Basic setup and connection
+- [Bulk Operations](bulk-operations.md) - High-performance batch processing
+- [Common Workflows](common-workflows.md) - Real-world examples
 - [NetBox Best Practices](https://github.com/netboxlabs/netbox-best-practices) - Official documentation

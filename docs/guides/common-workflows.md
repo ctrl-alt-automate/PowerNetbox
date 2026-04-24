@@ -4,7 +4,7 @@ Real-world examples and use cases for PowerNetbox.
 
 ## Bulk Import from CSV
 
-PowerNetbox supports native bulk operations for high-performance imports. See [Bulk Operations](Bulk-Operations.md) for comprehensive examples.
+PowerNetbox supports native bulk operations for high-performance imports. See [Bulk Operations](bulk-operations.md) for comprehensive examples.
 
 ### Import Devices (Bulk Mode)
 

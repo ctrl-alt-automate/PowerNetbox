@@ -107,7 +107,7 @@ See [CONTRIBUTING.md](https://github.com/ctrl-alt-automate/PowerNetbox/blob/dev/
 
 ## Related Pages
 
-- [Getting Started](Getting-Started.md)
-- [Function Naming](Function-Naming.md)
-- [Troubleshooting](Troubleshooting.md)
-- [Compatibility](Compatibility.md)
+- [Getting Started](../getting-started/connecting.md)
+- [Function Naming](../architecture/function-naming.md)
+- [Troubleshooting](../guides/troubleshooting.md)
+- [Compatibility](../guides/compatibility.md)

@@ -170,6 +170,6 @@ $script:NetboxConfig = @{
 
 ## Related Documentation
 
-- [Functions by Module](Functions.md) - Detailed function listing
-- [Helpers Reference](Helpers.md) - Internal helper functions
-- [Getting Started](../guides/Getting-Started.md) - Installation and usage
+- [Functions by Module](functions-map.md) - Detailed function listing
+- [Helpers Reference](helpers-map.md) - Internal helper functions
+- [Getting Started](../getting-started/connecting.md) - Installation and usage

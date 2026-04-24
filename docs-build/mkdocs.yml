@@ -7,6 +7,9 @@ edit_uri: edit/dev/docs/
 
 docs_dir: ../docs
 
+exclude_docs: |
+  superpowers/
+
 plugins:
   - search
   - awesome-pages

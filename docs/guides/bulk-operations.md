@@ -418,6 +418,6 @@ Measure-Command {
 
 ## See Also
 
-- [Common Workflows](Common-Workflows.md) - General workflow examples
-- [DCIM Examples](DCIM-Examples.md) - Device management examples
-- [IPAM Examples](IPAM-Examples.md) - IP address management examples
+- [Common Workflows](common-workflows.md) - General workflow examples
+- [DCIM Examples](dcim-examples.md) - Device management examples
+- [IPAM Examples](ipam-examples.md) - IP address management examples
