@@ -43,6 +43,12 @@ coverage.xml
 TestResults/
 *.trx
 
+# MkDocs build outputs
+docs-build/generated/
+docs-build/.venv/
+site/
+__pycache__/
+
 # Dev-only files (exclude from main branch merges)
 # These files exist on dev but should NOT be merged to main:
 # - Test-ExeDevVMs.ps1

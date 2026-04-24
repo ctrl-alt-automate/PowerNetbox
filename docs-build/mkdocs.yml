@@ -1,0 +1,33 @@
+site_name: PowerNetbox
+site_description: The comprehensive PowerShell module for the NetBox REST API
+site_url: https://ctrl-alt-automate.github.io/PowerNetbox/
+repo_url: https://github.com/ctrl-alt-automate/PowerNetbox
+repo_name: ctrl-alt-automate/PowerNetbox
+edit_uri: edit/dev/docs/
+
+docs_dir: ../docs
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.instant
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.action.edit
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - tables
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.snippets:
+      base_path: [docs-build/snippets]
