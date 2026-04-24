@@ -45,3 +45,11 @@ TestResults/
 # - Test-ExeDevVMs.ps1
 # - scripts/setup-exe-dev-environment.sh
 # - .github/workflows/exe-dev-tests.yml
+
+# Internal planning and design artifacts (local-only)
+# These document in-progress work for future-Claude context but are
+# not intended for public consumption. docs/superpowers/reviews/ is
+# deliberately excluded from this ignore — security reviews remain
+# public as a community trust signal (see CLAUDE.md "Security & reviews").
+docs/superpowers/plans/
+docs/superpowers/specs/
