@@ -32,6 +32,13 @@ DCIM/Racks/Export-NBRackElevation.ps1::Face
 Extras/CustomLinks/New-NBCustomLink.ps1::Button_Class
 Extras/CustomLinks/Set-NBCustomLink.ps1::Button_Class
 
+# -Status on Get-NBBranch is the netbox-branching plugin's BranchStatusChoices,
+# which lives outside the core NetBox source the parity tool scans. The heuristic
+# matches DataSourceStatusChoices on value-overlap (new/syncing/failed). Branch
+# statuses were last corrected in PR #387 (issue #385) against the plugin's
+# source — see memory/PR for the 11-value authoritative list.
+Plugins/Branching/Branch/Get-NBBranch.ps1::Status
+
 # ---------------------------------------------------------------------------
 # Parameters where PowerNetbox deliberately accepts backward-compat values
 # that are translated to real API values in the function's begin {} block.

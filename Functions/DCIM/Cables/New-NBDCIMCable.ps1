@@ -87,7 +87,9 @@ function New-NBDCIMCable {
         [object[]]$B_Terminations,
 
         [ValidateSet('cat3', 'cat5', 'cat5e', 'cat6', 'cat6a', 'cat7', 'cat7a', 'cat8',
-                     'dac-active', 'dac-passive', 'mrj21-trunk', 'coaxial',
+                     'dac-active', 'dac-passive', 'mrj21-trunk',
+                     'coaxial', 'lmr-100', 'lmr-200', 'lmr-400',
+                     'rg-6', 'rg-8', 'rg-11', 'rg-59', 'rg-62', 'rg-213',
                      'mmf', 'mmf-om1', 'mmf-om2', 'mmf-om3', 'mmf-om4', 'mmf-om5',
                      'smf', 'smf-os1', 'smf-os2', 'aoc', 'power', 'usb')]
         [string]$Type,
