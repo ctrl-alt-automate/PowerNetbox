@@ -10,6 +10,13 @@ docs_dir: ../docs
 plugins:
   - search
   - awesome-pages
+  - macros:
+      module_name: macros
+      include_dir: .
+      render_by_default: false
+
+hooks:
+  - hooks.py
 
 theme:
   name: material
