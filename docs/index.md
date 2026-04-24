@@ -1,10 +1,27 @@
+---
+title: PowerNetbox Documentation
+hide:
+  - toc
+render_macros: true
+---
+
 # PowerNetbox
 
-Comprehensive PowerShell module for the NetBox REST API.
+The comprehensive PowerShell module for the [NetBox](https://github.com/netbox-community/netbox)
+REST API - {{ cmdlet_count() }} cmdlets covering DCIM, IPAM, Virtualization, Circuits,
+Tenancy, VPN, Wireless, and the netbox-branching plugin.
 
-- [Getting Started](getting-started/connecting.md)
-- [Browse the Reference](reference/)
-- [Release Notes](release-notes/)
+<div class="pn-cta-row" markdown>
+[:material-rocket-launch: Getting Started](getting-started/connecting.md){ .md-button .md-button--primary }
+[:material-book-open-variant: Browse Reference](reference/){ .md-button }
+</div>
 
-!!! note
-    This homepage is a placeholder. A full utility-first homepage is landing in Task 14 of the docs migration.
+## Latest release
+
+{{ latest_release() }}
+
+## Compatibility
+
+{{ compat_table() }}
+
+[Compatibility testing details](guides/compatibility.md)
