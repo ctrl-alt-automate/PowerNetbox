@@ -67,6 +67,9 @@ function Get-NBDCIMRackElevation {
 
     .LINK
         https://netbox.readthedocs.io/en/stable/models/dcim/rack/
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]

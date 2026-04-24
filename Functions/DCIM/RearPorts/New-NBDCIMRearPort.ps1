@@ -78,6 +78,9 @@
 
 .LINK
     https://netbox.readthedocs.io/en/stable/models/dcim/rearport/
+.NOTES
+    AddedInVersion: v4.4.7
+
 #>
 function New-NBDCIMRearPort {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]

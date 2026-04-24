@@ -65,6 +65,9 @@ function Set-NBDCIMSite {
 
     .EXAMPLE
         Get-NBDCIMSite -Name "Site1" | Set-NBDCIMSite -Status planned
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]

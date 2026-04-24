@@ -44,6 +44,7 @@ function ConvertTo-NBRackHTML {
         Generates HTML and saves to file.
 
     .NOTES
+    AddedInVersion: v4.4.10.0
         This is an internal helper function. Use Export-NBRackElevation -Format HTML for the public interface.
 #>
     [CmdletBinding()]

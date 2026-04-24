@@ -12,6 +12,9 @@
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
+.NOTES
+    AddedInVersion: v1.7.1
+
 #>
 function Clear-NBCredential {
     [CmdletBinding(ConfirmImpact = 'Medium', SupportsShouldProcess = $true)]

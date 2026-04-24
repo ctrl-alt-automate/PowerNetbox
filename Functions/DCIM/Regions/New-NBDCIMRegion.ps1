@@ -37,6 +37,9 @@ function New-NBDCIMRegion {
         New-NBDCIMRegion -Name "Netherlands" -Slug "netherlands" -Parent 1
 
         Creates a new region as a child of region 1
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]

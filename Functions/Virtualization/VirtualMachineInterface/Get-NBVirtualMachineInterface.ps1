@@ -59,6 +59,9 @@ function Get-NBVirtualMachineInterface {
 
     .EXAMPLE
         PS C:\> Get-NBVirtualMachineInterface
+.NOTES
+    AddedInVersion: v1.0.4
+
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]

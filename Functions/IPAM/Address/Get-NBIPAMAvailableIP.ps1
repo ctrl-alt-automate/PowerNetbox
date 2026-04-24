@@ -29,6 +29,9 @@ function Get-NBIPAMAvailableIP {
         Get-NBIPAMAvailableIP -Prefix_ID 2 -NumberOfIPs 3
 
         Get 3 (Next) Available IP on the Prefix 192.0.2.0/24
+.NOTES
+    AddedInVersion: v1.0.4
+
 
 #>
 

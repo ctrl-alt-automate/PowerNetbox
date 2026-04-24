@@ -79,6 +79,9 @@ function Get-NBCircuit {
 
     .EXAMPLE
         PS C:\> Get-NBCircuit
+.NOTES
+    AddedInVersion: v1.3.3
+
 
 #>
 

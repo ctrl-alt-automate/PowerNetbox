@@ -113,6 +113,9 @@ function Get-NBVirtualMachine {
     .EXAMPLE
         Get-NBVirtualMachine -Omit 'comments','description'
         Returns VMs without comments and description fields (Netbox 4.5+).
+.NOTES
+    AddedInVersion: v1.0.4
+
 #>
 
     [CmdletBinding(DefaultParameterSetName = 'Query')]

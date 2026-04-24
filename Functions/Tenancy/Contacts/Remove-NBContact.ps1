@@ -32,6 +32,9 @@
 
 .LINK
     https://netbox.readthedocs.io/en/stable/models/tenancy/contact/
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 function Remove-NBContact {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]

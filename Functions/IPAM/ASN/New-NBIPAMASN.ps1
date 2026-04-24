@@ -36,6 +36,9 @@ function New-NBIPAMASN {
         New-NBIPAMASN -ASN 65001 -RIR 1 -Description "Primary ASN"
 
         Creates ASN 65001 with RIR and description
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]

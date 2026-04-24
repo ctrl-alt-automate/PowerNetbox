@@ -48,6 +48,9 @@ function Set-NBIPAMVRF {
         Set-NBIPAMVRF -Id 1 -Enforce_Unique $true
 
         Enables unique enforcement for VRF 1
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]

@@ -66,6 +66,9 @@
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
+.NOTES
+    AddedInVersion: v4.4.7
+
 #>
 
 function Set-NBDCIMRearPort {

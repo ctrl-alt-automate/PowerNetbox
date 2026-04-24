@@ -21,6 +21,9 @@ function Remove-NBDCIMSiteGroup {
         Get-NBDCIMSiteGroup -Name "Old Group" | Remove-NBDCIMSiteGroup
 
         Deletes site groups matching the name "Old Group"
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]

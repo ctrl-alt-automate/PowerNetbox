@@ -62,6 +62,7 @@ function Get-NBTenant {
         PS C:\> Get-NBTenant
 
 .NOTES
+    AddedInVersion: v1.0.4
     The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 #>
 

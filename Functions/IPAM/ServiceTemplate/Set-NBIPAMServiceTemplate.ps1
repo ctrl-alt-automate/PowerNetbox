@@ -34,6 +34,9 @@ function Set-NBIPAMServiceTemplate {
         Set-NBIPAMServiceTemplate -Id 1 -Ports @(80, 443, 8080)
 
         Updates service template 1 with new ports
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]

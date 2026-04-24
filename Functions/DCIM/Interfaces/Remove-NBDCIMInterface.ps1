@@ -14,6 +14,9 @@ function Remove-NBDCIMInterface {
 
     .EXAMPLE
         PS C:\> Remove-NBDCIMInterface -Id 123
+.NOTES
+    AddedInVersion: v1.0.4
+
 #>
 
     [CmdletBinding(ConfirmImpact = 'High',

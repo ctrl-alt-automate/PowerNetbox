@@ -94,6 +94,9 @@
 
 .LINK
     https://netbox.readthedocs.io/en/stable/models/virtualization/vminterface/
+.NOTES
+    AddedInVersion: v1.0.4
+
 #>
 function New-NBVirtualMachineInterface {
     [CmdletBinding(SupportsShouldProcess = $true,

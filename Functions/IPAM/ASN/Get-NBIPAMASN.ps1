@@ -63,6 +63,7 @@ function Get-NBIPAMASN {
 
         Returns ASN 65001
 .NOTES
+    AddedInVersion: v4.4.10.0
     The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 #>
 

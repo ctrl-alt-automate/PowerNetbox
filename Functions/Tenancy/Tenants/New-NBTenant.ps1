@@ -24,6 +24,9 @@ function New-NBTenant {
 
     .EXAMPLE
         PS C:\> New-NBTenant -Name 'Contoso Inc' -Slug 'contoso-inc'
+.NOTES
+    AddedInVersion: v1.7.1
+
 
 #>
 

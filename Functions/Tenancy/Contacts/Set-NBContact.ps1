@@ -48,6 +48,9 @@ function Set-NBContact {
 
     .EXAMPLE
         PS C:\> Set-NBContact -Id 10 -Name 'Leroy Jenkins' -Email 'leroy.jenkins@example.com'
+.NOTES
+    AddedInVersion: v1.7.1
+
 
 #>
 

@@ -33,6 +33,9 @@
 
 .EXAMPLE
     $result = Send-NBBulkRequest -URI $uri -Items $devices -Method POST -BatchSize 50
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 
 function Send-NBBulkRequest {

@@ -71,6 +71,7 @@ function Get-NBIPAMVRF {
 
         Returns VRFs with the specified route distinguisher
 .NOTES
+    AddedInVersion: v4.4.10.0
     The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 #>
 

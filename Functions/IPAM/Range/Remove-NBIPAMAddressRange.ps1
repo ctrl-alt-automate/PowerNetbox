@@ -15,6 +15,9 @@ function Remove-NBIPAMAddressRange {
 
     .EXAMPLE
         PS C:\> Remove-NBIPAMAddressRange -Id 1234
+.NOTES
+    AddedInVersion: v4.4.7
+
 
 #>
 

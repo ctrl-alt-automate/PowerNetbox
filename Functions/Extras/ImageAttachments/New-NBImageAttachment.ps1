@@ -42,6 +42,9 @@
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
+.NOTES
+    AddedInVersion: v4.5.2.0
+
 #>
 function New-NBImageAttachment {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]

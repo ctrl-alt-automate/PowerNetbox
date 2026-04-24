@@ -38,6 +38,9 @@
 
 .LINK
     https://netbox.readthedocs.io/en/stable/models/virtualization/vminterface/
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 function Remove-NBVirtualMachineInterface {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]

@@ -41,6 +41,9 @@
     Exit-NBBranch
     Get-NBBranchContext
     Invoke-NBInBranch
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 function Enter-NBBranch {
     [CmdletBinding(DefaultParameterSetName = 'ByName')]

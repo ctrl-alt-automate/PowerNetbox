@@ -29,6 +29,9 @@ function Remove-NBDCIMManufacturer {
         Get-NBDCIMManufacturer -Name "OldVendor" | Remove-NBDCIMManufacturer
 
         Deletes manufacturer named "OldVendor"
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]

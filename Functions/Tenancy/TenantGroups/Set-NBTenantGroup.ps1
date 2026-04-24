@@ -45,6 +45,9 @@
 
 .LINK
     https://netbox.readthedocs.io/en/stable/models/tenancy/tenantgroup/
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 function Set-NBTenantGroup {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]

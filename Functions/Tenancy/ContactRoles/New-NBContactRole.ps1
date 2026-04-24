@@ -24,6 +24,9 @@ function New-NBContactRole {
 
     .EXAMPLE
         PS C:\> New-NBContactRole -Name 'Network Support' -Slug 'network-support'
+.NOTES
+    AddedInVersion: v1.7.1
+
 #>
 
     [CmdletBinding(ConfirmImpact = 'Low',

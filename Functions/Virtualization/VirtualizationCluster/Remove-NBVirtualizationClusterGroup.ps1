@@ -27,6 +27,9 @@
 
 .LINK
     https://netbox.readthedocs.io/en/stable/models/virtualization/clustergroup/
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 function Remove-NBVirtualizationClusterGroup {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]

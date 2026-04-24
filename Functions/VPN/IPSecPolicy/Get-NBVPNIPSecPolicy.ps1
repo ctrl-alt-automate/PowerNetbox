@@ -32,6 +32,7 @@
     Get-NBVPNIPSecPolicy
 
 .NOTES
+    AddedInVersion: v4.4.10.0
     The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

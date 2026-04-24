@@ -21,6 +21,9 @@ function Remove-NBDCIMRegion {
         Get-NBDCIMRegion -Name "Old Region" | Remove-NBDCIMRegion
 
         Deletes regions matching the name "Old Region"
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]

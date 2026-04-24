@@ -54,6 +54,9 @@ function InvokeNetboxRequest {
 
     .EXAMPLE
         $result = InvokeNetboxRequest -URI $uri -Method POST -Body $data -MaxRetries 5
+.NOTES
+    AddedInVersion: v1.0.4
+
     #>
     [CmdletBinding()]
     [OutputType([PSCustomObject])]

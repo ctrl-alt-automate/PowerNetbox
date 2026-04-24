@@ -46,6 +46,9 @@ function New-NBIPAMService {
         New-NBIPAMService -Name "DNS" -Ports @(53) -Protocol udp -Virtual_Machine 1
 
         Creates a DNS service on VM 1
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]

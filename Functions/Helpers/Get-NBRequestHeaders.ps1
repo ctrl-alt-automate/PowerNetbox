@@ -27,6 +27,9 @@ function Get-NBRequestHeaders {
     .EXAMPLE
         $headers = Get-NBRequestHeaders -SkipBranchContext
         # Only returns Authorization header, no branch context
+.NOTES
+    AddedInVersion: v4.5.2.0
+
 #>
 
     [CmdletBinding()]

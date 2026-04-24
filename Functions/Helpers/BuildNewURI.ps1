@@ -1,4 +1,4 @@
-﻿
+
 function BuildNewURI {
 <#
     .SYNOPSIS
@@ -21,6 +21,9 @@ function BuildNewURI {
 
     .EXAMPLE
         PS C:\> BuildNewURI -Segments @('dcim', 'devices')
+.NOTES
+    AddedInVersion: v1.0.4
+
 #>
 
     [CmdletBinding()]

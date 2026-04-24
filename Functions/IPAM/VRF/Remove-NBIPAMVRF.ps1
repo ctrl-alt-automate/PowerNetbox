@@ -21,6 +21,9 @@ function Remove-NBIPAMVRF {
         Get-NBIPAMVRF -Name "Test-VRF" | Remove-NBIPAMVRF
 
         Deletes VRFs matching the name "Test-VRF"
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]

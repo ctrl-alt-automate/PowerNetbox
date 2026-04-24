@@ -20,6 +20,9 @@
 .LINK
     Enter-NBBranch
     Get-NBBranchContext
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 function Exit-NBBranch {
     [CmdletBinding()]

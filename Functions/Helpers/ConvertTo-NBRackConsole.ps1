@@ -1,4 +1,4 @@
-﻿function ConvertTo-NBRackConsole {
+function ConvertTo-NBRackConsole {
 <#
     .SYNOPSIS
         Convert rack elevation data to ASCII-art console output
@@ -47,6 +47,7 @@
         Generates plain text output without ANSI colors for file logging or piping.
 
     .NOTES
+    AddedInVersion: v4.4.10.0
         This is an internal helper function. Use Export-NBRackElevation -Format Console for the public interface.
 #>
     [CmdletBinding()]

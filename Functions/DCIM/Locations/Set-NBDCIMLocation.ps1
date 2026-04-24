@@ -51,6 +51,9 @@ function Set-NBDCIMLocation {
         Set-NBDCIMLocation -Id 1 -Status retired
 
         Marks location 1 as retired
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]

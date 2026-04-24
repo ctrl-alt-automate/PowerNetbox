@@ -49,6 +49,9 @@ function New-NBDCIMLocation {
         New-NBDCIMLocation -Name "Floor 2" -Slug "floor-2" -Site 1 -Status active
 
         Creates a new active location at site 1
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]

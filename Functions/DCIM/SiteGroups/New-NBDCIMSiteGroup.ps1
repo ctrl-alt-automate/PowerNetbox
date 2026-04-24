@@ -37,6 +37,9 @@ function New-NBDCIMSiteGroup {
         New-NBDCIMSiteGroup -Name "DR Sites" -Slug "dr-sites" -Parent 1
 
         Creates a new site group as a child of site group 1
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]

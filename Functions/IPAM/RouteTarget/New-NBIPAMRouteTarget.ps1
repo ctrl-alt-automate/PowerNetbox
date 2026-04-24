@@ -34,6 +34,9 @@ function New-NBIPAMRouteTarget {
         New-NBIPAMRouteTarget -Name "65001:200" -Description "Customer A import"
 
         Creates a new route target with description
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]

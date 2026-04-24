@@ -67,6 +67,7 @@ function Get-NBIPAMRouteTarget {
 
         Returns route targets matching the specified value
 .NOTES
+    AddedInVersion: v4.4.10.0
     The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 #>
 

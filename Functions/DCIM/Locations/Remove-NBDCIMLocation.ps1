@@ -21,6 +21,9 @@ function Remove-NBDCIMLocation {
         Get-NBDCIMLocation -Name "Old Room" | Remove-NBDCIMLocation
 
         Deletes locations matching the name "Old Room"
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]

@@ -33,6 +33,7 @@ function ConvertTo-NetboxVersion {
     System.Version or $null if parsing fails
 
 .NOTES
+    AddedInVersion: v4.4.10.0
     Resolves issue #111: Version detection inconsistency
 #>
     [CmdletBinding()]

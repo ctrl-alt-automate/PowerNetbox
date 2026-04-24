@@ -50,6 +50,7 @@ function Get-NBContactRole {
         PS C:\> Get-NBContactRole
 
 .NOTES
+    AddedInVersion: v1.0.4
     The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 #>
 

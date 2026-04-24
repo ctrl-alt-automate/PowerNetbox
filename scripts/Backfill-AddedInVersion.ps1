@@ -101,7 +101,7 @@ if ($MyInvocation.InvocationName -ne '.') {
         if ($DryRun) {
             Write-Host "[dry-run] $($file.FullName) -> $version"
         } else {
-            $newContent = $content -replace [regex]::Escape($originalBlock), $newBlock
+            $newContent = $content.Replace($originalBlock, $newBlock)
             [System.IO.File]::WriteAllText($file.FullName, $newContent, [System.Text.UTF8Encoding]::new($false))
             Write-Host "$($file.FullName) -> $version"
         }

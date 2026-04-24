@@ -90,6 +90,9 @@ function New-NBDCIMRack {
         New-NBDCIMRack -Name "Rack-02" -Site 1 -U_Height 48 -Status active
 
         Creates a 48U active rack at site 1
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]

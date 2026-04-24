@@ -84,6 +84,9 @@
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
+.NOTES
+    AddedInVersion: v1.0.4
+
 #>
 
 function Set-NBIPAMAddress {

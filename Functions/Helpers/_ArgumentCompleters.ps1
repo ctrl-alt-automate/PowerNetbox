@@ -8,6 +8,9 @@ function Get-NBArgumentCompleter {
     <#
     .SYNOPSIS
         Creates a script block for argument completion with the given values.
+.NOTES
+    AddedInVersion: v4.4.10.0
+
     #>
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'ValidValues', Justification = 'Used in closure')]
     [OutputType([scriptblock])]

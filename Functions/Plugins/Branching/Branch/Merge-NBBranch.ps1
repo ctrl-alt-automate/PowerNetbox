@@ -34,6 +34,9 @@
     Get-NBBranch
     Sync-NBBranch
     Undo-NBBranchMerge
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 function Merge-NBBranch {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]

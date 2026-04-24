@@ -40,6 +40,9 @@
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
+.NOTES
+    AddedInVersion: v4.5.0.0
+
 #>
 function Test-NBAuthentication {
     [CmdletBinding()]

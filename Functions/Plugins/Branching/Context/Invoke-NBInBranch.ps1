@@ -34,6 +34,9 @@
 .LINK
     Enter-NBBranch
     Exit-NBBranch
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 function Invoke-NBInBranch {
     [CmdletBinding()]

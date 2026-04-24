@@ -37,6 +37,9 @@ function New-NBIPAMServiceTemplate {
         New-NBIPAMServiceTemplate -Name "Web Server" -Ports @(80, 443) -Protocol tcp
 
         Creates a web server template with HTTP and HTTPS ports
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]

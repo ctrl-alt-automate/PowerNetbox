@@ -26,6 +26,9 @@
 .LINK
     Get-NBBranch
     New-NBBranch
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 function Remove-NBBranch {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]

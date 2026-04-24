@@ -37,6 +37,9 @@ function New-NBIPAMASNRange {
         New-NBIPAMASNRange -Name "Private" -Slug "private" -RIR 1 -Start 64512 -End 65534
 
         Creates a private ASN range
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]

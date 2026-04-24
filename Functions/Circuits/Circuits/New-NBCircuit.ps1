@@ -16,6 +16,9 @@
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
+.NOTES
+    AddedInVersion: v1.3.3
+
 #>
 
 function New-NBCircuit {

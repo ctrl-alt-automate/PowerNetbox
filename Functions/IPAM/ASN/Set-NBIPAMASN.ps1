@@ -34,6 +34,9 @@ function Set-NBIPAMASN {
         Set-NBIPAMASN -Id 1 -Description "Updated description"
 
         Updates the description of ASN 1
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]

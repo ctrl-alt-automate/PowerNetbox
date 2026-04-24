@@ -35,6 +35,7 @@ function ConvertTo-NBRackMarkdown {
         Generates markdown for only occupied rack units and saves to file.
 
     .NOTES
+    AddedInVersion: v4.4.10.0
         This is an internal helper function. Use Export-NBRackElevation -Format Markdown for the public interface.
 #>
     [CmdletBinding()]

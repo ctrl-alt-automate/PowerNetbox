@@ -78,6 +78,7 @@ function Get-NBDCIMLocation {
 
         Returns locations matching the name "Server Room"
 .NOTES
+    AddedInVersion: v4.4.10.0
     The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 #>
 

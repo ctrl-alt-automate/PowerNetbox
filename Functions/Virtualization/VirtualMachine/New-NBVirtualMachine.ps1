@@ -92,6 +92,9 @@
 
 .LINK
     https://netbox.readthedocs.io/en/stable/models/virtualization/virtualmachine/
+.NOTES
+    AddedInVersion: v1.0.4
+
 #>
 
 function New-NBVirtualMachine {

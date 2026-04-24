@@ -57,6 +57,7 @@ function Get-NBDCIMManufacturer {
 
         Returns manufacturers matching the name "Cisco"
 .NOTES
+    AddedInVersion: v4.4.10.0
     The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 #>
 

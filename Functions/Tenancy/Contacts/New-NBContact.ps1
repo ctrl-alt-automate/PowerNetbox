@@ -39,6 +39,9 @@ function New-NBContact {
 
     .EXAMPLE
         PS C:\> New-NBContact -Name 'Leroy Jenkins' -Email 'leroy.jenkins@example.com'
+.NOTES
+    AddedInVersion: v1.7.1
+
 #>
 
     [CmdletBinding(ConfirmImpact = 'Low',

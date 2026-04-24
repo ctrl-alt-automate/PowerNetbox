@@ -54,6 +54,7 @@ function New-NBIPAMAddressRange {
         Add new IP Address range from 192.0.2.20/24 to 192.0.2.20/24 with status active
 
     .NOTES
+    AddedInVersion: v4.4.7
         https://netbox.neonet.org/static/docs/models/ipam/iprange/
 #>
 

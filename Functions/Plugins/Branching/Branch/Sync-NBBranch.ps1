@@ -26,6 +26,9 @@
 .LINK
     Get-NBBranch
     Merge-NBBranch
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 function Sync-NBBranch {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]

@@ -16,6 +16,9 @@ function Remove-NBIPAMService {
         Remove-NBIPAMService -Id 1
 
         Deletes service with ID 1
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]

@@ -29,6 +29,9 @@ function Remove-NBDCIMRack {
         Get-NBDCIMRack -Name "Rack-01" | Remove-NBDCIMRack
 
         Deletes rack named "Rack-01"
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]

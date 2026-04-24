@@ -67,6 +67,7 @@ function Get-NBIPAMService {
 
         Returns TCP services on port 443
 .NOTES
+    AddedInVersion: v4.4.10.0
     The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 #>
 

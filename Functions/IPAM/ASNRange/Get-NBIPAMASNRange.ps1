@@ -60,6 +60,7 @@ function Get-NBIPAMASNRange {
 
         Returns ASN ranges matching the name "Private"
 .NOTES
+    AddedInVersion: v4.4.10.0
     The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 #>
 

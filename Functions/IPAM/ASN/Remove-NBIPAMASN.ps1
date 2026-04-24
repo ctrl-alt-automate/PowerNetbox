@@ -16,6 +16,9 @@ function Remove-NBIPAMASN {
         Remove-NBIPAMASN -Id 1
 
         Deletes ASN with ID 1
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]

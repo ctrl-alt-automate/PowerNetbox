@@ -41,6 +41,9 @@ function Connect-NBAPI {
         PS C:\> Connect-NBAPI -Hostname "netbox.domain.com"
 
         This will prompt for Credential, then proceed to attempt a connection to Netbox
+.NOTES
+    AddedInVersion: v1.0.4
+
 
 #>
 

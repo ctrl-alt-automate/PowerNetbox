@@ -14,6 +14,9 @@ function VerifyAPIConnectivity {
     .EXAMPLE
         $status = VerifyAPIConnectivity
         Write-Verbose "Connected to Netbox $($status.'netbox-version')"
+.NOTES
+    AddedInVersion: v1.0.4
+
     #>
     [CmdletBinding()]
     [OutputType([PSCustomObject])]

@@ -58,6 +58,7 @@ function Get-NBContentType {
         Get the device content type
 
     .NOTES
+    AddedInVersion: v1.0.4
         This function delegates to Get-NBObjectType.
         Backward compatible with Netbox 4.0+
         The -Brief, -Fields, and -Omit parameters are mutually exclusive.

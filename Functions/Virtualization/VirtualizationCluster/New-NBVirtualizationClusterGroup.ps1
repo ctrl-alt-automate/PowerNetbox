@@ -36,6 +36,9 @@
 
 .LINK
     https://netbox.readthedocs.io/en/stable/models/virtualization/clustergroup/
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 function New-NBVirtualizationClusterGroup {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]

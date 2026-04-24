@@ -30,6 +30,9 @@ function New-NBDCIMManufacturer {
         New-NBDCIMManufacturer -Name "Dell Technologies" -Slug "dell" -Description "Server and storage manufacturer"
 
         Creates a new manufacturer with description
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]

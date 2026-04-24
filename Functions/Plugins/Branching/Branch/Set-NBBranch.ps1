@@ -38,6 +38,9 @@
     Get-NBBranch
     New-NBBranch
     Remove-NBBranch
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 function Set-NBBranch {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]

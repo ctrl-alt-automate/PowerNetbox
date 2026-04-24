@@ -62,6 +62,7 @@
     Get-NBJob -Status "running"
 
 .NOTES
+    AddedInVersion: v1.3.3
     The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/

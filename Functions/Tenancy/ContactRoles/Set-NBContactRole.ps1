@@ -24,6 +24,9 @@ function Set-NBContactRole {
 
     .EXAMPLE
         PS C:\> Set-NBContactRole -Id 1 -Name 'Updated Role Name'
+.NOTES
+    AddedInVersion: v1.7.1
+
 #>
 
     [CmdletBinding(ConfirmImpact = 'Medium',

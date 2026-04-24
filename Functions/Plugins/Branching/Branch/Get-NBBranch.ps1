@@ -72,6 +72,7 @@
     Get all ready branches.
 
 .NOTES
+    AddedInVersion: v1.3.3
     The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 .LINK
     New-NBBranch

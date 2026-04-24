@@ -91,6 +91,9 @@
 
 .LINK
     https://netbox.readthedocs.io/en/stable/models/ipam/ipaddress/
+.NOTES
+    AddedInVersion: v1.0.4
+
 #>
 
 function New-NBIPAMAddress {

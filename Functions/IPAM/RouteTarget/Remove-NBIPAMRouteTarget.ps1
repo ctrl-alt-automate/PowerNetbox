@@ -21,6 +21,9 @@ function Remove-NBIPAMRouteTarget {
         Get-NBIPAMRouteTarget -Name "65001:999" | Remove-NBIPAMRouteTarget
 
         Deletes route targets matching the specified value
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]

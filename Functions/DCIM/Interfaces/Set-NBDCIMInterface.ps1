@@ -130,6 +130,9 @@
 
 .LINK
     https://netbox.readthedocs.io/en/stable/models/dcim/interface/
+.NOTES
+    AddedInVersion: v1.0.4
+
 #>
 function Set-NBDCIMInterface {
     [CmdletBinding(ConfirmImpact = 'Medium',

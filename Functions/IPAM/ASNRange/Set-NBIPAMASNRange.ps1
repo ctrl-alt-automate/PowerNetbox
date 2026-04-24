@@ -40,6 +40,9 @@ function Set-NBIPAMASNRange {
         Set-NBIPAMASNRange -Id 1 -Description "Updated description"
 
         Updates the description of ASN range 1
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]

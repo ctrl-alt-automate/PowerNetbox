@@ -19,6 +19,9 @@
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 function New-NBGroup {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]

@@ -66,6 +66,7 @@ function Get-NBVirtualizationCluster {
     .EXAMPLE
         PS C:\> Get-NBVirtualizationCluster
 .NOTES
+    AddedInVersion: v1.0.4
     The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 #>
 

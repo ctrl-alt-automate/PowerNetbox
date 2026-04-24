@@ -33,6 +33,9 @@
 
 .LINK
     https://netbox.readthedocs.io/en/stable/models/tenancy/contactassignment/
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 function Remove-NBContactAssignment {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]

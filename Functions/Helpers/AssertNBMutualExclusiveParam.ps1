@@ -21,6 +21,9 @@ function AssertNBMutualExclusiveParam {
 
     .EXAMPLE
         AssertNBMutualExclusiveParam -BoundParameters $PSBoundParameters -Parameters 'Brief','Fields','Omit'
+.NOTES
+    AddedInVersion: v4.5.8.0
+
     #>
     [CmdletBinding()]
     param (

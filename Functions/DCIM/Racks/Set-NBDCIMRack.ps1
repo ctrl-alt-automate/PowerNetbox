@@ -89,6 +89,9 @@ function Set-NBDCIMRack {
 
     .EXAMPLE
         Get-NBDCIMRack -Name "Rack-01" | Set-NBDCIMRack -Status deprecated
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]

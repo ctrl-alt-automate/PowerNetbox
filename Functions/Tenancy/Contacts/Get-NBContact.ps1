@@ -67,6 +67,7 @@ function Get-NBContact {
         PS C:\> Get-NBContact
 
 .NOTES
+    AddedInVersion: v1.0.4
     The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 #>
 

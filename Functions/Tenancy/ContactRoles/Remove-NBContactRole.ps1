@@ -27,6 +27,9 @@
 
 .LINK
     https://netbox.readthedocs.io/en/stable/models/tenancy/contactrole/
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 function Remove-NBContactRole {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]

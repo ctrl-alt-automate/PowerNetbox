@@ -45,6 +45,9 @@ function New-NBIPAMVRF {
         New-NBIPAMVRF -Name "Customer-A" -RD "65001:100" -Enforce_Unique $true
 
         Creates a new VRF with route distinguisher and unique enforcement
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]

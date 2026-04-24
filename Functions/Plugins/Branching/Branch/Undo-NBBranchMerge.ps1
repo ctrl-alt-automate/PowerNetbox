@@ -26,6 +26,9 @@
 .LINK
     Merge-NBBranch
     Get-NBBranch
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 function Undo-NBBranchMerge {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]

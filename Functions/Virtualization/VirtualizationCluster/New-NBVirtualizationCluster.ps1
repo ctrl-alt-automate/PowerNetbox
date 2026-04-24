@@ -52,6 +52,9 @@
 
 .LINK
     https://netbox.readthedocs.io/en/stable/models/virtualization/cluster/
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 function New-NBVirtualizationCluster {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]

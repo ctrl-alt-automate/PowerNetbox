@@ -66,6 +66,7 @@ function Get-NBDCIMSiteGroup {
 
         Returns all child site groups of site group 1
 .NOTES
+    AddedInVersion: v4.4.10.0
     The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 #>
 

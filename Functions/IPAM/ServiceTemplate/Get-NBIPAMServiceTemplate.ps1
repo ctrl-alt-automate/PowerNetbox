@@ -61,6 +61,7 @@ function Get-NBIPAMServiceTemplate {
 
         Returns service templates matching the name "HTTP"
 .NOTES
+    AddedInVersion: v4.4.10.0
     The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 #>
 

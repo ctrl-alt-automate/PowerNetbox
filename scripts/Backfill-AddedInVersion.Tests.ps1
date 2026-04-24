@@ -32,6 +32,30 @@ Describe 'Backfill-AddedInVersion.ps1' {
         }
     }
 
+    Context 'File write regression - special chars in content' {
+        It 'does not duplicate file content when comment block contains dollar-sign expressions' {
+            # Regression: PowerShell -replace treats $_ in replacement as the entire match,
+            # causing duplication when examples contain $_.property patterns. Fixed by using
+            # string.Replace() instead of regex -replace.
+            $input = @'
+<#
+.SYNOPSIS
+    Foo
+.EXAMPLE
+    Get-Item | Where-Object { $_.device }
+#>
+'@
+            # The script's Insert-AddedInVersion should not double the content
+            $result = Insert-AddedInVersion -CommentHelp $input -Version 'v4.5.7'
+            # Should contain AddedInVersion exactly once
+            ([regex]::Matches($result, 'AddedInVersion:')).Count | Should -Be 1
+            # Should NOT have duplicated the synopsis
+            ([regex]::Matches($result, '\.SYNOPSIS')).Count | Should -Be 1
+            # Should NOT have duplicated the example
+            ([regex]::Matches($result, '\$_\.device')).Count | Should -Be 1
+        }
+    }
+
     Context 'Insert-AddedInVersion helper' {
         It 'adds the AddedInVersion line to a .NOTES section that lacks it' {
             $input = @'

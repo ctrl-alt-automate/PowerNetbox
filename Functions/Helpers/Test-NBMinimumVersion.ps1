@@ -35,6 +35,7 @@ function Test-NBMinimumVersion {
         }
 
     .NOTES
+    AddedInVersion: v4.5.0.0
         This function requires that Connect-NBAPI has been called and
         $script:NetboxConfig.ParsedVersion is set.
     #>

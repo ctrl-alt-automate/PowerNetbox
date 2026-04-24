@@ -36,6 +36,9 @@ function Set-NBIPAMRouteTarget {
         Set-NBIPAMRouteTarget -Id 1 -Tenant 5
 
         Assigns route target 1 to tenant 5
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]

@@ -82,6 +82,9 @@
 
 .LINK
     https://netbox.readthedocs.io/en/stable/models/dcim/frontport/
+.NOTES
+    AddedInVersion: v4.4.7
+
 #>
 function New-NBDCIMFrontPort {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]

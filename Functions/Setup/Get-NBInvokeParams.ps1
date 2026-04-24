@@ -10,6 +10,9 @@
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
+.NOTES
+    AddedInVersion: v1.7.1
+
 #>
 function Get-NBInvokeParams {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', '', Justification = 'Params refers to a collection of invoke parameters')]

@@ -39,6 +39,9 @@ function Set-NBDCIMSiteGroup {
         Set-NBDCIMSiteGroup -Id 1 -Description "All production sites"
 
         Updates the description of site group 1
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]

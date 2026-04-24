@@ -74,6 +74,9 @@
 
 .LINK
     https://netbox.readthedocs.io/en/stable/models/ipam/vlan/
+.NOTES
+    AddedInVersion: v1.0.4
+
 #>
 
 function New-NBIPAMVLAN {

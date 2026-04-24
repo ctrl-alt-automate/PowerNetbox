@@ -22,6 +22,9 @@
 
 .LINK
     https://github.com/netboxlabs/netbox-branching
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 function Test-NBBranchingAvailable {
     [CmdletBinding()]

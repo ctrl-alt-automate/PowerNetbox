@@ -23,6 +23,7 @@ function Set-NBuntrustedSSL {
         with a self-signed certificate.
 
     .NOTES
+    AddedInVersion: v4.4.10.0
         This function should only be called on PowerShell Desktop edition.
         Security Warning: Only use in development/testing environments with self-signed certificates.
         PowerShell Core (7+) uses the -SkipCertificateCheck parameter on Invoke-RestMethod directly.

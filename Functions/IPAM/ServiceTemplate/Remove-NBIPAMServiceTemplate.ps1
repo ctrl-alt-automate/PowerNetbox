@@ -16,6 +16,9 @@ function Remove-NBIPAMServiceTemplate {
         Remove-NBIPAMServiceTemplate -Id 1
 
         Deletes service template with ID 1
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]

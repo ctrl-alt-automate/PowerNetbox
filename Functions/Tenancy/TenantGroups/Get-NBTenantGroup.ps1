@@ -69,6 +69,7 @@
     Returns the tenant group with ID 1.
 
 .NOTES
+    AddedInVersion: v4.4.10.0
     The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 .LINK
     https://netbox.readthedocs.io/en/stable/models/tenancy/tenantgroup/

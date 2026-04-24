@@ -27,6 +27,7 @@ function GetNetboxAPIErrorBody {
         }
 
     .NOTES
+    AddedInVersion: v1.0.4
         Fixes issue #100: Cross-platform error handling compatibility.
         Fixes issue #154: Content-Type check for proxy error handling.
     #>

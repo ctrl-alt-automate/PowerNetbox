@@ -119,6 +119,7 @@
     Executes GraphQL queries read from a file.
 
 .NOTES
+    AddedInVersion: v4.4.10.0
     Requires Netbox 3.0+ for GraphQL support.
     Advanced filtering syntax (OR/NOT operators, custom fields) requires Netbox 4.3+.
 

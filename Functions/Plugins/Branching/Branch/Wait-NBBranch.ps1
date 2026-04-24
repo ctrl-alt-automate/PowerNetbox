@@ -70,6 +70,9 @@
     Enter-NBBranch
     Sync-NBBranch
     Merge-NBBranch
+.NOTES
+    AddedInVersion: v4.5.7.0
+
 #>
 function Wait-NBBranch {
     [CmdletBinding(DefaultParameterSetName = 'ById')]

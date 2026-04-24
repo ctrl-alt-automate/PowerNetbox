@@ -37,6 +37,9 @@ function Set-NBIPAMService {
         Set-NBIPAMService -Id 1 -Ports @(443, 8443)
 
         Updates service 1 to listen on ports 443 and 8443
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]

@@ -20,6 +20,7 @@ function Set-NBCipherSSL {
         Enables modern TLS protocols with verbose output showing which protocols were enabled.
 
     .NOTES
+    AddedInVersion: v1.7.1
         This function should only be called on PowerShell Desktop edition.
         SSL3 and TLS 1.0/1.1 are intentionally excluded as they are deprecated.
         PowerShell Core (7+) uses modern TLS by default and does not require this function.

@@ -29,6 +29,7 @@ function New-NBContactAssignment {
         PS C:\> New-NBContactAssignment -Content_Type 'dcim.location' -Object_id 10 -Contact 15 -Role 10 -Priority 'Primary'
 
     .NOTES
+    AddedInVersion: v1.7.1
         Valid content types: https://docs.netbox.dev/en/stable/features/contacts/#contacts_1
 #>
 

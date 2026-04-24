@@ -62,6 +62,7 @@ function Get-NBContactAssignment {
         PS C:\> Get-NBContactAssignment
 
 .NOTES
+    AddedInVersion: v1.0.4
     The -Brief, -Fields, and -Omit parameters are mutually exclusive.
 #>
 

@@ -11,6 +11,9 @@
     $result = [BulkOperationResult]::new()
     $result.AddSuccess($item)
     $result.AddFailure($item, "Validation error")
+.NOTES
+    AddedInVersion: v4.4.10.0
+
 #>
 
 class BulkOperationResult {
