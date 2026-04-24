@@ -72,21 +72,30 @@ Current hardening includes:
 - Restricted GitHub Actions permissions (`contents: read` default)
 - Client-side 10 MB upload cap on `New-NBImageAttachment` (see `Functions/Extras/ImageAttachments/New-NBImageAttachment.ps1`); client-side default 10 000-item cap on `Send-NBBulkRequest` via `-MaxItems` (see `Functions/Helpers/Send-NBBulkRequest.ps1`). Both are local guards that throw before any network call — server-side limits from NetBox apply on top.
 
-## Code signing
+## Authenticity & provenance
 
-The published module on PSGallery is **not yet code-signed**. An
-application with [SignPath Foundation](https://signpath.org) for free
-open-source code signing is in progress. Until then, consumers can
-verify authenticity via:
+PowerNetbox is distributed **unsigned** on PSGallery. SignPath Foundation's
+free OSS code-signing program declined the application on 2026-04-24,
+citing insufficient external reputation signals (a common threshold for
+young/niche OSS projects).
 
-1. **PSGallery publisher:** modules are published only by the
+Consumers can verify authenticity today via:
+
+1. **GitHub build-provenance attestations** — every release is signed by
+   GitHub's Sigstore-backed attestation service (wired in `release.yml` via
+   `actions/attest-build-provenance@v2`):
+
+   ```bash
+   gh attestation verify PowerNetbox.psm1 \
+       --repo ctrl-alt-automate/PowerNetbox
+   ```
+
+2. **PSGallery publisher identity** — modules are published only by the
    `ctrl-alt-automate` publisher account.
-2. **Git tag SHA:** each release tag matches a commit on `main`; you
-   can verify by inspecting `git log` on your local clone.
-3. **Review the source:** PowerNetbox is MIT-licensed; the full source
-   of every released version is public at the matching tag.
+3. **Signed git tags** — each release tag matches a commit on `main`;
+   `git log` on your local clone confirms the SHA.
+4. **Public MIT source** — every released version's source is public at
+   the matching tag.
 
-Once SignPath signing is live, use the `Get-AuthenticodeSignature`
-snippet in [README.md → Code signing policy](README.md#code-signing-policy)
-to verify a local install. Signature verification steps are maintained
-in a single location to avoid drift.
+Code-signing certificates may be revisited if the project grows enough to
+requalify for a Foundation-backed cert.

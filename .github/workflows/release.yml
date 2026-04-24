@@ -89,9 +89,10 @@ jobs:
       - name: Generate build provenance attestation
         # Creates a cryptographic attestation that this PowerNetbox.psd1 +
         # PowerNetbox.psm1 were built by THIS workflow run. Consumers can
-        # verify via `gh attestation verify`. Free alternative to a paid
-        # Authenticode code-signing certificate (SignPath application is
-        # in progress separately for the full signature chain).
+        # verify via `gh attestation verify`. This is the module's sole
+        # authenticity anchor — PowerNetbox is distributed unsigned on
+        # PSGallery (SignPath Foundation declined the OSS application
+        # 2026-04-24; see SECURITY.md Authenticity & provenance section).
         uses: actions/attest-build-provenance@v2
         with:
           subject-path: |

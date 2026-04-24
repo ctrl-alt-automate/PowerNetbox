@@ -333,38 +333,32 @@ See also [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md).
   telemetry, no analytics.
 - **Recent security reviews:** `docs/superpowers/reviews/`.
 
-## Code signing policy
+## Authenticity & provenance
 
-PowerNetbox follows the [SignPath.io](https://signpath.org) code signing
-model (application in progress with the SignPath Foundation free open
-source tier). Once active:
+PowerNetbox is distributed **unsigned** on PSGallery. Authenticity is
+anchored in GitHub's Sigstore-backed build-provenance attestations,
+produced automatically for every release by
+[`actions/attest-build-provenance`](https://github.com/actions/attest-build-provenance).
 
-- Every published release on PSGallery will be signed with a certificate
-  issued to **ctrl-alt-automate / PowerNetbox** via SignPath.
-- Consumers can verify authenticity with:
+Verify a downloaded module:
 
-  ```powershell
-  $module = Get-Module -ListAvailable PowerNetbox |
-      Sort-Object Version -Descending |
-      Select-Object -First 1
-  if ($module) {
-      Get-AuthenticodeSignature $module.Path
-  }
-  ```
+```powershell
+$module = Get-Module -ListAvailable PowerNetbox |
+    Sort-Object Version -Descending |
+    Select-Object -First 1
 
-- Team roles for signing governance:
-  - **Author / Reviewer / Approver:** ctrl-alt-automate (solo
-    maintainer; external contributions are reviewed and merged by the
-    same maintainer before a signed release is cut).
+gh attestation verify $module.Path `
+    --repo ctrl-alt-automate/PowerNetbox
+```
 
-Until SignPath signing is live, the module is distributed unsigned on
-PSGallery. Trust anchors meanwhile are the PSGallery publisher identity
-(`ctrl-alt-automate`), signed git tags, and the public MIT-licensed
-source at each release tag.
+Additional trust anchors: PSGallery publisher identity
+(`ctrl-alt-automate`), signed git release tags, and the public MIT-licensed
+source at each tag.
 
-Credit: code signing sponsored by
-[SignPath Foundation](https://signpath.org) via
-[SignPath.io](https://signpath.io).
+**Note on Authenticode:** PowerNetbox has no Authenticode signature, so
+`Get-AuthenticodeSignature` will report `NotSigned` — this is expected.
+An OSS code-signing certificate may be revisited if the project grows
+enough to qualify for a Foundation-backed program.
 
 ## License
 
