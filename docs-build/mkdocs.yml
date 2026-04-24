@@ -7,6 +7,10 @@ edit_uri: edit/dev/docs/
 
 docs_dir: ../docs
 
+plugins:
+  - search
+  - awesome-pages
+
 theme:
   name: material
   features:
