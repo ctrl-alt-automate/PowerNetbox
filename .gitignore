@@ -34,6 +34,9 @@ Connect-DevNetbox.ps1
 PowerNetbox/
 NetboxPSv4/
 
+# Git worktrees (isolated workspaces for parallel branch work)
+.worktrees/
+
 # Test artifacts
 coverage.xml
 *.coverage.xml
