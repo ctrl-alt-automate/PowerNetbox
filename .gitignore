@@ -48,6 +48,8 @@ docs-build/generated/
 docs-build/.venv/
 site/
 __pycache__/
+# Generated reference docs (CI copies from docs-build/generated/reference/ before build)
+docs/reference/
 
 # Dev-only files (exclude from main branch merges)
 # These files exist on dev but should NOT be merged to main:
