@@ -109,4 +109,19 @@ foreach ($entry in $indexEntries) {
 
 [System.IO.File]::WriteAllText((Join-Path $OutputPath 'index.md'), $indexContent, $utf8NoBom)
 
+# Write awesome-pages .pages file with explicit descending-semver nav order.
+# Without this, awesome-pages sorts alphabetically (so 4.4.10 ends up above 4.4.7).
+$sortedEntries = $indexEntries | Sort-Object { [version]$_.Version } -Descending
+$pagesLines = @('nav:', '  - index.md')
+foreach ($entry in $sortedEntries) {
+    $pagesLines += "  - $($entry.Slug).md"
+}
+$pagesContent = ($pagesLines -join "`n") + "`n"
+[System.IO.File]::WriteAllText(
+    (Join-Path $OutputPath '.pages'),
+    $pagesContent,
+    [System.Text.UTF8Encoding]::new($false)
+)
+Write-Host "Wrote release-notes/.pages (descending semver order)"
+
 Write-Host "Wrote $($indexEntries.Count) release pages + index.md to $OutputPath"

@@ -4,11 +4,41 @@ title: Reference
 
 # Reference
 
-PowerNetbox provides approximately 508 cmdlets organized by NetBox module. Each
-cmdlet has a dedicated reference page with synopsis, syntax, parameters, examples,
-and a "Since v..." badge indicating the version that introduced it.
+PowerNetbox provides ~508 cmdlets organized by NetBox module. Each cmdlet has a dedicated page with synopsis, syntax, parameters, examples, and a "Since v..." badge indicating the release that introduced it.
 
-## Modules
+## Naming convention
+
+All cmdlets follow `[Verb]-NB[Module][Resource]`:
+
+| Verb | Action | HTTP method | Example |
+|---|---|---|---|
+| `Get-` | Retrieve | GET | `Get-NBDCIMDevice` |
+| `New-` | Create | POST | `New-NBIPAMAddress` |
+| `Set-` | Update | PATCH | `Set-NBVirtualMachine` |
+| `Remove-` | Delete | DELETE | `Remove-NBDCIMSite` |
+
+The `NB` prefix avoids collisions with other modules. The `[Module][Resource]` segment mirrors NetBox's URL path: `/api/dcim/devices/` <-> `Get-NBDCIMDevice`.
+
+For deeper conventions (parameter naming, `[Nullable[T]]` clearing pattern, ValidateSet drift), see [Architecture - Parameter conventions](../architecture/parameter-conventions.md).
+
+## Quick links
+
+Most-used cmdlets to bookmark:
+
+- [`Connect-NBAPI`](Setup/Connect-NBAPI.md) -- establish a session, must run first
+- [`Get-NBDCIMDevice`](DCIM/Devices/Get-NBDCIMDevice.md) -- query devices (use `-Brief` for fast lookups)
+- [`New-NBDCIMDevice`](DCIM/Devices/New-NBDCIMDevice.md) -- create a device
+- [`Get-NBIPAMAddress`](IPAM/Address/Get-NBIPAMAddress.md) -- query IP addresses
+- [`New-NBIPAMAddress`](IPAM/Address/New-NBIPAMAddress.md) -- allocate a new IP
+- [`Get-NBIPAMPrefix`](IPAM/Prefix/Get-NBIPAMPrefix.md) -- query prefixes
+- [`Invoke-NBGraphQL`](Setup/Invoke-NBGraphQL.md) -- run a GraphQL query (NetBox 4.5+)
+- [`Wait-NBBranch`](Plugins/Branching/Branch/Wait-NBBranch.md) -- block until a netbox-branching branch reaches a target status
+
+## Common parameters
+
+Most cmdlets share a small set of parameters (`-Raw`, `-All`, `-PageSize`, `-Brief`, `-Fields`, `-Omit`, and bulk-operation parameters). They're documented once at [Common parameters](common-parameters.md) and included on every cmdlet page via collapsible blocks.
+
+## All modules
 
 | Module | Endpoints | Cmdlets | Highlights |
 |---|---:|---:|---|
@@ -21,39 +51,4 @@ and a "Since v..." badge indicating the version that introduced it.
 | [Wireless](Wireless/index.md) | 3 | 12 | LANs, Links |
 | [Extras](Extras/index.md) | 12 | 45 | Custom Fields, Tags, Webhooks, Saved Filters |
 | [Users](Users/index.md) | 4 | 16 | Users, Groups, Permissions, Tokens |
-| [Core](Core/index.md) | 5 | 8 | API Definition, Object Types |
-
-## Conventions
-
-All cmdlets follow the naming pattern `[Verb]-NB[Module][Resource]`. See
-[Architecture -- Parameter conventions](../architecture/parameter-conventions.md)
-for the patterns shared across the codebase: snake_case parameter names, Nullable
-FK clearing, empty-string sentinels, ValidateSet drift prevention, and the
-ASCII-only `.ps1` constraint.
-
-For parameters shared across most cmdlets (`-Raw`, `-All`, `-PageSize`, `-Brief`,
-`-Fields`, `-Omit`, `-InputObject`, `-BatchSize`, `-Force`), see
-[Common parameters](common-parameters.md).
-
-## Special cmdlets
-
-- [`Connect-NBAPI`](Setup/Connect-NBAPI.md) -- Establish a connection to a NetBox
-  instance. Run once per session; all other cmdlets inherit the context it sets.
-
-- [`Invoke-NBGraphQL`](Setup/Invoke-NBGraphQL.md) -- Execute a GraphQL query against
-  NetBox 4.5+. Returns raw GraphQL response objects.
-
-- [`Wait-NBBranch`](Plugins/Branching/Branch/Wait-NBBranch.md) -- Block until a
-  branch reaches a target status (`ready`, `merged`, or `archived`). Added in
-  v4.5.7.0. Useful for scripting branch workflows:
-
-  ```powershell
-  New-NBBranch -Name "deployment-2026-05" | Wait-NBBranch | Enter-NBBranch
-  ```
-
-## Branching plugin
-
-The `Plugins/Branching/` section covers the 16 cmdlets that wrap the
-[netbox-branching](https://github.com/netboxlabs/netbox-branching) plugin. These
-cmdlets are available only when the plugin is installed on the target NetBox
-instance. Use `Test-NBBranchingAvailable` to probe availability at runtime.
+| [Core](Core/index.md) | 5 | 8 | API Definition, Object Types, Branching |
