@@ -1,5 +1,5 @@
 ---
-title: PowerNetbox Documentation
+title: Home
 hide:
   - toc
 render_macros: true
