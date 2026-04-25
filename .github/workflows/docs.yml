@@ -1,0 +1,104 @@
+name: Build and deploy docs
+
+on:
+  push:
+    branches: [dev, main, docs/mkdocs-site]
+    paths:
+      - 'Functions/**/*.ps1'
+      - 'docs/**'
+      - 'docs-build/**'
+      - 'scripts/Build-PlatyPSReference.ps1'
+      - 'scripts/Build-ReleaseNotes.ps1'
+      - '.github/workflows/docs.yml'
+  pull_request:
+    paths:
+      - 'Functions/**/*.ps1'
+      - 'docs/**'
+      - 'docs-build/**'
+      - 'scripts/Build-PlatyPSReference.ps1'
+      - 'scripts/Build-ReleaseNotes.ps1'
+      - '.github/workflows/docs.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # full history for git-log-based since-version reads
+
+      - name: Setup PowerShell
+        shell: bash
+        run: pwsh -v
+
+      - name: Install platyPS
+        shell: pwsh
+        run: |
+          Install-Module platyPS -Scope CurrentUser -Force -SkipPublisherCheck
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python deps
+        run: pip install -r docs-build/requirements.txt
+
+      - name: Build reference (public cmdlets)
+        shell: pwsh
+        run: |
+          ./scripts/Build-PlatyPSReference.ps1 `
+            -ModulePath ./PowerNetbox.psd1 `
+            -OutputPath ./docs-build/generated/reference `
+            -Scope Public
+
+      - name: Build release notes
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ./scripts/Build-ReleaseNotes.ps1 `
+            -OutputPath ./docs-build/generated/release-notes
+
+      - name: Merge generated content into docs/
+        run: |
+          # Wipe ONLY generated subdirs, keep handwritten reference/index.md and
+          # reference/common-parameters.md (Task 17). Same selective pattern used
+          # in local dev verification.
+          for d in docs/reference/*/; do rm -rf "$d"; done
+          rm -rf docs/release-notes
+          mkdir -p docs/reference docs/release-notes
+          cp -r docs-build/generated/reference/. docs/reference/
+          cp -r docs-build/generated/release-notes/. docs/release-notes/
+
+      - name: Build site
+        run: |
+          cd docs-build
+          mkdocs build --strict
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs-build/site
+
+  deploy:
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/docs/mkdocs-site')
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
