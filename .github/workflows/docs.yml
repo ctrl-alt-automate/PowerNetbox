@@ -82,6 +82,8 @@ jobs:
           cp -r docs-build/generated/release-notes/. docs/release-notes/
 
       - name: Build site
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd docs-build
           mkdocs build --strict
