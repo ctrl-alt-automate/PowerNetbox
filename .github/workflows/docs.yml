@@ -51,6 +51,9 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Install Cairo system library (for social cards)
+        run: sudo apt-get install -y libcairo2-dev libfreetype6-dev libffi-dev libjpeg-dev libpng-dev libz-dev pkg-config
+
       - name: Install Python deps
         run: pip install -r docs-build/requirements.txt
 

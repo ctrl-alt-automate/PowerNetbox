@@ -17,6 +17,10 @@ plugins:
       module_name: macros
       include_dir: .
       render_by_default: false
+  - social:
+      cards: true
+      cards_layout_options:
+        background_color: "#1976d2"
 
 hooks:
   - hooks.py
@@ -43,6 +47,8 @@ theme:
   font:
     text: Inter
     code: JetBrains Mono
+
+  favicon: assets/favicon.svg
 
   icon:
     logo: material/server
