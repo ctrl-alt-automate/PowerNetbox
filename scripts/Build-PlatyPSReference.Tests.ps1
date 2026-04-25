@@ -48,4 +48,21 @@ Describe 'Build-PlatyPSReference.ps1' {
         # Pagination params snippet should be referenced on Get- cmdlets
         $content | Should -Match '--8<-- "common-pagination-params\.md"'
     }
+
+    It 'writes source: front matter pointing to the .ps1 file' {
+        # No need to re-invoke the script — Get-NBDCIMDevice.md should exist from
+        # the previous test
+        $content = Get-Content -Raw (Join-Path $script:TempDir 'DCIM' 'Devices' 'Get-NBDCIMDevice.md')
+        $content | Should -Match '(?m)^source:\s+Functions/DCIM/Devices/Get-NBDCIMDevice\.ps1\s*$'
+    }
+
+    It 'generates per-module index.md listing cmdlets' {
+        # Each top-level module dir should have an index.md
+        Test-Path (Join-Path $script:TempDir 'DCIM' 'index.md') | Should -BeTrue
+        Test-Path (Join-Path $script:TempDir 'IPAM' 'index.md') | Should -BeTrue
+        # The module index should mention specific cmdlets and endpoint labels
+        $dcimIndex = Get-Content -Raw (Join-Path $script:TempDir 'DCIM' 'index.md')
+        $dcimIndex | Should -Match 'Get-NBDCIMDevice'
+        $dcimIndex | Should -Match 'Devices'  # endpoint label
+    }
 }

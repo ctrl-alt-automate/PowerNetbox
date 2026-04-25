@@ -225,6 +225,13 @@ foreach ($cmd in $targetCmdlets) {
 
     $mdFile = Join-Path $cmdletOutputDir "$($cmd.Name).md"
     if (Test-Path $mdFile) {
+        # Prepend YAML front matter with source: path before snippet injection
+        $sourcePath = "Functions/$($subpath -replace '\\', '/')/$($cmd.Name).ps1"
+        $existingContent = Get-Content -Raw $mdFile
+        $existingContent = if ($null -eq $existingContent) { '' } else { $existingContent }
+        $frontMatter = "---`nsource: $sourcePath`n---`n`n"
+        [System.IO.File]::WriteAllText($mdFile, $frontMatter + $existingContent)
+
         Invoke-SnippetInjection -FilePath $mdFile -CmdletName $cmd.Name
         $generated++
     } else {
@@ -234,3 +241,75 @@ foreach ($cmd in $targetCmdlets) {
 }
 
 Write-Host "Done. Generated: $generated  Skipped: $skipped"
+
+# ---------------------------------------------------------------------------
+# 8. Generate per-module index.md files
+# ---------------------------------------------------------------------------
+Write-Host 'Generating per-module index pages...'
+
+# Group cmdlets by top-level module (first segment of subpath)
+$moduleGroups = @{}
+foreach ($cmd in $targetCmdlets) {
+    $subpath = $cmdletSubpathMap[$cmd.Name]
+    if ($null -eq $subpath -or $subpath -eq '') { continue }
+
+    # First segment = top-level module (e.g., 'DCIM', 'IPAM', 'Plugins')
+    $segments = $subpath -split '/'
+    $topModule = $segments[0]
+
+    if (-not $moduleGroups.ContainsKey($topModule)) {
+        $moduleGroups[$topModule] = [System.Collections.Generic.List[hashtable]]::new()
+    }
+    $moduleGroups[$topModule].Add(@{
+        Name    = $cmd.Name
+        Subpath = $subpath
+    })
+}
+
+foreach ($moduleName in ($moduleGroups.Keys | Sort-Object)) {
+    $cmdlets = $moduleGroups[$moduleName] | Sort-Object { $_['Name'] }
+
+    # Count unique endpoints (all sub-segments after the top module)
+    $endpoints = $cmdlets | ForEach-Object {
+        $segs = $_['Subpath'] -split '/'
+        if ($segs.Count -gt 1) { ($segs[1..($segs.Count - 1)]) -join '/' } else { '(root)' }
+    } | Sort-Object -Unique
+
+    $endpointCount = ($endpoints | Measure-Object).Count
+    $cmdletCount   = $cmdlets.Count
+
+    # Build table rows
+    $tableRows = foreach ($entry in $cmdlets) {
+        $segs = $entry['Subpath'] -split '/'
+        if ($segs.Count -gt 1) {
+            # Path relative to module dir, e.g. 'Devices/Get-NBDCIMDevice.md'
+            $relLink    = ($segs[1..($segs.Count - 1)] + @("$($entry['Name']).md")) -join '/'
+            $endpointLabel = ($segs[1..($segs.Count - 1)]) -join '/'
+        } else {
+            $relLink       = "$($entry['Name']).md"
+            $endpointLabel = '(root)'
+        }
+        "| [$($entry['Name'])]($relLink) | $endpointLabel |"
+    }
+
+    $indexContent = @"
+---
+title: $moduleName
+---
+
+# $moduleName
+
+$cmdletCount cmdlets in the $moduleName module across $endpointCount endpoints.
+
+| Cmdlet | Endpoint |
+|---|---|
+$($tableRows -join "`n")
+"@
+
+    $moduleIndexPath = Join-Path $OutputPath $moduleName 'index.md'
+    New-Item -Path (Split-Path $moduleIndexPath -Parent) -ItemType Directory -Force | Out-Null
+    [System.IO.File]::WriteAllText($moduleIndexPath, $indexContent)
+    Write-Verbose "  Wrote $moduleIndexPath"
+}
+
+Write-Host "  Generated $($moduleGroups.Count) module index pages."

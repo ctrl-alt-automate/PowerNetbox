@@ -13,7 +13,7 @@ Tenancy, VPN, Wireless, and the netbox-branching plugin.
 
 <div class="pn-cta-row" markdown>
 [:material-rocket-launch: Getting Started](getting-started/connecting.md){ .md-button .md-button--primary }
-[:material-book-open-variant: Browse Reference](reference/){ .md-button }
+[:material-book-open-variant: Browse Reference](reference/index.md){ .md-button }
 </div>
 
 ## Latest release

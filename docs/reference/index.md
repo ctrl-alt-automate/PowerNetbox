@@ -12,20 +12,16 @@ and a "Since v..." badge indicating the version that introduced it.
 
 | Module | Endpoints | Cmdlets | Highlights |
 |---|---:|---:|---|
-| [DCIM](DCIM/Devices/Get-NBDCIMDevice.md) | 45 | 180 | Devices, Sites, Cables, Interfaces, Racks |
-| [IPAM](IPAM/Address/Get-NBIPAMAddress.md) | 18 | 72 | IP Addresses, Prefixes, VLANs, VRFs |
-| [Virtualization](Virtualization/) | 5 | 20 | Virtual Machines, Clusters, Interfaces |
-| [Circuits](Circuits/) | 11 | 44 | Providers, Circuits, Terminations |
-| [Tenancy](Tenancy/) | 5 | 20 | Tenants, Tenant Groups, Contacts |
-| [VPN](VPN/) | 10 | 40 | Tunnels, IKE, IPSec |
-| [Wireless](Wireless/) | 3 | 12 | LANs, Links |
-| [Extras](Extras/) | 12 | 45 | Custom Fields, Tags, Webhooks, Saved Filters |
-| [Users](Users/) | 4 | 16 | Users, Groups, Permissions, Tokens |
-| [Core](Core/) | 5 | 8 | API Definition, Object Types |
-
-!!! note "Per-module landing pages"
-    The DCIM and IPAM links above point at representative cmdlets. Per-module
-    landing pages with full cmdlet listings are planned for a future release.
+| [DCIM](DCIM/index.md) | 45 | 180 | Devices, Sites, Cables, Interfaces, Racks |
+| [IPAM](IPAM/index.md) | 18 | 72 | IP Addresses, Prefixes, VLANs, VRFs |
+| [Virtualization](Virtualization/index.md) | 5 | 20 | Virtual Machines, Clusters, Interfaces |
+| [Circuits](Circuits/index.md) | 11 | 44 | Providers, Circuits, Terminations |
+| [Tenancy](Tenancy/index.md) | 5 | 20 | Tenants, Tenant Groups, Contacts |
+| [VPN](VPN/index.md) | 10 | 40 | Tunnels, IKE, IPSec |
+| [Wireless](Wireless/index.md) | 3 | 12 | LANs, Links |
+| [Extras](Extras/index.md) | 12 | 45 | Custom Fields, Tags, Webhooks, Saved Filters |
+| [Users](Users/index.md) | 4 | 16 | Users, Groups, Permissions, Tokens |
+| [Core](Core/index.md) | 5 | 8 | API Definition, Object Types |
 
 ## Conventions
 
