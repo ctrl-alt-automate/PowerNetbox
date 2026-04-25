@@ -1,6 +1,6 @@
 site_name: PowerNetbox
 site_description: The comprehensive PowerShell module for the NetBox REST API
-site_url: https://ctrl-alt-automate.github.io/PowerNetbox/
+site_url: https://docs.powernetbox.dev/
 repo_url: https://github.com/ctrl-alt-automate/PowerNetbox
 repo_name: ctrl-alt-automate/PowerNetbox
 edit_uri: edit/dev/docs/
