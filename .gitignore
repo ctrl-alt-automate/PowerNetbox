@@ -46,6 +46,7 @@ TestResults/
 # MkDocs build outputs
 docs-build/generated/
 docs-build/.venv/
+docs-build/.cache/
 site/
 __pycache__/
 # Generated reference docs (CI copies from docs-build/generated/reference/ before build)
