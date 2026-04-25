@@ -1,0 +1,9 @@
+nav:
+  - index.md
+  - getting-started
+  - guides
+  - reference
+  - architecture
+  - contributing
+  - release-notes
+  - ...

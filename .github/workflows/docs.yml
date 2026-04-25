@@ -62,6 +62,14 @@ jobs:
             -OutputPath ./docs-build/generated/reference `
             -Scope Public
 
+      - name: Build reference (internal helpers)
+        shell: pwsh
+        run: |
+          ./scripts/Build-PlatyPSReference.ps1 `
+            -ModulePath ./PowerNetbox.psd1 `
+            -OutputPath ./docs-build/generated/architecture/internal-helpers `
+            -Scope Internal
+
       - name: Build release notes
         shell: pwsh
         env:
@@ -76,14 +84,13 @@ jobs:
           # reference/common-parameters.md (Task 17). Same selective pattern used
           # in local dev verification.
           for d in docs/reference/*/; do rm -rf "$d"; done
-          rm -rf docs/release-notes
-          mkdir -p docs/reference docs/release-notes
+          rm -rf docs/release-notes docs/architecture/internal-helpers
+          mkdir -p docs/reference docs/release-notes docs/architecture/internal-helpers
           cp -r docs-build/generated/reference/. docs/reference/
           cp -r docs-build/generated/release-notes/. docs/release-notes/
+          cp -r docs-build/generated/architecture/internal-helpers/. docs/architecture/internal-helpers/
 
       - name: Build site
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd docs-build
           mkdocs build --strict
