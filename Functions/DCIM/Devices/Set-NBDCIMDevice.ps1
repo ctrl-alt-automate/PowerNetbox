@@ -14,6 +14,8 @@
 
 .PARAMETER Name
     The new name for the device.
+.PARAMETER Description
+    The new description for the device.
 
 .PARAMETER Role
     The device role ID.
@@ -127,6 +129,9 @@ function Set-NBDCIMDevice {
 
         [Parameter(ParameterSetName = 'Single')]
         [string]$Name,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [string]$Description,
 
         [Parameter(ParameterSetName = 'Single')]
         [Alias('Device_Role')]
