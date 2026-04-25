@@ -23,19 +23,48 @@ hooks:
 
 theme:
   name: material
+
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: blue
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: blue
+      accent: light blue
+      toggle:
+        icon: material/weather-night
+        name: Switch to light mode
+
+  font:
+    text: Inter
+    code: JetBrains Mono
+
+  icon:
+    logo: material/server
+    repo: fontawesome/brands/github
+
   features:
     - navigation.tabs
+    - navigation.tabs.sticky
     - navigation.sections
     - navigation.instant
     - navigation.top
     - search.suggest
     - search.highlight
+    - search.share
     - content.code.copy
+    - content.tabs.link
     - content.action.edit
 
 markdown_extensions:
   - admonition
   - attr_list
+  - md_in_html
   - def_list
   - footnotes
   - tables
