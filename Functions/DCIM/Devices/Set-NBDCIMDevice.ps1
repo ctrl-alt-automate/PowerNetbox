@@ -13,52 +13,100 @@
     The database ID of the device to update. Required for single updates.
 
 .PARAMETER Name
-    The new name for the device.
+    The name of the device. Required for single device creation.
+
 .PARAMETER Description
     The new description for the device.
 
 .PARAMETER Role
-    The device role ID.
-    Alias: Device_Role (backwards compatibility)
+    The device role ID or name. Required for single device creation.
+    Alias: Device_Role (backwards compatibility with Netbox 3.x)
 
 .PARAMETER Device_Type
-    The device type ID.
+    The device type ID. Required for single device creation.
 
-.PARAMETER Site
-    The site ID.
 
-.PARAMETER Status
-    Status of the device.
-
-.PARAMETER Platform
-    The platform ID.
 
 .PARAMETER Tenant
     The tenant ID.
 
-.PARAMETER Cluster
-    The cluster ID.
+.PARAMETER Platform
+    The platform ID.
+
+.PARAMETER Serial
+    The device serial number.
+
+.PARAMETER Asset_Tag
+    The device asset tag.
+
+.PARAMETER Site
+    The site ID. Required for single device creation.
+
+.PARAMETER Location
+    The location ID.
 
 .PARAMETER Rack
     The rack ID.
 
-.PARAMETER Position
-    Position in the rack.
+.PARAMETER Postiton
+    The position within the rack (Valid range: 0.5-100).
 
 .PARAMETER Face
-    Face of the device in the rack.
+    The rack face (front or rear).
 
-.PARAMETER Serial
-    Serial number.
+.PARAMETER Latitude
+    The latitude coordinate for the device's location.
 
-.PARAMETER Asset_Tag
-    Asset tag.
+.PARAMETER Longitude
+    The longitude coordinate for the device's location.
+
+.PARAMETER Status
+    The device status. Optional for single device creation.
+    Valid values: offline, active, planned, staged, failed, inventory, decommissioning
+    Default: active
+
+.PARAMETER Airflow
+    The device airflow direction.
+    Valid values: front-to-rear, rear-to-front, left-to-right, right-to-left, side-to-rear, rear-to-side, bottom-to-top, top-to-bottom,passive, mixed
+
+.PARAMETER Primary_IP4
+    The primary IPv4 address ID.
+
+.PARAMETER Primary_IP6
+    The primary IPv6 address ID.
+
+.PARAMETER OOB_IP.
+    The out-of-band management IP address ID.
+
+.PARAMETER Cluster
+    The cluster ID.
+
+.PARAMETER Virtual_Chassis
+    The virtual chassis ID.
+
+.PARAMETER VC_Position
+    The virtual chassis position.
+
+.PARAMETER VC_Priority
+    The virtual chassis priority.
+
+.PARAMETER Description
+    A description of the device.
 
 .PARAMETER Comments
-    Comments about the device.
+    Additional comments about the device.
+
+.PARAMETER Config_template
+    The configuration template ID to associate with the device.
+
+.PARAMETER Local_Context_Data
+    The local context data for the device.
+
+.PARAMETER Tags
+    An array of tag names or IDs to assign to the device.
 
 .PARAMETER Custom_Fields
-    Hashtable of custom field values.
+    A hashtable of custom field values, where keys are field names and values are the corresponding values.
 
 .PARAMETER Owner
     The owner ID for object ownership (Netbox 4.5+ only).
@@ -132,6 +180,10 @@ function Set-NBDCIMDevice {
         [string]$Status,
 
         [Parameter(ParameterSetName = 'Single')]
+        [ValidateSet('front-to-rear', 'rear-to-front', 'left-to-right', 'right-to-left', 'side-to-rear', 'rear-to-side', 'bottom-to-top', 'top-to-bottom','passive','mixed','', IgnoreCase = $true)]
+        [string]$Airflow,
+
+        [Parameter(ParameterSetName = 'Single')]
         [Nullable[uint64]]$Platform,
 
         [Parameter(ParameterSetName = 'Single')]
@@ -144,11 +196,17 @@ function Set-NBDCIMDevice {
         [Nullable[uint64]]$Rack,
 
         [Parameter(ParameterSetName = 'Single')]
-        [Nullable[uint16]]$Position,
+        [Nullable[double]]$Position,
 
         [Parameter(ParameterSetName = 'Single')]
         [ValidateSet('front', 'rear', IgnoreCase = $true)]
         [string]$Face,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [Nullable[double]]$Latitude,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [Nullable[double]]$Longitude,
 
         [Parameter(ParameterSetName = 'Single')]
         [string]$Serial,
@@ -172,7 +230,16 @@ function Set-NBDCIMDevice {
         [Nullable[uint64]]$Primary_IP6,
 
         [Parameter(ParameterSetName = 'Single')]
+        [Nullable[uint64]]$OOB_IP,
+
+        [Parameter(ParameterSetName = 'Single')]
         [string]$Comments,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [Nullable[uint64]]$Config_Template,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [hashtable]$Local_Context_Data,
 
         [Parameter(ParameterSetName = 'Single')]
         [hashtable]$Custom_Fields,

@@ -182,7 +182,8 @@ function Get-NBDCIMDevice {
         [uint64]$Virtual_Chassis_Id,
 
         [Parameter(ParameterSetName = 'Query')]
-        [uint16]$Position,
+        [ValidateRange(0.5, 100)]
+        [double]$Position,
 
         [Parameter(ParameterSetName = 'Query')]
         [string]$Serial,

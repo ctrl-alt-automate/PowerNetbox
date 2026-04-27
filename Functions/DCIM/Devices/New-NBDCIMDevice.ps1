@@ -20,8 +20,86 @@
 .PARAMETER Device_Type
     The device type ID. Required for single device creation.
 
+.PARAMETER Tenant
+    The tenant ID.
+
+.PARAMETER Platform
+    The platform ID.
+
+.PARAMETER Serial
+    The device serial number.
+
+.PARAMETER Asset_Tag
+    The device asset tag.
+
 .PARAMETER Site
     The site ID. Required for single device creation.
+
+.PARAMETER Location
+    The location ID.
+
+.PARAMETER Rack
+    The rack ID.
+
+.PARAMETER Postiton
+    The position within the rack (Valid range: 0.5-100).
+
+.PARAMETER Face
+    The rack face (front or rear).
+
+.PARAMETER Latitude
+    The latitude coordinate for the device's location.
+
+.PARAMETER Longitude
+    The longitude coordinate for the device's location.
+
+.PARAMETER Status
+    The device status. Optional for single device creation.
+    Valid values: offline, active, planned, staged, failed, inventory, decommissioning
+    Default: active
+
+.PARAMETER Airflow
+    The device airflow direction.
+    Valid values: front-to-rear, rear-to-front, left-to-right, right-to-left, side-to-rear, rear-to-side, bottom-to-top, top-to-bottom,passive, mixed
+
+.PARAMETER Primary_IP4
+    The primary IPv4 address ID.
+
+.PARAMETER Primary_IP6
+    The primary IPv6 address ID.
+
+.PARAMETER OOB_IP.
+    The out-of-band management IP address ID.
+
+.PARAMETER Cluster
+    The cluster ID.
+
+.PARAMETER Virtual_Chassis
+    The virtual chassis ID.
+
+.PARAMETER VC_Position
+    The virtual chassis position.
+
+.PARAMETER VC_Priority
+    The virtual chassis priority.
+
+.PARAMETER Description
+    A description of the device.
+
+.PARAMETER Comments
+    Additional comments about the device.
+
+.PARAMETER Config_template
+    The configuration template ID to associate with the device.
+
+.PARAMETER Local_Context_Data
+    The local context data for the device.
+
+.PARAMETER Tags
+    An array of tag names or IDs to assign to the device.
+
+.PARAMETER Custom_Fields
+    A hashtable of custom field values, where keys are field names and values are the corresponding values.
 
 .PARAMETER InputObject
     Pipeline input for bulk operations. Each object should contain
@@ -92,8 +170,15 @@ function New-NBDCIMDevice {
         [uint64]$Site,
 
         [Parameter(ParameterSetName = 'Single')]
+        [string]$Description,
+
+        [Parameter(ParameterSetName = 'Single')]
         [ValidateSet('offline', 'active', 'planned', 'staged', 'failed', 'inventory', 'decommissioning', IgnoreCase = $true)]
         [string]$Status = 'active',
+
+        [Parameter(ParameterSetName = 'Single')]
+        [ValidateSet('front-to-rear', 'rear-to-front', 'left-to-right', 'right-to-left', 'side-to-rear', 'rear-to-side', 'bottom-to-top', 'top-to-bottom','passive','mixed', IgnoreCase = $true)]
+        [string]$Airflow,
 
         [Parameter(ParameterSetName = 'Single')]
         [uint64]$Platform,
@@ -105,14 +190,24 @@ function New-NBDCIMDevice {
         [uint64]$Cluster,
 
         [Parameter(ParameterSetName = 'Single')]
+        [uint64]$Location,
+
+        [Parameter(ParameterSetName = 'Single')]
         [uint64]$Rack,
 
         [Parameter(ParameterSetName = 'Single')]
-        [uint16]$Position,
+        [ValidateRange(0.5, 100)]
+        [double]$Position,
 
         [Parameter(ParameterSetName = 'Single')]
         [ValidateSet('front', 'rear', IgnoreCase = $true)]
         [string]$Face,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [double]$Latitude,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [double]$Longitude,
 
         [Parameter(ParameterSetName = 'Single')]
         [string]$Serial,
@@ -136,7 +231,16 @@ function New-NBDCIMDevice {
         [uint64]$Primary_IP6,
 
         [Parameter(ParameterSetName = 'Single')]
+        [uint64]$OOB_ID,
+
+        [Parameter(ParameterSetName = 'Single')]
         [string]$Comments,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [uint64]$Config_Template,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [hashtable]$Local_Context_Data,
 
         [Parameter(ParameterSetName = 'Single')]
         [hashtable]$Custom_Fields,
