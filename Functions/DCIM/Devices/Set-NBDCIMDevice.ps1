@@ -25,8 +25,6 @@
 .PARAMETER Device_Type
     The device type ID. Required for single device creation.
 
-
-
 .PARAMETER Tenant
     The tenant ID.
 
