@@ -103,10 +103,11 @@ function Set-NBUser {
             }
         }
 
-        $URI = BuildNewURI -Segments $Segments
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $params -SkipParameterByName 'Id','Raw','Force'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
 
         if ($PSCmdlet.ShouldProcess($Id, 'Update User')) {
-            InvokeNetboxRequest -URI $URI -Method PATCH -Body $params -Raw:$Raw
+            InvokeNetboxRequest -URI $URI -Method PATCH -Body $URIComponents.Parameters -Raw:$Raw
         }
     }
 }

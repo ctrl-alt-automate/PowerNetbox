@@ -411,6 +411,7 @@ Describe "Live Integration Tests" -Tag 'Integration', 'Live' -Skip:(-not $script
             Contacts            = [System.Collections.ArrayList]::new()
             ContactRoles        = [System.Collections.ArrayList]::new()
             ContactGroups       = [System.Collections.ArrayList]::new()
+            Users               = [System.Collections.ArrayList]::new()
         }
 
         Write-Host "Test Run ID: $script:TestRunId" -ForegroundColor Cyan
@@ -500,6 +501,9 @@ Describe "Live Integration Tests" -Tag 'Integration', 'Live' -Skip:(-not $script
         }
         foreach ($id in $script:CreatedResources.ContactGroups) {
              Remove-TestResource -ResourceType 'ContactGroup' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBContactGroup -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
+        }
+        foreach ($id in $script:CreatedResources.Users) {
+             Remove-TestResource -ResourceType 'User' -Id $id -RemoveCommand { param($Id, $Confirm, $ErrorAction) Remove-NBUser -Id $Id -Confirm:$Confirm -ErrorAction $ErrorAction }
         }
 
         # Report any cleanup errors
@@ -1672,6 +1676,75 @@ Describe "Live Integration Tests" -Tag 'Integration', 'Live' -Skip:(-not $script
             { Remove-NBContactAssignment -Id $script:TestContactAssignmentId -Confirm:$false } | Should -Not -Throw
 
             $script:CreatedResources.ContactAssignments.Remove($script:TestContactAssignmentId)
+        }
+    }
+
+    Context "User CRUD" {
+        BeforeAll {
+            $script:UserName = "$($script:TestPrefix)AuthenticationUser"
+            $script:UserSlug = $script:UserName.ToLower() -replace '[^a-z0-9-]', '-'
+            $splat = @{
+                Username = $script:UserName
+                Password = (ConvertTo-SecureString "<Your_Password1234>" -AsPlainText -Force)
+                First_Name = 'Test'
+                Last_Name  = 'User'
+                Email      = 'test.user@example.com'
+            }
+            $user = New-NBUser @splat
+            if ($null -eq $user) {
+                throw "Failed to create user"
+            }
+            $script:UserId = $user.id
+            [void]$script:CreatedResources.Users.Add($script:UserId)
+        }
+        It "Should create a new user and than set its properties" {
+            # Has been created in the BeforeAll block if that did not throw
+        }
+        It "Should get the user by ID" {
+            $user = Get-NBUser -Id $script:UserId
+            $user | Should -Not -BeNullOrEmpty
+            $user.id | Should -Be $script:UserId
+        }
+        It "Should get the user by <Case>" -ForEach @(
+            @{ Case = 'name'; First_Name = 'Test'; Last_Name = 'User' }
+            @{ Case = 'email'; Email = 'test.user@example.com' }
+        ) {
+            $params = $_
+            $params.Remove('Case')
+            $user = Get-NBUser @params
+            $user | Should -Not -BeNullOrEmpty
+            $user.username | Should -Be $script:UserName
+            $user.first_name | Should -Be 'Test'
+            $user.last_name | Should -Be 'User'
+            $user.email | Should -Be 'test.user@example.com'
+        }
+        It "Should get all users" {
+            $user = Get-NBUser -All
+            $user | Should -Not -BeNullOrEmpty
+            $user.email | Should -Contain 'test.user@example.com'
+        }
+        It "Should not find a non-existent user" {
+            # Searching by ID will throw an error if the user does not exist; searching by other fields will return empty results (because it is a query)
+            { Get-NBUser -Id ([uint64]::MaxValue) } | Should -Throw
+            Get-NBUser -First_Name 'NonExistentFirstName' | Should -BeNullOrEmpty
+        }
+        It "Should set the user's properties" {
+            $params = @{
+                Id         = $script:UserId
+                First_Name = 'UpdatedTest'
+                Last_Name  = 'UpdatedUser'
+                Email      = 'updated.user@example.com'
+            }
+            $user = Set-NBUser @params
+            $user | Should -Not -BeNullOrEmpty
+            $user.first_name | Should -Be 'UpdatedTest'
+            $user.last_name | Should -Be 'UpdatedUser'
+            $user.email | Should -Be 'updated.user@example.com'
+        }
+        It "Should delete the user" {
+            { Remove-NBUser -Id $script:UserId -Confirm:$false } | Should -Not -Throw
+            { Get-NBUser -Id $script:UserId } | Should -Throw
+            $script:CreatedResources.Users.Remove($script:UserId)
         }
     }
 
