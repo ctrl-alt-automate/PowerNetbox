@@ -101,10 +101,11 @@ function New-NBUser {
             }
         }
 
-        $URI = BuildNewURI -Segments $Segments
+        $URIComponents = BuildURIComponents -URISegments $Segments.Clone() -ParametersDictionary $params -SkipParameterByName 'Id', 'Raw', 'All', 'PageSize'
+        $URI = BuildNewURI -Segments $URIComponents.Segments
 
         if ($PSCmdlet.ShouldProcess($Username, 'Create User')) {
-            InvokeNetboxRequest -URI $URI -Method POST -Body $params -Raw:$Raw
+            InvokeNetboxRequest -URI $URI -Method POST -Body $URIComponents.Parameters -Raw:$Raw
         }
     }
 }
