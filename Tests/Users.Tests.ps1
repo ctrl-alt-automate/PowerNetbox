@@ -182,6 +182,18 @@ Describe "Users Module Tests" -Tag 'Users' {
             $Result = New-NBUser -Username 'whatifuser' -Password $securePass -WhatIf
             $Result | Should -BeNullOrEmpty
         }
+
+        # Regression for #505. NetBox field names are case-sensitive, but ConvertFrom-Json + property
+        # access is NOT ($obj.username also finds "Username"), so the assertions above could never
+        # see this bug. Assert on the raw JSON with a case-sensitive match instead.
+        It "Should send lower-case API field names in the body (#505)" {
+            $securePass = ConvertTo-SecureString "TestPass123" -AsPlainText -Force
+            $Result = New-NBUser -Username 'caseuser' -Password $securePass -First_Name 'John' -Last_Name 'Doe' -Email 'john@example.com' -Is_Active $true -Is_Superuser $false -Groups 1, 2 -Confirm:$false
+            foreach ($field in 'username', 'password', 'first_name', 'last_name', 'email', 'is_active', 'is_superuser', 'groups') {
+                $Result.Body | Should -MatchExactly "`"$field`":" -Because "NetBox only knows '$field' in lower case"
+            }
+            $Result.Body | Should -Not -MatchExactly '"[A-Z][A-Za-z_]*":' -Because 'a PascalCase key is silently ignored (PATCH) or rejected (POST) by NetBox'
+        }
     }
 
     Context "Set-NBUser" {
@@ -207,6 +219,18 @@ Describe "Users Module Tests" -Tag 'Users' {
         It "Should support -WhatIf" {
             $Result = Set-NBUser -Id 1 -First_Name 'WhatIf' -WhatIf
             $Result | Should -BeNullOrEmpty
+        }
+
+        # Regression for #505 - see the note on the matching New-NBUser test.
+        It "Should send lower-case API field names in the body (#505)" {
+            $securePass = ConvertTo-SecureString "TestPass123" -AsPlainText -Force
+            $Result = Set-NBUser -Id 7 -Username 'caseuser' -Password $securePass -First_Name 'John' -Last_Name 'Doe' -Email 'john@example.com' -Is_Active $true -Is_Superuser $false -Groups 1, 2 -Confirm:$false
+            $Result.Uri | Should -Be 'https://netbox.domain.com/api/users/users/7/'
+            foreach ($field in 'username', 'password', 'first_name', 'last_name', 'email', 'is_active', 'is_superuser', 'groups') {
+                $Result.Body | Should -MatchExactly "`"$field`":" -Because "NetBox only knows '$field' in lower case"
+            }
+            $Result.Body | Should -Not -MatchExactly '"[A-Z][A-Za-z_]*":' -Because 'NetBox silently ignores a PascalCase key on PATCH, so the update would be a no-op'
+            $Result.Body | Should -Not -MatchExactly '"id":' -Because 'the ID belongs in the URL, not in the body'
         }
     }
 

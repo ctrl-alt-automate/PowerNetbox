@@ -1,8 +1,8 @@
-# Netbox Version Compatibility
+# Compatibility
 
 PowerNetbox is tested against multiple Netbox versions to ensure broad compatibility.
 
-## Supported Versions
+## NetBox Versions
 
 > The exact versions exercised in CI are shown on the
 > [home page compatibility table](../index.md#compatibility), which is
@@ -23,6 +23,80 @@ PowerNetbox is tested against multiple Netbox versions to ensure broad compatibi
 
 **Minimum supported version: Netbox 4.3+**
 
+## Deprecations ahead of Netbox 5.0
+
+Netbox 5.0 removes several fields that still work today. PowerNetbox keeps sending them - your
+scripts do not change behaviour - but warns once per connection so the migration is not a
+surprise at upgrade time. Warnings are version-gated: nothing is reported while you are
+connected to a release where the old field is still the only option.
+
+| What | Deprecated in | Removed in | Use instead |
+|------|---------------|------------|-------------|
+| v1 API tokens (40-char hex, `Token` auth header) | Netbox 4.6 | Netbox 5.0 | A v2 token (`nbt_`-prefixed, `Bearer` auth). Create one under **Users > API Tokens**. |
+| `-Ports` / `-Protocol` on `New-`/`Set-NBIPAMService` and `-NBIPAMServiceTemplate` | Netbox 4.7 | Netbox 5.0 | `-Port_Mappings`, e.g. `-Port_Mappings 'tcp/80','udp/53'` |
+| `-Form_Factor`, `-Width`, `-Outer_Width`, `-Outer_Depth`, `-Outer_Height` on `New-`/`Set-NBDCIMRack` | Netbox 4.7 | Netbox 5.0 | Set the geometry on the rack type |
+
+The v1 token warning is raised by `Connect-NBAPI` when the connected server is Netbox 4.6 or
+newer. Migrating is a one-liner once the new token exists:
+
+```powershell
+Connect-NBAPI -URI https://netbox.example.com -Credential (
+    [PSCredential]::new('api', (ConvertTo-SecureString 'nbt_...' -AsPlainText -Force))
+)
+```
+
+Each distinct warning appears once per connection, so a bulk pipeline reports it once rather
+than once per object. Reconnecting resets that.
+
+## PowerShell Support
+
+These are the versions exercised in CI on every push and pull request. Each leg installs
+its PowerShell version explicitly and verifies `$PSVersionTable` before running the suite,
+so this table is a contract rather than an intention.
+
+| PowerShell | Edition | Status | Supported until |
+|------------|---------|--------|-----------------|
+| 7.6 LTS | Core | Baseline | 2028-11-14 (.NET 10) |
+| 5.1 | Desktop | Supported, frozen | Tied to the Windows release that ships it |
+
+PowerShell 7.0 through 7.5 are past end-of-support and are not tested - that includes
+7.4 LTS, whose support ended on 2026-11-10 (.NET 8) and whose CI leg was removed on that
+date. They will generally work, but no compatibility claim is made for them. Non-LTS
+releases such as 7.7 are not part of the matrix either; the next version to be added is
+the next LTS.
+
+### Windows PowerShell 5.1: supported, frozen
+
+The module loads and every cmdlet works on Windows PowerShell 5.1. There is no plan to drop
+it: Windows PowerShell has no end-of-life date of its own, because it is supported as a
+component of the Windows release that bundles it. Windows Server 2022 runs to October 2031
+and Windows Server 2025 to November 2034.
+
+"Frozen" means:
+
+- Features that require .NET capabilities 5.1 does not have ship as **PowerShell 7+
+  features**, with a warning and documented degradation rather than a hard failure.
+- No new 5.1-specific code is written.
+
+The support decision is revisited only if one of these happens:
+
+1. Microsoft announces an actual deprecation of Windows PowerShell 5.1.
+2. The edition-specific code in the module grows materially beyond its current footprint.
+3. A NetBox API feature turns out to be unimplementable on .NET Framework.
+
+### PowerShell 7+ only features
+
+One feature is genuinely gated on PowerShell 7, because it needs a capability that
+.NET Framework does not provide:
+
+| Feature | Requires | Behaviour on 5.1 |
+|---------|----------|------------------|
+| `Set-NBQueryOption -OptimisticConcurrency` (ETag / If-Match) | `Invoke-RestMethod -ResponseHeadersVariable` to read response headers | A warning is emitted once, and requests are sent without `If-Match` |
+
+Everything else that branches on edition - TLS configuration, certificate validation
+bypass, multipart image upload - takes a different code path to reach **the same
+behaviour**, and needs no change to your scripts.
+
 ## Compatibility Testing
 
 PowerNetbox uses automated compatibility testing via GitHub Actions. The workflow tests against multiple Netbox versions using Docker images from [netboxcommunity/netbox](https://hub.docker.com/r/netboxcommunity/netbox).
@@ -38,6 +112,11 @@ Netbox 4.5.10: 110/110 tests passed ✅
 Netbox 4.4.10: 110/110 tests passed ✅
 Netbox 4.3.7:   96/110 tests passed ✅ (Minimum supported; 14 skipped for 4.4+/4.5+ features)
 ```
+
+NetBox 4.7.5 (released 2026-11-10) is the release PowerNetbox 4.7.5.0 targets. Its choice
+values are in parity with the 4.7.5 source and the same suite was run live against a build
+of the 4.7.5 tag. It replaces 4.7.0 as the newest matrix leg as soon as the official
+`netboxcommunity/netbox:v4.7.5-5.1.1` image is published.
 
 ## API Endpoint Changes
 

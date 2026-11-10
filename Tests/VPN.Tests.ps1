@@ -264,6 +264,14 @@ Describe "VPN Module Tests" -Tag 'VPN' {
             $bodyObj.name | Should -Be 'test-l2vpn'
             $bodyObj.type | Should -Be 'vxlan'
         }
+
+        # NetBox has always rejected an L2VPN without a type (400 on 4.3.7 through 4.7.x); 4.7.1
+        # also declares it required in the schema (netbox#23154). Fail at binding time instead.
+        It "Should require -Type, like the API does" {
+            $attr = (Get-Command New-NBVPNL2VPN).Parameters['Type'].Attributes |
+                Where-Object { $_ -is [System.Management.Automation.ParameterAttribute] }
+            $attr.Mandatory | Should -BeTrue
+        }
     }
 
     Context "Set-NBVPNL2VPN" {

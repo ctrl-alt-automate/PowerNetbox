@@ -159,7 +159,7 @@ function Get-NBDCIMCable {
         [Parameter(ParameterSetName = 'Query')]
         [string]$Color,
 
-        # Valid values from netbox/dcim/choices.py CableProfileChoices (v4.5.7).
+        # Valid values from netbox/dcim/choices.py CableProfileChoices (v4.7.5).
         # Every value must carry its 'single-' / 'trunk-' / 'breakout-' prefix
         # or the NetBox API will reject the request. See #389.
         [Parameter(ParameterSetName = 'Query')]
@@ -170,8 +170,13 @@ function Get-NBDCIMCable {
             # Trunks (multi-connector)
             'trunk-2c1p', 'trunk-2c2p', 'trunk-2c4p', 'trunk-2c4p-shuffle',
             'trunk-2c6p', 'trunk-2c8p', 'trunk-2c12p',
+            'trunk-3c8p', 'trunk-3c12p',                # added in Netbox 4.7.5 (#23470)
             'trunk-4c1p', 'trunk-4c2p', 'trunk-4c4p', 'trunk-4c4p-shuffle',
-            'trunk-4c6p', 'trunk-4c8p', 'trunk-8c4p',
+            'trunk-4c6p', 'trunk-4c8p',
+            'trunk-4c12p',                              # added in Netbox 4.7.5 (#23470)
+            'trunk-8c1p',                               # added in Netbox 4.7.4 (#23031)
+            'trunk-8c4p',
+            'trunk-12c1p', 'trunk-24c1p',               # added in Netbox 4.7.4 (#23031)
             # Breakouts
             'breakout-1c2p-2c1p',       # added in Netbox 4.5.7 (#21760)
             'breakout-1c4p-4c1p',

@@ -257,19 +257,14 @@ function InvokeNetboxRequest {
             $null = $splat.Add('Body', ($Body | ConvertTo-Json -Compress -Depth 10))
         }
         else {
-            # Sanitize sensitive fields before logging
-            $sensitivePatterns = @('secret', 'password', 'key', 'token', 'psk')
-            $sanitizedBody = @{}
-            foreach ($prop in $Body.PSObject.Properties) {
-                $isSensitive = $sensitivePatterns | Where-Object { $prop.Name -match $_ }
-                if ($isSensitive) {
-                    $sanitizedBody[$prop.Name] = '***REDACTED***'
-                }
-                else {
-                    $sanitizedBody[$prop.Name] = $prop.Value
-                }
+            # Log a redacted copy, never $Body itself. ConvertToNBRedactedBody walks the entries of
+            # the hashtable; iterating $Body.PSObject.Properties here listed the .NET members of
+            # the Hashtable type instead and leaked every value through 'Values' / 'SyncRoot'.
+            # Only built when verbose output is on, so a normal call does no extra work.
+            if ($VerbosePreference -ne 'SilentlyContinue') {
+                $redactedBody = ConvertToNBRedactedBody -Body $Body
+                Write-Verbose "BODY: $($redactedBody | ConvertTo-Json -Compress -Depth 10)"
             }
-            Write-Verbose "BODY: $($sanitizedBody | ConvertTo-Json -Compress)"
             $null = $splat.Add('Body', ($Body | ConvertTo-Json -Compress -Depth 10))
         }
     }
