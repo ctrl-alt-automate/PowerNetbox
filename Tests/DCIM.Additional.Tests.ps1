@@ -100,7 +100,8 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
 
     Context "Cable Profile Support (4.5+)" {
         # The real CableProfileChoices values from netbox/dcim/choices.py
-        # as of v4.7.0 (26 as of v4.5.7 + breakout-1c8p-8c1p). Kept as script-scope so tests can iterate.
+        # as of v4.7.5 (32 values: 26 as of v4.7.0, +3 trunks in 4.7.4, +3 trunks in 4.7.5).
+        # Kept as script-scope so tests can iterate.
         BeforeAll {
             $script:ValidCableProfiles = @(
                 # Single (1 connector)
@@ -109,8 +110,13 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
                 # Trunks (multi-connector)
                 'trunk-2c1p', 'trunk-2c2p', 'trunk-2c4p', 'trunk-2c4p-shuffle',
                 'trunk-2c6p', 'trunk-2c8p', 'trunk-2c12p',
+                'trunk-3c8p', 'trunk-3c12p',                # added in 4.7.5 (#23470)
                 'trunk-4c1p', 'trunk-4c2p', 'trunk-4c4p', 'trunk-4c4p-shuffle',
-                'trunk-4c6p', 'trunk-4c8p', 'trunk-8c4p',
+                'trunk-4c6p', 'trunk-4c8p',
+                'trunk-4c12p',                              # added in 4.7.5 (#23470)
+                'trunk-8c1p',                               # added in 4.7.4 (#23031)
+                'trunk-8c4p',
+                'trunk-12c1p', 'trunk-24c1p',               # added in 4.7.4 (#23031)
                 # Breakouts
                 'breakout-1c2p-2c1p',       # added in 4.5.7 (#21760)
                 'breakout-1c4p-4c1p',
@@ -176,7 +182,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
             $Result.Uri | Should -Not -Match 'profile='
         }
 
-        It "Should accept all 25 real CableProfileChoices values on New-NBDCIMCable (#389)" {
+        It "Should accept every real CableProfileChoices value on New-NBDCIMCable (#389)" {
             InModuleScope -ModuleName 'PowerNetbox' {
                 $script:NetboxConfig.ParsedVersion = [version]'4.5.7'
             }
@@ -189,7 +195,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
             }
         }
 
-        It "Should accept all 25 real CableProfileChoices values on Get-NBDCIMCable (#389)" {
+        It "Should accept every real CableProfileChoices value on Get-NBDCIMCable (#389)" {
             InModuleScope -ModuleName 'PowerNetbox' {
                 $script:NetboxConfig.ParsedVersion = [version]'4.5.7'
             }
@@ -199,7 +205,7 @@ Describe "DCIM Additional Tests" -Tag 'DCIM' {
             }
         }
 
-        It "Should accept all 25 real CableProfileChoices values on Set-NBDCIMCable (#389)" {
+        It "Should accept every real CableProfileChoices value on Set-NBDCIMCable (#389)" {
             InModuleScope -ModuleName 'PowerNetbox' {
                 $script:NetboxConfig.ParsedVersion = [version]'4.5.7'
             }

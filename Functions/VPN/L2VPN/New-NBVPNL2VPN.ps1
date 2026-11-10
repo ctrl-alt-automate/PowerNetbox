@@ -19,7 +19,8 @@
     Identifier.
 
 .PARAMETER Type
-    Type of the object.
+    L2VPN type (required by NetBox): vpws, vpls, vxlan, vxlan-evpn, mpls-evpn, pbb-evpn,
+    evpn-vpws, epl, evpl, ep-lan, evp-lan, ep-tree, evp-tree or spb.
 
 .PARAMETER Status
     Operational status.
@@ -46,9 +47,9 @@
     One or more tags to assign to this object (tag names or IDs).
 
 .EXAMPLE
-    New-NBVPNL2VPN
+    New-NBVPNL2VPN -Name 'Customer A' -Slug 'customer-a' -Type 'vxlan' -Identifier 10100
 
-    Creates a new VPN L2VPN object.
+    Creates a VXLAN L2VPN with VNI 10100.
 
 .LINK
     https://netbox.readthedocs.io/en/stable/rest-api/overview/
@@ -60,7 +61,7 @@ function New-NBVPNL2VPN {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
     [OutputType([PSCustomObject])]
     param([Parameter(Mandatory = $true)][string]$Name,[Parameter(Mandatory = $true)][string]$Slug,
-        [uint64]$Identifier,[string]$Type,[string]$Status,[uint64]$Tenant,[string]$Description,[string]$Comments,
+        [uint64]$Identifier,[Parameter(Mandatory = $true)][string]$Type,[string]$Status,[uint64]$Tenant,[string]$Description,[string]$Comments,
         [uint64[]]$Import_Targets,[uint64[]]$Export_Targets,[hashtable]$Custom_Fields,[object[]]$Tags,[switch]$Raw)
     process {
         Write-Verbose "Creating VPN L2VPN"

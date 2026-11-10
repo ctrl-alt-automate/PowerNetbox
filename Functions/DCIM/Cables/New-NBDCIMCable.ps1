@@ -52,9 +52,13 @@
     Defines how connectors/lanes on one side map to those on the other side.
     Available profiles:
     - Single: 1c1p, 1c2p, 1c4p, 1c6p, 1c8p, 1c12p, 1c16p
-    - Trunk: 2c1p, 2c2p, 2c4p, 2c4p-shuffle, 2c6p, 2c8p, 2c12p,
-             4c1p, 4c2p, 4c4p, 4c4p-shuffle, 4c6p, 4c8p, 8c4p
-    - Breakout: 1c4p-4c1p, 1c6p-6c1p, 2c4p-8c1p-shuffle
+    - Trunk: 2c1p, 2c2p, 2c4p, 2c4p-shuffle, 2c6p, 2c8p, 2c12p, 3c8p, 3c12p,
+             4c1p, 4c2p, 4c4p, 4c4p-shuffle, 4c6p, 4c8p, 4c12p, 8c1p, 8c4p,
+             12c1p, 24c1p
+    - Breakout: 1c2p-2c1p, 1c4p-4c1p, 1c6p-6c1p, 1c8p-8c1p, 2c4p-8c1p-shuffle
+    Each value carries its 'single-' / 'trunk-' / 'breakout-' prefix (e.g. 'trunk-3c8p').
+    NetBox rejects a profile its own release does not know: 8c1p/12c1p/24c1p need
+    NetBox 4.7.4+, 3c8p/3c12p/4c12p need NetBox 4.7.5+.
 
 .PARAMETER Custom_Fields
     Hashtable of custom field values
@@ -120,7 +124,7 @@ function New-NBDCIMCable {
 
         [hashtable]$Custom_Fields,
 
-        # Valid values from netbox/dcim/choices.py CableProfileChoices (v4.5.7).
+        # Valid values from netbox/dcim/choices.py CableProfileChoices (v4.7.5).
         # Every value must carry its 'single-' / 'trunk-' / 'breakout-' prefix
         # or the NetBox API will reject the request. See #389.
         [ValidateSet(
@@ -130,8 +134,13 @@ function New-NBDCIMCable {
             # Trunks (multi-connector)
             'trunk-2c1p', 'trunk-2c2p', 'trunk-2c4p', 'trunk-2c4p-shuffle',
             'trunk-2c6p', 'trunk-2c8p', 'trunk-2c12p',
+            'trunk-3c8p', 'trunk-3c12p',                # added in Netbox 4.7.5 (#23470)
             'trunk-4c1p', 'trunk-4c2p', 'trunk-4c4p', 'trunk-4c4p-shuffle',
-            'trunk-4c6p', 'trunk-4c8p', 'trunk-8c4p',
+            'trunk-4c6p', 'trunk-4c8p',
+            'trunk-4c12p',                              # added in Netbox 4.7.5 (#23470)
+            'trunk-8c1p',                               # added in Netbox 4.7.4 (#23031)
+            'trunk-8c4p',
+            'trunk-12c1p', 'trunk-24c1p',               # added in Netbox 4.7.4 (#23031)
             # Breakouts
             'breakout-1c2p-2c1p',       # added in Netbox 4.5.7 (#21760)
             'breakout-1c4p-4c1p',

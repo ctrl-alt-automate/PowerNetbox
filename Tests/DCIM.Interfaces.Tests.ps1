@@ -390,6 +390,9 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
             @{ Type = '64gfc-sfpp'; Label = '64GFC SFP+' }
             @{ Type = 'moca'; Label = 'MoCA' }
             @{ Type = 'cisco-stackwise-1t'; Label = 'Cisco StackWise-1T' }
+            @{ Type = 'infiniband-hdr-2x'; Label = 'InfiniBand HDR 2X (new in 4.7.1)' }
+            @{ Type = 'infiniband-ndr-2x'; Label = 'InfiniBand NDR 2X (new in 4.7.1)' }
+            @{ Type = 'infiniband-xdr-2x'; Label = 'InfiniBand XDR 2X (new in 4.7.1)' }
         )
 
         It 'Should accept interface type <Label>' -TestCases $newTypeTestCases {
@@ -397,6 +400,20 @@ Describe "DCIM Interfaces Tests" -Tag 'DCIM', 'Interfaces' {
             $Result = New-NBDCIMInterface -Device 1 -Name "test-$Type" -Type $Type
             $bodyObj = $Result.Body | ConvertFrom-Json
             $bodyObj.type | Should -Be $Type
+        }
+
+        # Get/New/Set share one list of types; a value added to only one of them is silent drift.
+        It 'Should offer the InfiniBand 2X types (NetBox 4.7.1) on <Cmd>' -TestCases @(
+            @{ Cmd = 'Get-NBDCIMInterface' }
+            @{ Cmd = 'New-NBDCIMInterface' }
+            @{ Cmd = 'Set-NBDCIMInterface' }
+        ) {
+            param($Cmd)
+            $validateSet = (Get-Command $Cmd).Parameters['Type'].Attributes |
+                Where-Object { $_ -is [System.Management.Automation.ValidateSetAttribute] }
+            foreach ($type in 'infiniband-hdr-2x', 'infiniband-ndr-2x', 'infiniband-xdr-2x') {
+                $validateSet.ValidValues | Should -Contain $type
+            }
         }
     }
 
