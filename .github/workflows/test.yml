@@ -49,7 +49,11 @@ jobs:
           # channels in this matrix are LTS releases. When a channel reaches end-of-support it
           # drops out of LTSReleaseTag and this step fails loudly - that failure IS the signal
           # to remove the corresponding matrix leg.
-          $meta = Invoke-RestMethod 'https://raw.githubusercontent.com/PowerShell/PowerShell/master/tools/metadata.json'
+          # Both downloads below retry: GitHub occasionally answers with a 5xx "Server Error" page,
+          # and an unretried request turns that into a red leg plus an automatic "Test Failure" issue
+          # for a commit whose tests never ran (seen on main at the v4.7.5.0 release, #512).
+          $retry = @{ MaximumRetryCount = 5; RetryIntervalSec = 15 }
+          $meta = Invoke-RestMethod 'https://raw.githubusercontent.com/PowerShell/PowerShell/master/tools/metadata.json' @retry
           $tag = @($meta.LTSReleaseTag) | Where-Object { $_ -like "v$channel.*" } | Select-Object -First 1
           if (-not $tag) {
               throw "No LTS release tag for channel $channel in metadata.json (found: $($meta.LTSReleaseTag -join ', ')). If $channel has reached end-of-support, remove its matrix leg."
@@ -74,7 +78,7 @@ jobs:
           $url = "https://github.com/PowerShell/PowerShell/releases/download/$tag/$asset"
           $archive = Join-Path ([System.IO.Path]::GetTempPath()) $asset
           Write-Host "Downloading $url"
-          Invoke-WebRequest -Uri $url -OutFile $archive
+          Invoke-WebRequest -Uri $url -OutFile $archive @retry
 
           if ($asset.EndsWith('.zip')) {
               Expand-Archive -Path $archive -DestinationPath $dest -Force
