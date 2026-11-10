@@ -125,10 +125,10 @@ Depending on the version of the NetBox API used, the API supports these options 
 
 ## Requirements
 
-PowerShell **7.6 LTS** (baseline), **7.4 LTS** (until its end-of-support on 2026-11-10)
-or **Windows PowerShell 5.1**, on Windows / macOS / Linux. Every one of those is exercised
-in CI. Windows PowerShell 5.1 is supported and will not be dropped; features needing .NET
-capabilities it lacks are PowerShell 7+ and degrade with a warning.
+PowerShell **7.6 LTS** (baseline) or **Windows PowerShell 5.1**, on Windows / macOS / Linux.
+Both are exercised in CI. Windows PowerShell 5.1 is supported and will not be dropped;
+features needing .NET capabilities it lacks are PowerShell 7+ and degrade with a warning.
+PowerShell 7.4 LTS reached end-of-support on 2026-11-10 and is no longer tested.
 
 NetBox **4.3+** (tested against 4.3.7, 4.4.10, 4.5.10, 4.6.10, 4.7.0). Version-specific
 behaviour and both support matrices are documented in the

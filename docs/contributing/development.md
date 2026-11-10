@@ -28,8 +28,8 @@ Both `dev` and `main` branches are protected:
 | Pester Tests (windows-latest, PS 7.6) | Unit tests on Windows, PowerShell 7.6 LTS |
 | Pester Tests (windows-latest, PS 5.1) | Unit tests on Windows PowerShell 5.1 |
 
-The test workflow runs seven legs in total (Linux, Windows and macOS on PowerShell 7.4 and
-7.6, plus Windows PowerShell 5.1); the four above are the ones branch protection requires.
+The test workflow runs four legs in total (Linux, Windows and macOS on PowerShell 7.6, plus
+Windows PowerShell 5.1); the macOS leg is the only one branch protection does not require.
 
 The Windows PowerShell 5.1 leg is required deliberately - see
 [Keep .ps1 files ASCII-only](#keep-ps1-files-ascii-only) below.

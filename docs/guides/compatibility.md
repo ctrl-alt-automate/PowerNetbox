@@ -57,11 +57,13 @@ so this table is a contract rather than an intention.
 | PowerShell | Edition | Status | Supported until |
 |------------|---------|--------|-----------------|
 | 7.6 LTS | Core | Baseline | 2028-11-14 (.NET 10) |
-| 7.4 LTS | Core | Tested | **2026-11-10** (.NET 8) - the CI leg is removed on that date |
 | 5.1 | Desktop | Supported, frozen | Tied to the Windows release that ships it |
 
-PowerShell 7.0-7.3 and 7.5 are past end-of-support and are not tested. They will generally
-work, but no compatibility claim is made for them.
+PowerShell 7.0 through 7.5 are past end-of-support and are not tested - that includes
+7.4 LTS, whose support ended on 2026-11-10 (.NET 8) and whose CI leg was removed on that
+date. They will generally work, but no compatibility claim is made for them. Non-LTS
+releases such as 7.7 are not part of the matrix either; the next version to be added is
+the next LTS.
 
 ### Windows PowerShell 5.1: supported, frozen
 

@@ -23,9 +23,10 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         # PowerShell versions are installed explicitly (see "Set up PowerShell" below) rather
         # than taking whatever the runner image ships, so this list is the actual contract.
-        # 7.4 LTS reaches end-of-support on 2026-11-10 (.NET 8 lifecycle) - remove that leg
-        # on or after that date. 7.6 LTS (.NET 10) is supported to 2028-11-14.
-        ps: ['7.4', '7.6']
+        # 7.6 LTS (.NET 10) is supported to 2028-11-14. The 7.4 LTS leg was removed when 7.4
+        # reached end-of-support on 2026-11-10 (.NET 8 lifecycle). Only LTS channels resolve
+        # in the setup step below, so a non-LTS release such as 7.7 is deliberately not listed.
+        ps: ['7.6']
         include:
           # Windows PowerShell 5.1 (Desktop) ships with Windows, so there is nothing to install.
           # Deliberately retained - the support policy is "supported, frozen" (see issue #496).
@@ -162,7 +163,7 @@ jobs:
         shell: pwsh
         run: |
           # Code coverage is measured on exactly one leg - the canonical measurement. Running it
-          # on all six pwsh legs would cost time for six identical numbers.
+          # on all three pwsh legs would cost time for three identical numbers.
           $isCoverageLeg = ('${{ matrix.os }}' -eq 'ubuntu-latest') -and ('${{ matrix.ps }}' -eq '7.6')
 
           $config = New-PesterConfiguration
