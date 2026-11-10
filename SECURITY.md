@@ -66,7 +66,7 @@ Current hardening includes:
 
 - HTTPS by default with plaintext-HTTP warning
 - Central `Authorization: Bearer` header construction with v1/v2 token support
-- Token redaction in verbose / error output
+- Token redaction in verbose / error output; request bodies are written to the verbose stream with `password` / `secret` / `key` / `token` / `psk` fields masked, nested values included (regression-tested in `Tests/VerboseRedaction.Tests.ps1`)
 - Cross-origin validation on pagination `.next` URLs (PR #404)
 - `gitleaks` CI + `.gitleaks-baseline.json` + pre-commit hook (PR #403)
 - Restricted GitHub Actions permissions (`contents: read` default)
