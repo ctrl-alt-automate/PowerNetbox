@@ -1682,7 +1682,6 @@ Describe "Live Integration Tests" -Tag 'Integration', 'Live' -Skip:(-not $script
     Context "User CRUD" {
         BeforeAll {
             $script:UserName = "$($script:TestPrefix)AuthenticationUser"
-            $script:UserSlug = $script:UserName.ToLower() -replace '[^a-z0-9-]', '-'
             $splat = @{
                 Username = $script:UserName
                 Password = (ConvertTo-SecureString "<Your_Password1234>" -AsPlainText -Force)
@@ -1697,8 +1696,9 @@ Describe "Live Integration Tests" -Tag 'Integration', 'Live' -Skip:(-not $script
             $script:UserId = $user.id
             [void]$script:CreatedResources.Users.Add($script:UserId)
         }
-        It "Should create a new user and than set its properties" {
-            # Has been created in the BeforeAll block if that did not throw
+        It "Should create a new user" {
+            # Created in BeforeAll (which throws when New-NBUser returns nothing); #505 made this a 400.
+            $script:UserId | Should -BeGreaterThan 0
         }
         It "Should get the user by ID" {
             $user = Get-NBUser -Id $script:UserId
