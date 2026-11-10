@@ -13,12 +13,12 @@
   <a href="LICENSE"><img src="https://img.shields.io/github/license/ctrl-alt-automate/PowerNetbox" alt="License"></a>
   <a href="https://github.com/ctrl-alt-automate/PowerNetbox/actions/workflows/pssa.yml"><img src="https://github.com/ctrl-alt-automate/PowerNetbox/actions/workflows/pssa.yml/badge.svg" alt="Lint"></a>
   <a href="https://docs.powernetbox.dev/"><img src="https://img.shields.io/badge/docs-powernetbox.dev-blue?logo=materialformkdocs&logoColor=white" alt="Documentation"></a>
-  <a href="https://github.com/netbox-community/netbox"><img src="https://img.shields.io/badge/Netbox-4.7.0-blue?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyTDIgN2wxMCA1IDEwLTV6TTIgMTdsMTAgNSAxMC01TTIgMTJsMTAgNSAxMC01Ii8+PC9zdmc+" alt="Netbox Version"></a>
+  <a href="https://github.com/netbox-community/netbox"><img src="https://img.shields.io/badge/Netbox-4.7.5-blue?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyTDIgN2wxMCA1IDEwLTV6TTIgMTdsMTAgNSAxMC01TTIgMTJsMTAgNSAxMC01Ii8+PC9zdmc+" alt="Netbox Version"></a>
 </p>
 
 <p align="center">
   <b>The</b> comprehensive PowerShell module for the <a href="https://github.com/netbox-community/netbox">Netbox</a> REST API with <b>100% coverage</b> — 520+ cmdlets across DCIM, IPAM, Virtualization, Circuits, Tenancy, VPN, Wireless, and the netbox-branching plugin.<br>
-  Cross-platform (PowerShell 5.1 / 7+), fully compatible with <b>Netbox 4.7.0</b> (supports 4.3+).
+  Cross-platform (PowerShell 5.1 / 7+), fully compatible with <b>Netbox 4.7.5</b> (supports 4.3+).
 </p>
 
 <p align="center">
@@ -130,7 +130,8 @@ Both are exercised in CI. Windows PowerShell 5.1 is supported and will not be dr
 features needing .NET capabilities it lacks are PowerShell 7+ and degrade with a warning.
 PowerShell 7.4 LTS reached end-of-support on 2026-11-10 and is no longer tested.
 
-NetBox **4.3+** (tested against 4.3.7, 4.4.10, 4.5.10, 4.6.10, 4.7.0). Version-specific
+NetBox **4.3+** (tested in CI against 4.3.7, 4.4.10, 4.5.10, 4.6.10 and 4.7.0; verified
+live against 4.7.5, which joins the CI matrix once its Docker image is published). Version-specific
 behaviour and both support matrices are documented in the
 [Compatibility guide](https://docs.powernetbox.dev/guides/compatibility/).
 

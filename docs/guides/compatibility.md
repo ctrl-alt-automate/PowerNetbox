@@ -113,6 +113,11 @@ Netbox 4.4.10: 110/110 tests passed ✅
 Netbox 4.3.7:   96/110 tests passed ✅ (Minimum supported; 14 skipped for 4.4+/4.5+ features)
 ```
 
+NetBox 4.7.5 (released 2026-11-10) is the release PowerNetbox 4.7.5.0 targets. Its choice
+values are in parity with the 4.7.5 source and the same suite was run live against a build
+of the 4.7.5 tag. It replaces 4.7.0 as the newest matrix leg as soon as the official
+`netboxcommunity/netbox:v4.7.5-5.1.1` image is published.
+
 ## API Endpoint Changes
 
 PowerNetbox handles API changes between Netbox versions automatically:
