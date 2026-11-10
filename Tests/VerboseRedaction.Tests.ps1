@@ -78,6 +78,21 @@ Describe "Verbose request-body redaction" -Tag 'Security', 'Redaction' {
             } -Because 'redaction applies to the log line only; NetBox must receive the real value'
         }
 
+        # additional_headers is an ordinary string field, but it is where the Authorization header
+        # of a webhook target lives - the name does not say "secret", the content usually is one.
+        It "New-NBWebhook masks additional_headers (it usually carries an Authorization header)" {
+            $out = New-NBWebhook -Name 'hook' -Payload_Url 'https://x.test' -Additional_Headers 'Authorization: Bearer dummy-token-0006' -Confirm:$false -Verbose 4>&1
+            $verbose = Get-VerboseText $out
+
+            $verbose | Should -Not -Match 'dummy-token-0006'
+            $verbose | Should -Match '"additional_headers":"\*\*\*REDACTED\*\*\*"'
+            $verbose | Should -Match '"payload_url":"https://x.test"'
+
+            Should -Invoke -CommandName 'Invoke-RestMethod' -ModuleName 'PowerNetbox' -Times 1 -Exactly -Scope It -ParameterFilter {
+                $Body -match 'Authorization: Bearer dummy-token-0006'
+            }
+        }
+
         It "Logs the entries of the body, not the .NET members of the hashtable" {
             $out = New-NBWirelessLAN -SSID 'corp' -Auth_PSK (ConvertTo-TestSecureString 'fake-secret-psk-0002') -Description 'lobby' -Confirm:$false -Verbose 4>&1
             $verbose = Get-VerboseText $out
@@ -145,11 +160,16 @@ Describe "Verbose request-body redaction" -Tag 'Security', 'Redaction' {
                     auth_psk      = 'k1'
                     preshared_key = 'k2'
                     api_token     = 't'
+                    passwd             = 'p2'
+                    ssh_passphrase     = 'pp'
+                    snmp_community     = 'c'
+                    bind_credential    = 'cr'
+                    additional_headers = 'h'
                 }
                 $json = ConvertToNBRedactedBody -Body $body | ConvertTo-Json -Compress -Depth 10
 
                 $json | Should -Match '"name":"visible"'
-                foreach ($field in 'password', 'secret', 'auth_psk', 'preshared_key', 'api_token') {
+                foreach ($field in 'password', 'secret', 'auth_psk', 'preshared_key', 'api_token', 'passwd', 'ssh_passphrase', 'snmp_community', 'bind_credential', 'additional_headers') {
                     $json | Should -Match ('"{0}":"\*\*\*REDACTED\*\*\*"' -f $field)
                 }
             }

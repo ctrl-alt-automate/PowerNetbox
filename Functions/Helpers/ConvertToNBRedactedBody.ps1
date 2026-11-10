@@ -4,8 +4,15 @@
 
 .DESCRIPTION
     Builds a deep copy of the body in which the value of every field whose name looks
-    sensitive (secret, password, key, token, psk) is replaced by '***REDACTED***'.
-    The original body is never modified - it still has to be sent to NetBox.
+    sensitive is replaced by '***REDACTED***'. The original body is never modified - it
+    still has to be sent to NetBox.
+
+    A field is sensitive when its name contains one of: secret, passw (password, passwd),
+    passphrase, key, token, psk, credential, community (SNMP), header. 'header' is there
+    for a webhook's additional_headers, which is a plain string field that routinely
+    carries an 'Authorization: Bearer ...' line. Matching is by name only and errs on the
+    side of masking too much: a masked field costs a little debugging comfort, a logged
+    credential costs a rotation.
 
     Dictionaries are walked by their entries. That is the whole point of this helper:
     $hashtable.PSObject.Properties does NOT enumerate the entries of a hashtable, it
@@ -41,7 +48,7 @@ function ConvertToNBRedactedBody {
         [int]$Depth = 0
     )
 
-    $sensitivePattern = 'secret|password|key|token|psk'
+    $sensitivePattern = 'secret|passw|passphrase|key|token|psk|credential|community|header'
     $mask = '***REDACTED***'
 
     if ($null -eq $Body) { return $null }
